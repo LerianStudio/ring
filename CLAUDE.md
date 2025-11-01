@@ -4,155 +4,156 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-**ring** is a Claude Code plugin providing a comprehensive skills library. Skills are specialized process documents that guide AI assistants through proven techniques, patterns, and workflows.
+Ring is a comprehensive skills library and workflow system for Claude Code, implementing proven software engineering practices through structured skills. It provides:
 
-The repository contains:
-- **28 skills** covering testing, debugging, collaboration, development, and meta-skills
-- **3 slash commands** that activate key skills
-- **1 code reviewer agent** for systematic code review
-- **SessionStart hook** that loads the skills system automatically
+1. **28 specialized skills** covering testing, debugging, collaboration, and planning
+2. **8-gate pre-development workflow** for systematic feature planning
+3. **Session hooks** that automatically initialize skills on startup
+4. **Commands** for interactive workflows (/ring:brainstorm, /ring:write-plan, /ring:execute-plan)
 
 ## Architecture
 
-### Skills System
+### Core Components
 
-Skills use Claude Code's first-party skills system with:
-- **Frontmatter** (YAML): Only `name` and `description` fields (max 1024 chars)
-- **Description format**: "Use when [triggers] - [what it does]" in third person
-- **Flat namespace**: All skills in `skills/` with kebab-case names
-- **Namespaced references**: Skills reference each other as `ring:skill-name`
+**Skills System** (`skills/`)
+- Each skill is a self-contained directory with `SKILL.md` containing structured instructions
+- Skills use YAML frontmatter: `name`, `description`, `when_to_use`
+- Skills contain mandatory workflows, checklists, and anti-patterns
+- Universal patterns in `skills/shared-patterns/` provide common elements
 
-Directory structure:
+**Plugin System** (`.claude-plugin/`)
+- Integrates with Claude Code as a marketplace plugin
+- `plugin.json` defines metadata and version
+- `marketplace.json` contains display information
+
+**Session Management** (`hooks/`)
+- `hooks.json` configures SessionStart triggers
+- `session-start.sh` injects skills context at session start
+- Automatically loads `using-ring` skill and quick reference
+
+**Commands** (`commands/`)
+- Slash commands for common workflows
+- Each `.md` file defines a command template
+- Commands map to corresponding skills
+
+**Documentation** (`docs/`)
+- `skills-quick-reference.md` provides rapid skill lookup
+- `plans/` contains implementation plans for features
+
+## Common Commands
+
+### Skill Management
+```bash
+# List all available skills
+ls -la skills/
+
+# Read a specific skill
+cat skills/test-driven-development/SKILL.md
+
+# Check skill frontmatter
+head -20 skills/brainstorming/SKILL.md
 ```
-skills/
-  skill-name/
-    SKILL.md              # Main reference (required)
-    supporting-file.*     # Optional: tools, heavy reference docs
+
+### Git Operations
+```bash
+# Check status (main branch is 'main')
+git status
+
+# View recent commits
+git log --oneline -10
+
+# Create feature branch
+git checkout -b feature/your-feature
+
+# Commit with conventional commits
+git commit -m "feat(skills): add new capability"
 ```
 
-### Key Skills Categories
+### Plugin Development
+```bash
+# Test session start hook
+./hooks/session-start.sh
 
-**Testing** - TDD workflows, async patterns, anti-patterns
-**Debugging** - Systematic debugging, root cause tracing, verification
-**Collaboration** - Brainstorming, planning, code review, parallel agents
-**Development** - Git worktrees, branch finishing, subagent workflows
-**Pre-Dev Workflow** - PRD → Feature Map → TRD → API → Data Model → Dependencies → Tasks → Subtasks
-**Meta** - Creating, testing, and sharing skills
+# Validate plugin configuration
+cat .claude-plugin/plugin.json | jq .
 
-### Commands
-
-Commands are thin wrappers in `commands/*.md` that activate skills:
-- `/ring:brainstorm` → activates `brainstorming` skill
-- `/ring:write-plan` → activates `writing-plans` skill
-- `/ring:execute-plan` → activates `executing-plans` skill
-
-### Hooks
-
-**session-start.sh** - Loads `using-ring/SKILL.md` into every conversation, establishing mandatory workflows for finding and using skills
-
-### Agents
-
-**code-reviewer.md** - Provides systematic code review against plans and standards. Referenced as `ring:code-reviewer` in skills.
-
-## Development Workflow
+# Check marketplace metadata
+cat .claude-plugin/marketplace.json | jq .
+```
 
 ### Testing Skills
+```bash
+# Initialize skills system (for testing)
+./lib/initialize-skills.sh
 
-Skills follow TDD for documentation:
-1. **RED**: Write pressure scenarios, run WITHOUT skill, document baseline failures
-2. **GREEN**: Write skill addressing specific failures, verify agents comply
-3. **REFACTOR**: Find new rationalizations, add counters, re-test
-
-Use `testing-skills-with-subagents` skill for complete methodology.
-
-### Skill Creation Standards
-
-**Frontmatter requirements:**
-- Name: letters, numbers, hyphens only (no parentheses/special chars)
-- Description: starts with "Use when...", includes triggers and what it does
-- Third person voice throughout
-
-**Claude Search Optimization (CSO):**
-- Rich descriptions with concrete triggers and symptoms
-- Keyword coverage (error messages, symptoms, tools)
-- Verb-first naming (`creating-skills` not `skill-creation`)
-
-**Content structure:**
-1. Overview (core principle in 1-2 sentences)
-2. When to Use (bullets with symptoms)
-3. Implementation (inline code or file reference)
-4. Common Mistakes (what fails + fixes)
-
-**Token efficiency targets:**
-- Getting-started workflows: <150 words
-- Frequently-loaded skills: <200 words
-- Other skills: <500 words
-
-### Cross-Referencing Skills
-
-Use explicit requirement markers:
-- `**REQUIRED BACKGROUND:**` - Prerequisites to understand
-- `**REQUIRED SUB-SKILL:**` - Must be used in workflow
-- `**Complementary skills:**` - Optional related skills
-
-Format: `ring:skill-name` (no path, no @ syntax)
-
-### Flowcharts
-
-Use graphviz ONLY for non-obvious decision points. See `skills/writing-skills/graphviz-conventions.dot` for style rules.
-
-Never use for: reference material (use tables), code examples (use markdown), linear instructions (use lists).
-
-## Pre-Development Workflow
-
-Eight-gate sequence for planning major features:
-
-1. **PRD** (Gate 1) - Business requirements (WHAT/WHY only)
-2. **Feature Map** (Gate 2) - Feature relationships and domain groupings
-3. **TRD** (Gate 3) - Technical architecture patterns (HOW/WHERE, abstract)
-4. **API Design** (Gate 4) - Component contracts (protocol-agnostic)
-5. **Data Model** (Gate 5) - Entities and relationships (database-agnostic)
-6. **Dependency Map** (Gate 6) - Technology and version selection
-7. **Task Breakdown** (Gate 7) - High-level deliverable increments
-8. **Subtask Creation** (Gate 8) - Atomic, zero-context work units
-
-Each gate validates completeness before next phase.
-
-## Philosophy
-
-Core principles throughout the skills library:
-
-- **Test-Driven Development** - Write tests first, always
-- **Systematic over ad-hoc** - Process over guessing
-- **Complexity reduction** - Simplicity as primary goal
-- **Evidence over claims** - Verify before declaring success
-- **Domain over implementation** - Work at problem level, not solution level
-- **Skills are mandatory** - If a skill exists for your task, using it is required
-
-## Contributing
-
-Skills live directly in this repository:
-
-1. Follow `writing-skills` skill for creation methodology
-2. Use `testing-skills-with-subagents` to validate quality
-3. Create branch, commit, push to fork (if configured)
-4. Submit PR using `sharing-skills` workflow
-
-## Installation & Updates
-
-Users install via plugin marketplace:
-```
-/plugin marketplace add lerianstudio/ring-marketplace
-/plugin install ring@ring-marketplace
+# Check skills quick reference
+cat docs/skills-quick-reference.md
 ```
 
-Skills update when plugin updates:
-```
-/plugin update ring
-```
+## Key Workflows
 
-## Related Resources
+### Adding a New Skill
+1. Create directory: `skills/skill-name/`
+2. Add `SKILL.md` with frontmatter and content
+3. Update `docs/skills-quick-reference.md`
+4. Test with session-start hook
 
-- Blog post: https://blog.fsck.com/2025/10/09/ring/
-- Marketplace: https://github.com/lerianstudio/ring-marketplace
-- Issues: https://github.com/lerianstudio/ring/issues
+### Modifying Skills
+1. Edit `skills/{skill-name}/SKILL.md`
+2. Maintain frontmatter structure
+3. Follow existing patterns for checklists and warnings
+4. Preserve universal pattern references
+
+### Creating Commands
+1. Add `.md` file to `commands/`
+2. Reference corresponding skill
+3. Use clear, actionable language
+
+## Skill Categories
+
+**Testing & Debugging** (5 skills)
+- Focus on TDD, systematic debugging, verification
+- Enforce evidence-based practices
+
+**Collaboration & Planning** (9 skills)
+- Support team workflows and code review
+- Enable parallel execution and isolation
+
+**Pre-Dev Workflow** (8 gates)
+- Sequential gates from PRD to implementation
+- Each gate validates before proceeding
+
+**Meta Skills** (4 skills)
+- Skills about skills (discovery, writing, testing)
+- Self-improvement and contribution patterns
+
+## Important Patterns
+
+### Universal Patterns
+Located in `skills/shared-patterns/`:
+- State tracking and progress management
+- Failure recovery and rollback
+- Exit criteria and completion validation
+- TodoWrite integration
+
+### Mandatory Workflows
+- **using-ring**: Check for relevant skills before ANY task
+- **test-driven-development**: RED-GREEN-REFACTOR cycle
+- **systematic-debugging**: 4-phase investigation
+- **verification-before-completion**: Evidence before claims
+
+### Anti-Patterns to Avoid
+- Skipping skill checks before tasks
+- Writing code before tests
+- Fixing bugs without root cause analysis
+- Claiming completion without verification
+
+## Session Integration
+
+The repository uses a SessionStart hook that:
+1. Displays skills quick reference
+2. Loads the using-ring skill automatically
+3. Provides pre-dev workflow reminder
+4. Shows available skills and commands
+
+This ensures every Claude Code session starts with full awareness of available capabilities and mandatory workflows.
