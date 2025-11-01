@@ -43,10 +43,33 @@ If you catch yourself thinking ANY of these thoughts, STOP. You are rationalizin
 - "This doesn't count as a task" → WRONG. If you're taking action, it's a task. Check for skills.
 - "The skill is overkill for this" → WRONG. Skills exist because simple things become complex. Use it.
 - "I'll just do this one thing first" → WRONG. Check for skills BEFORE doing anything.
+- "Let me gather information first" → WRONG. Skills tell you HOW to gather information. Check for skills.
+- "I need context before checking skills" → WRONG. Gathering context IS a task. Check for skills first.
+- "Just a quick look at files" → WRONG. Looking at files requires skills check first.
 
 **Why:** Skills document proven techniques that save time and prevent mistakes. Not using available skills means repeating solved problems and making known errors.
 
 If a skill for your task exists, you must use it or you will fail at your task.
+
+## The Cost of Skipping Skills
+
+Every time you skip checking for skills:
+- You fail your task (skills contain critical patterns)
+- You waste time (rediscovering solved problems)
+- You make known errors (skills prevent common mistakes)
+- You lose trust (not following mandatory workflows)
+
+**This is not optional. Check for skills or fail.**
+
+## Mandatory Skill Check Points
+
+**Before EVERY tool use**, ask yourself:
+- About to use Read? → Is there a skill for reading this type of file?
+- About to use Bash? → Is there a skill for this command type?
+- About to use Grep? → Is there a skill for searching?
+- About to use Task? → Which subagent_type matches?
+
+**No tool use without skill check first.**
 
 ## Skills with Checklists
 
@@ -59,6 +82,15 @@ If a skill has a checklist, YOU MUST create TodoWrite todos for EACH item.
 - Mark complete without doing them
 
 **Why:** Checklists without TodoWrite tracking = steps get skipped. Every time. The overhead of TodoWrite is tiny compared to the cost of missing steps.
+
+## TodoWrite Requirement
+
+When starting ANY task:
+1. First todo: "Check for relevant skills"
+2. Mark complete only after actual check
+3. Document which skills apply/don't apply
+
+Skipping this todo = automatic failure.
 
 ## Announcing Skill Usage
 
