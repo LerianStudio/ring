@@ -17,6 +17,22 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Save plans to:** `docs/plans/YYYY-MM-DD-<feature-name>.md`
 
+## Zero-Context Test
+
+**Before finalizing ANY plan, verify:**
+
+```
+Can someone execute this if they:
+□ Never saw our codebase
+□ Don't know our framework
+□ Only have this document
+□ Have no context about our domain
+
+If NO to any → Add more detail
+```
+
+**Every task must be executable in isolation.**
+
 ## Bite-Sized Task Granularity
 
 **Each step is one action (2-5 minutes):**
@@ -41,6 +57,21 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 
 **Tech Stack:** [Key technologies/libraries]
 
+**Global Prerequisites:**
+- Environment: [OS, runtime versions]
+- Tools: [Exact commands to verify: `python --version`, `npm --version`]
+- Access: [Any API keys, services that must be running]
+- State: [Branch to work from, any required setup]
+
+**Verification before starting:**
+```bash
+# Run ALL these commands and verify output:
+python --version  # Expected: Python 3.8+
+npm --version     # Expected: 7.0+
+git status        # Expected: clean working tree
+pytest --version  # Expected: 7.0+
+```
+
 ---
 ```
 
@@ -54,6 +85,11 @@ Assume they are a skilled developer, but know almost nothing about our toolset o
 - Modify: `exact/path/to/existing.py:123-145`
 - Test: `tests/exact/path/to/test.py`
 
+**Prerequisites:**
+- Tools: pytest v7.0+, Python 3.8+
+- Files must exist: `src/config.py`, `tests/conftest.py`
+- Environment: `TESTING=true` must be set
+
 **Step 1: Write the failing test**
 
 ```python
@@ -65,7 +101,13 @@ def test_specific_behavior():
 **Step 2: Run test to verify it fails**
 
 Run: `pytest tests/path/test.py::test_name -v`
-Expected: FAIL with "function not defined"
+
+**Expected output:**
+```
+FAILED tests/path/test.py::test_name - NameError: name 'function' is not defined
+```
+
+**If you see different error:** Check file paths and imports
 
 **Step 3: Write minimal implementation**
 
@@ -77,7 +119,11 @@ def function(input):
 **Step 4: Run test to verify it passes**
 
 Run: `pytest tests/path/test.py::test_name -v`
-Expected: PASS
+
+**Expected output:**
+```
+PASSED tests/path/test.py::test_name
+```
 
 **Step 5: Commit**
 
@@ -86,6 +132,23 @@ git add tests/path/test.py src/path/file.py
 git commit -m "feat: add specific feature"
 ```
 ```
+
+**If Task Fails:**
+
+1. **Test won't run:**
+   - Check: `ls tests/path/` (file exists?)
+   - Fix: Create missing directories first
+   - Rollback: `git checkout -- .`
+
+2. **Implementation breaks other tests:**
+   - Run: `pytest` (check what broke)
+   - Rollback: `git reset --hard HEAD`
+   - Revisit: Design may conflict with existing code
+
+3. **Can't recover:**
+   - Document: What failed and why
+   - Stop: Return to human partner
+   - Don't: Try to fix without understanding
 
 ## Remember
 - Exact file paths always
