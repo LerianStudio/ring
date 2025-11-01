@@ -51,6 +51,23 @@ You MUST complete each phase before proceeding to the next.
 
 **BEFORE attempting ANY fix:**
 
+### Phase 1 Gate Checklist
+
+**MUST complete ALL before Phase 2:**
+
+```
+Phase 1 Investigation:
+□ Error message copied verbatim: ___________
+□ Reproduction confirmed: [steps documented]
+□ Recent changes reviewed: [git diff output]
+□ Evidence from ALL components: [list components checked]
+□ Data flow traced: [origin → error location]
+
+Status: [Cannot proceed until all checked]
+```
+
+**Copy this checklist. Check items. Include in response.**
+
 1. **Read Error Messages Carefully**
    - Don't skip past errors or warnings
    - They often contain the exact solution
@@ -123,6 +140,20 @@ You MUST complete each phase before proceeding to the next.
 
 **Find the pattern before fixing:**
 
+### Document Before Proceeding
+
+Before Phase 2, write findings summary:
+```
+PHASE 1 FINDINGS:
+- Error: [exact error]
+- Occurs when: [reproduction steps]
+- Recent changes: [relevant commits]
+- Component evidence: [what each component shows]
+- Data origin: [where bad data starts]
+```
+
+No summary = return to Phase 1.
+
 1. **Find Working Examples**
    - Locate similar working code in same codebase
    - What works that's similar to what's broken?
@@ -160,6 +191,19 @@ You MUST complete each phase before proceeding to the next.
    - Did it work? Yes → Phase 4
    - Didn't work? Form NEW hypothesis
    - DON'T add more fixes on top
+
+   **CRITICAL: Track hypothesis count:**
+   ```
+   Hypothesis #1: [what] → [result]
+   Hypothesis #2: [what] → [result]
+   Hypothesis #3: [what] → [STOP if fails]
+   ```
+
+   **If hypothesis_count >= 3 and all failed:**
+   - STOP immediately
+   - Document: "3 hypotheses failed, architecture review required"
+   - Discuss with human partner before ANY more attempts
+   - This is MANDATORY, not optional
 
 4. **When You Don't Know**
    - Say "I don't understand X"
@@ -211,6 +255,19 @@ You MUST complete each phase before proceeding to the next.
    **Discuss with your human partner before attempting more fixes**
 
    This is NOT a failed hypothesis - this is a wrong architecture.
+
+## Time Limits
+
+**Debugging time boxes:**
+- 30 minutes without root cause → Escalate to human partner
+- 3 failed fixes → Architecture review required
+- 1 hour total → Stop and document what you learned
+
+**When hitting time limit:**
+1. Document everything you tried
+2. State "Hit debugging time limit"
+3. Ask for human partner guidance
+4. Don't keep trying alone
 
 ## Red Flags - STOP and Follow Process
 
