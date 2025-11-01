@@ -41,10 +41,46 @@ Brainstorming Progress:
 ```
 
 ### Prep: Autonomous Recon
-- Use existing tools (file browsing, docs, git history, tests) to understand current project state before asking anything.
-- Form your draft model: what problem you're solving, what artifacts exist, and what questions remain.
-- Start the conversation by sharing that model: "Based on exploring the project state, docs, working copy, and recent commits, here's how I think this should work…"
-- Ask follow-up questions only for information you cannot infer from available materials.
+
+**MANDATORY evidence (paste ALL):**
+
+```
+Recon Checklist:
+□ Project structure:
+  $ ls -la
+  [PASTE OUTPUT]
+
+□ Recent activity:
+  $ git log --oneline -10
+  [PASTE OUTPUT]
+
+□ Documentation:
+  $ head -50 README.md
+  [PASTE OUTPUT]
+
+□ Test coverage:
+  $ find . -name "*test*" -type f | wc -l
+  [PASTE OUTPUT]
+
+□ Key frameworks/tools:
+  $ [Check package.json, requirements.txt, go.mod, etc.]
+  [PASTE RELEVANT SECTIONS]
+```
+
+**Only after ALL evidence pasted:** Form your model and share findings.
+
+**Skip any evidence = not following the skill**
+
+### Question Budget
+
+**Maximum 3 questions per phase.** More = insufficient research.
+
+Question count:
+- Phase 1: ___/3
+- Phase 2: ___/3
+- Phase 3: ___/3
+
+Hit limit? Do research instead of asking.
 
 ### Phase 1: Understanding
 - Share your synthesized understanding first, then invite corrections or additions.
@@ -56,6 +92,21 @@ Brainstorming Progress:
 ```
 Based on the README and yesterday's commit, we're expanding localization to dashboard and billing emails; admin console is still untouched. Only gap I see is whether support responses need localization in this iteration. Did I miss anything important?
 ```
+
+### Phase Lock Rules
+
+**CRITICAL:** Once you enter a phase, you CANNOT skip ahead.
+
+- Asked a question? → WAIT for answer before solutions
+- Proposed approaches? → WAIT for selection before design
+- Started design? → COMPLETE before documentation
+
+**Violations:**
+- "While you consider that, here's my design..." → WRONG
+- "I'll proceed with option 1 unless..." → WRONG
+- "Moving forward with the assumption..." → WRONG
+
+**WAIT means WAIT. No assumptions.**
 
 ### Phase 2: Exploration
 - Propose 2-3 different approaches
@@ -81,6 +132,21 @@ I recommend the direct API approach because it matches existing patterns and min
 - Check in at natural breakpoints rather than after every paragraph: "Stop me if this diverges from what you expect."
 - Use open-ended questions to allow freeform feedback
 - Assume ownership and proceed unless your partner redirects you
+
+**Design Acceptance Gate:**
+
+Design is NOT approved until human EXPLICITLY says one of:
+- "Approved" / "Looks good" / "Proceed"
+- "Let's implement that" / "Ship it"
+- "Yes" (in response to "Shall I proceed?")
+
+**These do NOT mean approval:**
+- Silence / No response
+- "Interesting" / "I see" / "Hmm"
+- Questions about the design
+- "What about X?" (that's requesting changes)
+
+**No explicit approval = keep refining**
 
 ### Phase 4: Design Documentation
 After validating the design, write it to a permanent document:
