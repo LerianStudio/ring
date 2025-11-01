@@ -160,6 +160,16 @@ Check:
 ❌ Trust agent report
 ```
 
+## Required Patterns
+
+This skill uses these universal patterns:
+- **State Tracking:** See `skills/shared-patterns/state-tracking.md`
+- **Failure Recovery:** See `skills/shared-patterns/failure-recovery.md`
+- **Exit Criteria:** See `skills/shared-patterns/exit-criteria.md`
+- **TodoWrite:** See `skills/shared-patterns/todowrite-integration.md`
+
+Apply ALL patterns when using this skill.
+
 ## Why This Matters
 
 From 24 failure memories:

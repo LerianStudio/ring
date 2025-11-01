@@ -343,6 +343,16 @@ If systematic investigation reveals issue is truly environmental, timing-depende
 - **condition-based-waiting** - Replace arbitrary timeouts identified in Phase 2
 - **verification-before-completion** - Verify fix worked before claiming success
 
+## Required Patterns
+
+This skill uses these universal patterns:
+- **State Tracking:** See `skills/shared-patterns/state-tracking.md`
+- **Failure Recovery:** See `skills/shared-patterns/failure-recovery.md`
+- **Exit Criteria:** See `skills/shared-patterns/exit-criteria.md`
+- **TodoWrite:** See `skills/shared-patterns/todowrite-integration.md`
+
+Apply ALL patterns when using this skill.
+
 ## Real-World Impact
 
 From debugging sessions:
