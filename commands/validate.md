@@ -5,7 +5,7 @@ Validate skill compliance using the compliance validator.
 - `/ring:validate <skill-name> <rule-id>` - Check specific rule
 
 **Example:**
-```
+```bash
 User: /ring:validate test-driven-development
 Assistant: Running compliance check for test-driven-development...
 

@@ -57,7 +57,7 @@ task_lower=$(echo "$TASK_DESC" | tr '[:upper:]' '[:lower:]')
 
 # Create temp file for skill data (bash 3.2 compatible - no associative arrays)
 TMPFILE=$(mktemp)
-trap "rm -f $TMPFILE" EXIT
+trap 'rm -f $TMPFILE' EXIT
 
 # Scan all skills
 for skill_dir in "$SKILLS_DIR"/*/; do
@@ -108,9 +108,10 @@ sorted_skills=$(sort -t'|' -k1 -rn "$TMPFILE" | awk -F'|' '$1 > 0')
 # Count total matching skills
 total_matches=$(echo "$sorted_skills" | wc -l | tr -d ' ')
 
-# Limit to top 5 using head
+# Limit to top 5 using heredoc to avoid subshell (bash 3.2 compatible)
 count=0
-echo "$sorted_skills" | head -5 | while IFS='|' read -r score skill desc; do
+top_five=$(echo "$sorted_skills" | head -5)
+while IFS='|' read -r score skill desc; do
     # Skip empty lines or invalid entries
     if [ -z "$score" ] || [ -z "$skill" ]; then
         continue
@@ -129,7 +130,9 @@ echo "$sorted_skills" | head -5 | while IFS='|' read -r score skill desc; do
     echo -e "$count. ${CYAN}$skill${NC} (${confidence} confidence - score: $score)"
     echo "   $desc"
     echo ""
-done
+done <<EOF
+$top_five
+EOF
 
 # Warn if showing only top results
 if [ "$total_matches" -gt 5 ]; then
