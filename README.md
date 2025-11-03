@@ -19,6 +19,62 @@ Ring solves this by:
 - **Automating skill discovery** - Skills load automatically at session start
 - **Preventing common failures** - Built-in anti-patterns and mandatory checklists
 
+## 🏗️ Infrastructure Features (New!)
+
+Ring now includes powerful infrastructure tools for automation and validation:
+
+### Automated Review
+
+**Sequential 3-gate review in one command:**
+```bash
+/ring:review src/auth.ts
+```
+
+Runs Gate 1 (Code) → Gate 2 (Business) → Gate 3 (Security) automatically, stops at first failure.
+
+### Skill Discovery
+
+**Find the right skill for your task:**
+```bash
+/ring:which-skill "debug authentication error"
+# Returns: systematic-debugging (HIGH confidence)
+```
+
+### Compliance Validation
+
+**Verify you're following skill workflows:**
+```bash
+/ring:validate test-driven-development
+# Checks: Test file exists, test fails first, etc.
+```
+
+### Usage Metrics
+
+**Track skill effectiveness:**
+```bash
+/ring:metrics test-driven-development
+# Shows: usage count, compliance rate, common violations
+```
+
+### Workflow Guidance
+
+**Get next skill suggestion:**
+```bash
+/ring:next-skill test-driven-development "test revealed bug"
+# Suggests: systematic-debugging
+```
+
+**New Agents:**
+- `review-orchestrator` - Automated sequential review
+- `full-reviewer` - All 3 gates in single invocation
+
+**New Utilities:**
+- Compliance validator - Enforce skill adherence
+- Output validator - Ensure consistent agent output
+- Skill matcher - Task-to-skill mapping
+- Pre-flight checker - Validate prerequisites
+- Metrics tracker - Track effectiveness
+
 ## 🚀 Quick Start
 
 ### Installation as Claude Code Plugin
