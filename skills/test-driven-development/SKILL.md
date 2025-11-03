@@ -452,6 +452,65 @@ This skill uses these universal patterns:
 
 Apply ALL patterns when using this skill.
 
+---
+
+## When You Violate This Skill
+
+### Violation: Wrote implementation before test
+
+**How to detect:**
+- Implementation file exists or modified
+- No test file exists yet
+- Git diff shows implementation changed before test
+
+**Recovery procedure:**
+1. Stash or delete the implementation code: `git stash` or `rm [file]`
+2. Write the failing test first
+3. Run test to verify it fails: `npm test` or `pytest`
+4. Rewrite the implementation to make test pass
+
+**Why recovery matters:**
+The test must fail first to prove it actually tests something. If implementation exists first, you can't verify the test works - it might be passing for the wrong reason or not testing anything at all.
+
+---
+
+### Violation: Test passes without implementation (FALSE GREEN)
+
+**How to detect:**
+- Wrote test
+- Test passes immediately
+- Haven't written implementation yet
+
+**Recovery procedure:**
+1. Test is broken - delete or fix it
+2. Make test stricter until it fails
+3. Verify failure shows expected error
+4. Then implement to make it pass
+
+**Why recovery matters:**
+A test that passes without implementation is useless - it's not testing the right thing.
+
+---
+
+### Violation: Kept code "as reference" instead of deleting
+
+**How to detect:**
+- Stashed implementation with `git stash`
+- Moved file to `.bak` or similar
+- Copied to clipboard "just in case"
+- Commented out instead of deleting
+
+**Recovery procedure:**
+1. Find the kept code (stash, backup, clipboard)
+2. Delete it permanently: `git stash drop`, `rm`, clear clipboard
+3. Verify code is truly gone
+4. Start RED phase fresh
+
+**Why recovery matters:**
+Keeping code means you'll adapt it instead of implementing from tests. The whole point is to implement fresh, guided by tests. Delete means delete.
+
+---
+
 ## Final Rule
 
 ```
