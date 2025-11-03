@@ -25,6 +25,27 @@ fi
 CURRENT_SKILL="$1"
 CONTEXT="$2"
 
+# Input validation
+validate_inputs() {
+    # Validate skill name format
+    if ! echo "$CURRENT_SKILL" | grep -qE '^[a-z0-9-]+$'; then
+        echo -e "${YELLOW}Warning: Skill name should be lowercase with hyphens${NC}"
+    fi
+
+    # Check context is reasonable
+    if [ -z "$CONTEXT" ]; then
+        echo -e "${YELLOW}Warning: Context is empty, suggestions may be generic${NC}"
+    fi
+
+    local ctx_len=${#CONTEXT}
+    if [ "$ctx_len" -gt 500 ]; then
+        echo -e "${YELLOW}Warning: Context very long, truncating to 500 chars${NC}"
+        CONTEXT="${CONTEXT:0:500}"
+    fi
+}
+
+validate_inputs
+
 echo "Suggesting next skill after: ${CYAN}$CURRENT_SKILL${NC}"
 echo "Context: $CONTEXT"
 echo ""

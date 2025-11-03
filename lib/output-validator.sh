@@ -26,16 +26,42 @@ fi
 AGENT_FILE="$1"
 OUTPUT_FILE="$2"
 
-# Validate files exist
-if [ ! -f "$AGENT_FILE" ]; then
-    echo -e "${RED}Error: Agent file not found: $AGENT_FILE${NC}"
-    exit 2
-fi
+# Input validation
+validate_inputs() {
+    # Check both file paths for path traversal
+    for file in "$AGENT_FILE" "$OUTPUT_FILE"; do
+        case "$file" in
+            *..*)
+                echo -e "${RED}Error: Invalid file path (contains ..)${NC}"
+                exit 2
+                ;;
+        esac
+    done
 
-if [ ! -f "$OUTPUT_FILE" ]; then
-    echo -e "${RED}Error: Output file not found: $OUTPUT_FILE${NC}"
-    exit 2
-fi
+    # Validate agent file exists and is readable
+    if [ ! -f "$AGENT_FILE" ]; then
+        echo -e "${RED}Error: Agent file not found: $AGENT_FILE${NC}"
+        exit 2
+    fi
+
+    if [ ! -r "$AGENT_FILE" ]; then
+        echo -e "${RED}Error: Agent file not readable: $AGENT_FILE${NC}"
+        exit 2
+    fi
+
+    # Validate output file exists and is readable
+    if [ ! -f "$OUTPUT_FILE" ]; then
+        echo -e "${RED}Error: Output file not found: $OUTPUT_FILE${NC}"
+        exit 2
+    fi
+
+    if [ ! -r "$OUTPUT_FILE" ]; then
+        echo -e "${RED}Error: Output file not readable: $OUTPUT_FILE${NC}"
+        exit 2
+    fi
+}
+
+validate_inputs
 
 echo "Validating output format for: $(basename "$AGENT_FILE")"
 echo ""

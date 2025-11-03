@@ -29,11 +29,45 @@ fi
 SKILL_FILE="$1"
 SPECIFIC_RULE="${2:-}"
 
-# Validate file exists
-if [ ! -f "$SKILL_FILE" ]; then
-    echo -e "${RED}Error: File not found: $SKILL_FILE${NC}"
-    exit 2
-fi
+# Input validation and sanitization
+validate_inputs() {
+    # Check for path traversal attempts
+    case "$SKILL_FILE" in
+        *..*)
+            echo -e "${RED}Error: Invalid file path (contains ..)${NC}"
+            exit 2
+            ;;
+        */*)
+            # Path contains directory separator - ok
+            ;;
+        *)
+            echo -e "${RED}Error: File path must be relative or absolute path${NC}"
+            exit 2
+            ;;
+    esac
+
+    # Validate file exists and is readable
+    if [ ! -f "$SKILL_FILE" ]; then
+        echo -e "${RED}Error: File not found: $SKILL_FILE${NC}"
+        exit 2
+    fi
+
+    if [ ! -r "$SKILL_FILE" ]; then
+        echo -e "${RED}Error: File not readable: $SKILL_FILE${NC}"
+        exit 2
+    fi
+
+    # Sanitize rule ID if provided
+    if [ -n "$SPECIFIC_RULE" ]; then
+        # Rule ID should only contain alphanumeric and underscore
+        if ! echo "$SPECIFIC_RULE" | grep -qE '^[a-zA-Z0-9_-]+$'; then
+            echo -e "${RED}Error: Invalid rule ID format${NC}"
+            exit 2
+        fi
+    fi
+}
+
+validate_inputs
 
 # Extract YAML frontmatter
 extract_frontmatter() {
@@ -74,7 +108,8 @@ run_check() {
 
         command_succeeds)
             # Run command and check exit code
-            if ! eval "$pattern" >/dev/null 2>&1; then
+            # Security: Pattern should be pre-validated command, not user input
+            if ! bash -c "$pattern" >/dev/null 2>&1; then
                 result=1
             fi
             ;;
@@ -83,15 +118,56 @@ run_check() {
             # Run command and check if output contains pattern
             local cmd=$(echo "$pattern" | cut -d'|' -f1)
             local search=$(echo "$pattern" | cut -d'|' -f2)
-            if ! eval "$cmd" 2>&1 | grep -q "$search"; then
+            if ! bash -c "$cmd" 2>&1 | grep -q "$search"; then
                 result=1
             fi
             ;;
 
         git_diff_order)
             # Check if test files modified before implementation files
-            # This is a simplified check - real implementation would parse patterns
-            if ! git diff --name-only HEAD | grep -q "test"; then
+            # Pattern format: "test_pattern|impl_pattern"
+            local test_pattern=$(echo "$pattern" | cut -d'|' -f1)
+            local impl_pattern=$(echo "$pattern" | cut -d'|' -f2)
+
+            # Get commit timestamps using git log
+            local latest_test_time=0
+            local latest_impl_time=0
+
+            # Find most recent test file modification
+            local changed_files=$(git diff --name-only HEAD 2>/dev/null)
+            while IFS= read -r file; do
+                [ -z "$file" ] && continue
+                # Use case for pattern matching (bash 3.2 compatible)
+                case "$file" in
+                    $test_pattern)
+                        local file_time=$(git log -1 --format=%at -- "$file" 2>/dev/null || echo 0)
+                        if [ "$file_time" -gt "$latest_test_time" ]; then
+                            latest_test_time=$file_time
+                        fi
+                        ;;
+                esac
+            done <<EOF
+$changed_files
+EOF
+
+            # Find most recent implementation file modification
+            while IFS= read -r file; do
+                [ -z "$file" ] && continue
+                # Use case for pattern matching (bash 3.2 compatible)
+                case "$file" in
+                    $impl_pattern)
+                        local file_time=$(git log -1 --format=%at -- "$file" 2>/dev/null || echo 0)
+                        if [ "$file_time" -gt "$latest_impl_time" ]; then
+                            latest_impl_time=$file_time
+                        fi
+                        ;;
+                esac
+            done <<EOF
+$changed_files
+EOF
+
+            # Test files should be modified before or at same time as impl files
+            if [ "$latest_test_time" -eq 0 ] || [ "$latest_impl_time" -eq 0 ] || [ "$latest_test_time" -gt "$latest_impl_time" ]; then
                 result=1
             fi
             ;;
@@ -146,15 +222,59 @@ main() {
         exit 0
     fi
 
-    echo -e "${GREEN}Compliance rules found${NC}"
-    echo "$rules"
-    echo ""
-    echo -e "${YELLOW}Note: Full validation requires YAML parser (yq)${NC}"
-    echo -e "${YELLOW}For now, showing rules structure only${NC}"
+    # Check if yq is available for full YAML parsing
+    if ! command -v yq >/dev/null 2>&1; then
+        echo -e "${RED}Error: yq is required for compliance validation${NC}"
+        echo "Install with: brew install yq (macOS) or see https://github.com/mikefarah/yq"
+        exit 2
+    fi
 
-    # TODO: Implement full rule parsing and validation with yq
-    # For now, return success
-    exit 0
+    echo -e "${GREEN}Compliance rules found - validating...${NC}"
+    echo ""
+
+    # Parse rules using yq
+    local overall_result=0
+    local rule_count=0
+
+    # Extract rule IDs from compliance_rules
+    local rule_ids=$(echo "$frontmatter" | yq eval '.compliance_rules | keys | .[]' - 2>/dev/null)
+
+    if [ -z "$rule_ids" ]; then
+        echo -e "${YELLOW}No rules could be parsed${NC}"
+        exit 0
+    fi
+
+    # Process each rule
+    while IFS= read -r rule_id; do
+        [ -z "$rule_id" ] && continue
+        rule_count=$((rule_count + 1))
+
+        local check_type=$(echo "$frontmatter" | yq eval ".compliance_rules.\"$rule_id\".check" - 2>/dev/null)
+        local pattern=$(echo "$frontmatter" | yq eval ".compliance_rules.\"$rule_id\".pattern" - 2>/dev/null)
+        local severity=$(echo "$frontmatter" | yq eval ".compliance_rules.\"$rule_id\".severity" - 2>/dev/null)
+        local failure_msg=$(echo "$frontmatter" | yq eval ".compliance_rules.\"$rule_id\".failure_message" - 2>/dev/null)
+
+        # Skip if we're filtering for specific rule
+        if [ -n "$SPECIFIC_RULE" ] && [ "$rule_id" != "$SPECIFIC_RULE" ]; then
+            continue
+        fi
+
+        if ! run_check "$rule_id" "$check_type" "$pattern" "$severity" "$failure_msg"; then
+            overall_result=1
+        fi
+    done <<< "$rule_ids"
+
+    echo ""
+    if [ $rule_count -eq 0 ]; then
+        echo -e "${YELLOW}No rules to validate${NC}"
+        exit 0
+    elif [ $overall_result -eq 0 ]; then
+        echo -e "${GREEN}✓ All compliance checks passed${NC}"
+        exit 0
+    else
+        echo -e "${RED}✗ One or more compliance checks failed${NC}"
+        exit 1
+    fi
 }
 
 main

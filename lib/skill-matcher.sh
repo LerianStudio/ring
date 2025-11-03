@@ -11,6 +11,7 @@
 
 set -euo pipefail
 
+RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 CYAN='\033[0;36m'
@@ -24,6 +25,29 @@ fi
 
 TASK_DESC="$1"
 SKILLS_DIR="${SKILLS_DIR:-skills}"
+
+# Input validation
+validate_inputs() {
+    # Check task description is not empty and reasonable length
+    if [ -z "$TASK_DESC" ]; then
+        echo -e "${RED}Error: Task description cannot be empty${NC}"
+        exit 2
+    fi
+
+    local desc_len=${#TASK_DESC}
+    if [ "$desc_len" -gt 1000 ]; then
+        echo -e "${RED}Error: Task description too long (max 1000 chars)${NC}"
+        exit 2
+    fi
+
+    # Validate SKILLS_DIR exists
+    if [ ! -d "$SKILLS_DIR" ]; then
+        echo -e "${RED}Error: Skills directory not found: $SKILLS_DIR${NC}"
+        exit 2
+    fi
+}
+
+validate_inputs
 
 echo "Finding skills for: \"$TASK_DESC\""
 echo ""
@@ -81,6 +105,9 @@ echo ""
 # Sort by score (descending)
 sorted_skills=$(sort -t'|' -k1 -rn "$TMPFILE")
 
+# Count total matching skills
+total_matches=$(echo "$sorted_skills" | awk -F'|' '$1 > 0' | wc -l | tr -d ' ')
+
 count=0
 echo "$sorted_skills" | while IFS='|' read -r score skill desc; do
     # Skip empty lines or invalid entries
@@ -109,6 +136,11 @@ echo "$sorted_skills" | while IFS='|' read -r score skill desc; do
 
     # Limit to top 5
     if [ $count -ge 5 ]; then
+        # Warn if showing only top results
+        if [ "$total_matches" -gt 5 ]; then
+            echo -e "${YELLOW}Note: Showing top 5 of $total_matches matching skills${NC}"
+            echo ""
+        fi
         break
     fi
 done
