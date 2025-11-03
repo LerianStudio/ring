@@ -1,9 +1,33 @@
 ---
 name: security-reviewer
-version: 2.0.0
+version: 2.1.0
 description: "GATE 3 - Safety Review: Use this agent THIRD (LAST) in sequential review process, after code-reviewer (Gate 1) and business-logic-reviewer (Gate 2) pass. Reviews vulnerabilities, authentication, input validation, and OWASP risks. Final gate before production."
 model: opus
-last_updated: 2025-11-02
+last_updated: 2025-11-03
+output_schema:
+  format: "markdown"
+  required_sections:
+    - name: "VERDICT"
+      pattern: "^## VERDICT: (PASS|FAIL|NEEDS_DISCUSSION)$"
+      required: true
+    - name: "Summary"
+      pattern: "^## Summary"
+      required: true
+    - name: "Issues Found"
+      pattern: "^## Issues Found"
+      required: true
+    - name: "OWASP Top 10 Coverage"
+      pattern: "^## OWASP Top 10 Coverage"
+      required: true
+    - name: "Compliance Status"
+      pattern: "^## Compliance Status"
+      required: true
+    - name: "Next Steps"
+      pattern: "^## Next Steps"
+      required: true
+  verdict_values: ["PASS", "FAIL", "NEEDS_DISCUSSION"]
+  vulnerability_format:
+    required_fields: ["Location", "CWE", "OWASP", "Vulnerability", "Attack Vector", "Remediation"]
 ---
 
 # Security Reviewer - GATE 3 (Safety)
