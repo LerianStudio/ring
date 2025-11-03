@@ -170,6 +170,64 @@ This skill uses these universal patterns:
 
 Apply ALL patterns when using this skill.
 
+---
+
+## When You Violate This Skill
+
+### Violation: Claimed complete without running verification
+
+**How to detect:**
+- Said "implementation is complete"
+- No command output shown
+- Used words like "should work" or "appears correct"
+
+**Recovery procedure:**
+1. Don't mark task complete yet
+2. Run actual verification commands
+3. Paste complete output
+4. Only then claim completion
+
+**Why recovery matters:**
+Claims without evidence create false confidence. Silent failures go undetected until production.
+
+---
+
+### Violation: Ran command but didn't paste output
+
+**How to detect:**
+- Mentioned running tests/build
+- No output shown in response
+- Said "tests passed" without proof
+
+**Recovery procedure:**
+1. Re-run the command
+2. Copy FULL output
+3. Paste output in response
+4. Then make completion claim
+
+**Why recovery matters:**
+"I ran tests and they passed" is a claim, not evidence. Paste the output to prove it.
+
+---
+
+### Violation: Used banned phrases before verification
+
+**How to detect:**
+- Said "appears to work" / "should be fixed" / "looks correct"
+- Expressed satisfaction: "Great!", "Perfect!", "Done!"
+- Implied success without evidence
+
+**Recovery procedure:**
+1. Recognize the violation immediately
+2. Stop and run verification
+3. Paste complete output
+4. Replace banned phrase with evidence-based claim
+
+**Why recovery matters:**
+Banned phrases are cognitive shortcuts that bypass verification. They signal you're claiming success without proof, which is lying to your partner.
+
+---
+
 ## Why This Matters
 
 From 24 failure memories:
