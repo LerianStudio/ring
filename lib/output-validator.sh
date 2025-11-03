@@ -95,7 +95,7 @@ if ! check_section "VERDICT" "^## VERDICT:" "true"; then
 fi
 
 # Check VERDICT value is valid
-if grep -q "^## VERDICT: \(PASS\|FAIL\|NEEDS_DISCUSSION\)" "$OUTPUT_FILE"; then
+if grep -q "^## VERDICT: \(PASS\|FAIL\|NEEDS_DISCUSSION\)$" "$OUTPUT_FILE"; then
     echo -e "${GREEN}✓${NC} VERDICT value is valid"
 else
     echo -e "${RED}✗${NC} VERDICT value must be PASS, FAIL, or NEEDS_DISCUSSION"
