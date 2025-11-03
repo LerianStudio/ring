@@ -101,7 +101,8 @@ run_check() {
     case "$check_type" in
         file_exists)
             # Check if any files match pattern
-            if ! find . -path "./.*" -prune -o -type f -path "$pattern" -print | grep -q .; then
+            # Prune common large directories for performance
+            if ! find . \( -path "./.*" -o -path "*/node_modules" -o -path "*/vendor" \) -prune -o -type f -path "$pattern" -print | grep -q .; then
                 result=1
             fi
             ;;
@@ -129,7 +130,7 @@ run_check() {
             local test_pattern=$(echo "$pattern" | cut -d'|' -f1)
             local impl_pattern=$(echo "$pattern" | cut -d'|' -f2)
 
-            # Get commit timestamps using git log
+            # Get file modification timestamps (for uncommitted changes, use mtime)
             local latest_test_time=0
             local latest_impl_time=0
 
@@ -140,9 +141,14 @@ run_check() {
                 # Use case for pattern matching (bash 3.2 compatible)
                 case "$file" in
                     $test_pattern)
-                        local file_time=$(git log -1 --format=%at -- "$file" 2>/dev/null || echo 0)
-                        if [ "$file_time" -gt "$latest_test_time" ]; then
-                            latest_test_time=$file_time
+                        # For uncommitted changes, use file modification time
+                        if [ -f "$file" ]; then
+                            # macOS/BSD stat: -f %m gets modification time
+                            # Linux stat: -c %Y gets modification time
+                            local file_time=$(stat -f %m "$file" 2>/dev/null || stat -c %Y "$file" 2>/dev/null || echo 0)
+                            if [ "$file_time" -gt "$latest_test_time" ]; then
+                                latest_test_time=$file_time
+                            fi
                         fi
                         ;;
                 esac
@@ -156,9 +162,14 @@ EOF
                 # Use case for pattern matching (bash 3.2 compatible)
                 case "$file" in
                     $impl_pattern)
-                        local file_time=$(git log -1 --format=%at -- "$file" 2>/dev/null || echo 0)
-                        if [ "$file_time" -gt "$latest_impl_time" ]; then
-                            latest_impl_time=$file_time
+                        # For uncommitted changes, use file modification time
+                        if [ -f "$file" ]; then
+                            # macOS/BSD stat: -f %m gets modification time
+                            # Linux stat: -c %Y gets modification time
+                            local file_time=$(stat -f %m "$file" 2>/dev/null || stat -c %Y "$file" 2>/dev/null || echo 0)
+                            if [ "$file_time" -gt "$latest_impl_time" ]; then
+                                latest_impl_time=$file_time
+                            fi
                         fi
                         ;;
                 esac
