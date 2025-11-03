@@ -102,23 +102,21 @@ done
 echo "Relevant skills:"
 echo ""
 
-# Sort by score (descending)
-sorted_skills=$(sort -t'|' -k1 -rn "$TMPFILE")
+# Sort by score (descending) and filter out zero scores
+sorted_skills=$(sort -t'|' -k1 -rn "$TMPFILE" | awk -F'|' '$1 > 0')
 
 # Count total matching skills
-total_matches=$(echo "$sorted_skills" | awk -F'|' '$1 > 0' | wc -l | tr -d ' ')
+total_matches=$(echo "$sorted_skills" | wc -l | tr -d ' ')
 
+# Limit to top 5 using head
 count=0
-echo "$sorted_skills" | while IFS='|' read -r score skill desc; do
+echo "$sorted_skills" | head -5 | while IFS='|' read -r score skill desc; do
     # Skip empty lines or invalid entries
     if [ -z "$score" ] || [ -z "$skill" ]; then
         continue
     fi
 
-    # Skip skills with score 0
-    if [ "$score" -eq 0 ] 2>/dev/null; then
-        continue
-    fi
+    count=$((count + 1))
 
     # Determine confidence level
     confidence="LOW"
@@ -128,22 +126,16 @@ echo "$sorted_skills" | while IFS='|' read -r score skill desc; do
         confidence="MEDIUM"
     fi
 
-    echo -e "$((count + 1)). ${CYAN}$skill${NC} (${confidence} confidence - score: $score)"
+    echo -e "$count. ${CYAN}$skill${NC} (${confidence} confidence - score: $score)"
     echo "   $desc"
     echo ""
-
-    count=$((count + 1))
-
-    # Limit to top 5
-    if [ $count -ge 5 ]; then
-        # Warn if showing only top results
-        if [ "$total_matches" -gt 5 ]; then
-            echo -e "${YELLOW}Note: Showing top 5 of $total_matches matching skills${NC}"
-            echo ""
-        fi
-        break
-    fi
 done
+
+# Warn if showing only top results
+if [ "$total_matches" -gt 5 ]; then
+    echo -e "${YELLOW}Note: Showing top 5 of $total_matches matching skills${NC}"
+    echo ""
+fi
 
 # Check if any skills found
 if [ ! -s "$TMPFILE" ] || [ "$(awk -F'|' '$1 > 0' "$TMPFILE" | wc -l)" -eq 0 ]; then
