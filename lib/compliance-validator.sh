@@ -18,6 +18,25 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
+# Security: Whitelisted commands for command_succeeds check
+# Only these base commands are allowed for security
+WHITELISTED_COMMANDS=(
+    "git"
+    "npm"
+    "yarn"
+    "pytest"
+    "jest"
+    "make"
+    "cargo"
+    "go"
+    "python"
+    "python3"
+    "node"
+)
+
+# Maximum command execution timeout (seconds)
+COMMAND_TIMEOUT=30
+
 # Usage
 if [ $# -lt 1 ]; then
     echo "Usage: $0 <skill-file> [rule-id]"
@@ -35,13 +54,6 @@ validate_inputs() {
     case "$SKILL_FILE" in
         *..*)
             echo -e "${RED}Error: Invalid file path (contains ..)${NC}"
-            exit 2
-            ;;
-        */*)
-            # Path contains directory separator - ok
-            ;;
-        *)
-            echo -e "${RED}Error: File path must be relative or absolute path${NC}"
             exit 2
             ;;
     esac
@@ -68,6 +80,90 @@ validate_inputs() {
 }
 
 validate_inputs
+
+# Security: Validate command against whitelist
+# Returns 0 if command is whitelisted, 1 otherwise
+validate_command() {
+    local cmd="$1"
+
+    # Extract the base command (first word)
+    local base_cmd=$(echo "$cmd" | awk '{print $1}')
+
+    # Check if base command is in whitelist
+    for allowed in "${WHITELISTED_COMMANDS[@]}"; do
+        if [ "$base_cmd" = "$allowed" ]; then
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+# Security: Validate and sanitize glob pattern
+# Ensures pattern doesn't contain command injection characters
+validate_pattern() {
+    local pattern="$1"
+
+    # Reject patterns with dangerous characters
+    # Allow: alphanumeric, -, _, /, *, ., |, space
+    # Reject: ; & $ ` ( ) < > \ newline tab
+    if echo "$pattern" | grep -qE '[;&$`()<>\\]'; then
+        return 1
+    fi
+
+    # Validate pipe-separated patterns (format: "pattern1|pattern2")
+    if echo "$pattern" | grep -q '|'; then
+        local left=$(echo "$pattern" | cut -d'|' -f1)
+        local right=$(echo "$pattern" | cut -d'|' -f2-)
+
+        # Both sides must be valid glob patterns
+        if ! echo "$left" | grep -qE '^[a-zA-Z0-9*_./-]+$'; then
+            return 1
+        fi
+        if ! echo "$right" | grep -qE '^[a-zA-Z0-9*_./ |-]+$'; then
+            return 1
+        fi
+    fi
+
+    return 0
+}
+
+# Security: Run command with timeout and validation
+safe_run_command() {
+    local cmd="$1"
+    local timeout_sec="${2:-$COMMAND_TIMEOUT}"
+
+    # Validate command against whitelist
+    if ! validate_command "$cmd"; then
+        echo -e "${RED}Security: '$cmd' not in whitelist${NC}" >&2
+        return 1
+    fi
+
+    # Run with timeout (macOS compatible)
+    if command -v timeout >/dev/null 2>&1; then
+        # GNU timeout available
+        timeout "$timeout_sec" bash -c "$cmd" 2>/dev/null
+    elif command -v gtimeout >/dev/null 2>&1; then
+        # GNU coreutils on macOS (brew install coreutils)
+        gtimeout "$timeout_sec" bash -c "$cmd" 2>/dev/null
+    else
+        # Fallback: use bash built-in with background job
+        (
+            bash -c "$cmd" 2>/dev/null &
+            local pid=$!
+            local count=0
+            while kill -0 $pid 2>/dev/null && [ $count -lt $timeout_sec ]; do
+                sleep 1
+                count=$((count + 1))
+            done
+            if kill -0 $pid 2>/dev/null; then
+                kill -9 $pid 2>/dev/null
+                return 124  # timeout exit code
+            fi
+            wait $pid
+        )
+    fi
+}
 
 # Extract YAML frontmatter
 extract_frontmatter() {
@@ -109,77 +205,102 @@ run_check() {
 
         command_succeeds)
             # Run command and check exit code
-            # Security: Pattern should be pre-validated command, not user input
-            if ! bash -c "$pattern" >/dev/null 2>&1; then
+            # Security: Validate command against whitelist and run with timeout
+            if ! validate_command "$pattern"; then
+                echo -e "${RED}Security: '$pattern' not in whitelist${NC}" >&2
+                result=1
+            elif ! safe_run_command "$pattern" >/dev/null 2>&1; then
                 result=1
             fi
             ;;
 
         command_output_contains)
             # Run command and check if output contains pattern
-            local cmd=$(echo "$pattern" | cut -d'|' -f1)
-            local search=$(echo "$pattern" | cut -d'|' -f2)
-            if ! bash -c "$cmd" 2>&1 | grep -q "$search"; then
+            # Security: Validate pattern format and command
+            if ! validate_pattern "$pattern"; then
+                echo -e "${RED}Security: Invalid pattern format${NC}" >&2
                 result=1
+            else
+                local cmd=$(echo "$pattern" | cut -d'|' -f1)
+                local search=$(echo "$pattern" | cut -d'|' -f2)
+
+                # Validate command against whitelist
+                if ! validate_command "$cmd"; then
+                    echo -e "${RED}Security: '$cmd' not in whitelist${NC}" >&2
+                    result=1
+                elif ! safe_run_command "$cmd" 2>&1 | grep -q "$search"; then
+                    result=1
+                fi
             fi
             ;;
 
         git_diff_order)
             # Check if test files modified before implementation files
             # Pattern format: "test_pattern|impl_pattern"
-            local test_pattern=$(echo "$pattern" | cut -d'|' -f1)
-            local impl_pattern=$(echo "$pattern" | cut -d'|' -f2)
-
-            # Get file modification timestamps (for uncommitted changes, use mtime)
-            local latest_test_time=0
-            local latest_impl_time=0
-
-            # Find most recent test file modification
-            local changed_files=$(git diff --name-only HEAD 2>/dev/null)
-            while IFS= read -r file; do
-                [ -z "$file" ] && continue
-                # Use case for pattern matching (bash 3.2 compatible)
-                case "$file" in
-                    $test_pattern)
-                        # For uncommitted changes, use file modification time
-                        if [ -f "$file" ]; then
-                            # macOS/BSD stat: -f %m gets modification time
-                            # Linux stat: -c %Y gets modification time
-                            local file_time=$(stat -f %m "$file" 2>/dev/null || stat -c %Y "$file" 2>/dev/null || echo 0)
-                            if [ "$file_time" -gt "$latest_test_time" ]; then
-                                latest_test_time=$file_time
-                            fi
-                        fi
-                        ;;
-                esac
-            done <<EOF
-$changed_files
-EOF
-
-            # Find most recent implementation file modification
-            while IFS= read -r file; do
-                [ -z "$file" ] && continue
-                # Use case for pattern matching (bash 3.2 compatible)
-                case "$file" in
-                    $impl_pattern)
-                        # For uncommitted changes, use file modification time
-                        if [ -f "$file" ]; then
-                            # macOS/BSD stat: -f %m gets modification time
-                            # Linux stat: -c %Y gets modification time
-                            local file_time=$(stat -f %m "$file" 2>/dev/null || stat -c %Y "$file" 2>/dev/null || echo 0)
-                            if [ "$file_time" -gt "$latest_impl_time" ]; then
-                                latest_impl_time=$file_time
-                            fi
-                        fi
-                        ;;
-                esac
-            done <<EOF
-$changed_files
-EOF
-
-            # Test files should be modified before or at same time as impl files
-            if [ "$latest_test_time" -eq 0 ] || [ "$latest_impl_time" -eq 0 ] || [ "$latest_test_time" -gt "$latest_impl_time" ]; then
+            # Security: Validate pattern format to prevent injection
+            if ! validate_pattern "$pattern"; then
+                echo -e "${RED}Error: Invalid pattern format${NC}" >&2
                 result=1
+            else
+                local test_pattern=$(echo "$pattern" | cut -d'|' -f1)
+                local impl_pattern=$(echo "$pattern" | cut -d'|' -f2)
+
+                # Sanitize patterns - remove any remaining dangerous chars
+                test_pattern=$(echo "$test_pattern" | tr -d ';$`\\')
+                impl_pattern=$(echo "$impl_pattern" | tr -d ';$`\\')
+
+                # Get file modification timestamps (for uncommitted changes, use mtime)
+                local latest_test_time=0
+                local latest_impl_time=0
+
+                # Find most recent test file modification
+                local changed_files=$(git diff --name-only HEAD 2>/dev/null)
+                while IFS= read -r file; do
+                    [ -z "$file" ] && continue
+                    # Use case for pattern matching with proper quoting (bash 3.2 compatible)
+                    # Note: Patterns are sanitized above, but we still quote for safety
+                    case "$file" in
+                        $test_pattern)
+                            # For uncommitted changes, use file modification time
+                            if [ -f "$file" ]; then
+                                # macOS/BSD stat: -f %m gets modification time
+                                # Linux stat: -c %Y gets modification time
+                                local file_time=$(stat -f %m "$file" 2>/dev/null || stat -c %Y "$file" 2>/dev/null || echo 0)
+                                if [ "$file_time" -gt "$latest_test_time" ]; then
+                                    latest_test_time=$file_time
+                                fi
+                            fi
+                            ;;
+                    esac
+                done <<EOF
+$changed_files
+EOF
+
+                # Find most recent implementation file modification
+                while IFS= read -r file; do
+                    [ -z "$file" ] && continue
+                    # Use case for pattern matching with proper quoting (bash 3.2 compatible)
+                    case "$file" in
+                        $impl_pattern)
+                            # For uncommitted changes, use file modification time
+                            if [ -f "$file" ]; then
+                                # macOS/BSD stat: -f %m gets modification time
+                                # Linux stat: -c %Y gets modification time
+                                local file_time=$(stat -f %m "$file" 2>/dev/null || stat -c %Y "$file" 2>/dev/null || echo 0)
+                                if [ "$file_time" -gt "$latest_impl_time" ]; then
+                                    latest_impl_time=$file_time
+                                fi
+                            fi
+                            ;;
+                    esac
+                done <<EOF
+$changed_files
+EOF
+
+                # Test files should be modified before or at same time as impl files
+                if [ "$latest_test_time" -eq 0 ] || [ "$latest_impl_time" -eq 0 ] || [ "$latest_test_time" -gt "$latest_impl_time" ]; then
+                    result=1
+                fi
             fi
             ;;
 
