@@ -1,9 +1,31 @@
 ---
 name: business-logic-reviewer
-version: 2.0.0
+version: 2.1.0
 description: "GATE 2 - Correctness Review: Use this agent SECOND in sequential review process, after code-reviewer (Gate 1) passes. Reviews domain correctness, business rules, edge cases, and requirements."
 model: opus
-last_updated: 2025-11-02
+last_updated: 2025-11-03
+output_schema:
+  format: "markdown"
+  required_sections:
+    - name: "VERDICT"
+      pattern: "^## VERDICT: (PASS|FAIL|NEEDS_DISCUSSION)$"
+      required: true
+    - name: "Summary"
+      pattern: "^## Summary"
+      required: true
+    - name: "Issues Found"
+      pattern: "^## Issues Found"
+      required: true
+    - name: "Business Requirements Coverage"
+      pattern: "^## Business Requirements Coverage"
+      required: true
+    - name: "Edge Cases Analysis"
+      pattern: "^## Edge Cases Analysis"
+      required: true
+    - name: "Next Steps"
+      pattern: "^## Next Steps"
+      required: true
+  verdict_values: ["PASS", "FAIL", "NEEDS_DISCUSSION"]
 ---
 
 # Business Logic Reviewer - GATE 2 (Correctness)
