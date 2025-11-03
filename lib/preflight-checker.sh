@@ -79,31 +79,83 @@ fi
 echo "Prerequisites found - validating..."
 echo ""
 
-# Parse prerequisites using yq
-prereq_list=$(echo "$frontmatter" | yq eval '.prerequisites[]' - 2>/dev/null)
+# Get prerequisite count
+prereq_count=$(echo "$frontmatter" | yq eval '.prerequisites | length' - 2>/dev/null)
 
-if [ -z "$prereq_list" ]; then
+if [ "$prereq_count" -eq 0 ] 2>/dev/null || [ -z "$prereq_count" ]; then
     echo -e "${GREEN}✓ No prerequisites to check${NC}"
     exit 0
 fi
 
 overall_result=0
 
-# Check each prerequisite
-while IFS= read -r prereq; do
-    [ -z "$prereq" ] && continue
+# Check each prerequisite by index
+for ((i=0; i<prereq_count; i++)); do
+    # Get prerequisite type and value
+    prereq_type=$(echo "$frontmatter" | yq eval ".prerequisites[$i].type" - 2>/dev/null)
+    prereq_value=$(echo "$frontmatter" | yq eval ".prerequisites[$i].value" - 2>/dev/null)
 
-    echo -n "Checking: $prereq ... "
-
-    # Check if it's a command
-    if command -v "$prereq" >/dev/null 2>&1; then
-        echo -e "${GREEN}✓${NC}"
-    else
-        echo -e "${RED}✗${NC}"
-        echo "  Required: $prereq"
-        overall_result=1
+    # Handle legacy format (plain strings) - treat as command
+    if [ "$prereq_type" = "null" ] || [ -z "$prereq_type" ]; then
+        prereq_type="command"
+        prereq_value=$(echo "$frontmatter" | yq eval ".prerequisites[$i]" - 2>/dev/null)
     fi
-done <<< "$prereq_list"
+
+    [ -z "$prereq_value" ] && continue
+
+    echo -n "Checking ($prereq_type): $prereq_value ... "
+
+    case "$prereq_type" in
+        command)
+            # Check if command exists
+            if command -v "$prereq_value" >/dev/null 2>&1; then
+                echo -e "${GREEN}✓${NC}"
+            else
+                echo -e "${RED}✗${NC}"
+                echo "  Required command: $prereq_value"
+                overall_result=1
+            fi
+            ;;
+
+        file)
+            # Check if file exists
+            if [ -f "$prereq_value" ]; then
+                echo -e "${GREEN}✓${NC}"
+            else
+                echo -e "${RED}✗${NC}"
+                echo "  Required file: $prereq_value"
+                overall_result=1
+            fi
+            ;;
+
+        env)
+            # Check if environment variable is set
+            if [ -n "${!prereq_value}" ]; then
+                echo -e "${GREEN}✓${NC}"
+            else
+                echo -e "${RED}✗${NC}"
+                echo "  Required environment variable: $prereq_value"
+                overall_result=1
+            fi
+            ;;
+
+        git_clean)
+            # Check if git working directory is clean
+            if git diff-index --quiet HEAD 2>/dev/null; then
+                echo -e "${GREEN}✓${NC}"
+            else
+                echo -e "${RED}✗${NC}"
+                echo "  Git working directory must be clean"
+                overall_result=1
+            fi
+            ;;
+
+        *)
+            echo -e "${YELLOW}⚠${NC}"
+            echo "  Unknown prerequisite type: $prereq_type"
+            ;;
+    esac
+done
 
 echo ""
 if [ $overall_result -eq 0 ]; then
