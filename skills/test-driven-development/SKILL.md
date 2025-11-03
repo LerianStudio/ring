@@ -1,6 +1,21 @@
 ---
 name: test-driven-development
 description: Use when implementing any feature or bugfix, before writing implementation code - write the test first, watch it fail, write minimal code to pass; ensures tests actually verify behavior by requiring failure first
+compliance_rules:
+  - id: "test_file_exists"
+    description: "Test file must exist before implementation file"
+    check_type: "file_exists"
+    pattern: "**/*.test.{ts,js,go,py}"
+    severity: "blocking"
+    failure_message: "No test file found. Write test first (RED phase)."
+
+  - id: "test_must_fail_first"
+    description: "Test must produce failure output before implementation"
+    check_type: "command_output_contains"
+    command: "npm test 2>&1 || pytest 2>&1 || go test ./... 2>&1"
+    pattern: "FAIL|Error|failed"
+    severity: "blocking"
+    failure_message: "Test does not fail. Write a failing test first (RED phase)."
 ---
 
 # Test-Driven Development (TDD)
