@@ -23,14 +23,17 @@ Ring solves this by:
 
 Ring now includes powerful infrastructure tools for automation and validation:
 
-### Automated Review
+### Automated Code Review
 
-**Sequential 3-gate review in one command:**
+**Parallel 3-gate review for 3x faster feedback:**
 ```bash
 /ring:review src/auth.ts
 ```
 
-Runs Gate 1 (Code) → Gate 2 (Business) → Gate 3 (Security) automatically, stops at first failure.
+Runs all 3 reviewers simultaneously (Code, Business, Security) - aggregates findings by severity:
+- **Critical/High/Medium** → Fix immediately, re-run all 3
+- **Low** → Add `TODO(review)` comments in code
+- **Cosmetic** → Add `FIXME(nitpick)` comments in code
 
 ### Skill Discovery
 
@@ -64,9 +67,11 @@ Runs Gate 1 (Code) → Gate 2 (Business) → Gate 3 (Security) automatically, st
 # Suggests: systematic-debugging
 ```
 
-**New Agents:**
-- `review-orchestrator` - Automated sequential review
-- `full-reviewer` - All 3 gates in single invocation
+**Review Agents:**
+- `code-reviewer` - Foundation review (architecture, code quality, design patterns)
+- `business-logic-reviewer` - Correctness review (domain logic, requirements, edge cases)
+- `security-reviewer` - Safety review (vulnerabilities, OWASP, authentication)
+- `full-reviewer` - **Parallel orchestrator** that dispatches all 3 reviewers simultaneously
 
 **New Utilities:**
 - Compliance validator - Enforce skill adherence
@@ -149,10 +154,10 @@ No "should work" → Only "does work" with proof
 - `brainstorming` - Structured design refinement
 - `writing-plans` - Zero-context implementation plans
 - `executing-plans` - Batch execution with checkpoints
-- `requesting-code-review` - Pre-review checklist
+- `requesting-code-review` - **Parallel 3-reviewer dispatch** with severity-based handling
 - `receiving-code-review` - Responding to feedback
 - `dispatching-parallel-agents` - Concurrent workflows
-- `subagent-driven-development` - Fast iteration
+- `subagent-driven-development` - Fast iteration with **parallel reviews**
 - `using-git-worktrees` - Isolated development
 - `finishing-a-development-branch` - Merge/PR decisions
 
@@ -213,20 +218,53 @@ Claude: I'll use the pre-dev workflow to plan this systematically...
         ... [Through all 8 gates]
 ```
 
+### Code Review (Parallel, 3x Faster!)
+```
+User: "Review my authentication implementation"
+Claude: Dispatching all 3 reviewers in parallel...
+        [Launches code-reviewer, business-logic-reviewer, security-reviewer simultaneously]
+
+        Code reviewer: PASS. Clean architecture, good tests.
+        Business reviewer: FAIL. Missing password reset flow (HIGH severity).
+        Security reviewer: FAIL. JWT secret hardcoded (CRITICAL severity).
+
+        Aggregating issues by severity:
+        - CRITICAL: JWT secret hardcoded in auth.ts:42
+        - HIGH: Password reset flow missing from requirements
+
+        Dispatching fix subagent to address Critical/High issues...
+        [Fixes applied]
+
+        Re-running all 3 reviewers in parallel...
+        All reviewers: PASS. Ready for production.
+```
+
+**Key benefits:**
+- **3x faster** - All reviewers run simultaneously (not sequential)
+- **Comprehensive** - Get all feedback at once, easier to prioritize
+- **Tech debt tracking** - Low/Cosmetic issues tracked with TODO/FIXME comments in code
+- **Model-specific** - All reviewers run on Opus for deep analysis
+
 ## 🏗️ Architecture
 
 ```
 ring/
-├── skills/                 # 28 specialized skills
+├── skills/                      # 28 specialized skills
 │   ├── skill-name/
-│   │   └── SKILL.md       # Skill definition with frontmatter
-│   └── shared-patterns/   # Universal patterns used across skills
-├── commands/              # Slash command definitions
-├── hooks/                 # Session initialization
-│   ├── hooks.json        # Hook configuration
-│   └── session-start.sh  # Loads skills at startup
-├── agents/               # Specialized agent definitions
-└── docs/                 # Documentation and quick reference
+│   │   └── SKILL.md            # Skill definition with frontmatter
+│   └── shared-patterns/        # Universal patterns used across skills
+├── commands/                   # Slash command definitions
+├── hooks/                      # Session initialization
+│   ├── hooks.json             # Hook configuration
+│   ├── session-start.sh       # Loads skills at startup
+│   └── generate-skills-ref.py # Auto-generates quick reference
+├── agents/                     # Specialized review agents (4 reviewers)
+│   ├── code-reviewer.md       # Gate 1: Foundation review
+│   ├── business-logic-reviewer.md  # Gate 2: Correctness review
+│   ├── security-reviewer.md   # Gate 3: Safety review
+│   └── full-reviewer.md       # Parallel orchestrator
+└── docs/                      # Documentation and plans
+    └── plans/                 # Implementation design documents
 ```
 
 ## 🤝 Contributing
@@ -271,8 +309,9 @@ ring/
 
 ## 📖 Documentation
 
-- [Skills Quick Reference](docs/skills-quick-reference.md) - All skills at a glance
-- [CLAUDE.md](CLAUDE.md) - Guide for Claude Code instances
+- **Skills Quick Reference** - Auto-generated at session start from skill frontmatter
+- [CLAUDE.md](CLAUDE.md) - Repository guide for Claude Code
+- [Design Documents](docs/plans/) - Implementation plans and architecture decisions
 
 ## 🎯 Philosophy
 

@@ -36,9 +36,16 @@ Ring is a comprehensive skills library and workflow system for Claude Code, impl
 - Each `.md` file defines a command template
 - Commands map to corresponding skills
 
+**Review Agents** (`agents/`)
+- `code-reviewer.md` - Gate 1: Foundation review (architecture, code quality, design patterns)
+- `business-logic-reviewer.md` - Gate 2: Correctness review (domain logic, requirements, edge cases)
+- `security-reviewer.md` - Gate 3: Safety review (vulnerabilities, OWASP, authentication)
+- `full-reviewer.md` - Parallel orchestrator that dispatches all 3 reviewers simultaneously
+- All reviewers run on Opus model for comprehensive analysis
+
 **Documentation** (`docs/`)
-- `skills-quick-reference.md` provides rapid skill lookup
-- `plans/` contains implementation plans for features
+- Skills quick reference is **auto-generated** at session start by `hooks/generate-skills-ref.py`
+- `plans/` contains implementation plans and architecture design documents
 
 ## Common Commands
 
@@ -83,20 +90,20 @@ cat .claude-plugin/marketplace.json | jq .
 
 ### Testing Skills
 ```bash
-# Initialize skills system (for testing)
-./lib/initialize-skills.sh
+# Test session start hook (generates skills quick reference)
+./hooks/session-start.sh
 
-# Check skills quick reference
-cat docs/skills-quick-reference.md
+# Test skills reference generation directly
+./hooks/generate-skills-ref.py
 ```
 
 ## Key Workflows
 
 ### Adding a New Skill
 1. Create directory: `skills/skill-name/`
-2. Add `SKILL.md` with frontmatter and content
-3. Update `docs/skills-quick-reference.md`
-4. Test with session-start hook
+2. Add `SKILL.md` with frontmatter (name, description) and content
+3. Test with session-start hook: `./hooks/session-start.sh`
+4. Skills quick reference auto-generates from frontmatter (no manual update needed)
 
 ### Modifying Skills
 1. Edit `skills/{skill-name}/SKILL.md`
@@ -108,6 +115,61 @@ cat docs/skills-quick-reference.md
 1. Add `.md` file to `commands/`
 2. Reference corresponding skill
 3. Use clear, actionable language
+
+## Code Review System (Parallel Execution)
+
+Ring uses a **parallel 3-reviewer system** for comprehensive, fast feedback:
+
+### Review Agents
+
+**All 3 reviewers dispatch simultaneously** (not sequential):
+1. **code-reviewer** (Gate 1) - Architecture, design patterns, code quality
+2. **business-logic-reviewer** (Gate 2) - Domain correctness, requirements, edge cases
+3. **security-reviewer** (Gate 3) - Vulnerabilities, OWASP, authentication
+
+**Model requirement:** All reviewers must run on `model: "opus"` for comprehensive analysis
+
+### Dispatch Pattern
+
+**Single message with 3 Task calls:**
+```python
+# Launch all 3 reviewers in parallel
+Task(ring:code-reviewer, model="opus", ...)
+Task(ring:business-logic-reviewer, model="opus", ...)
+Task(ring:security-reviewer, model="opus", ...)
+
+# Wait for all to complete, then aggregate by severity
+```
+
+### Severity-Based Handling
+
+After all reviewers complete, aggregate findings and handle by severity:
+
+**Critical/High/Medium Issues:**
+- Fix immediately via fix subagent
+- Re-run all 3 reviewers in parallel after fixes
+- Repeat until no Critical/High/Medium issues remain
+
+**Low Issues:**
+- Add `TODO(review):` comments in code with reporter, date, severity
+- Track tech debt at code location for visibility
+
+**Cosmetic/Nitpick Issues:**
+- Add `FIXME(nitpick):` comments in code with reporter, date, severity
+- Low-priority improvements tracked inline
+
+### Key Benefits
+
+- **3x faster** - All reviewers run simultaneously (vs. sequential gates)
+- **Comprehensive** - Get all feedback at once, easier to prioritize fixes
+- **Tech debt visible** - Low/Cosmetic issues tracked in code with TODO/FIXME
+- **Fast re-review** - Parallel execution makes verification quick (~3-5 min total)
+
+### Related Skills
+
+- `requesting-code-review` - How to dispatch parallel reviews properly
+- `subagent-driven-development` - Uses parallel reviews after each task
+- `receiving-code-review` - How to respond to review feedback
 
 ## Skill Categories
 
@@ -141,12 +203,16 @@ Located in `skills/shared-patterns/`:
 - **test-driven-development**: RED-GREEN-REFACTOR cycle
 - **systematic-debugging**: 4-phase investigation
 - **verification-before-completion**: Evidence before claims
+- **requesting-code-review**: Parallel 3-reviewer dispatch with severity-based handling
 
 ### Anti-Patterns to Avoid
 - Skipping skill checks before tasks
 - Writing code before tests
 - Fixing bugs without root cause analysis
 - Claiming completion without verification
+- Dispatching code reviewers sequentially (use parallel - 3x faster!)
+- Proceeding with unfixed Critical/High/Medium review issues
+- Forgetting TODO/FIXME comments for Low/Cosmetic issues
 
 ## Session Integration
 
