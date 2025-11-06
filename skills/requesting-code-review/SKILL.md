@@ -5,33 +5,30 @@ description: Use when completing tasks, implementing major features, or before m
 
 # Requesting Code Review
 
-Dispatch reviewer subagents sequentially to catch issues before they cascade.
+Dispatch all three reviewer subagents in parallel for fast, comprehensive feedback.
 
-**Core principle:** Review early, review often. Reviews build on validated foundations.
+**Core principle:** Review early, review often. Parallel execution provides 3x faster feedback with comprehensive coverage.
 
-## Review Order (In Parallel, using the Full Reviewer agent that orchestrates 3 parallel subagents)
+## Review Order (Parallel Execution)
 
-Three specialized reviewers run in sequence, each building on the previous:
+Three specialized reviewers run in **parallel** for maximum speed:
 
 **1. ring:code-reviewer** (Foundation)
 - **Focus:** Architecture, design patterns, code quality, maintainability
-- **Why first:** Can't review business logic or security in unreadable code
-- **Gates:** Clear structure, testable design, readable names
-- **If fails:** Report for final summary
+- **Model:** Opus (required for comprehensive analysis)
+- **Reports:** Code quality issues, architectural concerns
 
 **2. ring:business-logic-reviewer** (Correctness)
 - **Focus:** Domain correctness, business rules, edge cases, requirements
-- **Why second:** Assumes code is now readable and well-structured
-- **Gates:** Meets requirements, handles edge cases, maintains invariants
-- **If fails:** Report for final summary
+- **Model:** Opus (required for deep domain understanding)
+- **Reports:** Business logic issues, requirement gaps
 
 **3. ring:security-reviewer** (Safety)
 - **Focus:** Vulnerabilities, authentication, input validation, OWASP risks
-- **Why last:** Most effective on clean, correct implementation
-- **Gates:** Secure for production
-- **If fails:** Report for final summary
+- **Model:** Opus (required for thorough security analysis)
+- **Reports:** Security vulnerabilities, OWASP risks
 
-**Critical:** Run in parallel. Summarize after finished. Fix automatically CRITICAL, HIGH, and MEDIUM issues. Report on low/cosmetic issues.
+**Critical:** All three reviewers run simultaneously in a single message with 3 Task tool calls. Each reviewer works independently and returns its report. After all complete, aggregate findings and handle by severity.
 
 ## When to Request Review
 
@@ -57,7 +54,10 @@ Three specialized reviewers run in sequence, each building on the previous:
 - **Code + Security (skip business):** Infrastructure/DevOps changes
 
 **Default: Use all three in parallel.** Only skip reviewers when you're certain their domain doesn't apply.
-**Important note: if you wish, the 'full-reviewer' agent orchestrates the other reviewers.**
+
+**Two ways to run parallel reviews:**
+1. **Direct parallel dispatch:** Launch 3 Task calls in single message (explicit control)
+2. **full-reviewer agent:** Single agent that dispatches 3 reviewers in parallel internally (convenience)
 
 ## How to Request
 
@@ -67,97 +67,122 @@ BASE_SHA=$(git rev-parse HEAD~1)  # or origin/main
 HEAD_SHA=$(git rev-parse HEAD)
 ```
 
-**2. Parallel review process:**
+**2. Dispatch all three reviewers in parallel:**
 
-**Step 1: Code Review (Foundation)**
+**CRITICAL: Use a single message with 3 Task tool calls to launch all reviewers simultaneously.**
+
 ```
-Task tool (ring:code-reviewer):
-  WHAT_WAS_IMPLEMENTED: [What you built]
-  PLAN_OR_REQUIREMENTS: [Requirements/plan reference]
-  BASE_SHA: [starting commit]
-  HEAD_SHA: [current commit]
-  DESCRIPTION: [brief summary]
+# Single message with 3 parallel Task calls:
+
+Task tool #1 (ring:code-reviewer):
+  model: "opus"
+  description: "Review code quality and architecture"
+  prompt: |
+    WHAT_WAS_IMPLEMENTED: [What you built]
+    PLAN_OR_REQUIREMENTS: [Requirements/plan reference]
+    BASE_SHA: [starting commit]
+    HEAD_SHA: [current commit]
+    DESCRIPTION: [brief summary]
+
+Task tool #2 (ring:business-logic-reviewer):
+  model: "opus"
+  description: "Review business logic correctness"
+  prompt: |
+    [Same parameters as above]
+
+Task tool #3 (ring:security-reviewer):
+  model: "opus"
+  description: "Review security vulnerabilities"
+  prompt: |
+    [Same parameters as above]
 ```
 
-**If code review passes → Report**
-**If code review fails → Report**
+**All three reviewers execute simultaneously. Wait for all to complete.**
 
-**Step 2: Business Logic Review (Correctness)**
+**3. Aggregate findings from all three reviews:**
+
+Collect all issues by severity across all three reviewers:
+- **Critical issues:** [List from all 3 reviewers]
+- **High issues:** [List from all 3 reviewers]
+- **Medium issues:** [List from all 3 reviewers]
+- **Low issues:** [List from all 3 reviewers]
+- **Cosmetic/Nitpick issues:** [List from all 3 reviewers]
+
+**4. Handle by severity:**
+
+**Critical/High/Medium → Fix immediately:**
+- Dispatch fix subagent to address all Critical/High/Medium issues
+- After fixes complete, re-run all 3 reviewers in parallel
+- Repeat until no Critical/High/Medium issues remain
+
+**Low issues → Add TODO comments in code:**
+```javascript
+// TODO(review): [Issue description from reviewer]
+// Reported by: [reviewer-name] on [date]
+// Location: file:line
 ```
-Task tool (ring:business-logic-reviewer):
-  [Same parameters as code review]
+
+**Cosmetic/Nitpick → Add FIXME comments in code:**
+```javascript
+// FIXME(nitpick): [Issue description from reviewer]
+// Reported by: [reviewer-name] on [date]
+// Location: file:line
 ```
 
-**If code review passes → Report**
-**If code review fails → Report**
-
-**Step 3: Security Review (Safety)**
-```
-Task tool (ring:security-reviewer):
-  [Same parameters as code review]
-```
-
-**If code review passes → Report**
-**If code review fails → Report**
-
-**3. Act on feedback at each gate:**
-- **Critical/High/Medium issues:** MUST fix immediately before proceeding to next task.
-- **Low issues:** Report before proceeding (document tech debt at ``docs/tech-debt/{date}-{subject}.md``)
-- **Push back:** If reviewer is wrong, provide reasoning and evidence
+**Push back on incorrect feedback:**
+- If reviewer is wrong, provide reasoning and evidence
+- Request clarification for ambiguous feedback
+- Security concerns require extra scrutiny before dismissing
 
 ## Integration with Workflows
 
 **Subagent-Driven Development:**
-- Review after EACH task sequentially (Gate 1 → Gate 2 → Gate 3)
-- Catch issues at earliest gate
-- Fix before moving to next reviewer, then next task
+- Review after EACH task using parallel dispatch (all 3 reviewers at once)
+- Aggregate findings across all reviewers
+- Fix Critical/High/Medium, add TODO/FIXME for Low/Cosmetic
+- Move to next task only after all Critical/High/Medium resolved
 
 **Executing Plans:**
-- Review after each batch (3 tasks) sequentially
-- Get feedback at each gate, apply, continue
-- Re-run from Gate 1 if major changes needed
+- Review after each batch (3 tasks) using parallel dispatch
+- Handle severity-based fixes before next batch
+- Track Low/Cosmetic issues in code comments
 
 **Ad-Hoc Development:**
-- Review before merge sequentially (all three gates)
-- Review when stuck (may only need Gate 1 for perspective)
+- Review before merge using parallel dispatch (all three reviewers)
+- Can use single reviewer if domain-specific (e.g., docs → code-reviewer only)
 
 ## Red Flags
 
 **Never:**
-- Skip Gate 1 because "code is simple" (foundation for other gates)
+- Dispatch reviewers sequentially (wastes time - use parallel!)
 - Proceed to next task with unfixed Critical/High/Medium issues
 - Skip security review for "just refactoring" (may expose vulnerabilities)
-- Assume business logic is correct without Gate 2 validation
-- Argue with valid technical/security feedback
+- Skip code review because "code is simple"
+- Forget to add TODO/FIXME comments for Low/Cosmetic issues
+- Argue with valid technical/security feedback without evidence
 
 **Always:**
-- Run in parallel: Code / Business / Security
-- Fix Critical/High/Medium issues before next task
-- Re-run from Gate 1 if major architectural changes made
-- Document Low issues as tech debt
+- Launch all 3 reviewers in a single message (3 Task calls)
+- Specify `model: "opus"` for each reviewer
+- Wait for all reviewers to complete before aggregating
+- Fix Critical/High/Medium immediately
+- Add TODO comments for Low issues
+- Add FIXME comments for Cosmetic/Nitpick issues
+- Re-run all 3 reviewers after fixing Critical/High/Medium issues
 
 **If reviewer wrong:**
 - Push back with technical reasoning
 - Show code/tests that prove it works
 - Request clarification
-- Security concerns require extra scrutiny
+- Security concerns require extra scrutiny before dismissing
 
-## When to Re-run From Gate 1
+## Re-running Reviews After Fixes
 
-After fixing issues, decide where to restart:
+**After fixing Critical/High/Medium issues:**
+- Re-run all 3 reviewers in parallel (same as initial review)
+- Don't cherry-pick which reviewers to re-run
+- Parallel execution makes full re-review fast (~3-5 minutes total)
 
-**Re-run from Gate 1 (code review):**
-- Major architectural changes
-- Significant refactoring
-- New files or modules added
-- Changed project structure
-
-**Re-run from Gate 2 (business logic):**
-- Business rule changes
-- Added/changed features
-- Modified workflows or state machines
-
-**Re-run only Gate 3 (security):**
-- Small security fixes (validation, encoding, config)
-- No architectural or business logic changes
-- Adding defensive measures only
+**After adding TODO/FIXME comments:**
+- Commit with message noting review completion and tech debt tracking
+- No need to re-run reviews for comment additions

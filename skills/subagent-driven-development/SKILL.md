@@ -58,98 +58,138 @@ Task tool (general-purpose):
 
 **Subagent reports back** with summary of work.
 
-### 3. Review Subagent's Work (Sequential Gates)
+### 3. Review Subagent's Work (Parallel Execution)
 
-**Dispatch reviewer subagents sequentially, not in parallel:**
+**Dispatch all three reviewer subagents in parallel using a single message:**
 
-**Gate 1: Code Review (Foundation)**
+**CRITICAL: Use one message with 3 Task tool calls to launch all reviewers simultaneously.**
+
 ```
-Task tool (ring:code-reviewer):
-  WHAT_WAS_IMPLEMENTED: [from subagent's report]
-  PLAN_OR_REQUIREMENTS: Task N from [plan-file]
-  BASE_SHA: [commit before task]
-  HEAD_SHA: [current commit]
-  DESCRIPTION: [task summary]
+# Single message with 3 parallel Task calls:
+
+Task tool #1 (ring:code-reviewer):
+  model: "opus"
+  description: "Review code quality for Task N"
+  prompt: |
+    WHAT_WAS_IMPLEMENTED: [from subagent's report]
+    PLAN_OR_REQUIREMENTS: Task N from [plan-file]
+    BASE_SHA: [commit before task]
+    HEAD_SHA: [current commit]
+    DESCRIPTION: [task summary]
+
+Task tool #2 (ring:business-logic-reviewer):
+  model: "opus"
+  description: "Review business logic for Task N"
+  prompt: |
+    [Same parameters as above]
+
+Task tool #3 (ring:security-reviewer):
+  model: "opus"
+  description: "Review security for Task N"
+  prompt: |
+    [Same parameters as above]
 ```
-**→ If fails: Fix issues, re-run Gate 1, then proceed**
-**→ If passes: Proceed to Gate 2**
 
-**Gate 2: Business Logic Review (Correctness)**
+**All three reviewers execute simultaneously. Wait for all to complete.**
+
+**Each reviewer returns:** Strengths, Issues (Critical/High/Medium/Low/Cosmetic), Assessment (PASS/FAIL)
+
+### 4. Aggregate and Handle Review Feedback
+
+**After all three reviewers complete:**
+
+**Step 1: Aggregate all issues by severity across all reviewers:**
+- **Critical issues:** [List from code/business/security reviewers]
+- **High issues:** [List from code/business/security reviewers]
+- **Medium issues:** [List from code/business/security reviewers]
+- **Low issues:** [List from code/business/security reviewers]
+- **Cosmetic/Nitpick issues:** [List from code/business/security reviewers]
+
+**Step 2: Handle by severity:**
+
+**Critical/High/Medium → Fix immediately:**
 ```
-Task tool (ring:business-logic-reviewer):
-  [Same parameters]
+Dispatch fix subagent:
+"Fix the following issues from parallel code review:
+
+Critical Issues:
+- [Issue 1 from reviewer X] - file:line
+- [Issue 2 from reviewer Y] - file:line
+
+High Issues:
+- [Issue 3 from reviewer Z] - file:line
+
+Medium Issues:
+- [Issue 4 from reviewer X] - file:line"
 ```
-**→ If fails: Fix issues, re-run from Gate 1, then proceed**
-**→ If passes: Proceed to Gate 3**
 
-**Gate 3: Security Review (Safety)**
+After fixes complete, **re-run all 3 reviewers in parallel** to verify fixes.
+Repeat until no Critical/High/Medium issues remain.
+
+**Low issues → Add TODO comments in code:**
+```python
+# TODO(review): Extract this validation logic into separate function
+# Reported by: code-reviewer on 2025-11-06
+# Severity: Low
+def process_data(data):
+    ...
 ```
-Task tool (ring:security-reviewer):
-  [Same parameters]
+
+**Cosmetic/Nitpick → Add FIXME comments in code:**
+```python
+# FIXME(nitpick): Consider more descriptive variable name than 'x'
+# Reported by: code-reviewer on 2025-11-06
+# Severity: Cosmetic
+x = calculate_total()
 ```
-**→ If fails: Fix issues, determine restart point (usually Gate 1 or Gate 3 only)**
-**→ If passes: Task complete**
 
-**Each reviewer returns:** Strengths, Issues (Critical/High/Medium/Low), Assessment (PASS/FAIL)
-
-### 4. Apply Review Feedback at Each Gate
-
-**At each gate:**
-
-**If Critical/High issues:**
-- Dispatch fix subagent to address issues
-- Re-run from appropriate gate:
-  - Major changes → Re-run from Gate 1
-  - Business changes → Re-run from Gate 2
-  - Small security fixes → Re-run Gate 3 only
-- Don't proceed to next gate until current gate passes
-
-**If Medium issues:**
-- Fix before proceeding (prevents tech debt accumulation)
-- Re-run current gate to verify
-
-**If Low/Minor issues only:**
-- Note for tech debt backlog
-- Proceed to next gate
-
-**Dispatch follow-up subagent when needed:**
-```
-"Fix issues from [reviewer name]: [list issues with severity]"
-```
+Commit TODO/FIXME comments with fixes.
 
 ### 5. Mark Complete, Next Task
 
-After all three gates pass for current task:
+After all Critical/High/Medium issues resolved for current task:
 - Mark task as completed in TodoWrite
+- Commit all changes (including TODO/FIXME comments)
 - Move to next task
 - Repeat steps 2-5
 
 ### 6. Final Review (After All Tasks)
 
-After all tasks complete, run sequential final validation across entire implementation:
+After all tasks complete, run parallel final validation across entire implementation:
 
-**Final Gate 1: Code Review**
-```
-Task tool (ring:code-reviewer):
-  WHAT_WAS_IMPLEMENTED: All tasks from [plan]
-  PLAN_OR_REQUIREMENTS: Complete plan from [plan-file]
-  BASE_SHA: [start of development]
-  HEAD_SHA: [current commit]
-  DESCRIPTION: Full implementation review
-```
-**→ Reviews overall architecture, integration, consistency**
+**Dispatch all three reviewers in parallel for full implementation review:**
 
-**Final Gate 2: Business Logic Review**
 ```
-Task tool (ring:business-logic-reviewer): [Same parameters]
-```
-**→ Validates all plan requirements met, end-to-end workflows work**
+# Single message with 3 parallel Task calls:
 
-**Final Gate 3: Security Review**
+Task tool #1 (ring:code-reviewer):
+  model: "opus"
+  description: "Final code review for complete implementation"
+  prompt: |
+    WHAT_WAS_IMPLEMENTED: All tasks from [plan]
+    PLAN_OR_REQUIREMENTS: Complete plan from [plan-file]
+    BASE_SHA: [start of development]
+    HEAD_SHA: [current commit]
+    DESCRIPTION: Full implementation review
+
+Task tool #2 (ring:business-logic-reviewer):
+  model: "opus"
+  description: "Final business logic review"
+  prompt: |
+    [Same parameters as above]
+
+Task tool #3 (ring:security-reviewer):
+  model: "opus"
+  description: "Final security review"
+  prompt: |
+    [Same parameters as above]
 ```
-Task tool (ring:security-reviewer): [Same parameters]
-```
-**→ Final security audit across all changes, integration security**
+
+**Wait for all three final reviews to complete, then:**
+- Aggregate findings by severity
+- Fix any remaining Critical/High/Medium issues
+- Add TODO/FIXME for Low/Cosmetic issues
+- Re-run parallel review if fixes were needed
 
 ### 7. Complete Development
 
@@ -170,73 +210,79 @@ Task 1: Hook installation script
 [Dispatch implementation subagent]
 Subagent: Implemented install-hook with tests, 5/5 passing
 
-[Sequential review process]
-Gate 1 - Code reviewer: PASS. Strengths: Good test coverage. Issues: None.
-Gate 2 - Business reviewer: PASS. Strengths: Meets requirements. Issues: None.
-Gate 3 - Security reviewer: PASS. Strengths: No security concerns. Issues: None.
+[Parallel review - dispatch all 3 reviewers in single message]
+Code reviewer: PASS. Strengths: Good test coverage. Issues: None.
+Business reviewer: PASS. Strengths: Meets requirements. Issues: None.
+Security reviewer: PASS. Strengths: No security concerns. Issues: None.
 
-[Mark Task 1 complete]
+[All pass - mark Task 1 complete]
 
 Task 2: User authentication endpoint
 
 [Dispatch implementation subagent]
 Subagent: Added auth endpoint with JWT, 8/8 tests passing
 
-[Sequential review process]
-Gate 1 - Code reviewer:
+[Parallel review - all 3 reviewers run simultaneously]
+Code reviewer:
   Strengths: Clean architecture
   Issues (Low): Consider extracting token logic
-  Assessment: PASS (low issues don't block)
+  Assessment: PASS
 
-Gate 2 - Business reviewer:
+Business reviewer:
   Strengths: Workflow correct
   Issues (High): Missing password reset flow (required per PRD)
   Assessment: FAIL
 
-[Dispatch fix subagent for password reset]
-Fix subagent: Added password reset flow with email validation
-
-[Re-run from Gate 1 due to new feature]
-Gate 1 - Code reviewer: PASS
-Gate 2 - Business reviewer: PASS. All requirements met.
-
-Gate 3 - Security reviewer:
+Security reviewer:
   Strengths: Good validation
   Issues (Critical): JWT secret hardcoded, (High): No rate limiting
   Assessment: FAIL
 
-[Dispatch fix subagent for security issues]
-Fix subagent: Moved secret to env var, added rate limiting
+[Aggregate issues by severity]
+Critical: JWT secret hardcoded
+High: Missing password reset, No rate limiting
+Low: Extract token logic
 
-[Re-run Gate 3 only - small security fixes]
-Gate 3 - Security reviewer: PASS. Issues resolved.
+[Dispatch fix subagent for Critical/High issues]
+Fix subagent: Added password reset, moved secret to env var, added rate limiting
 
-[Mark Task 2 complete]
+[Re-run all 3 reviewers in parallel after fixes]
+Code reviewer: PASS
+Business reviewer: PASS. All requirements met.
+Security reviewer: PASS. Issues resolved.
+
+[Add TODO comment for Low issue]
+# TODO(review): Extract token generation logic into TokenService
+# Reported by: code-reviewer on 2025-11-06
+# Severity: Low
+
+[Commit and mark Task 2 complete]
 
 ...
 
 [After all tasks]
-[Sequential final validation across entire implementation]
+[Parallel final review - all 3 reviewers simultaneously]
 
-Final Gate 1 - Code reviewer:
+Code reviewer:
   All implementation solid, architecture consistent
   Assessment: PASS
 
-Final Gate 2 - Business reviewer:
+Business reviewer:
   All requirements met, workflows complete
   Assessment: PASS
 
-Final Gate 3 - Security reviewer:
+Security reviewer:
   No remaining security concerns, ready for production
   Assessment: PASS
 
 Done!
 ```
 
-**Why sequential worked better:**
-- Business reviewer caught missing feature before security audit
-- Security fixes didn't require re-running business review
-- Each reviewer worked on validated foundation from previous gates
+**Why parallel works well:**
+- 3x faster than sequential (reviewers run simultaneously)
+- Get all feedback at once (easier to prioritize fixes)
+- Re-review after fixes is fast (parallel execution)
+- TODO/FIXME comments track tech debt in code
 
 ## Advantages
 
@@ -258,9 +304,19 @@ Done!
 
 **Never:**
 - Skip code review between tasks
-- Proceed with unfixed Critical issues
+- Proceed with unfixed Critical/High/Medium issues
+- Dispatch reviewers sequentially (use parallel - 3x faster!)
 - Dispatch multiple implementation subagents in parallel (conflicts)
 - Implement without reading plan task
+- Forget to add TODO/FIXME comments for Low/Cosmetic issues
+
+**Always:**
+- Launch all 3 reviewers in single message with 3 Task calls
+- Specify `model: "opus"` for each reviewer
+- Wait for all reviewers before aggregating findings
+- Fix Critical/High/Medium immediately
+- Add TODO for Low, FIXME for Cosmetic
+- Re-run all 3 reviewers after fixes
 
 **If subagent fails task:**
 - Dispatch fix subagent with specific instructions
