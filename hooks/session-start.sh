@@ -8,8 +8,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-# Build skills overview
-skills_overview=$(cat "${PLUGIN_ROOT}/docs/skills-quick-reference.md" 2>&1 || echo "Error reading skills quick reference")
+# Generate skills overview dynamically
+skills_overview=$("${SCRIPT_DIR}/generate-skills-ref.py" 2>&1 || echo "Error generating skills quick reference")
 
 # Read using-ring content (still include for mandatory workflows)
 using_ring_content=$(cat "${PLUGIN_ROOT}/skills/using-ring/SKILL.md" 2>&1 || echo "Error reading using-ring skill")
