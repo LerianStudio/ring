@@ -94,14 +94,32 @@ Skipping this todo = automatic failure.
 
 ## Announcing Skill Usage
 
-Before using a skill, announce that you are using it.
+**Announce skill usage when the choice is non-obvious to the user.**
+
 "I'm using [Skill Name] to [what you're doing]."
 
-**Examples:**
-- "I'm using the brainstorming skill to refine your idea into a design."
-- "I'm using the test-driven-development skill to implement this feature."
+### When to Announce
 
-**Why:** Transparency helps your human partner understand your process and catch errors early. It also confirms you actually read the skill.
+**Announce when:**
+- Skill choice isn't obvious from user's request
+- Multiple skills could apply (explain why you picked this one)
+- Using a meta-skill (brainstorming, writing-plans, systematic-debugging)
+- User might not know this skill exists
+
+**Examples:**
+- User: "This auth bug is weird" → Announce: "I'm using systematic-debugging to investigate..."
+- User: "Let's add user profiles" → Announce: "I'm using brainstorming to refine this into a design..."
+- User: "Help me plan this feature" → Announce: "I'm using pre-dev-prd-creation to start the planning workflow..."
+
+**Don't announce when obvious:**
+- User: "Write tests first" → Don't announce test-driven-development (duh)
+- User: "Review my code" → Don't announce requesting-code-review (obvious)
+- User: "Fix this bug" + you're gathering evidence → Don't announce systematic-debugging (expected)
+- User: "Run the build and verify it works" → Don't announce verification-before-completion (explicit)
+
+**Why announce:** Transparency helps your human partner understand your process when it's not obvious from their request. It also confirms you actually read the skill.
+
+**Why skip when obvious:** Reduces ceremony, respects user's time, avoids "well duh" moments.
 
 ## Required Patterns
 
