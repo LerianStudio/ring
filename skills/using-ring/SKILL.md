@@ -121,6 +121,67 @@ Skipping this todo = automatic failure.
 
 **Why skip when obvious:** Reduces ceremony, respects user's time, avoids "well duh" moments.
 
+## Pre-Dev Track Selection
+
+**Before starting pre-dev workflow, choose your track:**
+
+### Small Track (3 gates) - <2 Day Features
+
+**Use when feature meets ALL criteria:**
+- ✅ Implementation: <2 days
+- ✅ No new external dependencies
+- ✅ No new data models/entities
+- ✅ No multi-service integration
+- ✅ Uses existing architecture patterns
+- ✅ Single developer can complete
+
+**Gates:**
+1. **pre-dev-prd-creation** - Business requirements (WHAT/WHY)
+2. **pre-dev-trd-creation** - Technical architecture (HOW)
+3. **pre-dev-task-breakdown** - Work increments
+
+**Planning time:** 30-60 minutes
+
+**Examples:**
+- Add logout button to UI
+- Fix email validation bug
+- Add API rate limiting to existing endpoint
+
+### Large Track (8 gates) - ≥2 Day Features
+
+**Use when feature has ANY:**
+- ❌ Implementation: ≥2 days
+- ❌ New external dependencies (APIs, databases, libraries)
+- ❌ New data models or entities
+- ❌ Multi-service integration
+- ❌ New architecture patterns
+- ❌ Team collaboration required
+
+**Gates:**
+1. **pre-dev-prd-creation** - Business requirements
+2. **pre-dev-feature-map** - Feature relationships
+3. **pre-dev-trd-creation** - Technical architecture
+4. **pre-dev-api-design** - Component contracts
+5. **pre-dev-data-model** - Entity relationships
+6. **pre-dev-dependency-map** - Technology selection
+7. **pre-dev-task-breakdown** - Work increments
+8. **pre-dev-subtask-creation** - Atomic units
+
+**Planning time:** 2-4 hours
+
+**Examples:**
+- Add user authentication
+- Implement payment processing
+- Add file upload with CDN
+
+### Decision Rule
+
+**When in doubt: Use Large Track.**
+
+Better to over-plan than discover mid-implementation that feature is larger than estimated.
+
+**Can switch tracks:** If Small Track feature grows during implementation, pause and complete remaining Large Track gates.
+
 ## Required Patterns
 
 This skill uses these universal patterns:
