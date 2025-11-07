@@ -13,26 +13,23 @@ Bugs often manifest deep in the call stack (git init in wrong directory, file cr
 
 ## When to Use
 
-```dot
-digraph when_to_use {
-    "Bug appears deep in stack?" [shape=diamond];
-    "Can trace backwards?" [shape=diamond];
-    "Fix at symptom point" [shape=box];
-    "Trace to original trigger" [shape=box];
-    "BETTER: Also add defense-in-depth" [shape=box];
-
-    "Bug appears deep in stack?" -> "Can trace backwards?" [label="yes"];
-    "Can trace backwards?" -> "Trace to original trigger" [label="yes"];
-    "Can trace backwards?" -> "Fix at symptom point" [label="no - dead end"];
-    "Trace to original trigger" -> "BETTER: Also add defense-in-depth";
-}
-```
-
-**Use when:**
+**Use root-cause-tracing when:**
 - Error happens deep in execution (not at entry point)
 - Stack trace shows long call chain
 - Unclear where invalid data originated
-- Need to find which test/code triggers the problem
+- systematic-debugging Phase 1 leads you here
+
+**Relationship with systematic-debugging:**
+- root-cause-tracing is a **SUB-SKILL** of systematic-debugging
+- Use during **systematic-debugging Phase 1, Step 5** (Trace Data Flow)
+- Can also use standalone if you KNOW bug is deep-stack issue
+- After tracing to source, **return to systematic-debugging Phase 2**
+
+**When NOT to use:**
+- Bug appears at entry point → Use systematic-debugging Phase 1 directly
+- You haven't started systematic-debugging yet → Start there first
+- Root cause is obvious → Just fix it
+- Still gathering evidence → Continue systematic-debugging Phase 1
 
 ## The Tracing Process
 
