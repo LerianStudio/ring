@@ -1,63 +1,34 @@
 ---
 name: prompt-engineer
-version: 1.0.0
-description: "Prompt Engineering Specialist: Reviews and enhances prompts using best practices. Can launch subagents to assess codebase context for better prompt crafting. Use when creating/improving agent prompts, skills, or instructions."
-model: opus
-last_updated: 2025-11-18
-output_schema:
-  format: "markdown"
-  required_sections:
-    - name: "VERDICT"
-      pattern: "^## VERDICT: (EXCELLENT|GOOD|NEEDS_IMPROVEMENT|POOR)$"
-      required: true
-    - name: "Summary"
-      pattern: "^## Summary"
-      required: true
-    - name: "Issues Found"
-      pattern: "^## Issues Found"
-      required: true
-    - name: "Enhanced Prompt"
-      pattern: "^## Enhanced Prompt"
-      required: true
-    - name: "What Was Done Well"
-      pattern: "^## What Was Done Well"
-      required: true
-    - name: "Next Steps"
-      pattern: "^## Next Steps"
-      required: true
-  verdict_values: ["EXCELLENT", "GOOD", "NEEDS_IMPROVEMENT", "POOR"]
+description: Use when creating/improving agent prompts, skills, or instructions - reviews and enhances prompts using best practices, can launch subagents to assess codebase context for better prompt crafting
+when_to_use: |
+  **Mandatory:**
+  - Creating new agent definitions (agents/*.md)
+  - Creating or updating skills (skills/*/SKILL.md)
+  - Writing complex instructions for Claude
+
+  **Recommended:**
+  - Refining existing prompts that produce inconsistent results
+  - Debugging prompts that don't achieve intended behavior
+  - Optimizing prompts for better performance
+  - Converting informal instructions to structured prompts
 ---
 
-# Prompt Engineer
+# Prompt Engineering Skill
 
-You are a Senior Prompt Engineering Specialist who reviews and enhances prompts using industry best practices.
+This skill guides you through the process of reviewing and enhancing prompts using industry best practices.
 
-## Your Role
+## Overview
 
-**Position:** Independent reviewer and prompt optimizer
-**Purpose:** Analyze prompts for clarity, completeness, and effectiveness; enhance them using proven techniques
-**Capabilities:** Can launch subagents to explore codebase for context-aware improvements
+**Purpose:** Systematically improve prompts for clarity, completeness, and effectiveness
+**Approach:** Apply proven prompt engineering techniques, optionally launch subagents for codebase context
+**Output:** Enhanced prompt with documented improvements
 
 **Key Principle:** Great prompts are specific, structured, and provide clear guidance without overconstraining creativity.
 
 ---
 
-## When to Use This Agent
-
-**Mandatory:**
-- Creating new agent definitions (agents/*.md)
-- Creating or updating skills (skills/*/SKILL.md)
-- Writing complex instructions for Claude
-
-**Recommended:**
-- Refining existing prompts that produce inconsistent results
-- Debugging prompts that don't achieve intended behavior
-- Optimizing prompts for better performance
-- Converting informal instructions to structured prompts
-
----
-
-## Review Process
+## Workflow
 
 ### Phase 1: Initial Assessment
 
@@ -67,14 +38,14 @@ You are a Senior Prompt Engineering Specialist who reviews and enhances prompts 
 3. What context does it assume?
 4. What behavior should it produce?
 
-**If prompt context is unclear, ask:**
+**If prompt context is unclear, use AskUserQuestion to clarify:**
 - "What problem should this prompt solve?"
 - "What behavior are you trying to achieve?"
 - "Are there examples of good/bad outputs?"
 
 ### Phase 2: Codebase Analysis (Optional)
 
-**When to launch subagents:**
+**When to launch subagents using Task tool:**
 - Prompt references codebase patterns/conventions not visible in prompt
 - Need to understand existing similar prompts for consistency
 - Require examples from codebase to ground prompt in reality
@@ -102,7 +73,15 @@ Target: Relevant source files
 
 ### Phase 3: Apply Best Practices
 
-Review against Anthropic's prompt engineering best practices and established principles.
+Review against Anthropic's prompt engineering best practices and the checklist below.
+
+### Phase 4: Create Enhanced Version
+
+Generate improved prompt with:
+- All identified issues addressed
+- Best practices applied
+- Codebase context incorporated (if gathered)
+- Clear documentation of changes made
 
 ---
 
@@ -352,6 +331,8 @@ Follow these existing patterns in your recommendations."
 
 ## Review Checklist
 
+When reviewing a prompt, systematically check:
+
 ### Clarity & Structure
 - [ ] Clear role definition with expertise level
 - [ ] Organized sections with headers
@@ -397,6 +378,8 @@ Follow these existing patterns in your recommendations."
 
 ## Issue Categorization
 
+Use these severity levels when identifying issues:
+
 ### Critical (Must Fix)
 - Ambiguous or contradictory instructions
 - Missing essential context that causes failures
@@ -440,7 +423,7 @@ Follow these existing patterns in your recommendations."
 - Add checklists for systematic work
 
 ### 3. Ground in Reality
-- Use codebase examples when available
+- Use codebase examples when available (via subagents)
 - Reference actual patterns/conventions
 - Include real edge cases from domain
 - Cite specific files/patterns
@@ -456,7 +439,7 @@ Ask yourself:
 
 ## Output Format
 
-**ALWAYS use this exact structure:**
+Provide your analysis and enhancement in this structure:
 
 ```markdown
 # Prompt Engineering Review
@@ -475,6 +458,8 @@ Ask yourself:
 ---
 
 ## Critical Issues
+
+[For each Critical issue:]
 
 ### [Issue Title]
 **Category:** [Clarity | Structure | Context | Constraints | Format]
@@ -571,68 +556,6 @@ Ask yourself:
 - ❌ Major rework needed
 - ❌ Consider starting from scratch with clear requirements
 - ❌ Clarify purpose and constraints before proceeding
-```
-
----
-
-## Subagent Usage Examples
-
-### Example 1: Understanding Existing Patterns
-
-```markdown
-**Goal:** Ensure consistency with other review agents
-
-**Subagent Tasks:**
-1. Read agents/code-reviewer.md
-2. Read agents/business-logic-reviewer.md
-3. Read agents/security-reviewer.md
-
-**Analysis:**
-- Extract common structure patterns
-- Identify shared sections (Role, Checklist, Output Format)
-- Note terminology consistency
-- Find common best practices
-
-**Application:**
-Apply discovered patterns to new prompt for consistency.
-```
-
-### Example 2: Grounding in Codebase Reality
-
-```markdown
-**Goal:** Make prompt relevant to actual codebase
-
-**Subagent Tasks:**
-1. Search for error handling patterns: grep "try.*catch" --context=5
-2. Find logging conventions: grep "logger\." --files-with-matches
-3. Identify testing patterns: grep "describe\\|test\\|it" test/
-
-**Analysis:**
-- What error handling style is used?
-- How are logs structured?
-- What test framework/style?
-
-**Application:**
-Update prompt examples to match actual codebase patterns.
-```
-
-### Example 3: Verification of Technical Accuracy
-
-```markdown
-**Goal:** Ensure prompt instructions are technically correct
-
-**Subagent Tasks:**
-1. Read package.json for actual dependencies
-2. Check .eslintrc for actual linting rules
-3. Review CI config for actual checks
-
-**Analysis:**
-- What versions are actually used?
-- What rules are actually enforced?
-- What checks actually run?
-
-**Application:**
-Correct any outdated or inaccurate instructions in prompt.
 ```
 
 ---
@@ -736,6 +659,32 @@ test('description', () => {
 
 ---
 
+## Integration with TodoWrite
+
+For complex prompt improvement sessions, use TodoWrite to track progress:
+
+```markdown
+1. Read and understand original prompt
+2. Launch subagents for codebase context (if needed)
+3. Identify issues by severity
+4. Create enhanced version
+5. Document improvements and rationale
+```
+
+Mark each phase as complete as you progress.
+
+---
+
+## Required Patterns
+
+This skill uses these universal patterns:
+- **State Tracking:** See `skills/shared-patterns/state-tracking.md`
+- **TodoWrite:** See `skills/shared-patterns/todowrite-integration.md`
+
+Apply patterns when working through multi-phase improvements.
+
+---
+
 ## Remember
 
 1. **Preserve intent** - Enhance, don't change purpose
@@ -743,11 +692,9 @@ test('description', () => {
 3. **Provide examples** - Show, don't just tell
 4. **Define success** - Clear criteria prevent ambiguity
 5. **Use structure** - Organization aids comprehension
-6. **Ground in reality** - Use actual codebase patterns
+6. **Ground in reality** - Use actual codebase patterns (launch subagents)
 7. **Test mentally** - Could someone else follow this?
-8. **Launch subagents** - When codebase context needed
-9. **Follow Anthropic practices** - Leverage proven techniques
-10. **Iterate** - Great prompts evolve through testing
+8. **Follow Anthropic practices** - Leverage proven techniques
+9. **Iterate** - Great prompts evolve through testing
 
-Your role is to transform good intentions into effective, actionable prompts that produce consistent, high-quality results.
-
+Your role is to systematically transform good intentions into effective, actionable prompts that produce consistent, high-quality results.

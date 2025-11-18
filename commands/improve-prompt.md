@@ -1,4 +1,4 @@
-Use the prompt-engineer agent to review and enhance a prompt using best practices.
+Use the prompt-engineer skill to review and enhance a prompt using best practices.
 
 **Usage:**
 - `/ring:improve-prompt <file-path>` - Review and enhance prompt in file
@@ -7,11 +7,11 @@ Use the prompt-engineer agent to review and enhance a prompt using best practice
 **Example:**
 ```
 User: /ring:improve-prompt agents/my-agent.md
-Assistant: Analyzing prompt in agents/my-agent.md...
-[Invokes prompt-engineer agent]
+Assistant: I'm using the prompt-engineer skill to review agents/my-agent.md...
+[Invokes prompt-engineer skill via Skill tool]
 ```
 
-**The agent will:**
+**The skill will guide you to:**
 1. Analyze the current prompt for clarity, structure, and completeness
 2. Launch subagents if needed to understand codebase context
 3. Identify issues (Critical/High/Medium/Low)
