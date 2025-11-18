@@ -37,11 +37,13 @@ Ring is a comprehensive skills library and workflow system for Claude Code, impl
 - Commands map to corresponding skills
 
 **Review Agents** (`agents/`)
-- `code-reviewer.md` - Gate 1: Foundation review (architecture, code quality, design patterns)
-- `business-logic-reviewer.md` - Gate 2: Correctness review (domain logic, requirements, edge cases)
-- `security-reviewer.md` - Gate 3: Safety review (vulnerabilities, OWASP, authentication)
+- `code-reviewer.md` - Foundation review (architecture, code quality, design patterns)
+- `business-logic-reviewer.md` - Correctness review (domain logic, requirements, edge cases)
+- `security-reviewer.md` - Safety review (vulnerabilities, OWASP, authentication)
 - `full-reviewer.md` - Parallel orchestrator that dispatches all 3 reviewers simultaneously
+- `prompt-engineer.md` - Prompt enhancement specialist (reviews and improves prompts using best practices)
 - All reviewers run on Opus model for comprehensive analysis
+- **All 3 code reviewers run in parallel** (not sequentially) for 3x faster feedback
 
 **Documentation** (`docs/`)
 - Skills quick reference is **auto-generated** at session start by `hooks/generate-skills-ref.py`
@@ -116,18 +118,40 @@ cat .claude-plugin/marketplace.json | jq .
 2. Reference corresponding skill
 3. Use clear, actionable language
 
+### Creating or Improving Agents
+1. Draft initial agent definition in `agents/`
+2. Use `/ring:improve-prompt agents/your-agent.md` to enhance with best practices
+3. Test agent with real scenarios
+4. Iterate based on results
+
+### Improving Prompts
+**Use prompt-engineer agent when:**
+- Creating new agent definitions
+- Skills produce inconsistent results
+- Instructions are unclear or ambiguous
+- Need to apply Anthropic best practices
+- Want codebase-aware prompt improvements
+
+**The agent will:**
+- Analyze prompt for clarity, structure, completeness
+- Launch subagents to understand codebase context
+- Apply proven prompt engineering techniques
+- Provide enhanced version with explanations
+
 ## Code Review System (Parallel Execution)
 
 Ring uses a **parallel 3-reviewer system** for comprehensive, fast feedback:
 
 ### Review Agents
 
-**All 3 reviewers dispatch simultaneously** (not sequential):
-1. **code-reviewer** (Gate 1) - Architecture, design patterns, code quality
-2. **business-logic-reviewer** (Gate 2) - Domain correctness, requirements, edge cases
-3. **security-reviewer** (Gate 3) - Vulnerabilities, OWASP, authentication
+**All 3 reviewers dispatch simultaneously** (independent, not sequential):
+1. **code-reviewer** (Foundation) - Architecture, design patterns, code quality
+2. **business-logic-reviewer** (Correctness) - Domain correctness, requirements, edge cases
+3. **security-reviewer** (Safety) - Vulnerabilities, OWASP, authentication
 
 **Model requirement:** All reviewers must run on `model: "opus"` for comprehensive analysis
+
+**Key change:** Reviewers are no longer Gates 1→2→3 in sequence. All run in parallel independently.
 
 ### Dispatch Pattern
 

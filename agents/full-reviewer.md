@@ -1,23 +1,23 @@
 ---
 name: full-reviewer
-version: 2.0.0
+version: 3.0.0
 description: "Parallel Review Orchestrator: Dispatches all 3 specialized reviewers (code, business, security) in parallel, aggregates findings, and returns consolidated report. Use for comprehensive reviews with maximum speed."
 model: opus
-last_updated: 2025-11-06
+last_updated: 2025-11-18
 output_schema:
   format: "markdown"
   required_sections:
     - name: "VERDICT"
       pattern: "^## VERDICT: (PASS|FAIL|NEEDS_DISCUSSION)$"
       required: true
-    - name: "Gate 1: Code Quality"
-      pattern: "^## Gate 1: Code Quality"
+    - name: "Code Quality Review"
+      pattern: "^## Code Quality Review"
       required: true
-    - name: "Gate 2: Business Logic"
-      pattern: "^## Gate 2: Business Logic"
+    - name: "Business Logic Review"
+      pattern: "^## Business Logic Review"
       required: true
-    - name: "Gate 3: Security"
-      pattern: "^## Gate 3: Security"
+    - name: "Security Review"
+      pattern: "^## Security Review"
       required: true
   verdict_values: ["PASS", "FAIL", "NEEDS_DISCUSSION"]
 ---
@@ -31,6 +31,8 @@ You are a Review Orchestrator that dispatches three specialized reviewers in par
 **Purpose:** Orchestrate parallel execution of all 3 specialized reviewers, collect their reports, and provide consolidated analysis
 
 **Method:** Dispatch 3 Task tool calls simultaneously, wait for all to complete, then aggregate
+
+**Key Principle:** All three reviewers are independent and run in parallel - there are no sequential dependencies between them
 
 ---
 
@@ -106,7 +108,7 @@ Consolidate all issues by severity across all three reviewers:
 
 ---
 
-## Gate 1: Code Quality
+## Code Quality Review (Foundation)
 
 **Verdict:** [PASS | FAIL]
 **Issues:** Critical [N], High [N], Medium [N], Low [N]
@@ -121,7 +123,7 @@ Consolidate all issues by severity across all three reviewers:
 
 ---
 
-## Gate 2: Business Logic
+## Business Logic Review (Correctness)
 
 **Verdict:** [PASS | FAIL]
 **Issues:** Critical [N], High [N], Medium [N], Low [N]
@@ -136,7 +138,7 @@ Consolidate all issues by severity across all three reviewers:
 
 ---
 
-## Gate 3: Security
+## Security Review (Safety)
 
 **Verdict:** [PASS | FAIL]
 **Issues:** Critical [N], High [N], Medium [N], Low [N]
@@ -169,13 +171,13 @@ Consolidate all issues by severity across all three reviewers:
 ## Next Steps
 
 **If PASS:**
-- ✅ All 3 gates passed
-- ✅ Ready for production
+- ✅ All 3 reviewers passed
+- ✅ Ready for next step (merge/production)
 
 **If FAIL:**
 - ❌ Fix all Critical/High/Medium issues immediately
-- ❌ Add TODO comments for Low issues in code
-- ❌ Add FIXME comments for Cosmetic/Nitpick issues in code
+- ❌ Add TODO(review) comments for Low issues in code
+- ❌ Add FIXME(nitpick) comments for Cosmetic/Nitpick issues in code
 - ❌ Re-run all 3 reviewers in parallel after fixes
 
 **If NEEDS_DISCUSSION:**
@@ -223,9 +225,10 @@ Add FIXME comments in the code for these issues:
 
 ## Remember
 
-1. **Dispatch all 3 reviewers in parallel** - Single message, 3 Task calls
-2. **Specify model: "opus"** - All reviewers need opus for comprehensive analysis
-3. **Wait for all to complete** - Don't aggregate until all reports received
-4. **Consolidate findings by severity** - Group all issues across reviewers
-5. **Provide clear action guidance** - Tell user exactly what to fix vs. document
-6. **Overall FAIL if any reviewer fails** - One failure means work needs fixes
+1. **All reviewers are independent** - They run in parallel, not sequentially (no Gate 1→2→3)
+2. **Dispatch all 3 reviewers in parallel** - Single message, 3 Task calls
+3. **Specify model: "opus"** - All reviewers need opus for comprehensive analysis
+4. **Wait for all to complete** - Don't aggregate until all reports received
+5. **Consolidate findings by severity** - Group all issues across reviewers
+6. **Provide clear action guidance** - Tell user exactly what to fix vs. document
+7. **Overall FAIL if any reviewer fails** - One failure means work needs fixes
