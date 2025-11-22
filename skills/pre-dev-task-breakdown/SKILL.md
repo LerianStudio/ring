@@ -1,6 +1,6 @@
 ---
 name: pre-dev-task-breakdown
-description: Use when decomposing features into implementation units, after Dependency Map Gate 6 passes, when tempted to create giant tasks, or when tasks don't deliver user value
+description: Use when decomposing features into implementation units, after PRD and TRD are complete, when tempted to create giant tasks, or when tasks don't deliver user value
 ---
 
 # Task Breakdown - Value-Driven Decomposition
@@ -21,9 +21,12 @@ Creating technical-only or oversized tasks creates:
 ## When to Use This Skill
 
 Use this skill when:
-- Dependency Map has passed Gate 6 validation
-- Data Model has passed Gate 5 validation
-- API Design has passed Gate 4 validation
+- PRD has passed Gate 1 validation (REQUIRED)
+- TRD has passed Gate 3 validation (REQUIRED)
+- Feature Map has passed Gate 2 validation (OPTIONAL - use if exists)
+- API Design has passed Gate 4 validation (OPTIONAL - use if exists)
+- Data Model has passed Gate 5 validation (OPTIONAL - use if exists)
+- Dependency Map has passed Gate 6 validation (OPTIONAL - use if exists)
 - About to break down work for sprints/iterations
 - Tempted to create "Setup Infrastructure" as a task
 - Asked to estimate or plan implementation work
@@ -32,12 +35,18 @@ Use this skill when:
 ## Mandatory Workflow
 
 ### Phase 1: Task Identification (Inputs Required)
-1. **Approved Dependency Map** (Gate 6 passed) - tech stack locked
-2. **Approved Data Model** (Gate 5 passed) - data structures defined
-3. **Approved API Design** (Gate 4 passed) - contracts specified
-4. **Approved TRD** (Gate 3 passed) - architecture patterns documented
-5. **Approved Feature Map** (Gate 2 passed) - feature relationships mapped
-6. **Approved PRD** (Gate 1 passed) - business requirements and priorities
+
+**Required Inputs:**
+1. **Approved PRD** (Gate 1 passed) - business requirements and priorities (REQUIRED - check `docs/pre-dev/<feature-name>/prd.md`)
+2. **Approved TRD** (Gate 3 passed) - architecture patterns documented (REQUIRED - check `docs/pre-dev/<feature-name>/trd.md`)
+
+**Optional Inputs (use if exists for richer context):**
+3. **Approved Feature Map** (Gate 2 passed) - feature relationships mapped (check `docs/pre-dev/<feature-name>/feature-map.md`)
+4. **Approved API Design** (Gate 4 passed) - contracts specified (check `docs/pre-dev/<feature-name>/api-design.md`)
+5. **Approved Data Model** (Gate 5 passed) - data structures defined (check `docs/pre-dev/<feature-name>/data-model.md`)
+6. **Approved Dependency Map** (Gate 6 passed) - tech stack locked (check `docs/pre-dev/<feature-name>/dependency-map.md`)
+
+**Analysis:**
 7. **Identify value streams** - what delivers user value first?
 
 ### Phase 2: Decomposition

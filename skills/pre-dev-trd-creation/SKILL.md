@@ -1,6 +1,6 @@
 ---
 name: pre-dev-trd-creation
-description: Use when translating business requirements to architecture, before selecting technologies, when tempted to specify frameworks/tools, or after Feature Map Gate 2 passes
+description: Use when translating business requirements to architecture, before selecting technologies, when tempted to specify frameworks/tools, after PRD is complete
 ---
 
 # TRD Creation - Architecture Before Implementation
@@ -21,8 +21,8 @@ Specifying technologies in TRD creates:
 ## When to Use This Skill
 
 Use this skill when:
-- Feature Map has passed Gate 2 validation
-- PRD has passed Gate 1 validation
+- PRD has passed Gate 1 validation (REQUIRED)
+- Feature Map has passed Gate 2 validation (optional - use if exists)
 - About to design technical architecture
 - Tempted to specify "PostgreSQL" instead of "Relational Database"
 - Asked to create technical design or architecture document
@@ -31,10 +31,12 @@ Use this skill when:
 ## Mandatory Workflow
 
 ### Phase 1: Technical Analysis (Inputs Required)
-1. **Approved Feature Map** (Gate 2 passed) - feature relationships mapped
-2. **Approved PRD** (Gate 1 passed) - business requirements locked
+1. **Approved PRD** (Gate 1 passed) - business requirements locked (REQUIRED)
+2. **Approved Feature Map** (Gate 2 passed) - feature relationships mapped (OPTIONAL - check `docs/pre-dev/<feature-name>/feature-map.md`)
 3. **Identify non-functional requirements** (performance, security, scalability)
-4. **Map Feature Map domains** to architectural components
+4. **Map domains to components**:
+   - If Feature Map exists: Map Feature Map domains to architectural components
+   - If no Feature Map: Map PRD features directly to architectural components
 
 ### Phase 2: Architecture Definition
 1. **Choose Architecture Style** (Microservices, Modular Monolith, Serverless)
@@ -45,9 +47,9 @@ Use this skill when:
 6. **Design Security Architecture** (layers, threat model)
 
 ### Phase 3: Gate 3 Validation
-**MANDATORY CHECKPOINT** - Must pass before proceeding to API/Contract Design:
-- [ ] All Feature Map domains mapped to components
-- [ ] All PRD features mapped to components
+**MANDATORY CHECKPOINT** - Must pass before proceeding:
+- [ ] All Feature Map domains mapped to components (if Feature Map exists)
+- [ ] All PRD features mapped to components (REQUIRED)
 - [ ] Component boundaries are clear and logical
 - [ ] Interfaces are well-defined and technology-agnostic
 - [ ] Data ownership is explicit
