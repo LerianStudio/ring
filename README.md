@@ -71,7 +71,7 @@ Runs all 3 reviewers simultaneously (Code, Business, Security) - aggregates find
 - `code-reviewer` - Foundation review (architecture, code quality, design patterns)
 - `business-logic-reviewer` - Correctness review (domain logic, requirements, edge cases)
 - `security-reviewer` - Safety review (vulnerabilities, OWASP, authentication)
-- `full-reviewer` - **Parallel orchestrator** that dispatches all 3 reviewers simultaneously
+- Use `/ring:review` command to orchestrate parallel review workflow
 
 **New Utilities:**
 - Compliance validator - Enforce skill adherence
@@ -258,11 +258,10 @@ ring/
 │   ├── hooks.json             # Hook configuration
 │   ├── session-start.sh       # Loads skills at startup
 │   └── generate-skills-ref.py # Auto-generates quick reference
-├── agents/                     # Specialized review agents (5 agents)
+├── agents/                     # Specialized review agents (4 agents)
 │   ├── code-reviewer.md       # Foundation review (runs in parallel)
 │   ├── business-logic-reviewer.md  # Correctness review (runs in parallel)
 │   ├── security-reviewer.md   # Safety review (runs in parallel)
-│   ├── full-reviewer.md       # Parallel orchestrator (dispatches all 3)
 │   └── prompt-engineer.md     # Prompt enhancement specialist
 └── docs/                      # Documentation and plans
     └── plans/                 # Implementation design documents

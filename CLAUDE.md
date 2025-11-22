@@ -40,10 +40,10 @@ Ring is a comprehensive skills library and workflow system for Claude Code, impl
 - `code-reviewer.md` - Foundation review (architecture, code quality, design patterns)
 - `business-logic-reviewer.md` - Correctness review (domain logic, requirements, edge cases)
 - `security-reviewer.md` - Safety review (vulnerabilities, OWASP, authentication)
-- `full-reviewer.md` - Parallel orchestrator that dispatches all 3 reviewers simultaneously
 - `prompt-engineer.md` - Prompt enhancement specialist (reviews and improves prompts using best practices)
 - All reviewers run on Opus model for comprehensive analysis
 - **All 3 code reviewers run in parallel** (not sequentially) for 3x faster feedback
+- Use `/ring:review` command to orchestrate parallel review workflow
 
 **Documentation** (`docs/`)
 - Skills quick reference is **auto-generated** at session start by `hooks/generate-skills-ref.py`

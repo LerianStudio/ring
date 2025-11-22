@@ -57,7 +57,7 @@ Three specialized reviewers run in **parallel** for maximum speed:
 
 **Two ways to run parallel reviews:**
 1. **Direct parallel dispatch:** Launch 3 Task calls in single message (explicit control)
-2. **full-reviewer agent:** Single agent that dispatches 3 reviewers in parallel internally (convenience)
+2. **/ring:review command:** Command that provides workflow instructions for parallel review (convenience)
 
 ## How to Request
 

@@ -73,16 +73,16 @@ agents/
 ├── code-reviewer.md         # Foundation review
 ├── business-logic-reviewer.md # Correctness review
 ├── security-reviewer.md      # Safety review
-└── full-reviewer.md         # Parallel orchestrator
+└── prompt-engineer.md        # Prompt enhancement
 ```
 
 **Key Characteristics:**
 - Invoked via Claude's `Task` tool
 - Must specify model (typically "opus" for comprehensive analysis)
-- Can run in parallel (full-reviewer dispatches 3 simultaneously)
+- Can run in parallel (3 reviewers dispatch simultaneously via `/ring:review` command)
 - Return structured reports with severity-based findings
 
-**Note:** prompt-engineer was previously an agent but is now a skill (see skills/prompt-engineer/)
+**Note:** Parallel review orchestration is now handled by the `/ring:review` command rather than a separate agent
 
 ### 3. Commands (`commands/`)
 **Purpose:** Slash commands that provide shortcuts to skills/workflows
@@ -194,15 +194,17 @@ sequenceDiagram
 
 ```mermaid
 sequenceDiagram
+    participant User
     participant Claude
-    participant full-reviewer
     participant Task Tool
     participant code-reviewer
     participant business-reviewer
     participant security-reviewer
 
-    Claude->>full-reviewer: Request comprehensive review
-    full-reviewer->>Task Tool: Dispatch 3 parallel tasks
+    User->>Claude: /ring:review
+    Note over Claude: Command provides<br/>parallel review workflow
+
+    Claude->>Task Tool: Dispatch 3 parallel tasks
 
     par Parallel Execution
         Task Tool->>code-reviewer: Review architecture
@@ -212,11 +214,12 @@ sequenceDiagram
         Task Tool->>security-reviewer: Review vulnerabilities
     end
 
-    code-reviewer-->>full-reviewer: Return findings
-    business-reviewer-->>full-reviewer: Return findings
-    security-reviewer-->>full-reviewer: Return findings
+    code-reviewer-->>Claude: Return findings
+    business-reviewer-->>Claude: Return findings
+    security-reviewer-->>Claude: Return findings
 
-    full-reviewer->>Claude: Aggregate & prioritize by severity
+    Note over Claude: Aggregate & prioritize by severity
+    Claude->>User: Consolidated report
 ```
 
 ## Integration with Claude Code
