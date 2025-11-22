@@ -218,8 +218,10 @@ Format as JSON:
         for dir_path in layer['directories']:
             full_path = self.project_dir / dir_path
             if full_path.exists() and full_path.is_dir():
+                # TODO(review): Extract file patterns to class constant for easier maintenance (reported by code-reviewer on 2025-11-22, severity: Low)
                 # Look for important files
                 for pattern in ['*.py', '*.js', '*.ts', '*.go', '*.java']:
+                    # TODO(review): Document magic number 3 as MAX_EXAMPLE_FILES constant (reported by code-reviewer on 2025-11-22, severity: Low)
                     files = list(full_path.glob(pattern))[:3]  # Limit to 3 examples
                     for f in files:
                         rel_path = f.relative_to(self.project_dir)
@@ -422,6 +424,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
         claude_md_path = self.project_dir / 'CLAUDE.md'
         try:
             claude_md_path.write_text(content, encoding='utf-8')
+            # Set secure permissions (owner read/write only)
+            os.chmod(claude_md_path, 0o600)
             return True
         except Exception as e:
             print(f"Failed to write CLAUDE.md: {e}", file=sys.stderr)
@@ -463,8 +467,11 @@ You can:
         claude_md_path = self.project_dir / 'CLAUDE.md'
         try:
             claude_md_path.write_text(fallback, encoding='utf-8')
-        except:
-            pass  # Silent failure for fallback
+            # Set secure permissions (owner read/write only)
+            os.chmod(claude_md_path, 0o600)
+        except Exception as e:
+            # Log exception instead of silently swallowing
+            print(f"Warning: Failed to write fallback CLAUDE.md: {e}", file=sys.stderr)
 
 
 def main():

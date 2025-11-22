@@ -32,7 +32,8 @@ log_error() {
 # Creates file atomically with secure permissions (600)
 # Returns: 0 on success, 1 on failure
 create_fallback_template() {
-    local temp_file="${PROJECT_DIR}/.CLAUDE.md.tmp.$$"
+    local temp_file
+    temp_file=$(mktemp "${PROJECT_DIR}/.CLAUDE.md.tmp.XXXXXX")
 
     # Set umask to ensure secure permissions (owner-only rw)
     local old_umask=$(umask)

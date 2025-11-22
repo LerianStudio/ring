@@ -11,8 +11,12 @@ PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 # Configuration
 THROTTLE_INTERVAL=1  # Re-inject every N prompts
 INSTRUCTION_FILES=("CLAUDE.md" "AGENTS.md" "RULES.md")  # File types to discover
-STATE_FILE="${SCRIPT_DIR}/.instruction-files-reminder-state"
-CACHE_FILE="${SCRIPT_DIR}/.instruction-files-cache"
+
+# Use session-specific state file (per-session, not persistent)
+# CLAUDE_SESSION_ID should be provided by Claude Code, fallback to PPID for session isolation
+SESSION_ID="${CLAUDE_SESSION_ID:-$PPID}"
+STATE_FILE="/tmp/claude-instruction-reminder-${SESSION_ID}.state"
+CACHE_FILE="/tmp/claude-instruction-reminder-${SESSION_ID}.cache"
 
 # Initialize or read state
 if [ -f "$STATE_FILE" ]; then
@@ -128,6 +132,11 @@ for file in "${instruction_files[@]}"; do
   reminder="${reminder}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
 
   # Read entire file content and escape for JSON
+  # TODO(review): Incomplete JSON escaping - missing control characters, unicode escaping
+  # Current escaping only handles backslash and double-quote
+  # Missing: \t, \r, \n (literal), \f, \b, unicode sequences
+  # Severity: Medium - can break JSON parsing if instruction files contain control chars
+  # Reported by: security-reviewer, Date: 2025-11-22
   content=$(cat "$file")
   escaped_content=$(echo "$content" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | awk '{printf "%s\\n", $0}')
 

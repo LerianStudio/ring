@@ -1,5 +1,6 @@
 .worktrees/
 .private-journal/
+.test/
 
 # Ring infrastructure runtime files
 .ring/

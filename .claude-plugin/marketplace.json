@@ -9,7 +9,7 @@
     {
       "name": "ring",
       "description": "Core skills library for the Lerian Team: TDD, debugging, collaboration patterns, and proven techniques. Comprehensive 8-gate pre-development workflow with systematic testing and debugging skills. Features parallel 3-reviewer code review system (Foundation, Correctness, Safety).",
-      "version": "0.5.0",
+      "version": "0.6.0",
       "source": "./",
       "author": {
         "name": "Fred Amaral",
