@@ -165,10 +165,21 @@ else
 
         log_success "CLAUDE.md generation running in background (PID: ${bg_pid})"
         log_info "Monitor: tail -f .claude-md-bootstrap.log"
+
+        # Inject user notification into session context
+        cat <<EOF
+{
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "additionalContext": "📋 **CLAUDE.md Bootstrap Running**\n\nA background agent is analyzing this repository to auto-generate CLAUDE.md documentation.\n\n**Status:** In progress (PID: ${bg_pid})\n**Duration:** ~60-120 seconds\n**Monitor:** \`tail -f .claude-md-bootstrap.log\`\n**Result:** CLAUDE.md will be available in your next session or after background completion\n\nYou can start working immediately - the bootstrap won't interrupt your session."
+  }
+}
+EOF
+        exit 0
     fi
 fi
 
-# Return standard SessionStart output
+# Return standard SessionStart output (no bootstrap needed)
 cat <<EOF
 {
   "hookSpecificOutput": {
