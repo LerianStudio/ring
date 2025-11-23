@@ -27,6 +27,55 @@ class BootstrapOrchestrator:
         self.project_dir = project_dir
         self.layers = []
         self.layer_findings = {}
+        self.cross_cutting = {}
+        self.claude_cli_available = self._check_claude_cli()
+
+    def _check_claude_cli(self) -> bool:
+        """Check if Claude Code CLI is available."""
+        try:
+            result = subprocess.run(
+                ['claude', '--version'],
+                capture_output=True,
+                timeout=5
+            )
+            return result.returncode == 0
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            return False
+
+    def _invoke_claude_agent(self, prompt: str, max_turns: int = 3, timeout: int = 120) -> Optional[str]:
+        """Invoke Claude Code CLI in headless mode."""
+        if not self.claude_cli_available:
+            return None
+
+        try:
+            result = subprocess.run([
+                'claude',
+                '--print', prompt,
+                '--output-format', 'json',
+                '--max-turns', str(max_turns),
+                '--allowedTools', 'Glob,Grep,Read,Bash'
+            ],
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            cwd=str(self.project_dir)
+            )
+
+            if result.returncode == 0:
+                # Parse JSON output from Claude CLI
+                response_data = json.loads(result.stdout)
+                # Extract the actual response text from JSON structure
+                if isinstance(response_data, dict) and 'content' in response_data:
+                    return response_data['content']
+                elif isinstance(response_data, str):
+                    return response_data
+                else:
+                    return str(response_data)
+            return None
+
+        except (subprocess.TimeoutExpired, json.JSONDecodeError, Exception) as e:
+            print(f"Claude CLI invocation failed: {e}", file=sys.stderr)
+            return None
 
     def run(self) -> bool:
         """Execute the full bootstrap process."""
@@ -55,13 +104,12 @@ class BootstrapOrchestrator:
             return False
 
     def discover_layers(self) -> bool:
-        """Phase 1: Discover architectural layers using Explore agent."""
+        """Phase 1: Discover architectural layers using Claude CLI."""
         try:
             # Prepare discovery prompt
-            discovery_prompt = """
-Analyze this codebase's layered architecture:
+            discovery_prompt = """Analyze this codebase's layered architecture:
 
-1. Identify ALL architectural layers (e.g., API, business logic, data, UI, infrastructure)
+1. Identify ALL architectural layers (e.g., skills system, hooks, commands, agents, API, business logic, data, UI, infrastructure)
 2. For each layer, provide:
    - Layer name
    - Primary directories/files
@@ -69,7 +117,7 @@ Analyze this codebase's layered architecture:
    - Technologies used
 3. Identify cross-cutting concerns (auth, logging, config, testing)
 
-Format response as structured JSON:
+Format your response as valid JSON only (no markdown, no explanation):
 {
   "layers": [
     {
@@ -85,19 +133,34 @@ Format response as structured JSON:
     "configuration": "path/to/config",
     "testing": "test/ directories"
   }
-}
-"""
+}"""
 
-            # TODO(review): Add actual agent invocation when Task framework available
-            # For now, continue using static discovery as fallback
-            # agent_response = Task(
-            #     subagent_type="Explore",
-            #     model="sonnet",
-            #     description="Discover architectural layers",
-            #     prompt=discovery_prompt
-            # )
+            # Try agent-based discovery via Claude CLI
+            if self.claude_cli_available:
+                print("Using Claude CLI for intelligent layer discovery...", file=sys.stderr)
+                agent_response = self._invoke_claude_agent(discovery_prompt, max_turns=3, timeout=30)
 
-            # Use static discovery for now
+                if agent_response:
+                    # Parse JSON response
+                    try:
+                        # Extract JSON from response (may contain markdown code blocks)
+                        json_match = re.search(r'```json\s*(\{.*?\})\s*```', agent_response, re.DOTALL)
+                        if json_match:
+                            data = json.loads(json_match.group(1))
+                        else:
+                            # Try parsing entire response as JSON
+                            data = json.loads(agent_response)
+
+                        if 'layers' in data and data['layers']:
+                            self.layers = data['layers']
+                            self.cross_cutting = data.get('cross_cutting', {})
+                            print(f"Discovered {len(self.layers)} layers via agent", file=sys.stderr)
+                            return True
+                    except json.JSONDecodeError as e:
+                        print(f"Failed to parse agent response: {e}", file=sys.stderr)
+
+            # Fallback to static discovery
+            print("Falling back to static discovery...", file=sys.stderr)
             self.layers = self.static_layer_discovery()
 
             if not self.layers:
@@ -184,25 +247,42 @@ Format as JSON:
 """
             layer_prompts.append((layer['name'], prompt))
 
-        # TODO(review): Dispatch parallel agents when Task framework available
-        # For now, use sequential static analysis
-        # parallel_tasks = []
-        # for layer_name, prompt in layer_prompts:
-        #     task = Task(
-        #         subagent_type="Explore",
-        #         model="haiku",  # Fast model for parallel execution
-        #         description=f"Explore {layer_name}",
-        #         prompt=prompt
-        #     )
-        #     parallel_tasks.append((layer_name, task))
-        #
-        # # Wait for all to complete
-        # for layer_name, task in parallel_tasks:
-        #     self.layer_findings[layer_name] = task.result
+        # Try parallel agent analysis via Claude CLI
+        if self.claude_cli_available and len(layer_prompts) > 0:
+            print(f"Analyzing {len(layer_prompts)} layers via Claude CLI...", file=sys.stderr)
 
-        # Use static analysis for now
-        for layer in self.layers:
-            self.layer_findings[layer['name']] = self.analyze_layer_static(layer)
+            # Note: True parallel execution would require concurrent.futures
+            # For now, run sequentially but with intelligent agent analysis
+            for layer_name, prompt in layer_prompts:
+                agent_response = self._invoke_claude_agent(prompt, max_turns=2, timeout=60)
+
+                if agent_response:
+                    try:
+                        # Extract JSON from response
+                        json_match = re.search(r'```json\s*(\{.*?\})\s*```', agent_response, re.DOTALL)
+                        if json_match:
+                            findings = json.loads(json_match.group(1))
+                        else:
+                            findings = json.loads(agent_response)
+
+                        self.layer_findings[layer_name] = findings
+                        print(f"  ✓ Analyzed {layer_name}", file=sys.stderr)
+                    except json.JSONDecodeError:
+                        # Fallback to static for this layer
+                        print(f"  ⚠ Agent parse failed for {layer_name}, using static", file=sys.stderr)
+                        layer_data = next((l for l in self.layers if l['name'] == layer_name), None)
+                        if layer_data:
+                            self.layer_findings[layer_name] = self.analyze_layer_static(layer_data)
+                else:
+                    # Fallback to static for this layer
+                    layer_data = next((l for l in self.layers if l['name'] == layer_name), None)
+                    if layer_data:
+                        self.layer_findings[layer_name] = self.analyze_layer_static(layer_data)
+        else:
+            # Use static analysis when CLI unavailable
+            print("Using static analysis (Claude CLI unavailable)...", file=sys.stderr)
+            for layer in self.layers:
+                self.layer_findings[layer['name']] = self.analyze_layer_static(layer)
 
     def analyze_layer_static(self, layer: Dict) -> Dict:
         """Temporary: Analyze layer via filesystem."""
@@ -270,16 +350,22 @@ Generate the complete CLAUDE.md content now. Start with:
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 """
 
-        # TODO(review): Use synthesis agent when available
-        # agent_response = Task(
-        #     subagent_type="general-purpose",
-        #     model="sonnet",
-        #     description="Generate CLAUDE.md from findings",
-        #     prompt=synthesis_prompt
-        # )
-        # return agent_response.content
+        # Try agent-based synthesis via Claude CLI
+        if self.claude_cli_available:
+            print("Synthesizing CLAUDE.md via Claude CLI...", file=sys.stderr)
+            agent_response = self._invoke_claude_agent(synthesis_prompt, max_turns=5, timeout=60)
 
-        # Use template generation for now
+            if agent_response:
+                # Agent should return the complete CLAUDE.md content
+                # Check if it starts with expected header
+                if '# CLAUDE.md' in agent_response:
+                    print("  ✓ Agent synthesis successful", file=sys.stderr)
+                    return agent_response
+                else:
+                    print("  ⚠ Agent synthesis invalid format, using template", file=sys.stderr)
+
+        # Fallback to template generation
+        print("Using template generation...", file=sys.stderr)
         return self.generate_enhanced_template(synthesis_data)
 
     def generate_enhanced_template(self, data: Dict) -> str:
