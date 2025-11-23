@@ -65,8 +65,12 @@ class BootstrapOrchestrator:
                 # Parse JSON output from Claude CLI
                 response_data = json.loads(result.stdout)
                 # Extract the actual response text from JSON structure
-                if isinstance(response_data, dict) and 'content' in response_data:
-                    return response_data['content']
+                # CLI returns: {"type":"result", "result":"actual content"}
+                if isinstance(response_data, dict):
+                    if 'result' in response_data:
+                        return response_data['result']
+                    elif 'content' in response_data:
+                        return response_data['content']
                 elif isinstance(response_data, str):
                     return response_data
                 else:
@@ -107,57 +111,63 @@ class BootstrapOrchestrator:
         """Phase 1: Discover architectural layers using Claude CLI."""
         try:
             # Prepare discovery prompt
-            discovery_prompt = """Analyze this codebase's layered architecture:
+            discovery_prompt = """Analyze this codebase and identify its architectural layers.
 
-1. Identify ALL architectural layers (e.g., skills system, hooks, commands, agents, API, business logic, data, UI, infrastructure)
-2. For each layer, provide:
-   - Layer name
-   - Primary directories/files
-   - Key responsibilities
-   - Technologies used
-3. Identify cross-cutting concerns (auth, logging, config, testing)
+CRITICAL: Your response must be ONLY a JSON object, nothing else. No explanations, no markdown.
 
-Format your response as valid JSON only (no markdown, no explanation):
+Required JSON structure:
 {
   "layers": [
-    {
-      "name": "Layer Name",
-      "directories": ["dir1/", "dir2/"],
-      "description": "What this layer does",
-      "technologies": ["tech1", "tech2"]
-    }
+    {"name": "Skills System", "directories": ["skills/"], "description": "...", "technologies": ["Python", "Markdown"]},
+    {"name": "Hooks System", "directories": ["hooks/"], "description": "...", "technologies": ["Bash", "Python"]}
   ],
   "cross_cutting": {
-    "authentication": "path/to/auth",
-    "logging": "path/to/logging",
-    "configuration": "path/to/config",
-    "testing": "test/ directories"
+    "authentication": "path or N/A",
+    "logging": "path or N/A",
+    "configuration": "path or N/A",
+    "testing": "path or N/A"
   }
-}"""
+}
+
+Identify ALL distinct architectural layers. Look beyond conventional patterns (API/services/models) - this could be a skills system, plugin architecture, CLI tool, etc."""
 
             # Try agent-based discovery via Claude CLI
             if self.claude_cli_available:
                 print("Using Claude CLI for intelligent layer discovery...", file=sys.stderr)
-                agent_response = self._invoke_claude_agent(discovery_prompt, max_turns=3, timeout=30)
+                agent_response = self._invoke_claude_agent(discovery_prompt, max_turns=5, timeout=90)
 
                 if agent_response:
                     # Parse JSON response
                     try:
-                        # Extract JSON from response (may contain markdown code blocks)
-                        json_match = re.search(r'```json\s*(\{.*?\})\s*```', agent_response, re.DOTALL)
-                        if json_match:
-                            data = json.loads(json_match.group(1))
-                        else:
-                            # Try parsing entire response as JSON
+                        # Agent response might be:
+                        # 1. Direct JSON string (already extracted from CLI "result" field)
+                        # 2. JSON in markdown code blocks
+                        # 3. Natural language containing JSON
+
+                        # Try parsing as direct JSON first
+                        try:
                             data = json.loads(agent_response)
+                        except json.JSONDecodeError:
+                            # Try extracting from markdown code block
+                            json_match = re.search(r'```json\s*(\{.*?\})\s*```', agent_response, re.DOTALL)
+                            if json_match:
+                                data = json.loads(json_match.group(1))
+                            else:
+                                # Try extracting any JSON object from text
+                                json_match = re.search(r'\{[^{}]*"layers"[^{}]*\[.*?\].*?\}', agent_response, re.DOTALL)
+                                if json_match:
+                                    data = json.loads(json_match.group(0))
+                                else:
+                                    raise json.JSONDecodeError("No JSON found", agent_response, 0)
 
                         if 'layers' in data and data['layers']:
                             self.layers = data['layers']
                             self.cross_cutting = data.get('cross_cutting', {})
                             print(f"Discovered {len(self.layers)} layers via agent", file=sys.stderr)
                             return True
-                    except json.JSONDecodeError as e:
+                    except (json.JSONDecodeError, AttributeError) as e:
                         print(f"Failed to parse agent response: {e}", file=sys.stderr)
+                        print(f"Response preview: {agent_response[:200]}...", file=sys.stderr)
 
             # Fallback to static discovery
             print("Falling back to static discovery...", file=sys.stderr)
@@ -254,7 +264,7 @@ Format as JSON:
             # Note: True parallel execution would require concurrent.futures
             # For now, run sequentially but with intelligent agent analysis
             for layer_name, prompt in layer_prompts:
-                agent_response = self._invoke_claude_agent(prompt, max_turns=2, timeout=60)
+                agent_response = self._invoke_claude_agent(prompt, max_turns=3, timeout=120)
 
                 if agent_response:
                     try:
@@ -353,7 +363,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
         # Try agent-based synthesis via Claude CLI
         if self.claude_cli_available:
             print("Synthesizing CLAUDE.md via Claude CLI...", file=sys.stderr)
-            agent_response = self._invoke_claude_agent(synthesis_prompt, max_turns=5, timeout=60)
+            agent_response = self._invoke_claude_agent(synthesis_prompt, max_turns=5, timeout=120)
 
             if agent_response:
                 # Agent should return the complete CLAUDE.md content
