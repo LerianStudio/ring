@@ -113,23 +113,26 @@ class BootstrapOrchestrator:
             # Prepare discovery prompt
             discovery_prompt = """Analyze this codebase and identify its architectural layers.
 
-CRITICAL: Your response must be ONLY a JSON object, nothing else. No explanations, no markdown.
+You may explain your findings, but you MUST end your response with a valid JSON object in this exact format:
 
-Required JSON structure:
+```json
 {
   "layers": [
-    {"name": "Skills System", "directories": ["skills/"], "description": "...", "technologies": ["Python", "Markdown"]},
-    {"name": "Hooks System", "directories": ["hooks/"], "description": "...", "technologies": ["Bash", "Python"]}
+    {"name": "Skills System", "directories": ["skills/"], "description": "Workflow documentation system", "technologies": ["Markdown", "YAML"]},
+    {"name": "Hooks System", "directories": ["hooks/"], "description": "Session lifecycle automation", "technologies": ["Bash", "Python"]}
   ],
   "cross_cutting": {
-    "authentication": "path or N/A",
-    "logging": "path or N/A",
-    "configuration": "path or N/A",
-    "testing": "path or N/A"
+    "authentication": "path/to/auth or N/A",
+    "logging": "path/to/logging or N/A",
+    "configuration": "path/to/config or N/A",
+    "testing": "path/to/tests or N/A"
   }
 }
+```
 
-Identify ALL distinct architectural layers. Look beyond conventional patterns (API/services/models) - this could be a skills system, plugin architecture, CLI tool, etc."""
+Identify ALL distinct architectural layers. Look beyond conventional patterns (API/services/models) - this could be a skills system, plugin architecture, CLI tool, documentation system, etc.
+
+END YOUR RESPONSE WITH THE JSON CODE BLOCK ABOVE (filled with actual findings)."""
 
             # Try agent-based discovery via Claude CLI
             if self.claude_cli_available:
@@ -137,37 +140,57 @@ Identify ALL distinct architectural layers. Look beyond conventional patterns (A
                 agent_response = self._invoke_claude_agent(discovery_prompt, max_turns=5, timeout=90)
 
                 if agent_response:
-                    # Parse JSON response
+                    # Parse JSON response - try multiple strategies
                     try:
-                        # Agent response might be:
-                        # 1. Direct JSON string (already extracted from CLI "result" field)
-                        # 2. JSON in markdown code blocks
-                        # 3. Natural language containing JSON
+                        data = None
 
-                        # Try parsing as direct JSON first
+                        # Strategy 1: Direct JSON parsing
                         try:
                             data = json.loads(agent_response)
                         except json.JSONDecodeError:
-                            # Try extracting from markdown code block
+                            pass
+
+                        # Strategy 2: Extract from markdown code block
+                        if not data:
                             json_match = re.search(r'```json\s*(\{.*?\})\s*```', agent_response, re.DOTALL)
                             if json_match:
-                                data = json.loads(json_match.group(1))
-                            else:
-                                # Try extracting any JSON object from text
-                                json_match = re.search(r'\{[^{}]*"layers"[^{}]*\[.*?\].*?\}', agent_response, re.DOTALL)
-                                if json_match:
-                                    data = json.loads(json_match.group(0))
-                                else:
-                                    raise json.JSONDecodeError("No JSON found", agent_response, 0)
+                                try:
+                                    data = json.loads(json_match.group(1))
+                                except json.JSONDecodeError:
+                                    pass
 
-                        if 'layers' in data and data['layers']:
+                        # Strategy 3: Find last complete JSON object with "layers" key
+                        if not data:
+                            # Match nested JSON objects properly
+                            pattern = r'\{(?:[^{}]|(?:\{(?:[^{}]|(?:\{[^{}]*\}))*\}))*"layers"(?:[^{}]|(?:\{(?:[^{}]|(?:\{[^{}]*\}))*\}))*\}'
+                            matches = list(re.finditer(pattern, agent_response, re.DOTALL))
+                            if matches:
+                                # Try last match first (most likely to be the final answer)
+                                for match in reversed(matches):
+                                    try:
+                                        data = json.loads(match.group(0))
+                                        if 'layers' in data:
+                                            break
+                                    except json.JSONDecodeError:
+                                        continue
+
+                        # Strategy 4: Extract from natural language (parse manually)
+                        if not data:
+                            # Look for explicit layer mentions in text
+                            layers = self._extract_layers_from_text(agent_response)
+                            if layers:
+                                data = {'layers': layers, 'cross_cutting': {}}
+
+                        if data and 'layers' in data and data['layers']:
                             self.layers = data['layers']
                             self.cross_cutting = data.get('cross_cutting', {})
-                            print(f"Discovered {len(self.layers)} layers via agent", file=sys.stderr)
+                            print(f"✓ Discovered {len(self.layers)} layers via agent", file=sys.stderr)
                             return True
-                    except (json.JSONDecodeError, AttributeError) as e:
+                        else:
+                            print(f"⚠ No valid layer data in agent response", file=sys.stderr)
+
+                    except Exception as e:
                         print(f"Failed to parse agent response: {e}", file=sys.stderr)
-                        print(f"Response preview: {agent_response[:200]}...", file=sys.stderr)
 
             # Fallback to static discovery
             print("Falling back to static discovery...", file=sys.stderr)
@@ -183,6 +206,34 @@ Identify ALL distinct architectural layers. Look beyond conventional patterns (A
             print(f"Layer discovery failed: {e}", file=sys.stderr)
             self.layers = self.fallback_layers()
             return False
+
+    def _extract_layers_from_text(self, text: str) -> List[Dict]:
+        """Extract layer information from natural language response."""
+        layers = []
+
+        # Look for common patterns like "**Layer Name** - description"
+        # or "- **directory/** - description"
+        layer_patterns = [
+            r'\*\*([^*]+)\*\*\s*(?:\(`([^`]+)`\))?\s*[-:]\s*([^\n]+)',
+            r'-\s*\*\*([^*]+)/\*\*\s*[-:]\s*([^\n]+)',
+        ]
+
+        for pattern in layer_patterns:
+            matches = re.findall(pattern, text)
+            for match in matches:
+                if len(match) >= 2:
+                    name = match[0].strip()
+                    description = match[-1].strip()
+                    directories = [match[1]] if len(match) > 2 and match[1] else [name.lower().replace(' ', '-') + '/']
+
+                    layers.append({
+                        'name': name,
+                        'directories': directories,
+                        'description': description,
+                        'technologies': []
+                    })
+
+        return layers[:10]  # Limit to 10 layers max
 
     def static_layer_discovery(self) -> List[Dict]:
         """Temporary: Discover layers via filesystem analysis."""
