@@ -84,28 +84,118 @@ class BootstrapOrchestrator:
     def run(self) -> bool:
         """Execute the full bootstrap process."""
         try:
-            # Phase 1: Layer Discovery
-            print("[Phase 1] Discovering repository layers...", file=sys.stderr)
-            if not self.discover_layers():
-                print("Warning: Layer discovery failed, using fallback", file=sys.stderr)
-                self.layers = self.fallback_layers()
+            # Single-pass generation with Opus for maximum quality
+            print("[Bootstrap] Generating CLAUDE.md with Claude Opus...", file=sys.stderr)
 
-            # Phase 2: Parallel Layer Analysis
-            print(f"[Phase 2] Analyzing {len(self.layers)} layers...", file=sys.stderr)
-            self.analyze_layers()
+            if self.claude_cli_available:
+                content = self.generate_with_opus()
+                if content and '# CLAUDE.md' in content:
+                    print("[Bootstrap] ✓ Opus generation successful", file=sys.stderr)
+                    return self.write_claude_md(content)
+                else:
+                    print("[Bootstrap] ⚠ Opus generation failed, using template", file=sys.stderr)
 
-            # Phase 3: Synthesis
-            print("[Phase 3] Synthesizing CLAUDE.md...", file=sys.stderr)
-            content = self.synthesize_content()
-
-            # Phase 4: Validation and Write
-            print("[Phase 4] Validating and writing file...", file=sys.stderr)
+            # Fallback to template
+            print("[Bootstrap] Using template generation...", file=sys.stderr)
+            content = self.generate_template_only()
             return self.write_claude_md(content)
 
         except Exception as e:
             print(f"Bootstrap failed: {e}", file=sys.stderr)
             self.write_fallback_template()
             return False
+
+    def generate_with_opus(self) -> Optional[str]:
+        """Single-pass CLAUDE.md generation using Opus."""
+        prompt = f"""Analyze this repository at {self.project_dir} and generate a complete, actionable CLAUDE.md file.
+
+CRITICAL REQUIREMENTS:
+1. **Explore the codebase thoroughly** - Use Read, Glob, Grep tools to understand the actual structure
+2. **Maximum 500 lines** - Token-conscious output
+3. **Actionable content** - Specific file paths, runnable commands, real workflows
+4. **Return ONLY the markdown content** - No explanations before or after
+
+REQUIRED SECTIONS:
+- Repository Overview (2-3 sentences: what it does, tech stack, architecture style)
+- Architecture (describe actual directories found: skills/, hooks/, agents/, commands/, etc.)
+- Common Commands (git, build, test, plugin-specific commands)
+- Key Workflows (how to add skills, modify hooks, create agents - with exact file paths)
+- Important Patterns (code organization, naming, anti-patterns to avoid)
+
+STYLE:
+- Use exact file paths found in the repo (e.g., `skills/using-ring/SKILL.md:15`)
+- List actual commands that work (not placeholders)
+- Focus on "how to work in this repo" not generic advice
+
+Generate the complete CLAUDE.md now, starting with:
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository."""
+
+        print("[Bootstrap] Invoking Claude Opus (this may take 60-120 seconds)...", file=sys.stderr)
+
+        result = subprocess.run([
+            'claude',
+            '--print', prompt,
+            '--output-format', 'json',
+            '--max-turns', '8',
+            '--model', 'opus',
+            '--allowedTools', 'Glob,Grep,Read,Bash'
+        ],
+        capture_output=True,
+        text=True,
+        timeout=180,  # 3 minutes max
+        cwd=str(self.project_dir),
+        stdin=subprocess.DEVNULL
+        )
+
+        if result.returncode == 0:
+            try:
+                response_data = json.loads(result.stdout)
+                if isinstance(response_data, dict) and 'result' in response_data:
+                    content = response_data['result']
+                    # Verify it's actual CLAUDE.md content
+                    if '# CLAUDE.md' in content:
+                        return content
+            except json.JSONDecodeError as e:
+                print(f"Failed to parse Opus response: {e}", file=sys.stderr)
+
+        return None
+
+    def generate_template_only(self) -> str:
+        """Generate minimal template when Opus unavailable."""
+        return """# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Repository Overview
+
+[Auto-generated minimal template - Claude Opus unavailable]
+
+## Architecture
+
+Explore the codebase to understand the structure.
+
+## Common Commands
+
+```bash
+# Check git status
+git status
+
+# View recent commits
+git log --oneline -10
+```
+
+## Key Workflows
+
+1. Explore the codebase to understand patterns
+2. Check existing files for conventions
+3. Follow established directory structure
+
+## Important Patterns
+
+Check existing code for patterns and conventions used in this repository.
+"""
 
     def discover_layers(self) -> bool:
         """Phase 1: Discover architectural layers using Claude CLI."""

@@ -138,12 +138,13 @@ else
         LOG_FILE="${PROJECT_DIR}/.claude-md-bootstrap.log"
 
         # Fork Python orchestrator to background (non-blocking)
+        # Redirect all stdio to prevent hanging
         {
             # Set lock
             echo $$ > "$LOCK_FILE"
 
-            # Run bootstrap
-            if "${SCRIPT_DIR}/claude-md-bootstrap.py" >> "$LOG_FILE" 2>&1; then
+            # Run bootstrap with full stdio redirection
+            if "${SCRIPT_DIR}/claude-md-bootstrap.py" </dev/null >>"$LOG_FILE" 2>&1; then
                 if [ -f "${PROJECT_DIR}/CLAUDE.md" ]; then
                     line_count=$(wc -l < "${PROJECT_DIR}/CLAUDE.md" 2>/dev/null || echo "0")
                     echo "[$(date)] ✓ Generated CLAUDE.md (${line_count} lines)" >> "$LOG_FILE"
@@ -155,7 +156,7 @@ else
 
             # Remove lock
             rm -f "$LOCK_FILE"
-        } &
+        } </dev/null &>/dev/null &
 
         # Capture background PID
         bg_pid=$!
