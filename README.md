@@ -94,7 +94,13 @@ Runs all 3 reviewers simultaneously (Code, Business, Security) - aggregates find
    ```bash
    # Clone to your Claude plugins directory
    git clone https://github.com/lerianstudio/ring.git ~/.claude/plugins/ring
+   
+   # Install Python dependencies (optional, but recommended)
+   cd ~/.claude/plugins/ring
+   pip install -r requirements.txt
    ```
+   
+   **Note:** Python dependencies are optional. The hooks will use fallback parsers if PyYAML is unavailable.
 
 ### First Session
 

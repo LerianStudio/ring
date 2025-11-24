@@ -1,5 +1,6 @@
 ---
 description: Create isolated git worktree with interactive setup
+argument-hint: "[branch-name]"
 ---
 
 I'm using the using-git-worktrees skill to set up an isolated workspace for your feature work.

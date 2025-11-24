@@ -1,5 +1,6 @@
 ---
 description: Complete 8-gate pre-dev workflow for large features (≥2 days)
+argument-hint: "[feature-name]"
 ---
 
 I'm running the **Full Track** pre-development workflow (8 gates) for your feature.

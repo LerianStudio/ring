@@ -1,5 +1,6 @@
 ---
 description: Run comprehensive parallel code review with all 3 specialized reviewers
+argument-hint: "[files-or-paths]"
 ---
 
 Dispatch all 3 specialized code reviewers in parallel, collect their reports, and provide a consolidated analysis.

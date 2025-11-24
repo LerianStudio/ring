@@ -1,0 +1,7 @@
+# Python dependencies for Ring plugin hooks
+# Install with: pip install -r requirements.txt
+
+# Used by default/hooks/generate-skills-ref.py for parsing YAML frontmatter
+# Optional: script has fallback parser if unavailable
+PyYAML>=6.0.0,<7.0.0
+
