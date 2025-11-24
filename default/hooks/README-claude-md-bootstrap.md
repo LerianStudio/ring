@@ -233,7 +233,7 @@ CLAUDE_PROJECT_DIR=$(pwd) ./hooks/claude-md-bootstrap.sh
 
 ### Current Limitations
 
-1. **Agent integration pending:** Currently uses static analysis instead of Claude agents
+1. **Agent integration pending:** Currently uses static analysis instead of AI agent delegation
 2. **Language detection basic:** Relies on file extensions and common patterns
 3. **No incremental updates:** Full regeneration only (no updates)
 4. **Single file output:** Doesn't generate modular documentation

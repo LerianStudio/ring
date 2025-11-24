@@ -86,7 +86,7 @@ The agent will report back and offer two execution options:
 - Use ring:subagent-driven-development
 
 **2. Parallel Session (separate session)**
-- Open new Claude session in worktree
+- Open new agent session in worktree
 - Batch execution with checkpoints
 - Use ring:executing-plans
 

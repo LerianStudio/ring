@@ -54,7 +54,7 @@ Requiring context creates bottlenecks, onboarding friction, and integration fail
 ```markdown
 # ST-[task-id]-[number]: [Subtask Name]
 
-> **For Claude:** REQUIRED SUB-SKILL: Use ring:executing-plans to implement this subtask step-by-step.
+> **For Agents:** REQUIRED SUB-SKILL: Use ring:executing-plans to implement this subtask step-by-step.
 
 **Goal:** [One sentence describing what this builds]
 
@@ -212,7 +212,7 @@ Before declaring subtasks ready:
 ```markdown
 # ST-001-01: Create User Model with Validation
 
-> **For Claude:** REQUIRED SUB-SKILL: Use ring:executing-plans to implement this subtask step-by-step.
+> **For Agents:** REQUIRED SUB-SKILL: Use ring:executing-plans to implement this subtask step-by-step.
 
 **Goal:** Create a User model class with email and password validation in the auth service.
 

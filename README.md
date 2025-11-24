@@ -1,8 +1,8 @@
-# 💍 Ring - Skills Library for Claude Code
+# 💍 The Ring - Skills Library for AI Agents
 
 **Proven engineering practices, enforced through skills.**
 
-Ring is a comprehensive skills library and workflow system for Claude Code that transforms how AI assistants approach software development. It provides battle-tested patterns, mandatory workflows, and systematic approaches to common development tasks.
+Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a Claude Code plugin, the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches to common development tasks.
 
 ## ✨ Why Ring?
 
@@ -247,32 +247,47 @@ Claude: Dispatching all 3 reviewers in parallel...
 
 ## 🏗️ Architecture
 
+**Monorepo Marketplace** - Multiple specialized plugin collections:
+
 ```
-ring/
-├── skills/                      # 28 specialized skills
-│   ├── skill-name/
-│   │   └── SKILL.md            # Skill definition with frontmatter
-│   └── shared-patterns/        # Universal patterns used across skills
-├── commands/                   # Slash command definitions
-├── hooks/                      # Session initialization
-│   ├── hooks.json             # Hook configuration
-│   ├── session-start.sh       # Loads skills at startup
-│   └── generate-skills-ref.py # Auto-generates quick reference
-├── agents/                     # Specialized review agents (3 agents)
-│   ├── code-reviewer.md       # Foundation review (runs in parallel)
-│   ├── business-logic-reviewer.md  # Correctness review (runs in parallel)
-│   └── security-reviewer.md   # Safety review (runs in parallel)
-└── docs/                      # Documentation and plans
-    └── plans/                 # Implementation design documents
+ring/                                  # Monorepo root
+├── .claude-plugin/
+│   └── marketplace.json              # Multi-plugin marketplace config
+├── default/                          # Core Ring plugin (28 skills)
+│   ├── skills/                       # 28 specialized skills
+│   │   ├── skill-name/
+│   │   │   └── SKILL.md             # Skill definition with frontmatter
+│   │   └── shared-patterns/         # Universal patterns used across skills
+│   ├── commands/                    # Slash command definitions
+│   ├── hooks/                       # Session initialization
+│   │   ├── hooks.json              # Hook configuration
+│   │   ├── session-start.sh        # Loads skills at startup
+│   │   └── generate-skills-ref.py  # Auto-generates quick reference
+│   ├── agents/                      # Specialized review agents (3 agents)
+│   │   ├── code-reviewer.md        # Foundation review (runs in parallel)
+│   │   ├── business-logic-reviewer.md  # Correctness review (runs in parallel)
+│   │   └── security-reviewer.md    # Safety review (runs in parallel)
+│   └── lib/                        # Infrastructure utilities
+├── product-flowker/                 # Product-specific skills (future)
+├── product-matcher/                 # Product-specific skills (future)
+├── product-midaz/                   # Product-specific skills (future)
+├── product-reporter/                # Product-specific skills (future)
+├── product-tracer/                  # Product-specific skills (future)
+├── team-devops/                     # Team-specific skills (future)
+├── team-ops/                        # Team-specific skills (future)
+└── docs/                           # Documentation and plans
+    └── plans/                      # Implementation design documents
 ```
 
 ## 🤝 Contributing
 
 ### Adding a New Skill
 
+**For core Ring skills:**
+
 1. **Create the skill directory**
    ```bash
-   mkdir skills/your-skill-name
+   mkdir default/skills/your-skill-name
    ```
 
 2. **Write SKILL.md with frontmatter**
@@ -287,16 +302,40 @@ ring/
    ```
 
 3. **Update documentation**
-   - Add to `docs/skills-quick-reference.md`
+   - Skills auto-load via `default/hooks/generate-skills-ref.py`
    - Test with session start hook
 
 4. **Submit PR**
    ```bash
    git checkout -b feat/your-skill-name
-   git add skills/your-skill-name
+   git add default/skills/your-skill-name
    git commit -m "feat(skills): add your-skill-name for X"
    gh pr create
    ```
+
+**For product/team-specific skills:**
+
+1. **Create plugin structure**
+   ```bash
+   mkdir -p product-xyz/{skills,agents,commands,hooks,lib}
+   ```
+
+2. **Register in marketplace**
+   Edit `.claude-plugin/marketplace.json`:
+   ```json
+   {
+     "name": "ring-product-xyz",
+     "description": "Product XYZ specific skills",
+     "version": "0.1.0",
+     "source": "./product-xyz",
+     "homepage": "https://github.com/lerianstudio/ring/tree/product-xyz"
+   }
+   ```
+
+3. **Follow core plugin structure**
+   - Use same layout as `default/`
+   - Create `product-xyz/hooks/hooks.json` for initialization
+   - Add skills to `product-xyz/skills/`
 
 ### Skill Quality Standards
 

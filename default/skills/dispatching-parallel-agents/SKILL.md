@@ -1,6 +1,6 @@
 ---
 name: dispatching-parallel-agents
-description: Use when facing 3+ independent failures that can be investigated without shared state or dependencies - dispatches multiple Claude agents to investigate and fix independent problems concurrently
+description: Use when facing 3+ independent failures that can be investigated without shared state or dependencies - dispatches multiple AI agents to investigate and fix independent problems concurrently
 ---
 
 # Dispatching Parallel Agents
@@ -64,7 +64,7 @@ Each agent gets:
 ### 3. Dispatch in Parallel
 
 ```typescript
-// In Claude Code / AI environment
+// In AI agent environment with parallel task dispatch
 Task("Fix agent-tool-abort.test.ts failures")
 Task("Fix batch-completion-behavior.test.ts failures")
 Task("Fix tool-approval-race-conditions.test.ts failures")
