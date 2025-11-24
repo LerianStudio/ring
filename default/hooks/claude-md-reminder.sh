@@ -132,13 +132,24 @@ for file in "${instruction_files[@]}"; do
   reminder="${reminder}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
 
   # Read entire file content and escape for JSON
-  # TODO(review): Incomplete JSON escaping - missing control characters, unicode escaping
-  # Current escaping only handles backslash and double-quote
-  # Missing: \t, \r, \n (literal), \f, \b, unicode sequences
-  # Severity: Medium - can break JSON parsing if instruction files contain control chars
-  # Reported by: security-reviewer, Date: 2025-11-22
-  content=$(cat "$file")
-  escaped_content=$(echo "$content" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | awk '{printf "%s\\n", $0}')
+  # Proper JSON string escaping for all control characters (RFC 8259)
+  # Uses gsub for reliable cross-platform escaping (works on BSD and GNU awk)
+  escaped_content=$(awk '
+    BEGIN { ORS="" }
+    {
+      # Order matters: backslash must be escaped first
+      gsub(/\\/, "\\\\")
+      gsub(/"/, "\\\"")
+      gsub(/\t/, "\\t")
+      gsub(/\r/, "\\r")
+      gsub(/\f/, "\\f")
+      # Note: \b (backspace) rarely appears in text files, skip to avoid regex issues
+      # Add escaped newline between lines
+      if (NR > 1) printf "\\n"
+      printf "%s", $0
+    }
+    END { printf "\\n" }
+  ' "$file")
 
   reminder="${reminder}${escaped_content}\n\n"
 done

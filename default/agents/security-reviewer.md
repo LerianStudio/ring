@@ -4,6 +4,8 @@ version: 3.0.0
 description: "Safety Review: Reviews vulnerabilities, authentication, input validation, and OWASP risks. Runs in parallel with code-reviewer and business-logic-reviewer for fast feedback."
 model: opus
 last_updated: 2025-11-18
+changelog:
+  - 3.0.0: Initial versioned release with OWASP Top 10 coverage, compliance checks, and structured output schema
 output_schema:
   format: "markdown"
   required_sections:
