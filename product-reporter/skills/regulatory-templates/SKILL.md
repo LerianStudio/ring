@@ -31,6 +31,30 @@ description: Use when mapping Brazilian regulatory templates (BACEN CADOCs, e-Fi
 
 ---
 
+## Foundational Principle
+
+**Brazilian regulatory compliance (BACEN, RFB) has zero margin for error.**
+
+This isn't hyperbole:
+- BACEN penalties for incorrect submissions: R$10,000 - R$500,000 + license sanctions
+- RFB penalties for e-Financeira errors: Criminal liability for false declarations
+- Template errors are discovered during audits, often months after submission
+- "We'll fix it later" is impossible - submissions are final
+
+**This workflow exists because:**
+1. Human confidence without validation = optimism bias (proven by TDD research)
+2. "Mostly correct" regulatory submissions = rejected submissions + penalties
+3. Shortcuts under pressure = exactly when errors are most likely
+4. Each gate prevents specific failure modes discovered in production
+
+**The 3-gate architecture is not bureaucracy - it's risk management.**
+
+Every section that seems "rigid" or "redundant" exists because someone, somewhere, cut that corner and caused a regulatory incident.
+
+**Follow this workflow exactly. Your professional reputation depends on it.**
+
+---
+
 ## When to Use
 
 **Use this skill when:**
@@ -47,6 +71,71 @@ description: Use when mapping Brazilian regulatory templates (BACEN CADOCs, e-Fi
 - Non-Brazilian regulations
 - Analysis-only without template creation
 - Templates already exist and just need updates
+
+---
+
+## NO EXCEPTIONS - Read This First
+
+**This workflow has ZERO exceptions.** Brazilian regulatory compliance (BACEN, RFB) has zero margin for error.
+
+### Common Pressures You Must Resist
+
+| Pressure | Your Thought | Reality |
+|----------|--------------|---------|
+| **Deadline** | "Skip Gate 2, we're confident" | Gate 1 analysis ≠ Gate 2 validation. Confidence without verification = optimism bias |
+| **Authority** | "Manager says skip it" | Manager authority doesn't override regulatory requirements. Workflow protects both of you |
+| **Fatigue** | "Manual creation is faster" | Fatigue makes errors MORE likely. Automation doesn't get tired |
+| **Economic** | "Optional fields have no fines" | Template is reusable. Skipping fields = technical debt + future rework |
+| **Sunk Cost** | "Reuse existing template" | 70% overlap = 30% different. Regulatory work doesn't tolerate "mostly correct" |
+| **Pragmatism** | "Setup is ceremony" | Setup initializes context. Skipping = silent assumptions |
+| **Efficiency** | "Fix critical only" | Gate 2 PASS criteria: ALL uncertainties resolved, not just critical |
+
+### Emergency Scenarios
+
+**"Production is down, need template NOW"**
+→ Production issues don't override regulatory compliance. Fix production differently.
+
+**"CEO directive to ship immediately"**
+→ CEO authority doesn't override BACEN requirements. Escalate risk in writing.
+
+**"Client contract requires delivery today"**
+→ Contract penalties < regulatory penalties. Renegotiate delivery, don't skip validation.
+
+**"Tool/agent is unavailable"**
+→ Wait for tools or escalate. Manual workarounds bypass validation layers.
+
+### The Bottom Line
+
+**Shortcuts in regulatory templates = career-ending mistakes.**
+
+BACEN and RFB submissions are final. You cannot "patch next sprint." Every gate exists because regulatory compliance has zero tolerance for "mostly correct."
+
+**If you're tempted to skip ANY part of this workflow, stop and ask yourself: Am I willing to stake my professional reputation on this shortcut?**
+
+---
+
+## Rationalization Table - Know the Excuses
+
+Every rationalization below has been used to justify skipping workflow steps. **ALL are invalid.**
+
+| Excuse | Why It's Wrong | Correct Response |
+|--------|---------------|------------------|
+| "Gate 2 is redundant when Gate 1 is complete" | Gate 1 = analysis, Gate 2 = validation. Different purposes. Validation catches analysis errors | Run Gate 2 completely |
+| "Manual creation is pragmatic" | Manual bypasses validation layer. Gate 3 agent validates against Gate 2 report | Use automation agent |
+| "Optional fields don't affect compliance" | Overall confidence includes all fields. Skipping 36% fails PASS criteria | Map all fields |
+| "70% overlap means we can copy" | 30% difference contains critical regulatory fields. Similarity ≠ simplicity | Run full workflow |
+| "Setup is bureaucratic ceremony" | Setup initializes context for Gates 1-3. Skipping creates silent assumptions | Run setup completely |
+| "Fix critical issues only" | Gate 2 PASS: ALL uncertainties resolved. Medium/low issues cascade to mandatory failures | Resolve all uncertainties |
+| "We're experienced, simplified workflow" | Experience doesn't exempt you from validation. Regulatory work requires process | Follow full workflow |
+| "Following spirit not letter" | Regulatory compliance requires BOTH. Skipping steps violates spirit AND letter | Process IS the spirit |
+| "Being pragmatic vs dogmatic" | Process exists because pragmatism failed. Brazilian regulatory penalties are severe | Rigor is pragmatism |
+| "Tool is too rigid for real-world" | Rigidity prevents errors. Real-world includes regulatory audits and penalties | Rigidity is protection |
+
+### If You Find Yourself Making These Excuses
+
+**STOP. You are rationalizing.**
+
+The workflow exists specifically to prevent these exact thoughts from leading to errors. If the workflow seems "too rigid," that's evidence it's working - preventing you from shortcuts that seem reasonable but create risk.
 
 ---
 
@@ -425,6 +514,49 @@ Ready for production use!
 5. **TodoWrite Updates:** Mark complete immediately after each phase
 6. **NO INTERMEDIATE FILES:** Context flows in memory only - no .md files between gates
 7. **SINGLE OUTPUT FILE:** Only create final .tpl template file in Gate 3
+
+---
+
+## Red Flags - STOP Immediately
+
+If you catch yourself thinking ANY of these, STOP and re-read the NO EXCEPTIONS section:
+
+### Skip Patterns
+- "Skip Gate X" (any variation)
+- "Run Gates out of order"
+- "Parallel gates for speed"
+- "Simplified workflow for experienced teams"
+- "Emergency override protocol"
+
+### Manual Workarounds
+- "Create template manually"
+- "Copy existing template"
+- "Manual validation is sufficient"
+- "I'll verify it myself"
+
+### Partial Compliance
+- "Fix critical only"
+- "Map mandatory fields only"
+- "Skip setup, we already know"
+- "Lower pass threshold"
+
+### Justification Language
+- "Being pragmatic"
+- "Following spirit not letter"
+- "Real-world flexibility"
+- "Process over outcome"
+- "Dogmatic adherence"
+- "We're confident"
+- "Manager approved"
+
+### If You See These Red Flags
+
+1. **Acknowledge the rationalization** ("I'm trying to skip Gate 2")
+2. **Read the NO EXCEPTIONS section** (understand why it's required)
+3. **Follow the workflow completely** (no modifications)
+4. **Document the pressure** (for future skill improvement)
+
+**The workflow is non-negotiable. Regulatory compliance doesn't have "reasonable exceptions."**
 
 ---
 

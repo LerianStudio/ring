@@ -19,11 +19,112 @@ description: Gate 1 of regulatory templates - performs regulatory compliance ana
 
 ---
 
+## Foundational Principle
+
+**Field mapping errors compound through Gates 2-3 and into production.**
+
+Gate 1 is the foundation of regulatory template accuracy:
+- **snake_case conversion**: Python/Django ecosystem standard (PEP 8) - mixed conventions cause maintenance nightmares
+- **Data source prefixes**: BACEN audits require data lineage traceability - "where did this value come from?"
+- **Interactive validation**: No dictionary = no ground truth - user approval prevents assumption errors
+- **Confidence thresholds**: Quality gates prevent low-confidence mappings from reaching production
+- **Dictionary checks**: Consistency across team, audit trail for regulatory reviews
+
+**Every "shortcut" in Gate 1 multiplies through downstream gates:**
+- Skip snake_case → Gate 3 templates have mixed conventions → maintenance debt
+- Skip prefixes → Gate 2 cannot trace data sources → debugging nightmares
+- Auto-approve mappings → Gate 2 validates wrong assumptions → compliance violations
+- Skip optional fields → Gate 1 fails confidence threshold → rework loops
+- Lower thresholds → Low-confidence fields reach Gate 3 → production errors
+
+**Technical correctness in Gate 1 = foundation for compliance in production.**
+
+---
+
 ## When to Use
 
 **Called by:** `regulatory-templates` skill after Gate 0 template structure copy
 
 **Purpose:** Map each placeholder to its data source - structure already defined in Gate 0
+
+---
+
+## NO EXCEPTIONS - Technical Requirements Are Mandatory
+
+**Gate 1 field mapping requirements have ZERO exceptions.** Every requirement exists to prevent specific failure modes.
+
+### Common Pressures You Must Resist
+
+| Pressure | Your Thought | Reality |
+|----------|--------------|---------|
+| **Speed** | "camelCase works, skip conversion" | PEP 8 violation creates maintenance debt. 30 min now vs 75+ min debugging later |
+| **Simplicity** | "Prefix is verbose, omit it" | BACEN audits require data lineage. Implicit resolution = debugging nightmares |
+| **Efficiency** | "AUTO-approve obvious mappings" | No dictionary = no ground truth. "Obvious" assumptions cause compliance violations |
+| **Pragmatism** | "Skip optional fields" | Confidence calculated across ALL fields. 64% coverage = FAIL |
+| **Authority** | "75% confidence is enough" | Threshold erosion: 75% → 70% → 60%. LOW confidence fields = high-risk mappings |
+| **Experience** | "I memorized these, skip dictionary" | Memory is fallible. 1-min check prevents 20-40 min error correction |
+
+### Technical Requirements (Non-Negotiable)
+
+**snake_case Conversion:**
+- ✅ REQUIRED: Convert ALL field names to snake_case
+- ❌ FORBIDDEN: Use camelCase, PascalCase, or mixed conventions
+- Why: Python/Django PEP 8 standard, grep-able patterns, maintenance
+
+**Data Source Prefixes:**
+- ✅ REQUIRED: `{{ midaz_onboarding.organization.0.legal_document }}`
+- ❌ FORBIDDEN: `{{ organization.legal_document }}`
+- Why: Data lineage traceability, multi-source disambiguation, audit compliance
+
+**Interactive Validation:**
+- ✅ REQUIRED: AskUserQuestion for EACH field mapping
+- ❌ FORBIDDEN: Auto-approve HIGH confidence fields
+- Why: No dictionary = no ground truth, user provides domain knowledge
+
+**Confidence Threshold:**
+- ✅ REQUIRED: Overall confidence ≥ 80%
+- ❌ FORBIDDEN: Lower threshold or skip fields
+- Why: Quality gate for Gate 2/3, prevents low-confidence mappings in production
+
+**Dictionary Check:**
+- ✅ REQUIRED: Check `~/.claude/docs/regulatory/dictionaries/` first
+- ❌ FORBIDDEN: Skip check and use memory
+- Why: Consistency, audit trail, error prevention
+
+### The Bottom Line
+
+**Shortcuts in field mapping = errors in production regulatory submissions.**
+
+Gate 1 creates the foundation for Gates 2-3. Technical correctness here prevents compliance violations downstream.
+
+**If you're tempted to skip ANY requirement, ask yourself: Am I willing to debug production BACEN submission failures caused by this shortcut?**
+
+---
+
+## Rationalization Table - Know the Excuses
+
+Every rationalization below has been used to justify skipping requirements. **ALL are invalid.**
+
+| Excuse | Why It's Wrong | Correct Response |
+|--------|---------------|------------------|
+| "camelCase works fine in Django" | PEP 8 violation, maintenance debt, inconsistent conventions | Convert ALL to snake_case |
+| "Prefix is verbose and ugly" | Audit trail required, multi-source disambiguation critical | Prefix ALL fields |
+| "HIGH confidence = obvious, no approval needed" | No dictionary = no ground truth, assumptions fail | Ask approval for EACH field |
+| "Optional fields don't affect compliance" | Confidence calculated across ALL fields, 64% = FAIL | Map ALL fields |
+| "75% is close to 80%, good enough" | Threshold erosion, LOW confidence = high risk | Research to ≥80% |
+| "I know these mappings by heart" | Memory fallible, experience creates overconfidence | Check dictionary first |
+| "Everyone knows where organization comes from" | Implicit tribal knowledge, new team members lost | Explicit beats implicit |
+| "User approval wastes their time" | User provides domain knowledge we lack | Interactive validation mandatory |
+| "Conversion is unnecessary busywork" | Dismissing requirements without understanding cost | Technical correctness prevents debt |
+| "This is simple, process is overkill" | Simple tasks accumulate into complex problems | Follow workflow completely |
+
+### If You Find Yourself Making These Excuses
+
+**STOP. You are rationalizing.**
+
+The requirements exist to prevent these exact thoughts from causing errors. If a requirement seems "unnecessary," that's evidence it's working - preventing shortcuts that seem reasonable but create risk.
+
+---
 
 ## CRITICAL CHANGE
 
@@ -90,7 +191,6 @@ description: Gate 1 of regulatory templates - performs regulatory compliance ana
 | CNPJ (8 dígitos) | `midaz_onboarding` | `organization.0.legal_document` |
 | Código COSIF | `midaz_transaction` | `operation_route.code` |
 | Saldo | `midaz_transaction` | `balance.available` |
-| Data Base | `reporter` | `{% date_time "YYYY/MM" %}` |
 
 **RULE:** Always prefix fields with the correct data source!
 - ❌ WRONG: `{{ organization.legal_document }}`
@@ -135,8 +235,8 @@ console.log(`📋 Template ${context.template_selected} requires USER APPROVAL f
 
 // 2.1 Query schemas via MCP
 console.log(`📡 Fetching system schemas via MCP...`);
-const midazSchema = await mcp__apidog_midaz__read_project_oas_n78ry3();
-const crmSchema = await mcp__apidog_crm__read_project_oas_a72jt2();
+const midazSchema = await mcp__apidog_midaz__read_project_oas();
+const crmSchema = await mcp__apidog_crm__read_project_oas();
 
 // 2.2 Analyze schemas and SUGGEST mappings (not decide)
 // CRITICAL: Preserve exact field casing from schemas!
@@ -225,8 +325,8 @@ return useDictionary(newDictionary);
                               ▼
     ┌─────────────────────────────────────────────────────────────┐
     │ STEP B: Query API Schemas via MCP                           │
-    │ - mcp__apidog-midaz__read_project_oas_nkt61k()             │
-    │ - mcp__apidog-crm__read_project_oas_7bcuo0()               │
+    │ - mcp__apidog-midaz__read_project_oas()                    │
+    │ - mcp__apidog-crm__read_project_oas()                      │
     │ - Extract available fields from both systems                │
     └─────────────────────────────────────────────────────────────┘
                               │
@@ -375,8 +475,8 @@ async function interactiveFieldValidation(context) {
   console.log(`📋 Found ${requiredFields.length} fields requiring validation`);
 
   // 2. Query API schemas
-  const midazSchema = await mcp__apidog_midaz__read_project_oas_nkt61k();
-  const crmSchema = await mcp__apidog_crm__read_project_oas_7bcuo0();
+  const midazSchema = await mcp__apidog_midaz__read_project_oas();
+  const crmSchema = await mcp__apidog_crm__read_project_oas();
 
   // 3. For EACH field, get user approval
   for (const field of requiredFields) {
@@ -568,9 +668,8 @@ STEP 1: Query Available Schemas
 ----------------------------------------
 // Get current schemas via MCP
 // PRESERVE field names exactly as they appear in schemas!
-const crmSchema = await mcp__apidog-crm__read_project_oas_j55q8g();
-const midazSchema = await mcp__apidog-midaz__read_project_oas_8p5ko0();
-const reporterSchema = await mcp__apidog-reporter__read_project_oas_skd4ka();
+const crmSchema = await mcp__apidog_crm__read_project_oas();
+const midazSchema = await mcp__apidog_midaz__read_project_oas();
 
 STEP 2: Search CRM First (Most Complete)
 ----------------------------------------
@@ -1165,6 +1264,51 @@ Task({
 
 ---
 
+## Red Flags - STOP Immediately
+
+If you catch yourself thinking ANY of these, STOP and re-read the NO EXCEPTIONS section:
+
+### Skip Patterns
+- "Skip snake_case conversion for..."
+- "Omit prefix for obvious fields"
+- "Use camelCase this time"
+- "Mixed conventions are fine"
+- "Dictionary check is ceremony"
+
+### Partial Compliance
+- "Convert only mandatory fields"
+- "Prefix only ambiguous fields"
+- "Auto-approve HIGH confidence"
+- "Map only mandatory fields"
+- "75% is close enough to 80%"
+
+### Experience-Based Shortcuts
+- "I memorized these mappings"
+- "I know where this comes from"
+- "We've done this 50 times"
+- "The pattern is obvious"
+- "Dictionary won't exist anyway"
+
+### Justification Language
+- "Unnecessary busywork"
+- "Verbose and ugly"
+- "Wasting user time"
+- "Process over outcome"
+- "Being pragmatic"
+- "Close enough"
+- "Everyone knows"
+
+### If You See These Red Flags
+
+1. **Acknowledge the rationalization** ("I'm trying to skip snake_case")
+2. **Read the NO EXCEPTIONS section** (understand why it's required)
+3. **Read the Rationalization Table** (see your exact excuse refuted)
+4. **Follow the requirement completely** (no modifications)
+
+**Technical requirements are not negotiable. Field mapping errors compound through Gates 2-3.**
+
+---
+
 ## Pass/Fail Criteria
 
 ### PASS Criteria
@@ -1272,11 +1416,11 @@ Return to `regulatory-templates` main skill:
 const patterns = ["branch", "agency", "agencia", "branch_code"];
 
 // 2. Query CRM first (banking data priority)
-const crmSchema = mcp__apidog-crm__read_project_oas_j55q8g();
+const crmSchema = mcp__apidog_crm__read_project_oas();
 // Search result: crm.alias.bankingDetails.branch ✓ (exact match)
 
 // 3. Query Midaz as fallback
-const midazSchema = mcp__apidog-midaz__read_project_oas_8p5ko0();
+const midazSchema = mcp__apidog_midaz__read_project_oas();
 // Search result: midaz.account.metadata.branch_code ⚠ (in metadata)
 
 // 4. Calculate confidence
