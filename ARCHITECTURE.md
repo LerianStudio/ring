@@ -3,16 +3,17 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Component Hierarchy](#component-hierarchy)
-3. [Core Components](#core-components)
-4. [Data & Control Flow](#data--control-flow)
-5. [Integration with Claude Code](#integration-with-claude-code)
-6. [Execution Patterns](#execution-patterns)
-7. [Component Relationships](#component-relationships)
+2. [Marketplace Structure](#marketplace-structure)
+3. [Component Hierarchy](#component-hierarchy)
+4. [Core Components](#core-components)
+5. [Data & Control Flow](#data--control-flow)
+6. [Integration with Claude Code](#integration-with-claude-code)
+7. [Execution Patterns](#execution-patterns)
+8. [Component Relationships](#component-relationships)
 
 ## Overview
 
-Ring is a Claude Code plugin that provides a comprehensive skills library and workflow system. It extends Claude Code's capabilities through structured, reusable patterns that enforce proven software engineering practices.
+Ring is a **Claude Code plugin marketplace** that provides a comprehensive skills library and workflow system. It extends Claude Code's capabilities through structured, reusable patterns that enforce proven software engineering practices.
 
 ### Architecture Philosophy
 
@@ -21,25 +22,63 @@ Ring operates on three core principles:
 1. **Mandatory Workflows** - Critical skills (like using-ring) enforce specific behaviors
 2. **Parallel Execution** - Review systems run concurrently for speed
 3. **Session Context** - Skills load automatically at session start
+4. **Modular Plugins** - Specialized plugins for different domains and teams
 
 ### System Boundaries
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                     Claude Code                         │
-│  ┌───────────────────────────────────────────────────┐  │
-│  │                  Ring Plugin                      │  │
-│  │  ┌─────────────┐  ┌─────────────┐  ┌──────────┐ │  │
-│  │  │   Skills    │  │   Agents    │  │ Commands │ │  │
-│  │  └─────────────┘  └─────────────┘  └──────────┘ │  │
-│  │  ┌─────────────┐  ┌─────────────┐               │  │
-│  │  │    Hooks    │  │     Lib     │               │  │
-│  │  └─────────────┘  └─────────────┘               │  │
-│  └───────────────────────────────────────────────────┘  │
-│                                                          │
-│  Native Tools: Skill, Task, TodoWrite, SlashCommand     │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                          Claude Code                                 │
+│  ┌────────────────────────────────────────────────────────────────┐ │
+│  │                    Ring Marketplace                             │ │
+│  │  ┌──────────────────────────┐  ┌─────────────────────────────┐ │ │
+│  │  │   ring-default (v0.6.1)  │  │  ring-developers (v0.0.1)   │ │ │
+│  │  │  ┌───────┐ ┌──────────┐  │  │  ┌──────────────────────┐   │ │ │
+│  │  │  │Skills │ │ Agents   │  │  │  │  Developer Agents    │   │ │ │
+│  │  │  │ (34)  │ │  (6)     │  │  │  │       (5)            │   │ │ │
+│  │  │  └───────┘ └──────────┘  │  │  └──────────────────────┘   │ │ │
+│  │  │  ┌───────┐ ┌──────────┐  │  │                             │ │ │
+│  │  │  │Cmds(7)│ │Hooks/Lib │  │  │                             │ │ │
+│  │  │  └───────┘ └──────────┘  │  │                             │ │ │
+│  │  └──────────────────────────┘  └─────────────────────────────┘ │ │
+│  │                                                                 │ │
+│  │  ┌──────────────────────────────────────────────────────────┐  │ │
+│  │  │   Reserved Plugins (9): product-*, team-*                │  │ │
+│  │  └──────────────────────────────────────────────────────────┘  │ │
+│  └────────────────────────────────────────────────────────────────┘ │
+│                                                                      │
+│  Native Tools: Skill, Task, TodoWrite, SlashCommand                 │
+└─────────────────────────────────────────────────────────────────────┘
 ```
+
+## Marketplace Structure
+
+Ring is organized as a monorepo marketplace with multiple plugin collections:
+
+```
+ring/                                  # Monorepo root
+├── .claude-plugin/
+│   └── marketplace.json              # Multi-plugin registry (2 active plugins)
+├── default/                          # Core plugin: ring-default v0.6.1
+├── developers/                       # Developer agents: ring-developers v0.0.1
+├── product-*/                        # 5 reserved product-specific slots
+└── team-*/                           # 4 reserved team-specific slots
+```
+
+### Active Plugins
+
+| Plugin | Version | Description | Components |
+|--------|---------|-------------|------------|
+| **ring-default** | 0.6.1 | Core skills library | 34 skills, 6 agents, 7 commands |
+| **ring-developers** | 0.0.1 | Developer agents | 5 specialized developer agents |
+
+### Reserved Plugin Slots
+
+**Product Plugins (5):**
+- `product-flowker`, `product-matcher`, `product-midaz`, `product-reporter`, `product-tracer`
+
+**Team Plugins (4):**
+- `team-devops`, `team-ops`, `team-pmm`, `team-product`
 
 ## Component Hierarchy
 
@@ -65,38 +104,55 @@ skills/
 - Can reference shared patterns for common behaviors
 
 ### 2. Agents (`agents/`)
-**Purpose:** Specialized reviewers that analyze code/designs using AI models
+**Purpose:** Specialized agents that analyze code/designs or provide domain expertise using AI models
 
-**Structure:**
+**Structure (ring-default plugin):**
 ```
-agents/
-├── code-reviewer.md         # Foundation review
-├── business-logic-reviewer.md # Correctness review
-└── security-reviewer.md      # Safety review
+default/agents/
+├── code-reviewer.md           # Foundation review (architecture, patterns)
+├── business-logic-reviewer.md # Correctness review (requirements, edge cases)
+├── security-reviewer.md       # Safety review (OWASP, auth, validation)
+├── write-plan.md              # Implementation planning
+├── finops-analyzer.md         # Financial operations analysis
+└── finops-creator.md          # FinOps template creation
+```
+
+**Structure (ring-developers plugin):**
+```
+developers/agents/
+├── backend-engineer-golang.md  # Go backend specialist for financial systems
+├── devops-engineer.md          # DevOps infrastructure specialist
+├── frontend-engineer.md        # React/Next.js specialist
+├── qa-analyst.md               # Quality assurance specialist
+└── sre.md                      # Site reliability engineer
 ```
 
 **Key Characteristics:**
-- Invoked via Claude's `Task` tool
+- Invoked via Claude's `Task` tool with `subagent_type`
 - Must specify model (typically "opus" for comprehensive analysis)
-- Can run in parallel (3 reviewers dispatch simultaneously via `/ring:review` command)
+- Review agents run in parallel (3 reviewers dispatch simultaneously via `/ring:review` command)
+- Developer agents provide specialized domain expertise
 - Return structured reports with severity-based findings
 
-**Note:** Parallel review orchestration is now handled by the `/ring:review` command rather than a separate agent
+**Note:** Parallel review orchestration is handled by the `/ring:review` command
 
 ### 3. Commands (`commands/`)
 **Purpose:** Slash commands that provide shortcuts to skills/workflows
 
 **Structure:**
 ```
-commands/
-├── brainstorm.md    # Maps to brainstorming skill
-├── write-plan.md    # Maps to writing-plans skill
-├── execute-plan.md  # Maps to executing-plans skill
-└── review.md        # Triggers parallel review
+default/commands/
+├── brainstorm.md       # /ring:brainstorm - Socratic design refinement
+├── write-plan.md       # /ring:write-plan - Implementation planning
+├── execute-plan.md     # /ring:execute-plan - Batch execution
+├── review.md           # /ring:review - Parallel 3-reviewer dispatch
+├── worktree.md         # /ring:worktree - Git worktree creation
+├── pre-dev-feature.md  # /ring:pre-dev-feature - 3-gate workflow
+└── pre-dev-full.md     # /ring:pre-dev-full - 8-gate workflow
 ```
 
 **Key Characteristics:**
-- Simple `.md` files with frontmatter
+- Simple `.md` files with YAML frontmatter
 - Invoked via `/ring:{command}` syntax
 - Typically reference a corresponding skill
 - Expand into full skill/agent invocation
@@ -106,14 +162,16 @@ commands/
 
 **Structure:**
 ```
-hooks/
-├── hooks.json            # Hook configuration
-├── session-start.sh      # Main initialization script
-└── generate-skills-ref.py # Dynamic skill reference generator
+default/hooks/
+├── hooks.json              # Hook configuration (SessionStart, UserPromptSubmit)
+├── session-start.sh        # Main initialization script
+├── generate-skills-ref.py  # Dynamic skill reference generator
+└── claude-md-reminder.sh   # CLAUDE.md reminder on prompt submit
 ```
 
 **Key Characteristics:**
-- Triggers on SessionStart events
+- Triggers on SessionStart events (startup|resume, clear|compact)
+- Triggers on UserPromptSubmit for reminders
 - Injects skills context into Claude's memory
 - Auto-generates skills quick reference from frontmatter
 - Ensures mandatory workflows are loaded
@@ -123,16 +181,20 @@ hooks/
 
 **Structure:**
 ```
-lib/
-├── common.sh              # Shared bash functions
-├── preflight-checker.sh   # Prerequisite validation
-├── compliance-validator.sh # Skill adherence checking
-├── skill-matcher.sh       # Task-to-skill mapping
-├── metrics-tracker.sh     # Usage statistics
-└── output-validator.sh    # Response format validation
+default/lib/
+├── common.sh              # Shared bash functions (2.9 KB)
+├── preflight-checker.sh   # Prerequisite validation (4.4 KB)
+├── compliance-validator.sh # Skill adherence checking (14 KB)
+├── skill-matcher.sh       # Task-to-skill mapping (4.0 KB)
+├── metrics-tracker.sh     # Usage statistics (7.8 KB)
+├── output-validator.sh    # Response format validation (3.0 KB)
+├── initialize-skills.sh   # Skill initialization (3.0 KB)
+├── skill-composer.sh      # Skill composition utility (2.2 KB)
+└── README.md              # Library documentation
 ```
 
 **Key Characteristics:**
+- 9 infrastructure scripts (~40 KB total)
 - Bash scripts for infrastructure support
 - Can be called by skills or directly
 - Provide validation and metrics capabilities
@@ -143,8 +205,32 @@ lib/
 **Structure:**
 ```
 .claude-plugin/
-├── plugin.json      # Plugin metadata and version
-└── marketplace.json # Display information for marketplace
+└── marketplace.json    # Multi-plugin registry
+    ├── ring-default    # Core skills library (v0.6.1)
+    └── ring-developers # Developer agents (v0.0.1)
+```
+
+**marketplace.json Schema:**
+```json
+{
+  "name": "ring",
+  "description": "...",
+  "owner": { "name": "...", "email": "..." },
+  "plugins": [
+    {
+      "name": "ring-default",
+      "version": "0.6.1",
+      "source": "./default",
+      "keywords": ["skills", "tdd", "debugging", ...]
+    },
+    {
+      "name": "ring-developers",
+      "version": "0.0.1",
+      "source": "./developers",
+      "keywords": ["developer", "agents"]
+    }
+  ]
+}
 ```
 
 ## Data & Control Flow
@@ -407,9 +493,11 @@ SKILL.md frontmatter → generate-skills-ref.py → formatted overview → sessi
 3. Available immediately after session restart
 
 ### Adding New Agents
-1. Create `agents/{name}.md` with model specification
-2. Invoke via Task tool with agent name
-3. Can be orchestrated by other agents (like full-reviewer)
+1. Create `{plugin}/agents/{name}.md` with model specification
+2. Include YAML frontmatter: `name`, `description`, `model`, `version`
+3. Invoke via Task tool with `subagent_type="ring:{name}"`
+4. Review agents can run in parallel via `/ring:review`
+5. Developer agents provide domain expertise via direct Task invocation
 
 ### Adding New Commands
 1. Create `commands/{name}.md`
@@ -420,6 +508,20 @@ SKILL.md frontmatter → generate-skills-ref.py → formatted overview → sessi
 1. Create `skills/shared-patterns/{pattern}.md`
 2. Reference from skills that need the pattern
 3. Maintains consistency across skills
+
+### Adding New Plugins
+1. Create plugin directory: `mkdir -p {plugin-name}/{skills,agents,commands,hooks,lib}`
+2. Register in `.claude-plugin/marketplace.json`:
+   ```json
+   {
+     "name": "ring-{plugin-name}",
+     "version": "0.1.0",
+     "source": "./{plugin-name}",
+     "keywords": [...]
+   }
+   ```
+3. Create `{plugin-name}/hooks/hooks.json` for initialization
+4. Add skills/agents following same structure as `default/`
 
 ## Performance Considerations
 
@@ -480,10 +582,24 @@ SKILL.md frontmatter → generate-skills-ref.py → formatted overview → sessi
 ## Summary
 
 Ring's architecture is designed for:
-- **Modularity** - Independent, composable components
-- **Performance** - Parallel execution wherever possible
+- **Modularity** - Independent, composable components across multiple plugins
+- **Performance** - Parallel execution wherever possible (3x faster reviews)
 - **Reliability** - Mandatory workflows prevent failures
-- **Extensibility** - Easy to add new skills/agents/commands
+- **Extensibility** - Easy to add new skills/agents/commands/plugins
+- **Scalability** - Marketplace structure supports product and team-specific plugins
 - **Integration** - Seamless with Claude Code's native tools
 
-The system achieves these goals through clear component separation, structured workflows, and automatic context management, creating a robust foundation for AI-assisted software development.
+### Current State (v0.6.1)
+
+| Component | Count | Location |
+|-----------|-------|----------|
+| Active Plugins | 2 | `default/`, `developers/` |
+| Skills | 34 | `default/skills/` |
+| Agents (default) | 6 | `default/agents/` |
+| Agents (developers) | 5 | `developers/agents/` |
+| Commands | 7 | `default/commands/` |
+| Hooks | 4 | `default/hooks/` |
+| Lib utilities | 9 | `default/lib/` |
+| Reserved plugins | 9 | `product-*/`, `team-*/` |
+
+The system achieves these goals through clear component separation, structured workflows, automatic context management, and a modular marketplace architecture, creating a robust foundation for AI-assisted software development.

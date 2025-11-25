@@ -4,7 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-Ring is a comprehensive skills library and workflow system for AI agents that enforces proven software engineering practices through mandatory workflows, parallel code review, and systematic pre-development planning. Currently implemented as a Claude Code plugin (v0.6.1), the skills are agent-agnostic and reusable across different AI systems. The plugin contains 27 core skills, 7 slash commands, and 4 specialized review agents that run in parallel for 3x faster reviews. The architecture uses markdown-based skill definitions with YAML frontmatter, auto-discovered at session start via hooks, and executed through Claude Code's native Skill/Task tools.
+Ring is a comprehensive skills library and workflow system for AI agents that enforces proven software engineering practices through mandatory workflows, parallel code review, and systematic pre-development planning. Currently implemented as a Claude Code plugin marketplace with **2 active plugins** and **9 reserved plugin slots**, the skills are agent-agnostic and reusable across different AI systems.
+
+**Active Plugins:**
+- **ring-default** (v0.6.1): 34 core skills, 7 slash commands, 6 specialized agents
+- **ring-developers** (v0.0.1): 5 specialized developer agents (Go backend, DevOps, Frontend, QA, SRE)
+
+The architecture uses markdown-based skill definitions with YAML frontmatter, auto-discovered at session start via hooks, and executed through Claude Code's native Skill/Task tools.
 
 ## Architecture
 
@@ -13,19 +19,23 @@ Ring is a comprehensive skills library and workflow system for AI agents that en
 ```
 ring/                                  # Monorepo root
 ├── .claude-plugin/
-│   └── marketplace.json              # Multi-plugin marketplace config
-├── default/                          # Core Ring plugin (27 skills)
-│   ├── skills/                       # 27 core skills (8,722 lines total)
+│   └── marketplace.json              # Multi-plugin marketplace config (2 active plugins)
+├── default/                          # Core Ring plugin (ring-default v0.6.1)
+│   ├── skills/                       # 34 skills (13,637 lines total)
 │   │   ├── brainstorming/            # Socratic design refinement
 │   │   ├── test-driven-development/  # RED-GREEN-REFACTOR cycle enforcement
 │   │   ├── systematic-debugging/     # 4-phase root cause analysis
 │   │   ├── pre-dev-*/               # 8-gate workflow (PRD→TRD→API→Data→Tasks)
+│   │   ├── regulatory-templates*/   # Brazilian regulatory compliance (BACEN, RFB)
 │   │   ├── using-ring/              # MANDATORY skill discovery (non-negotiable)
 │   │   └── shared-patterns/         # Reusable: state-tracking, failure-recovery
-│   ├── agents/                      # Parallel review system (3x faster)
+│   ├── agents/                      # 6 specialized agents
 │   │   ├── code-reviewer.md         # Foundation review (architecture, patterns)
 │   │   ├── business-logic-reviewer.md # Correctness (requirements, edge cases)
-│   │   └── security-reviewer.md     # Safety (OWASP, auth, validation)
+│   │   ├── security-reviewer.md     # Safety (OWASP, auth, validation)
+│   │   ├── write-plan.md            # Implementation planning
+│   │   ├── finops-analyzer.md       # Financial operations analysis
+│   │   └── finops-creator.md        # FinOps creation
 │   ├── commands/                    # 7 slash commands
 │   │   ├── review.md               # /ring:review - dispatch 3 parallel reviewers
 │   │   ├── brainstorm.md           # /ring:brainstorm - interactive design
@@ -34,17 +44,32 @@ ring/                                  # Monorepo root
 │   │   ├── hooks.json             # SessionStart, UserPromptSubmit config
 │   │   ├── session-start.sh       # Load skills quick reference
 │   │   ├── generate-skills-ref.py # Parse SKILL.md frontmatter
-│   │   └── claude-md-bootstrap.sh # Auto-generate CLAUDE.md for repos
-│   └── lib/                       # Infrastructure utilities
-│       ├── preflight-checker.sh   # Validate prerequisites
-│       └── compliance-validator.sh # Check skill adherence
-├── product-flowker/               # Product-specific skills (future)
-├── product-matcher/               # Product-specific skills (future)
-├── product-midaz/                 # Product-specific skills (future)
-├── product-reporter/              # Product-specific skills (future)
-├── product-tracer/                # Product-specific skills (future)
-├── team-devops/                   # Team-specific skills (future)
-└── team-ops/                      # Team-specific skills (future)
+│   │   └── claude-md-reminder.sh  # CLAUDE.md reminder on prompt submit
+│   ├── lib/                       # Infrastructure utilities (9 scripts)
+│   │   ├── common.sh              # Shared shell functions
+│   │   ├── preflight-checker.sh   # Validate prerequisites
+│   │   ├── compliance-validator.sh # Check skill adherence
+│   │   ├── metrics-tracker.sh     # Usage statistics
+│   │   ├── skill-matcher.sh       # Task-to-skill mapping
+│   │   └── output-validator.sh    # Response format validation
+│   └── docs/                      # Documentation
+│       └── regulatory/            # Brazilian regulatory templates (BACEN, RFB)
+├── developers/                    # Developer Agents plugin (ring-developers v0.0.1)
+│   └── agents/                    # 5 specialized developer agents
+│       ├── backend-engineer-golang.md  # Go backend specialist
+│       ├── devops-engineer.md          # DevOps infrastructure specialist
+│       ├── frontend-engineer.md        # React/Next.js specialist
+│       ├── qa-analyst.md               # Quality assurance specialist
+│       └── sre.md                      # Site reliability engineer
+├── product-flowker/               # Product-specific skills (reserved)
+├── product-matcher/               # Product-specific skills (reserved)
+├── product-midaz/                 # Product-specific skills (reserved)
+├── product-reporter/              # Product-specific skills (reserved)
+├── product-tracer/                # Product-specific skills (reserved)
+├── team-devops/                   # Team-specific skills (reserved)
+├── team-ops/                      # Team-specific skills (reserved)
+├── team-pmm/                      # Team-specific skills (reserved)
+└── team-product/                  # Team-specific skills (reserved)
 ```
 
 ## Common Commands
@@ -193,14 +218,16 @@ Task.parallel([
 
 ### Session Context
 The system loads at SessionStart (from `default/` plugin):
-1. `default/hooks/claude-md-bootstrap.sh` - Generates this CLAUDE.md if missing (45-60s)
-2. `default/hooks/session-start.sh` - Loads skill quick reference via `generate-skills-ref.py`
-3. `using-ring` skill - Injected as mandatory workflow
+1. `default/hooks/session-start.sh` - Loads skill quick reference via `generate-skills-ref.py`
+2. `using-ring` skill - Injected as mandatory workflow
+3. `default/hooks/claude-md-reminder.sh` - Reminds about CLAUDE.md on prompt submit
 
 **Monorepo Context:**
 - Repository: Monorepo marketplace with multiple plugin collections
-- Core plugin: `default/` (27 skills, 4 agents, 7 commands)
-- Product plugins: `product-*/` (reserved for product-specific skills)
-- Team plugins: `team-*/` (reserved for team-specific skills)
+- Active plugins: 2 (`ring-default` v0.6.1, `ring-developers` v0.0.1)
+- Core plugin: `default/` (34 skills, 6 agents, 7 commands)
+- Developer agents plugin: `developers/` (5 specialized developer agents)
+- Product plugins: `product-*/` (5 reserved directories)
+- Team plugins: `team-*/` (4 reserved directories)
 - Current git branch: `main`
 - Remote: `github.com/LerianStudio/ring`
