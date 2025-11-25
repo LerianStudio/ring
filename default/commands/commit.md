@@ -137,3 +137,31 @@ git commit \
   --trailer "Generated-by: Claude" \
   --trailer "AI-Model: claude-opus-4-5-20251101"
 ```
+
+## Step 6: Offer Push (Optional)
+
+After successful commit, ask the user if they want to push:
+
+```javascript
+AskUserQuestion({
+  questions: [{
+    question: "Push commit to remote?",
+    header: "Push",
+    multiSelect: false,
+    options: [
+      { label: "Yes", description: "Push to current branch" },
+      { label: "No", description: "Keep local only" }
+    ]
+  }]
+});
+```
+
+If user selects "Yes":
+```bash
+git push
+```
+
+If branch has no upstream, use:
+```bash
+git push -u origin <current-branch>
+```
