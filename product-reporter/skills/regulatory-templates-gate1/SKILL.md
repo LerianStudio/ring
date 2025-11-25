@@ -280,29 +280,11 @@ return useDictionary(newDictionary);
 
 ## 🔴 CRITICAL: INTERACTIVE VALIDATION FOR TEMPLATES WITHOUT DICTIONARY
 
-### Templates Status Reference
+### Data Dictionaries Location
 
-**DICTIONARY BASE PATH:** `~/.claude/docs/regulatory/dictionaries`
+**Dicionários de dados disponíveis em:** `~/.claude/docs/regulatory/dictionaries/`
 
-**Templates WITH Dictionary (Auto-validation):**
-| Template | Dictionary Path | Status |
-|----------|-----------------|--------|
-| CADOC 4010 | `cadoc-4010.yaml` | ✅ Ready |
-| CADOC 4016 | `cadoc-4016.yaml` | ✅ Ready |
-| APIX 001 | `apix-001.yaml` | ✅ Ready |
-| e-Financeira evtCadDeclarante | `efinanceira-evtCadDeclarante.yaml` | ✅ Ready |
-
-**Templates WITHOUT Dictionary (REQUIRE Interactive Validation):**
-| Template | Dictionary Path | Status |
-|----------|-----------------|--------|
-| CADOC 4111 | `null` | ⚠️ Requires user validation |
-| APIX 002 | `null` | ⚠️ Requires user validation |
-| e-Financeira evtAberturaeFinanceira | `null` | ⚠️ Requires user validation |
-| e-Financeira evtFechamentoeFinanceira | `null` | ⚠️ Requires user validation |
-| e-Financeira evtMovOpFin | `null` | ⚠️ Requires user validation |
-| e-Financeira evtMovPP | `null` | ⚠️ Requires user validation |
-| e-Financeira evtMovOpFinAnual | `null` | ⚠️ Requires user validation |
-| DIMP v10 | `null` | ⚠️ Requires user validation |
+Consulte os dicionários existentes antes de iniciar o mapeamento de campos.
 
 ---
 
@@ -601,57 +583,12 @@ Examples of CORRECT field mapping with snake_case conversion:
 ✅ API has "TaxID" → Map as "organization.tax_id"
 ✅ API has "openingDate" → Map as "organization.opening_date"
 ✅ API has "naturalPerson" → Map as "organization.natural_person"
-✅ API has "tax_id" → Map as "organization.tax_id" (already snake_case)
 
 Examples of INCORRECT field mapping (NEVER DO THIS):
 ❌ API has "legalDocument" → Mapping as "organization.legalDocument" (keep camelCase)
-❌ API has "tax_id" → Mapping as "organization.taxId" (convert to camelCase)
 ❌ API has "openingDate" → Mapping as "organization.openingDate" (keep camelCase)
 
 The search patterns below help FIND fields. Once found, CONVERT TO SNAKE_CASE!
-```
-
-### Field Discovery Pattern Dictionary
-
-```javascript
-FIELD DISCOVERY PATTERNS - Use for intelligent field mapping:
-IMPORTANT: These patterns help FIND fields. Once found, use the EXACT field name from the API!
-
-IDENTIFICATION PATTERNS:
-- CPF/CNPJ → search: ["document", "tax_id", "legal_document", "cpf", "cnpj", "identification", "fiscal_number", "registro"]
-- Nome → search: ["name", "full_name", "legal_name", "trade_name", "razao_social", "nome_completo", "denominacao"]
-- Tipo Pessoa → search: ["type", "person_type", "tipo_pessoa", "natureza", "NATURAL_PERSON", "LEGAL_PERSON"]
-- Nome Social → search: ["social_name", "nome_social", "preferred_name"]
-- Nome Mãe → search: ["mother_name", "motherName", "nome_mae", "filiacao_mae"]
-- Nome Pai → search: ["father_name", "fatherName", "nome_pai", "filiacao_pai"]
-
-CONTACT PATTERNS:
-- Email → search: ["email", "mail", "electronic_mail", "correio", "primaryEmail", "email_principal"]
-- Telefone → search: ["phone", "mobile", "telephone", "telefone", "contact", "mobilePhone", "celular"]
-- Endereço → search: ["address", "addresses", "location", "endereco", "logradouro", "domicilio"]
-- Cidade → search: ["city", "cidade", "municipio", "locality"]
-- Estado → search: ["state", "estado", "uf", "province", "region"]
-- CEP → search: ["zipCode", "zip", "postal_code", "cep", "codigo_postal"]
-- País → search: ["country", "pais", "countryCode", "nacionalidade"]
-
-BANKING PATTERNS:
-- Conta → search: ["account", "account_number", "numero_conta", "conta", "conta_corrente"]
-- Agência → search: ["branch", "agency", "agencia", "branch_code", "codigo_agencia"]
-- Banco → search: ["bank", "bank_id", "bankId", "bank_code", "codigo_banco", "instituicao"]
-- IBAN → search: ["iban", "international_account", "conta_internacional"]
-- Tipo Conta → search: ["account_type", "type", "tipo_conta", "modalidade"]
-- Data Abertura Conta → search: ["opening_date", "openingDate", "created_at", "data_abertura"]
-
-DATE PATTERNS:
-- Nascimento → search: ["birth", "birth_date", "birthDate", "data_nascimento", "dt_nasc", "born"]
-- Abertura → search: ["opening", "created", "opened", "start", "inicio", "created_at"]
-- Fundação → search: ["foundation", "founding", "foundingDate", "established", "fundacao", "constituicao"]
-
-BUSINESS PATTERNS:
-- Atividade → search: ["activity", "business", "atividade", "ramo", "cnae", "economic_activity"]
-- Porte → search: ["size", "company_size", "porte", "tamanho", "classificacao"]
-- Faturamento → search: ["revenue", "income", "faturamento", "receita", "turnover"]
-- Capital Social → search: ["capital", "social_capital", "capital_social", "patrimonio"]
 ```
 
 ### Hierarchical Search Strategy
