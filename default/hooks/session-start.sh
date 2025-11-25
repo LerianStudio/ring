@@ -84,13 +84,12 @@ update_message_escaped=$(echo -e "$update_message" | sed 's/\\/\\\\/g' | sed 's/
 
 # Build JSON output with conditional userMessage field
 if [ -n "$update_message" ]; then
-  # Include top-level userMessage if marketplace was updated
+  # Include userMessage INSIDE hookSpecificOutput so model can see it
   cat <<EOF
 {
-  "userMessage": "${update_message_escaped}",
-  "requiresAcknowledgment": true,
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
+    "userMessage": "${update_message_escaped}",
     "additionalContext": "<ring-skills-system>\n${overview_escaped}\n\n---\n\n**MANDATORY WORKFLOWS:**\n\n${using_ring_escaped}\n</ring-skills-system>"
   }
 }
