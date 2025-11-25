@@ -156,6 +156,21 @@ done
 
 reminder="${reminder}</instruction-files-reminder>\n"
 
+# Add agent usage reminder (compact, ~200 tokens)
+agent_reminder="<agent-usage-reminder>\n"
+agent_reminder="${agent_reminder}CONTEXT CHECK: Before using Glob/Grep/Read chains, consider agents:\n\n"
+agent_reminder="${agent_reminder}| Task | Agent |\n"
+agent_reminder="${agent_reminder}|------|-------|\n"
+agent_reminder="${agent_reminder}| Explore codebase | Explore |\n"
+agent_reminder="${agent_reminder}| Multi-file search | Explore |\n"
+agent_reminder="${agent_reminder}| Complex research | general-purpose |\n"
+agent_reminder="${agent_reminder}| Code review | ring-default:code-reviewer + business-logic-reviewer + security-reviewer (PARALLEL) |\n"
+agent_reminder="${agent_reminder}| Implementation plan | ring-default:write-plan |\n\n"
+agent_reminder="${agent_reminder}**3-File Rule:** If reading >3 files, use an agent instead. 15x more context-efficient.\n"
+agent_reminder="${agent_reminder}</agent-usage-reminder>\n"
+
+reminder="${reminder}${agent_reminder}"
+
 # Output hook response with injected context
 cat <<EOF
 {

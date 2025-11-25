@@ -71,6 +71,90 @@ Every time you skip checking for skills:
 
 **No tool use without skill check first.**
 
+## Agent-First Exploration (Context Efficiency)
+
+**The Problem:** Direct Glob/Grep/Read chains consume 50-100k tokens in main context.
+**The Solution:** Agents offload work to subagents, using only ~2k tokens in main.
+
+### Available Agents
+
+#### Built-in Agents (Claude Code)
+| Agent | When to Use |
+|-------|-------------|
+| `Explore` | Codebase questions, finding files, understanding architecture |
+| `general-purpose` | Complex multi-step research, tasks requiring many tool calls |
+| `Plan` | Creating implementation plans, exploration before coding |
+| `claude-code-guide` | Questions about Claude Code features, SDK, or capabilities |
+
+#### Ring Agents (Custom)
+| Agent | When to Use |
+|-------|-------------|
+| `ring-default:code-reviewer` | Review architecture, patterns, maintainability |
+| `ring-default:business-logic-reviewer` | Review correctness, edge cases, requirements |
+| `ring-default:security-reviewer` | Review vulnerabilities, OWASP, auth, validation |
+| `ring-default:write-plan` | Generate detailed implementation plans |
+
+### Decision Tree: Which Agent?
+
+```
+START: What am I trying to do?
+│
+├─▶ "Understand/explore codebase"
+│   └─▶ Use `Explore` agent
+│
+├─▶ "Find specific code/files"
+│   └─▶ Use `Explore` agent (NOT Glob/Grep chains)
+│
+├─▶ "Complex research with many steps"
+│   └─▶ Use `general-purpose` agent
+│
+├─▶ "Review code for quality"
+│   └─▶ Use Ring reviewers IN PARALLEL:
+│       • ring-default:code-reviewer
+│       • ring-default:business-logic-reviewer
+│       • ring-default:security-reviewer
+│
+├─▶ "Create implementation plan"
+│   └─▶ Use `ring-default:write-plan` agent
+│
+├─▶ "Question about Claude Code itself"
+│   └─▶ Use `claude-code-guide` agent
+│
+└─▶ "Read ONE specific known file"
+    └─▶ OK to use `Read` directly
+```
+
+### The 3-File Rule
+
+**If you'll need to read more than 3 files → Use an agent instead.**
+
+Why? At 3+ files, you're exploring, not targeted reading. Agents do this better.
+
+### Rationalizations That Mean You're Burning Context
+
+- "I'll just quickly check this file" → Will you check more after? Use agent.
+- "Let me see what's in this directory" → That's exploration. Use agent.
+- "I need context before using an agent" → Agents gather context FOR you.
+- "It's faster to do it myself" → Agents are 15x more context-efficient.
+- "I already started this chain" → Switch to agent NOW. Sunk cost fallacy.
+
+### Ring Reviewers: ALWAYS Parallel
+
+When using Ring reviewers, dispatch ALL THREE in a single message:
+
+```
+✅ CORRECT: One message with 3 Task calls (parallel)
+❌ WRONG: Three separate messages (sequential, 3x slower)
+```
+
+### Context Cost Comparison
+
+| Approach | Tokens Used |
+|----------|-------------|
+| Manual exploration (10 tool calls) | ~30,000 tokens |
+| Single Explore agent call | ~2,000 tokens |
+| **Savings** | **15x more efficient** |
+
 ## Skills with Checklists
 
 If a skill has a checklist, YOU MUST create TodoWrite todos for EACH item.
