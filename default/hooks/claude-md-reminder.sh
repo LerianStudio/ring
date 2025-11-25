@@ -9,7 +9,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 
 # Configuration
-THROTTLE_INTERVAL=1  # Re-inject every N prompts
+THROTTLE_INTERVAL=3  # Re-inject every N prompts
 INSTRUCTION_FILES=("CLAUDE.md" "AGENTS.md" "RULES.md")  # File types to discover
 
 # Use session-specific state file (per-session, not persistent)
