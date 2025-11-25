@@ -9,32 +9,69 @@
     {
       "name": "ring-default",
       "description": "Core skills library for the Lerian Team: TDD, debugging, collaboration patterns, and proven techniques. Features parallel 3-reviewer code review system (Foundation, Correctness, Safety), systematic debugging, and workflow orchestration. 20 essential skills for software engineering excellence.",
-      "version": "0.6.1",
+      "version": "0.7.0",
       "source": "./default",
       "homepage": "https://github.com/lerianstudio/ring/tree/default",
       "repository": "https://github.com/lerianstudio/ring/tree/default",
       "license": "MIT",
-      "keywords": ["skills", "tdd", "debugging", "collaboration", "best-practices", "workflows", "orchestration", "validation", "code-review", "parallel-review"]
+      "keywords": [
+        "skills",
+        "tdd",
+        "debugging",
+        "collaboration",
+        "best-practices",
+        "workflows",
+        "orchestration",
+        "validation",
+        "code-review",
+        "parallel-review"
+      ]
     },
     {
       "name": "ring-developers",
       "description": "Specialized developer agents for technical roles: Go Backend Engineer, DevOps Engineer, Frontend Engineer (React/Next.js), QA Analyst, and Site Reliability Engineer (SRE). Each agent provides domain-specific expertise and best practices for their specialty area.",
-      "version": "0.0.1",
+      "version": "0.0.2",
       "source": "./developers",
       "homepage": "https://github.com/lerianstudio/ring/tree/developers",
       "repository": "https://github.com/lerianstudio/ring/tree/developers",
       "license": "MIT",
-      "keywords": ["agents", "developers", "golang", "backend", "devops", "frontend", "react", "nextjs", "qa", "testing", "sre", "reliability", "infrastructure"]
+      "keywords": [
+        "agents",
+        "developers",
+        "golang",
+        "backend",
+        "devops",
+        "frontend",
+        "react",
+        "nextjs",
+        "qa",
+        "testing",
+        "sre",
+        "reliability",
+        "infrastructure"
+      ]
     },
     {
       "name": "ring-product-reporter",
       "description": "Financial operations (FinOps) agents and Brazilian regulatory compliance skills. Includes finops-analyzer and finops-automation agents for financial analysis and automation. Contains regulatory templates for BACEN, RFB, and other Brazilian financial regulations with multi-gate workflow support.",
-      "version": "0.0.1",
+      "version": "0.1.0",
       "source": "./product-reporter",
       "homepage": "https://github.com/lerianstudio/ring/tree/product-reporter",
       "repository": "https://github.com/lerianstudio/ring/tree/product-reporter",
       "license": "MIT",
-      "keywords": ["finops", "financial-operations", "agents", "regulatory", "compliance", "bacen", "rfb", "brazil", "reporting", "templates", "automation"]
+      "keywords": [
+        "finops",
+        "financial-operations",
+        "agents",
+        "regulatory",
+        "compliance",
+        "bacen",
+        "rfb",
+        "brazil",
+        "reporting",
+        "templates",
+        "automation"
+      ]
     },
     {
       "name": "ring-team-product",
@@ -44,7 +81,20 @@
       "homepage": "https://github.com/lerianstudio/ring/tree/team-product",
       "repository": "https://github.com/lerianstudio/ring/tree/team-product",
       "license": "MIT",
-      "keywords": ["skills", "product", "pre-dev", "planning", "prd", "trd", "api-design", "data-model", "workflow", "feature-planning", "task-breakdown"]
+      "keywords": [
+        "skills",
+        "product",
+        "pre-dev",
+        "planning",
+        "prd",
+        "trd",
+        "api-design",
+        "data-model",
+        "workflow",
+        "feature-planning",
+        "task-breakdown"
+      ]
     }
-  ]
+  ],
+  "version": "0.1.0"
 }
