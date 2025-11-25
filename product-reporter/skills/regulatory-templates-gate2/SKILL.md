@@ -19,11 +19,104 @@ description: Gate 2 of regulatory templates - validates uncertain mappings and c
 
 ---
 
+## Foundational Principle
+
+**Validation is the checkpoint that prevents incorrect mappings from reaching production.**
+
+Gate 2 is the quality gate between analysis (Gate 1) and implementation (Gate 3):
+- **All uncertainties resolved**: Gate 1 analysis ≠ Gate 2 validation. MEDIUM/LOW uncertainties often hide critical issues
+- **100% mandatory validation**: 95% = 5% of mandatory data could be wrong in BACEN submission
+- **>90% test pass rate**: Test data reveals transformation bugs, data type mismatches, edge cases
+- **Confirmed mappings**: Prevents Gate 3 from generating templates based on assumptions
+- **Validation rules defined**: Gate 3 needs explicit validation logic for template generation
+
+**Skipping validation in Gate 2 means:**
+- Gate 1 assumptions become Gate 3 implementation (no verification layer)
+- Uncertainties propagate to production (BACEN submission failures)
+- Low-confidence mappings generate incorrect templates (compliance violations)
+- No test data validation = edge cases break in production
+
+**Gate 2 is not redundant - it's the firewall between analysis and implementation.**
+
+---
+
 ## When to Use
 
 **Called by:** `regulatory-templates` skill after Gate 1 passes
 
 **Purpose:** Resolve uncertainties, validate field mappings, test transformations, define validation rules
+
+---
+
+## NO EXCEPTIONS - Validation Requirements Are Mandatory
+
+**Gate 2 validation requirements have ZERO exceptions.** This is the quality firewall before template generation.
+
+### Common Pressures You Must Resist
+
+| Pressure | Your Thought | Reality |
+|----------|--------------|---------|
+| **Pragmatism** | "Critical uncertainties only, skip MEDIUM/LOW" | PASS criteria: ALL uncertainties resolved. MEDIUM/LOW cascade to mandatory failures |
+| **Efficiency** | "88% test pass rate is excellent" | Threshold is >90%. 12% failure = edge cases that break in production |
+| **Complexity** | "Validation dashboard is redundant" | Mandatory validation = 100% required. Dashboard catches missing validations |
+| **Confidence** | "Mappings look correct, skip testing" | Visual inspection ≠ test validation. Test data reveals hidden bugs |
+| **Authority** | "95% mandatory validation is outstanding" | 100% is non-negotiable. 5% gap = 5% of mandatory data wrong in BACEN |
+| **Frustration** | "Use workarounds for rejected fields" | FAIL criteria: Cannot find alternatives. Workarounds bypass validation |
+
+### Validation Requirements (Non-Negotiable)
+
+**All Uncertainties Resolved:**
+- ✅ REQUIRED: Resolve ALL Gate 1 uncertainties (CRITICAL + MEDIUM + LOW)
+- ❌ FORBIDDEN: "Fix critical only", "Skip low-priority items"
+- Why: MEDIUM/LOW uncertainties often reveal systemic issues, cascade to mandatory failures
+
+**Test Data Validation:**
+- ✅ REQUIRED: Test pass rate >90%
+- ❌ FORBIDDEN: "88% is close enough", "Skip testing, looks correct"
+- Why: Test data reveals transformation bugs, data type mismatches, edge cases
+
+**Mandatory Field Validation:**
+- ✅ REQUIRED: 100% mandatory fields validated
+- ❌ FORBIDDEN: "95% is outstanding", "Edge cases don't matter"
+- Why: Each 1% gap = potential BACEN submission failure on mandatory data
+
+**Alternative Mappings:**
+- ✅ REQUIRED: Find alternatives for ALL rejected fields
+- ❌ FORBIDDEN: "Use workarounds", "Keep original with patches"
+- Why: Rejected mappings fail validation for a reason - workarounds bypass the firewall
+
+### The Bottom Line
+
+**Partial validation = no validation.**
+
+Gate 2 exists to catch what Gate 1 missed. Lowering thresholds or skipping validation defeats the purpose. Every PASS criterion exists because production incidents occurred without it.
+
+**If you're tempted to skip ANY validation, ask yourself: Am I willing to defend this shortcut during a BACEN audit?**
+
+---
+
+## Rationalization Table - Know the Excuses
+
+Every rationalization below has been used to justify skipping validation. **ALL are invalid.**
+
+| Excuse | Why It's Wrong | Correct Response |
+|--------|---------------|------------------|
+| "Critical uncertainties only, MEDIUM/LOW can wait" | ALL uncertainties = all 8. MEDIUM cascade to mandatory failures | Resolve ALL uncertainties |
+| "88% is excellent, 2% gap is edge cases" | >90% threshold exists for production edge cases | Fix to reach >90% |
+| "Validation dashboard is redundant with Gate 1" | Gate 1 = mapping, Gate 2 = validation. Different purposes | Run dashboard, ensure 100% |
+| "Mappings look correct, testing is busywork" | Visual inspection missed bugs testing would catch | Run test data validation |
+| "95% is outstanding, 5% isn't worth 2 hours" | 100% is binary requirement. 95% ≠ 100% | Fix to reach 100% |
+| "Rejected fields can use workarounds" | Workarounds bypass validation layer | Find valid alternatives |
+| "Gate 2 rarely finds issues after 50 templates" | Experience doesn't exempt from validation | Run full validation |
+| "Following spirit not letter" | Validation thresholds ARE the spirit | Meet all thresholds |
+| "Being pragmatic vs dogmatic" | Thresholds prevent regulatory incidents | Rigor is pragmatism |
+| "Fix in next sprint if issues arise" | Regulatory submissions are final, can't patch | Fix now before Gate 3 |
+
+### If You Find Yourself Making These Excuses
+
+**STOP. You are rationalizing.**
+
+The validation exists to prevent these exact thoughts from allowing errors into production. If validation seems "redundant," that's evidence it's working - catching what analysis missed.
 
 ---
 
@@ -256,6 +349,51 @@ Document all test results:
   }
 }
 ```
+
+---
+
+## Red Flags - STOP Immediately
+
+If you catch yourself thinking ANY of these, STOP and re-read the NO EXCEPTIONS section:
+
+### Partial Resolution
+- "Resolve critical only, skip MEDIUM/LOW"
+- "Fix most uncertainties, good enough"
+- "ALL is unrealistic, most is pragmatic"
+
+### Threshold Degradation
+- "88% is close to 90%"
+- "95% mandatory validation is outstanding"
+- "Close enough to pass"
+- "The gap isn't material"
+
+### Skip Validation Steps
+- "Validation dashboard is redundant"
+- "Mappings look correct visually"
+- "Testing is busywork"
+- "We'll catch issues in Gate 3"
+
+### Workaround Thinking
+- "Use workarounds for rejected fields"
+- "Patch it in Gate 3"
+- "Fix in next sprint"
+- "This is an edge case"
+
+### Justification Language
+- "Being pragmatic"
+- "Following spirit not letter"
+- "Outstanding is good enough"
+- "Rarely finds issues anyway"
+- "Experience says this is fine"
+
+### If You See These Red Flags
+
+1. **Acknowledge the rationalization** ("I'm trying to skip LOW uncertainties")
+2. **Read the NO EXCEPTIONS section** (understand why ALL means ALL)
+3. **Read the Rationalization Table** (see your exact excuse refuted)
+4. **Meet the threshold completely** (100%, >90%, ALL)
+
+**Validation thresholds are binary gates, not aspirational goals.**
 
 ---
 
