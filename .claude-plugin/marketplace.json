@@ -35,6 +35,16 @@
       "repository": "https://github.com/lerianstudio/ring/tree/product-reporter",
       "license": "MIT",
       "keywords": ["skills", "product", "reporter", "agents"]
+    },
+    {
+      "name": "ring-team-product",
+      "description": "Team Product Agents.",
+      "version": "0.0.1",
+      "source": "./team-product",
+      "homepage": "https://github.com/lerianstudio/ring/tree/team-product",
+      "repository": "https://github.com/lerianstudio/ring/tree/team-product",
+      "license": "MIT",
+      "keywords": ["skills", "team", "product", "agents"]
     }
   ]
 }
