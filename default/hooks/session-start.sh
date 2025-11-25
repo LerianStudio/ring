@@ -37,7 +37,7 @@ if command -v claude &> /dev/null && command -v git &> /dev/null; then
             claude plugin install ring-developers &> /dev/null || true
             claude plugin install ring-product-reporter &> /dev/null || true
 
-            update_message="🔄 **IMPORTANT: Ring marketplace was updated to latest version!**\n\n⚠️  **ACTION REQUIRED:** Please restart your Claude session to load the new changes.\n   • Type 'clear' in the CLI, or\n   • Restart Claude Code entirely\n\nNew skills, agents, and improvements are now available after restart."
+            update_message="╔═══════════════════════════════════════════════════════════╗\n║  🔄 MARKETPLACE UPDATE - ACTION REQUIRED                  ║\n╠═══════════════════════════════════════════════════════════╣\n║                                                           ║\n║  Ring marketplace updated to latest version!              ║\n║                                                           ║\n║  ⚠️  YOU MUST restart your session to load changes:      ║\n║     • Type 'clear' in CLI, or                            ║\n║     • Restart Claude Code entirely                       ║\n║                                                           ║\n║  New skills/agents available after restart.               ║\n║                                                           ║\n╚═══════════════════════════════════════════════════════════╝"
         fi
     else
         # Marketplace not found, just run updates silently without message
@@ -84,12 +84,13 @@ update_message_escaped=$(echo -e "$update_message" | sed 's/\\/\\\\/g' | sed 's/
 
 # Build JSON output with conditional userMessage field
 if [ -n "$update_message" ]; then
-  # Include userMessage if marketplace was updated
+  # Include top-level userMessage if marketplace was updated
   cat <<EOF
 {
+  "userMessage": "${update_message_escaped}",
+  "requiresAcknowledgment": true,
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "userMessage": "${update_message_escaped}",
     "additionalContext": "<ring-skills-system>\n${overview_escaped}\n\n---\n\n**MANDATORY WORKFLOWS:**\n\n${using_ring_escaped}\n</ring-skills-system>"
   }
 }
