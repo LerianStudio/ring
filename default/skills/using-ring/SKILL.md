@@ -18,7 +18,7 @@ This is not negotiable. This is not optional. You cannot rationalize your way ou
 
 Before responding to ANY user message, you MUST complete this checklist:
 
-1. ☐ **Check for hook userMessage** - If SessionStart hook contains a `userMessage` field, display it FIRST, verbatim, at the start of your response
+1. ☐ **Check for MANDATORY-USER-MESSAGE** - If additionalContext contains `<MANDATORY-USER-MESSAGE>` tags, display the message FIRST, verbatim, at the start of your response
 2. ☐ List available skills in your mind
 3. ☐ Ask yourself: "Does ANY skill match this request?"
 4. ☐ If yes → Use the Skill tool to read and run the skill file
@@ -27,9 +27,9 @@ Before responding to ANY user message, you MUST complete this checklist:
 
 **Responding WITHOUT completing this checklist = automatic failure.**
 
-### Hook userMessage Contract
+### MANDATORY-USER-MESSAGE Contract
 
-When SessionStart (or any hook) returns a `userMessage` field:
+When SessionStart hook additionalContext contains `<MANDATORY-USER-MESSAGE>` tags:
 
 - ✅ **MUST display verbatim** - No paraphrasing, summarizing, or modification
 - ✅ **MUST display in first response** - Cannot wait for "relevant context"
@@ -39,15 +39,23 @@ When SessionStart (or any hook) returns a `userMessage` field:
 **Example:**
 
 ```
-Hook output: { "userMessage": "🔄 **IMPORTANT:** Marketplace updated. Restart session." }
+Hook additionalContext contains:
+<MANDATORY-USER-MESSAGE>
+You MUST display the following message verbatim to the user:
+
+╔═══════════════════════════════════════════════════════════╗
+║  🔄 MARKETPLACE UPDATE - ACTION REQUIRED                  ║
+╚═══════════════════════════════════════════════════════════╝
+
+</MANDATORY-USER-MESSAGE>
 
 Your response:
-🔄 **IMPORTANT:** Marketplace updated. Restart session.
+╔═══════════════════════════════════════════════════════════╗
+║  🔄 MARKETPLACE UPDATE - ACTION REQUIRED                  ║
+╚═══════════════════════════════════════════════════════════╝
 
 Now, regarding your question about...
 ```
-
-See `default/docs/hooks/user-message-contract.md` for full specification.
 
 ## Critical Rules
 
@@ -200,27 +208,27 @@ When starting ANY task:
 
 Skipping this todo = automatic failure.
 
-### Hook userMessage TodoWrite Integration
+### MANDATORY-USER-MESSAGE TodoWrite Integration
 
-When SessionStart (or any hook) contains a `userMessage`:
+When SessionStart hook additionalContext contains `<MANDATORY-USER-MESSAGE>` tags:
 
 **MUST create todo:**
-1. Todo content: "Display hook userMessage to user"
+1. Todo content: "Display MANDATORY-USER-MESSAGE to user"
 2. Status: `in_progress` (immediately)
 3. Mark `completed` ONLY after displaying it verbatim
 
 **Verification workflow:**
 ```
-Hook returns userMessage
+Hook additionalContext contains <MANDATORY-USER-MESSAGE>
   ↓
-Create todo: "Display hook userMessage"
+Create todo: "Display MANDATORY-USER-MESSAGE"
   ↓
-Display message verbatim to user
+Display message verbatim to user (content between the tags)
   ↓
 Mark todo as completed
 ```
 
-**This creates an audit trail** - TodoWrite tracking makes userMessage display verifiable, not just a mental checklist item.
+**This creates an audit trail** - TodoWrite tracking makes message display verifiable, not just a mental checklist item.
 
 ## Announcing Skill Usage
 
