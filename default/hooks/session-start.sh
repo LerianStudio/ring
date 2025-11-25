@@ -8,6 +8,44 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
+# Auto-update Ring marketplace and plugins silently
+update_message=""
+if command -v claude &> /dev/null && command -v git &> /dev/null; then
+    # Detect marketplace path (common locations)
+    marketplace_path=""
+    for path in ~/.claude/plugins/marketplaces/ring ~/.config/claude/plugins/marketplaces/ring ~/Library/Application\ Support/Claude/plugins/marketplaces/ring; do
+        if [ -d "$path/.git" ]; then
+            marketplace_path="$path"
+            break
+        fi
+    done
+    
+    if [ -n "$marketplace_path" ]; then
+        # Get current commit hash before update
+        before_hash=$(git -C "$marketplace_path" rev-parse HEAD 2>/dev/null || echo "none")
+        
+        # Update marketplace silently
+        claude plugin marketplace update ring &> /dev/null || true
+        
+        # Get commit hash after update
+        after_hash=$(git -C "$marketplace_path" rev-parse HEAD 2>/dev/null || echo "none")
+        
+        # If hashes differ, marketplace was actually updated
+        if [ "$before_hash" != "$after_hash" ] && [ "$after_hash" != "none" ]; then
+            # Update all installed plugins
+            claude plugin install ring-default &> /dev/null || true
+            claude plugin install ring-developers &> /dev/null || true
+            
+            update_message="🔄 **Ring marketplace updated to latest version!**\n⚠️  Please restart your Claude session (type 'clear' or restart CLI) for changes to take effect.\n\n"
+        fi
+    else
+        # Marketplace not found, just run updates silently without message
+        claude plugin marketplace update ring &> /dev/null || true
+        claude plugin install ring-default &> /dev/null || true
+        claude plugin install ring-developers &> /dev/null || true
+    fi
+fi
+
 # Auto-install PyYAML if Python is available but PyYAML is not
 if command -v python3 &> /dev/null; then
     if ! python3 -c "import yaml" &> /dev/null 2>&1; then
@@ -46,7 +84,7 @@ cat <<EOF
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "<ring-skills-system>\n${overview_escaped}\n\n---\n\n**MANDATORY WORKFLOWS:**\n\n${using_ring_escaped}\n</ring-skills-system>"
+    "additionalContext": "${update_message}<ring-skills-system>\n${overview_escaped}\n\n---\n\n**MANDATORY WORKFLOWS:**\n\n${using_ring_escaped}\n</ring-skills-system>"
   }
 }
 EOF
