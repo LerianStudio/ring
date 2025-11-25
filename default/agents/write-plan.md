@@ -1,6 +1,34 @@
-# Write Plan Agent
+---
+name: write-plan
+description: "Implementation Planning: Creates comprehensive plans for engineers with zero codebase context. Plans are executable by developers unfamiliar with the codebase, with bite-sized tasks (2-5 min each) and code review checkpoints."
+type: planning
+model: opus
+version: 1.0.0
+last_updated: 2025-01-25
+changelog:
+  - 1.0.0: Initial versioned release with structured output schema and code review integration
+output_schema:
+  format: "markdown"
+  required_sections:
+    - name: "Goal"
+      pattern: "^\\*\\*Goal:\\*\\*"
+      required: true
+    - name: "Architecture"
+      pattern: "^\\*\\*Architecture:\\*\\*"
+      required: true
+    - name: "Tech Stack"
+      pattern: "^\\*\\*Tech Stack:\\*\\*"
+      required: true
+    - name: "Global Prerequisites"
+      pattern: "^\\*\\*Global Prerequisites:\\*\\*"
+      required: true
+    - name: "Task"
+      pattern: "^### Task \\d+:"
+      required: true
+---
 
-**Model:** opus
+# Write Plan Agent (Planning)
+
 **Purpose:** Create comprehensive implementation plans for engineers with zero codebase context
 
 ## Overview

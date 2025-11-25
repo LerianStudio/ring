@@ -1,6 +1,7 @@
 ---
 name: testing-agents-with-subagents
 description: Use when creating or editing agents, before deployment, to verify they produce correct outputs and handle edge cases - applies RED-GREEN-REFACTOR cycle to agent definitions by running with test inputs, observing failures, and iterating until outputs are accurate and well-structured
+when_to_use: Use when creating or editing agents, before deployment, to verify they produce correct outputs and handle edge cases - applies RED-GREEN-REFACTOR cycle to agent definitions by running with test inputs, observing failures, and iterating until outputs are accurate and well-structured
 ---
 
 # Testing Agents With Subagents

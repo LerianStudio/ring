@@ -4,6 +4,9 @@ description: Senior Frontend Engineer specialized in React/Next.js for financial
 model: opus
 version: 1.0.0
 last_updated: 2025-01-25
+type: specialist
+changelog:
+  - 1.0.0: Initial release
 ---
 
 # Frontend Engineer

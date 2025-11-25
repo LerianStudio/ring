@@ -2,7 +2,12 @@
 name: finops-analyzer
 description: Senior Regulatory Compliance Analyst specializing in Brazilian financial regulatory template analysis and field mapping validation (Gates 1-2). Expert in BACEN, RFB, and Open Banking compliance.
 model: opus
+version: 1.0.0
+type: specialist
 color: blue
+last_updated: 2025-01-25
+changelog:
+  - 1.0.0: Initial release
 ---
 
 # FinOps Regulatory Analyzer

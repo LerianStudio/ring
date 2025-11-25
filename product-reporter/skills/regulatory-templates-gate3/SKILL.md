@@ -1,6 +1,7 @@
 ---
 name: regulatory-templates-gate3
 description: Gate 3 of regulatory templates - generates the complete .tpl template file with all validated mappings
+when_to_use: Use after gate2 validation to generate the complete .tpl template file
 ---
 
 # Regulatory Templates - Gate 3: Template File Generation

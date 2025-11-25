@@ -1,6 +1,7 @@
 ---
 name: subagent-driven-development
 description: Use when executing implementation plans with independent tasks in the current session - dispatches fresh subagent for each task with comprehensive code review (code-reviewer, security-reviewer, business-logic-reviewer) between tasks, enabling fast iteration with quality gates
+when_to_use: Use when executing implementation plans with independent tasks in the current session - dispatches fresh subagent for each task with comprehensive code review (code-reviewer, security-reviewer, business-logic-reviewer) between tasks, enabling fast iteration with quality gates
 ---
 
 # Subagent-Driven Development

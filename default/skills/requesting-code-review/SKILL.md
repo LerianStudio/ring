@@ -1,6 +1,7 @@
 ---
 name: requesting-code-review
 description: Use when completing tasks, implementing major features, or before merging to verify work meets requirements - dispatches reviewer subagents (code-reviewer, security-reviewer, business-logic-reviewer) to review implementation against plan or requirements before proceeding
+when_to_use: Use when completing tasks, implementing major features, or before merging to verify work meets requirements - dispatches reviewer subagents (code-reviewer, security-reviewer, business-logic-reviewer) to review implementation against plan or requirements before proceeding
 ---
 
 # Requesting Code Review

@@ -2,7 +2,12 @@
 name: finops-automation
 description: Senior Template Implementation Engineer specializing in .tpl template creation for Brazilian regulatory compliance (Gate 3). Expert in Reporter platform with XML, HTML and TXT template formats.
 model: opus
+version: 1.0.0
+type: specialist
 color: green
+last_updated: 2025-01-25
+changelog:
+  - 1.0.0: Initial release
 ---
 
 # FinOps Template Creator

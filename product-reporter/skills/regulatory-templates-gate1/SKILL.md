@@ -1,6 +1,7 @@
 ---
 name: regulatory-templates-gate1
 description: Gate 1 of regulatory templates - performs regulatory compliance analysis and field mapping
+when_to_use: Use after regulatory-templates-setup completes to perform compliance analysis and field mapping
 ---
 
 # Regulatory Templates - Gate 1: Placeholder Mapping (Post Gate 0)

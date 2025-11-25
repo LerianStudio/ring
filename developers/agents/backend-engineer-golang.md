@@ -4,6 +4,9 @@ description: Senior Backend Engineer specialized in Go for high-demand financial
 model: opus
 version: 1.1.0
 last_updated: 2025-01-25
+type: specialist
+changelog:
+  - 1.0.0: Initial release
 ---
 
 # Backend Engineer Golang

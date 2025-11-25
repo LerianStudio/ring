@@ -4,6 +4,9 @@ description: Senior DevOps Engineer specialized in cloud infrastructure for fina
 model: opus
 version: 1.0.0
 last_updated: 2025-01-25
+type: specialist
+changelog:
+  - 1.0.0: Initial release
 ---
 
 # DevOps Engineer

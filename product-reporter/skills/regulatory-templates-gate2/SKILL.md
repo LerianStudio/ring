@@ -1,6 +1,7 @@
 ---
 name: regulatory-templates-gate2
 description: Gate 2 of regulatory templates - validates uncertain mappings and confirms all field specifications
+when_to_use: Use after gate1 to validate uncertain mappings and confirm field specifications
 ---
 
 # Regulatory Templates - Gate 2: Technical Validation

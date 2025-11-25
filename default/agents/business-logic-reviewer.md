@@ -2,6 +2,7 @@
 name: business-logic-reviewer
 version: 4.1.0
 description: "Correctness Review: reviews domain correctness, business rules, edge cases, and requirements. Uses mental execution to trace code paths and analyzes full file context, not just changes. Runs in parallel with code-reviewer and security-reviewer for fast feedback."
+type: reviewer
 model: opus
 last_updated: 2025-11-23
 changelog:

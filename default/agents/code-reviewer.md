@@ -2,6 +2,7 @@
 name: code-reviewer
 version: 3.0.0
 description: "Foundation Review: Reviews code quality, architecture, design patterns, algorithmic flow, and maintainability. Runs in parallel with business-logic-reviewer and security-reviewer for fast feedback."
+type: reviewer
 model: opus
 last_updated: 2025-11-18
 changelog:

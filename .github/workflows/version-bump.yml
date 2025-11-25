@@ -1,0 +1,337 @@
+name: Version Bump
+
+on:
+  push:
+    branches:
+      - main
+
+# Prevent concurrent version bumps
+concurrency:
+  group: version-bump
+  cancel-in-progress: false
+
+jobs:
+  version-bump:
+    runs-on: ubuntu-latest
+
+    # Explicit minimal permissions
+    permissions:
+      contents: write
+
+    # Skip if commit is from GitHub Actions bot (avoid infinite loops)
+    if: "!contains(github.event.head_commit.message, '[skip-version-bump]')"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history for commit analysis
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Verify jq is available
+        run: jq --version
+
+      - name: Detect changed plugins and bump versions
+        id: bump
+        run: |
+          set -e
+
+          MARKETPLACE_JSON=".claude-plugin/marketplace.json"
+          PLUGINS_CHANGED=false
+          CHANGED_PLUGINS=""
+          HIGHEST_BUMP="none"
+          BUMPED_PLUGINS=""  # Track which plugins were bumped for tag creation
+
+          # Verify marketplace.json exists
+          if [ ! -f "$MARKETPLACE_JSON" ]; then
+            echo "ERROR: $MARKETPLACE_JSON not found"
+            exit 1
+          fi
+
+          # Get plugin directories from marketplace.json
+          PLUGIN_COUNT=$(jq '.plugins | length' "$MARKETPLACE_JSON")
+
+          # Get commits since last version bump (or all commits if none)
+          LAST_BUMP=$(git log --all --grep="\[skip-version-bump\]" -1 --format="%H" 2>/dev/null || echo "")
+
+          if [ -z "$LAST_BUMP" ]; then
+            # No previous version bump, determine safe commit range
+            COMMIT_COUNT=$(git rev-list --count HEAD 2>/dev/null || echo "0")
+
+            if [ "$COMMIT_COUNT" -eq 0 ]; then
+              echo "No commits found, skipping"
+              echo "changed=false" >> $GITHUB_OUTPUT
+              exit 0
+            elif [ "$COMMIT_COUNT" -eq 1 ]; then
+              # Single commit: analyze from empty tree to include first commit
+              EMPTY_TREE=$(git hash-object -t tree /dev/null)
+              COMMIT_RANGE="$EMPTY_TREE..HEAD"
+              echo "Single commit repository, including first commit in analysis"
+            elif [ "$COMMIT_COUNT" -lt 10 ]; then
+              # Multiple commits less than 10: use empty tree to include all
+              EMPTY_TREE=$(git hash-object -t tree /dev/null)
+              COMMIT_RANGE="$EMPTY_TREE..HEAD"
+              echo "Small repository (<10 commits), analyzing all commits"
+            else
+              COMMIT_RANGE="HEAD~10..HEAD"
+            fi
+          else
+            COMMIT_RANGE="$LAST_BUMP..HEAD"
+          fi
+
+          echo "Analyzing commits: $COMMIT_RANGE ($(git rev-list --count $COMMIT_RANGE) commits)"
+
+          # For each plugin in marketplace.json
+          for ((i=0; i<$PLUGIN_COUNT; i++)); do
+            PLUGIN_NAME=$(jq -r ".plugins[$i].name" "$MARKETPLACE_JSON")
+            PLUGIN_SOURCE=$(jq -r ".plugins[$i].source" "$MARKETPLACE_JSON" | sed 's|^\./||')
+
+            echo "Checking plugin: $PLUGIN_NAME (source: $PLUGIN_SOURCE)"
+
+            # Validate source is not null/empty (HIGH severity fix)
+            if [ -z "$PLUGIN_SOURCE" ] || [ "$PLUGIN_SOURCE" = "null" ]; then
+              echo "  ERROR: Plugin $PLUGIN_NAME has missing or null source field"
+              exit 1
+            fi
+
+            # Verify plugin directory exists
+            if [ ! -d "$PLUGIN_SOURCE" ]; then
+              echo "  WARNING: Directory $PLUGIN_SOURCE not found, skipping"
+              continue
+            fi
+
+            # Check if plugin directory has changes (CRITICAL fix: explicit empty check)
+            DIFF_OUTPUT=$(git diff --name-only $COMMIT_RANGE -- "$PLUGIN_SOURCE" 2>/dev/null | grep -v "^docs/" | grep -v "README.md" || true)
+            if [ -n "$DIFF_OUTPUT" ]; then
+              CHANGES=$(echo "$DIFF_OUTPUT" | wc -l | tr -d ' ')
+            else
+              CHANGES=0
+            fi
+
+            if [ "$CHANGES" -gt 0 ]; then
+              echo "  Changes detected: $CHANGES files"
+
+              # Get commits affecting this plugin (full messages for body parsing)
+              FULL_COMMITS=$(git log $COMMIT_RANGE --pretty=format:"%B%n---COMMIT---" -- "$PLUGIN_SOURCE" 2>/dev/null || echo "")
+
+              # Filter out docs: and chore: commits from subjects
+              COMMIT_SUBJECTS=$(git log $COMMIT_RANGE --pretty=format:"%s" -- "$PLUGIN_SOURCE" 2>/dev/null | grep -v "^docs" | grep -v "^chore" || echo "")
+
+              if [ -z "$COMMIT_SUBJECTS" ]; then
+                echo "  Only docs/chore commits, skipping version bump"
+                continue
+              fi
+
+              # Determine version bump type
+              BUMP_TYPE="patch"
+
+              # Check for breaking changes (MAJOR)
+              # Patterns: feat!:, fix!:, refactor!:, BREAKING CHANGE: (in body or subject)
+              if echo "$FULL_COMMITS" | grep -qE "(^[a-z]+(\([^)]+\))?!:|BREAKING[ -]CHANGE:)"; then
+                BUMP_TYPE="major"
+                echo "  Breaking changes detected → MAJOR bump"
+
+                # Track highest bump type across all plugins
+                HIGHEST_BUMP="major"
+              # Check for features (MINOR)
+              elif echo "$COMMIT_SUBJECTS" | grep -qE "^feat(\([^)]+\))?:"; then
+                BUMP_TYPE="minor"
+                echo "  Features detected → MINOR bump"
+
+                # Track highest bump (don't override major)
+                if [ "$HIGHEST_BUMP" != "major" ]; then
+                  HIGHEST_BUMP="minor"
+                fi
+              # Everything else is PATCH
+              else
+                echo "  Fixes/other changes → PATCH bump"
+
+                # Track highest bump (don't override major/minor)
+                if [ "$HIGHEST_BUMP" = "none" ]; then
+                  HIGHEST_BUMP="patch"
+                fi
+              fi
+
+              # Get current version from marketplace.json
+              CURRENT_VERSION=$(jq -r ".plugins[$i].version" "$MARKETPLACE_JSON")
+              echo "  Current version: $CURRENT_VERSION"
+
+              # Validate version format
+              if ! [[ "$CURRENT_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                echo "  ERROR: Invalid version format: $CURRENT_VERSION (expected X.Y.Z)"
+                exit 1
+              fi
+
+              # Parse version
+              IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+
+              # Bump version
+              case $BUMP_TYPE in
+                major)
+                  MAJOR=$((MAJOR + 1))
+                  MINOR=0
+                  PATCH=0
+                  ;;
+                minor)
+                  MINOR=$((MINOR + 1))
+                  PATCH=0
+                  ;;
+                patch)
+                  PATCH=$((PATCH + 1))
+                  ;;
+              esac
+
+              NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+              echo "  New version: $NEW_VERSION"
+
+              # Update version in marketplace.json
+              jq --argjson index "$i" --arg version "$NEW_VERSION" \
+                '.plugins[$index].version = $version' "$MARKETPLACE_JSON" > "${MARKETPLACE_JSON}.tmp"
+
+              # Validate the generated JSON before replacing
+              if jq empty "${MARKETPLACE_JSON}.tmp" 2>/dev/null; then
+                mv "${MARKETPLACE_JSON}.tmp" "$MARKETPLACE_JSON"
+              else
+                echo "  ERROR: Generated invalid JSON"
+                rm -f "${MARKETPLACE_JSON}.tmp"
+                exit 1
+              fi
+
+              # Track changes
+              PLUGINS_CHANGED=true
+              CHANGED_PLUGINS="$CHANGED_PLUGINS\n  - $PLUGIN_NAME: $CURRENT_VERSION → $NEW_VERSION ($BUMP_TYPE)"
+
+              # Track bumped plugins for tag creation (MEDIUM fix)
+              BUMPED_PLUGINS="$BUMPED_PLUGINS $PLUGIN_NAME:$NEW_VERSION"
+
+              # Stage the file
+              git add "$MARKETPLACE_JSON"
+            else
+              echo "  No relevant changes detected"
+            fi
+          done
+
+          # Bump marketplace version if any plugin changed
+          if [ "$PLUGINS_CHANGED" = true ]; then
+            echo "Plugins changed, bumping marketplace version"
+
+            CURRENT_MKT_VERSION=$(jq -r '.version // "0.0.0"' "$MARKETPLACE_JSON")
+            echo "Current marketplace version: $CURRENT_MKT_VERSION"
+
+            # Validate marketplace version format
+            if ! [[ "$CURRENT_MKT_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "WARNING: Invalid marketplace version format: $CURRENT_MKT_VERSION, defaulting to 0.0.0"
+              CURRENT_MKT_VERSION="0.0.0"
+            fi
+
+            # Parse marketplace version
+            IFS='.' read -r MKT_MAJOR MKT_MINOR MKT_PATCH <<< "$CURRENT_MKT_VERSION"
+
+            # Marketplace gets independent MINOR bump (per requirements)
+            MKT_MINOR=$((MKT_MINOR + 1))
+            MKT_PATCH=0
+
+            NEW_MKT_VERSION="$MKT_MAJOR.$MKT_MINOR.$MKT_PATCH"
+            echo "New marketplace version: $NEW_MKT_VERSION"
+
+            # Update marketplace version
+            jq --arg version "$NEW_MKT_VERSION" '.version = $version' "$MARKETPLACE_JSON" > "${MARKETPLACE_JSON}.tmp"
+
+            # Validate JSON before replacing
+            if jq empty "${MARKETPLACE_JSON}.tmp" 2>/dev/null; then
+              mv "${MARKETPLACE_JSON}.tmp" "$MARKETPLACE_JSON"
+            else
+              echo "ERROR: Generated invalid marketplace JSON"
+              rm -f "${MARKETPLACE_JSON}.tmp"
+              exit 1
+            fi
+
+            git add "$MARKETPLACE_JSON"
+
+            # Use random delimiter for security (MEDIUM fix)
+            DELIMITER="EOF_CHANGES_$(date +%s%N 2>/dev/null || echo $RANDOM)"
+
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "changes<<$DELIMITER" >> $GITHUB_OUTPUT
+            echo -e "$CHANGED_PLUGINS" >> $GITHUB_OUTPUT
+            echo "$DELIMITER" >> $GITHUB_OUTPUT
+            echo "highest_bump=$HIGHEST_BUMP" >> $GITHUB_OUTPUT
+            echo "bumped_plugins=$BUMPED_PLUGINS" >> $GITHUB_OUTPUT
+          else
+            echo "No plugin changes requiring version bumps"
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit version bumps
+        if: steps.bump.outputs.changed == 'true'
+        run: |
+          git commit -m "chore: bump versions [skip-version-bump]
+
+          Automated version bumps:
+          ${{ steps.bump.outputs.changes }}
+
+          Co-authored-by: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+
+          git push origin main
+
+      - name: Create release tags
+        if: steps.bump.outputs.changed == 'true'
+        run: |
+          set -e
+
+          # Use tracked bumped plugins from bump step (MEDIUM fix: more reliable)
+          BUMPED_PLUGINS="${{ steps.bump.outputs.bumped_plugins }}"
+
+          if [ -n "$BUMPED_PLUGINS" ]; then
+            # Tag each bumped plugin
+            for entry in $BUMPED_PLUGINS; do
+              PLUGIN_NAME=$(echo "$entry" | cut -d: -f1)
+              VERSION=$(echo "$entry" | cut -d: -f2)
+
+              # Validate plugin name format for security (MEDIUM fix)
+              if ! [[ "$PLUGIN_NAME" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+                echo "ERROR: Invalid plugin name format: $PLUGIN_NAME"
+                exit 1
+              fi
+
+              TAG_NAME="${PLUGIN_NAME}@${VERSION}"
+
+              # Check if tag already exists (avoid overwrite)
+              if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+                echo "Tag $TAG_NAME already exists, skipping"
+                continue
+              fi
+
+              echo "Creating tag: $TAG_NAME"
+              if ! git tag -a "$TAG_NAME" -m "Release $PLUGIN_NAME version $VERSION" 2>/dev/null; then
+                echo "WARNING: Failed to create tag $TAG_NAME (may already exist)"
+                continue
+              fi
+
+              if ! git push origin "$TAG_NAME" 2>/dev/null; then
+                echo "WARNING: Failed to push tag $TAG_NAME"
+              fi
+            done
+          fi
+
+          # Tag marketplace version
+          MARKETPLACE_JSON=".claude-plugin/marketplace.json"
+          MKT_VERSION=$(jq -r '.version' "$MARKETPLACE_JSON")
+          MKT_TAG="marketplace@${MKT_VERSION}"
+
+          # Check if marketplace tag already exists
+          if git rev-parse "$MKT_TAG" >/dev/null 2>&1; then
+            echo "Marketplace tag $MKT_TAG already exists, skipping"
+          else
+            echo "Creating marketplace tag: $MKT_TAG"
+            if ! git tag -a "$MKT_TAG" -m "Release marketplace version $MKT_VERSION" 2>/dev/null; then
+              echo "WARNING: Failed to create marketplace tag (may already exist)"
+            elif ! git push origin "$MKT_TAG" 2>/dev/null; then
+              echo "WARNING: Failed to push marketplace tag"
+            fi
+          fi

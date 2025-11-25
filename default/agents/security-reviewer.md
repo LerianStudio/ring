@@ -2,6 +2,7 @@
 name: security-reviewer
 version: 3.0.0
 description: "Safety Review: Reviews vulnerabilities, authentication, input validation, and OWASP risks. Runs in parallel with code-reviewer and business-logic-reviewer for fast feedback."
+type: reviewer
 model: opus
 last_updated: 2025-11-18
 changelog:

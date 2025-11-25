@@ -8,6 +8,10 @@ Write-Host ""
 
 $MARKETPLACE_SOURCE = "lerianstudio/ring"
 $MARKETPLACE_NAME = "ring"
+$MARKETPLACE_JSON_URL = "https://raw.githubusercontent.com/lerianstudio/ring/main/.claude-plugin/marketplace.json"
+
+# Ensure TLS 1.2+ is used for secure connections
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 Write-Host "📦 Adding Ring marketplace from GitHub..."
 try {
@@ -56,66 +60,104 @@ Write-Host "================================================"
 Write-Host "Additional Plugins Available"
 Write-Host "================================================"
 Write-Host ""
-Write-Host "Active plugins:"
-Write-Host "  • ring-developers - 5 specialized developer agents (Go backend, DevOps, Frontend, QA, SRE)"
-Write-Host "  • ring-product-reporter - Product Reporter specialized agents and skills"
-Write-Host ""
-Write-Host "Reserved (coming soon):"
-Write-Host "  • ring-product-flowker"
-Write-Host "  • ring-product-matcher"
-Write-Host "  • ring-product-midaz"
-Write-Host "  • ring-product-tracer"
-Write-Host "  • ring-team-devops"
-Write-Host "  • ring-team-ops"
-Write-Host "  • ring-team-pmm"
-Write-Host "  • ring-team-product"
-Write-Host ""
+Write-Host "📡 Fetching plugin list from marketplace..."
 
-$installDevelopers = Read-Host "Would you like to install ring-developers? (y/N)"
+# Download and parse marketplace.json dynamically
+try {
+    $marketplaceData = Invoke-RestMethod -Uri $MARKETPLACE_JSON_URL -TimeoutSec 30 -ErrorAction Stop
 
-if ($installDevelopers -match "^[Yy]$") {
-    Write-Host ""
-    Write-Host "🔧 Installing/updating ring-developers..."
-    try {
-        & claude plugin install ring-developers 2>&1 | Out-Null
-        Write-Host "✅ ring-developers ready"
-    } catch {
-        Write-Host "⚠️  Failed to install ring-developers (might not be published yet)"
-        $installDevelopers = "n"
+    # Validate JSON structure
+    if (-not ($marketplaceData.PSObject.Properties.Name -contains 'plugins') -or
+        $marketplaceData.plugins -isnot [System.Array]) {
+        Write-Host "⚠️  Invalid marketplace data structure"
+        throw "Invalid structure"
     }
-}
 
-$installReporter = Read-Host "Would you like to install ring-product-reporter? (y/N)"
+    if ($marketplaceData -and $marketplaceData.plugins) {
+        # Track installations
+        $installedPlugins = @{}
 
-if ($installReporter -match "^[Yy]$") {
-    Write-Host ""
-    Write-Host "🔧 Installing/updating ring-product-reporter..."
-    try {
-        & claude plugin install ring-product-reporter 2>&1 | Out-Null
-        Write-Host "✅ ring-product-reporter ready"
-    } catch {
-        Write-Host "⚠️  Failed to install ring-product-reporter (might not be published yet)"
-        $installReporter = "n"
+        # Loop through each plugin
+        foreach ($plugin in $marketplaceData.plugins) {
+            $pluginName = $plugin.name
+            $pluginDesc = $plugin.description
+
+            # Validate plugin name format (alphanumeric, underscore, hyphen only)
+            if ($pluginName -notmatch '^[a-zA-Z0-9_-]+$') {
+                Write-Host "  ⚠️  Skipping invalid plugin name: $pluginName"
+                continue
+            }
+
+            # Skip ring-default (already installed)
+            if ($pluginName -eq "ring-default") {
+                continue
+            }
+
+            # Sanitize description for display (remove potential control characters)
+            $pluginDesc = $pluginDesc -replace '[^\x20-\x7E]', ''
+
+            Write-Host ""
+            Write-Host "📦 $pluginName"
+            Write-Host "   $pluginDesc"
+            Write-Host ""
+
+            $installChoice = Read-Host "Would you like to install $pluginName? (y/N)"
+
+            if ($installChoice -match "^[Yy]$") {
+                Write-Host "🔧 Installing/updating $pluginName..."
+                try {
+                    & claude plugin install $pluginName 2>&1 | Out-Null
+                    Write-Host "✅ $pluginName ready"
+                    $installedPlugins[$pluginName] = "installed"
+                } catch {
+                    Write-Host "⚠️  Failed to install $pluginName (might not be published yet)"
+                    $installedPlugins[$pluginName] = "failed"
+                }
+            } else {
+                $installedPlugins[$pluginName] = "skipped"
+            }
+        }
+
+        Write-Host ""
+        Write-Host "================================================"
+        Write-Host "✨ Setup Complete!"
+        Write-Host "================================================"
+        Write-Host ""
+        Write-Host "Installed plugins:"
+        Write-Host "  ✓ ring-default (core - required)"
+
+        # Show installation status for each plugin
+        foreach ($pluginName in $installedPlugins.Keys) {
+            $status = $installedPlugins[$pluginName]
+            if ($status -eq "installed") {
+                Write-Host "  ✓ $pluginName"
+            } elseif ($status -eq "failed") {
+                Write-Host "  ⚠ $pluginName (installation failed)"
+            } else {
+                Write-Host "  ○ $pluginName (not installed)"
+            }
+        }
+    } else {
+        Write-Host "⚠️  Could not parse marketplace data, showing static list..."
+        Write-Host ""
+        Write-Host "Available plugins (manual installation required):"
+        Write-Host "  • ring-developers - Developer role agents"
+        Write-Host "  • ring-product-reporter - FinOps & regulatory compliance"
+        Write-Host "  • ring-team-product - Product planning workflows"
+        Write-Host ""
+        Write-Host "To install manually: claude plugin install <plugin-name>"
     }
+} catch {
+    Write-Host "⚠️  Could not fetch marketplace data, showing static list..."
+    Write-Host ""
+    Write-Host "Available plugins (manual installation required):"
+    Write-Host "  • ring-developers - Developer role agents"
+    Write-Host "  • ring-product-reporter - FinOps & regulatory compliance"
+    Write-Host "  • ring-team-product - Product planning workflows"
+    Write-Host ""
+    Write-Host "To install manually: claude plugin install <plugin-name>"
 }
 
-Write-Host ""
-Write-Host "================================================"
-Write-Host "✨ Setup Complete!"
-Write-Host "================================================"
-Write-Host ""
-Write-Host "Active plugins:"
-Write-Host "  ✓ ring-default (34 skills, 7 commands, 6 agents)"
-if ($installDevelopers -match "^[Yy]$") {
-    Write-Host "  ✓ ring-developers (5 developer agents)"
-} else {
-    Write-Host "  ○ ring-developers (not installed)"
-}
-if ($installReporter -match "^[Yy]$") {
-    Write-Host "  ✓ ring-product-reporter (Product Reporter agents & skills)"
-} else {
-    Write-Host "  ○ ring-product-reporter (not installed)"
-}
 Write-Host ""
 Write-Host "Next steps:"
 Write-Host "  1. Restart Claude Code or start a new session"

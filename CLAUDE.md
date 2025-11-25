@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Ring is a comprehensive skills library and workflow system for AI agents that enforces proven software engineering practices through mandatory workflows, parallel code review, and systematic pre-development planning. Currently implemented as a Claude Code plugin marketplace with **4 active plugins** and **6 reserved plugin slots**, the skills are agent-agnostic and reusable across different AI systems.
 
 **Active Plugins:**
-- **ring-default** (v0.6.1): 20 core skills, 8 slash commands, 4 specialized agents
+- **ring-default** (v0.6.1): 20 core skills, 8 slash commands, 5 specialized agents
 - **ring-developers** (v0.0.1): 5 specialized developer agents (Go backend, DevOps, Frontend, QA, SRE)
 - **ring-product-reporter** (v0.0.1): 5 regulatory skills, 2 FinOps agents
 - **ring-team-product** (v0.0.1): 8 product planning skills
@@ -42,11 +42,12 @@ ring/                                  # Monorepo root
 │   │   ├── systematic-debugging/     # 4-phase root cause analysis
 │   │   ├── using-ring/              # MANDATORY skill discovery (non-negotiable)
 │   │   └── shared-patterns/         # Reusable: state-tracking, failure-recovery
-│   ├── agents/                      # 4 specialized agents
+│   ├── agents/                      # 5 specialized agents
 │   │   ├── code-reviewer.md         # Foundation review (architecture, patterns)
 │   │   ├── business-logic-reviewer.md # Correctness (requirements, edge cases)
 │   │   ├── security-reviewer.md     # Safety (OWASP, auth, validation)
-│   │   └── write-plan.md            # Implementation planning
+│   │   ├── write-plan.md            # Implementation planning
+│   │   └── codebase-explorer.md     # Deep architecture analysis (Opus)
 │   ├── commands/                    # 8 slash commands
 │   │   ├── review.md               # /ring:review - dispatch 3 parallel reviewers
 │   │   ├── brainstorm.md           # /ring:brainstorm - interactive design

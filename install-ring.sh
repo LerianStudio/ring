@@ -1,6 +1,11 @@
 #!/bin/bash
 set -e
 
+# Check bash version for associative array support
+if ((BASH_VERSINFO[0] < 4)); then
+    echo "⚠️  Bash 4+ required for full functionality. Some features may not work."
+fi
+
 echo "================================================"
 echo "Ring Plugin Marketplace Installer"
 echo "================================================"
@@ -8,6 +13,7 @@ echo ""
 
 MARKETPLACE_SOURCE="lerianstudio/ring"
 MARKETPLACE_NAME="ring"
+MARKETPLACE_JSON_URL="https://raw.githubusercontent.com/lerianstudio/ring/main/.claude-plugin/marketplace.json"
 
 echo "📦 Adding Ring marketplace from GitHub..."
 set +e
@@ -18,7 +24,7 @@ set -e
 if echo "$marketplace_output" | grep -q "already installed"; then
     echo "ℹ️  Ring marketplace already installed"
     read -p "Would you like to update it? (Y/n): " update_marketplace || update_marketplace=""
-    
+
     if [[ ! "$update_marketplace" =~ ^[Nn]$ ]]; then
         echo "🔄 Updating Ring marketplace..."
         if claude plugin marketplace update "$MARKETPLACE_NAME"; then
@@ -51,64 +57,114 @@ echo "================================================"
 echo "Additional Plugins Available"
 echo "================================================"
 echo ""
-echo "Active plugins:"
-echo "  • ring-developers - 5 specialized developer agents (Go backend, DevOps, Frontend, QA, SRE)"
-echo "  • ring-product-reporter - Product Reporter specialized agents and skills"
-echo ""
-echo "Reserved (coming soon):"
-echo "  • ring-product-flowker"
-echo "  • ring-product-matcher"
-echo "  • ring-product-midaz"
-echo "  • ring-product-tracer"
-echo "  • ring-team-devops"
-echo "  • ring-team-ops"
-echo "  • ring-team-pmm"
-echo "  • ring-team-product"
-echo ""
+echo "📡 Fetching plugin list from marketplace..."
 
-read -p "Would you like to install ring-developers? (y/N): " install_developers || install_developers=""
+# Download and parse marketplace.json dynamically
+if command -v curl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
+    MARKETPLACE_DATA=$(curl -fsSL --connect-timeout 10 --max-time 30 "$MARKETPLACE_JSON_URL" 2>/dev/null)
 
-if [[ "$install_developers" =~ ^[Yy]$ ]]; then
-    echo ""
-    echo "🔧 Installing/updating ring-developers..."
-    if claude plugin install ring-developers 2>&1; then
-        echo "✅ ring-developers ready"
-    else
-        echo "⚠️  Failed to install ring-developers (might not be published yet)"
-        install_developers="n"
+    if [ -n "$MARKETPLACE_DATA" ]; then
+        # Validate JSON structure
+        if ! echo "$MARKETPLACE_DATA" | jq -e '.plugins | type == "array"' >/dev/null 2>&1; then
+            echo "⚠️  Invalid marketplace data structure"
+            MARKETPLACE_DATA=""
+        fi
     fi
-fi
 
-read -p "Would you like to install ring-product-reporter? (y/N): " install_reporter || install_reporter=""
+    if [ -n "$MARKETPLACE_DATA" ]; then
+        # Get list of plugins (excluding ring-default which is already installed)
+        PLUGIN_COUNT=$(echo "$MARKETPLACE_DATA" | jq '.plugins | length')
 
-if [[ "$install_reporter" =~ ^[Yy]$ ]]; then
-    echo ""
-    echo "🔧 Installing/updating ring-product-reporter..."
-    if claude plugin install ring-product-reporter 2>&1; then
-        echo "✅ ring-product-reporter ready"
-    else
-        echo "⚠️  Failed to install ring-product-reporter (might not be published yet)"
-        install_reporter="n"
+        # Validate PLUGIN_COUNT is numeric
+        if ! [[ "$PLUGIN_COUNT" =~ ^[0-9]+$ ]]; then
+            echo "⚠️  Could not determine plugin count"
+            MARKETPLACE_DATA=""
+        fi
     fi
+
+    if [ -n "$MARKETPLACE_DATA" ]; then
+
+        # Track installations
+        declare -A INSTALLED_PLUGINS
+
+        # Loop through each plugin
+        for ((i=0; i<$PLUGIN_COUNT; i++)); do
+            PLUGIN_NAME=$(echo "$MARKETPLACE_DATA" | jq -r ".plugins[$i].name")
+            PLUGIN_DESC=$(echo "$MARKETPLACE_DATA" | jq -r ".plugins[$i].description")
+
+            # Validate plugin name format (alphanumeric, underscore, hyphen only)
+            if [[ ! "$PLUGIN_NAME" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+                echo "  ⚠️  Skipping invalid plugin name: $PLUGIN_NAME"
+                continue
+            fi
+
+            # Skip ring-default (already installed)
+            if [ "$PLUGIN_NAME" = "ring-default" ]; then
+                continue
+            fi
+
+            echo ""
+            echo "📦 $PLUGIN_NAME"
+            echo "   $PLUGIN_DESC"
+            echo ""
+
+            read -p "Would you like to install $PLUGIN_NAME? (y/N): " install_choice || install_choice=""
+
+            if [[ "$install_choice" =~ ^[Yy]$ ]]; then
+                echo "🔧 Installing/updating $PLUGIN_NAME..."
+                if claude plugin install "$PLUGIN_NAME" 2>&1; then
+                    echo "✅ $PLUGIN_NAME ready"
+                    INSTALLED_PLUGINS["$PLUGIN_NAME"]="installed"
+                else
+                    echo "⚠️  Failed to install $PLUGIN_NAME (might not be published yet)"
+                    INSTALLED_PLUGINS["$PLUGIN_NAME"]="failed"
+                fi
+            else
+                INSTALLED_PLUGINS["$PLUGIN_NAME"]="skipped"
+            fi
+        done
+
+        echo ""
+        echo "================================================"
+        echo "✨ Setup Complete!"
+        echo "================================================"
+        echo ""
+        echo "Installed plugins:"
+        echo "  ✓ ring-default (core - required)"
+
+        # Show installation status for each plugin
+        for plugin_name in "${!INSTALLED_PLUGINS[@]}"; do
+            status="${INSTALLED_PLUGINS[$plugin_name]}"
+            if [ "$status" = "installed" ]; then
+                echo "  ✓ $plugin_name"
+            elif [ "$status" = "failed" ]; then
+                echo "  ⚠ $plugin_name (installation failed)"
+            else
+                echo "  ○ $plugin_name (not installed)"
+            fi
+        done
+
+    else
+        echo "⚠️  Could not fetch marketplace data, showing static list..."
+        echo ""
+        echo "Available plugins (manual installation required):"
+        echo "  • ring-developers - Developer role agents"
+        echo "  • ring-product-reporter - FinOps & regulatory compliance"
+        echo "  • ring-team-product - Product planning workflows"
+        echo ""
+        echo "To install manually: claude plugin install <plugin-name>"
+    fi
+else
+    echo "⚠️  curl or jq not found, showing static list..."
+    echo ""
+    echo "Available plugins (manual installation required):"
+    echo "  • ring-developers - Developer role agents"
+    echo "  • ring-product-reporter - FinOps & regulatory compliance"
+    echo "  • ring-team-product - Product planning workflows"
+    echo ""
+    echo "To install manually: claude plugin install <plugin-name>"
 fi
 
-echo ""
-echo "================================================"
-echo "✨ Setup Complete!"
-echo "================================================"
-echo ""
-echo "Active plugins:"
-echo "  ✓ ring-default (34 skills, 7 commands, 6 agents)"
-if [[ "$install_developers" =~ ^[Yy]$ ]]; then
-    echo "  ✓ ring-developers (5 developer agents)"
-else
-    echo "  ○ ring-developers (not installed)"
-fi
-if [[ "$install_reporter" =~ ^[Yy]$ ]]; then
-    echo "  ✓ ring-product-reporter (Product Reporter agents & skills)"
-else
-    echo "  ○ ring-product-reporter (not installed)"
-fi
 echo ""
 echo "Next steps:"
 echo "  1. Restart Claude Code or start a new session"

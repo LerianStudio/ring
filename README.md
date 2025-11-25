@@ -16,7 +16,7 @@ Without Ring, AI assistants often:
 Ring solves this by:
 - **Enforcing proven workflows** - Test-driven development, systematic debugging, proper planning
 - **Providing 33 specialized skills** - From brainstorming to production deployment (20 core + 5 FinOps + 8 product planning)
-- **11 specialized agents** - 4 review/planning agents + 5 developer role agents + 2 FinOps agents
+- **12 specialized agents** - 5 review/planning agents + 5 developer role agents + 2 FinOps agents
 - **Automating skill discovery** - Skills load automatically at session start
 - **Preventing common failures** - Built-in anti-patterns and mandatory checklists
 
@@ -73,6 +73,7 @@ Runs all 3 reviewers simultaneously (Code, Business, Security) - aggregates find
 - `business-logic-reviewer` - Correctness review (domain logic, requirements, edge cases)
 - `security-reviewer` - Safety review (vulnerabilities, OWASP, authentication)
 - `write-plan` - Implementation planning agent
+- `codebase-explorer` - Deep architecture analysis (Opus-powered, complements built-in Explore)
 - Use `/ring:review` command to orchestrate parallel review workflow
 
 **Developer Agents (developers plugin):**
@@ -309,11 +310,12 @@ ring/                                  # Monorepo root
 │   │   ├── hooks.json              # Hook configuration
 │   │   ├── session-start.sh        # Loads skills at startup
 │   │   └── generate-skills-ref.py  # Auto-generates quick reference
-│   ├── agents/                      # 4 specialized agents
+│   ├── agents/                      # 5 specialized agents
 │   │   ├── code-reviewer.md        # Foundation review (parallel)
 │   │   ├── business-logic-reviewer.md  # Correctness review (parallel)
 │   │   ├── security-reviewer.md    # Safety review (parallel)
-│   │   └── write-plan.md           # Implementation planning
+│   │   ├── write-plan.md           # Implementation planning
+│   │   └── codebase-explorer.md    # Deep architecture analysis (Opus)
 │   ├── lib/                        # Infrastructure utilities (9 scripts)
 │   └── docs/                       # Documentation
 ├── developers/                      # Developer Agents plugin (ring-developers v0.0.1)
