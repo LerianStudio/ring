@@ -36,8 +36,8 @@ if command -v claude &> /dev/null && command -v git &> /dev/null; then
             claude plugin install ring-default &> /dev/null || true
             claude plugin install ring-developers &> /dev/null || true
             claude plugin install ring-product-reporter &> /dev/null || true
-            
-            update_message="<system-reminder>\n🔄 **IMPORTANT: Ring marketplace was updated to latest version!**\n\n⚠️  **ACTION REQUIRED:** Please restart your Claude session to load the new changes.\n   • Type 'clear' in the CLI, or\n   • Restart Claude Code entirely\n\nNew skills, agents, and improvements are now available after restart.\n</system-reminder>\n\n"
+
+            update_message="🔄 **IMPORTANT: Ring marketplace was updated to latest version!**\n\n⚠️  **ACTION REQUIRED:** Please restart your Claude session to load the new changes.\n   • Type 'clear' in the CLI, or\n   • Restart Claude Code entirely\n\nNew skills, agents, and improvements are now available after restart."
         fi
     else
         # Marketplace not found, just run updates silently without message
@@ -82,14 +82,28 @@ overview_escaped=$(echo "$skills_overview" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g'
 using_ring_escaped=$(echo "$using_ring_content" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | awk '{printf "%s\\n", $0}')
 update_message_escaped=$(echo -e "$update_message" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | awk '{printf "%s\\n", $0}')
 
-# Output context injection as JSON
-cat <<EOF
+# Build JSON output with conditional userMessage field
+if [ -n "$update_message" ]; then
+  # Include userMessage if marketplace was updated
+  cat <<EOF
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "${update_message_escaped}<ring-skills-system>\n${overview_escaped}\n\n---\n\n**MANDATORY WORKFLOWS:**\n\n${using_ring_escaped}\n</ring-skills-system>"
+    "userMessage": "${update_message_escaped}",
+    "additionalContext": "<ring-skills-system>\n${overview_escaped}\n\n---\n\n**MANDATORY WORKFLOWS:**\n\n${using_ring_escaped}\n</ring-skills-system>"
   }
 }
 EOF
+else
+  # No userMessage if no update occurred
+  cat <<EOF
+{
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "additionalContext": "<ring-skills-system>\n${overview_escaped}\n\n---\n\n**MANDATORY WORKFLOWS:**\n\n${using_ring_escaped}\n</ring-skills-system>"
+  }
+}
+EOF
+fi
 
 exit 0

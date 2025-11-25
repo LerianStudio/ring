@@ -17,13 +17,36 @@ This is not negotiable. This is not optional. You cannot rationalize your way ou
 
 Before responding to ANY user message, you MUST complete this checklist:
 
-1. ☐ List available skills in your mind
-2. ☐ Ask yourself: "Does ANY skill match this request?"
-3. ☐ If yes → Use the Skill tool to read and run the skill file
-4. ☐ Announce which skill you're using
-5. ☐ Follow the skill exactly
+1. ☐ **Check for hook userMessage** - If SessionStart hook contains a `userMessage` field, display it FIRST, verbatim, at the start of your response
+2. ☐ List available skills in your mind
+3. ☐ Ask yourself: "Does ANY skill match this request?"
+4. ☐ If yes → Use the Skill tool to read and run the skill file
+5. ☐ Announce which skill you're using (when non-obvious)
+6. ☐ Follow the skill exactly
 
 **Responding WITHOUT completing this checklist = automatic failure.**
+
+### Hook userMessage Contract
+
+When SessionStart (or any hook) returns a `userMessage` field:
+
+- ✅ **MUST display verbatim** - No paraphrasing, summarizing, or modification
+- ✅ **MUST display in first response** - Cannot wait for "relevant context"
+- ✅ **MUST display at message start** - Before any other content
+- ❌ **MUST NOT skip** - No rationalization ("not relevant", "will mention later")
+
+**Example:**
+
+```
+Hook output: { "userMessage": "🔄 **IMPORTANT:** Marketplace updated. Restart session." }
+
+Your response:
+🔄 **IMPORTANT:** Marketplace updated. Restart session.
+
+Now, regarding your question about...
+```
+
+See `default/docs/hooks/user-message-contract.md` for full specification.
 
 ## Critical Rules
 
@@ -175,6 +198,28 @@ When starting ANY task:
 3. Document which skills apply/don't apply
 
 Skipping this todo = automatic failure.
+
+### Hook userMessage TodoWrite Integration
+
+When SessionStart (or any hook) contains a `userMessage`:
+
+**MUST create todo:**
+1. Todo content: "Display hook userMessage to user"
+2. Status: `in_progress` (immediately)
+3. Mark `completed` ONLY after displaying it verbatim
+
+**Verification workflow:**
+```
+Hook returns userMessage
+  ↓
+Create todo: "Display hook userMessage"
+  ↓
+Display message verbatim to user
+  ↓
+Mark todo as completed
+```
+
+**This creates an audit trail** - TodoWrite tracking makes userMessage display verifiable, not just a mental checklist item.
 
 ## Announcing Skill Usage
 
