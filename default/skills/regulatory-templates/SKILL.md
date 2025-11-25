@@ -15,10 +15,15 @@ description: Use when mapping Brazilian regulatory templates (BACEN CADOCs, e-Fi
 - `regulatory-templates-gate2` - Technical validation of mappings
 - `regulatory-templates-gate3` - Template file generation (.tpl)
 
-**Template Specifications:** All template specifications are dynamically loaded within gates from centralized configurations for:
-- BACEN CADOCs (4010, 4016, 4111)
-- RFB (e-Financeira, DIMP)
-- Open Banking (APIX)
+**Template Specifications:** All template specifications are dynamically loaded within gates from centralized configurations. Templates are organized by regulatory authority with cascading selection:
+
+**BACEN (Banco Central):**
+- **CADOC:** 4010 (Cadastro), 4016 (Crédito), 4111 (Câmbio)
+- **APIX:** 001 (Dados Cadastrais), 002 (Contas e Transações)
+
+**RFB (Receita Federal):**
+- **e-Financeira:** evtCadDeclarante, evtAberturaeFinanceira, evtFechamentoeFinanceira, evtMovOpFin, evtMovPP, evtMovOpFinAnual
+- **DIMP:** v10 (Movimentação Patrimonial)
 
 **REQUIRED AGENTS:** The sub-skills dispatch specialized agents:
 - `finops-analyzer` - For Gates 1-2 and Discussion (regulatory analysis and validation)

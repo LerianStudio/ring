@@ -25,49 +25,33 @@ description: Initial setup for regulatory templates - handles template selection
 
 ## Setup Steps
 
-### Step 1: Template Selection
+### Step 1: Regulatory Authority Selection
 
-Use `AskUserQuestion` tool to present template selection:
+Use `AskUserQuestion` tool to present regulatory authority selection:
 
 ```javascript
 AskUserQuestion({
   questions: [
     {
-      question: "Which regulatory template do you want to create?",
-      header: "Template",
+      question: "Which regulatory authority template do you want to create?",
+      header: "Authority",
       multiSelect: false,
       options: [
         {
-          label: "CADOC 4010",
-          description: "BACEN - Informações de Cadastro (Cadastral Information)"
+          label: "CADOC",
+          description: "BACEN - Cadastro de Clientes do SFN (select specific document next)"
         },
         {
-          label: "CADOC 4016",
-          description: "BACEN - Informações de Operações de Crédito (Credit Operations)"
-        },
-        {
-          label: "CADOC 4111",
-          description: "BACEN - Operações de Câmbio (Foreign Exchange Operations)"
-        },
-        {
-          label: "e-Financeira - Movement",
-          description: "RFB - Movimento de Operações Financeiras (Financial Movement)"
-        },
-        {
-          label: "e-Financeira - Private Pension",
-          description: "RFB - Eventos de Previdência Privada (Private Pension Events)"
+          label: "e-Financeira",
+          description: "RFB - SPED e-Financeira (select specific event next)"
         },
         {
           label: "DIMP",
           description: "RFB - Declaração de Informações sobre Movimentação Patrimonial"
         },
         {
-          label: "APIX 001",
-          description: "BACEN - Open Banking - Dados Cadastrais (Registration Data)"
-        },
-        {
-          label: "APIX 002",
-          description: "BACEN - Open Banking - Contas e Transações (Accounts & Transactions)"
+          label: "APIX",
+          description: "BACEN - Open Banking API (select specific API next)"
         }
       ]
     }
@@ -75,27 +59,319 @@ AskUserQuestion({
 })
 ```
 
+---
+
+### Step 1.1: Template Selection (Conditional by Authority)
+
+**Based on authority selected, show specific template options:**
+
+#### If "CADOC" selected:
+
+```javascript
+AskUserQuestion({
+  questions: [
+    {
+      question: "Which CADOC document do you want to create?",
+      header: "CADOC",
+      multiSelect: false,
+      options: [
+        {
+          label: "4010",
+          description: "Informações de Cadastro - Cadastral Information"
+        },
+        {
+          label: "4016",
+          description: "Informações de Operações de Crédito - Credit Operations"
+        },
+        {
+          label: "4111",
+          description: "Operações de Câmbio - Foreign Exchange Operations"
+        }
+      ]
+    }
+  ]
+})
+```
+
+**CADOC Template Details:**
+
+| Code | Name | Description | Frequency |
+|------|------|-------------|-----------|
+| 4010 | Informações de Cadastro | Client cadastral data | Monthly |
+| 4016 | Operações de Crédito | Credit operation details | Monthly |
+| 4111 | Operações de Câmbio | Foreign exchange operations | Daily |
+
+---
+
+#### If "e-Financeira" selected:
+
+```javascript
+AskUserQuestion({
+  questions: [
+    {
+      question: "Which e-Financeira event do you want to create?",
+      header: "Event",
+      multiSelect: false,
+      options: [
+        {
+          label: "evtCadDeclarante",
+          description: "Cadastro do Declarante - Entity registration (GIIN, FATCA/CRS)"
+        },
+        {
+          label: "evtAberturaeFinanceira",
+          description: "Abertura e-Financeira - Opens reporting period (semester)"
+        },
+        {
+          label: "evtFechamentoeFinanceira",
+          description: "Fechamento e-Financeira - Closes period and consolidates totals"
+        },
+        {
+          label: "evtMovOpFin",
+          description: "Movimento de Operações Financeiras - Semestral financial movements"
+        }
+      ]
+    }
+  ]
+})
+
+// If user selects "Other", show remaining events:
+AskUserQuestion({
+  questions: [
+    {
+      question: "Select additional e-Financeira event type:",
+      header: "Event",
+      multiSelect: false,
+      options: [
+        {
+          label: "evtMovPP",
+          description: "Movimento de Previdência Privada - Private pension (PGBL, VGBL)"
+        },
+        {
+          label: "evtMovOpFinAnual",
+          description: "Movimento de Operações Financeiras Anual - Annual consolidated"
+        }
+      ]
+    }
+  ]
+})
+```
+
+**e-Financeira Event Details:**
+
+| Event Code | Event Name | Module | Frequency |
+|------------|------------|--------|-----------|
+| evtCadDeclarante | Cadastro do Declarante | Structural | Per Period |
+| evtAberturaeFinanceira | Abertura e-Financeira | Structural | Semestral |
+| evtFechamentoeFinanceira | Fechamento e-Financeira | Structural | Semestral |
+| evtMovOpFin | Mov. Operações Financeiras | Financial Operations | Semestral |
+| evtMovPP | Mov. Previdência Privada | Private Pension | Semestral |
+| evtMovOpFinAnual | Mov. Operações Fin. Anual | Financial Operations | Annual |
+
+---
+
+#### If "DIMP" selected:
+
+```javascript
+AskUserQuestion({
+  questions: [
+    {
+      question: "Which DIMP version do you want to create?",
+      header: "DIMP",
+      multiSelect: false,
+      options: [
+        {
+          label: "v10",
+          description: "DIMP Versão 10 - Current version (Movimentação Patrimonial)"
+        }
+      ]
+    }
+  ]
+})
+```
+
+**DIMP Template Details:**
+
+| Version | Name | Description | Frequency |
+|---------|------|-------------|-----------|
+| v10 | DIMP v10 | Declaração de Informações sobre Movimentação Patrimonial | Annual |
+
+---
+
+#### If "APIX" selected:
+
+```javascript
+AskUserQuestion({
+  questions: [
+    {
+      question: "Which APIX (Open Banking) API do you want to create?",
+      header: "APIX",
+      multiSelect: false,
+      options: [
+        {
+          label: "001",
+          description: "Dados Cadastrais - Registration/Customer Data API"
+        },
+        {
+          label: "002",
+          description: "Contas e Transações - Accounts & Transactions API"
+        }
+      ]
+    }
+  ]
+})
+```
+
+**APIX Template Details:**
+
+| Code | Name | Description | Type |
+|------|------|-------------|------|
+| 001 | Dados Cadastrais | Customer registration data | REST API |
+| 002 | Contas e Transações | Account balances and transactions | REST API |
+
+---
+
+### Selection Flow Diagram
+
+```
+┌─────────────────────────────────────┐
+│ Step 1: Select Authority            │
+│ ○ CADOC (BACEN)                     │
+│ ○ e-Financeira (RFB)                │
+│ ○ DIMP (RFB)                        │
+│ ○ APIX (BACEN)                      │
+└──────────────┬──────────────────────┘
+               │
+    ┌──────────┼──────────┬───────────┐
+    ▼          ▼          ▼           ▼
+┌────────┐ ┌────────┐ ┌────────┐ ┌────────┐
+│ CADOC  │ │e-Financ│ │  DIMP  │ │  APIX  │
+│────────│ │────────│ │────────│ │────────│
+│○ 4010  │ │○ evtCad│ │○ v10   │ │○ 001   │
+│○ 4016  │ │○ evtAbe│ │        │ │○ 002   │
+│○ 4111  │ │○ evtFec│ │        │ │        │
+│        │ │○ evtMov│ │        │ │        │
+│        │ │○ evtPP │ │        │ │        │
+│        │ │○ evtAnu│ │        │ │        │
+└────────┘ └────────┘ └────────┘ └────────┘
+```
+
 **Capture and extract:**
-- Template name (e.g., "CADOC 4010")
-- Template code (e.g., "4010")
-- Regulatory authority (BACEN, RFB)
-- Template type for context
+- Authority (BACEN, RFB)
+- Template category (CADOC, e-Financeira, DIMP, APIX)
+- Template code (e.g., "4010", "evtMovOpFin", "v10", "001")
+- Template name (full descriptive name)
+- Additional metadata based on template type
 
 ### Step 2: Optional Deadline Input
 
 If not provided by user, use standard deadline for the template type.
 
-### Step 3: Initialize Context Object
+### Step 3: Check Dictionary Status and Alert User
 
-Create and return the complete initial context:
+**CRITICAL: Before initializing context, check if template has a data dictionary:**
 
 ```javascript
+// Dictionary status check - MANDATORY
+// STANDARDIZED DICTIONARY PATH
+const DICTIONARY_BASE_PATH = "~/.claude/docs/regulatory/dictionaries";
+
+const TEMPLATES_WITH_DICTIONARY = {
+  "CADOC_4010": `${DICTIONARY_BASE_PATH}/cadoc-4010.yaml`,
+  "CADOC_4016": `${DICTIONARY_BASE_PATH}/cadoc-4016.yaml`,
+  "APIX_001": `${DICTIONARY_BASE_PATH}/apix-001.yaml`,
+  "EFINANCEIRA_evtCadDeclarante": `${DICTIONARY_BASE_PATH}/efinanceira-evtCadDeclarante.yaml`
+};
+
+const TEMPLATES_WITHOUT_DICTIONARY = [
+  "CADOC_4111",
+  "APIX_002",
+  "EFINANCEIRA_evtAberturaeFinanceira",
+  "EFINANCEIRA_evtFechamentoeFinanceira",
+  "EFINANCEIRA_evtMovOpFin",
+  "EFINANCEIRA_evtMovPP",
+  "EFINANCEIRA_evtMovOpFinAnual",
+  "DIMP_v10"
+];
+
+function checkDictionaryStatus(templateKey) {
+  if (TEMPLATES_WITH_DICTIONARY[templateKey]) {
+    return {
+      has_dictionary: true,
+      dictionary_path: TEMPLATES_WITH_DICTIONARY[templateKey],
+      validation_mode: "automatic"
+    };
+  } else {
+    return {
+      has_dictionary: false,
+      dictionary_path: null,
+      validation_mode: "interactive"
+    };
+  }
+}
+```
+
+**If template has NO dictionary, alert user with AskUserQuestion:**
+
+```javascript
+// Alert user about interactive validation requirement
+if (!dictionaryStatus.has_dictionary) {
+  await AskUserQuestion({
+    questions: [{
+      question: `⚠️ Template '${templateSelected}' does NOT have a pre-configured data dictionary.\n\n` +
+                `This means you will need to MANUALLY VALIDATE each field mapping in Gate 1.\n\n` +
+                `The process will:\n` +
+                `1. Query API schemas (Midaz, CRM)\n` +
+                `2. Suggest mappings for each regulatory field\n` +
+                `3. Ask YOUR APPROVAL via selection boxes or custom typing\n` +
+                `4. Save approved mappings as new dictionary for future use\n\n` +
+                `Do you want to proceed?`,
+      header: "Dictionary",
+      multiSelect: false,
+      options: [
+        {
+          label: "Proceed with interactive validation",
+          description: "I'll validate each field mapping manually"
+        },
+        {
+          label: "Choose different template",
+          description: "Select a template that has pre-configured dictionary"
+        }
+      ]
+    }]
+  });
+}
+```
+
+---
+
+### Step 4: Initialize Context Object
+
+Create and return the complete initial context based on selections:
+
+```javascript
+// Base context structure (common to all templates)
 let context = {
-  // From template selection
-  template_selected: "CADOC 4010",
-  template_code: "4010",
-  authority: "BACEN",
-  template_type: "cadastral_information",
+  // From Step 1 - Authority selection
+  authority: "BACEN", // or "RFB"
+  template_category: "CADOC", // or "e-Financeira", "DIMP", "APIX"
+
+  // From Step 1.1 - Template selection
+  template_code: "4010", // specific code selected
+  template_name: "Informações de Cadastro", // full name
+
+  // Computed fields
+  template_selected: "CADOC 4010", // combined identifier
+
+  // Dictionary status (CRITICAL - determines validation mode)
+  // STANDARDIZED PATH: ~/.claude/docs/regulatory/dictionaries/
+  dictionary_status: {
+    has_dictionary: true/false,
+    dictionary_path: "~/.claude/docs/regulatory/dictionaries/cadoc-4010.yaml" or null,
+    validation_mode: "automatic" or "interactive"
+  },
+
+  // Documentation reference (auto-resolved)
+  documentation_path: ".claude/docs/regulatory/templates/BACEN/CADOC/cadoc-4010-4016.md",
 
   // Optional user input
   deadline: "2025-12-31", // or ask if needed
@@ -104,6 +380,224 @@ let context = {
   gate1: null,
   gate2: null,
   gate3: null
+};
+```
+
+---
+
+### Template-Specific Context Extensions
+
+#### CADOC Context
+
+```javascript
+const cadocContext = {
+  ...baseContext,
+  authority: "BACEN",
+  template_category: "CADOC",
+  template_code: "4010", // or "4016", "4111"
+  template_name: "Informações de Cadastro",
+  template_selected: "CADOC 4010",
+  documentation_path: ".claude/docs/regulatory/templates/BACEN/CADOC/cadoc-4010-4016.md",
+  format: "XML",
+  frequency: "monthly" // or "daily" for 4111
+};
+```
+
+#### e-Financeira Context
+
+```javascript
+const efinanceiraContext = {
+  ...baseContext,
+  authority: "RFB",
+  template_category: "e-Financeira",
+  template_code: "evtMovOpFin", // event code selected
+  template_name: "Movimento de Operações Financeiras",
+  template_selected: "e-Financeira evtMovOpFin",
+  documentation_path: ".claude/docs/regulatory/templates/RFB/EFINANCEIRA/efinanceira.md",
+  format: "XML",
+
+  // e-Financeira specific fields
+  event_module: "financial_operations", // or "private_pension", "structural"
+  event_category: "movement", // or "structural"
+  event_frequency: "semestral", // or "annual", "per_period"
+  fatca_applicable: true,
+  crs_applicable: true
+};
+```
+
+#### DIMP Context
+
+```javascript
+const dimpContext = {
+  ...baseContext,
+  authority: "RFB",
+  template_category: "DIMP",
+  template_code: "v10",
+  template_name: "DIMP Versão 10",
+  template_selected: "DIMP v10",
+  documentation_path: ".claude/docs/regulatory/templates/RFB/DIMP/dimp-v10-manual.md",
+  format: "XML",
+  frequency: "annual"
+};
+```
+
+#### APIX Context
+
+```javascript
+const apixContext = {
+  ...baseContext,
+  authority: "BACEN",
+  template_category: "APIX",
+  template_code: "001", // or "002"
+  template_name: "Dados Cadastrais",
+  template_selected: "APIX 001",
+  documentation_path: ".claude/docs/regulatory/templates/BACEN/APIX/001/",
+  format: "JSON",
+  api_type: "REST"
+};
+```
+
+---
+
+### Template Mapping Reference
+
+```javascript
+const TEMPLATE_REGISTRY = {
+  // CADOC Templates (BACEN)
+  CADOC: {
+    authority: "BACEN",
+    templates: {
+      "4010": {
+        name: "Informações de Cadastro",
+        description: "Client cadastral data",
+        frequency: "monthly",
+        format: "XML",
+        documentation: ".claude/docs/regulatory/templates/BACEN/CADOC/cadoc-4010-4016.md"
+      },
+      "4016": {
+        name: "Operações de Crédito",
+        description: "Credit operation details",
+        frequency: "monthly",
+        format: "XML",
+        documentation: ".claude/docs/regulatory/templates/BACEN/CADOC/cadoc-4010-4016.md"
+      },
+      "4111": {
+        name: "Operações de Câmbio",
+        description: "Foreign exchange operations",
+        frequency: "daily",
+        format: "XML",
+        documentation: ".claude/docs/regulatory/templates/BACEN/CADOC/cadoc-4010-4016.md"
+      }
+    }
+  },
+
+  // e-Financeira Templates (RFB)
+  "e-Financeira": {
+    authority: "RFB",
+    templates: {
+      evtCadDeclarante: {
+        name: "Cadastro do Declarante",
+        module: "structural",
+        category: "structural",
+        frequency: "per_period",
+        format: "XML",
+        fatca_applicable: true,
+        crs_applicable: true,
+        description: "Entity registration with GIIN, FATCA/CRS categories",
+        documentation: ".claude/docs/regulatory/templates/RFB/EFINANCEIRA/efinanceira.md"
+      },
+      evtAberturaeFinanceira: {
+        name: "Abertura e-Financeira",
+        module: "structural",
+        category: "structural",
+        frequency: "semestral",
+        format: "XML",
+        fatca_applicable: false,
+        crs_applicable: false,
+        description: "Opens reporting period (dtIni/dtFim)",
+        documentation: ".claude/docs/regulatory/templates/RFB/EFINANCEIRA/efinanceira.md"
+      },
+      evtFechamentoeFinanceira: {
+        name: "Fechamento e-Financeira",
+        module: "structural",
+        category: "structural",
+        frequency: "semestral",
+        format: "XML",
+        fatca_applicable: true,
+        crs_applicable: true,
+        description: "Closes period, consolidates PP/OpFin/OpFinAnual totals",
+        documentation: ".claude/docs/regulatory/templates/RFB/EFINANCEIRA/efinanceira.md"
+      },
+      evtMovOpFin: {
+        name: "Movimento de Operações Financeiras",
+        module: "financial_operations",
+        category: "movement",
+        frequency: "semestral",
+        format: "XML",
+        fatca_applicable: true,
+        crs_applicable: true,
+        description: "Financial movements - accounts, balances, income",
+        documentation: ".claude/docs/regulatory/templates/RFB/EFINANCEIRA/efinanceira.md"
+      },
+      evtMovPP: {
+        name: "Movimento de Previdência Privada",
+        module: "private_pension",
+        category: "movement",
+        frequency: "semestral",
+        format: "XML",
+        fatca_applicable: false,
+        crs_applicable: false,
+        description: "Private pension movements - PGBL, VGBL, etc.",
+        documentation: ".claude/docs/regulatory/templates/RFB/EFINANCEIRA/efinanceira.md"
+      },
+      evtMovOpFinAnual: {
+        name: "Movimento de Operações Financeiras Anual",
+        module: "financial_operations",
+        category: "movement",
+        frequency: "annual",
+        format: "XML",
+        fatca_applicable: true,
+        crs_applicable: true,
+        description: "Annual consolidated financial movements",
+        documentation: ".claude/docs/regulatory/templates/RFB/EFINANCEIRA/efinanceira.md"
+      }
+    }
+  },
+
+  // DIMP Templates (RFB)
+  DIMP: {
+    authority: "RFB",
+    templates: {
+      v10: {
+        name: "DIMP Versão 10",
+        description: "Declaração de Informações sobre Movimentação Patrimonial",
+        frequency: "annual",
+        format: "XML",
+        documentation: ".claude/docs/regulatory/templates/RFB/DIMP/dimp-v10-manual.md"
+      }
+    }
+  },
+
+  // APIX Templates (BACEN - Open Banking)
+  APIX: {
+    authority: "BACEN",
+    templates: {
+      "001": {
+        name: "Dados Cadastrais",
+        description: "Customer registration data API",
+        api_type: "REST",
+        format: "JSON",
+        documentation: ".claude/docs/regulatory/templates/BACEN/APIX/001/"
+      },
+      "002": {
+        name: "Contas e Transações",
+        description: "Account balances and transactions API",
+        api_type: "REST",
+        format: "JSON",
+        documentation: ".claude/docs/regulatory/templates/BACEN/APIX/002/"
+      }
+    }
+  }
 };
 ```
 

@@ -20,6 +20,7 @@ This agent is responsible for all backend development using Go, including:
 - Implementing message queue consumers and producers (RabbitMQ, Kafka)
 - Creating caching strategies with Redis/Valkey
 - Writing business logic for financial operations (transactions, balances, reconciliation)
+- Designing and implementing multi-tenant architectures (tenant isolation, data segregation)
 - Ensuring data consistency and integrity in distributed systems
 - Implementing proper error handling, logging, and observability
 - Writing unit and integration tests with high coverage
@@ -36,6 +37,18 @@ Invoke this agent when the task involves:
 - Input validation and sanitization
 - API versioning and backward compatibility
 
+### Authentication & Authorization (OAuth2, WorkOS)
+- OAuth2 flows implementation (Authorization Code, Client Credentials, PKCE)
+- JWT token generation, validation, and refresh strategies
+- WorkOS integration for enterprise SSO (SAML, OIDC)
+- WorkOS Directory Sync for user provisioning (SCIM)
+- WorkOS Admin Portal and Organization management
+- Multi-tenant authentication with WorkOS Organizations
+- Role-based access control (RBAC) and permissions
+- API key management and scoping
+- Session management and token revocation
+- MFA/2FA implementation
+
 ### Business Logic
 - Implementing financial calculations (balances, rates, conversions)
 - Transaction processing with double-entry accounting
@@ -51,6 +64,14 @@ Invoke this agent when the task involves:
 - Query optimization and indexing
 - Transaction management and concurrency control
 - Data consistency patterns (optimistic locking, saga pattern)
+
+### Multi-Tenancy
+- Tenant isolation strategies (schema-per-tenant, row-level security, database-per-tenant)
+- Tenant context propagation through request lifecycle
+- Tenant-aware connection pooling and routing
+- Cross-tenant data protection and validation
+- Tenant provisioning and onboarding workflows
+- Per-tenant configuration and feature flags
 
 ### Event-Driven Architecture
 - Message queue producer/consumer implementation
@@ -71,6 +92,23 @@ Invoke this agent when the task involves:
 - Graceful shutdown handling
 - Health check endpoints
 
+### Serverless (AWS Lambda)
+- Lambda function development in Go (aws-lambda-go SDK)
+- Cold start optimization (minimal dependencies, binary size reduction)
+- Lambda handler patterns and context management
+- API Gateway integration (REST, HTTP API, WebSocket)
+- Event source mappings (SQS, SNS, DynamoDB Streams, Kinesis)
+- Lambda Layers for shared dependencies
+- Environment variables and secrets management (SSM, Secrets Manager)
+- Structured logging for CloudWatch (JSON format)
+- X-Ray tracing integration for distributed tracing
+- Provisioned concurrency for latency-sensitive workloads
+- Lambda function URLs for simple HTTP endpoints
+- Step Functions integration for orchestration
+- VPC configuration for database access
+- Error handling and DLQ (Dead Letter Queue) patterns
+- Idempotency patterns for event-driven architectures
+
 ## Technical Expertise
 
 - **Language**: Go 1.21+
@@ -79,9 +117,11 @@ Invoke this agent when the task involves:
 - **Caching**: Redis, Valkey, Memcached
 - **Messaging**: RabbitMQ, Kafka, NATS
 - **APIs**: REST, gRPC, GraphQL
+- **Auth**: OAuth2, JWT, WorkOS (SSO, Directory Sync, Admin Portal), SAML, OIDC
 - **Testing**: Go test, Testify, GoMock, SQLMock
 - **Observability**: OpenTelemetry, Zap, Prometheus metrics
-- **Patterns**: Hexagonal Architecture, CQRS, Repository, DDD
+- **Patterns**: Hexagonal Architecture, CQRS, Repository, DDD, Multi-Tenancy
+- **Serverless**: AWS Lambda, API Gateway, Step Functions, SAM
 
 ## What This Agent Does NOT Handle
 

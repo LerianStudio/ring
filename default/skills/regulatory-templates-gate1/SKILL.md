@@ -102,13 +102,17 @@ description: Gate 1 of regulatory templates - performs regulatory compliance ana
 
 ### STEP 1: Check for Data Dictionary (FROM/TO Mappings)
 
-**HIERARCHICAL SEARCH - Data Dictionary first, MCP second:**
+**HIERARCHICAL SEARCH - Data Dictionary first, Interactive Validation second:**
 
 ```javascript
 // CRITICAL: Hierarchical search to avoid unnecessary MCP calls
 
+// STANDARDIZED DICTIONARY PATH - ALWAYS USE THIS PATH
+const DICTIONARY_BASE_PATH = "~/.claude/docs/regulatory/dictionaries";
+
 const templateCode = context.template_selected.split(' ')[1]; // e.g., "4010"
-const dictionaryPath = `docs/regulatory/dictionaries/cadoc-${templateCode}.yaml`;
+const templateCategory = context.template_category.toLowerCase(); // e.g., "cadoc"
+const dictionaryPath = `${DICTIONARY_BASE_PATH}/${templateCategory}-${templateCode}.yaml`;
 
 // 1. FIRST: Check LOCAL data dictionary
 if (fileExists(dictionaryPath)) {
@@ -125,8 +129,9 @@ if (fileExists(dictionaryPath)) {
   return useDictionary(dictionary);
 }
 
-// 2. IF NOT EXISTS: SEMI-AUTOMATIC discovery with human approval
-console.log(`⚠️ Dictionary not found. Starting semi-automatic discovery...`);
+// 2. IF NOT EXISTS: INTERACTIVE VALIDATION REQUIRED
+console.log(`⚠️ Dictionary not found. Starting INTERACTIVE VALIDATION...`);
+console.log(`📋 Template ${context.template_selected} requires USER APPROVAL for field mappings`);
 
 // 2.1 Query schemas via MCP
 console.log(`📡 Fetching system schemas via MCP...`);
@@ -143,10 +148,10 @@ const suggestedMappings = analyzeSchemasAndSuggestMappings(
   crmSchema     // Fields like: natural_person, tax_id (snake_case)
 );
 
-// 2.3 PRESENT suggestions to user for APPROVAL
-// Use AskUserQuestion tool for each field mapping
-console.log(`👤 Requesting user approval for suggested mappings...`);
-const approvedMappings = await requestUserApproval(suggestedMappings);
+// 2.3 PRESENT suggestions to user for APPROVAL via AskUserQuestion
+// CRITICAL: Use interactive validation with selection boxes AND typing option
+console.log(`👤 Requesting INTERACTIVE user approval for suggested mappings...`);
+const approvedMappings = await interactiveFieldValidation(suggestedMappings);
 
 // 2.4 CREATE dictionary with APPROVED mappings only
 const newDictionary = {
@@ -155,7 +160,7 @@ const newDictionary = {
     template_name: context.template_selected,
     authority: context.authority,
     created_at: new Date().toISOString(),
-    created_by: "semi-automatic discovery with human approval",
+    created_by: "interactive validation with user approval",
     version: "1.0"
   },
   field_mappings: approvedMappings, // Only approved mappings
@@ -169,6 +174,320 @@ console.log(`✅ Dictionary created with approved mappings: ${dictionaryPath}`);
 
 // 2.6 Use newly created dictionary
 return useDictionary(newDictionary);
+```
+
+---
+
+## 🔴 CRITICAL: INTERACTIVE VALIDATION FOR TEMPLATES WITHOUT DICTIONARY
+
+### Templates Status Reference
+
+**DICTIONARY BASE PATH:** `~/.claude/docs/regulatory/dictionaries`
+
+**Templates WITH Dictionary (Auto-validation):**
+| Template | Dictionary Path | Status |
+|----------|-----------------|--------|
+| CADOC 4010 | `cadoc-4010.yaml` | ✅ Ready |
+| CADOC 4016 | `cadoc-4016.yaml` | ✅ Ready |
+| APIX 001 | `apix-001.yaml` | ✅ Ready |
+| e-Financeira evtCadDeclarante | `efinanceira-evtCadDeclarante.yaml` | ✅ Ready |
+
+**Templates WITHOUT Dictionary (REQUIRE Interactive Validation):**
+| Template | Dictionary Path | Status |
+|----------|-----------------|--------|
+| CADOC 4111 | `null` | ⚠️ Requires user validation |
+| APIX 002 | `null` | ⚠️ Requires user validation |
+| e-Financeira evtAberturaeFinanceira | `null` | ⚠️ Requires user validation |
+| e-Financeira evtFechamentoeFinanceira | `null` | ⚠️ Requires user validation |
+| e-Financeira evtMovOpFin | `null` | ⚠️ Requires user validation |
+| e-Financeira evtMovPP | `null` | ⚠️ Requires user validation |
+| e-Financeira evtMovOpFinAnual | `null` | ⚠️ Requires user validation |
+| DIMP v10 | `null` | ⚠️ Requires user validation |
+
+---
+
+### Interactive Validation Process (MANDATORY for templates without dictionary)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│              INTERACTIVE VALIDATION WORKFLOW                      │
+│           (For templates WITHOUT data dictionary)                 │
+└─────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+    ┌─────────────────────────────────────────────────────────────┐
+    │ STEP A: Discover Fields from Regulatory Specification       │
+    │ - Read regulatory spec (XSD, manual PDF, etc.)             │
+    │ - Extract ALL required fields                               │
+    │ - Identify field types, formats, validations                │
+    └─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+    ┌─────────────────────────────────────────────────────────────┐
+    │ STEP B: Query API Schemas via MCP                           │
+    │ - mcp__apidog-midaz__read_project_oas_nkt61k()             │
+    │ - mcp__apidog-crm__read_project_oas_7bcuo0()               │
+    │ - Extract available fields from both systems                │
+    └─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+    ┌─────────────────────────────────────────────────────────────┐
+    │ STEP C: INTERACTIVE VALIDATION FOR EACH FIELD               │
+    │                                                              │
+    │ For EACH regulatory field, use AskUserQuestion with:        │
+    │                                                              │
+    │ 1. SELECTION BOX: Show top 3-4 suggested mappings          │
+    │ 2. TYPING OPTION: "Other" allows custom field path         │
+    │ 3. SKIP OPTION: Mark field for later resolution            │
+    │                                                              │
+    │ Example AskUserQuestion for "CNPJ" field:                   │
+    │ ┌────────────────────────────────────────────────────────┐ │
+    │ │ Question: "Map regulatory field 'CNPJ (14 digits)'?"   │ │
+    │ │                                                         │ │
+    │ │ Options:                                                │ │
+    │ │ ○ midaz_onboarding.organization.0.legal_document      │ │
+    │ │   (HIGH confidence - exact match in Midaz)             │ │
+    │ │                                                         │ │
+    │ │ ○ crm.holder.document                                  │ │
+    │ │   (MEDIUM confidence - found in CRM)                   │ │
+    │ │                                                         │ │
+    │ │ ○ Skip for now                                         │ │
+    │ │   (Mark as unmapped, resolve later)                    │ │
+    │ │                                                         │ │
+    │ │ ○ Other... [TEXT INPUT]                                │ │
+    │ │   (Type custom field path)                             │ │
+    │ └────────────────────────────────────────────────────────┘ │
+    └─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+    ┌─────────────────────────────────────────────────────────────┐
+    │ STEP D: Validate Transformations (for each approved field)  │
+    │                                                              │
+    │ If field needs transformation, ask user:                    │
+    │ ┌────────────────────────────────────────────────────────┐ │
+    │ │ Question: "Transformation for 'CNPJ Base (8 digits)'?" │ │
+    │ │                                                         │ │
+    │ │ Options:                                                │ │
+    │ │ ○ slice:':8' (extract first 8 digits)                 │ │
+    │ │ ○ No transformation (use raw value)                    │ │
+    │ │ ○ Other... [TEXT INPUT]                                │ │
+    │ └────────────────────────────────────────────────────────┘ │
+    └─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+    ┌─────────────────────────────────────────────────────────────┐
+    │ STEP E: Generate and Save Dictionary                        │
+    │ - Create YAML with ALL approved mappings                    │
+    │ - Save to: DICTIONARY_BASE_PATH/[template].yaml             │
+    │ - Dictionary available for future use (no repeat questions) │
+    └─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+### AskUserQuestion Implementation for Field Mapping
+
+**CRITICAL: Use AskUserQuestion tool with these patterns:**
+
+```javascript
+// PATTERN 1: Field Source Selection (with suggestions + typing)
+async function askFieldMapping(regulatoryField, suggestions) {
+  // Build options from suggestions (max 3) + skip option
+  // Note: "Other" option is AUTOMATICALLY added by AskUserQuestion
+  const options = [
+    ...suggestions.slice(0, 3).map(s => ({
+      label: s.field_path,
+      description: `${s.confidence_level} confidence (${s.confidence}%) - ${s.reasoning}`
+    })),
+    {
+      label: "Skip for now",
+      description: "Mark as unmapped and resolve in Gate 2"
+    }
+  ];
+
+  return AskUserQuestion({
+    questions: [{
+      question: `Map regulatory field '${regulatoryField.name}' (${regulatoryField.type}, ${regulatoryField.required ? 'required' : 'optional'})?`,
+      header: regulatoryField.code,
+      multiSelect: false,
+      options: options
+      // Note: User can always select "Other" to type custom path
+    }]
+  });
+}
+
+// PATTERN 2: Transformation Selection (with options + typing)
+async function askTransformation(field, suggestedTransforms) {
+  const options = [
+    ...suggestedTransforms.map(t => ({
+      label: t.filter,
+      description: `${t.description} - Example: '${t.example_input}' → '${t.example_output}'`
+    })),
+    {
+      label: "No transformation",
+      description: "Use raw value without modification"
+    }
+  ];
+
+  return AskUserQuestion({
+    questions: [{
+      question: `Transformation needed for '${field.name}'?`,
+      header: "Transform",
+      multiSelect: false,
+      options: options
+      // Note: User can always select "Other" to type custom filter
+    }]
+  });
+}
+
+// PATTERN 3: Batch Approval (up to 4 fields at once)
+async function askBatchApproval(fieldsToApprove) {
+  // Group related fields (max 4 questions per batch)
+  const questions = fieldsToApprove.slice(0, 4).map(field => ({
+    question: `Approve mapping for '${field.regulatory_name}'?\nSuggested: ${field.suggested_path}\nConfidence: ${field.confidence}%`,
+    header: field.code,
+    multiSelect: false,
+    options: [
+      { label: "Approve ✓", description: "Accept suggested mapping" },
+      { label: "Reject ✗", description: "I'll provide alternative" }
+    ]
+  }));
+
+  return AskUserQuestion({ questions });
+}
+```
+
+---
+
+### Complete Interactive Validation Example
+
+```javascript
+// EXAMPLE: Interactive validation for e-Financeira evtMovOpFin (no dictionary)
+
+async function interactiveFieldValidation(context) {
+  const approvedMappings = [];
+  const skippedFields = [];
+
+  // 1. Read regulatory specification
+  const regulatorySpec = await readRegulatorySpec(context.template_code);
+  const requiredFields = extractRequiredFields(regulatorySpec);
+
+  console.log(`📋 Found ${requiredFields.length} fields requiring validation`);
+
+  // 2. Query API schemas
+  const midazSchema = await mcp__apidog_midaz__read_project_oas_nkt61k();
+  const crmSchema = await mcp__apidog_crm__read_project_oas_7bcuo0();
+
+  // 3. For EACH field, get user approval
+  for (const field of requiredFields) {
+    // Find suggestions from schemas
+    const suggestions = findFieldSuggestions(field, midazSchema, crmSchema);
+
+    // Ask user to select/type mapping
+    const response = await AskUserQuestion({
+      questions: [{
+        question: `Map '${field.name}' (${field.format})?\n\nRegulatory requirement: ${field.description}\nData type: ${field.type}`,
+        header: field.code || field.name.substring(0, 10),
+        multiSelect: false,
+        options: [
+          ...suggestions.slice(0, 3).map(s => ({
+            label: s.path,
+            description: `${s.source} - ${s.confidence}% confidence`
+          })),
+          {
+            label: "Skip",
+            description: "Resolve later in Gate 2"
+          }
+        ]
+      }]
+    });
+
+    // Process user response
+    if (response.includes("Skip")) {
+      skippedFields.push(field);
+    } else if (response.isCustomInput) {
+      // User typed custom path via "Other" option
+      approvedMappings.push({
+        regulatory_field: field.name,
+        api_field: response.customValue,
+        transformation: "direct",
+        approved_by: "user_custom_input",
+        confidence: 100
+      });
+    } else {
+      // User selected suggested option
+      const selectedSuggestion = suggestions.find(s => response.includes(s.path));
+
+      // Ask about transformation if needed
+      if (field.needsTransformation) {
+        const transformResponse = await AskUserQuestion({
+          questions: [{
+            question: `Transformation for '${field.name}'?`,
+            header: "Transform",
+            multiSelect: false,
+            options: [
+              { label: "slice:':8'", description: "First 8 characters" },
+              { label: "floatformat:2", description: "2 decimal places" },
+              { label: "No transform", description: "Use raw value" }
+            ]
+          }]
+        });
+
+        approvedMappings.push({
+          regulatory_field: field.name,
+          api_field: selectedSuggestion.path,
+          transformation: transformResponse.isCustomInput ? transformResponse.customValue : transformResponse,
+          approved_by: "user_selection",
+          confidence: selectedSuggestion.confidence
+        });
+      } else {
+        approvedMappings.push({
+          regulatory_field: field.name,
+          api_field: selectedSuggestion.path,
+          transformation: "direct",
+          approved_by: "user_selection",
+          confidence: selectedSuggestion.confidence
+        });
+      }
+    }
+  }
+
+  // 4. Summary and confirmation
+  console.log(`✅ Approved: ${approvedMappings.length} fields`);
+  console.log(`⏭️ Skipped: ${skippedFields.length} fields (to resolve in Gate 2)`);
+
+  return { approvedMappings, skippedFields };
+}
+```
+
+---
+
+### Validation Rules for User Input
+
+```javascript
+// When user selects "Other" and types custom field path:
+
+const VALID_PATH_PATTERNS = {
+  midaz_onboarding: /^midaz_onboarding\.(organization|account)\.\d+\.[a-z_]+$/,
+  midaz_transaction: /^midaz_transaction\.(operation_route|balance|operation)\.[a-z_]+$/,
+  crm: /^crm\.(holder|alias)\.[a-z_.]+$/,
+  metadata: /^(midaz|crm)\.[a-z_]+\.metadata\.[a-z_]+$/
+};
+
+function validateUserInputPath(inputPath) {
+  // Check against valid patterns
+  for (const [source, pattern] of Object.entries(VALID_PATH_PATTERNS)) {
+    if (pattern.test(inputPath)) {
+      return { valid: true, source };
+    }
+  }
+
+  // If no pattern matches, warn user but allow
+  return {
+    valid: false,
+    warning: `Path '${inputPath}' doesn't match known patterns. Please verify.`
+  };
+}
 ```
 
 ### NAMING CONVENTION IN FIELD DISCOVERY
@@ -403,9 +722,13 @@ Valid: ✓ TRUE (confidence +20)
 
 1. **BEFORE dispatching the agent, check for existing data dictionary:**
    ```javascript
+   // STANDARDIZED DICTIONARY PATH - ALWAYS USE THIS PATH
+   const DICTIONARY_BASE_PATH = "~/.claude/docs/regulatory/dictionaries";
+
    // Extract template code from context
    const templateCode = context.template_selected.split(' ')[1].toLowerCase(); // e.g., "4010"
-   const dictionaryPath = `/Users/jeffersonrodrigues/.claude/docs/regulatory/dictionaries/cadoc-${templateCode}.yaml`;
+   const templateCategory = context.template_category.toLowerCase(); // e.g., "cadoc"
+   const dictionaryPath = `${DICTIONARY_BASE_PATH}/${templateCategory}-${templateCode}.yaml`;
 
    // Try to read the dictionary file
    let dictionaryContent = null;
@@ -464,7 +787,7 @@ INSTRUCTIONS FOR DICTIONARY MODE:
 No existing data dictionary was found at the expected path.
 You MUST perform dynamic field discovery using MCP APIs.
 
-Path checked: docs/regulatory/dictionaries/cadoc-${context.template_code}.yaml
+Path checked: ${DICTIONARY_BASE_PATH}/${templateCategory}-${context.template_code}.yaml
 
 INSTRUCTIONS FOR MCP DISCOVERY MODE:
 
@@ -515,9 +838,9 @@ INSTRUCTIONS FOR MCP DISCOVERY MODE:
                           │ - pitfalls                  │
                           │                             │
                           │ Save to:                    │
-                          │ docs/regulatory/            │
-                          │ dictionaries/               │
+                          │ DICTIONARY_BASE_PATH/       │
                           │ [template-code].yaml        │
+                          │                             │
                           └─────────────────────────────┘`}
 
 CRITICAL: NAMING CONVENTION - SNAKE_CASE STANDARD
@@ -565,7 +888,7 @@ Output structured report with:
 
 1. Data Dictionary Status:
    - dictionary_found: true/false
-   - dictionary_path: "docs/regulatory/dictionaries/cadoc-4010.yaml"
+   - dictionary_path: "${DICTIONARY_BASE_PATH}/cadoc-4010.yaml"
    - dictionary_created: true/false (if new)
 
 2. Field Mappings:
@@ -689,9 +1012,13 @@ COMPLETION STATUS: COMPLETE, INCOMPLETE, or NEEDS_DISCUSSION
 
 4. **Example Task tool invocation:**
 ```javascript
+// STANDARDIZED DICTIONARY PATH - ALWAYS USE THIS PATH
+const DICTIONARY_BASE_PATH = "~/.claude/docs/regulatory/dictionaries";
+
 // First, check for data dictionary
 const templateCode = context.template_selected.split(' ')[1].toLowerCase();
-const dictionaryPath = `/Users/jeffersonrodrigues/.claude/docs/regulatory/dictionaries/cadoc-${templateCode}.yaml`;
+const templateCategory = context.template_category.toLowerCase();
+const dictionaryPath = `${DICTIONARY_BASE_PATH}/${templateCategory}-${templateCode}.yaml`;
 
 let dictionaryContent = null;
 let dictionaryExists = false;

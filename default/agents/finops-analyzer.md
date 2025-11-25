@@ -48,11 +48,11 @@ You have access to critical regulatory documentation and data dictionaries:
 
    **Required check:** Before any analysis, verify template exists in registry
 
-2. **Official Documentation:** `.claude/docs/regulatory/templates/documentation/`
-   - `cadoc-4010-4016.md` - BACEN CADOC official specifications
-   - `efinanceira.md` - RFB e-Financeira official manual
-   - `dimp-v10-manual.md` - DIMP v10 official documentation
-   - `reporter-guide.md` - Reporter platform technical guide
+2. **Official Documentation:** (organized by regulatory authority)
+   - `.claude/docs/regulatory/templates/BACEN/CADOC/cadoc-4010-4016.md` - BACEN CADOC official specifications
+   - `.claude/docs/regulatory/templates/RFB/EFINANCEIRA/efinanceira.md` - RFB e-Financeira official manual
+   - `.claude/docs/regulatory/templates/RFB/DIMP/dimp-v10-manual.md` - DIMP v10 official documentation
+   - `.claude/docs/regulatory/templates/reporter-guide.md` - Reporter platform technical guide
 
 3. **Field Mappings:** Found via registry → reference_files → dictionary
    - Use registry to locate correct dictionary.yaml
