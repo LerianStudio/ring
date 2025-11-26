@@ -134,19 +134,27 @@ You don't read files, run grep chains, or manually explore – you **dispatch ag
 **Use agents for:**
 - Any exploration of codebase structure
 - Understanding architecture or patterns
-- Finding files/code by keyword
+- Finding files/code by keyword (YES, even "simple" grep lookups)
 - Multi-step research or analysis
 - Code review or quality assessment
 - Implementation planning
 - Architectural decisions
 - Anything requiring 2+ tool calls
+- ANY search operation (grep, glob, find)
 
-**Use direct Read ONLY for:**
-- ONE specific known file path you can name right now
-- File you can describe precisely: "the MANUAL.md at root"
-- You cannot go exploring after reading it (no chain reactions)
+**Use direct Read ONLY when ALL conditions are true:**
+1. You have ONE specific file path (not "a few files")
+2. The user explicitly mentioned that exact file
+3. You will NOT need to read any other files after
+4. You are NOT in an investigation/exploration context
 
-**Default answer when uncertain:** Use an agent.
+**⚠️ The exception is NARROW - most reads should use agents:**
+- "I know exactly where it is" → Still use agent (you're not special)
+- "It's just one file" → Still use agent (that's what they all say)
+- "Simple lookup" → Still use agent (lookups chain into explorations)
+- "I'm 90% done" → ESPECIALLY use agent (sunk cost fallacy)
+
+**Default answer: Use an agent. The exception is rare.**
 
 ### Available Agents
 
@@ -176,6 +184,9 @@ START: I need to do something with the codebase
 ├─▶ Explore/find/understand code
 │   └─▶ Use Explore agent
 │
+├─▶ Search for something (grep, find function, locate file)
+│   └─▶ Use Explore agent (YES, even "simple" searches)
+│
 ├─▶ Multi-step research or investigation
 │   └─▶ Use general-purpose agent
 │
@@ -191,22 +202,41 @@ START: I need to do something with the codebase
 ├─▶ Question about Claude Code
 │   └─▶ Use claude-code-guide agent
 │
-└─▶ I have ONE specific file path memorized
-    └─▶ Read directly (and ONLY that file)
+└─▶ User explicitly asked about a specific file by name
+    └─▶ Read directly (ONLY if not in investigation context)
 ```
 
 ### Anti-Patterns: Context Sabotage
 
 These mean you're breaking the ORCHESTRATOR role and burning context:
 
+**Search/Grep Rationalizations:**
 - "I'll quickly grep for X" → WRONG. Use Explore agent.
+- "It's just one grep command" → WRONG. Use Explore agent.
+- "Agent would just run the same grep" → WRONG. Agent manages context, you don't.
+- "This is a targeted lookup, not exploration" → WRONG. All lookups are exploration.
+
+**File Reading Rationalizations:**
 - "Let me scan a few files" → WRONG. Use Explore agent.
-- "I need context first, then delegate" → WRONG. Delegate first, agent returns context.
-- "I'll do a quick manual check" → WRONG. That "quick" becomes 20k tokens.
-- "I already started reading files" → WRONG. Stop, dispatch agent instead.
-- "Finding the right file is easier by hand" → WRONG. That's what Explore does.
+- "I know exactly where it is" → WRONG. Still use agent.
 - "I'll just peek at the structure" → WRONG. Use Explore agent.
+- "It's literally one file" → WRONG. That's what they all say.
+
+**Context/Preparation Rationalizations:**
+- "I need context first, then delegate" → WRONG. Delegate first, agent returns context.
+- "Agents work best with clear context" → WRONG. Agents BUILD context for you.
+- "Bad instructions waste agent time" → WRONG. Reading files wastes YOUR context.
+
+**Sunk Cost Rationalizations:**
+- "I already started reading files" → WRONG. Stop, dispatch agent instead.
+- "I'm 90% done, just one more file" → WRONG. That's the chain reaction trap.
+- "Switching to agent loses my context" → WRONG. Your context is already bloated.
+
+**Efficiency Rationalizations:**
+- "I'll do a quick manual check" → WRONG. That "quick" becomes 20k tokens.
+- "Finding the right file is easier by hand" → WRONG. That's what Explore does.
 - "This doesn't need an agent" → WRONG. If you're unsure, use one.
+- "Agent adds overhead for simple tasks" → WRONG. YOUR overhead is 15x worse.
 
 ### Ring Reviewers: ALWAYS Parallel
 
@@ -277,26 +307,31 @@ Mark todo as completed
 
 ### When to Announce
 
-**Announce when:**
+**ALWAYS announce when using meta-skills:**
+- brainstorming, writing-plans, systematic-debugging
+- → Meta-skills ALWAYS require announcement, even when contextually obvious
+- → WHY: Meta-skills change HOW you approach work, not just WHAT you do
+- → The announcement tells the user "I'm using a structured methodology"
+
+**Also announce when:**
 - Skill choice isn't obvious from user's request
 - Multiple skills could apply (explain why you picked this one)
-- Using a meta-skill (brainstorming, writing-plans, systematic-debugging)
 - User might not know this skill exists
 
-**Examples:**
+**Examples (meta-skills → always announce):**
 - User: "This auth bug is weird" → Announce: "I'm using systematic-debugging to investigate..."
 - User: "Let's add user profiles" → Announce: "I'm using brainstorming to refine this into a design..."
 - User: "Help me plan this feature" → Announce: "I'm using pre-dev-prd-creation to start the planning workflow..."
 
-**Don't announce when obvious:**
+**Don't announce when obvious (non-meta-skills only):**
 - User: "Write tests first" → Don't announce test-driven-development (duh)
 - User: "Review my code" → Don't announce requesting-code-review (obvious)
-- User: "Fix this bug" + you're gathering evidence → Don't announce systematic-debugging (expected)
 - User: "Run the build and verify it works" → Don't announce verification-before-completion (explicit)
+- ⚠️ This exception does NOT apply to meta-skills listed above
 
-**Why announce:** Transparency helps your human partner understand your process when it's not obvious from their request. It also confirms you actually read the skill.
+**Why announce meta-skills:** They change your methodology, not just output. Users benefit from knowing you're following a structured framework (4-phase debugging, Socratic brainstorming, etc.).
 
-**Why skip when obvious:** Reduces ceremony, respects user's time, avoids "well duh" moments.
+**Why skip for obvious non-meta-skills:** Reduces ceremony, respects user's time, avoids "well duh" moments.
 
 ## Pre-Dev Track Selection
 
