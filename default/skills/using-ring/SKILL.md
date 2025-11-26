@@ -28,14 +28,18 @@ This is not negotiable. This is not optional. You cannot rationalize your way ou
 
 ## MANDATORY FIRST RESPONSE PROTOCOL
 
-Before responding to ANY user message, you MUST complete this checklist:
+Before responding to ANY user message, you MUST complete this checklist IN ORDER:
 
 1. ☐ **Check for MANDATORY-USER-MESSAGE** - If additionalContext contains `<MANDATORY-USER-MESSAGE>` tags, display the message FIRST, verbatim, at the start of your response
-2. ☐ List available skills in your mind
-3. ☐ Ask yourself: "Does ANY skill match this request?"
-4. ☐ If yes → Use the Skill tool to read and run the skill file
-5. ☐ Announce which skill you're using (when non-obvious)
-6. ☐ Follow the skill exactly
+2. ☐ **ORCHESTRATION DECISION** - Determine which agent handles this task
+   - Create TodoWrite: "Orchestration decision: [agent-name] with Opus"
+   - Default model: **Opus** (use unless user specifies otherwise)
+   - If considering direct tools, document why the exception applies (user explicitly requested specific file read)
+   - Mark todo complete only after documenting decision
+3. ☐ **Skill Check** - List available skills in your mind, ask: "Does ANY skill match this request?"
+4. ☐ **If yes** → Use the Skill tool to read and run the skill file
+5. ☐ **Announce** - State which skill/agent you're using (when non-obvious)
+6. ☐ **Execute** - Dispatch agent OR follow skill exactly
 
 **Responding WITHOUT completing this checklist = automatic failure.**
 
@@ -123,6 +127,46 @@ Every time you skip checking for skills:
 
 **No tool use without skill check first.**
 
+## MANDATORY PRE-TOOL-USE PROTOCOL
+
+**Before EVERY tool call** (Read, Grep, Glob, Bash), complete this check:
+
+```
+Tool I'm about to use: [tool-name]
+Purpose: [what I'm trying to learn/do]
+
+Orchestration Decision:
+☐ This is explicit user request to read specific file → Direct tool OK
+☐ This is investigation/exploration/search → MUST use agent
+
+Agent I'm dispatching: [agent-name]
+Model: Opus (default, unless user specified otherwise)
+OR
+Exception justification: [why user explicitly requested this specific file]
+```
+
+**If you skip this check, you are automatically in violation.**
+
+**Examples:**
+
+❌ **WRONG:**
+```
+User: "Where are errors handled?"
+Me: [uses Grep to search for "error"]
+```
+**Why wrong:** No orchestration decision documented, direct tool usage for exploration.
+
+✅ **CORRECT:**
+```
+User: "Where are errors handled?"
+Me:
+Tool I'm about to use: None (using agent)
+Purpose: Find error handling code
+Orchestration Decision: Investigation task → Explore agent
+Agent I'm dispatching: Explore
+Model: Opus
+```
+
 ## ORCHESTRATOR Principle: Agent-First Always
 
 **Your role is ORCHESTRATOR, not operator.**
@@ -141,42 +185,44 @@ You don't read files, run grep chains, or manually explore – you **dispatch ag
 - Main context stays lean for reasoning
 - **15x more efficient** than direct file operations
 
-### Your Decision: Agent or Direct?
+### Your Role: ORCHESTRATOR (No Exceptions)
 
-**Use agents for:**
-- Any exploration of codebase structure
-- Understanding architecture or patterns
-- Finding files/code by keyword (YES, even "simple" grep lookups)
-- Multi-step research or analysis
-- Code review or quality assessment
-- Implementation planning
-- Architectural decisions
-- Anything requiring 2+ tool calls
-- ANY search operation (grep, glob, find)
+**You dispatch agents. You do not operate tools directly.**
 
-**Use direct Read ONLY when ALL conditions are true:**
-1. You have ONE specific file path (not "a few files")
-2. The user explicitly mentioned that exact file
-3. You will NOT need to read any other files after
-4. You are NOT in an investigation/exploration context
+**Default answer for ANY exploration/search/investigation:** Use one of the three built-in agents (Explore, Plan, or general-purpose) with Opus model.
 
-**⚠️ The exception is NARROW - most reads should use agents:**
-- "I know exactly where it is" → Still use agent (you're not special)
-- "It's just one file" → Still use agent (that's what they all say)
-- "Simple lookup" → Still use agent (lookups chain into explorations)
-- "I'm 90% done" → ESPECIALLY use agent (sunk cost fallacy)
+**Which agent?**
+- **Explore** - Fast codebase navigation, finding files/code, understanding architecture
+- **Plan** - Implementation planning, breaking down features into tasks
+- **general-purpose** - Multi-step research, complex investigations, anything not fitting Explore/Plan
 
-**Default answer: Use an agent. The exception is rare.**
+**Model Selection:** Always use **Opus** for agent dispatching unless user explicitly specifies otherwise (e.g., "use Haiku", "use Sonnet").
+
+**Only exception:** User explicitly provides a file path AND explicitly requests you read it (e.g., "read src/foo.ts").
+
+**All these are STILL orchestration tasks:**
+- ❌ "I need to understand the codebase structure first" → Explore agent
+- ❌ "Let me check what files handle X" → Explore agent
+- ❌ "I'll grep for the function definition" → Explore agent
+- ❌ "User mentioned component Y, let me find it" → Explore agent
+- ❌ "I'm confident it's in src/foo/" → Explore agent
+- ❌ "Just checking one file to confirm" → Explore agent
+- ❌ "This search premise seems invalid, won't find anything" → Explore agent (you're not the validator)
+
+**You don't validate search premises.** Dispatch the agent, let the agent report back if search yields nothing.
+
+**If you're about to use Read, Grep, Glob, or Bash for investigation:**
+You are breaking ORCHESTRATOR. Use an agent instead.
 
 ### Available Agents
 
 #### Built-in Agents (Claude Code)
-| Agent | Purpose |
-|-------|---------|
-| `Explore` | Codebase navigation & discovery |
-| `general-purpose` | Multi-step research |
-| `Plan` | Implementation planning |
-| `claude-code-guide` | Claude Code documentation |
+| Agent | Purpose | When to Use | Model Default |
+|-------|---------|-------------|---------------|
+| **`Explore`** | Codebase navigation & discovery | Finding files/code, understanding architecture, searching patterns | **Opus** |
+| **`Plan`** | Implementation planning | Breaking down features, creating task lists, architecting solutions | **Opus** |
+| **`general-purpose`** | Multi-step research & investigation | Complex analysis, research requiring multiple steps, anything not fitting Explore/Plan | **Opus** |
+| `claude-code-guide` | Claude Code documentation | Questions about Claude Code features, hooks, MCP, SDK | Opus |
 
 #### Ring Agents (Specialized)
 | Agent | Purpose |
@@ -194,28 +240,35 @@ You don't read files, run grep chains, or manually explore – you **dispatch ag
 START: I need to do something with the codebase
 
 ├─▶ Explore/find/understand code
-│   └─▶ Use Explore agent
+│   └─▶ Use Explore agent with Opus
+│       Examples: "Find where X is used", "Understand auth flow", "Locate config files"
 │
 ├─▶ Search for something (grep, find function, locate file)
-│   └─▶ Use Explore agent (YES, even "simple" searches)
+│   └─▶ Use Explore agent with Opus (YES, even "simple" searches)
+│       Examples: "Search for handleError", "Find all API endpoints", "Locate middleware"
 │
-├─▶ Multi-step research or investigation
-│   └─▶ Use general-purpose agent
+├─▶ Plan implementation or break down features
+│   └─▶ Use Plan agent with Opus
+│       Examples: "Plan how to add feature X", "Break down this task", "Design solution for Y"
+│
+├─▶ Multi-step research or complex investigation
+│   └─▶ Use general-purpose agent with Opus
+│       Examples: "Research and analyze X", "Investigate Y across multiple files", "Deep dive into Z"
 │
 ├─▶ Review code quality
 │   └─▶ Use ALL THREE in parallel:
-│       • ring-default:code-reviewer
-│       • ring-default:business-logic-reviewer
-│       • ring-default:security-reviewer
+│       • ring-default:code-reviewer (with Opus)
+│       • ring-default:business-logic-reviewer (with Opus)
+│       • ring-default:security-reviewer (with Opus)
 │
-├─▶ Create implementation tasks
-│   └─▶ Use ring-default:write-plan agent
+├─▶ Create implementation plan document
+│   └─▶ Use ring-default:write-plan agent with Opus
 │
 ├─▶ Question about Claude Code
-│   └─▶ Use claude-code-guide agent
+│   └─▶ Use claude-code-guide agent with Opus
 │
-└─▶ User explicitly asked about a specific file by name
-    └─▶ Read directly (ONLY if not in investigation context)
+└─▶ User explicitly said "read [specific-file]"
+    └─▶ Read directly (ONLY if user explicitly requested specific file read)
 ```
 
 ### Anti-Patterns: Context Sabotage
@@ -249,6 +302,55 @@ These mean you're breaking the ORCHESTRATOR role and burning context:
 - "Finding the right file is easier by hand" → WRONG. That's what Explore does.
 - "This doesn't need an agent" → WRONG. If you're unsure, use one.
 - "Agent adds overhead for simple tasks" → WRONG. YOUR overhead is 15x worse.
+- "This search premise is invalid, agent would find nothing" → WRONG. You're not the validator. Dispatch anyway.
+
+### Common Violation Patterns (How You Actually Fail)
+
+These are the ACTUAL patterns where you break ORCHESTRATOR, with what you should do instead:
+
+**Pattern 1: "Let me understand X first"**
+```
+❌ Your thought: "Let me read a few files to understand the auth system"
+✅ Correct: Task tool with Explore agent: "Understand auth system architecture"
+```
+
+**Pattern 2: "I'll quickly check Y"**
+```
+❌ Your thought: "I'll quickly grep for 'handleError' to see where it's used"
+✅ Correct: Task tool with Explore agent: "Find all uses of handleError function"
+```
+
+**Pattern 3: "User mentioned Z"**
+```
+❌ Your thought: "User mentioned config.ts, let me read it"
+✅ Correct: Task tool with Explore agent: "Examine config.ts and related configuration"
+(Exception: User said "read config.ts" explicitly)
+```
+
+**Pattern 4: "I need context to give the agent good instructions"**
+```
+❌ Your thought: "Let me scan the codebase first so I can write better agent instructions"
+✅ Correct: Task tool with Explore agent with broad instructions: "Explore codebase for [topic]"
+(Agent BUILDS context for you)
+```
+
+**Pattern 5: "I already started, might as well finish"**
+```
+❌ Your thought: "I already read 3 files, just 2 more to complete the picture"
+✅ Correct: STOP. Dispatch Explore agent with: "Continue investigation of [topic], considering [what I learned]"
+```
+
+**Pattern 6: "I can see this won't work"**
+```
+❌ Your thought: "This search premise is invalid, dispatching agent would be wasteful"
+✅ Correct: Dispatch agent anyway - let AGENT determine if search is valid
+
+You are ORCHESTRATOR, not premise validator.
+Agent will report back: "Not found" or "Search complete, no results"
+That's the agent's job, not yours.
+```
+
+**If you recognize yourself in ANY of these patterns, you are violating ORCHESTRATOR.**
 
 ### Ring Reviewers: ALWAYS Parallel
 
@@ -283,11 +385,27 @@ If a skill has a checklist, YOU MUST create TodoWrite todos for EACH item.
 ## TodoWrite Requirement
 
 When starting ANY task:
-1. First todo: "Check for relevant skills"
-2. Mark complete only after actual check
-3. Document which skills apply/don't apply
+1. **First todo: "Orchestration decision: [agent-name or direct+justification]"**
+2. **Second todo: "Check for relevant skills"**
+3. Mark complete only after actual check
+4. Document which skills apply/don't apply
 
-Skipping this todo = automatic failure.
+**Orchestration todo is FIRST because it determines if you even use tools directly.**
+
+Skipping either todo = automatic failure.
+
+**Examples:**
+
+✅ **Correct orchestration todo:**
+- "Orchestration decision: Explore agent with Opus for codebase structure"
+- "Orchestration decision: Explore agent with Opus for finding auth code"
+- "Orchestration decision: general-purpose agent with Opus for multi-step analysis"
+- "Orchestration decision: Direct read of src/config.ts (user requested explicitly)"
+
+❌ **Wrong (no orchestration todo):**
+- "Read config files" (skipped orchestration decision)
+- "Search for error handlers" (skipped orchestration decision)
+- "Orchestration decision: Explore agent" (missing model specification)
 
 ### MANDATORY-USER-MESSAGE TodoWrite Integration
 
@@ -437,10 +555,17 @@ Your human partner's specific instructions describe WHAT to do, not HOW.
 ## Summary
 
 **Starting any task:**
-1. If relevant skill exists → Use the skill
-3. Announce you're using it
-4. Follow what it says
+1. **Orchestration decision** → Which agent handles this? Use **Opus** model by default (TodoWrite required)
+2. **Skill check** → If relevant skill exists, use it
+3. **Announce** → State which skill/agent you're using
+4. **Execute** → Dispatch agent with Opus OR follow skill exactly
+
+**Before ANY tool use (Read/Grep/Glob/Bash):** Complete PRE-TOOL-USE PROTOCOL checklist.
 
 **Skill has checklist?** TodoWrite for every item.
+
+**Default answer: Use an agent with Opus. Exception is rare (user explicitly requests specific file read).**
+
+**Model default: Opus** (unless user specifies Haiku/Sonnet explicitly).
 
 **Finding a relevant skill = mandatory to read and use it. Not optional.**
