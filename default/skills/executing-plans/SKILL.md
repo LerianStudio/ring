@@ -8,9 +8,13 @@ when_to_use: Use when partner provides a complete implementation plan to execute
 
 ## Overview
 
-Load plan, review critically, execute tasks in batches, report for review between batches.
+Load plan, review critically, choose execution mode, execute tasks with code review.
 
-**Core principle:** Batch execution with checkpoints for architect review.
+**Core principle:** User chooses between autonomous execution or batch execution with human review checkpoints.
+
+**Two execution modes:**
+- **One-go (autonomous):** Execute all batches continuously with code review, report only at completion
+- **Batch (with review):** Execute one batch, code review, pause for human feedback, repeat
 
 **Announce at start:** "I'm using the executing-plans skill to implement this plan."
 
@@ -20,18 +24,82 @@ Load plan, review critically, execute tasks in batches, report for review betwee
 1. Read plan file
 2. Review critically - identify any questions or concerns about the plan
 3. If concerns: Raise them with your human partner before starting
-4. If no concerns: Create TodoWrite and proceed
+4. If no concerns: Create TodoWrite and proceed to Step 2
 
-### Step 2: Execute Batch
+### Step 2: Choose Execution Mode (MANDATORY)
+
+**⚠️ THIS STEP IS NON-NEGOTIABLE. You MUST use `AskUserQuestion` before executing ANY tasks.**
+
+Use `AskUserQuestion` to determine execution mode:
+
+```
+AskUserQuestion(
+  questions: [{
+    header: "Mode",
+    question: "How would you like to execute this plan?",
+    options: [
+      { label: "One-go (autonomous)", description: "Execute all batches automatically with code review between each, no human review until completion" },
+      { label: "Batch (with review)", description: "Execute in batches, pause for human review after each batch's code review" }
+    ],
+    multiSelect: false
+  }]
+)
+```
+
+**Based on response:**
+- **One-go** → Execute all batches continuously (Steps 3-4 loop until done, skip Step 5)
+- **Batch** → Execute one batch, report, wait for feedback (Steps 3-5 loop)
+
+### Why AskUserQuestion is Mandatory (Not "Contextual Guidance")
+
+**This is a structural checkpoint, not optional UX polish.**
+
+User saying "don't wait", "don't ask questions", or "just execute" does NOT skip this step because:
+
+1. **Execution mode affects architecture** - One-go vs batch determines review checkpoints, error recovery paths, and rollback points
+2. **Implicit intent ≠ explicit choice** - "Don't wait" might mean "use one-go" OR "ask quickly and proceed"
+3. **AskUserQuestion takes 3 seconds** - It's not an interruption, it's a confirmation
+4. **Emergency pressure is exactly when mistakes happen** - Structural gates exist FOR high-pressure moments
+
+**Common Rationalizations That Mean You're About to Violate This Rule:**
+
+| Rationalization | Reality |
+|-----------------|---------|
+| "User intent is crystal clear" | Intent is not the same as explicit selection. Ask anyway. |
+| "This is contextual guidance, not absolute law" | Wrong. It says MANDATORY. That means mandatory. |
+| "Asking would violate their 'don't ask' instruction" | AskUserQuestion is a 3-second structural gate, not a conversation. |
+| "Skills are tools, not bureaucratic checklists" | This skill IS the checklist. Follow it. |
+| "Interpreting spirit over letter" | The spirit IS the letter. Use AskUserQuestion. |
+| "User already chose by saying 'just execute'" | Verbal shorthand ≠ structured mode selection. Ask. |
+
+**If you catch yourself thinking any of these → STOP → Use AskUserQuestion anyway.**
+
+### Step 3: Execute Batch
 **Default: First 3 tasks**
+
+**Agent Selection:** For each task, dispatch to the appropriate specialized agent based on task type:
+
+| Task Type | Preferred Agent | Fallback |
+|-----------|-----------------|----------|
+| Backend (Go) | `ring-developers:backend-engineer-golang` | `general-purpose` |
+| Backend (Python) | `ring-developers:backend-engineer-python` | `general-purpose` |
+| Backend (other) | `ring-developers:backend-engineer-*` | `general-purpose` |
+| Frontend (React) | `ring-developers:frontend-engineer-react` | `general-purpose` |
+| Frontend (other) | `ring-developers:frontend-engineer-*` | `general-purpose` |
+| Infrastructure | `ring-developers:devops-engineer` | `general-purpose` |
+| Testing | `ring-developers:qa-analyst` | `general-purpose` |
+| Reliability | `ring-developers:sre` | `general-purpose` |
+
+**Note:** If plan specifies a recommended agent in its header, use that. If `ring-developers` plugin is unavailable, fall back to `general-purpose`.
 
 For each task:
 1. Mark as in_progress
-2. Follow each step exactly (plan has bite-sized steps)
-3. Run verifications as specified
-4. Mark as completed
+2. Dispatch to appropriate specialized agent (or fallback)
+3. Agent follows each step exactly (plan has bite-sized steps)
+4. Run verifications as specified
+5. Mark as completed
 
-### Step 3: Run Code Review
+### Step 4: Run Code Review
 **After each batch execution, REQUIRED:**
 
 1. **Dispatch all 3 reviewers in parallel:**
@@ -56,22 +124,28 @@ For each task:
 - Format: `FIXME(nitpick): [Issue description] (reported by [reviewer] on [date], severity: Cosmetic)`
 - Low-priority improvements tracked inline
 
-3. **Only proceed to reporting when:**
+3. **Only proceed when:**
    - Zero Critical/High/Medium issues remain
    - All Low/Cosmetic issues have TODO/FIXME comments
 
-### Step 4: Report
-When batch complete AND code review passed:
+### Step 5: Report and Continue
+
+**Behavior depends on execution mode chosen in Step 2:**
+
+**One-go mode:**
+- Log batch completion internally
+- Immediately proceed to next batch (Step 3)
+- Continue until all tasks complete
+- Only report to human at final completion
+
+**Batch mode:**
 - Show what was implemented
 - Show verification output
 - Show code review results (severity breakdown)
 - Say: "Ready for feedback."
-
-### Step 5: Continue
-Based on feedback:
-- Apply changes if needed
-- Execute next batch
-- Repeat until complete
+- Wait for human response
+- Apply changes if requested
+- Then proceed to next batch (Step 3)
 
 ### Step 6: Complete Development
 
@@ -100,11 +174,15 @@ After all tasks complete and verified:
 
 ## Remember
 - Review plan critically first
+- **MANDATORY: Use `AskUserQuestion` for execution mode** - NO exceptions, even if user says "don't ask"
+- **Use specialized agents:** Prefer `ring-developers:*` agents over `general-purpose` when available
 - Follow plan steps exactly
 - Don't skip verifications
 - Run code review after each batch (all 3 reviewers in parallel)
 - Fix Critical/High/Medium immediately - no TODO comments for these
 - Only Low issues get TODO comments, Cosmetic get FIXME
 - Reference skills when plan says to
-- Between batches: just report and wait
+- **One-go mode:** Continue autonomously until completion
+- **Batch mode:** Report and wait for feedback between batches
 - Stop when blocked, don't guess
+- **If rationalizing why to skip AskUserQuestion → You're wrong → Ask anyway**

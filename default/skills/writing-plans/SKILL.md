@@ -39,9 +39,29 @@ Task(
 )
 ```
 
-**Step 2: Report to human**
+**Step 2: Ask user about execution**
 
-After the agent completes, it will save the plan and offer execution options to the human partner.
+After the agent completes and saves the plan, use `AskUserQuestion` to determine next steps:
+
+```
+AskUserQuestion(
+  questions: [{
+    header: "Execution",
+    question: "The plan is ready. Would you like to execute it now or save it for later?",
+    options: [
+      { label: "Execute now", description: "Start implementation in current session using subagent-driven development" },
+      { label: "Execute in parallel session", description: "Open a new agent session in the worktree for batch execution" },
+      { label: "Save for later", description: "Keep the plan for manual review before execution" }
+    ],
+    multiSelect: false
+  }]
+)
+```
+
+**Based on response:**
+- **Execute now** → Use `ring:subagent-driven-development` skill
+- **Execute in parallel session** → Instruct user to open new session and use `ring:executing-plans`
+- **Save for later** → Report plan location and end workflow
 
 ## Why Use an Agent?
 
@@ -62,7 +82,7 @@ The write-plan agent will:
 6. Add code review checkpoints after task batches
 7. Verify the plan passes the Zero-Context Test
 8. Save to `docs/plans/YYYY-MM-DD-<feature-name>.md`
-9. Offer execution options (subagent-driven or parallel session)
+9. Report back (supervisor then uses `AskUserQuestion` for execution choice)
 
 ## Requirements for Plans
 
@@ -75,21 +95,51 @@ The agent ensures every plan includes:
 - ✅ Failure recovery steps
 - ✅ Code review checkpoints with severity-based handling
 - ✅ Passes Zero-Context Test (executable with only the document)
+- ✅ **Recommended agents per task** (see Agent Selection below)
 
-## After Plan Creation
+## Agent Selection for Execution
 
-The agent will report back and offer two execution options:
+Plans should specify which specialized agents to use for each task type. During execution, prefer specialized agents over general-purpose when available.
 
-**1. Subagent-Driven (current session)**
-- Agent dispatches fresh subagent per task
+**Pattern matching for agent selection:**
+
+| Task Type | Agent Pattern | Examples |
+|-----------|---------------|----------|
+| Backend API/services | `ring-developers:backend-engineer-*` | `backend-engineer-golang`, `backend-engineer-python` |
+| Frontend UI/components | `ring-developers:frontend-engineer-*` | `frontend-engineer-react`, `frontend-engineer-vue` |
+| Infrastructure/CI/CD | `ring-developers:devops-engineer` | Single agent |
+| Testing strategy | `ring-developers:qa-analyst` | Single agent |
+| Monitoring/reliability | `ring-developers:sre` | Single agent |
+
+**Plan header should include:**
+```markdown
+## Recommended Agents
+- Backend tasks: `ring-developers:backend-engineer-golang` (or language variant)
+- Frontend tasks: `ring-developers:frontend-engineer-react` (or framework variant)
+- Fallback: `general-purpose` if specialized agent unavailable
+```
+
+**Agent availability check:** If `ring-developers` plugin is not installed, execution falls back to `general-purpose` Task agents automatically.
+
+## Execution Options Reference
+
+When user selects an execution mode via `AskUserQuestion`:
+
+**1. Execute now (Subagent-Driven)**
+- Dispatches fresh subagent per task in current session
 - Code review between tasks
 - Fast iteration with quality gates
-- Use ring:subagent-driven-development
+- Uses `ring:subagent-driven-development`
 
-**2. Parallel Session (separate session)**
-- Open new agent session in worktree
-- Batch execution with checkpoints
-- Use ring:executing-plans
+**2. Execute in parallel session**
+- User opens new agent session in the worktree
+- Batch execution with human review checkpoints
+- Uses `ring:executing-plans`
+
+**3. Save for later**
+- Plan saved to `docs/plans/YYYY-MM-DD-<feature-name>.md`
+- User reviews plan manually before deciding on execution
+- Can invoke `ring:executing-plans` later with the plan file
 
 ## Required Patterns
 
