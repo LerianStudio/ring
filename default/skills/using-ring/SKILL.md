@@ -65,23 +65,31 @@ Now, regarding your question about...
 
 ## Common Rationalizations That Mean You're About To Fail
 
-If you catch yourself thinking ANY of these thoughts, STOP. You are rationalizing. Check for and use the skill.
+If you catch yourself thinking ANY of these thoughts, STOP. You are rationalizing. Check for and use the skill. Also check: are you being an OPERATOR instead of ORCHESTRATOR?
 
+**Skill Checks:**
 - "This is just a simple question" → WRONG. Questions are tasks. Check for skills.
-- "I can check git/files quickly" → WRONG. Files don't have conversation context. Check for skills.
-- "Let me gather information first" → WRONG. Skills tell you HOW to gather information. Check for skills.
 - "This doesn't need a formal skill" → WRONG. If a skill exists for it, use it.
 - "I remember this skill" → WRONG. Skills evolve. Run the current version.
 - "This doesn't count as a task" → WRONG. If you're taking action, it's a task. Check for skills.
 - "The skill is overkill for this" → WRONG. Skills exist because simple things become complex. Use it.
 - "I'll just do this one thing first" → WRONG. Check for skills BEFORE doing anything.
-- "Let me gather information first" → WRONG. Skills tell you HOW to gather information. Check for skills.
 - "I need context before checking skills" → WRONG. Gathering context IS a task. Check for skills first.
-- "Just a quick look at files" → WRONG. Looking at files requires skills check first.
 
-**Why:** Skills document proven techniques that save time and prevent mistakes. Not using available skills means repeating solved problems and making known errors.
+**Orchestrator Breaks (Direct Tool Usage):**
+- "I can check git/files quickly" → WRONG. Use agents, stay ORCHESTRATOR.
+- "Let me gather information first" → WRONG. Dispatch agent to gather it.
+- "Just a quick look at files" → WRONG. That "quick" becomes 20k tokens. Use agent.
+- "I'll scan the codebase manually" → WRONG. That's operator behavior. Use Explore.
+- "This exploration is too simple for an agent" → WRONG. Simplicity makes agents more efficient.
+- "I already started reading files" → WRONG. Stop. Dispatch agent instead.
+- "It's faster to do it myself" → WRONG. You're burning context. Agents are 15x faster contextually.
 
-If a skill for your task exists, you must use it or you will fail at your task.
+**Why:** Skills document proven techniques. Agents preserve context. Not using them means repeating mistakes and wasting tokens.
+
+**Both matter:** Skills check is mandatory. ORCHESTRATOR approach is mandatory.
+
+If a skill exists or if you're about to use tools directly, you must use the proper approach or you will fail.
 
 ## The Cost of Skipping Skills
 
@@ -103,89 +111,120 @@ Every time you skip checking for skills:
 
 **No tool use without skill check first.**
 
-## Agent-First Exploration (Context Efficiency)
+## ORCHESTRATOR Principle: Agent-First Always
 
-**The Problem:** Direct Glob/Grep/Read chains consume 50-100k tokens in main context.
-**The Solution:** Agents offload work to subagents, using only ~2k tokens in main.
+**Your role is ORCHESTRATOR, not operator.**
+
+You don't read files, run grep chains, or manually explore – you **dispatch agents** to do the work and return results. This is not optional. This is mandatory for context efficiency.
+
+**The Problem with Direct Tool Usage:**
+- Manual exploration chains: ~30-100k tokens in main context
+- Each file read adds context bloat
+- Grep/Glob chains multiply the problem
+- User sees work happening but context explodes
+
+**The Solution: Orchestration:**
+- Dispatch agents to handle complexity
+- Agents return only essential findings (~2-5k tokens)
+- Main context stays lean for reasoning
+- **15x more efficient** than direct file operations
+
+### Your Decision: Agent or Direct?
+
+**Use agents for:**
+- Any exploration of codebase structure
+- Understanding architecture or patterns
+- Finding files/code by keyword
+- Multi-step research or analysis
+- Code review or quality assessment
+- Implementation planning
+- Architectural decisions
+- Anything requiring 2+ tool calls
+
+**Use direct Read ONLY for:**
+- ONE specific known file path you can name right now
+- File you can describe precisely: "the MANUAL.md at root"
+- You cannot go exploring after reading it (no chain reactions)
+
+**Default answer when uncertain:** Use an agent.
 
 ### Available Agents
 
 #### Built-in Agents (Claude Code)
-| Agent | When to Use |
-|-------|-------------|
-| `Explore` | Codebase questions, finding files, understanding architecture |
-| `general-purpose` | Complex multi-step research, tasks requiring many tool calls |
-| `Plan` | Creating implementation plans, exploration before coding |
-| `claude-code-guide` | Questions about Claude Code features, SDK, or capabilities |
+| Agent | Purpose |
+|-------|---------|
+| `Explore` | Codebase navigation & discovery |
+| `general-purpose` | Multi-step research |
+| `Plan` | Implementation planning |
+| `claude-code-guide` | Claude Code documentation |
 
-#### Ring Agents (Custom)
-| Agent | When to Use |
-|-------|-------------|
-| `ring-default:code-reviewer` | Review architecture, patterns, maintainability |
-| `ring-default:business-logic-reviewer` | Review correctness, edge cases, requirements |
-| `ring-default:security-reviewer` | Review vulnerabilities, OWASP, auth, validation |
-| `ring-default:write-plan` | Generate detailed implementation plans |
+#### Ring Agents (Specialized)
+| Agent | Purpose |
+|-------|---------|
+| `ring-default:code-reviewer` | Architecture & patterns |
+| `ring-default:business-logic-reviewer` | Correctness & requirements |
+| `ring-default:security-reviewer` | Security & OWASP |
+| `ring-default:write-plan` | Implementation planning |
 
-### Decision Tree: Which Agent?
+### Decision: Which Agent?
+
+**Don't ask "should I use an agent?" Ask "which agent?"**
 
 ```
-START: What am I trying to do?
+START: I need to do something with the codebase
+
+├─▶ Explore/find/understand code
+│   └─▶ Use Explore agent
 │
-├─▶ "Understand/explore codebase"
-│   └─▶ Use `Explore` agent
+├─▶ Multi-step research or investigation
+│   └─▶ Use general-purpose agent
 │
-├─▶ "Find specific code/files"
-│   └─▶ Use `Explore` agent (NOT Glob/Grep chains)
+├─▶ Review code quality
+│   └─▶ Use ALL THREE in parallel:
+│       • code-reviewer
+│       • business-logic-reviewer
+│       • security-reviewer
 │
-├─▶ "Complex research with many steps"
-│   └─▶ Use `general-purpose` agent
+├─▶ Create implementation tasks
+│   └─▶ Use write-plan agent
 │
-├─▶ "Review code for quality"
-│   └─▶ Use Ring reviewers IN PARALLEL:
-│       • ring-default:code-reviewer
-│       • ring-default:business-logic-reviewer
-│       • ring-default:security-reviewer
+├─▶ Question about Claude Code
+│   └─▶ Use claude-code-guide agent
 │
-├─▶ "Create implementation plan"
-│   └─▶ Use `ring-default:write-plan` agent
-│
-├─▶ "Question about Claude Code itself"
-│   └─▶ Use `claude-code-guide` agent
-│
-└─▶ "Read ONE specific known file"
-    └─▶ OK to use `Read` directly
+└─▶ I have ONE specific file path memorized
+    └─▶ Read directly (and ONLY that file)
 ```
 
-### The 3-File Rule
+### Anti-Patterns: Context Sabotage
 
-**If you'll need to read more than 3 files → Use an agent instead.**
+These mean you're breaking the ORCHESTRATOR role and burning context:
 
-Why? At 3+ files, you're exploring, not targeted reading. Agents do this better.
-
-### Rationalizations That Mean You're Burning Context
-
-- "I'll just quickly check this file" → Will you check more after? Use agent.
-- "Let me see what's in this directory" → That's exploration. Use agent.
-- "I need context before using an agent" → Agents gather context FOR you.
-- "It's faster to do it myself" → Agents are 15x more context-efficient.
-- "I already started this chain" → Switch to agent NOW. Sunk cost fallacy.
+- "I'll quickly grep for X" → WRONG. Use Explore agent.
+- "Let me scan a few files" → WRONG. Use Explore agent.
+- "I need context first, then delegate" → WRONG. Delegate first, agent returns context.
+- "I'll do a quick manual check" → WRONG. That "quick" becomes 20k tokens.
+- "I already started reading files" → WRONG. Stop, dispatch agent instead.
+- "Finding the right file is easier by hand" → WRONG. That's what Explore does.
+- "I'll just peek at the structure" → WRONG. Use Explore agent.
+- "This doesn't need an agent" → WRONG. If you're unsure, use one.
 
 ### Ring Reviewers: ALWAYS Parallel
 
-When using Ring reviewers, dispatch ALL THREE in a single message:
+When dispatching code reviewers, **single message with 3 Task calls:**
 
 ```
-✅ CORRECT: One message with 3 Task calls (parallel)
+✅ CORRECT: One message with 3 Task calls (all in parallel)
 ❌ WRONG: Three separate messages (sequential, 3x slower)
 ```
 
-### Context Cost Comparison
+### Context Efficiency: Orchestrator Wins
 
-| Approach | Tokens Used |
-|----------|-------------|
-| Manual exploration (10 tool calls) | ~30,000 tokens |
-| Single Explore agent call | ~2,000 tokens |
-| **Savings** | **15x more efficient** |
+| Approach | Context Cost | Your Role |
+|----------|--------------|-----------|
+| Manual file reading (5 files) | ~25k tokens | Operator |
+| Manual grep chains (10 searches) | ~50k tokens | Operator |
+| Explore agent dispatch | ~2-3k tokens | Orchestrator |
+| **Savings** | **15-25x more efficient** | **Orchestrator always wins** |
 
 ## Skills with Checklists
 

@@ -57,13 +57,6 @@ ring/                                  # Monorepo root
 │   │   ├── session-start.sh       # Load skills quick reference
 │   │   ├── generate-skills-ref.py # Parse SKILL.md frontmatter
 │   │   └── claude-md-reminder.sh  # CLAUDE.md reminder on prompt submit
-│   ├── lib/                       # Infrastructure utilities (9 scripts)
-│   │   ├── common.sh              # Shared shell functions
-│   │   ├── preflight-checker.sh   # Validate prerequisites
-│   │   ├── compliance-validator.sh # Check skill adherence
-│   │   ├── metrics-tracker.sh     # Usage statistics
-│   │   ├── skill-matcher.sh       # Task-to-skill mapping
-│   │   └── output-validator.sh    # Response format validation
 │   └── docs/                      # Documentation
 ├── developers/                    # Developer Agents plugin (ring-developers v0.0.1)
 │   └── agents/                    # 5 specialized developer agents
@@ -115,7 +108,6 @@ Skill tool: "ring:using-ring"              # Load mandatory workflows
 # Hook validation (from default plugin)
 bash default/hooks/session-start.sh      # Test skill loading
 python default/hooks/generate-skills-ref.py # Generate skill overview
-bash default/lib/preflight-checker.sh    # Validate prerequisites
 ```
 
 ## Key Workflows
@@ -136,7 +128,7 @@ bash default/lib/preflight-checker.sh    # Validate prerequisites
 4. Skill auto-loads next SessionStart via `default/hooks/generate-skills-ref.py`
 
 **For product/team-specific skills:**
-1. Create plugin directory: `mkdir -p product-xyz/{skills,agents,commands,hooks,lib}`
+1. Create plugin directory: `mkdir -p product-xyz/{skills,agents,commands,hooks}`
 2. Add to `.claude-plugin/marketplace.json`:
    ```json
    {
@@ -154,6 +146,38 @@ bash default/lib/preflight-checker.sh    # Validate prerequisites
 3. Test: `bash default/hooks/session-start.sh` outputs JSON with additionalContext
 4. SessionStart hooks run on `startup|resume` and `clear|compact`
 5. Note: `${CLAUDE_PLUGIN_ROOT}` resolves to plugin root (`default/` for core plugin)
+
+### Plugin-Specific Using-* Skills
+
+Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introduce available agents and capabilities:
+
+**Default Plugin:**
+- `using-ring` → ORCHESTRATOR principle, mandatory workflow
+- Always injected, always mandatory
+- Located: `default/skills/using-ring/SKILL.md`
+
+**Ring Developers Plugin:**
+- `using-developers` → 5 specialist developer agents
+- Auto-loads when ring-developers plugin is enabled
+- Located: `developers/skills/using-developers/SKILL.md`
+- Agents: backend-engineer-golang, devops-engineer, frontend-engineer, qa-analyst, sre
+
+**Ring Product Reporter Plugin:**
+- `using-product-reporter` → 2 FinOps agents for Brazilian compliance
+- Auto-loads when ring-product-reporter plugin is enabled
+- Located: `product-reporter/skills/using-product-reporter/SKILL.md`
+- Agents: finops-analyzer (compliance analysis), finops-automation (template generation)
+
+**Ring Team Product Plugin:**
+- `using-team-product` → Pre-dev workflow skills (8 gates)
+- Auto-loads when ring-team-product plugin is enabled
+- Located: `team-product/skills/using-team-product/SKILL.md`
+- Skills: 8 pre-dev gates for feature planning
+
+**Hook Configuration:**
+- Each plugin has: `{plugin}/hooks/hooks.json` + `{plugin}/hooks/session-start.sh`
+- SessionStart hook executes, outputs additionalContext with skill reference
+- Only plugins in marketplace.json get loaded (conditional)
 
 ### Creating Review Agents
 1. Add to `default/agents/your-reviewer.md` with output_schema

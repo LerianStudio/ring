@@ -1,54 +1,12 @@
-#!/usr/bin/env bash
-# SessionStart hook for ring-developers plugin
-# Provides overview of available developer agents
+#!/bin/bash
+# Session start hook for ring-developers plugin
+# Injects quick reference for developer specialist agents
 
-set -euo pipefail
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
-PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-
-# Generate agents overview
-agents_overview="# Ring Developers Plugin
-
-## Available Developer Agents
-
-Use these specialized agents via Task tool with \`subagent_type\`:
-
-| Agent | Expertise | Use For |
-|-------|-----------|---------|
-| \`ring-developers:backend-engineer-golang\` | Go, APIs, microservices, databases | Backend development, API design, database optimization |
-| \`ring-developers:frontend-engineer\` | React, Next.js, TypeScript | UI components, state management, frontend architecture |
-| \`ring-developers:devops-engineer\` | CI/CD, Docker, Kubernetes, IaC | Pipeline setup, containerization, infrastructure |
-| \`ring-developers:qa-analyst\` | Testing strategies, automation | Test planning, E2E testing, quality gates |
-| \`ring-developers:sre\` | Monitoring, reliability, performance | Observability, incident response, SLOs |
-
-## Agent Selection Guide
-
-**Use \`ring-developers:writing-code\` skill** to help identify the right agent for your task.
-
-### Quick Selection:
-- **Building APIs/services?** → \`backend-engineer-golang\`
-- **Building UI/dashboards?** → \`frontend-engineer\`
-- **Setting up pipelines/infra?** → \`devops-engineer\`
-- **Writing tests/QA strategy?** → \`qa-analyst\`
-- **Monitoring/reliability?** → \`sre\`
-
-### Example Usage:
-\`\`\`
-Task tool with subagent_type=\"ring-developers:backend-engineer-golang\"
-Prompt: \"Design a REST API for user authentication with JWT\"
-\`\`\`"
-
-# Escape for JSON
-overview_escaped=$(echo "$agents_overview" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | awk '{printf "%s\\n", $0}')
-
-cat <<EOF
+cat <<'EOF'
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "<ring-developers-plugin>\n${overview_escaped}\n</ring-developers-plugin>"
+    "additionalContext": "<ring-developers-system>\n**Developer Specialists Available**\n\nUse these specialized agents via Task tool with `subagent_type`:\n\n| Agent | Expertise |\n|-------|----------|\n| `backend-engineer-golang` | Go, APIs, microservices, databases |\n| `frontend-engineer` | React, TypeScript, UI, state management |\n| `devops-engineer` | CI/CD, Docker, Kubernetes, infrastructure |\n| `qa-analyst` | Testing, automation, quality gates |\n| `sre` | Monitoring, reliability, performance |\n\nFor full details and decision guide: Skill tool with \"ring-developers:using-developers\"\n</ring-developers-system>"
   }
 }
 EOF
-
-exit 0

@@ -179,30 +179,7 @@ default/hooks/
 - Auto-generates skills quick reference from frontmatter
 - Ensures mandatory workflows are loaded
 
-### 5. Library (`lib/`)
-**Purpose:** Supporting utilities for validation and orchestration
-
-**Structure:**
-```
-default/lib/
-├── common.sh              # Shared bash functions (2.9 KB)
-├── preflight-checker.sh   # Prerequisite validation (4.4 KB)
-├── compliance-validator.sh # Skill adherence checking (14 KB)
-├── skill-matcher.sh       # Task-to-skill mapping (4.0 KB)
-├── metrics-tracker.sh     # Usage statistics (7.8 KB)
-├── output-validator.sh    # Response format validation (3.0 KB)
-├── initialize-skills.sh   # Skill initialization (3.0 KB)
-├── skill-composer.sh      # Skill composition utility (2.2 KB)
-└── README.md              # Library documentation
-```
-
-**Key Characteristics:**
-- 9 infrastructure scripts (~40 KB total)
-- Bash scripts for infrastructure support
-- Can be called by skills or directly
-- Provide validation and metrics capabilities
-
-### 6. Plugin Configuration (`.claude-plugin/`)
+### 5. Plugin Configuration (`.claude-plugin/`)
 **Purpose:** Integration metadata for Claude Code marketplace
 
 **Structure:**
