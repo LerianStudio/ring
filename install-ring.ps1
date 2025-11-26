@@ -1,6 +1,13 @@
 # Ring Plugin Marketplace Installer (PowerShell)
 $ErrorActionPreference = "Stop"
 
+# Check PowerShell version (3.0+ recommended for Invoke-RestMethod)
+if ($PSVersionTable.PSVersion.Major -lt 3) {
+    Write-Host "⚠️  PowerShell 3.0+ recommended. Current version: $($PSVersionTable.PSVersion)"
+    Write-Host "Some features may not work correctly."
+    Write-Host ""
+}
+
 Write-Host "================================================"
 Write-Host "Ring Plugin Marketplace Installer"
 Write-Host "================================================"

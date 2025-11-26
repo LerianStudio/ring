@@ -1,9 +1,10 @@
 #!/bin/bash
 set -e
 
-# Check bash version for associative array support
-if ((BASH_VERSINFO[0] < 4)); then
-    echo "⚠️  Bash 4+ required for full functionality. Some features may not work."
+# Check bash version (Bash 3.2+ required, works on macOS default bash)
+if ((BASH_VERSINFO[0] < 3 || (BASH_VERSINFO[0] == 3 && BASH_VERSINFO[1] < 2))); then
+    echo "❌ Bash 3.2+ required. Current version: ${BASH_VERSION}"
+    exit 1
 fi
 
 echo "================================================"
@@ -84,8 +85,9 @@ if command -v curl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
 
     if [ -n "$MARKETPLACE_DATA" ]; then
 
-        # Track installations
-        declare -A INSTALLED_PLUGINS
+        # Track installations (Bash 3.2 compatible - using indexed arrays)
+        PLUGIN_NAMES=()
+        PLUGIN_STATUSES=()
 
         # Loop through each plugin
         for ((i=0; i<$PLUGIN_COUNT; i++)); do
@@ -114,13 +116,16 @@ if command -v curl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
                 echo "🔧 Installing/updating $PLUGIN_NAME..."
                 if claude plugin install "$PLUGIN_NAME" 2>&1; then
                     echo "✅ $PLUGIN_NAME ready"
-                    INSTALLED_PLUGINS["$PLUGIN_NAME"]="installed"
+                    PLUGIN_NAMES+=("$PLUGIN_NAME")
+                    PLUGIN_STATUSES+=("installed")
                 else
                     echo "⚠️  Failed to install $PLUGIN_NAME (might not be published yet)"
-                    INSTALLED_PLUGINS["$PLUGIN_NAME"]="failed"
+                    PLUGIN_NAMES+=("$PLUGIN_NAME")
+                    PLUGIN_STATUSES+=("failed")
                 fi
             else
-                INSTALLED_PLUGINS["$PLUGIN_NAME"]="skipped"
+                PLUGIN_NAMES+=("$PLUGIN_NAME")
+                PLUGIN_STATUSES+=("skipped")
             fi
         done
 
@@ -132,9 +137,10 @@ if command -v curl >/dev/null 2>&1 && command -v jq >/dev/null 2>&1; then
         echo "Installed plugins:"
         echo "  ✓ ring-default (core - required)"
 
-        # Show installation status for each plugin
-        for plugin_name in "${!INSTALLED_PLUGINS[@]}"; do
-            status="${INSTALLED_PLUGINS[$plugin_name]}"
+        # Show installation status for each plugin (Bash 3.2 compatible)
+        for ((j=0; j<${#PLUGIN_NAMES[@]}; j++)); do
+            plugin_name="${PLUGIN_NAMES[$j]}"
+            status="${PLUGIN_STATUSES[$j]}"
             if [ "$status" = "installed" ]; then
                 echo "  ✓ $plugin_name"
             elif [ "$status" = "failed" ]; then
