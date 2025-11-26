@@ -123,8 +123,8 @@ Plans should specify which specialized agents to use for each task type. During 
 
 | Task Type | Agent Pattern | Examples |
 |-----------|---------------|----------|
-| Backend API/services | `ring-dev-team:backend-engineer-*` | `backend-engineer-golang`, `backend-engineer-python` |
-| Frontend UI/components | `ring-dev-team:frontend-engineer-*` | `frontend-engineer-react`, `frontend-engineer-vue` |
+| Backend API/services | `ring-dev-team:backend-engineer-*` | `backend-engineer-golang`, `backend-engineer-python`, `backend-engineer-typescript` |
+| Frontend UI/components | `ring-dev-team:frontend-engineer-*` | `frontend-engineer`, `frontend-engineer-typescript` |
 | Infrastructure/CI/CD | `ring-dev-team:devops-engineer` | Single agent |
 | Testing strategy | `ring-dev-team:qa-analyst` | Single agent |
 | Monitoring/reliability | `ring-dev-team:sre` | Single agent |
@@ -132,8 +132,8 @@ Plans should specify which specialized agents to use for each task type. During 
 **Plan header should include:**
 ```markdown
 ## Recommended Agents
-- Backend tasks: `ring-dev-team:backend-engineer-golang` (or language variant)
-- Frontend tasks: `ring-dev-team:frontend-engineer-react` (or framework variant)
+- Backend tasks: `ring-dev-team:backend-engineer-golang` (or language variant: `-python`, `-typescript`)
+- Frontend tasks: `ring-dev-team:frontend-engineer-typescript` (or generic `frontend-engineer`)
 - Fallback: `general-purpose` if specialized agent unavailable
 ```
 

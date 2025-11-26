@@ -136,4 +136,4 @@ Invoke this agent when the task involves:
 - CI/CD pipeline creation (use `ring-dev-team:devops-engineer`)
 - Test case writing and execution (use `ring-dev-team:qa-analyst`)
 - Docker/Kubernetes initial setup (use `ring-dev-team:devops-engineer`)
-- Business logic implementation (use `ring-dev-team:backend-engineer-golang`)
+- Business logic implementation (use `ring-dev-team:backend-engineer` or language-specific variant)

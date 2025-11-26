@@ -332,10 +332,20 @@ output_schema:
       pattern: "^## VERDICT: (PASS|FAIL|NEEDS_DISCUSSION)$"
       required: true
     - name: "Summary"
+      pattern: "^## Summary"
+      required: true
     - name: "Issues Found"
-    - name: "Critical|High|Medium|Low Issues" (categorized)
+      pattern: "^## Issues Found"
+      required: true
+    - name: "Categorized Issues"
+      pattern: "^### (Critical|High|Medium|Low)"
+      required: false
     - name: "What Was Done Well"
+      pattern: "^## What Was Done Well"
+      required: true
     - name: "Next Steps"
+      pattern: "^## Next Steps"
+      required: true
 ```
 
 **Used by:** code-reviewer, business-logic-reviewer, security-reviewer
