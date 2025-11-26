@@ -1,25 +1,30 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 # Session start hook for ring-pm-team plugin
 # Dynamically generates quick reference for pre-dev planning skills
 
 # Find the monorepo root (where shared/ directory exists)
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 PLUGIN_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 MONOREPO_ROOT="$(cd "$PLUGIN_ROOT/.." && pwd)"
 
 # Output file mapping: skill name -> output filename
 # This is structural knowledge not derivable from frontmatter
-declare -A OUTPUT_FILES=(
-  ["pre-dev-prd-creation"]="PRD.md"
-  ["pre-dev-feature-map"]="feature-map.md"
-  ["pre-dev-trd-creation"]="TRD.md"
-  ["pre-dev-api-design"]="API.md"
-  ["pre-dev-data-model"]="data-model.md"
-  ["pre-dev-dependency-map"]="dependencies.md"
-  ["pre-dev-task-breakdown"]="tasks.md"
-  ["pre-dev-subtask-creation"]="subtasks.md"
-)
+# NOTE: Using function instead of associative array for bash 3.x compatibility (macOS default)
+get_output_file() {
+  local skill_name="$1"
+  case "$skill_name" in
+    pre-dev-prd-creation)      echo "PRD.md" ;;
+    pre-dev-feature-map)       echo "feature-map.md" ;;
+    pre-dev-trd-creation)      echo "TRD.md" ;;
+    pre-dev-api-design)        echo "API.md" ;;
+    pre-dev-data-model)        echo "data-model.md" ;;
+    pre-dev-dependency-map)    echo "dependencies.md" ;;
+    pre-dev-task-breakdown)    echo "tasks.md" ;;
+    pre-dev-subtask-creation)  echo "subtasks.md" ;;
+    *)                         echo "${skill_name#pre-dev-}.md" ;;
+  esac
+}
 
 # Extract gate number from skill description (format: "Gate X: ...")
 extract_gate() {
@@ -43,7 +48,8 @@ build_skills_table() {
     skill_name=$(basename "$skill_dir")
     local gate
     gate=$(extract_gate "$skill_dir")
-    local output="${OUTPUT_FILES[$skill_name]:-${skill_name#pre-dev-}.md}"
+    local output
+    output=$(get_output_file "$skill_name")
 
     if [ -n "$gate" ]; then
       # Append row with gate for sorting (format: gate|skill|gate|output)
