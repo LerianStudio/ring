@@ -50,7 +50,8 @@ fi
 HOOK_INPUT=$(cat)
 
 # Check if ralph-loop is active (find any ralph-loop-*.local.md file)
-RALPH_STATE_FILE=$(find .claude -maxdepth 1 -name 'ralph-loop-*.local.md' -type f 2>/dev/null | head -1)
+# Note: Use || true to prevent set -e from exiting if .claude directory doesn't exist
+RALPH_STATE_FILE=$(find .claude -maxdepth 1 -name 'ralph-loop-*.local.md' -type f 2>/dev/null | head -1 || true)
 
 if [[ -z "$RALPH_STATE_FILE" ]] || [[ ! -f "$RALPH_STATE_FILE" ]]; then
   # No active loop - allow exit

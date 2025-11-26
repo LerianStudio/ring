@@ -1,7 +1,20 @@
 ---
 name: defense-in-depth
-description: Use when invalid data causes failures deep in execution, requiring validation at multiple system layers - validates at every layer data passes through to make bugs structurally impossible
-when_to_use: Use when invalid data causes failures deep in execution, requiring validation at multiple system layers - validates at every layer data passes through to make bugs structurally impossible
+description: |
+  Multi-layer validation pattern - validates data at EVERY layer it passes through
+  to make bugs structurally impossible, not just caught.
+
+trigger: |
+  - Bug caused by invalid data reaching deep layers
+  - Single validation point can be bypassed
+  - Need to prevent bug category, not just instance
+
+skip_when: |
+  - Validation already exists at all layers → check other issues
+  - Simple input validation sufficient → add single check
+
+related:
+  complementary: [root-cause-tracing]
 ---
 
 # Defense-in-Depth Validation

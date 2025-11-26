@@ -1,7 +1,20 @@
 ---
 name: regulatory-templates-gate1
-description: Gate 1 of regulatory templates - performs regulatory compliance analysis and field mapping
-when_to_use: Use after regulatory-templates-setup completes to perform compliance analysis and field mapping
+description: |
+  Gate 1 sub-skill - performs regulatory compliance analysis and field mapping
+  from template specifications.
+
+trigger: |
+  - regulatory-templates-setup completed
+  - Need to analyze regulatory specification and map fields
+
+skip_when: |
+  - Setup not complete → run setup first
+  - Gate 1 already passed → proceed to Gate 2
+
+sequence:
+  after: [regulatory-templates-setup]
+  before: [regulatory-templates-gate2]
 ---
 
 # Regulatory Templates - Gate 1: Placeholder Mapping (Post Gate 0)

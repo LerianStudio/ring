@@ -1,7 +1,20 @@
 ---
 name: regulatory-templates-gate2
-description: Gate 2 of regulatory templates - validates uncertain mappings and confirms all field specifications
-when_to_use: Use after gate1 to validate uncertain mappings and confirm field specifications
+description: |
+  Gate 2 sub-skill - validates uncertain mappings from Gate 1 and confirms
+  all field specifications through testing.
+
+trigger: |
+  - Gate 1 PASSED
+  - Need to validate mappings before template generation
+
+skip_when: |
+  - Gate 1 not passed → complete Gate 1 first
+  - Gate 2 already passed → proceed to Gate 3
+
+sequence:
+  after: [regulatory-templates-gate1]
+  before: [regulatory-templates-gate3]
 ---
 
 # Regulatory Templates - Gate 2: Technical Validation

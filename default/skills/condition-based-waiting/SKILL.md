@@ -1,7 +1,18 @@
 ---
 name: condition-based-waiting
-description: Use when tests have race conditions, timing dependencies, or inconsistent pass/fail behavior - replaces arbitrary timeouts with condition polling to wait for actual state changes, eliminating flaky tests from timing guesses
-when_to_use: Use when tests have race conditions, timing dependencies, or inconsistent pass/fail behavior - replaces arbitrary timeouts with condition polling to wait for actual state changes, eliminating flaky tests from timing guesses
+description: |
+  Flaky test fix pattern - replaces arbitrary timeouts with condition polling
+  that waits for actual state changes.
+
+trigger: |
+  - Tests use setTimeout/sleep with arbitrary values
+  - Tests are flaky (pass sometimes, fail under load)
+  - Tests timeout when run in parallel
+  - Waiting for async operations in tests
+
+skip_when: |
+  - Testing actual timing behavior (debounce, throttle) → timeout is correct
+  - Synchronous tests → no waiting needed
 ---
 
 # Condition-Based Waiting

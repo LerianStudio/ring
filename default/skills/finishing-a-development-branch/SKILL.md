@@ -1,7 +1,21 @@
 ---
 name: finishing-a-development-branch
-description: Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup
-when_to_use: Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup
+description: |
+  Branch completion workflow - guides merge/PR/cleanup decisions after implementation
+  is verified complete.
+
+trigger: |
+  - Implementation complete (tests passing)
+  - Ready to integrate work to main branch
+  - Need to decide: merge, PR, or more work
+
+skip_when: |
+  - Tests not passing → fix first
+  - Implementation incomplete → continue development
+  - Already merged → proceed to next task
+
+sequence:
+  after: [verification-before-completion, requesting-code-review]
 ---
 
 # Finishing a Development Branch

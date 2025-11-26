@@ -1,6 +1,21 @@
 ---
 name: regulatory-templates
-description: Use when mapping Brazilian regulatory templates (BACEN CADOCs, e-Financeira, DIMP, APIX) to Midaz/Reporter - orchestrates 3-gate validation process through modular sub-skills with dynamic context passing, culminating in template file generation
+description: |
+  3-gate regulatory template orchestrator - manages setup, Gate 1 (analysis),
+  Gate 2 (validation), Gate 3 (generation) for BACEN/RFB compliance.
+
+trigger: |
+  - Creating BACEN CADOCs (4010, 4016, 4111)
+  - Mapping e-Financeira, DIMP, APIX templates
+  - Full automation from analysis to template creation
+
+skip_when: |
+  - Non-Brazilian regulations → not applicable
+  - Analysis-only without template → use finops-analyzer directly
+  - Template already exists, just needs updates → modify directly
+
+sequence:
+  before: [regulatory-templates-setup]
 ---
 
 # Regulatory Templates - Orchestrator

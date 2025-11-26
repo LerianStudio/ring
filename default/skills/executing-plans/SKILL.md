@@ -1,7 +1,24 @@
 ---
 name: executing-plans
-description: Use when partner provides a complete implementation plan to execute in controlled batches with review checkpoints - loads plan, reviews critically, executes tasks in batches, reports for review between batches
-when_to_use: Use when partner provides a complete implementation plan to execute in controlled batches with review checkpoints - loads plan, reviews critically, executes tasks in batches, reports for review between batches
+description: |
+  Controlled plan execution with human review checkpoints - loads plan, executes
+  in batches, pauses for feedback. Supports one-go (autonomous) or batch modes.
+
+trigger: |
+  - Have a plan file ready to execute
+  - Want human review between task batches
+  - Need structured checkpoints during implementation
+
+skip_when: |
+  - Same session with independent tasks → use subagent-driven-development
+  - No plan exists → use writing-plans first
+  - Plan needs revision → use brainstorming first
+
+sequence:
+  after: [writing-plans, pre-dev-task-breakdown]
+
+related:
+  similar: [subagent-driven-development]
 ---
 
 # Executing Plans

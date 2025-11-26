@@ -379,15 +379,41 @@ ring/                                  # Monorepo root
    ```
 
 2. **Write SKILL.md with frontmatter**
-   ```markdown
+   ```yaml
    ---
    name: your-skill-name
-   description: Brief description of what this skill does
-   when_to_use: Specific situations when this skill applies
+   description: |
+     Brief description of WHAT this skill does (the method/technique).
+     1-2 sentences maximum.
+
+   trigger: |
+     - Specific condition that mandates using this skill
+     - Another trigger condition
+     - Use quantifiable criteria when possible
+
+   skip_when: |
+     - When NOT to use this skill → alternative
+     - Another exclusion condition
+
+   sequence:
+     after: [prerequisite-skill]   # Skills that should come before
+     before: [following-skill]     # Skills that typically follow
+
+   related:
+     similar: [skill-that-seems-similar]      # Differentiate from these
+     complementary: [skill-that-pairs-well]   # Use together with these
    ---
 
    # Skill content here...
    ```
+
+   **Schema fields explained:**
+   - `name`: Skill identifier (matches directory name)
+   - `description`: WHAT the skill does (method/technique)
+   - `trigger`: WHEN to use - specific, quantifiable conditions
+   - `skip_when`: WHEN NOT to use - differentiates from similar skills
+   - `sequence`: Workflow ordering (optional)
+   - `related`: Similar/complementary skills for disambiguation (optional)
 
 3. **Update documentation**
    - Skills auto-load via `default/hooks/generate-skills-ref.py`

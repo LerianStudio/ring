@@ -75,8 +75,44 @@ if command -v python3 &> /dev/null; then
     fi
 fi
 
-# Generate skills overview dynamically
-skills_overview=$("${SCRIPT_DIR}/generate-skills-ref.py" 2>&1 || echo "Error generating skills quick reference")
+# Generate skills overview with cascading fallback
+# Priority: Python+PyYAML > Python regex > Bash fallback > Error message
+generate_skills_overview() {
+    local python_cmd=""
+
+    # Try python3 first, then python
+    for cmd in python3 python; do
+        if command -v "$cmd" &> /dev/null; then
+            python_cmd="$cmd"
+            break
+        fi
+    done
+
+    if [[ -n "$python_cmd" ]]; then
+        # Python available - use Python script (handles PyYAML fallback internally)
+        "$python_cmd" "${SCRIPT_DIR}/generate-skills-ref.py" 2>&1
+        return $?
+    fi
+
+    # Python not available - try bash fallback
+    if [[ -x "${SCRIPT_DIR}/generate-skills-ref.sh" ]]; then
+        echo "Note: Python unavailable, using bash fallback" >&2
+        "${SCRIPT_DIR}/generate-skills-ref.sh" 2>&1
+        return $?
+    fi
+
+    # Ultimate fallback - minimal useful output
+    echo "# Ring Skills Quick Reference"
+    echo ""
+    echo "**Note:** Neither Python nor bash fallback available."
+    echo "Skills are still accessible via the Skill tool."
+    echo ""
+    echo "Run: \`Skill tool: ring:using-ring\` to see available workflows."
+    echo ""
+    echo "To fix: Install Python 3.x or ensure generate-skills-ref.sh is executable."
+}
+
+skills_overview=$(generate_skills_overview || echo "Error generating skills quick reference")
 
 # Read using-ring content (still include for mandatory workflows)
 using_ring_content=$(cat "${PLUGIN_ROOT}/skills/using-ring/SKILL.md" 2>&1 || echo "Error reading using-ring skill")

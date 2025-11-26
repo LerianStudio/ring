@@ -1,6 +1,23 @@
 ---
 name: pre-dev-subtask-creation
-description: Use when breaking tasks into bite-sized steps (2-5 min each), after Task Gate 7 passes, when tempted to write TODOs/placeholders, or when creating zero-context work units - produces TDD-based implementation steps with complete code
+description: |
+  Gate 8: Zero-context implementation steps - 2-5 minute atomic subtasks with
+  complete code, exact commands, TDD pattern. Large Track only.
+
+trigger: |
+  - Tasks passed Gate 7 validation
+  - Need absolute implementation clarity
+  - Creating work for engineers with zero codebase context
+  - Large Track workflow (2+ day features)
+
+skip_when: |
+  - Small Track workflow → execute tasks directly
+  - Tasks simple enough without breakdown
+  - Tasks not validated → complete Gate 7 first
+
+sequence:
+  after: [pre-dev-task-breakdown]
+  before: [executing-plans, subagent-driven-development]
 ---
 
 # Subtask Creation - Bite-Sized, Zero-Context Steps

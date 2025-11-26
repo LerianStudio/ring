@@ -1,7 +1,25 @@
 ---
 name: brainstorming
-description: Use when creating or developing anything, before writing code or implementation plans - refines rough ideas into fully-formed designs through structured Socratic questioning, alternative exploration, and incremental validation
-when_to_use: Use when creating or developing anything, before writing code or implementation plans - refines rough ideas into fully-formed designs through structured Socratic questioning, alternative exploration, and incremental validation
+description: |
+  Socratic design refinement - transforms rough ideas into validated designs through
+  structured questioning, alternative exploration, and incremental validation.
+
+trigger: |
+  - New feature or product idea (requirements unclear)
+  - User says "plan", "design", or "architect" something
+  - Multiple approaches seem possible
+  - Design hasn't been validated by user
+
+skip_when: |
+  - Design already complete and validated → use writing-plans
+  - Have detailed plan ready to execute → use executing-plans
+  - Just need task breakdown from existing design → use writing-plans
+
+sequence:
+  before: [writing-plans, using-git-worktrees]
+
+related:
+  similar: [writing-plans]
 ---
 
 # Brainstorming Ideas Into Designs

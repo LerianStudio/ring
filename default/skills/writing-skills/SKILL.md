@@ -1,7 +1,20 @@
 ---
 name: writing-skills
-description: Use when creating new skills, editing existing skills, or verifying skills work before deployment - applies TDD to process documentation by testing with subagents before writing, iterating until bulletproof against rationalization
-when_to_use: Use when creating new skills, editing existing skills, or verifying skills work before deployment - applies TDD to process documentation by testing with subagents before writing, iterating until bulletproof against rationalization
+description: |
+  TDD for process documentation - write test cases (pressure scenarios), watch
+  baseline fail, write skill, iterate until bulletproof against rationalization.
+
+trigger: |
+  - Creating a new skill
+  - Editing an existing skill
+  - Skill needs to resist rationalization under pressure
+
+skip_when: |
+  - Writing pure reference skill (API docs) → no rules to test
+  - Skill has no compliance costs → no rationalization risk
+
+related:
+  complementary: [testing-skills-with-subagents]
 ---
 
 # Writing Skills

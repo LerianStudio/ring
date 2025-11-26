@@ -1,7 +1,22 @@
 ---
 name: test-driven-development
-description: Use when implementing any feature or bugfix, before writing implementation code - write the test first, watch it fail, write minimal code to pass; ensures tests actually verify behavior by requiring failure first
-when_to_use: Use when implementing any feature or bugfix, before writing implementation code - write the test first, watch it fail, write minimal code to pass; ensures tests actually verify behavior by requiring failure first
+description: |
+  RED-GREEN-REFACTOR implementation methodology - write failing test first,
+  minimal implementation to pass, then refactor. Ensures tests verify behavior.
+
+trigger: |
+  - Starting implementation of new feature
+  - Starting implementation of bugfix
+  - Writing new production code
+
+skip_when: |
+  - Reviewing/modifying existing tests → use testing-anti-patterns
+  - Code already exists without tests → add tests first, then TDD for new code
+  - Exploratory/spike work → consider brainstorming first
+
+related:
+  complementary: [testing-anti-patterns, verification-before-completion]
+
 compliance_rules:
   - id: "test_file_exists"
     description: "Test file must exist before implementation file"

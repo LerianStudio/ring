@@ -1,7 +1,18 @@
 ---
 name: using-pm-team
-description: Pre-dev workflow skills for feature planning - organize requirements, architecture, APIs, data models, dependencies, and tasks before implementation
-when_to_use: Before starting implementation of any feature - use to systematically plan through 8 gates (or 3 for simple features) to create executable implementation plans
+description: |
+  8 pre-dev workflow skills organized into Small Track (3 gates, <2 days) and
+  Large Track (8 gates, 2+ days) for systematic feature planning.
+
+trigger: |
+  - Starting any feature implementation
+  - Need systematic planning before coding
+  - User requests "plan a feature"
+
+skip_when: |
+  - Quick exploratory work → brainstorming may suffice
+  - Bug fix with known solution → direct implementation
+  - Trivial change (<1 hour) → skip formal planning
 ---
 
 # Using Ring Team-Product: Pre-Dev Workflow

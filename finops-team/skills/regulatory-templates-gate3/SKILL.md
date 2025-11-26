@@ -1,7 +1,19 @@
 ---
 name: regulatory-templates-gate3
-description: Gate 3 of regulatory templates - generates the complete .tpl template file with all validated mappings
-when_to_use: Use after gate2 validation to generate the complete .tpl template file
+description: |
+  Gate 3 sub-skill - generates complete .tpl template file with all validated
+  mappings from Gates 1-2.
+
+trigger: |
+  - Gate 2 PASSED
+  - Ready to generate production template file
+
+skip_when: |
+  - Gate 2 not passed → complete Gate 2 first
+  - Template already generated → verify or regenerate
+
+sequence:
+  after: [regulatory-templates-gate2]
 ---
 
 # Regulatory Templates - Gate 3: Template File Generation

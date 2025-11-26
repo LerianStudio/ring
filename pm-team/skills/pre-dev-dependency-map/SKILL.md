@@ -1,6 +1,23 @@
 ---
 name: pre-dev-dependency-map
-description: Use when making concrete technology choices, after Data Model Gate 5 passes, when tempted to use "latest" versions, or before task breakdown begins
+description: |
+  Gate 6: Technology choices document - explicit, versioned, validated technology
+  selections with justifications. Large Track only.
+
+trigger: |
+  - Data Model passed Gate 5 validation
+  - About to select specific technologies
+  - Tempted to write "@latest" or "newest version"
+  - Large Track workflow (2+ day features)
+
+skip_when: |
+  - Small Track workflow → skip to Task Breakdown
+  - Technologies already locked → skip to Task Breakdown
+  - Data Model not validated → complete Gate 5 first
+
+sequence:
+  after: [pre-dev-data-model]
+  before: [pre-dev-task-breakdown]
 ---
 
 # Dependency Map - Explicit Technology Choices

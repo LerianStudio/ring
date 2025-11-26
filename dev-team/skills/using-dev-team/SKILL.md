@@ -1,7 +1,23 @@
 ---
 name: using-dev-team
-description: Specialist developer agents for backend (Go/TypeScript/Python), DevOps, frontend engineering (TypeScript), frontend design, QA, and SRE - dispatch when you need deep expertise
-when_to_use: When you need specialized developer expertise beyond general code review - use when implementing complex backend systems (language-agnostic or specific), infrastructure, frontend applications, distinctive UI design, test strategies, or reliability solutions
+description: |
+  10 specialist developer agents for backend (Go/TypeScript/Python), DevOps, frontend,
+  design, QA, and SRE. Dispatch when you need deep technology expertise.
+
+trigger: |
+  - Need deep expertise for specific technology (Go, TypeScript, Python)
+  - Building infrastructure/CI-CD → devops-engineer
+  - Frontend with design focus → frontend-designer
+  - Test strategy needed → qa-analyst
+  - Reliability/monitoring → sre
+
+skip_when: |
+  - General code review → use default plugin reviewers
+  - Planning/design → use brainstorming
+  - Debugging → use systematic-debugging
+
+related:
+  similar: [using-ring]
 ---
 
 # Using Ring Developer Specialists

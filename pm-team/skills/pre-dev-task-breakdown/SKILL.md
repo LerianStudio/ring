@@ -1,6 +1,23 @@
 ---
 name: pre-dev-task-breakdown
-description: Use when decomposing features into implementation units, after PRD and TRD are complete, when tempted to create giant tasks, or when tasks don't deliver user value
+description: |
+  Gate 7: Implementation tasks - value-driven decomposition into working increments
+  that deliver measurable user value.
+
+trigger: |
+  - PRD passed Gate 1 (required)
+  - TRD passed Gate 3 (required)
+  - All Large Track gates passed (if applicable)
+  - Ready to create sprint/iteration tasks
+
+skip_when: |
+  - PRD or TRD not validated → complete earlier gates
+  - Tasks already exist → proceed to Subtask Creation
+  - Trivial change → direct implementation
+
+sequence:
+  after: [pre-dev-trd-creation, pre-dev-dependency-map]
+  before: [pre-dev-subtask-creation, executing-plans]
 ---
 
 # Task Breakdown - Value-Driven Decomposition

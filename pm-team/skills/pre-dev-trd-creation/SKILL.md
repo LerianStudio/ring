@@ -1,6 +1,23 @@
 ---
 name: pre-dev-trd-creation
-description: Use when translating business requirements to architecture, before selecting technologies, when tempted to specify frameworks/tools, after PRD is complete
+description: |
+  Gate 3: Technical architecture document - defines HOW/WHERE with technology-agnostic
+  patterns before concrete implementation choices.
+
+trigger: |
+  - PRD passed Gate 1 (required)
+  - Feature Map passed Gate 2 (if Large Track)
+  - About to design technical architecture
+  - Tempted to specify "PostgreSQL" instead of "Relational Database"
+
+skip_when: |
+  - PRD not validated → complete Gate 1 first
+  - Architecture already documented → proceed to API Design
+  - Pure business requirement change → update PRD
+
+sequence:
+  after: [pre-dev-prd-creation, pre-dev-feature-map]
+  before: [pre-dev-api-design, pre-dev-task-breakdown]
 ---
 
 # TRD Creation - Architecture Before Implementation

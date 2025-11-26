@@ -1,7 +1,19 @@
 ---
 name: using-ring
-description: Use when starting any conversation - establishes mandatory workflows for finding and using skills, including using Skill tool before announcing usage, following brainstorming before coding, and creating TodoWrite todos for checklists
-when_to_use: Use when starting any conversation - establishes mandatory workflows for finding and using skills, including using Skill tool before announcing usage, following brainstorming before coding, and creating TodoWrite todos for checklists
+description: |
+  Mandatory orchestrator protocol - establishes ORCHESTRATOR principle (dispatch agents,
+  don't operate directly) and skill discovery workflow for every conversation.
+
+trigger: |
+  - Every conversation start (automatic via SessionStart hook)
+  - Before ANY task (check for applicable skills)
+  - When tempted to operate tools directly instead of delegating
+
+skip_when: |
+  - Never skip - this skill is always mandatory
+
+sequence:
+  before: [all-other-skills]
 ---
 
 <EXTREMELY-IMPORTANT>

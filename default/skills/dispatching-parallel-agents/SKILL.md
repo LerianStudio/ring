@@ -1,7 +1,18 @@
 ---
 name: dispatching-parallel-agents
-description: Use when facing 3+ independent failures that can be investigated without shared state or dependencies - dispatches multiple AI agents to investigate and fix independent problems concurrently
-when_to_use: Use when facing 3+ independent failures that can be investigated without shared state or dependencies - dispatches multiple AI agents to investigate and fix independent problems concurrently
+description: |
+  Concurrent investigation pattern - dispatches multiple AI agents to investigate
+  and fix independent problems simultaneously.
+
+trigger: |
+  - 3+ failures in different test files/subsystems
+  - Problems are independent (no shared state)
+  - Each can be investigated without context from others
+
+skip_when: |
+  - Failures are related/connected → single investigation
+  - Shared state between problems → sequential investigation
+  - <3 failures → investigate directly
 ---
 
 # Dispatching Parallel Agents

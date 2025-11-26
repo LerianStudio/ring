@@ -1,7 +1,23 @@
 ---
 name: requesting-code-review
-description: Use when completing tasks, implementing major features, or before merging to verify work meets requirements - dispatches reviewer subagents (code-reviewer, security-reviewer, business-logic-reviewer) to review implementation against plan or requirements before proceeding
-when_to_use: Use when completing tasks, implementing major features, or before merging to verify work meets requirements - dispatches reviewer subagents (code-reviewer, security-reviewer, business-logic-reviewer) to review implementation against plan or requirements before proceeding
+description: |
+  Parallel code review dispatch - sends to 3 specialized reviewers (code, business-logic,
+  security) simultaneously for comprehensive feedback.
+
+trigger: |
+  - After completing major feature implementation
+  - After completing task in subagent-driven-development
+  - Before merge to main branch
+  - After fixing complex bug
+
+skip_when: |
+  - Trivial change (<20 lines, no logic change) → verify manually
+  - Still in development → finish implementation first
+  - Already reviewed and no changes since → proceed
+
+sequence:
+  after: [verification-before-completion]
+  before: [finishing-a-development-branch]
 ---
 
 # Requesting Code Review

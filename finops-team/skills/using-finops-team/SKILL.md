@@ -1,7 +1,18 @@
 ---
 name: using-finops-team
-description: FinOps agents for Brazilian financial regulatory compliance - dispatch when implementing BACEN, RFB, or Open Banking requirements
-when_to_use: When implementing Brazilian regulatory reporting, financial compliance, or Open Banking specifications - use when you need compliance analysis or template generation
+description: |
+  2 FinOps agents for Brazilian financial regulatory compliance (BACEN, RFB,
+  Open Banking). Dispatch for compliance analysis or template generation.
+
+trigger: |
+  - Brazilian regulatory reporting (BACEN, RFB)
+  - Financial compliance requirements
+  - Open Banking specifications
+  - Template generation for Reporter platform
+
+skip_when: |
+  - Non-Brazilian regulations → use appropriate resources
+  - General financial analysis → use other tools
 ---
 
 # Using Ring FinOps & Regulatory Agents

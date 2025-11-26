@@ -1,7 +1,21 @@
 ---
 name: verification-before-completion
-description: Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always
-when_to_use: Use when about to claim work is complete, fixed, or passing, before committing or creating PRs - requires running verification commands and confirming output before making any success claims; evidence before assertions always
+description: |
+  Evidence-first completion gate - requires running verification commands and
+  confirming output before making any success claims.
+
+trigger: |
+  - About to claim "work is complete"
+  - About to claim "tests pass"
+  - About to claim "bug is fixed"
+  - Before committing or creating PRs
+
+skip_when: |
+  - Just ran verification command with passing output → proceed
+  - Still in development (not claiming completion) → continue working
+
+sequence:
+  before: [finishing-a-development-branch, requesting-code-review]
 ---
 
 # Verification Before Completion

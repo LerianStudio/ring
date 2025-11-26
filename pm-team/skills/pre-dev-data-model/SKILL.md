@@ -1,6 +1,23 @@
 ---
 name: pre-dev-data-model
-description: Use after API/Contract Design to define data structures and relationships, before selecting databases, when you need clear data ownership and schemas
+description: |
+  Gate 5: Data structures document - defines entities, relationships, and ownership
+  before database technology selection. Large Track only.
+
+trigger: |
+  - API Design passed Gate 4 validation
+  - System stores persistent data
+  - Multiple entities with relationships
+  - Large Track workflow (2+ day features)
+
+skip_when: |
+  - Small Track workflow → skip to Task Breakdown
+  - No persistent data → skip to Dependency Map
+  - API Design not validated → complete Gate 4 first
+
+sequence:
+  after: [pre-dev-api-design]
+  before: [pre-dev-dependency-map]
 ---
 
 # Data Modeling - Defining Data Structures

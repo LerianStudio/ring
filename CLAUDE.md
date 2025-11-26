@@ -140,8 +140,24 @@ python default/hooks/generate-skills-ref.py # Generate skill overview
    ```yaml
    ---
    name: your-skill-name
-   description: Brief description for quick reference
-   when_to_use: Specific triggers that mandate this skill
+   description: |
+     Brief description of WHAT the skill does (method/technique).
+
+   trigger: |
+     - Specific condition that mandates this skill
+     - Another trigger condition
+
+   skip_when: |
+     - When NOT to use → alternative skill
+     - Another exclusion
+
+   sequence:
+     after: [prerequisite-skill]   # Optional: ordering
+     before: [following-skill]
+
+   related:
+     similar: [differentiate-from]      # Optional: disambiguation
+     complementary: [pairs-well-with]
    ---
    ```
 3. Test with `Skill tool: "ring:testing-skills-with-subagents"`

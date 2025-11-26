@@ -1,7 +1,20 @@
 ---
 name: using-ralph-wiggum
-description: Ralph Wiggum iterative AI development loops - autonomous task refinement using Stop hooks that intercept session exit to create self-referential feedback loops
-when_to_use: When you need to work on a well-defined task autonomously with multiple iterations until completion, especially for tasks with clear success criteria like passing tests or meeting specific requirements
+description: |
+  Autonomous iterative loops using Stop hooks - Claude continuously works on
+  a task until completion promise is emitted, with same prompt re-fed each iteration.
+
+trigger: |
+  - Well-defined task with clear success criteria
+  - Task has objective verification (tests pass, requirements met)
+  - Progress is visible in file changes
+  - Want autonomous iteration without human intervention
+
+skip_when: |
+  - Design judgment required → use brainstorming
+  - Subjective quality assessment → human review needed
+  - Strategic pivoting may be needed → interactive approach
+  - Success criteria unclear → clarify first
 ---
 
 # Using Ralph Wiggum Loops

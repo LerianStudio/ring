@@ -1,7 +1,17 @@
 ---
 name: receiving-code-review
-description: Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation
-when_to_use: Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation
+description: |
+  Review reception protocol - requires technical verification before implementing
+  suggestions. Prevents performative agreement and blind implementation.
+
+trigger: |
+  - Received code review feedback
+  - About to implement reviewer suggestions
+  - Feedback seems unclear or technically questionable
+
+skip_when: |
+  - Feedback is clear and obviously correct → implement directly
+  - No feedback received → continue working
 ---
 
 # Code Review Reception

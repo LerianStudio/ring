@@ -1,6 +1,20 @@
 ---
 name: regulatory-templates-setup
-description: Initial setup for regulatory templates - handles template selection and context initialization
+description: |
+  Initial setup sub-skill - handles template selection and context initialization
+  for the 3-gate regulatory workflow.
+
+trigger: |
+  - Called by regulatory-templates orchestrator at workflow start
+  - Need to select template type and initialize context
+
+skip_when: |
+  - Not in regulatory-templates workflow
+  - Setup already completed for current template
+
+sequence:
+  after: [regulatory-templates]
+  before: [regulatory-templates-gate1]
 ---
 
 # Regulatory Templates - Initial Setup

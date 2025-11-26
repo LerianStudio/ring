@@ -1,7 +1,20 @@
 ---
 name: testing-agents-with-subagents
-description: Use when creating or editing agents, before deployment, to verify they produce correct outputs and handle edge cases - applies RED-GREEN-REFACTOR cycle to agent definitions by running with test inputs, observing failures, and iterating until outputs are accurate and well-structured
-when_to_use: Use when creating or editing agents, before deployment, to verify they produce correct outputs and handle edge cases - applies RED-GREEN-REFACTOR cycle to agent definitions by running with test inputs, observing failures, and iterating until outputs are accurate and well-structured
+description: |
+  Agent testing methodology - run agents with test inputs, observe outputs,
+  iterate until outputs are accurate and well-structured.
+
+trigger: |
+  - Before deploying a new agent
+  - After editing an existing agent
+  - Agent produces structured outputs that must be accurate
+
+skip_when: |
+  - Agent is simple passthrough → minimal testing needed
+  - Agent already tested for this use case
+
+related:
+  complementary: [test-driven-development]
 ---
 
 # Testing Agents With Subagents

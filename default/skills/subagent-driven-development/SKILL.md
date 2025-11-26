@@ -1,7 +1,24 @@
 ---
 name: subagent-driven-development
-description: Use when executing implementation plans with independent tasks in the current session - dispatches fresh subagent for each task with comprehensive code review (code-reviewer, security-reviewer, business-logic-reviewer) between tasks, enabling fast iteration with quality gates
-when_to_use: Use when executing implementation plans with independent tasks in the current session - dispatches fresh subagent for each task with comprehensive code review (code-reviewer, security-reviewer, business-logic-reviewer) between tasks, enabling fast iteration with quality gates
+description: |
+  Autonomous plan execution - fresh subagent per task with automated code review
+  between tasks. No human-in-loop, high throughput with quality gates.
+
+trigger: |
+  - Staying in current session (no worktree switch)
+  - Tasks are independent (can be executed in isolation)
+  - Want continuous progress without human pause points
+
+skip_when: |
+  - Need human review between tasks → use executing-plans
+  - Tasks are tightly coupled → execute manually
+  - Plan needs revision → use brainstorming first
+
+sequence:
+  after: [writing-plans, pre-dev-task-breakdown]
+
+related:
+  similar: [executing-plans]
 ---
 
 # Subagent-Driven Development

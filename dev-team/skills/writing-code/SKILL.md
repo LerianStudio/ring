@@ -1,7 +1,17 @@
 ---
 name: writing-code
-description: Use when starting implementation work to identify the most appropriate developer agent for the task based on technology stack, domain, and requirements.
-when_to_use: Use when starting implementation work to identify the most appropriate developer agent for the task based on technology stack, domain, and requirements.
+description: |
+  Developer agent selection matrix - helps identify the best developer specialist
+  based on technology stack, domain, and requirements.
+
+trigger: |
+  - Starting implementation work
+  - Need to choose between multiple developer agents
+  - Technology stack determines agent choice
+
+skip_when: |
+  - Already know which agent to use → dispatch directly
+  - Not implementation work → use other skills
 ---
 
 # Writing Code - Developer Agent Selection

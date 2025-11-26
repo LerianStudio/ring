@@ -1,7 +1,25 @@
 ---
 name: writing-plans
-description: Use when design is complete and you need detailed implementation tasks for engineers with zero codebase context - creates comprehensive implementation plans with exact file paths, complete code examples, and verification steps assuming engineer has minimal domain knowledge
-when_to_use: Use when design is complete and you need detailed implementation tasks for engineers with zero codebase context - creates comprehensive implementation plans with exact file paths, complete code examples, and verification steps assuming engineer has minimal domain knowledge
+description: |
+  Creates comprehensive implementation plans with exact file paths, complete code
+  examples, and verification steps for engineers with zero codebase context.
+
+trigger: |
+  - Design phase complete (brainstorming/PRD/TRD validated)
+  - Need to create executable task breakdown
+  - Creating work for other engineers or AI agents
+
+skip_when: |
+  - Design not validated → use brainstorming first
+  - Requirements still unclear → use pre-dev-prd-creation first
+  - Already have a plan → use executing-plans
+
+sequence:
+  after: [brainstorming, pre-dev-trd-creation]
+  before: [executing-plans, subagent-driven-development]
+
+related:
+  similar: [brainstorming]
 ---
 
 # Writing Plans

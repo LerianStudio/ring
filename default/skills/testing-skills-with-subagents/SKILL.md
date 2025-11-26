@@ -1,7 +1,20 @@
 ---
 name: testing-skills-with-subagents
-description: Use when creating or editing skills, before deployment, to verify they work under pressure and resist rationalization - applies RED-GREEN-REFACTOR cycle to process documentation by running baseline without skill, writing to address failures, iterating to close loopholes
-when_to_use: Use when creating or editing skills, before deployment, to verify they work under pressure and resist rationalization - applies RED-GREEN-REFACTOR cycle to process documentation by running baseline without skill, writing to address failures, iterating to close loopholes
+description: |
+  Skill testing methodology - run scenarios without skill (RED), observe failures,
+  write skill (GREEN), close loopholes (REFACTOR).
+
+trigger: |
+  - Before deploying a new skill
+  - After editing an existing skill
+  - Skill enforces discipline that could be rationalized away
+
+skip_when: |
+  - Pure reference skill → no behavior to test
+  - No rules that agents have incentive to bypass
+
+related:
+  complementary: [writing-skills, test-driven-development]
 ---
 
 # Testing Skills With Subagents

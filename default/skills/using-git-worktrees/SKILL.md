@@ -1,7 +1,22 @@
 ---
 name: using-git-worktrees
-description: Use when starting feature work that needs isolation from current workspace or before executing implementation plans - creates isolated git worktrees with smart directory selection and safety verification
-when_to_use: Use when starting feature work that needs isolation from current workspace or before executing implementation plans - creates isolated git worktrees with smart directory selection and safety verification
+description: |
+  Isolated workspace creation - creates git worktrees with smart directory selection
+  and safety verification for parallel feature development.
+
+trigger: |
+  - Starting feature that needs isolation from main workspace
+  - Before executing implementation plan
+  - Working on multiple features simultaneously
+
+skip_when: |
+  - Quick fix in current branch → stay in place
+  - Already in isolated worktree for this feature → continue
+  - Repository doesn't use worktrees → use standard branch workflow
+
+sequence:
+  after: [brainstorming]
+  before: [writing-plans, executing-plans]
 ---
 
 # Using Git Worktrees

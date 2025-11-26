@@ -150,6 +150,24 @@ Skills (38) are workflows that Claude Code invokes automatically when it detects
 
 Examples: test-driven-development, systematic-debugging, requesting-code-review, verification-before-completion, etc.
 
+### Skill Selection Criteria
+
+Each skill has structured frontmatter that helps Claude Code determine which skill to use:
+
+| Field | Purpose | Example |
+|-------|---------|---------|
+| `description` | WHAT the skill does | "Four-phase debugging framework..." |
+| `trigger` | WHEN to use (specific conditions) | "Bug reported", "Test failure observed" |
+| `skip_when` | WHEN NOT to use (exclusions) | "Root cause already known → just fix it" |
+| `sequence` | Workflow ordering (optional) | `after: [prd-creation]` |
+| `related` | Similar/complementary skills | `similar: [root-cause-tracing]` |
+
+**How Claude Code chooses skills:**
+1. Checks `trigger` conditions against current context
+2. Uses `skip_when` to differentiate from similar skills
+3. Considers `sequence` for workflow ordering
+4. References `related` for disambiguation when multiple skills match
+
 ---
 
 ## 🤖 Available Agents
