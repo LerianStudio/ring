@@ -30,7 +30,7 @@
     {
       "name": "ring-dev-team",
       "description": "10 specialized developer agents: Language-agnostic Backend, Go/TypeScript/Python Backend specialists, DevOps Engineer, Frontend (JavaScript + TypeScript specialists), Frontend Designer, QA Analyst, and SRE. Complete development team coverage with security best practices and language-specific patterns.",
-      "version": "0.4.0",
+      "version": "0.4.1",
       "source": "./dev-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/dev-team",
       "repository": "https://github.com/lerianstudio/ring/tree/dev-team",
@@ -54,7 +54,7 @@
     {
       "name": "ring-pm-team",
       "description": "Product team pre-development workflow skills: 8-gate planning system including PRD creation, feature mapping, TRD creation, API design, data modeling, dependency mapping, task breakdown, and subtask creation. Comprehensive planning framework for product features of any complexity.",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "source": "./pm-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/pm-team",
       "repository": "https://github.com/lerianstudio/ring/tree/pm-team",
@@ -76,7 +76,7 @@
     {
       "name": "ring-finops-team",
       "description": "Financial operations (FinOps) agents and Brazilian regulatory compliance skills. Includes finops-analyzer and finops-automation agents for financial analysis and automation. Contains regulatory templates for BACEN, RFB, and other Brazilian financial regulations with multi-gate workflow support.",
-      "version": "0.5.0",
+      "version": "0.5.1",
       "source": "./finops-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/finops-team",
       "repository": "https://github.com/lerianstudio/ring/tree/finops-team",
@@ -98,7 +98,7 @@
     {
       "name": "ralph-wiggum",
       "description": "Ralph Wiggum iterative AI development loops - autonomous task refinement using Stop hooks. Enables hands-off iteration where Claude continuously works on a task until completion, with progress tracked via state files and completion signaled through XML promise tags.",
-      "version": "0.4.0",
+      "version": "0.4.1",
       "source": "./ralph-wiggum",
       "homepage": "https://github.com/lerianstudio/ring/tree/ralph-wiggum",
       "repository": "https://github.com/lerianstudio/ring/tree/ralph-wiggum",
@@ -116,5 +116,5 @@
       ]
     }
   ],
-  "version": "0.14.0"
+  "version": "0.15.0"
 }
