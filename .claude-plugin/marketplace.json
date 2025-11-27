@@ -118,7 +118,7 @@
     {
       "name": "ring-tw-team",
       "description": "Technical writing specialists for functional and API documentation. 3 specialized agents (functional-writer, api-writer, docs-reviewer) and 7 documentation skills covering voice/tone, structure, API field descriptions, and quality review. Enforces clear, consistent documentation standards.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "source": "./tw-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/tw-team",
       "repository": "https://github.com/lerianstudio/ring/tree/tw-team",
@@ -139,7 +139,7 @@
     {
       "name": "beads",
       "description": "Beads (bd) integration for dependency-aware issue tracking in AI workflows. Provides workflow guidance for issue lifecycle management, dependency tracking, and ready work discovery. Designed for AI-supervised development with bd ready → work → close patterns.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "source": "./beads",
       "homepage": "https://github.com/steveyegge/beads",
       "repository": "https://github.com/lerianstudio/ring/tree/beads",
@@ -157,5 +157,5 @@
       ]
     }
   ],
-  "version": "0.19.0"
+  "version": "0.20.0"
 }
