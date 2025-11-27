@@ -223,6 +223,7 @@ $PROMPT
 EOF
 
 # Output setup message
+# SYNC-POINT: "Session ID: $SESSION_ID" format must match stop-hook.sh grep pattern
 cat <<EOF
 🔄 Ralph loop activated in this session!
 

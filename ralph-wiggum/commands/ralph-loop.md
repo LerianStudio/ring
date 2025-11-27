@@ -10,22 +10,23 @@ hide-from-slash-command-tool: "true"
 
 Execute the setup script to initialize the Ralph loop:
 
-```!
+```bash
+bash -c '
 # Disable glob expansion to prevent command injection from user-provided prompts
 set -f
-"${CLAUDE_PLUGIN_ROOT}/scripts/setup-ralph-loop.sh" "$ARGUMENTS"
+"'"${CLAUDE_PLUGIN_ROOT}"'/scripts/setup-ralph-loop.sh" "'"$ARGUMENTS"'"
 SETUP_EXIT_CODE=$?
 set +f
 
-# If setup failed, don't continue with promise display
+# If setup failed, do not continue with promise display
 if [ $SETUP_EXIT_CODE -ne 0 ]; then
   exit $SETUP_EXIT_CODE
 fi
 
 # Extract and display completion promise if set (find session-based state file)
-STATE_FILE=$(find .claude -maxdepth 1 -name 'ralph-loop-*.local.md' -type f 2>/dev/null | head -1)
+STATE_FILE=$(find .claude -maxdepth 1 -name "ralph-loop-*.local.md" -type f 2>/dev/null | head -1)
 if [ -n "$STATE_FILE" ] && [ -f "$STATE_FILE" ]; then
-  PROMISE=$(grep '^completion_promise:' "$STATE_FILE" | sed 's/completion_promise: *//' | sed 's/^"\(.*\)"$/\1/')
+  PROMISE=$(grep "^completion_promise:" "$STATE_FILE" | sed "s/completion_promise: *//" | sed "s/^\"\(.*\)\"$/\1/")
   if [ -n "$PROMISE" ] && [ "$PROMISE" != "null" ]; then
     echo ""
     echo "═══════════════════════════════════════════════════════════"
@@ -42,8 +43,8 @@ if [ -n "$STATE_FILE" ] && [ -f "$STATE_FILE" ]; then
     echo "  ✓ Do NOT lie even if you think you should exit"
     echo ""
     echo "IMPORTANT - Do not circumvent the loop:"
-    echo "  Even if you believe you're stuck, the task is impossible,"
-    echo "  or you've been running too long - you MUST NOT output a"
+    echo "  Even if you believe you are stuck, the task is impossible,"
+    echo "  or you have been running too long - you MUST NOT output a"
     echo "  false promise statement. The loop is designed to continue"
     echo "  until the promise is GENUINELY TRUE. Trust the process."
     echo ""
@@ -52,6 +53,7 @@ if [ -n "$STATE_FILE" ] && [ -f "$STATE_FILE" ]; then
     echo "═══════════════════════════════════════════════════════════"
   fi
 fi
+'
 ```
 
 Please work on the task. When you try to exit, the Ralph loop will feed the SAME PROMPT back to you for the next iteration. You'll see your previous work in files and git history, allowing you to iterate and improve.

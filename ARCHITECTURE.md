@@ -71,10 +71,10 @@ ring/                                  # Monorepo root
 
 | Plugin | Description | Components |
 |--------|-------------|------------|
-| **ring-default** | Core skills library | 20 skills, 5 agents, 8 commands |
+| **ring-default** | Core skills library | 20 skills, 5 agents, 6 commands |
 | **ring-dev-team** | Developer agents | 2 skills, 10 specialized developer agents |
 | **ring-finops-team** | FinOps & regulatory compliance | 6 skills, 2 agents |
-| **ring-pm-team** | Product planning workflows | 9 skills |
+| **ring-pm-team** | Product planning workflows | 9 skills, 2 commands |
 | **ralph-wiggum** | Iterative AI development loops | 1 skill, 3 commands, Stop hook |
 
 ## Component Hierarchy
@@ -143,18 +143,20 @@ dev-team/agents/
 **Structure:**
 ```
 default/commands/
-├── brainstorm.md       # /ring:brainstorm - Socratic design refinement
-├── write-plan.md       # /ring:write-plan - Implementation planning
-├── execute-plan.md     # /ring:execute-plan - Batch execution
-├── review.md           # /ring:review - Parallel 3-reviewer dispatch
-├── worktree.md         # /ring:worktree - Git worktree creation
-├── pre-dev-feature.md  # /ring:pre-dev-feature - 3-gate workflow
-└── pre-dev-full.md     # /ring:pre-dev-full - 8-gate workflow
+├── brainstorm.md       # /ring-default:brainstorm - Socratic design refinement
+├── write-plan.md       # /ring-default:write-plan - Implementation planning
+├── execute-plan.md     # /ring-default:execute-plan - Batch execution
+├── review.md           # /ring-default:review - Parallel 3-reviewer dispatch
+└── worktree.md         # /ring-default:worktree - Git worktree creation
+
+pm-team/commands/
+├── pre-dev-feature.md  # /ring-pm-team:pre-dev-feature - 3-gate workflow
+└── pre-dev-full.md     # /ring-pm-team:pre-dev-full - 8-gate workflow
 ```
 
 **Key Characteristics:**
 - Simple `.md` files with YAML frontmatter
-- Invoked via `/ring:{command}` syntax
+- Invoked via `/ring-{plugin}:{command}` syntax
 - Typically reference a corresponding skill
 - Expand into full skill/agent invocation
 
@@ -606,7 +608,8 @@ Ring's architecture is designed for:
 | Agents (ring-dev-team) | 10 | `dev-team/agents/` |
 | Agents (ring-finops-team) | 2 | `finops-team/agents/` |
 | **Total Agents** | **17** | **All plugins** |
-| Commands (ring-default) | 8 | `default/commands/` |
+| Commands (ring-default) | 6 | `default/commands/` |
+| Commands (ring-pm-team) | 2 | `pm-team/commands/` |
 | Commands (ralph-wiggum) | 3 | `ralph-wiggum/commands/` |
 | Hooks | 4 | `default/hooks/` |
 | Lib utilities | 9 | `default/lib/` |

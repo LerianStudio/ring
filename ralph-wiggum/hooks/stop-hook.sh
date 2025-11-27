@@ -61,23 +61,29 @@ fi
 # Get transcript path from hook input EARLY to verify session ownership
 TRANSCRIPT_PATH_CHECK=$(echo "$HOOK_INPUT" | jq -r '.transcript_path')
 
-# Validate transcript path is a reasonable location (defense-in-depth)
+# Validate transcript path is a reasonable location (defense-in-depth, fail-secure)
 if [[ -n "$TRANSCRIPT_PATH_CHECK" ]] && [[ "$TRANSCRIPT_PATH_CHECK" != "null" ]]; then
   # Resolve to absolute path and verify it's under expected directories
   RESOLVED_PATH=$(realpath -q "$TRANSCRIPT_PATH_CHECK" 2>/dev/null || echo "")
-  if [[ -n "$RESOLVED_PATH" ]] && [[ ! "$RESOLVED_PATH" =~ ^(/Users/|/home/|/tmp/|/var/|/private/) ]]; then
+  # Fail-secure: if realpath fails or path is outside expected directories, allow exit
+  if [[ -z "$RESOLVED_PATH" ]]; then
+    echo "⚠️  Ralph loop: Could not resolve transcript path. Allowing exit." >&2
+    exit 0
+  fi
+  if [[ ! "$RESOLVED_PATH" =~ ^(/Users/|/home/|/tmp/|/var/|/private/) ]]; then
     echo "⚠️  Ralph loop: Unexpected transcript path location. Allowing exit." >&2
     exit 0
   fi
 fi
 
 # CRITICAL: Verify this loop was started in THIS session, not a stale file from another session
-# Extract session_id from state file and check if it appears in current transcript
-STATE_SESSION_ID=$(grep '^session_id:' "$RALPH_STATE_FILE" | sed 's/session_id: *"//' | sed 's/"$//')
+# Extract session_id from state file (handles various YAML quote formats)
+# SYNC-POINT: Format must match setup-ralph-loop.sh output "Session ID: <8-char-alphanumeric>"
+STATE_SESSION_ID=$(grep '^session_id:' "$RALPH_STATE_FILE" | sed 's/^session_id: *//' | sed 's/^["'"'"']//; s/["'"'"']$//' | tr -cd 'a-z0-9')
 
 if [[ -n "$TRANSCRIPT_PATH_CHECK" ]] && [[ -f "$TRANSCRIPT_PATH_CHECK" ]] && [[ -n "$STATE_SESSION_ID" ]]; then
   # Check if this session's transcript contains evidence of starting this specific loop
-  # Look for the activation message with this session ID
+  # SYNC-POINT: grep pattern must match setup-ralph-loop.sh line ~229 output format
   if ! grep -qF "Session ID: $STATE_SESSION_ID" "$TRANSCRIPT_PATH_CHECK" 2>/dev/null; then
     # This state file was created by a DIFFERENT session - it's stale
     echo "⚠️  Found stale Ralph state file from another session (ID: $STATE_SESSION_ID)" >&2

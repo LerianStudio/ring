@@ -7,10 +7,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Ring is a comprehensive skills library and workflow system for AI agents that enforces proven software engineering practices through mandatory workflows, parallel code review, and systematic pre-development planning. Currently implemented as a Claude Code plugin marketplace with **5 active plugins**, the skills are agent-agnostic and reusable across different AI systems.
 
 **Active Plugins:**
-- **ring-default**: 20 core skills, 8 slash commands, 5 specialized agents
+- **ring-default**: 20 core skills, 6 slash commands, 5 specialized agents
 - **ring-dev-team**: 2 developer skills, 10 specialized developer agents (Backend [generic], Backend Go, Backend TypeScript, Backend Python, DevOps, Frontend [generic], Frontend TypeScript, Frontend Designer, QA, SRE)
 - **ring-finops-team**: 6 regulatory skills, 2 FinOps agents
-- **ring-pm-team**: 9 product planning skills
+- **ring-pm-team**: 9 product planning skills, 2 slash commands
 - **ralph-wiggum**: 1 skill for iterative AI development loops using Stop hooks
 
 **Note:** Plugin versions are managed in `.claude-plugin/marketplace.json`
@@ -53,10 +53,9 @@ ring/                                  # Monorepo root
 │   │   ├── security-reviewer.md     # Safety (OWASP, auth, validation)
 │   │   ├── write-plan.md            # Implementation planning
 │   │   └── codebase-explorer.md     # Deep architecture analysis (Opus)
-│   ├── commands/                    # 8 slash commands
-│   │   ├── review.md               # /ring:review - dispatch 3 parallel reviewers
-│   │   ├── brainstorm.md           # /ring:brainstorm - interactive design
-│   │   └── pre-dev-*.md            # /ring:pre-dev-feature or pre-dev-full
+│   ├── commands/                    # 6 slash commands
+│   │   ├── review.md               # /ring-default:review - dispatch 3 parallel reviewers
+│   │   └── brainstorm.md           # /ring-default:brainstorm - interactive design
 │   ├── hooks/                      # Session lifecycle
 │   │   ├── hooks.json             # SessionStart, UserPromptSubmit config
 │   │   ├── session-start.sh       # Load skills quick reference
@@ -86,7 +85,10 @@ ring/                                  # Monorepo root
 │   │   └── finops-automation.md  # FinOps automation
 │   └── docs/
 │       └── regulatory/           # Brazilian regulatory documentation
-├── pm-team/                  # Product Planning plugin (ring-pm-team)
+├── pm-team/                       # Product Planning plugin (ring-pm-team)
+│   ├── commands/                  # 2 slash commands
+│   │   ├── pre-dev-feature.md    # /ring-pm-team:pre-dev-feature - 3-gate workflow
+│   │   └── pre-dev-full.md       # /ring-pm-team:pre-dev-full - 8-gate workflow
 │   └── skills/                    # 9 pre-dev workflow skills
 │       └── pre-dev-*/            # PRD→TRD→API→Data→Tasks
 ├── ralph-wiggum/                  # Iterative AI loops plugin (ralph-wiggum)
@@ -120,12 +122,12 @@ Skill tool: "ring:systematic-debugging"     # Debug with 4-phase analysis
 Skill tool: "ring:using-ring"              # Load mandatory workflows
 
 # Slash commands
-/ring:review                       # Dispatch 3 parallel reviewers
-/ring:brainstorm                  # Socratic design refinement
-/ring:pre-dev-feature             # <2 day features (3 gates)
-/ring:pre-dev-full               # ≥2 day features (8 gates)
-/ring:execute-plan               # Batch execution with checkpoints
-/ring:worktree                   # Create isolated development branch
+/ring-default:review              # Dispatch 3 parallel reviewers
+/ring-default:brainstorm          # Socratic design refinement
+/ring-pm-team:pre-dev-feature     # <2 day features (3 gates)
+/ring-pm-team:pre-dev-full        # ≥2 day features (8 gates)
+/ring-default:execute-plan        # Batch execution with checkpoints
+/ring-default:worktree            # Create isolated development branch
 
 # Hook validation (from default plugin)
 bash default/hooks/session-start.sh      # Test skill loading
@@ -231,12 +233,12 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 
 ### Pre-Dev Workflow
 ```
-Simple (<2 days): /ring:pre-dev-feature
+Simple (<2 days): /ring-pm-team:pre-dev-feature
 ├── Gate 1: pm-team/skills/pre-dev-prd-creation → docs/pre-dev/feature/PRD.md
 ├── Gate 2: pm-team/skills/pre-dev-trd-creation → docs/pre-dev/feature/TRD.md
 └── Gate 3: pm-team/skills/pre-dev-task-breakdown → docs/pre-dev/feature/tasks.md
 
-Complex (≥2 days): /ring:pre-dev-full
+Complex (≥2 days): /ring-pm-team:pre-dev-full
 ├── Gates 1-3: Same as above
 ├── Gate 4: pm-team/skills/pre-dev-api-design → docs/pre-dev/feature/API.md
 ├── Gate 5: pm-team/skills/pre-dev-data-model → docs/pre-dev/feature/data-model.md

@@ -146,7 +146,7 @@ Work through these areas systematically:
 - [ ] Magic numbers replaced with named constants
 - [ ] Dead code removed
 
-### 3. Architecture & Design Review
+### 4. Architecture & Design Review
 - [ ] SOLID principles followed
 - [ ] Proper separation of concerns
 - [ ] Loose coupling between components
@@ -155,7 +155,7 @@ Work through these areas systematically:
 - [ ] Extensibility for future changes
 - [ ] No circular dependencies
 
-### 4. Test Quality
+### 5. Test Quality
 - [ ] Test coverage for critical paths
 - [ ] Tests follow AAA pattern (Arrange-Act-Assert)
 - [ ] Tests are independent and repeatable
@@ -163,14 +163,14 @@ Work through these areas systematically:
 - [ ] Mocks are used appropriately (not testing mock behavior)
 - [ ] Test names clearly describe what they test
 
-### 5. Documentation & Readability
+### 6. Documentation & Readability
 - [ ] Functions/methods have descriptive comments
 - [ ] Complex logic has explanatory comments
 - [ ] Public APIs are documented
 - [ ] README updated if needed
 - [ ] File/module purpose is clear
 
-### 6. Performance & Maintainability
+### 7. Performance & Maintainability
 - [ ] No obvious performance issues (N+1 queries, inefficient loops)
 - [ ] Memory leaks prevented (cleanup, resource disposal)
 - [ ] Logging is appropriate (not too verbose, not too sparse)

@@ -257,12 +257,12 @@ Pre-dev workflow ensures:
 
 **Small feature:**
 ```
-/ring:pre-dev-feature logout-button
+/ring-pm-team:pre-dev-feature logout-button
 ```
 
 **Large feature:**
 ```
-/ring:pre-dev-full payment-system
+/ring-pm-team:pre-dev-full payment-system
 ```
 
 These run all gates sequentially and create artifacts in `docs/pre-dev/{feature}/`.
@@ -337,7 +337,7 @@ Remember:
 - **Use agents for specialist review** – Dispatch backend-engineer-golang to review TRD
 
 ### Good Example (ORCHESTRATOR):
-> "I need to plan payment system. Let me run /ring:pre-dev-full to get organized, then dispatch backend-engineer-golang to review the architecture."
+> "I need to plan payment system. Let me run /ring-pm-team:pre-dev-full to get organized, then dispatch backend-engineer-golang to review the architecture."
 
 ### Bad Example (OPERATOR):
 > "I'll start coding and plan as I go."
@@ -358,8 +358,8 @@ Remember:
 - using-pm-team (this skill)
 
 **Commands:**
-- `/ring:pre-dev-feature` – Small track (3 gates)
-- `/ring:pre-dev-full` – Large track (8 gates)
+- `/ring-pm-team:pre-dev-feature` – Small track (3 gates)
+- `/ring-pm-team:pre-dev-full` – Large track (8 gates)
 
 **Note:** If skills are unavailable, check if ring-pm-team is enabled in `.claude-plugin/marketplace.json`.
 

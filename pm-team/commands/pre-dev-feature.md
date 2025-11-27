@@ -14,7 +14,7 @@ I'm running the **Small Track** pre-development workflow (3 gates) for your feat
 - ✅ Don't require multi-service integration
 - ✅ Can be completed by a single developer
 
-**If any of the above are false, use `/ring-default:pre-dev-full` instead.**
+**If any of the above are false, use `/ring-pm-team:pre-dev-full` instead.**
 
 ## Document Organization
 
@@ -37,7 +37,7 @@ mkdir -p docs/pre-dev/<feature-name>
 
 ## Gate 1: PRD Creation
 
-**Skill:** ring:pre-dev-prd-creation
+**Skill:** ring-pm-team:pre-dev-prd-creation
 
 1. Ask user to describe the feature (what problem does it solve, who are the users, what's the business value)
 2. Create PRD document with:
@@ -58,7 +58,7 @@ mkdir -p docs/pre-dev/<feature-name>
 
 ## Gate 2: TRD Creation (Skipping Feature Map)
 
-**Skill:** ring:pre-dev-trd-creation
+**Skill:** ring-pm-team:pre-dev-trd-creation
 
 1. Load PRD from `docs/pre-dev/<feature-name>/prd.md`
 2. Note: No Feature Map exists (small track) - map PRD features directly to components
@@ -81,7 +81,7 @@ mkdir -p docs/pre-dev/<feature-name>
 
 ## Gate 3: Task Breakdown (Skipping API/Data/Deps)
 
-**Skill:** ring:pre-dev-task-breakdown
+**Skill:** ring-pm-team:pre-dev-task-breakdown
 
 1. Load PRD from `docs/pre-dev/<feature-name>/prd.md`
 2. Load TRD from `docs/pre-dev/<feature-name>/trd.md`
@@ -131,7 +131,7 @@ Next steps:
 ## Remember
 
 - This is the **Small Track** - lightweight and fast
-- If feature grows during planning, switch to `/ring-default:pre-dev-full`
+- If feature grows during planning, switch to `/ring-pm-team:pre-dev-full`
 - All documents saved to `docs/pre-dev/<feature-name>/`
 - Get human approval at each gate
 - Technology decisions happen later in Dependency Map (not in this track)

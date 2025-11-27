@@ -14,7 +14,7 @@ I'm running the **Full Track** pre-development workflow (8 gates) for your featu
 - ❌ Use new architecture patterns
 - ❌ Require team collaboration
 
-**If feature is simple (<2 days, existing patterns), use `/ring-default:pre-dev-feature` instead.**
+**If feature is simple (<2 days, existing patterns), use `/ring-pm-team:pre-dev-feature` instead.**
 
 ## Document Organization
 
@@ -37,7 +37,7 @@ mkdir -p docs/pre-dev/<feature-name>
 
 ## Gate 1: PRD Creation
 
-**Skill:** ring:pre-dev-prd-creation
+**Skill:** ring-pm-team:pre-dev-prd-creation
 
 1. Ask user to describe the feature (problem, users, business value)
 2. Create PRD document with:
@@ -58,7 +58,7 @@ mkdir -p docs/pre-dev/<feature-name>
 
 ## Gate 2: Feature Map Creation
 
-**Skill:** ring:pre-dev-feature-map
+**Skill:** ring-pm-team:pre-dev-feature-map
 
 1. Load PRD from `docs/pre-dev/<feature-name>/prd.md`
 2. Create feature map document with:
@@ -78,7 +78,7 @@ mkdir -p docs/pre-dev/<feature-name>
 
 ## Gate 3: TRD Creation
 
-**Skill:** ring:pre-dev-trd-creation
+**Skill:** ring-pm-team:pre-dev-trd-creation
 
 1. Load PRD from `docs/pre-dev/<feature-name>/prd.md`
 2. Load Feature Map from `docs/pre-dev/<feature-name>/feature-map.md`
@@ -103,7 +103,7 @@ mkdir -p docs/pre-dev/<feature-name>
 
 ## Gate 4: API Design
 
-**Skill:** ring:pre-dev-api-design
+**Skill:** ring-pm-team:pre-dev-api-design
 
 1. Load previous artifacts (PRD, Feature Map, TRD)
 2. Create API design document with:
@@ -123,7 +123,7 @@ mkdir -p docs/pre-dev/<feature-name>
 
 ## Gate 5: Data Model
 
-**Skill:** ring:pre-dev-data-model
+**Skill:** ring-pm-team:pre-dev-data-model
 
 1. Load previous artifacts
 2. Create data model document with:
@@ -143,7 +143,7 @@ mkdir -p docs/pre-dev/<feature-name>
 
 ## Gate 6: Dependency Map
 
-**Skill:** ring:pre-dev-dependency-map
+**Skill:** ring-pm-team:pre-dev-dependency-map
 
 1. Load previous artifacts
 2. Create dependency map document with:
@@ -163,7 +163,7 @@ mkdir -p docs/pre-dev/<feature-name>
 
 ## Gate 7: Task Breakdown
 
-**Skill:** ring:pre-dev-task-breakdown
+**Skill:** ring-pm-team:pre-dev-task-breakdown
 
 1. Load all previous artifacts (PRD, Feature Map, TRD, API Design, Data Model, Dependency Map)
 2. Create task breakdown document with:
@@ -184,7 +184,7 @@ mkdir -p docs/pre-dev/<feature-name>
 
 ## Gate 8: Subtask Creation
 
-**Skill:** ring:pre-dev-subtask-creation
+**Skill:** ring-pm-team:pre-dev-subtask-creation
 
 1. Load tasks from `docs/pre-dev/<feature-name>/tasks.md`
 2. Create subtask breakdown document with:

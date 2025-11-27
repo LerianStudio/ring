@@ -97,8 +97,8 @@ All commands prefixed with `/ring-default:` (can use `/ring:` shorthand in conte
 | Command | Use Case | Example |
 |---------|----------|---------|
 | `/ring-default:brainstorm [topic]` | Interactive design refinement before coding | `/ring-default:brainstorm user-authentication` |
-| `/ring-default:pre-dev-feature [name]` | Plan simple features (<2 days) – 3 gates | `/ring-default:pre-dev-feature logout-button` |
-| `/ring-default:pre-dev-full [name]` | Plan complex features (≥2 days) – 8 gates | `/ring-default:pre-dev-full payment-system` |
+| `/ring-pm-team:pre-dev-feature [name]` | Plan simple features (<2 days) – 3 gates | `/ring-pm-team:pre-dev-feature logout-button` |
+| `/ring-pm-team:pre-dev-full [name]` | Plan complex features (≥2 days) – 8 gates | `/ring-pm-team:pre-dev-full payment-system` |
 | `/ring-default:worktree [branch-name]` | Create isolated git workspace | `/ring-default:worktree auth-system` |
 | `/ring-default:write-plan [feature]` | Generate detailed task breakdown | `/ring-default:write-plan dashboard-redesign` |
 | `/ring-default:execute-plan [path]` | Execute plan in batches with checkpoints | `/ring-default:execute-plan docs/pre-dev/feature/tasks.md` |
@@ -226,7 +226,7 @@ For Brazilian financial compliance workflows:
 ### New Feature Development
 
 1. **Design** → `/ring-default:brainstorm feature-name`
-2. **Plan** → `/ring-default:pre-dev-feature feature-name` (or `pre-dev-full` if complex)
+2. **Plan** → `/ring-pm-team:pre-dev-feature feature-name` (or `pre-dev-full` if complex)
 3. **Isolate** → `/ring-default:worktree feature-branch`
 4. **Implement** → Use `ring-default:test-driven-development` skill
 5. **Review** → `/ring-default:review src/` (dispatches 3 reviewers)
@@ -275,8 +275,8 @@ These enforce quality standards:
 | Situation | Use This |
 |-----------|----------|
 | New feature, unsure about design | `/ring-default:brainstorm` |
-| Feature will take < 2 days | `/ring-default:pre-dev-feature` |
-| Feature will take ≥ 2 days or has complex dependencies | `/ring-default:pre-dev-full` |
+| Feature will take < 2 days | `/ring-pm-team:pre-dev-feature` |
+| Feature will take ≥ 2 days or has complex dependencies | `/ring-pm-team:pre-dev-full` |
 | Need implementation tasks | `/ring-default:write-plan` |
 | Before merging code | `/ring-default:review` |
 
