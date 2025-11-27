@@ -71,7 +71,7 @@ Requiring context creates bottlenecks, onboarding friction, and integration fail
 ```markdown
 # ST-[task-id]-[number]: [Subtask Name]
 
-> **For Agents:** REQUIRED SUB-SKILL: Use ring:executing-plans to implement this subtask step-by-step.
+> **For Agents:** REQUIRED SUB-SKILL: Use ring-default:executing-plans to implement this subtask step-by-step.
 
 **Goal:** [One sentence describing what this builds]
 
@@ -229,7 +229,7 @@ Before declaring subtasks ready:
 ```markdown
 # ST-001-01: Create User Model with Validation
 
-> **For Agents:** REQUIRED SUB-SKILL: Use ring:executing-plans to implement this subtask step-by-step.
+> **For Agents:** REQUIRED SUB-SKILL: Use ring-default:executing-plans to implement this subtask step-by-step.
 
 **Goal:** Create a User model class with email and password validation in the auth service.
 
@@ -420,13 +420,13 @@ After creating subtasks, offer execution choice:
 **Which approach?"**
 
 **If Subagent-Driven chosen:**
-- **REQUIRED SUB-SKILL:** Use ring:subagent-driven-development
+- **REQUIRED SUB-SKILL:** Use ring-default:subagent-driven-development
 - Stay in this session
 - Fresh subagent per subtask + code review
 
 **If Parallel Session chosen:**
 - Guide them to open new session in worktree
-- **REQUIRED SUB-SKILL:** New session uses ring:executing-plans
+- **REQUIRED SUB-SKILL:** New session uses ring-default:executing-plans
 
 ## Quality Self-Check
 

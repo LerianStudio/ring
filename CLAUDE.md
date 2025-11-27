@@ -208,9 +208,9 @@ git log --oneline -20              # Recent commits show hook development
 git worktree list                  # Check isolated development branches
 
 # Skill invocation (via Claude Code)
-Skill tool: "ring:test-driven-development"  # Enforce TDD workflow
-Skill tool: "ring:systematic-debugging"     # Debug with 4-phase analysis
-Skill tool: "ring:using-ring"              # Load mandatory workflows
+Skill tool: "ring-default:test-driven-development"  # Enforce TDD workflow
+Skill tool: "ring-default:systematic-debugging"     # Debug with 4-phase analysis
+Skill tool: "ring-default:using-ring"              # Load mandatory workflows
 
 # Slash commands
 /ring-default:codereview          # Dispatch 3 parallel reviewers
@@ -255,7 +255,7 @@ python default/hooks/generate-skills-ref.py # Generate skill overview
      complementary: [pairs-well-with]
    ---
    ```
-3. Test with `Skill tool: "ring:testing-skills-with-subagents"`
+3. Test with `Skill tool: "ring-default:testing-skills-with-subagents"`
 4. Skill auto-loads next SessionStart via `default/hooks/generate-skills-ref.py`
 
 **For product/team-specific skills:**
@@ -332,7 +332,7 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 ### Creating Review Agents
 1. Add to `default/agents/your-reviewer.md` with output_schema
 2. Reference in `default/skills/requesting-code-review/SKILL.md:85`
-3. Dispatch via Task tool with `subagent_type="ring:your-reviewer"`
+3. Dispatch via Task tool with `subagent_type="ring-default:your-reviewer"`
 4. Must run in parallel with other reviewers (single message, multiple Tasks)
 
 ### Pre-Dev Workflow
@@ -356,15 +356,15 @@ Complex (≥2 days): /ring-pm-team:pre-dev-full
 ### Parallel Code Review
 ```python
 # Instead of sequential (60 min):
-review1 = Task("ring:code-reviewer")      # 20 min
-review2 = Task("ring:business-logic")     # 20 min  
-review3 = Task("ring:security-reviewer")  # 20 min
+review1 = Task("ring-default:code-reviewer")      # 20 min
+review2 = Task("ring-default:business-logic-reviewer")     # 20 min
+review3 = Task("ring-default:security-reviewer")  # 20 min
 
 # Run parallel (20 min total):
 Task.parallel([
-    ("ring:code-reviewer", prompt),
-    ("ring:business-logic-reviewer", prompt),
-    ("ring:security-reviewer", prompt)
+    ("ring-default:code-reviewer", prompt),
+    ("ring-default:business-logic-reviewer", prompt),
+    ("ring-default:security-reviewer", prompt)
 ])  # Single message, 3 tool calls
 ```
 
@@ -383,6 +383,15 @@ Task.parallel([
 - Agents: `{domain}-reviewer.md` format
 - Commands: `/ring-{plugin}:{action}` format (e.g., `/ring-default:brainstorm`, `/ring-pm-team:pre-dev-feature`)
 - Hooks: `{event}-{purpose}.sh` format
+
+#### Agent/Skill/Command Invocation
+- **ALWAYS use fully qualified names**: `ring-{plugin}:{component}`
+- **Examples:**
+  - ✅ Correct: `ring-default:code-reviewer`
+  - ✅ Correct: `ring-dev-team:backend-engineer-golang`
+  - ❌ Wrong: `ring:code-reviewer` (ambiguous shorthand)
+  - ❌ Wrong: `backend-engineer-golang` (missing plugin prefix)
+- **Rationale:** Prevents ambiguity in multi-plugin environments
 
 ### Agent Output Schema Archetypes
 
@@ -600,5 +609,12 @@ Agent Cross-References:
 - [ ] Command added? Update MANUAL.md, README.md
 - [ ] Plugin added? Create hooks/, using-* skill, update marketplace.json
 - [ ] Names changed? Search repo for old names: `grep -r "old-name" --include="*.md" --include="*.sh"`
+
+**Naming Convention Enforcement:**
+- [ ] All agent invocations use `ring-{plugin}:agent-name` format
+- [ ] All skill invocations use `ring-{plugin}:skill-name` format
+- [ ] All command invocations use `/ring-{plugin}:command-name` format
+- [ ] No `ring:` shorthand used (except in historical examples with context)
+- [ ] No bare agent/skill names in invocation contexts
 
 **Always use fully qualified names:** `ring-{plugin}:{component}` (e.g., `ring-default:code-reviewer`)

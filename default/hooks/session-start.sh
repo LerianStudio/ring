@@ -125,7 +125,7 @@ generate_skills_overview() {
     echo "**Note:** Neither Python nor bash fallback available."
     echo "Skills are still accessible via the Skill tool."
     echo ""
-    echo "Run: \`Skill tool: ring:using-ring\` to see available workflows."
+    echo "Run: \`Skill tool: ring-default:using-ring\` to see available workflows."
     echo ""
     echo "To fix: Install Python 3.x or ensure generate-skills-ref.sh is executable."
 }

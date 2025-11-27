@@ -33,12 +33,12 @@ Ring operates on three core principles:
 │  │                          Ring Marketplace                                  │  │
 │  │  ┌──────────────────────┐  ┌──────────────────────┐                       │  │
 │  │  │ ring-default         │  │ ring-dev-team        │                       │  │
-│  │  │ Skills(20) Agents(5) │  │ Skills(2) Agents(10) │                       │  │
-│  │  │ Cmds(6) Hooks/Lib    │  │                      │                       │  │
+│  │  │ Skills(21) Agents(5) │  │ Skills(2) Agents(10) │                       │  │
+│  │  │ Cmds(7) Hooks/Lib    │  │                      │                       │  │
 │  │  └──────────────────────┘  └──────────────────────┘                       │  │
 │  │  ┌──────────────────────┐  ┌──────────────────────┐                       │  │
 │  │  │ ring-finops-team     │  │ ring-pm-team         │                       │  │
-│  │  │ Skills(6) Agents(2)  │  │ Skills(9) Cmds(2)    │                       │  │
+│  │  │ Skills(6) Agents(2)  │  │ Skills(10) Cmds(2)   │                       │  │
 │  │  └──────────────────────┘  └──────────────────────┘                       │  │
 │  │  ┌──────────────────────┐  ┌──────────────────────┐                       │  │
 │  │  │ ralph-wiggum         │  │ ring-tw-team         │                       │  │
@@ -77,10 +77,10 @@ ring/                                  # Monorepo root
 
 | Plugin | Description | Components |
 |--------|-------------|------------|
-| **ring-default** | Core skills library | 20 skills, 5 agents, 6 commands |
+| **ring-default** | Core skills library | 21 skills, 5 agents, 7 commands |
 | **ring-dev-team** | Developer agents | 2 skills, 10 specialized developer agents |
 | **ring-finops-team** | FinOps & regulatory compliance | 6 skills, 2 agents |
-| **ring-pm-team** | Product planning workflows | 9 skills, 2 commands |
+| **ring-pm-team** | Product planning workflows | 10 skills, 2 commands |
 | **ralph-wiggum** | Iterative AI development loops | 1 skill, 3 commands, Stop hook |
 | **ring-tw-team** | Technical writing specialists | 7 skills, 3 agents, 3 commands |
 | **beads** | Issue tracking integration | 1 skill, hooks |
@@ -139,11 +139,11 @@ dev-team/agents/
 **Key Characteristics:**
 - Invoked via Claude's `Task` tool with `subagent_type`
 - Must specify model (typically "opus" for comprehensive analysis)
-- Review agents run in parallel (3 reviewers dispatch simultaneously via `/ring:codereview` command)
+- Review agents run in parallel (3 reviewers dispatch simultaneously via `/ring-default:codereview` command)
 - Developer agents provide specialized domain expertise
 - Return structured reports with severity-based findings
 
-**Note:** Parallel review orchestration is handled by the `/ring:codereview` command
+**Note:** Parallel review orchestration is handled by the `/ring-default:codereview` command
 
 ### 3. Commands (`commands/`)
 **Purpose:** Slash commands that provide shortcuts to skills/workflows
@@ -294,7 +294,7 @@ sequenceDiagram
     participant business-reviewer
     participant security-reviewer
 
-    User->>Claude: /ring:codereview
+    User->>Claude: /ring-default:codereview
     Note over Claude: Command provides<br/>parallel review workflow
 
     Claude->>Task Tool: Dispatch 3 parallel tasks
@@ -322,12 +322,12 @@ sequenceDiagram
 Ring leverages four primary Claude Code tools:
 
 1. **Skill Tool**
-   - Invokes skills by name: `skill: "ring:test-driven-development"`
+   - Invokes skills by name: `skill: "ring-default:test-driven-development"`
    - Skills expand into full instructions within conversation
    - Skill content becomes part of Claude's working context
 
 2. **Task Tool**
-   - Dispatches agents to subagent instances: `Task(agent="ring:code-reviewer", model="opus")`
+   - Dispatches agents to subagent instances: `Task(agent="ring-default:code-reviewer", model="opus")`
    - Enables parallel execution (multiple Tasks in one message)
    - Returns structured reports from independent analysis
 
@@ -337,7 +337,7 @@ Ring leverages four primary Claude Code tools:
    - Provides progress visibility to users
 
 4. **SlashCommand Tool**
-   - Executes commands: `SlashCommand(command="/ring:brainstorm")`
+   - Executes commands: `SlashCommand(command="/ring-default:brainstorm")`
    - Commands expand to skill/agent invocations
    - Provides user-friendly shortcuts
 
@@ -379,7 +379,7 @@ Review Request → full-reviewer → Dispatch 3 Tasks (parallel)
 ### Pattern 3: Skill-to-Command Mapping
 
 ```
-User: /ring:brainstorm
+User: /ring-default:brainstorm
     ↓
 SlashCommand Tool
     ↓
@@ -387,7 +387,7 @@ commands/brainstorm.md
     ↓
 "Use and follow the brainstorming skill"
     ↓
-Skill Tool: ring:brainstorming
+Skill Tool: ring-default:brainstorming
     ↓
 skills/brainstorming/SKILL.md
 ```
@@ -425,9 +425,9 @@ Complex Skill → TodoWrite tracking
 - Some commands (like review) orchestrate multiple components
 
 **Example Mappings:**
-- `/ring:brainstorm` → `brainstorming` skill
-- `/ring:write-plan` → `writing-plans` skill
-- `/ring:codereview` → `full-reviewer` agent → 3 parallel review agents
+- `/ring-default:brainstorm` → `brainstorming` skill
+- `/ring-default:write-plan` → `writing-plans` skill
+- `/ring-default:codereview` → `full-reviewer` agent → 3 parallel review agents
 
 ### Skills ↔ Shared Patterns
 
@@ -504,14 +504,14 @@ SKILL.md frontmatter → generate-skills-ref.py → formatted overview → sessi
 ### Adding New Agents
 1. Create `{plugin}/agents/{name}.md` with model specification
 2. Include YAML frontmatter: `name`, `description`, `model`, `version`
-3. Invoke via Task tool with `subagent_type="ring:{name}"`
-4. Review agents can run in parallel via `/ring:codereview`
+3. Invoke via Task tool with `subagent_type="ring-{plugin}:{name}"`
+4. Review agents can run in parallel via `/ring-default:codereview`
 5. Developer agents provide domain expertise via direct Task invocation
 
 ### Adding New Commands
 1. Create `commands/{name}.md`
 2. Reference skill or agent to invoke
-3. Available via `/ring:{name}`
+3. Available via `/ring-{plugin}:{name}`
 
 ### Adding Shared Patterns
 1. Create `skills/shared-patterns/{pattern}.md`
@@ -606,24 +606,24 @@ Ring's architecture is designed for:
 | Component | Count | Location |
 |-----------|-------|----------|
 | Active Plugins | 7 | `default/`, `dev-team/`, `finops-team/`, `pm-team/`, `ralph-wiggum/`, `tw-team/`, `beads/` |
-| Skills (ring-default) | 20 | `default/skills/` |
+| Skills (ring-default) | 21 | `default/skills/` |
 | Skills (ring-dev-team) | 2 | `dev-team/skills/` |
 | Skills (ring-finops-team) | 6 | `finops-team/skills/` |
-| Skills (ring-pm-team) | 9 | `pm-team/skills/` |
+| Skills (ring-pm-team) | 10 | `pm-team/skills/` |
 | Skills (ralph-wiggum) | 1 | `ralph-wiggum/skills/` |
 | Skills (ring-tw-team) | 7 | `tw-team/skills/` |
 | Skills (beads) | 1 | `beads/skills/` |
-| **Total Skills** | **46** | **All plugins** |
+| **Total Skills** | **48** | **All plugins** |
 | Agents (ring-default) | 5 | `default/agents/` |
 | Agents (ring-dev-team) | 10 | `dev-team/agents/` |
 | Agents (ring-finops-team) | 2 | `finops-team/agents/` |
 | Agents (ring-tw-team) | 3 | `tw-team/agents/` |
 | **Total Agents** | **20** | **All plugins** |
-| Commands (ring-default) | 6 | `default/commands/` |
+| Commands (ring-default) | 7 | `default/commands/` |
 | Commands (ring-pm-team) | 2 | `pm-team/commands/` |
 | Commands (ralph-wiggum) | 3 | `ralph-wiggum/commands/` |
 | Commands (ring-tw-team) | 3 | `tw-team/commands/` |
-| **Total Commands** | **14** | **All plugins** |
+| **Total Commands** | **15** | **All plugins** |
 | Hooks | Per plugin | `{plugin}/hooks/` |
 | Lib utilities | 9 | `default/lib/` |
 

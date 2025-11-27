@@ -27,7 +27,7 @@ You run agents with known test inputs (RED - observe incorrect outputs), fix the
 
 **Core principle:** If you didn't run an agent with test inputs and verify its outputs, you don't know if the agent works correctly.
 
-**REQUIRED BACKGROUND:** You MUST understand `ring:test-driven-development` before using this skill. That skill defines the fundamental RED-GREEN-REFACTOR cycle. This skill provides agent-specific test formats (test inputs, output verification, accuracy metrics).
+**REQUIRED BACKGROUND:** You MUST understand `ring-default:test-driven-development` before using this skill. That skill defines the fundamental RED-GREEN-REFACTOR cycle. This skill provides agent-specific test formats (test inputs, output verification, accuracy metrics).
 
 **Key difference from testing-skills-with-subagents:**
 - **Skills** = instructions that guide behavior; test if agent follows rules under pressure
@@ -155,7 +155,7 @@ One test case proves nothing. Three tests are suspicious. Six tests are minimum 
 Use Task tool to dispatch agent:
 
 Task(
-  subagent_type="ring:code-reviewer",
+  subagent_type="ring-default:code-reviewer",
   prompt="""
   Review this code for security issues:
 

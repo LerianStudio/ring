@@ -30,17 +30,17 @@ Dispatch all three reviewer subagents in parallel for fast, comprehensive feedba
 
 Three specialized reviewers run in **parallel** for maximum speed:
 
-**1. ring:code-reviewer** (Foundation)
+**1. ring-default:code-reviewer** (Foundation)
 - **Focus:** Architecture, design patterns, code quality, maintainability
 - **Model:** Opus (required for comprehensive analysis)
 - **Reports:** Code quality issues, architectural concerns
 
-**2. ring:business-logic-reviewer** (Correctness)
+**2. ring-default:business-logic-reviewer** (Correctness)
 - **Focus:** Domain correctness, business rules, edge cases, requirements
 - **Model:** Opus (required for deep domain understanding)
 - **Reports:** Business logic issues, requirement gaps
 
-**3. ring:security-reviewer** (Safety)
+**3. ring-default:security-reviewer** (Safety)
 - **Focus:** Vulnerabilities, authentication, input validation, OWASP risks
 - **Model:** Opus (required for thorough security analysis)
 - **Reports:** Security vulnerabilities, OWASP risks
@@ -74,7 +74,7 @@ Three specialized reviewers run in **parallel** for maximum speed:
 
 **Two ways to run parallel reviews:**
 1. **Direct parallel dispatch:** Launch 3 Task calls in single message (explicit control)
-2. **/ring:codereview command:** Command that provides workflow instructions for parallel review (convenience)
+2. **/ring-default:codereview command:** Command that provides workflow instructions for parallel review (convenience)
 
 ## How to Request
 
@@ -91,7 +91,7 @@ HEAD_SHA=$(git rev-parse HEAD)
 ```
 # Single message with 3 parallel Task calls:
 
-Task tool #1 (ring:code-reviewer):
+Task tool #1 (ring-default:code-reviewer):
   model: "opus"
   description: "Review code quality and architecture"
   prompt: |
@@ -101,13 +101,13 @@ Task tool #1 (ring:code-reviewer):
     HEAD_SHA: [current commit]
     DESCRIPTION: [brief summary]
 
-Task tool #2 (ring:business-logic-reviewer):
+Task tool #2 (ring-default:business-logic-reviewer):
   model: "opus"
   description: "Review business logic correctness"
   prompt: |
     [Same parameters as above]
 
-Task tool #3 (ring:security-reviewer):
+Task tool #3 (ring-default:security-reviewer):
   model: "opus"
   description: "Review security vulnerabilities"
   prompt: |

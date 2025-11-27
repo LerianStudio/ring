@@ -222,8 +222,10 @@ def test_preserves_code_blocks(self):
 
 def test_replaces_ring_contexts(self):
     """_replace_agent_references() should replace Ring-specific contexts."""
+    # Test uses old shorthand format to verify adapter transformation behavior
     text = 'Use "ring:test-agent" for testing'
     result = adapter._replace_agent_references(text)
+    # Adapter should transform ring:test-agent → ring:test-droid for Factory AI
     assert "ring:test-droid" in result
 ```
 

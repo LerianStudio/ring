@@ -77,8 +77,8 @@ AskUserQuestion(
 ```
 
 **Based on response:**
-- **Execute now** → Use `ring:subagent-driven-development` skill
-- **Execute in parallel session** → Instruct user to open new session and use `ring:executing-plans`
+- **Execute now** → Use `ring-default:subagent-driven-development` skill
+- **Execute in parallel session** → Instruct user to open new session and use `ring-default:executing-plans`
 - **Save for later** → Report plan location and end workflow
 
 ## Why Use an Agent?
@@ -147,17 +147,17 @@ When user selects an execution mode via `AskUserQuestion`:
 - Dispatches fresh subagent per task in current session
 - Code review between tasks
 - Fast iteration with quality gates
-- Uses `ring:subagent-driven-development`
+- Uses `ring-default:subagent-driven-development`
 
 **2. Execute in parallel session**
 - User opens new agent session in the worktree
 - Batch execution with human review checkpoints
-- Uses `ring:executing-plans`
+- Uses `ring-default:executing-plans`
 
 **3. Save for later**
 - Plan saved to `docs/plans/YYYY-MM-DD-<feature-name>.md`
 - User reviews plan manually before deciding on execution
-- Can invoke `ring:executing-plans` later with the plan file
+- Can invoke `ring-default:executing-plans` later with the plan file
 
 ## Required Patterns
 

@@ -63,7 +63,7 @@ Quick reference guide for the Ring skills library and workflow system. This mono
     │ PLUGIN     │ Self-contained package (skills+agents+commands)  │
     │ HOOK       │ Auto-runs at session events (injects context)    │
     │ SKILL      │ Workflow pattern (Claude Code uses internally)   │
-    │ COMMAND    │ User-invokable action (/ring:codereview)         │
+    │ COMMAND    │ User-invokable action (/ring-default:codereview)         │
     │ AGENT      │ Specialized subprocess (Task tool dispatch)      │
     └────────────┴──────────────────────────────────────────────────┘
 ```
@@ -82,7 +82,8 @@ Ring is auto-loaded at session start. Three ways to invoke Ring capabilities:
 
 ## 📋 Slash Commands
 
-All commands prefixed with `/ring-default:` (can use `/ring:` shorthand in context).
+All commands prefixed with `/ring-default:` for default plugin commands.
+Other plugins require full prefix: `/ring-dev-team:`, `/ring-finops-team:`, `/ring-pm-team:`, `/ring-tw-team:`, etc.
 
 ### Project & Feature Workflows
 

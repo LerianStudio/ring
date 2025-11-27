@@ -132,7 +132,7 @@ If the user provides a commit message as argument:
 3. Append the trailers via `--trailer` parameter
 
 ```bash
-# User says: /ring:commit "fix login bug"
+# User says: /ring-default:commit "fix login bug"
 git commit \
   -m "fix: fix login bug" \
   --trailer "Generated-by: Claude" \

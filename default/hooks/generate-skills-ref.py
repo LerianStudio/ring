@@ -277,7 +277,7 @@ def generate_markdown(skills: List[Skill]) -> str:
     # Add usage section
     lines.append('## Usage\n')
     lines.append('To use a skill: Use the Skill tool with skill name')
-    lines.append('Example: `ring:brainstorming`')
+    lines.append('Example: `ring-default:brainstorming`')
 
     return '\n'.join(lines)
 

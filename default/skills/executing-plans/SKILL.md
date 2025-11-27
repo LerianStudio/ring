@@ -121,7 +121,7 @@ For each task:
 **After each batch execution, REQUIRED:**
 
 1. **Dispatch all 3 reviewers in parallel:**
-   - REQUIRED SUB-SKILL: Use ring:requesting-code-review
+   - REQUIRED SUB-SKILL: Use ring-default:requesting-code-review
    - All reviewers run simultaneously (not sequentially)
    - Wait for all to complete
 
@@ -169,7 +169,7 @@ For each task:
 
 After all tasks complete and verified:
 - Announce: "I'm using the finishing-a-development-branch skill to complete this work."
-- **REQUIRED SUB-SKILL:** Use ring:finishing-a-development-branch
+- **REQUIRED SUB-SKILL:** Use ring-default:finishing-a-development-branch
 - Follow that skill to verify tests, present options, execute choice
 
 ## When to Stop and Ask for Help

@@ -84,7 +84,7 @@ If NO to any → Add more detail
 ```markdown
 # [Feature Name] Implementation Plan
 
-> **For Agents:** REQUIRED SUB-SKILL: Use ring:executing-plans to implement this plan task-by-task.
+> **For Agents:** REQUIRED SUB-SKILL: Use ring-default:executing-plans to implement this plan task-by-task.
 
 **Goal:** [One sentence describing what this builds]
 
@@ -211,7 +211,7 @@ Add this step after every 3-5 tasks (or after significant features):
 ### Task N: Run Code Review
 
 1. **Dispatch all 3 reviewers in parallel:**
-   - REQUIRED SUB-SKILL: Use ring:requesting-code-review
+   - REQUIRED SUB-SKILL: Use ring-default:requesting-code-review
    - All reviewers run simultaneously (ring-default:code-reviewer, ring-default:business-logic-reviewer, ring-default:security-reviewer)
    - Wait for all to complete
 
@@ -279,13 +279,13 @@ After saving the plan to `docs/plans/<filename>.md`, return to the main conversa
 Then wait for human to choose.
 
 **If Subagent-Driven chosen:**
-- Inform: **REQUIRED SUB-SKILL:** Use ring:subagent-driven-development
+- Inform: **REQUIRED SUB-SKILL:** Use ring-default:subagent-driven-development
 - Stay in current session
 - Fresh subagent per task + code review between tasks
 
 **If Parallel Session chosen:**
 - Guide them to open new session in the worktree
-- Inform: **REQUIRED SUB-SKILL:** New session uses ring:executing-plans
+- Inform: **REQUIRED SUB-SKILL:** New session uses ring-default:executing-plans
 - Provide exact command: `cd <worktree-path> && claude`
 
 ## Critical Reminders

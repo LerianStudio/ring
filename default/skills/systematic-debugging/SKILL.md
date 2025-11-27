@@ -79,7 +79,7 @@ Phase 1 Investigation:
 
 5. **Trace Data Flow**
 
-   Error deep in stack? **Use ring:root-cause-tracing skill.**
+   Error deep in stack? **Use ring-default:root-cause-tracing skill.**
 
    Quick version:
    - Where does bad value originate?
@@ -147,7 +147,7 @@ FINDINGS:
 
 1. **Create Failing Test**
    - Simplest reproduction
-   - **Use ring:test-driven-development skill**
+   - **Use ring-default:test-driven-development skill**
 
 2. **Implement Single Fix**
    - Address root cause only
@@ -169,7 +169,7 @@ FINDINGS:
    - **If non-trivial (took > 5 min):** Suggest documentation
    > "The fix has been verified. Would you like to document this solution for future reference?
    > Run: `/ring-default:codify`"
-   - **Use ring:codify-solution skill** to capture institutional knowledge
+   - **Use ring-default:codify-solution skill** to capture institutional knowledge
 
 6. **If 3+ Fixes Failed: Question Architecture**
 

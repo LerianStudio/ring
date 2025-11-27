@@ -85,7 +85,7 @@ Task tool (general-purpose):
 ```
 # Single message with 3 parallel Task calls:
 
-Task tool #1 (ring:code-reviewer):
+Task tool #1 (ring-default:code-reviewer):
   model: "opus"
   description: "Review code quality for Task N"
   prompt: |
@@ -95,13 +95,13 @@ Task tool #1 (ring:code-reviewer):
     HEAD_SHA: [current commit]
     DESCRIPTION: [task summary]
 
-Task tool #2 (ring:business-logic-reviewer):
+Task tool #2 (ring-default:business-logic-reviewer):
   model: "opus"
   description: "Review business logic for Task N"
   prompt: |
     [Same parameters as above]
 
-Task tool #3 (ring:security-reviewer):
+Task tool #3 (ring-default:security-reviewer):
   model: "opus"
   description: "Review security for Task N"
   prompt: |
@@ -180,7 +180,7 @@ After all tasks complete, run parallel final validation across entire implementa
 ```
 # Single message with 3 parallel Task calls:
 
-Task tool #1 (ring:code-reviewer):
+Task tool #1 (ring-default:code-reviewer):
   model: "opus"
   description: "Final code review for complete implementation"
   prompt: |
@@ -190,13 +190,13 @@ Task tool #1 (ring:code-reviewer):
     HEAD_SHA: [current commit]
     DESCRIPTION: Full implementation review
 
-Task tool #2 (ring:business-logic-reviewer):
+Task tool #2 (ring-default:business-logic-reviewer):
   model: "opus"
   description: "Final business logic review"
   prompt: |
     [Same parameters as above]
 
-Task tool #3 (ring:security-reviewer):
+Task tool #3 (ring-default:security-reviewer):
   model: "opus"
   description: "Final security review"
   prompt: |
@@ -213,7 +213,7 @@ Task tool #3 (ring:security-reviewer):
 
 After final review passes:
 - Announce: "I'm using the finishing-a-development-branch skill to complete this work."
-- **REQUIRED SUB-SKILL:** Use ring:finishing-a-development-branch
+- **REQUIRED SUB-SKILL:** Use ring-default:finishing-a-development-branch
 - Follow that skill to verify tests, present options, execute choice
 
 ## Example Workflow

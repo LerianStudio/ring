@@ -45,8 +45,8 @@ Skills are markdown files with YAML frontmatter that define workflows, processes
 
 **Invocation:**
 ```
-Skill tool: "ring:test-driven-development"
-Skill tool: "ring:systematic-debugging"
+Skill tool: "ring-default:test-driven-development"
+Skill tool: "ring-default:systematic-debugging"
 ```
 
 **Structure:**
