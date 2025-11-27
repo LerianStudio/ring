@@ -9,7 +9,7 @@
     {
       "name": "ring-default",
       "description": "Core skills library for the Lerian Team: TDD, debugging, collaboration patterns, and proven techniques. Features parallel 3-reviewer code review system (Foundation, Correctness, Safety), systematic debugging, workflow orchestration, and knowledge capture via /codify. 21 essential skills for software engineering excellence.",
-      "version": "0.14.0",
+      "version": "0.14.1",
       "source": "./default",
       "homepage": "https://github.com/lerianstudio/ring/tree/default",
       "repository": "https://github.com/lerianstudio/ring/tree/default",
@@ -54,7 +54,7 @@
     {
       "name": "ring-pm-team",
       "description": "Product team pre-development workflow: 10 skills + 3 research agents. 9-gate planning system with research-first approach (Gate 0) before PRD creation. Includes parallel research agents (repo-research-analyst, best-practices-researcher, framework-docs-researcher) and full planning gates (PRD, feature map, TRD, API, data model, dependencies, tasks, subtasks).",
-      "version": "0.6.0",
+      "version": "0.6.1",
       "source": "./pm-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/pm-team",
       "repository": "https://github.com/lerianstudio/ring/tree/pm-team",
@@ -157,5 +157,5 @@
       ]
     }
   ],
-  "version": "0.24.0"
+  "version": "0.25.0"
 }
