@@ -63,7 +63,7 @@ Quick reference guide for the Ring skills library and workflow system. This mono
     │ PLUGIN     │ Self-contained package (skills+agents+commands)  │
     │ HOOK       │ Auto-runs at session events (injects context)    │
     │ SKILL      │ Workflow pattern (Claude Code uses internally)   │
-    │ COMMAND    │ User-invokable action (/ring:review)             │
+    │ COMMAND    │ User-invokable action (/ring:codereview)         │
     │ AGENT      │ Specialized subprocess (Task tool dispatch)      │
     └────────────┴──────────────────────────────────────────────────┘
 ```
@@ -99,7 +99,7 @@ All commands prefixed with `/ring-default:` (can use `/ring:` shorthand in conte
 
 | Command | Use Case | Example |
 |---------|----------|---------|
-| `/ring-default:review [files-or-paths]` | Dispatch 3 parallel code reviewers | `/ring-default:review src/auth/` |
+| `/ring-default:codereview [files-or-paths]` | Dispatch 3 parallel code reviewers | `/ring-default:codereview src/auth/` |
 | `/ring-default:commit [message]` | Create git commit with AI trailers | `/ring-default:commit "fix(auth): improve token validation"` |
 
 ### Iterative AI Development (ralph-wiggum)
@@ -184,7 +184,7 @@ Invoke via `Task tool with subagent_type: "..."`.
 | `ring-default:business-logic-reviewer` | Domain correctness, edge cases, requirements | Opus |
 | `ring-default:security-reviewer` | Vulnerabilities, OWASP, auth, validation | Opus |
 
-**Example:** Before merging, run all 3 parallel reviewers via `/ring-default:review src/`
+**Example:** Before merging, run all 3 parallel reviewers via `/ring-default:codereview src/`
 
 ### Planning & Analysis (ring-default)
 
@@ -239,7 +239,7 @@ For documentation creation and review:
 2. **Plan** → `/ring-pm-team:pre-dev-feature feature-name` (or `pre-dev-full` if complex)
 3. **Isolate** → `/ring-default:worktree feature-branch`
 4. **Implement** → Use `ring-default:test-driven-development` skill
-5. **Review** → `/ring-default:review src/` (dispatches 3 reviewers)
+5. **Review** → `/ring-default:codereview src/` (dispatches 3 reviewers)
 6. **Commit** → `/ring-default:commit "message"`
 
 ### Bug Investigation
@@ -248,12 +248,12 @@ For documentation creation and review:
 2. **Trace** → Use `ring-default:root-cause-tracing` if needed
 3. **Implement** → Use `ring-default:test-driven-development` skill
 4. **Verify** → Use `ring-default:verification-before-completion` skill
-5. **Review & Merge** → `/ring-default:review` + `/ring-default:commit`
+5. **Review & Merge** → `/ring-default:codereview` + `/ring-default:commit`
 
 ### Code Review
 
 ```
-/ring-default:review [files-or-paths]
+/ring-default:codereview [files-or-paths]
     ↓
 Runs in parallel:
   • ring-default:code-reviewer (Opus)
@@ -271,7 +271,7 @@ These enforce quality standards:
 
 1. **TDD is enforced** – Test must fail (RED) before implementation
 2. **Skill check is mandatory** – Use `using-ring` before any task
-3. **Reviewers run parallel** – Never sequential review (use `/ring-default:review`)
+3. **Reviewers run parallel** – Never sequential review (use `/ring-default:codereview`)
 4. **Verification required** – Don't claim complete without evidence
 5. **No incomplete code** – No "TODO" or placeholder comments
 6. **Error handling required** – Don't ignore errors
@@ -288,14 +288,14 @@ These enforce quality standards:
 | Feature will take < 2 days | `/ring-pm-team:pre-dev-feature` |
 | Feature will take ≥ 2 days or has complex dependencies | `/ring-pm-team:pre-dev-full` |
 | Need implementation tasks | `/ring-default:write-plan` |
-| Before merging code | `/ring-default:review` |
+| Before merging code | `/ring-default:codereview` |
 
 
 ### Agent Selection
 
 | Need | Agent to Use |
 |------|-------------|
-| General code quality review | 3 parallel reviewers via `/ring-default:review` |
+| General code quality review | 3 parallel reviewers via `/ring-default:codereview` |
 | Language-agnostic backend design | `ring-dev-team:backend-engineer` |
 | Go backend expertise | `ring-dev-team:backend-engineer-golang` |
 | TypeScript/Node.js backend | `ring-dev-team:backend-engineer-typescript` |

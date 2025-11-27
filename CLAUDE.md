@@ -56,7 +56,7 @@ ring/                                  # Monorepo root
 │   │   ├── write-plan.md            # Implementation planning
 │   │   └── codebase-explorer.md     # Deep architecture analysis (Opus)
 │   ├── commands/                    # 6 slash commands
-│   │   ├── review.md               # /ring-default:review - dispatch 3 parallel reviewers
+│   │   ├── codereview.md           # /ring-default:codereview - dispatch 3 parallel reviewers
 │   │   └── brainstorm.md           # /ring-default:brainstorm - interactive design
 │   ├── hooks/                      # Session lifecycle
 │   │   ├── hooks.json             # SessionStart, UserPromptSubmit config
@@ -151,7 +151,7 @@ Skill tool: "ring:systematic-debugging"     # Debug with 4-phase analysis
 Skill tool: "ring:using-ring"              # Load mandatory workflows
 
 # Slash commands
-/ring-default:review              # Dispatch 3 parallel reviewers
+/ring-default:codereview          # Dispatch 3 parallel reviewers
 /ring-default:brainstorm          # Socratic design refinement
 /ring-pm-team:pre-dev-feature     # <2 day features (3 gates)
 /ring-pm-team:pre-dev-full        # ≥2 day features (8 gates)

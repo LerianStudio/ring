@@ -258,13 +258,13 @@ Ralph complements other Ring workflows:
 
 - Use **brainstorming** to design the task before starting a Ralph loop
 - Include **TDD patterns** in your Ralph prompt for self-verification
-- After Ralph completes, run **/ring-default:review** for code quality check
+- After Ralph completes, run **/ring-default:codereview** for code quality check
 
 **Example workflow:**
 ```
 1. /ring-default:brainstorm "TODO API design"
 2. /ralph-wiggum:ralph-loop "Implement TODO API per design..." --max-iterations 30
-3. /ring-default:review src/
+3. /ring-default:codereview src/
 4. /ring-default:commit "feat: add TODO API"
 ```
 
