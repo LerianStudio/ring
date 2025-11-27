@@ -8,8 +8,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-# Auto-update Ring marketplace and plugins silently
-update_message=""
+# Auto-update Ring marketplace and plugins
+marketplace_updated="false"
 if command -v claude &> /dev/null && command -v git &> /dev/null; then
     # Detect marketplace path (common locations)
     marketplace_path=""
@@ -19,35 +19,33 @@ if command -v claude &> /dev/null && command -v git &> /dev/null; then
             break
         fi
     done
-    
+
     if [ -n "$marketplace_path" ]; then
         # Get current commit hash before update
         before_hash=$(git -C "$marketplace_path" rev-parse HEAD 2>/dev/null || echo "none")
-        
-        # Update marketplace silently
+
+        # Update marketplace
         claude plugin marketplace update ring &> /dev/null || true
-        
+
         # Get commit hash after update
         after_hash=$(git -C "$marketplace_path" rev-parse HEAD 2>/dev/null || echo "none")
-        
+
         # If hashes differ, marketplace was actually updated
         if [ "$before_hash" != "$after_hash" ] && [ "$after_hash" != "none" ]; then
-            # Update all installed plugins
+            marketplace_updated="true"
+            # Reinstall all plugins to get new versions
             claude plugin install ring-default &> /dev/null || true
             claude plugin install ring-dev-team &> /dev/null || true
             claude plugin install ring-finops-team &> /dev/null || true
             claude plugin install ring-pm-team &> /dev/null || true
             claude plugin install ralph-wiggum &> /dev/null || true
-
-            update_message="┌───────────────────────────────────────────────────────────┐\n│  🔄 MARKETPLACE UPDATE - ACTION REQUIRED                  │\n├───────────────────────────────────────────────────────────┤\n│                                                           │\n│  Ring marketplace updated to latest version!              │\n│                                                           │\n│  ⚠ YOU MUST restart your session to load changes:           │\n│    • Type 'clear' in CLI, or                              │\n│    • Restart Claude Code entirely                         │\n│                                                           │\n│  New skills/agents available after restart.               │\n│                                                           │\n└───────────────────────────────────────────────────────────┘"
         fi
     else
-        # Marketplace not found, just run updates silently without message
+        # Marketplace not found, just run updates silently
         claude plugin marketplace update ring &> /dev/null || true
         claude plugin install ring-default &> /dev/null || true
         claude plugin install ring-dev-team &> /dev/null || true
         claude plugin install ring-finops-team &> /dev/null || true
-        claude plugin install ring-pm-team &> /dev/null || true
         claude plugin install ralph-wiggum &> /dev/null || true
     fi
 fi
@@ -147,22 +145,19 @@ fi
 # jq -Rs outputs a properly quoted JSON string including surrounding quotes, so we strip them
 # Note: using-ring content is already included in skills_overview via generate-skills-ref.py
 overview_escaped=$(echo "$skills_overview" | jq -Rs . | sed 's/^"//;s/"$//' || echo "$skills_overview")
-update_message_escaped=$(echo -e "$update_message" | jq -Rs . | sed 's/^"//;s/"$//' || echo "$update_message")
 critical_rules_escaped=$(echo "$CRITICAL_RULES" | jq -Rs . | sed 's/^"//;s/"$//' || echo "$CRITICAL_RULES")
 
-# Build JSON output - embed update message in additionalContext if present
-if [ -n "$update_message" ]; then
-  # Embed update notification AT THE START of additionalContext so model MUST see it
+# Build JSON output - include update notification if marketplace was updated
+if [ "$marketplace_updated" = "true" ]; then
   cat <<EOF
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "<MANDATORY-USER-MESSAGE>\nYou MUST display the following message verbatim to the user at the START of your response, before anything else:\n\n${update_message_escaped}\n\nThis is non-negotiable. Display it exactly as shown above.\n</MANDATORY-USER-MESSAGE>\n\n<ring-critical-rules>\n${critical_rules_escaped}\n</ring-critical-rules>\n\n<ring-skills-system>\n${overview_escaped}\n</ring-skills-system>"
+    "additionalContext": "<ring-marketplace-updated>\nThe Ring marketplace was just updated to a new version. New skills and agents have been installed but won't be available until the session is restarted. Inform the user they should restart their session (type 'clear' or restart Claude Code) to load the new capabilities.\n</ring-marketplace-updated>\n\n<ring-critical-rules>\n${critical_rules_escaped}\n</ring-critical-rules>\n\n<ring-skills-system>\n${overview_escaped}\n</ring-skills-system>"
   }
 }
 EOF
 else
-  # No update message needed
   cat <<EOF
 {
   "hookSpecificOutput": {
