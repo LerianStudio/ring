@@ -15,7 +15,7 @@ Without Ring, AI assistants often:
 
 Ring solves this by:
 - **Enforcing proven workflows** - Test-driven development, systematic debugging, proper planning
-- **Providing 48 specialized skills** - From brainstorming to production deployment (21 core + 2 dev-team + 10 product planning + 6 FinOps + 1 ralph-wiggum + 7 technical writing + 1 beads)
+- **Providing 47 specialized skills** - From brainstorming to production deployment (21 core + 2 dev-team + 10 product planning + 6 FinOps + 1 ralph-wiggum + 7 technical writing)
 - **23 specialized agents** - 5 review/planning agents + 10 developer role agents + 3 research agents + 2 FinOps agents + 3 technical writing agents
 - **Automating skill discovery** - Skills load automatically at session start
 - **Preventing common failures** - Built-in anti-patterns and mandatory checklists
@@ -287,11 +287,6 @@ No "should work" → Only "does work" with proof
 - `documentation-review` - Quality checklist and review process
 - `api-field-descriptions` - Field description patterns by type
 
-### Beads Integration (beads plugin - 1 skill)
-
-**Issue Tracking:**
-- `using-beads` - Beads (bd) integration for dependency-aware issue tracking
-
 ## 🎮 Interactive Commands
 
 Ring provides 15 slash commands across 4 plugins for common workflows.
@@ -442,9 +437,6 @@ ring/                                  # Monorepo root
 │   ├── agents/                      # 3 technical writing agents
 │   ├── commands/                    # 3 slash commands
 │   └── hooks/                       # SessionStart hook
-├── beads/                           # Beads integration plugin (beads)
-│   ├── skills/                      # using-beads skill
-│   └── hooks/                       # SessionStart and Stop hooks
 ├── ops-team/                        # Team-specific skills (reserved)
 └── pmm-team/                        # Team-specific skills (reserved)
 ```

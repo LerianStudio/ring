@@ -32,8 +32,7 @@ Ring installs to: `~/.claude/`
 │       ├── pm-team/             # Product planning plugin
 │       ├── finops-team/         # FinOps plugin
 │       ├── tw-team/             # Technical writing plugin
-│       ├── ralph-wiggum/        # Iterative loops plugin
-│       └── beads/               # Issue tracking plugin
+│       └── ralph-wiggum/        # Iterative loops plugin
 └── .ring-manifest.json          # Installation tracking
 ```
 

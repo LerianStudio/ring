@@ -44,10 +44,7 @@ Ring operates on three core principles:
 │  │  │ ralph-wiggum         │  │ ring-tw-team         │                       │  │
 │  │  │ Skills(1) Cmds(3)    │  │ Skills(7) Agents(3)  │                       │  │
 │  │  └──────────────────────┘  │ Cmds(3)              │                       │  │
-│  │  ┌──────────────────────┐  └──────────────────────┘                       │  │
-│  │  │ beads                │                                                 │  │
-│  │  │ Skills(1) Hooks      │                                                 │  │
-│  │  └──────────────────────┘                                                 │  │
+│  │                            └──────────────────────┘                       │  │
 │  └───────────────────────────────────────────────────────────────────────────┘  │
 │                                                                                  │
 │  Native Tools: Skill, Task, TodoWrite, SlashCommand                             │
@@ -67,8 +64,7 @@ ring/                                  # Monorepo root
 ├── finops-team/                      # FinOps & regulatory: ring-finops-team
 ├── pm-team/                          # Product planning: ring-pm-team
 ├── ralph-wiggum/                     # Iterative AI loops: ralph-wiggum
-├── tw-team/                          # Technical writing: ring-tw-team
-└── beads/                            # Issue tracking: beads
+└── tw-team/                          # Technical writing: ring-tw-team
 ```
 
 ### Active Plugins
@@ -83,7 +79,6 @@ ring/                                  # Monorepo root
 | **ring-pm-team** | Product planning workflows | 10 skills, 2 commands |
 | **ralph-wiggum** | Iterative AI development loops | 1 skill, 3 commands, Stop hook |
 | **ring-tw-team** | Technical writing specialists | 7 skills, 3 agents, 3 commands |
-| **beads** | Issue tracking integration | 1 skill, hooks |
 
 ## Component Hierarchy
 
@@ -605,15 +600,14 @@ Ring's architecture is designed for:
 
 | Component | Count | Location |
 |-----------|-------|----------|
-| Active Plugins | 7 | `default/`, `dev-team/`, `finops-team/`, `pm-team/`, `ralph-wiggum/`, `tw-team/`, `beads/` |
+| Active Plugins | 6 | `default/`, `dev-team/`, `finops-team/`, `pm-team/`, `ralph-wiggum/`, `tw-team/` |
 | Skills (ring-default) | 21 | `default/skills/` |
 | Skills (ring-dev-team) | 2 | `dev-team/skills/` |
 | Skills (ring-finops-team) | 6 | `finops-team/skills/` |
 | Skills (ring-pm-team) | 10 | `pm-team/skills/` |
 | Skills (ralph-wiggum) | 1 | `ralph-wiggum/skills/` |
 | Skills (ring-tw-team) | 7 | `tw-team/skills/` |
-| Skills (beads) | 1 | `beads/skills/` |
-| **Total Skills** | **48** | **All plugins** |
+| **Total Skills** | **47** | **All plugins** |
 | Agents (ring-default) | 5 | `default/agents/` |
 | Agents (ring-dev-team) | 10 | `dev-team/agents/` |
 | Agents (ring-finops-team) | 2 | `finops-team/agents/` |

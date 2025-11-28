@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-Ring is a comprehensive skills library and workflow system for AI agents that enforces proven software engineering practices through mandatory workflows, parallel code review, and systematic pre-development planning. Currently implemented as a Claude Code plugin marketplace with **7 active plugins**, the skills are agent-agnostic and reusable across different AI systems.
+Ring is a comprehensive skills library and workflow system for AI agents that enforces proven software engineering practices through mandatory workflows, parallel code review, and systematic pre-development planning. Currently implemented as a Claude Code plugin marketplace with **6 active plugins**, the skills are agent-agnostic and reusable across different AI systems.
 
 **Active Plugins:**
 - **ring-default**: 21 core skills, 7 slash commands, 5 specialized agents
@@ -13,11 +13,10 @@ Ring is a comprehensive skills library and workflow system for AI agents that en
 - **ring-pm-team**: 10 product planning skills, 3 research agents, 2 slash commands
 - **ralph-wiggum**: 1 skill for iterative AI development loops using Stop hooks
 - **ring-tw-team**: 7 technical writing skills, 3 slash commands, 3 documentation agents (Functional Writer, API Writer, Docs Reviewer)
-- **beads**: 1 skill for Beads (bd) issue tracking integration
 
 **Note:** Plugin versions are managed in `.claude-plugin/marketplace.json`
 
-**Total: 48 skills (21 + 2 + 6 + 10 + 1 + 7 + 1) across 7 plugins**
+**Total: 47 skills (21 + 2 + 6 + 10 + 1 + 7) across 6 plugins**
 
 The architecture uses markdown-based skill definitions with YAML frontmatter, auto-discovered at session start via hooks, and executed through Claude Code's native Skill/Task tools.
 
@@ -176,13 +175,6 @@ ring/                                  # Monorepo root
 │   └── hooks/                     # Session lifecycle
 │       ├── hooks.json            # Hook configuration
 │       └── session-start.sh      # Context injection
-├── beads/                         # Beads integration plugin (beads)
-│   ├── skills/                    # Plugin skill
-│   │   └── using-beads/          # Beads issue tracking guide
-│   └── hooks/                     # Session and Stop hooks
-│       ├── hooks.json            # Hook configuration
-│       ├── session-start.sh      # Context injection
-│       └── stop-hook.sh          # Issue tracking integration
 ├── installer/                     # Multi-platform installer
 │   ├── ring_installer/           # Python package
 │   │   ├── adapters/             # Platform adapters (claude, factory, cursor, cline)
@@ -317,12 +309,6 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 - Located: `tw-team/skills/using-tw-team/SKILL.md`
 - Agents: functional-writer (guides), api-writer (API reference), docs-reviewer (quality review)
 - Commands: write-guide, write-api, review-docs
-
-**Beads Plugin:**
-- `using-beads` → Beads (bd) issue tracking integration
-- Auto-loads when beads plugin is enabled
-- Located: `beads/skills/using-beads/SKILL.md`
-- Provides workflow guidance for issue lifecycle management
 
 **Hook Configuration:**
 - Each plugin has: `{plugin}/hooks/hooks.json` + `{plugin}/hooks/session-start.sh`
@@ -556,7 +542,7 @@ The system loads at SessionStart (from `default/` plugin):
 
 **Monorepo Context:**
 - Repository: Monorepo marketplace with multiple plugin collections
-- Active plugins: 7 (`ring-default`, `ring-dev-team`, `ring-finops-team`, `ring-pm-team`, `ralph-wiggum`, `ring-tw-team`, `beads`)
+- Active plugins: 6 (`ring-default`, `ring-dev-team`, `ring-finops-team`, `ring-pm-team`, `ralph-wiggum`, `ring-tw-team`)
 - Plugin versions: See `.claude-plugin/marketplace.json`
 - Core plugin: `default/` (21 skills, 5 agents, 7 commands)
 - Developer agents plugin: `dev-team/` (2 skills, 10 specialized developer agents)
@@ -564,7 +550,6 @@ The system loads at SessionStart (from `default/` plugin):
 - Product planning plugin: `pm-team/` (10 skills, 3 research agents, 2 commands)
 - Ralph plugin: `ralph-wiggum/` (1 skill, 3 commands, Stop hook)
 - Technical writing plugin: `tw-team/` (7 skills, 3 agents, 3 commands)
-- Beads plugin: `beads/` (1 skill, hooks)
 - Reserved plugins: `ops-team/`, `pmm-team/` (2 directories)
 - Current git branch: `main`
 - Remote: `github.com/LerianStudio/ring`
@@ -587,8 +572,7 @@ Plugin Hooks (inject context at session start):
 ├── finops-team/hooks/session-start.sh    # FinOps agents
 ├── pm-team/hooks/session-start.sh        # Pre-dev skills
 ├── ralph-wiggum/hooks/session-start.sh   # Ralph loop commands
-├── tw-team/hooks/session-start.sh        # Technical writing agents
-└── beads/hooks/session-start.sh          # Beads issue tracking
+└── tw-team/hooks/session-start.sh        # Technical writing agents
 
 Using-* Skills (plugin introductions):
 ├── default/skills/using-ring/SKILL.md           # Core workflow + agent list
@@ -596,8 +580,7 @@ Using-* Skills (plugin introductions):
 ├── finops-team/skills/using-finops-team/SKILL.md # FinOps guide
 ├── pm-team/skills/using-pm-team/SKILL.md        # Pre-dev workflow
 ├── ralph-wiggum/skills/using-ralph-wiggum/SKILL.md # Ralph loops guide
-├── tw-team/skills/using-tw-team/SKILL.md        # Technical writing guide
-└── beads/skills/using-beads/SKILL.md            # Beads integration guide
+└── tw-team/skills/using-tw-team/SKILL.md        # Technical writing guide
 
 Agent Cross-References:
 └── default/agents/write-plan.md          # References reviewers

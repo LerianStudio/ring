@@ -25,10 +25,6 @@ Quick reference guide for the Ring skills library and workflow system. This mono
 │  │ Cmds(2)         │  │ Cmds(3)         │  │ Agents(3)       │              │
 │  │                 │  │                 │  │ Cmds(3)         │              │
 │  └─────────────────┘  └─────────────────┘  └─────────────────┘              │
-│  ┌─────────────────┐                                                        │
-│  │ beads (plugin)  │                                                        │
-│  │ Skills(1)       │                                                        │
-│  └─────────────────┘                                                        │
 └─────────────────────────────────────────────────────────────────────────────┘
 
                               HOW IT WORKS

@@ -135,26 +135,6 @@
         "agents",
         "content-quality"
       ]
-    },
-    {
-      "name": "beads",
-      "description": "Beads (bd) integration for dependency-aware issue tracking in AI workflows. Provides workflow guidance for issue lifecycle management, dependency tracking, and ready work discovery. Designed for AI-supervised development with bd ready → work → close patterns.",
-      "version": "0.3.0",
-      "source": "./beads",
-      "homepage": "https://github.com/steveyegge/beads",
-      "repository": "https://github.com/lerianstudio/ring/tree/beads",
-      "license": "MIT",
-      "keywords": [
-        "beads",
-        "issue-tracking",
-        "dependencies",
-        "workflow",
-        "ai-agents",
-        "task-management",
-        "ready-work",
-        "blocking",
-        "automation"
-      ]
     }
   ],
   "version": "0.25.0"
