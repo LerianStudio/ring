@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# shellcheck disable=SC2034  # Unused variables OK for exported config
 
 # Ralph Loop Setup Script
 # Creates state file for in-session Ralph loop
@@ -183,8 +184,10 @@ if [[ -z "$SESSION_ID" ]]; then
   # Use multiple entropy sources for better randomness
   SESSION_ID=$(printf '%s%s%s' "$$" "$(date +%s)" "$RANDOM" | shasum -a 256 2>/dev/null | head -c 8)
   if [[ -z "$SESSION_ID" ]]; then
-    # Ultimate fallback if shasum not available
-    SESSION_ID=$(printf '%08x' "$((RANDOM * RANDOM))" | head -c 8)
+    # Ultimate fallback combining multiple entropy sources:
+    # - $$ (process ID), $RANDOM, $SECONDS (shell uptime), date
+    # XOR combines entropy sources for improved randomness
+    SESSION_ID=$(printf '%08x' "$((RANDOM ^ $$ ^ ${SECONDS:-0} ^ $(date +%s)))" | head -c 8)
   fi
 fi
 
@@ -208,8 +211,10 @@ else
   COMPLETION_PROMISE_YAML="null"
 fi
 
-touch "$RALPH_STATE_FILE" && chmod 600 "$RALPH_STATE_FILE"
-cat > "$RALPH_STATE_FILE" <<EOF
+# Create state file with restricted permissions from the start (umask 077 = 600 mode)
+(
+    umask 077
+    cat > "$RALPH_STATE_FILE" <<EOF
 ---
 active: true
 session_id: "$SESSION_ID"
@@ -221,6 +226,7 @@ started_at: "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 $PROMPT
 EOF
+)
 
 # Output setup message
 # SYNC-POINT: "Session ID: $SESSION_ID" format must match stop-hook.sh grep pattern

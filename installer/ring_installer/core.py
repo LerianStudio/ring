@@ -6,7 +6,10 @@ along with supporting data structures.
 """
 
 import json
+import logging
 import shutil
+import traceback
+import warnings
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
@@ -14,6 +17,11 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any, Callable
 
 from ring_installer.adapters import get_adapter, SUPPORTED_PLATFORMS, PlatformAdapter
+
+logger = logging.getLogger(__name__)
+
+# Maximum file size to read (10MB)
+MAX_FILE_SIZE = 10 * 1024 * 1024
 
 
 class InstallStatus(Enum):
@@ -84,7 +92,7 @@ class InstallOptions:
     exclude_plugins: Optional[List[str]] = None
 
 
-@dataclass
+@dataclass(slots=True)
 class ComponentResult:
     """Result of installing a single component."""
     source_path: Path
@@ -92,6 +100,7 @@ class ComponentResult:
     status: InstallStatus
     message: str = ""
     backup_path: Optional[Path] = None
+    traceback_str: Optional[str] = None
 
 
 @dataclass
@@ -132,15 +141,38 @@ class InstallResult:
             backup_path=backup
         ))
 
-    def add_failure(self, source: Path, target: Path, message: str) -> None:
-        """Record a failed component installation."""
+    def add_failure(
+        self,
+        source: Path,
+        target: Path,
+        message: str,
+        exc_info: Optional[BaseException] = None,
+        include_traceback: bool = True
+    ) -> None:
+        """Record a failed component installation.
+
+        Args:
+            source: Source file path
+            target: Target file path
+            message: Error message
+            exc_info: Optional exception for context preservation
+            include_traceback: Whether to include traceback in details
+        """
         self.components_failed += 1
         self.errors.append(f"{source}: {message}")
+
+        traceback_str = None
+        if exc_info is not None and include_traceback:
+            traceback_str = "".join(
+                traceback.format_exception(type(exc_info), exc_info, exc_info.__traceback__)
+            )
+
         self.details.append(ComponentResult(
             source_path=source,
             target_path=target,
             status=InstallStatus.FAILED,
-            message=message
+            message=message,
+            traceback_str=traceback_str
         ))
 
     def add_skip(self, source: Path, target: Path, message: str) -> None:
@@ -175,6 +207,91 @@ class InstallResult:
             self.status = InstallStatus.SKIPPED
         else:
             self.status = InstallStatus.FAILED
+
+
+def _validate_marketplace_schema(
+    marketplace: Dict[str, Any],
+    marketplace_path: Path,
+    ring_path: Path
+) -> None:
+    """
+    Validate the marketplace.json schema.
+
+    Security: Ensures plugin sources don't escape the ring directory.
+
+    Args:
+        marketplace: Parsed marketplace JSON
+        marketplace_path: Path to marketplace.json
+        ring_path: Root path of the Ring installation
+
+    Raises:
+        ValueError: If schema validation fails
+    """
+    # Validate plugins is a list
+    plugins = marketplace.get("plugins")
+    if plugins is not None and not isinstance(plugins, list):
+        raise ValueError(
+            f"Invalid marketplace.json: 'plugins' must be a list, got {type(plugins).__name__}"
+        )
+
+    if not plugins:
+        return
+
+    ring_path_resolved = ring_path.resolve()
+
+    for i, plugin in enumerate(plugins):
+        if not isinstance(plugin, dict):
+            raise ValueError(
+                f"Invalid marketplace.json: plugin at index {i} must be an object"
+            )
+
+        # Required fields
+        if "name" not in plugin:
+            raise ValueError(
+                f"Invalid marketplace.json: plugin at index {i} missing required 'name' field"
+            )
+        if "source" not in plugin:
+            raise ValueError(
+                f"Invalid marketplace.json: plugin '{plugin.get('name', i)}' missing required 'source' field"
+            )
+
+        # Security: Validate source path doesn't escape ring directory
+        source = plugin["source"]
+        if source.startswith("./"):
+            source_path = ring_path / source[2:]
+        else:
+            source_path = ring_path / source
+
+        try:
+            source_resolved = source_path.resolve()
+            source_resolved.relative_to(ring_path_resolved)
+        except ValueError:
+            raise ValueError(
+                f"Invalid marketplace.json: plugin '{plugin.get('name')}' source path "
+                f"'{source}' escapes ring directory (path traversal detected)"
+            )
+
+
+def _sanitize_path_for_display(path: Path, base_path: Optional[Path] = None) -> str:
+    """
+    Sanitize a path for display in error messages.
+
+    In non-verbose mode, shows only relative paths to avoid exposing
+    full filesystem structure.
+
+    Args:
+        path: Path to sanitize
+        base_path: Optional base path to make path relative to
+
+    Returns:
+        Sanitized path string
+    """
+    if base_path is not None:
+        try:
+            return str(path.relative_to(base_path))
+        except ValueError:
+            pass
+    return path.name
 
 
 def load_manifest(manifest_path: Optional[Path] = None) -> Dict[str, Any]:
@@ -232,9 +349,11 @@ def discover_ring_components(ring_path: Path, plugin_names: Optional[List[str]] 
         with open(marketplace_path) as f:
             marketplace = json.load(f)
 
+        # Validate marketplace schema
+        _validate_marketplace_schema(marketplace, marketplace_path, ring_path)
+
         # Validate marketplace has plugins
         if not marketplace.get("plugins"):
-            import warnings
             warnings.warn(f"marketplace.json contains no plugins at {marketplace_path}")
             return {}
 
@@ -419,12 +538,21 @@ def install(
                     if target_file.exists() and options.backup and not options.dry_run:
                         backup_path = backup_existing(target_file)
 
-                    # Read source content
+                    # Read source content with size validation
                     try:
+                        file_size = source_file.stat().st_size
+                        if file_size > MAX_FILE_SIZE:
+                            result.add_failure(
+                                source_file,
+                                target_file,
+                                f"File too large ({file_size} bytes, max {MAX_FILE_SIZE})"
+                            )
+                            continue
+
                         with open(source_file, "r", encoding="utf-8") as f:
                             content = f.read()
                     except Exception as e:
-                        result.add_failure(source_file, target_file, f"Read error: {e}")
+                        result.add_failure(source_file, target_file, f"Read error: {e}", exc_info=e)
                         continue
 
                     # Transform content
@@ -446,7 +574,7 @@ def install(
                         else:
                             transformed = content
                     except Exception as e:
-                        result.add_failure(source_file, target_file, f"Transform error: {e}")
+                        result.add_failure(source_file, target_file, f"Transform error: {e}", exc_info=e)
                         continue
 
                     # Write transformed content
@@ -465,7 +593,7 @@ def install(
                             )
                             result.add_success(source_file, target_file, backup_path)
                         except Exception as e:
-                            result.add_failure(source_file, target_file, f"Write error: {e}")
+                            result.add_failure(source_file, target_file, f"Write error: {e}", exc_info=e)
 
     result.finalize()
     return result
@@ -515,10 +643,10 @@ def uninstall(
     options = options or InstallOptions()
     result = InstallResult(status=InstallStatus.SUCCESS, targets=[t.platform for t in targets])
 
-    manifest = load_manifest()
+    platform_manifest = load_manifest()
 
     for target in targets:
-        adapter = get_adapter(target.platform, manifest.get("platforms", {}).get(target.platform))
+        adapter = get_adapter(target.platform, platform_manifest.get("platforms", {}).get(target.platform))
         install_path = target.path or adapter.get_install_path()
         component_mapping = adapter.get_component_mapping()
 

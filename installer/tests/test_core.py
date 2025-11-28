@@ -355,15 +355,26 @@ class TestLoadManifest:
     def test_uses_bundled_manifest_when_none(self):
         """load_manifest() should use bundled manifest when path is None."""
         from ring_installer.core import load_manifest
+        import importlib.resources
 
-        # Should not raise - uses bundled manifest
-        # May raise FileNotFoundError if bundled manifest doesn't exist yet
+        # Check if bundled manifest exists before testing
         try:
-            result = load_manifest(None)
-            assert isinstance(result, dict)
-        except FileNotFoundError:
-            # Bundled manifest may not exist in test environment
-            pass
+            # Try to find the bundled manifest
+            if hasattr(importlib.resources, 'files'):
+                # Python 3.9+
+                pkg_files = importlib.resources.files('ring_installer')
+                manifest_file = pkg_files / 'data' / 'platforms.json'
+                manifest_exists = manifest_file.is_file() if hasattr(manifest_file, 'is_file') else False
+            else:
+                manifest_exists = False
+        except Exception:
+            manifest_exists = False
+
+        if not manifest_exists:
+            pytest.skip("Bundled manifest not available in test environment")
+
+        result = load_manifest(None)
+        assert isinstance(result, dict)
 
 
 # ==============================================================================

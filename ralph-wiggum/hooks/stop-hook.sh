@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034  # Unused variables OK for exported config
 
 # Ralph Wiggum Stop Hook
 # Prevents session exit when a ralph-loop is active
@@ -6,10 +7,22 @@
 
 set -euo pipefail
 
-# Cleanup function for temp files
+# Configuration constants
+readonly MAX_OUTPUT_SIZE_BYTES=1048576  # 1MB limit to prevent OOM
+readonly SESSION_ID_LENGTH=8
+readonly LOCK_TIMEOUT_SECONDS=30
+
+# Cleanup function for temp files with robust resource handling
+cleanup_lock() {
+    if [[ -n "${LOCK_FD:-}" ]]; then
+        exec {LOCK_FD}>&- 2>/dev/null || true
+    fi
+    [[ -f "${LOCK_FILE:-}" ]] && rm -f "$LOCK_FILE"
+}
+
 cleanup() {
   [[ -n "${TEMP_FILE:-}" ]] && [[ -f "$TEMP_FILE" ]] && rm -f "$TEMP_FILE"
-  [[ -n "${LOCK_FD:-}" ]] && exec {LOCK_FD}>&- 2>/dev/null || true
+  cleanup_lock
 }
 trap cleanup EXIT
 
@@ -55,6 +68,13 @@ RALPH_STATE_FILE=$(find .claude -maxdepth 1 -name 'ralph-loop-*.local.md' -type 
 
 if [[ -z "$RALPH_STATE_FILE" ]] || [[ ! -f "$RALPH_STATE_FILE" ]]; then
   # No active loop - allow exit
+  exit 0
+fi
+
+# Security: Validate state file is not a symlink (prevents symlink attacks)
+if [[ -L "$RALPH_STATE_FILE" ]]; then
+  echo "⚠️  Ralph loop: State file is a symlink - refusing to operate for security" >&2
+  echo '{"decision": "approve", "reason": "Security: symlink detected in state files"}'
   exit 0
 fi
 
@@ -180,9 +200,9 @@ if ! LAST_OUTPUT=$(echo "$LAST_LINE" | jq -r '
   exit 0
 fi
 
-# Limit output size to prevent OOM (max 1MB)
-if [[ ${#LAST_OUTPUT} -gt 1048576 ]]; then
-  LAST_OUTPUT="${LAST_OUTPUT:0:1048576}"
+# Limit output size to prevent OOM
+if [[ ${#LAST_OUTPUT} -gt $MAX_OUTPUT_SIZE_BYTES ]]; then
+  LAST_OUTPUT="${LAST_OUTPUT:0:$MAX_OUTPUT_SIZE_BYTES}"
 fi
 
 if [[ -z "$LAST_OUTPUT" ]]; then
@@ -256,7 +276,11 @@ if [[ "$HAS_FLOCK" = true ]]; then
 fi
 
 # Use mktemp for secure temp file creation (prevents symlink attacks)
+# Set restrictive umask for temp file (consistent with generate-skills-ref.sh)
+old_umask=$(umask)
+umask 077
 TEMP_FILE=$(mktemp "${RALPH_STATE_FILE}.XXXXXX")
+umask "$old_umask"
 sed "s/^iteration: .*/iteration: $NEXT_ITERATION/" "$RALPH_STATE_FILE" > "$TEMP_FILE"
 mv "$TEMP_FILE" "$RALPH_STATE_FILE"
 

@@ -1,7 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# shellcheck disable=SC2034  # Unused variables OK for exported config
 # Ring Multi-Platform Installer
 # Installs Ring skills to Claude Code, Factory AI, Cursor, and/or Cline
-set -eu
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RING_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
@@ -46,14 +47,14 @@ if [ -z "$PYTHON_CMD" ]; then
     exit 1
 fi
 
-echo "${GREEN}Found Python:${RESET} $($PYTHON_CMD --version)"
+echo "${GREEN}Found Python:${RESET} $("$PYTHON_CMD" --version)"
 echo ""
 
 # Check if running with arguments (non-interactive mode)
 if [ $# -gt 0 ]; then
     # Direct passthrough to Python module
     cd "$RING_ROOT"
-    exec $PYTHON_CMD -m installer.ring_installer "$@"
+    exec "$PYTHON_CMD" -m installer.ring_installer "$@"
 fi
 
 # Interactive mode - platform selection
@@ -67,11 +68,22 @@ echo "  ${BLUE}5)${RESET} All detected platforms"
 echo "  ${BLUE}6)${RESET} Auto-detect and install"
 echo ""
 
-read -p "Enter choice(s) separated by comma (e.g., 1,2) [default: 6]: " choices
+read -p "Enter choice(s) separated by comma (e.g., 1,2,3) [default: 6]: " choices
+
+# Validate input only contains expected characters
+if [[ -n "$choices" ]] && ! [[ "$choices" =~ ^[1-6,[:space:]]*$ ]]; then
+    echo "${RED}Error: Invalid input. Please enter numbers 1-6 separated by commas.${RESET}"
+    exit 1
+fi
 
 # Default to auto-detect
 if [ -z "$choices" ]; then
     choices="6"
+fi
+
+# Check for conflicting options (auto-detect with specific platforms)
+if [[ "$choices" =~ [56] ]] && [[ "$choices" =~ [1234] ]]; then
+    echo "${YELLOW}Note: Auto-detect selected - ignoring specific platform selections.${RESET}"
 fi
 
 # Parse choices
@@ -121,7 +133,7 @@ if [[ "$dry_run" =~ ^[Yy]$ ]]; then
     echo ""
     echo "${YELLOW}=== Dry Run ===${RESET}"
     cd "$RING_ROOT"
-    $PYTHON_CMD -m installer.ring_installer install --platforms "$PLATFORMS" --dry-run "${EXTRA_ARGS[@]}"
+    "$PYTHON_CMD" -m installer.ring_installer install --platforms "$PLATFORMS" --dry-run "${EXTRA_ARGS[@]}"
     echo ""
     read -p "Proceed with actual installation? (Y/n): " proceed
     if [[ "$proceed" =~ ^[Nn]$ ]]; then
@@ -134,7 +146,7 @@ fi
 echo ""
 echo "${GREEN}=== Installing ===${RESET}"
 cd "$RING_ROOT"
-$PYTHON_CMD -m installer.ring_installer install --platforms "$PLATFORMS" "${EXTRA_ARGS[@]}"
+"$PYTHON_CMD" -m installer.ring_installer install --platforms "$PLATFORMS" "${EXTRA_ARGS[@]}"
 
 echo ""
 echo "${GREEN}================================================${RESET}"

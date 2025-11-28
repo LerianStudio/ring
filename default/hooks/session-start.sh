@@ -1,8 +1,18 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034  # Unused variables OK for exported config
 # Enhanced SessionStart hook for ring plugin
 # Provides comprehensive skill overview and status
 
 set -euo pipefail
+
+# Validate CLAUDE_PLUGIN_ROOT is set and reasonable (when used via hooks)
+# Note: This script can run standalone via SCRIPT_DIR detection or via CLAUDE_PLUGIN_ROOT
+if [[ -n "${CLAUDE_PLUGIN_ROOT:-}" ]]; then
+    if ! cd "${CLAUDE_PLUGIN_ROOT}" 2>/dev/null; then
+        echo '{"error": "Invalid CLAUDE_PLUGIN_ROOT path"}'
+        exit 1
+    fi
+fi
 
 # Determine plugin root directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
@@ -132,20 +142,33 @@ generate_skills_overview() {
 
 skills_overview=$(generate_skills_overview || echo "Error generating skills quick reference")
 
-# Check jq availability (required for JSON escaping)
-if ! command -v jq &>/dev/null; then
-  echo "Error: jq is required for JSON escaping but not found" >&2
-  echo "Install with: brew install jq (macOS) or apt install jq (Linux)" >&2
-  exit 1
+# Source shared JSON escaping utility
+SHARED_LIB="${PLUGIN_ROOT}/../shared/lib"
+if [[ -f "${SHARED_LIB}/json-escape.sh" ]]; then
+    # shellcheck source=/dev/null
+    source "${SHARED_LIB}/json-escape.sh"
+else
+    # Fallback: define json_escape locally if shared lib not found
+    json_escape() {
+        local input="$1"
+        if command -v jq &>/dev/null; then
+            printf '%s' "$input" | jq -Rs . | sed 's/^"//;s/"$//'
+        else
+            # Fallback sed-based escaping (handles common cases)
+            printf '%s' "$input" | sed \
+                -e 's/\\/\\\\/g' \
+                -e 's/"/\\"/g' \
+                -e 's/\t/\\t/g' \
+                -e 's/\r/\\r/g' \
+                -e ':a;N;$!ba;s/\n/\\n/g'
+        fi
+    }
 fi
 
-# Escape outputs for JSON using jq for RFC 8259 compliant escaping
-# Note: jq is required - commonly pre-installed on macOS/Linux, install via package manager if missing
-# The -Rs flags: -R (raw input, don't parse as JSON), -s (slurp entire input into single string)
-# jq -Rs outputs a properly quoted JSON string including surrounding quotes, so we strip them
+# Escape outputs for JSON using RFC 8259 compliant escaping
 # Note: using-ring content is already included in skills_overview via generate-skills-ref.py
-overview_escaped=$(echo "$skills_overview" | jq -Rs . | sed 's/^"//;s/"$//' || echo "$skills_overview")
-critical_rules_escaped=$(echo "$CRITICAL_RULES" | jq -Rs . | sed 's/^"//;s/"$//' || echo "$CRITICAL_RULES")
+overview_escaped=$(json_escape "$skills_overview")
+critical_rules_escaped=$(json_escape "$CRITICAL_RULES")
 
 # Build JSON output - include update notification if marketplace was updated
 if [ "$marketplace_updated" = "true" ]; then

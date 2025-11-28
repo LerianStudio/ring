@@ -6,16 +6,19 @@ and retrieve their version information.
 """
 
 import json
+import logging
 import os
 import re
 import shutil
 import subprocess
 import sys
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 
 from ring_installer.adapters import SUPPORTED_PLATFORMS
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -29,11 +32,7 @@ class PlatformInfo:
     install_path: Optional[Path] = None
     config_path: Optional[Path] = None
     binary_path: Optional[Path] = None
-    details: Dict[str, Any] = None
-
-    def __post_init__(self):
-        if self.details is None:
-            self.details = {}
+    details: Dict[str, Any] = field(default_factory=dict)
 
 
 def detect_installed_platforms() -> List[PlatformInfo]:
@@ -122,54 +121,182 @@ def _detect_platform(platform_id: str) -> PlatformInfo:
     )
 
 
+# Allowed binary path prefixes for security validation
+_ALLOWED_BINARY_PREFIXES = [
+    Path("/usr"),
+    Path("/opt"),
+    Path("/bin"),
+    Path("/sbin"),
+]
+
+
+def _is_binary_path_allowed(binary_path: Path) -> bool:
+    """
+    Validate that a binary path is from an expected location.
+
+    Security: Prevents executing binaries from untrusted locations.
+
+    Args:
+        binary_path: Path to the binary to validate
+
+    Returns:
+        True if the binary is in an allowed location
+    """
+    resolved = binary_path.resolve()
+
+    # Check system paths
+    for prefix in _ALLOWED_BINARY_PREFIXES:
+        if prefix.exists():
+            try:
+                resolved.relative_to(prefix)
+                return True
+            except ValueError:
+                continue
+
+    # Check user-local paths (common for npm/pip installs)
+    home = Path.home()
+    allowed_user_paths = [
+        home / ".local" / "bin",
+        home / ".local" / "share",
+        home / "bin",
+        home / ".cargo" / "bin",
+        home / ".npm-global" / "bin",
+    ]
+
+    for user_path in allowed_user_paths:
+        if user_path.exists():
+            try:
+                resolved.relative_to(user_path)
+                return True
+            except ValueError:
+                continue
+
+    # macOS specific paths
+    if sys.platform == "darwin":
+        macos_paths = [
+            Path("/Applications"),
+            home / "Applications",
+            Path("/Library"),
+            home / "Library",
+        ]
+        for macos_path in macos_paths:
+            if macos_path.exists():
+                try:
+                    resolved.relative_to(macos_path)
+                    return True
+                except ValueError:
+                    continue
+
+    # Windows specific paths
+    if sys.platform == "win32":
+        local_app_data = os.environ.get("LOCALAPPDATA", "")
+        program_files = os.environ.get("PROGRAMFILES", "")
+        program_files_x86 = os.environ.get("PROGRAMFILES(X86)", "")
+
+        win_paths = [p for p in [local_app_data, program_files, program_files_x86] if p]
+        for win_path in win_paths:
+            try:
+                resolved.relative_to(Path(win_path))
+                return True
+            except ValueError:
+                continue
+
+    return False
+
+
+def _detect_generic_cli_platform(
+    platform_id: str,
+    name: str,
+    config_dir_name: str,
+    binary_name: Optional[str] = None,
+) -> PlatformInfo:
+    """
+    Generic platform detection for CLI-based platforms.
+
+    Shared logic for platforms that have a config directory and optional CLI binary.
+
+    Args:
+        platform_id: Platform identifier (e.g., "claude", "factory")
+        name: Human-readable platform name (e.g., "Claude Code")
+        config_dir_name: Name of the config directory (e.g., ".claude")
+        binary_name: Optional binary name to search in PATH
+
+    Returns:
+        PlatformInfo with detection results
+    """
+    # Allow environment variable override for config path
+    env_var = f"{platform_id.upper()}_CONFIG_PATH"
+    env_path = os.environ.get(env_var)
+
+    if env_path:
+        config_path = Path(env_path).expanduser()
+    else:
+        config_path = Path.home() / config_dir_name
+
+    info = PlatformInfo(
+        platform_id=platform_id,
+        name=name,
+        installed=False
+    )
+
+    # Check config directory
+    if config_path.exists():
+        info.config_path = config_path
+        info.install_path = config_path
+
+    # Check for binary if specified
+    if binary_name:
+        binary = shutil.which(binary_name)
+        if binary:
+            binary_path = Path(binary)
+
+            # Security: Validate binary is from allowed location
+            if _is_binary_path_allowed(binary_path):
+                info.binary_path = binary_path
+                info.installed = True
+
+                # Get version using resolved binary path
+                try:
+                    result = subprocess.run(
+                        [binary, "--version"],
+                        capture_output=True,
+                        text=True,
+                        timeout=5
+                    )
+                    if result.returncode == 0:
+                        version_match = re.search(r"(\d+\.\d+\.\d+)", result.stdout)
+                        if version_match:
+                            info.version = version_match.group(1)
+                except (subprocess.TimeoutExpired, subprocess.SubprocessError, FileNotFoundError):
+                    pass
+            else:
+                logger.warning(
+                    "Binary %s found at %s but path is not in allowed locations",
+                    binary_name, binary_path
+                )
+
+    # Config directory without binary indicates partial install
+    if not info.installed and config_path.exists():
+        info.partial = True
+        info.details["note"] = "Config directory exists but binary not found"
+
+    return info
+
+
 def _detect_claude() -> PlatformInfo:
     """
     Detect Claude Code installation.
 
     Checks for:
-    - ~/.claude directory
+    - ~/.claude directory (or CLAUDE_CONFIG_PATH env var)
     - claude binary in PATH
     """
-    info = PlatformInfo(
+    return _detect_generic_cli_platform(
         platform_id="claude",
         name="Claude Code",
-        installed=False
+        config_dir_name=".claude",
+        binary_name="claude",
     )
-
-    # Check config directory
-    config_path = Path.home() / ".claude"
-    if config_path.exists():
-        info.config_path = config_path
-        info.install_path = config_path
-
-    # Check for binary
-    binary = shutil.which("claude")
-    if binary:
-        info.binary_path = Path(binary)
-        info.installed = True
-
-        # Get version using resolved binary path
-        try:
-            result = subprocess.run(
-                [binary, "--version"],
-                capture_output=True,
-                text=True,
-                timeout=5
-            )
-            if result.returncode == 0:
-                version_match = re.search(r"(\d+\.\d+\.\d+)", result.stdout)
-                if version_match:
-                    info.version = version_match.group(1)
-        except (subprocess.TimeoutExpired, subprocess.SubprocessError, FileNotFoundError):
-            pass
-
-    # Even without binary, config directory indicates partial install
-    if not info.installed and config_path.exists():
-        info.installed = False  # Don't mark as installed
-        info.partial = True  # Mark as partial
-        info.details["note"] = "Config directory exists but binary not found"
-
-    return info
 
 
 def _detect_factory() -> PlatformInfo:
@@ -177,48 +304,15 @@ def _detect_factory() -> PlatformInfo:
     Detect Factory AI installation.
 
     Checks for:
-    - ~/.factory directory
+    - ~/.factory directory (or FACTORY_CONFIG_PATH env var)
     - factory binary in PATH
     """
-    info = PlatformInfo(
+    return _detect_generic_cli_platform(
         platform_id="factory",
         name="Factory AI",
-        installed=False
+        config_dir_name=".factory",
+        binary_name="factory",
     )
-
-    # Check config directory
-    config_path = Path.home() / ".factory"
-    if config_path.exists():
-        info.config_path = config_path
-        info.install_path = config_path
-
-    # Check for binary
-    binary = shutil.which("factory")
-    if binary:
-        info.binary_path = Path(binary)
-        info.installed = True
-
-        # Get version using resolved binary path
-        try:
-            result = subprocess.run(
-                [binary, "--version"],
-                capture_output=True,
-                text=True,
-                timeout=5
-            )
-            if result.returncode == 0:
-                version_match = re.search(r"(\d+\.\d+\.\d+)", result.stdout)
-                if version_match:
-                    info.version = version_match.group(1)
-        except (subprocess.TimeoutExpired, subprocess.SubprocessError, FileNotFoundError):
-            pass
-
-    if not info.installed and config_path.exists():
-        info.installed = False  # Don't mark as installed
-        info.partial = True  # Mark as partial
-        info.details["note"] = "Config directory exists but binary not found"
-
-    return info
 
 
 def _detect_cursor() -> PlatformInfo:
@@ -226,9 +320,16 @@ def _detect_cursor() -> PlatformInfo:
     Detect Cursor installation.
 
     Checks for:
-    - ~/.cursor directory
+    - ~/.cursor directory (or CURSOR_CONFIG_PATH env var)
     - Cursor application in standard locations
     """
+    # Allow environment variable override for config path
+    env_path = os.environ.get("CURSOR_CONFIG_PATH")
+    if env_path:
+        config_path = Path(env_path).expanduser()
+    else:
+        config_path = Path.home() / ".cursor"
+
     info = PlatformInfo(
         platform_id="cursor",
         name="Cursor",
@@ -236,12 +337,11 @@ def _detect_cursor() -> PlatformInfo:
     )
 
     # Check config directory
-    config_path = Path.home() / ".cursor"
     if config_path.exists():
         info.config_path = config_path
         info.install_path = config_path
 
-    # Check for application
+    # Check for application (environment variable override)
     app_paths = _get_cursor_app_paths()
     for app_path in app_paths:
         if app_path.exists():
@@ -255,8 +355,7 @@ def _detect_cursor() -> PlatformInfo:
             break
 
     if not info.installed and config_path.exists():
-        info.installed = False  # Don't mark as installed
-        info.partial = True  # Mark as partial
+        info.partial = True
         info.details["note"] = "Config directory exists but application not found"
 
     return info
@@ -267,9 +366,16 @@ def _detect_cline() -> PlatformInfo:
     Detect Cline installation.
 
     Checks for:
-    - ~/.cline directory
+    - ~/.cline directory (or CLINE_CONFIG_PATH env var)
     - Cline VS Code extension
     """
+    # Allow environment variable override for config path
+    env_path = os.environ.get("CLINE_CONFIG_PATH")
+    if env_path:
+        config_path = Path(env_path).expanduser()
+    else:
+        config_path = Path.home() / ".cline"
+
     info = PlatformInfo(
         platform_id="cline",
         name="Cline",
@@ -277,7 +383,6 @@ def _detect_cline() -> PlatformInfo:
     )
 
     # Check config directory
-    config_path = Path.home() / ".cline"
     if config_path.exists():
         info.config_path = config_path
         info.install_path = config_path
@@ -295,8 +400,16 @@ def _detect_cline() -> PlatformInfo:
 
 
 def _get_cursor_app_paths() -> List[Path]:
-    """Get potential Cursor application paths based on platform."""
-    paths = []
+    """Get potential Cursor application paths based on platform.
+
+    Supports CURSOR_APP_PATH environment variable override.
+    """
+    paths: List[Path] = []
+
+    # Allow environment variable override
+    env_path = os.environ.get("CURSOR_APP_PATH")
+    if env_path:
+        paths.append(Path(env_path).expanduser())
 
     if sys.platform == "darwin":
         paths.extend([

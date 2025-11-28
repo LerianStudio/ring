@@ -1,16 +1,22 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034  # Unused variables OK for exported config
 # UserPromptSubmit hook to periodically re-inject instruction files
 # Combats context drift in long-running sessions by re-surfacing project instructions
 # Supports: CLAUDE.md, AGENTS.md, RULES.md
 
 set -euo pipefail
 
+# Configuration constants
+# Re-inject every 3 prompts - balances context freshness with token overhead
+# Lower values = more frequent reminders but higher token cost
+# Higher values = less overhead but risk of context being forgotten
+readonly THROTTLE_INTERVAL=3
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 
-# Configuration
-THROTTLE_INTERVAL=3  # Re-inject every N prompts
-INSTRUCTION_FILES=("CLAUDE.md" "AGENTS.md" "RULES.md")  # File types to discover
+# File types to discover
+INSTRUCTION_FILES=("CLAUDE.md" "AGENTS.md" "RULES.md")
 
 # Use session-specific state file (per-session, not persistent)
 # CLAUDE_SESSION_ID should be provided by Claude Code, fallback to PPID for session isolation
@@ -81,6 +87,7 @@ done
 if [ "${#instruction_files[@]}" -gt 0 ]; then
   # Create a temporary file to store paths (one per line)
   tmp_file=$(mktemp)
+  trap "rm -f '$tmp_file'" EXIT INT TERM HUP
   printf '%s\n' "${instruction_files[@]}" | sort -u > "$tmp_file"
 
   # Read back into array

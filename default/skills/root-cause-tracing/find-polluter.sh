@@ -1,9 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# shellcheck disable=SC2034  # Unused variables OK for exported config
 # Bisection script to find which test creates unwanted files/state
 # Usage: ./find-polluter.sh <file_or_dir_to_check> <test_pattern>
 # Example: ./find-polluter.sh '.git' 'src/**/*.test.ts'
 
-set -e
+set -euo pipefail
 
 if [ $# -ne 2 ]; then
   echo "Usage: $0 <file_to_check> <test_pattern>"
@@ -49,8 +50,15 @@ while IFS= read -r TEST_FILE; do
 
   echo "[$COUNT/$TOTAL] Testing: $TEST_FILE"
 
-  # Run the test
-  npm test "$TEST_FILE" > /dev/null 2>&1 || true
+  # Run test with 60-second timeout to prevent hanging on stuck tests
+  # 60s allows slow integration tests to complete while catching infinite loops
+  # On macOS without coreutils, install timeout via: brew install coreutils
+  if command -v timeout &>/dev/null; then
+      timeout 60 npm test "$TEST_FILE" > /dev/null 2>&1 || true
+  else
+      # Fallback: run without timeout (may hang on stuck tests)
+      npm test "$TEST_FILE" > /dev/null 2>&1 || true
+  fi
 
   # Check if pollution appeared
   if [ -e "$POLLUTION_CHECK" ]; then

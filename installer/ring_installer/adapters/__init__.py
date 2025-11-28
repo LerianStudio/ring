@@ -11,7 +11,11 @@ Supported Platforms:
 - Cline: All components -> Prompts
 """
 
-from typing import Dict, Type, Optional
+from typing import Dict, List, Optional, Type, TypeVar
+
+
+# TypeVar for adapter type hints
+AdapterT = TypeVar("AdapterT", bound="PlatformAdapter")
 
 
 class PlatformID:
@@ -30,7 +34,7 @@ class PlatformID:
     CLINE = "cline"
 
     @classmethod
-    def all(cls) -> list:
+    def all(cls) -> list[str]:
         """Return all platform identifiers."""
         return [cls.CLAUDE, cls.FACTORY, cls.CURSOR, cls.CLINE]
 
@@ -58,13 +62,18 @@ ADAPTER_REGISTRY: Dict[str, Type[PlatformAdapter]] = {
 SUPPORTED_PLATFORMS = list(ADAPTER_REGISTRY.keys())
 
 
-def get_adapter(platform: str, config: Optional[dict] = None) -> PlatformAdapter:
+def get_adapter(
+    platform: str,
+    config: Optional[dict] = None,
+    adapter_class_override: Optional[Type[AdapterT]] = None
+) -> PlatformAdapter:
     """
     Get an adapter instance for the specified platform.
 
     Args:
         platform: Platform identifier (claude, factory, cursor, cline)
         config: Optional platform-specific configuration
+        adapter_class_override: Optional adapter class to use instead of registry
 
     Returns:
         Instantiated adapter for the platform
@@ -73,6 +82,9 @@ def get_adapter(platform: str, config: Optional[dict] = None) -> PlatformAdapter
         ValueError: If the platform is not supported
     """
     platform = platform.lower()
+
+    if adapter_class_override is not None:
+        return adapter_class_override(config)
 
     if platform not in ADAPTER_REGISTRY:
         supported = ", ".join(SUPPORTED_PLATFORMS)
@@ -128,6 +140,8 @@ def list_platforms() -> list[dict]:
 
 
 __all__ = [
+    # Type hints
+    "AdapterT",
     # Platform identifiers
     "PlatformID",
     # Base class

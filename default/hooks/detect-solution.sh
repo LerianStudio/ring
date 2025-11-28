@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034  # Unused variables OK for exported config
 # detect-solution.sh - Detect solution confirmation phrases and suggest codify skill
 # Called by UserPromptSubmit hook to auto-suggest documentation after fixes
 #
@@ -7,14 +8,12 @@
 
 set -euo pipefail
 
-# Read hook input from stdin (contains user's message)
-HOOK_INPUT=$(cat)
+# Configuration constants
+readonly MAX_INPUT_SIZE=100000  # Limit input size to prevent resource exhaustion
 
-# Defense in depth: limit input size to prevent resource exhaustion
-MAX_INPUT_SIZE=100000
-if [ ${#HOOK_INPUT} -gt $MAX_INPUT_SIZE ]; then
-    exit 0
-fi
+# Read hook input from stdin with size limit BEFORE storing in memory
+# This prevents memory exhaustion from maliciously large inputs
+HOOK_INPUT=$(head -c "$MAX_INPUT_SIZE")
 
 # Extract user message from JSON input with proper error handling
 USER_MESSAGE=$(echo "$HOOK_INPUT" | jq -r '.userMessage // empty' 2>/dev/null)

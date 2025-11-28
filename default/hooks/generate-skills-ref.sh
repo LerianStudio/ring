@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034  # Unused variables OK for exported config
 # Fallback skill reference generator when Python is unavailable
 # Requires bash 3.2+ (uses [[ ]], ${BASH_SOURCE}, ${var:0:n})
 # Tools used: sed, awk, grep (standard on macOS/Linux/Git Bash)
@@ -176,8 +177,12 @@ main() {
 
     # Collect all skills with categories, then sort and generate markdown
     local tmpfile
+    # Set restrictive umask before creating temp file (prevents race condition)
+    local old_umask
+    old_umask=$(umask)
+    umask 077
     tmpfile=$(mktemp)
-    chmod 600 "$tmpfile"  # Restrict permissions for security
+    umask "$old_umask"
     trap "rm -f '$tmpfile'" EXIT INT TERM HUP
 
     for skill_dir in "$SKILLS_DIR"/*/; do

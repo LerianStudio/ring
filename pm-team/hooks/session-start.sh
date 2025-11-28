@@ -1,7 +1,16 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034  # Unused variables OK for exported config
 set -euo pipefail
 # Session start hook for ring-pm-team plugin
 # Dynamically generates quick reference for pre-dev planning skills
+
+# Validate CLAUDE_PLUGIN_ROOT is set and reasonable (when used via hooks)
+if [[ -n "${CLAUDE_PLUGIN_ROOT:-}" ]]; then
+    if ! cd "${CLAUDE_PLUGIN_ROOT}" 2>/dev/null; then
+        echo '{"error": "Invalid CLAUDE_PLUGIN_ROOT path"}'
+        exit 1
+    fi
+fi
 
 # Find the monorepo root (where shared/ directory exists)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
@@ -64,6 +73,28 @@ build_skills_table() {
   done
 }
 
+# Source shared JSON escaping utility
+SHARED_JSON_ESCAPE="$MONOREPO_ROOT/shared/lib/json-escape.sh"
+if [[ -f "$SHARED_JSON_ESCAPE" ]]; then
+    # shellcheck source=/dev/null
+    source "$SHARED_JSON_ESCAPE"
+else
+    # Fallback: define json_escape locally
+    json_escape() {
+        local input="$1"
+        if command -v jq &>/dev/null; then
+            printf '%s' "$input" | jq -Rs . | sed 's/^"//;s/"$//'
+        else
+            printf '%s' "$input" | sed \
+                -e 's/\\/\\\\/g' \
+                -e 's/"/\\"/g' \
+                -e 's/\t/\\t/g' \
+                -e 's/\r/\\r/g' \
+                -e ':a;N;$!ba;s/\n/\\n/g'
+        fi
+    }
+fi
+
 # Generate skills reference
 if [ -d "$PLUGIN_ROOT/skills" ]; then
   # Build table dynamically
@@ -84,20 +115,8 @@ ${table_content}
 For full details: Skill tool with \"ring-pm-team:using-pm-team\"
 </ring-pm-team-system>"
 
-    # Escape for JSON using jq
-    if command -v jq &>/dev/null; then
-      context_escaped=$(echo "$context" | jq -Rs . | sed 's/^"//;s/"$//')
-    else
-      # Fallback: more complete escaping (handles tabs, carriage returns, form feeds)
-      # Note: Still not RFC 8259 compliant for all control chars - jq is strongly recommended
-      context_escaped=$(printf '%s' "$context" | \
-        sed 's/\\/\\\\/g' | \
-        sed 's/"/\\"/g' | \
-        sed 's/	/\\t/g' | \
-        sed $'s/\r/\\\\r/g' | \
-        sed 's/\f/\\f/g' | \
-        awk '{printf "%s\\n", $0}')
-    fi
+    # Escape for JSON using shared utility
+    context_escaped=$(json_escape "$context")
 
     cat <<EOF
 {

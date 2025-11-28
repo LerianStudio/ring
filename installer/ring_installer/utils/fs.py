@@ -5,11 +5,18 @@ Provides safe file operations with backup, transformation, and error handling.
 """
 
 import hashlib
+import logging
 import os
 import shutil
+import warnings
 from datetime import datetime
 from pathlib import Path
 from typing import Callable, Optional, Union
+
+logger = logging.getLogger(__name__)
+
+# Hash algorithms considered weak and should be avoided
+_WEAK_HASH_ALGORITHMS = {"md5", "sha1"}
 
 
 def ensure_directory(path: Path) -> Path:
@@ -182,18 +189,30 @@ def get_file_hash(path: Path, algorithm: str = "sha256") -> str:
 
     Args:
         path: Path to the file
-        algorithm: Hash algorithm (sha256, md5, sha1)
+        algorithm: Hash algorithm (sha256 recommended; md5 and sha1 are deprecated)
 
     Returns:
         Hexadecimal hash string
 
     Raises:
         FileNotFoundError: If file doesn't exist
+
+    Warns:
+        DeprecationWarning: If md5 or sha1 algorithm is used
     """
     path = Path(path).expanduser()
 
     if not path.exists():
         raise FileNotFoundError(f"File not found: {path}")
+
+    # Warn about weak hash algorithms
+    if algorithm.lower() in _WEAK_HASH_ALGORITHMS:
+        warnings.warn(
+            f"Hash algorithm '{algorithm}' is cryptographically weak. "
+            "Use 'sha256' or 'sha512' for better security.",
+            DeprecationWarning,
+            stacklevel=2  # Points to immediate caller; use 3 if this function is wrapped
+        )
 
     hash_func = hashlib.new(algorithm)
 
@@ -204,7 +223,7 @@ def get_file_hash(path: Path, algorithm: str = "sha256") -> str:
     return hash_func.hexdigest()
 
 
-def files_are_identical(path1: Path, path2: Path) -> bool:
+def are_files_identical(path1: Path, path2: Path) -> bool:
     """
     Check if two files have identical content.
 
@@ -227,6 +246,29 @@ def files_are_identical(path1: Path, path2: Path) -> bool:
 
     # Compare hashes
     return get_file_hash(path1) == get_file_hash(path2)
+
+
+def files_are_identical(path1: Path, path2: Path) -> bool:
+    """
+    Check if two files have identical content.
+
+    .. deprecated:: 0.2.0
+       Use :func:`are_files_identical` instead. This function will be
+       removed in version 1.0.0.
+
+    Args:
+        path1: First file path
+        path2: Second file path
+
+    Returns:
+        True if files are identical, False otherwise
+    """
+    warnings.warn(
+        "files_are_identical() is deprecated, use are_files_identical() instead",
+        DeprecationWarning,
+        stacklevel=2
+    )
+    return are_files_identical(path1, path2)
 
 
 def get_directory_size(path: Path) -> int:

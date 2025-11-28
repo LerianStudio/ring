@@ -100,8 +100,19 @@ def print_result(result: InstallResult, verbose: bool = False) -> None:
 
 
 def progress_callback(message: str, current: int, total: int) -> None:
-    """Display progress information."""
-    percent = (current / total * 100) if total > 0 else 0
+    """Display progress information.
+
+    Args:
+        message: Current operation message
+        current: Current progress count
+        total: Total work items (must be > 0 for percentage display)
+    """
+    if total > 0:
+        # Ensure current doesn't exceed total for percentage calculation
+        safe_current = min(max(current, 0), total)
+        percent = (safe_current / total) * 100
+    else:
+        percent = 0
     print(f"\r[{percent:5.1f}%] {message[:60]:<60}", end="", flush=True)
 
 

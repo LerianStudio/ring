@@ -11,6 +11,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+# Maximum allowed version string length to prevent DoS attacks
+MAX_VERSION_LENGTH = 100
+
 
 @dataclass
 class Version:
@@ -37,8 +40,14 @@ class Version:
             Version object
 
         Raises:
-            ValueError: If version string is invalid
+            ValueError: If version string is invalid or too long
         """
+        # Security: Validate version string length to prevent DoS
+        if len(version_str) > MAX_VERSION_LENGTH:
+            raise ValueError(
+                f"Version string too long (max {MAX_VERSION_LENGTH} chars, got {len(version_str)})"
+            )
+
         # Strip leading 'v' if present
         version_str = version_str.lstrip("v")
 
