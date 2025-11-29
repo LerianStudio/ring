@@ -17,11 +17,11 @@ cleanup_lock() {
     if [[ -n "${LOCK_FD:-}" ]]; then
         exec {LOCK_FD}>&- 2>/dev/null || true
     fi
-    [[ -f "${LOCK_FILE:-}" ]] && rm -f "$LOCK_FILE"
+    [[ -f "${LOCK_FILE:-}" ]] && rm -f "$LOCK_FILE" || true
 }
 
 cleanup() {
-  [[ -n "${TEMP_FILE:-}" ]] && [[ -f "$TEMP_FILE" ]] && rm -f "$TEMP_FILE"
+  [[ -n "${TEMP_FILE:-}" ]] && [[ -f "$TEMP_FILE" ]] && rm -f "$TEMP_FILE" || true
   cleanup_lock
 }
 trap cleanup EXIT
@@ -31,6 +31,7 @@ if ! command -v jq &>/dev/null; then
   echo "⚠️  Ralph loop: Missing required dependency 'jq'" >&2
   echo "   Install with: brew install jq (macOS) or apt install jq (Linux)" >&2
   echo "   Ralph loop cannot function without jq. Allowing exit." >&2
+  echo '{"decision": "approve"}'
   exit 0
 fi
 
@@ -68,6 +69,7 @@ RALPH_STATE_FILE=$(find .claude -maxdepth 1 -name 'ralph-loop-*.local.md' -type 
 
 if [[ -z "$RALPH_STATE_FILE" ]] || [[ ! -f "$RALPH_STATE_FILE" ]]; then
   # No active loop - allow exit
+  echo '{"decision": "approve"}'
   exit 0
 fi
 
@@ -88,10 +90,12 @@ if [[ -n "$TRANSCRIPT_PATH_CHECK" ]] && [[ "$TRANSCRIPT_PATH_CHECK" != "null" ]]
   # Fail-secure: if realpath fails or path is outside expected directories, allow exit
   if [[ -z "$RESOLVED_PATH" ]]; then
     echo "⚠️  Ralph loop: Could not resolve transcript path. Allowing exit." >&2
+    echo '{"decision": "approve"}'
     exit 0
   fi
   if [[ ! "$RESOLVED_PATH" =~ ^(/Users/|/home/|/tmp/|/var/|/private/) ]]; then
     echo "⚠️  Ralph loop: Unexpected transcript path location. Allowing exit." >&2
+    echo '{"decision": "approve"}'
     exit 0
   fi
 fi
@@ -109,6 +113,7 @@ if [[ -n "$TRANSCRIPT_PATH_CHECK" ]] && [[ -f "$TRANSCRIPT_PATH_CHECK" ]] && [[ 
     echo "⚠️  Found stale Ralph state file from another session (ID: $STATE_SESSION_ID)" >&2
     echo "   This session did not start the loop. Cleaning up stale file..." >&2
     rm "$RALPH_STATE_FILE"
+    echo '{"decision": "approve"}'
     exit 0
   fi
 fi
@@ -129,6 +134,7 @@ if [[ ! "$ITERATION" =~ ^[0-9]+$ ]]; then
   echo "   This usually means the state file was manually edited or corrupted." >&2
   echo "   Ralph loop is stopping. Run /ralph-loop again to start fresh." >&2
   rm "$RALPH_STATE_FILE"
+  echo '{"decision": "approve"}'
   exit 0
 fi
 
@@ -140,6 +146,7 @@ if [[ ! "$MAX_ITERATIONS" =~ ^[0-9]+$ ]]; then
   echo "   This usually means the state file was manually edited or corrupted." >&2
   echo "   Ralph loop is stopping. Run /ralph-loop again to start fresh." >&2
   rm "$RALPH_STATE_FILE"
+  echo '{"decision": "approve"}'
   exit 0
 fi
 
@@ -147,6 +154,7 @@ fi
 if [[ $MAX_ITERATIONS -gt 0 ]] && [[ $ITERATION -ge $MAX_ITERATIONS ]]; then
   echo "🛑 Ralph loop: Max iterations ($MAX_ITERATIONS) reached."
   rm "$RALPH_STATE_FILE"
+  echo '{"decision": "approve"}'
   exit 0
 fi
 
@@ -159,6 +167,7 @@ if [[ ! -f "$TRANSCRIPT_PATH" ]]; then
   echo "   This is unusual and may indicate a Claude Code internal issue." >&2
   echo "   Ralph loop is stopping." >&2
   rm "$RALPH_STATE_FILE"
+  echo '{"decision": "approve"}'
   exit 0
 fi
 
@@ -170,6 +179,7 @@ if ! grep -q '"role":"assistant"' "$TRANSCRIPT_PATH"; then
   echo "   This is unusual and may indicate a transcript format issue" >&2
   echo "   Ralph loop is stopping." >&2
   rm "$RALPH_STATE_FILE"
+  echo '{"decision": "approve"}'
   exit 0
 fi
 
@@ -179,6 +189,7 @@ if [[ -z "$LAST_LINE" ]]; then
   echo "⚠️  Ralph loop: Failed to extract last assistant message" >&2
   echo "   Ralph loop is stopping." >&2
   rm "$RALPH_STATE_FILE"
+  echo '{"decision": "approve"}'
   exit 0
 fi
 
@@ -197,6 +208,7 @@ if ! LAST_OUTPUT=$(echo "$LAST_LINE" | jq -r '
   echo "   This may indicate a transcript format issue." >&2
   echo "   Ralph loop is stopping." >&2
   rm "$RALPH_STATE_FILE"
+  echo '{"decision": "approve"}'
   exit 0
 fi
 
@@ -209,6 +221,7 @@ if [[ -z "$LAST_OUTPUT" ]]; then
   echo "⚠️  Ralph loop: Assistant message contained no text content." >&2
   echo "   Ralph loop is stopping." >&2
   rm "$RALPH_STATE_FILE"
+  echo '{"decision": "approve"}'
   exit 0
 fi
 
@@ -241,6 +254,7 @@ if [[ "$COMPLETION_PROMISE" != "null" ]] && [[ -n "$COMPLETION_PROMISE" ]]; then
   if [[ -n "$PROMISE_TEXT" ]] && [[ "$PROMISE_TEXT" = "$NORMALIZED_PROMISE" ]]; then
     echo "✅ Ralph loop: Detected <promise>$COMPLETION_PROMISE</promise>"
     rm "$RALPH_STATE_FILE"
+    echo '{"decision": "approve"}'
     exit 0
   fi
 fi
@@ -260,6 +274,7 @@ if [[ -z "$PROMPT_TEXT" ]]; then
   echo "   This usually means the state file was manually edited or corrupted." >&2
   echo "   Ralph loop is stopping. Run /ralph-wiggum:ralph-loop again to start fresh." >&2
   rm "$RALPH_STATE_FILE"
+  echo '{"decision": "approve"}'
   exit 0
 fi
 

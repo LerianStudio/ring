@@ -103,6 +103,35 @@ WRONG. Count > 3 = agent. No exceptions. Task size is irrelevant.
 **Full rules:** Use Skill tool with "ring-default:using-ring" if needed.
 '
 
+# Doubt-triggered questions pattern - when agents should ask vs proceed
+DOUBT_QUESTIONS='## 🤔 DOUBT-TRIGGERED QUESTIONS (WHEN TO ASK)
+
+**Resolution hierarchy (check BEFORE asking):**
+1. User dispatch context → Did they already specify?
+2. CLAUDE.md / repo conventions → Is there a standard?
+3. Codebase patterns → What does existing code do?
+4. Best practice → Is one approach clearly superior?
+5. **→ ASK** → Only if ALL above fail AND affects correctness
+
+**Genuine doubt criteria (ALL must be true):**
+- Cannot resolve from hierarchy above
+- Multiple approaches genuinely viable
+- Choice significantly impacts correctness
+- Getting it wrong wastes substantial effort
+
+**Question quality - show your work:**
+```
+✅ "Found PostgreSQL in docker-compose but MongoDB in docs.
+    This feature needs time-series. Which should I extend?"
+❌ "Which database should I use?"
+```
+
+**If proceeding without asking:**
+State assumption → Explain why → Note what would change it
+
+**Full pattern:** See shared-patterns/doubt-triggered-questions.md
+'
+
 # Generate skills overview with cascading fallback
 # Priority: Python+PyYAML > Python regex > Bash fallback > Error message
 generate_skills_overview() {
@@ -169,6 +198,7 @@ fi
 # Note: using-ring content is already included in skills_overview via generate-skills-ref.py
 overview_escaped=$(json_escape "$skills_overview")
 critical_rules_escaped=$(json_escape "$CRITICAL_RULES")
+doubt_questions_escaped=$(json_escape "$DOUBT_QUESTIONS")
 
 # Build JSON output - include update notification if marketplace was updated
 if [ "$marketplace_updated" = "true" ]; then
@@ -176,7 +206,7 @@ if [ "$marketplace_updated" = "true" ]; then
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "<ring-marketplace-updated>\nThe Ring marketplace was just updated to a new version. New skills and agents have been installed but won't be available until the session is restarted. Inform the user they should restart their session (type 'clear' or restart Claude Code) to load the new capabilities.\n</ring-marketplace-updated>\n\n<ring-critical-rules>\n${critical_rules_escaped}\n</ring-critical-rules>\n\n<ring-skills-system>\n${overview_escaped}\n</ring-skills-system>"
+    "additionalContext": "<ring-marketplace-updated>\nThe Ring marketplace was just updated to a new version. New skills and agents have been installed but won't be available until the session is restarted. Inform the user they should restart their session (type 'clear' or restart Claude Code) to load the new capabilities.\n</ring-marketplace-updated>\n\n<ring-critical-rules>\n${critical_rules_escaped}\n</ring-critical-rules>\n\n<ring-doubt-questions>\n${doubt_questions_escaped}\n</ring-doubt-questions>\n\n<ring-skills-system>\n${overview_escaped}\n</ring-skills-system>"
   }
 }
 EOF
@@ -185,7 +215,7 @@ else
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "<ring-critical-rules>\n${critical_rules_escaped}\n</ring-critical-rules>\n\n<ring-skills-system>\n${overview_escaped}\n</ring-skills-system>"
+    "additionalContext": "<ring-critical-rules>\n${critical_rules_escaped}\n</ring-critical-rules>\n\n<ring-doubt-questions>\n${doubt_questions_escaped}\n</ring-doubt-questions>\n\n<ring-skills-system>\n${overview_escaped}\n</ring-skills-system>"
   }
 }
 EOF
