@@ -7,6 +7,7 @@ Ring is a comprehensive skills library and workflow system for AI agents that tr
 ## ✨ Why Ring?
 
 Without Ring, AI assistants often:
+
 - Skip tests and jump straight to implementation
 - Make changes without understanding root causes
 - Claim tasks are complete without verification
@@ -14,6 +15,7 @@ Without Ring, AI assistants often:
 - Repeat known mistakes
 
 Ring solves this by:
+
 - **Enforcing proven workflows** - Test-driven development, systematic debugging, proper planning
 - **Providing 47 specialized skills** - From brainstorming to production deployment (21 core + 2 dev-team + 10 product planning + 6 FinOps + 1 ralph-wiggum + 7 technical writing)
 - **23 specialized agents** - 5 review/planning agents + 10 developer role agents + 3 research agents + 2 FinOps agents + 3 technical writing agents
@@ -23,6 +25,7 @@ Ring solves this by:
 ## 🤖 Specialized Agents
 
 **Review & Planning Agents (default plugin):**
+
 - `ring-default:code-reviewer` - Foundation review (architecture, code quality, design patterns)
 - `ring-default:business-logic-reviewer` - Correctness review (domain logic, requirements, edge cases)
 - `ring-default:security-reviewer` - Safety review (vulnerabilities, OWASP, authentication)
@@ -31,6 +34,7 @@ Ring solves this by:
 - Use `/ring-default:codereview` command to orchestrate parallel review workflow
 
 **Developer Agents (dev-team plugin):**
+
 - `ring-dev-team:backend-engineer` - Language-agnostic backend specialist (adapts to Go/TypeScript/Python/etc)
 - `ring-dev-team:backend-engineer-golang` - Go backend specialist for financial systems
 - `ring-dev-team:backend-engineer-typescript` - TypeScript/Node.js backend specialist (Express, NestJS, Fastify)
@@ -43,34 +47,38 @@ Ring solves this by:
 - `ring-dev-team:sre` - Site reliability engineer
 
 **FinOps Agents (ring-finops-team plugin):**
+
 - `ring-finops-team:finops-analyzer` - Financial operations analysis
 - `ring-finops-team:finops-automation` - FinOps template creation and automation
 
 **Technical Writing Agents (ring-tw-team plugin):**
+
 - `ring-tw-team:functional-writer` - Functional documentation (guides, tutorials, conceptual docs)
 - `ring-tw-team:api-writer` - API reference documentation (endpoints, schemas, examples)
 - `ring-tw-team:docs-reviewer` - Documentation quality review (voice, tone, structure, completeness)
 
-*Plugin versions are managed in `.claude-plugin/marketplace.json`*
+_Plugin versions are managed in `.claude-plugin/marketplace.json`_
 
 ## 🖥️ Supported Platforms
 
 Ring works across multiple AI development platforms:
 
-| Platform | Format | Status | Features |
-|----------|--------|--------|----------|
-| **Claude Code** | Native | ✅ Source of truth | Skills, agents, commands, hooks |
-| **Factory AI** | Transformed | ✅ Supported | Droids, commands, skills |
-| **Cursor** | Transformed | ✅ Supported | Rules, workflows |
-| **Cline** | Transformed | ✅ Supported | Prompts |
+| Platform        | Format      | Status             | Features                        |
+| --------------- | ----------- | ------------------ | ------------------------------- |
+| **Claude Code** | Native      | ✅ Source of truth | Skills, agents, commands, hooks |
+| **Factory AI**  | Transformed | ✅ Supported       | Droids, commands, skills        |
+| **Cursor**      | Transformed | ✅ Supported       | Rules, workflows                |
+| **Cline**       | Transformed | ✅ Supported       | Prompts                         |
 
 **Transformation Notes:**
+
 - Claude Code receives Ring content in its native format
 - Factory AI: `agents` → `droids` terminology
 - Cursor: Skills/agents → `.cursorrules` and workflows
 - Cline: All content → structured prompts
 
 **Platform-Specific Guides:**
+
 - [Claude Code Installation Guide](docs/platforms/claude-code.md) - Native format setup and usage
 - [Factory AI Installation Guide](docs/platforms/factory-ai.md) - Droids transformation and configuration
 - [Cursor Installation Guide](docs/platforms/cursor.md) - Rules and workflow setup
@@ -84,6 +92,7 @@ Ring works across multiple AI development platforms:
 The Ring installer automatically detects installed platforms and transforms content appropriately.
 
 **Linux/macOS/Git Bash:**
+
 ```bash
 # Interactive installer (auto-detects platforms)
 curl -fsSL https://raw.githubusercontent.com/lerianstudio/ring/main/install-ring.sh | bash
@@ -95,6 +104,7 @@ cd ~/ring
 ```
 
 **Windows PowerShell:**
+
 ```powershell
 # Interactive installer (auto-detects platforms)
 irm https://raw.githubusercontent.com/lerianstudio/ring/main/install-ring.ps1 | iex
@@ -151,6 +161,7 @@ Install to specific platforms without the interactive menu:
 ### Claude Code Plugin Marketplace
 
 For Claude Code users, you can also install from the marketplace:
+
 - Open Claude Code
 - Go to Settings → Plugins
 - Search for "ring"
@@ -184,6 +195,7 @@ When you start a new Claude Code session with Ring installed, you'll see:
 ### The Big Four (Use These First!)
 
 #### 1. **using-ring** - Mandatory Skill Discovery
+
 ```
 Before ANY action → Check skills
 Before ANY tool → Check skills
@@ -191,6 +203,7 @@ Before ANY code → Check skills
 ```
 
 #### 2. **test-driven-development** - Test First, Always
+
 ```
 RED → Write failing test → Watch it fail
 GREEN → Minimal code → Watch it pass
@@ -198,6 +211,7 @@ REFACTOR → Clean up → Stay green
 ```
 
 #### 3. **systematic-debugging** - Find Root Cause
+
 ```
 Phase 1: Investigate (gather ALL evidence)
 Phase 2: Analyze patterns
@@ -206,6 +220,7 @@ Phase 4: Implement fix (with test)
 ```
 
 #### 4. **verification-before-completion** - Prove It Works
+
 ```
 Run command → Paste output → Then claim
 No "should work" → Only "does work" with proof
@@ -216,6 +231,7 @@ No "should work" → Only "does work" with proof
 ### Core Skills (ring-default plugin - 21 skills)
 
 **Testing & Debugging (6):**
+
 - `test-driven-development` - Write test first, watch fail, minimal code
 - `systematic-debugging` - 4-phase root cause investigation
 - `verification-before-completion` - Evidence before claims
@@ -224,6 +240,7 @@ No "should work" → Only "does work" with proof
 - `defense-in-depth` - Multi-layer validation
 
 **Collaboration & Planning (10):**
+
 - `brainstorming` - Structured design refinement
 - `writing-plans` - Zero-context implementation plans
 - `executing-plans` - Batch execution with checkpoints
@@ -236,6 +253,7 @@ No "should work" → Only "does work" with proof
 - `root-cause-tracing` - Backward bug tracking
 
 **Meta Skills (4):**
+
 - `using-ring` - Mandatory skill discovery
 - `writing-skills` - TDD for documentation
 - `testing-skills-with-subagents` - Skill validation
@@ -244,13 +262,16 @@ No "should work" → Only "does work" with proof
 ### Developer Skills (ring-dev-team plugin - 2 skills)
 
 **Code Development:**
+
 - `using-dev-team` - Introduction to developer specialist agents
 - `writing-code` - Best practices for code implementation
 
 ### Product Planning Skills (ring-pm-team plugin - 10 skills)
 
 **Pre-Development Workflow (includes using-pm-team + 9 gates):**
+
 - `using-pm-team` - Introduction to product planning workflow
+
 0. `pre-dev-research` - Research phase (parallel agents)
 1. `pre-dev-prd-creation` - Business requirements (WHAT/WHY)
 2. `pre-dev-feature-map` - Feature relationships
@@ -264,6 +285,7 @@ No "should work" → Only "does work" with proof
 ### FinOps & Regulatory Skills (ring-finops-team plugin - 6 skills)
 
 **Regulatory Templates (6):**
+
 - `using-finops-team` - Introduction to FinOps team workflow
 - `regulatory-templates` - Brazilian regulatory orchestration (BACEN, RFB)
 - `regulatory-templates-setup` - Template selection initialization
@@ -274,11 +296,13 @@ No "should work" → Only "does work" with proof
 ### Ralph Wiggum (ralph-wiggum plugin - 1 skill)
 
 **Iterative Development:**
+
 - `using-ralph-wiggum` - Ralph Wiggum iterative loop technique guide
 
 ### Technical Writing Skills (ring-tw-team plugin - 7 skills)
 
 **Documentation Creation:**
+
 - `using-tw-team` - Introduction to technical writing specialists
 - `writing-functional-docs` - Patterns for guides, tutorials, conceptual docs
 - `writing-api-docs` - API reference documentation patterns
@@ -321,6 +345,7 @@ Ring provides 15 slash commands across 4 plugins for common workflows.
 ## 💡 Usage Examples
 
 ### Building a Feature
+
 ```
 User: "Add user authentication to the app"
 Claude: I'm using the brainstorming skill to design this feature...
@@ -332,6 +357,7 @@ Claude: I'm using verification-before-completion to confirm...
 ```
 
 ### Fixing a Bug
+
 ```
 User: "The app crashes when clicking submit"
 Claude: I'm using systematic-debugging to investigate...
@@ -342,6 +368,7 @@ Claude: I'm using systematic-debugging to investigate...
 ```
 
 ### Planning a Project
+
 ```
 User: "Plan an e-commerce platform"
 Claude: I'll use the pre-dev workflow to plan this systematically...
@@ -352,6 +379,7 @@ Claude: I'll use the pre-dev workflow to plan this systematically...
 ```
 
 ### Code Review (Parallel, 3x Faster!)
+
 ```
 User: "Review my authentication implementation"
 Claude: Dispatching all 3 reviewers in parallel...
@@ -373,6 +401,7 @@ Claude: Dispatching all 3 reviewers in parallel...
 ```
 
 **Key benefits:**
+
 - **3x faster** - All reviewers run simultaneously (not sequential)
 - **Comprehensive** - Get all feedback at once, easier to prioritize
 - **Tech debt tracking** - Low/Cosmetic issues tracked with TODO/FIXME comments in code
@@ -405,17 +434,34 @@ ring/                                  # Monorepo root
 │   ├── lib/                        # Infrastructure utilities (9 scripts)
 │   └── docs/                       # Documentation
 ├── dev-team/                      # Developer Agents plugin (ring-dev-team)
-│   └── agents/                      # 10 specialized developer agents
-│       ├── backend-engineer.md         # Language-agnostic backend specialist
-│       ├── backend-engineer-golang.md  # Go backend specialist
-│       ├── backend-engineer-typescript.md # TypeScript/Node.js backend specialist
-│       ├── backend-engineer-python.md  # Python backend specialist
-│       ├── devops-engineer.md          # DevOps infrastructure
-│       ├── frontend-engineer.md        # React/Next.js specialist (JavaScript-first)
-│       ├── frontend-engineer-typescript.md # TypeScript-first React/Next.js specialist
-│       ├── frontend-designer.md        # Visual design specialist
-│       ├── qa-analyst.md               # Quality assurance
-│       └── sre.md                      # Site reliability engineer
+│   ├── skills/                      # 2 developer skills
+│   │   ├── using-dev-team/          # Plugin introduction
+│   │   └── writing-code/            # Developer agent selection
+│   ├── agents/                      # 10 specialized developer agents
+│   │   ├── backend-engineer.md         # Language-agnostic backend specialist
+│   │   ├── backend-engineer-golang.md  # Go backend specialist
+│   │   ├── backend-engineer-typescript.md # TypeScript/Node.js backend specialist
+│   │   ├── backend-engineer-python.md  # Python backend specialist
+│   │   ├── devops-engineer.md          # DevOps infrastructure
+│   │   ├── frontend-engineer.md        # React/Next.js specialist (JavaScript-first)
+│   │   ├── frontend-engineer-typescript.md # TypeScript-first React/Next.js specialist
+│   │   ├── frontend-designer.md        # Visual design specialist
+│   │   ├── qa-analyst.md               # Quality assurance
+│   │   └── sre.md                      # Site reliability engineer
+│   ├── commands/                    # 25 slash commands (by category)
+│   │   ├── analysis/                # analyze-codebase, code-searcher, diagram, etc.
+│   │   ├── debugging/               # fix-problem
+│   │   ├── documentation/           # architecture-document, document
+│   │   ├── planning/                # estimate, options, question
+│   │   ├── quality/                 # clean-comments, code-review, technical-debt, etc.
+│   │   ├── security/                # predict-issue, security-scan
+│   │   ├── utils/                   # markdown-syntax, url-link-extractor
+│   │   └── workflow/                # commit-generator, pr-generator, etc.
+│   ├── hooks/                       # Plugin hooks
+│   │   ├── hooks.json               # SessionStart, PreToolUse, PostToolUse config
+│   │   ├── session-start.sh         # Context injection at startup
+│   │   └── notification.py          # Desktop notifications on tool completion
+│   └── .mcp.json                    # MCP servers (context7)
 ├── finops-team/                     # FinOps plugin (ring-finops-team)
 │   ├── skills/                      # 6 regulatory compliance skills
 │   │   └── regulatory-templates*/   # Brazilian regulatory compliance
@@ -448,11 +494,13 @@ ring/                                  # Monorepo root
 **For core Ring skills:**
 
 1. **Create the skill directory**
+
    ```bash
    mkdir default/skills/your-skill-name
    ```
 
 2. **Write SKILL.md with frontmatter**
+
    ```yaml
    ---
    name: your-skill-name
@@ -470,14 +518,13 @@ ring/                                  # Monorepo root
      - Another exclusion condition
 
    sequence:
-     after: [prerequisite-skill]   # Skills that should come before
-     before: [following-skill]     # Skills that typically follow
+     after: [prerequisite-skill] # Skills that should come before
+     before: [following-skill] # Skills that typically follow
 
    related:
-     similar: [skill-that-seems-similar]      # Differentiate from these
-     complementary: [skill-that-pairs-well]   # Use together with these
+     similar: [skill-that-seems-similar] # Differentiate from these
+     complementary: [skill-that-pairs-well] # Use together with these
    ---
-
    # Skill content here...
    ```
 
@@ -504,12 +551,14 @@ ring/                                  # Monorepo root
 **For product/team-specific skills:**
 
 1. **Create plugin structure**
+
    ```bash
    mkdir -p product-xyz/{skills,agents,commands,hooks,lib}
    ```
 
 2. **Register in marketplace**
    Edit `.claude-plugin/marketplace.json`:
+
    ```json
    {
      "name": "ring-product-xyz",
@@ -559,6 +608,7 @@ Ring embodies these principles:
 ## 📊 Success Metrics
 
 Teams using Ring report:
+
 - 90% reduction in "works on my machine" issues
 - 75% fewer bugs reaching production
 - 60% faster debugging cycles
@@ -567,6 +617,7 @@ Teams using Ring report:
 ## 🙏 Acknowledgments
 
 Ring is built on decades of collective software engineering wisdom, incorporating patterns from:
+
 - Extreme Programming (XP)
 - Test-Driven Development (TDD)
 - Domain-Driven Design (DDD)
