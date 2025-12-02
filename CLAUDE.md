@@ -7,8 +7,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Ring is a comprehensive skills library and workflow system for AI agents that enforces proven software engineering practices through mandatory workflows, parallel code review, and systematic pre-development planning. Currently implemented as a Claude Code plugin marketplace with **6 active plugins**, the skills are agent-agnostic and reusable across different AI systems.
 
 **Active Plugins:**
+
 - **ring-default**: 21 core skills, 7 slash commands, 5 specialized agents
-- **ring-dev-team**: 2 developer skills, 10 specialized developer agents (Backend [generic], Backend Go, Backend TypeScript, Backend Python, DevOps, Frontend [generic], Frontend TypeScript, Frontend Designer, QA, SRE)
+- **ring-dev-team**: 2 developer skills, 25 slash commands, 10 specialized developer agents (Backend [generic], Backend Go, Backend TypeScript, Backend Python, DevOps, Frontend [generic], Frontend TypeScript, Frontend Designer, QA, SRE), hooks, MCP servers
 - **ring-finops-team**: 6 regulatory skills, 2 FinOps agents
 - **ring-pm-team**: 10 product planning skills, 3 research agents, 2 slash commands
 - **ralph-wiggum**: 1 skill for iterative AI development loops using Stop hooks
@@ -26,12 +27,12 @@ Ring supports multiple AI platforms. The installer auto-detects installed platfo
 
 ### Supported Platforms
 
-| Platform | Install Path | Format | Components |
-|----------|-------------|--------|------------|
-| Claude Code | `~/.claude/` | Native | skills, agents, commands, hooks |
-| Factory AI | `~/.factory/` | Transformed | skills, droids, commands |
-| Cursor | `~/.cursor/` | Transformed | .cursorrules, workflows |
-| Cline | `~/.cline/` | Transformed | prompts |
+| Platform    | Install Path  | Format      | Components                      |
+| ----------- | ------------- | ----------- | ------------------------------- |
+| Claude Code | `~/.claude/`  | Native      | skills, agents, commands, hooks |
+| Factory AI  | `~/.factory/` | Transformed | skills, droids, commands        |
+| Cursor      | `~/.cursor/`  | Transformed | .cursorrules, workflows         |
+| Cline       | `~/.cline/`   | Transformed | prompts                         |
 
 ### Quick Install
 
@@ -113,17 +114,56 @@ ring/                                  # Monorepo root
 │   ├── skills/                    # 2 developer skills
 │   │   ├── using-dev-team/        # Plugin introduction
 │   │   └── writing-code/          # Developer agent selection
-│   └── agents/                    # 10 specialized developer agents
-│       ├── backend-engineer.md             # Backend specialist (language agnostic)
-│       ├── backend-engineer-golang.md      # Go backend specialist
-│       ├── backend-engineer-typescript.md  # TypeScript/Node.js backend specialist
-│       ├── backend-engineer-python.md      # Python backend specialist
-│       ├── devops-engineer.md              # DevOps infrastructure specialist
-│       ├── frontend-engineer.md            # Frontend specialist (language agnostic)
-│       ├── frontend-engineer-typescript.md # TypeScript/React/Next.js specialist
-│       ├── frontend-designer.md            # Visual design specialist
-│       ├── qa-analyst.md                   # Quality assurance specialist
-│       └── sre.md                          # Site reliability engineer
+│   ├── agents/                    # 10 specialized developer agents
+│   │   ├── backend-engineer.md             # Backend specialist (language agnostic)
+│   │   ├── backend-engineer-golang.md      # Go backend specialist
+│   │   ├── backend-engineer-typescript.md  # TypeScript/Node.js backend specialist
+│   │   ├── backend-engineer-python.md      # Python backend specialist
+│   │   ├── devops-engineer.md              # DevOps infrastructure specialist
+│   │   ├── frontend-engineer.md            # Frontend specialist (language agnostic)
+│   │   ├── frontend-engineer-typescript.md # TypeScript/React/Next.js specialist
+│   │   ├── frontend-designer.md            # Visual design specialist
+│   │   ├── qa-analyst.md                   # Quality assurance specialist
+│   │   └── sre.md                          # Site reliability engineer
+│   ├── commands/                  # 25 slash commands (organized by category)
+│   │   ├── analysis/             # 5 analysis commands
+│   │   │   ├── analyze-codebase.md   # Comprehensive codebase analysis
+│   │   │   ├── code-searcher.md      # Code search with patterns
+│   │   │   ├── diagram.md            # Generate architecture diagrams
+│   │   │   ├── directory-deep-dive.md # Directory structure analysis
+│   │   │   └── knowledger-extract.md # Extract domain knowledge
+│   │   ├── debugging/            # 1 debugging command
+│   │   │   └── fix-problem.md        # Problem resolution workflow
+│   │   ├── documentation/        # 2 documentation commands
+│   │   │   ├── architecture-document.md # Architecture docs generation
+│   │   │   └── document.md           # Documentation management
+│   │   ├── planning/             # 3 planning commands
+│   │   │   ├── estimate.md           # Project estimation
+│   │   │   ├── options.md            # Options analysis
+│   │   │   └── question.md           # Question answering
+│   │   ├── quality/              # 5 quality commands
+│   │   │   ├── clean-comments.md     # Comment cleanup
+│   │   │   ├── clean-project.md      # Project cleanup
+│   │   │   ├── code-improve.md       # Code improvement
+│   │   │   ├── code-review.md        # Code review
+│   │   │   └── technical-debt.md     # Technical debt analysis
+│   │   ├── security/             # 2 security commands
+│   │   │   ├── predict-issue.md      # Issue prediction
+│   │   │   └── security-scan.md      # Security scanning
+│   │   ├── utils/                # 2 utility commands
+│   │   │   ├── markdown-syntax.md    # Markdown formatting
+│   │   │   └── url-link-extractor.md # URL extraction
+│   │   └── workflow/             # 5 workflow commands
+│   │       ├── commit-generator.md   # Commit message generation
+│   │       ├── find-todos.md         # Find TODO comments
+│   │       ├── pr-generator.md       # PR description generation
+│   │       ├── prompt-engineer.md    # Prompt engineering
+│   │       └── summary.md            # Conversation summary
+│   ├── hooks/                     # Plugin hooks
+│   │   ├── hooks.json            # SessionStart, PreToolUse, PostToolUse config
+│   │   ├── session-start.sh      # Context injection at startup
+│   │   └── notification.py       # Desktop notifications on tool completion
+│   └── .mcp.json                  # MCP servers (context7)
 ├── finops-team/                   # FinOps plugin (ring-finops-team)
 │   ├── skills/                    # 6 regulatory compliance skills
 │   │   └── regulatory-templates*/ # Brazilian regulatory compliance (BACEN, RFB)
@@ -222,8 +262,10 @@ python default/hooks/generate-skills-ref.py # Generate skill overview
 ### Adding a New Skill
 
 **For core Ring skills:**
+
 1. Create directory: `mkdir default/skills/your-skill-name/`
 2. Write `default/skills/your-skill-name/SKILL.md` with frontmatter:
+
    ```yaml
    ---
    name: your-skill-name
@@ -239,18 +281,20 @@ python default/hooks/generate-skills-ref.py # Generate skill overview
      - Another exclusion
 
    sequence:
-     after: [prerequisite-skill]   # Optional: ordering
+     after: [prerequisite-skill] # Optional: ordering
      before: [following-skill]
 
    related:
-     similar: [differentiate-from]      # Optional: disambiguation
+     similar: [differentiate-from] # Optional: disambiguation
      complementary: [pairs-well-with]
    ---
    ```
+
 3. Test with `Skill tool: "ring-default:testing-skills-with-subagents"`
 4. Skill auto-loads next SessionStart via `default/hooks/generate-skills-ref.py`
 
 **For product/team-specific skills:**
+
 1. Create plugin directory: `mkdir -p product-xyz/{skills,agents,commands,hooks}`
 2. Add to `.claude-plugin/marketplace.json`:
    ```json
@@ -264,46 +308,53 @@ python default/hooks/generate-skills-ref.py # Generate skill overview
 3. Follow same skill structure as default plugin
 
 ### Modifying Hooks
+
 1. Edit `default/hooks/hooks.json` for trigger configuration
 2. Scripts in `default/hooks/`: `session-start.sh`, `claude-md-bootstrap.sh`
 3. Test: `bash default/hooks/session-start.sh` outputs JSON with additionalContext
 4. SessionStart hooks run on `startup|resume` and `clear|compact`
 5. Note: `${CLAUDE_PLUGIN_ROOT}` resolves to plugin root (`default/` for core plugin)
 
-### Plugin-Specific Using-* Skills
+### Plugin-Specific Using-\* Skills
 
 Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introduce available agents and capabilities:
 
 **Default Plugin:**
+
 - `using-ring` → ORCHESTRATOR principle, mandatory workflow
 - Always injected, always mandatory
 - Located: `default/skills/using-ring/SKILL.md`
 
 **Ring Dev Team Plugin:**
+
 - `using-dev-team` → 10 specialist developer agents
 - Auto-loads when ring-dev-team plugin is enabled
 - Located: `dev-team/skills/using-dev-team/SKILL.md`
 - Agents (invoke as `ring-dev-team:{agent-name}`): backend-engineer, backend-engineer-golang, backend-engineer-typescript, backend-engineer-python, devops-engineer, frontend-engineer, frontend-engineer-typescript, frontend-designer, qa-analyst, sre
 
 **Ring FinOps Team Plugin:**
+
 - `using-finops-team` → 2 FinOps agents for Brazilian compliance
 - Auto-loads when ring-finops-team plugin is enabled
 - Located: `finops-team/skills/using-finops-team/SKILL.md`
 - Agents (invoke as `ring-finops-team:{agent-name}`): finops-analyzer (compliance analysis), finops-automation (template generation)
 
 **Ring PM Team Plugin:**
+
 - `using-pm-team` → Pre-dev workflow skills (8 gates)
 - Auto-loads when ring-pm-team plugin is enabled
 - Located: `pm-team/skills/using-pm-team/SKILL.md`
 - Skills: 8 pre-dev gates for feature planning
 
 **Ralph Wiggum Plugin:**
+
 - `using-ralph-wiggum` → Iterative AI development loops
 - Auto-loads when ralph-wiggum plugin is enabled
 - Located: `ralph-wiggum/skills/using-ralph-wiggum/SKILL.md`
 - Commands: ralph-loop, cancel-ralph, help
 
 **Ring TW Team Plugin:**
+
 - `using-tw-team` → 3 technical writing agents for documentation
 - Auto-loads when ring-tw-team plugin is enabled
 - Located: `tw-team/skills/using-tw-team/SKILL.md`
@@ -311,17 +362,20 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 - Commands: write-guide, write-api, review-docs
 
 **Hook Configuration:**
+
 - Each plugin has: `{plugin}/hooks/hooks.json` + `{plugin}/hooks/session-start.sh`
 - SessionStart hook executes, outputs additionalContext with skill reference
 - Only plugins in marketplace.json get loaded (conditional)
 
 ### Creating Review Agents
+
 1. Add to `default/agents/your-reviewer.md` with output_schema
 2. Reference in `default/skills/requesting-code-review/SKILL.md:85`
 3. Dispatch via Task tool with `subagent_type="ring-default:your-reviewer"`
 4. Must run in parallel with other reviewers (single message, multiple Tasks)
 
 ### Pre-Dev Workflow
+
 ```
 Simple (<2 days): /ring-pm-team:pre-dev-feature
 ├── Gate 0: pm-team/skills/pre-dev-research → docs/pre-dev/feature/research.md (parallel agents)
@@ -340,6 +394,7 @@ Complex (≥2 days): /ring-pm-team:pre-dev-full
 ```
 
 ### Parallel Code Review
+
 ```python
 # Instead of sequential (60 min):
 review1 = Task("ring-default:code-reviewer")      # 20 min
@@ -357,6 +412,7 @@ Task.parallel([
 ## Important Patterns
 
 ### Code Organization
+
 - **Skill Structure**: `default/skills/{name}/SKILL.md` with YAML frontmatter
 - **Agent Output**: Required markdown sections per `default/agents/*.md:output_schema`
 - **Hook Scripts**: Must output JSON with success/error fields
@@ -365,12 +421,14 @@ Task.parallel([
 - **Monorepo Layout**: Each plugin (`default/`, `team-*/`, `dev-team/`, `ralph-wiggum/`) is self-contained
 
 ### Naming Conventions
+
 - Skills: `kebab-case` matching directory name
 - Agents: `{domain}-reviewer.md` format
 - Commands: `/ring-{plugin}:{action}` format (e.g., `/ring-default:brainstorm`, `/ring-pm-team:pre-dev-feature`)
 - Hooks: `{event}-{purpose}.sh` format
 
 #### Agent/Skill/Command Invocation
+
 - **ALWAYS use fully qualified names**: `ring-{plugin}:{component}`
 - **Examples:**
   - ✅ Correct: `ring-default:code-reviewer`
@@ -384,6 +442,7 @@ Task.parallel([
 Agents use standard output schema patterns based on their purpose:
 
 **Implementation Schema** (for agents that write code/configs):
+
 ```yaml
 output_schema:
   format: "markdown"
@@ -408,6 +467,7 @@ output_schema:
 **Used by:** All backend engineers (`ring-dev-team:backend-engineer`, `ring-dev-team:backend-engineer-golang`, `ring-dev-team:backend-engineer-typescript`, `ring-dev-team:backend-engineer-python`), all frontend engineers except designer (`ring-dev-team:frontend-engineer`, `ring-dev-team:frontend-engineer-typescript`), `ring-dev-team:devops-engineer`, `ring-dev-team:qa-analyst`, `ring-dev-team:sre`, `ring-finops-team:finops-automation`
 
 **Analysis Schema** (for agents that analyze and recommend):
+
 ```yaml
 output_schema:
   format: "markdown"
@@ -429,6 +489,7 @@ output_schema:
 **Used by:** `ring-dev-team:frontend-designer`, `ring-finops-team:finops-analyzer`
 
 **Reviewer Schema** (for code review agents):
+
 ```yaml
 output_schema:
   format: "markdown"
@@ -456,10 +517,12 @@ output_schema:
 **Used by:** `ring-default:code-reviewer`, `ring-default:business-logic-reviewer`, `ring-default:security-reviewer`
 
 **Note:** `ring-default:business-logic-reviewer` and `ring-default:security-reviewer` extend the base Reviewer Schema with additional domain-specific required sections:
+
 - `ring-default:business-logic-reviewer` adds: "Mental Execution Analysis", "Business Requirements Coverage", "Edge Cases Analysis"
 - `ring-default:security-reviewer` adds: "OWASP Top 10 Coverage", "Compliance Status"
 
 **Exploration Schema** (for deep codebase analysis):
+
 ```yaml
 output_schema:
   format: "markdown"
@@ -484,6 +547,7 @@ output_schema:
 **Used by:** `ring-default:codebase-explorer`
 
 **Planning Schema** (for implementation planning):
+
 ```yaml
 output_schema:
   format: "markdown"
@@ -508,6 +572,7 @@ output_schema:
 **Used by:** `ring-default:write-plan`
 
 ### Anti-Patterns to Avoid
+
 1. **Never skip using-ring** - It's mandatory, not optional
 2. **Never run reviewers sequentially** - Always dispatch in parallel
 3. **Never modify generated skill reference** - Auto-generated from frontmatter
@@ -517,6 +582,7 @@ output_schema:
 7. **Never commit incomplete code** - No "TODO: implement" comments
 
 ### Compliance Rules
+
 ```bash
 # TDD compliance (default/skills/test-driven-development/SKILL.md:638)
 - Test file must exist before implementation
@@ -535,17 +601,20 @@ output_schema:
 ```
 
 ### Session Context
+
 The system loads at SessionStart (from `default/` plugin):
+
 1. `default/hooks/session-start.sh` - Loads skill quick reference via `generate-skills-ref.py`
 2. `using-ring` skill - Injected as mandatory workflow
 3. `default/hooks/claude-md-reminder.sh` - Reminds about CLAUDE.md on prompt submit
 
 **Monorepo Context:**
+
 - Repository: Monorepo marketplace with multiple plugin collections
 - Active plugins: 6 (`ring-default`, `ring-dev-team`, `ring-finops-team`, `ring-pm-team`, `ralph-wiggum`, `ring-tw-team`)
 - Plugin versions: See `.claude-plugin/marketplace.json`
 - Core plugin: `default/` (21 skills, 5 agents, 7 commands)
-- Developer agents plugin: `dev-team/` (2 skills, 10 specialized developer agents)
+- Developer agents plugin: `dev-team/` (2 skills, 25 commands, 10 specialized developer agents, hooks, MCP servers)
 - FinOps plugin: `finops-team/` (6 skills, 2 agents)
 - Product planning plugin: `pm-team/` (10 skills, 3 research agents, 2 commands)
 - Ralph plugin: `ralph-wiggum/` (1 skill, 3 commands, Stop hook)
@@ -587,13 +656,15 @@ Agent Cross-References:
 ```
 
 **Checklist when adding/modifying:**
-- [ ] Agent added? Update hooks, using-* skills, MANUAL.md, README.md
+
+- [ ] Agent added? Update hooks, using-\* skills, MANUAL.md, README.md
 - [ ] Skill added? Update CLAUDE.md architecture, hooks if plugin-specific
 - [ ] Command added? Update MANUAL.md, README.md
-- [ ] Plugin added? Create hooks/, using-* skill, update marketplace.json
+- [ ] Plugin added? Create hooks/, using-\* skill, update marketplace.json
 - [ ] Names changed? Search repo for old names: `grep -r "old-name" --include="*.md" --include="*.sh"`
 
 **Naming Convention Enforcement:**
+
 - [ ] All agent invocations use `ring-{plugin}:agent-name` format
 - [ ] All skill invocations use `ring-{plugin}:skill-name` format
 - [ ] All command invocations use `/ring-{plugin}:command-name` format
