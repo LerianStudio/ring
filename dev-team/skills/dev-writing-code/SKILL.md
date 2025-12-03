@@ -1,5 +1,5 @@
 ---
-name: writing-code
+name: dev-writing-code
 description: |
   Developer agent selection matrix - helps identify the best developer specialist
   based on technology stack, domain, and requirements.

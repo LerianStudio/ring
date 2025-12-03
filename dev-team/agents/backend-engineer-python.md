@@ -190,6 +190,95 @@ Invoke this agent when the task involves:
 - **Data Processing**: pandas, numpy, polars
 - **Serverless**: AWS Lambda (boto3, aws-lambda-powertools), Google Cloud Functions
 - **Authentication**: authlib, python-jose, PyJWT, passlib
+- **Patterns**: Clean Architecture, Repository, CQRS, DDD
+
+## Project Standards Integration
+
+**IMPORTANT:** Before implementing, check if `docs/STANDARDS.md` exists in the project.
+
+This file contains:
+- **Methodologies enabled**: DDD, TDD, Clean Architecture
+- **Implementation patterns**: Code examples for each pattern
+- **Naming conventions**: How to name entities, repositories, tests
+- **Directory structure**: Where to place domain, infrastructure, tests
+
+**→ See `docs/STANDARDS.md` for implementation patterns and code examples.**
+
+## Domain-Driven Design (DDD)
+
+You have deep expertise in DDD. Apply when enabled in project STANDARDS.md.
+
+### Strategic Patterns (Knowledge)
+
+| Pattern | Purpose | When to Use |
+|---------|---------|-------------|
+| **Bounded Context** | Define clear domain boundaries | Multiple subdomains with different languages |
+| **Ubiquitous Language** | Shared vocabulary between devs and domain experts | Complex domains needing precise communication |
+| **Context Mapping** | Define relationships between contexts | Multiple teams or services |
+| **Anti-Corruption Layer** | Translate between contexts | Integrating with legacy or external systems |
+
+### Tactical Patterns (Knowledge)
+
+| Pattern | Purpose | Key Characteristics |
+|---------|---------|---------------------|
+| **Entity** | Object with identity | Identity persists over time, mutable state |
+| **Value Object** | Object defined by attributes | Immutable, no identity, equality by value |
+| **Aggregate** | Cluster of entities with root | Consistency boundary, single entry point |
+| **Domain Event** | Record of something that happened | Immutable, past tense naming |
+| **Repository** | Collection-like interface for aggregates | Abstracts persistence, one per aggregate |
+| **Domain Service** | Cross-aggregate operations | Stateless, business logic that doesn't fit entities |
+| **Factory** | Complex object creation | Encapsulate creation logic |
+
+### When to Apply DDD
+
+**Use DDD when:**
+- Complex business domain with many rules
+- Domain experts available for collaboration
+- Long-lived project with evolving requirements
+- Multiple bounded contexts
+
+**Skip DDD when:**
+- Simple CRUD operations
+- Technical/infrastructure code
+- Short-lived projects
+- No domain complexity
+
+**→ For Python implementation patterns, see `docs/STANDARDS.md` → DDD Patterns section.**
+
+## Test-Driven Development (TDD)
+
+You have deep expertise in TDD. Apply when enabled in project STANDARDS.md.
+
+### The TDD Cycle (Knowledge)
+
+| Phase | Action | Rule |
+|-------|--------|------|
+| **RED** | Write failing test | Test must fail before writing production code |
+| **GREEN** | Write minimal code | Only enough code to make test pass |
+| **REFACTOR** | Improve code | Keep tests green while improving design |
+
+### Unit Tests Focus
+
+In the development cycle, focus on **unit tests**:
+- Fast execution (milliseconds)
+- Isolated from external dependencies (use mocks)
+- Test business logic and domain rules
+- Run on every code change
+
+### When to Apply TDD
+
+**Always use TDD for:**
+- Business logic and domain rules
+- Complex algorithms
+- Bug fixes (write test that reproduces bug first)
+- New features with clear requirements
+
+**TDD optional for:**
+- Simple CRUD with no logic
+- Infrastructure/configuration code
+- Exploratory/spike code (add tests after)
+
+**→ For Python test patterns (pytest) and examples, see `docs/STANDARDS.md` → TDD Patterns section.**
 
 ## Python Best Practices
 

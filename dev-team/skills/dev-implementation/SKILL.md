@@ -1,0 +1,374 @@
+---
+name: dev-implementation
+description: |
+  Gate 3 of the development cycle. Executes code implementation following the technical
+  design from Gate 2. Uses the specialized agent selected in Gate 1 to implement
+  according to project standards defined in docs/STANDARDS.md (including TDD if configured).
+
+trigger: |
+  - Gate 3 of development cycle
+  - Technical design document exists from Gate 2
+  - Ready to write code
+
+skip_when: |
+  - No technical design exists (need Gate 2 first)
+  - No agent selected (need Gate 1 analysis)
+  - Design document has unresolved questions
+
+sequence:
+  after: [dev-design]
+  before: [dev-devops-setup]
+
+related:
+  complementary: [dev-design, test-driven-development, requesting-code-review]
+  similar: [subagent-driven-development, executing-plans]
+---
+
+# Code Implementation (Gate 3)
+
+## Overview
+
+This skill executes the implementation phase of the development cycle. It:
+- Follows the technical design from Gate 2
+- Uses the specialized agent selected in Gate 1
+- Applies project standards from docs/STANDARDS.md
+- Documents implementation decisions
+
+## Prerequisites
+
+Before starting Gate 3:
+
+1. **Gate 2 Complete**: Technical design document exists at `docs/plans/YYYY-MM-DD-{feature}.md`
+2. **Agent Selected**: Implementation agent from Gate 1 analysis:
+   - `ring-dev-team:backend-engineer-golang`
+   - `ring-dev-team:backend-engineer-typescript`
+   - `ring-dev-team:backend-engineer-python`
+   - `ring-dev-team:backend-engineer`
+   - `ring-dev-team:frontend-engineer-typescript`
+   - `ring-dev-team:frontend-engineer`
+   - `ring-dev-team:frontend-designer`
+3. **Standards Available**: Project standards at `docs/STANDARDS.md` (or conventions from analysis)
+
+## Step 1: Prepare Implementation Context
+
+Gather all necessary context:
+
+```
+Required:
+- Technical design: docs/plans/YYYY-MM-DD-{feature}.md
+- Selected agent: ring-dev-team:{agent}
+- Project standards: docs/STANDARDS.md
+
+Optional:
+- PRD/TRD: docs/pre-dev/{feature}/
+- Existing code patterns from Gate 1 analysis
+```
+
+**Verify readiness:**
+- [ ] Plan document is complete (passes zero-context test)
+- [ ] Agent type matches technology stack
+- [ ] Development environment is ready
+- [ ] Git branch is clean
+
+## Step 2: Choose Execution Approach
+
+Two approaches for executing the implementation plan:
+
+### Option A: Subagent-Driven (Recommended)
+
+Execute in current session with fresh subagent per task:
+
+```
+Advantages:
+- Real-time feedback and course correction
+- Code review between tasks
+- Human can intervene at any checkpoint
+
+Process:
+1. Dispatch agent for Task 1
+2. Review output
+3. Run code review if checkpoint
+4. Repeat for remaining tasks
+```
+
+### Option B: Parallel Session
+
+Execute in separate session with `ring-default:executing-plans`:
+
+```
+Advantages:
+- Batch execution with checkpoints
+- Good for well-defined, tested plans
+- Non-blocking main session
+
+Process:
+1. Open new terminal in worktree
+2. Start Claude session
+3. Use executing-plans skill with plan path
+```
+
+## Step 3: Execute Implementation Tasks
+
+For each task in the plan, dispatch the selected agent:
+
+```
+Task tool:
+  subagent_type: "ring-dev-team:{selected-agent}"
+  model: "opus"
+  prompt: |
+    Execute the following implementation task.
+
+    ## Task
+    {paste task from plan}
+
+    ## Project Standards
+    {paste docs/STANDARDS.md content}
+
+    ## Context from Plan
+    **Goal:** {goal from plan}
+    **Architecture:** {architecture from plan}
+
+    ## Requirements
+
+    1. **Follow TDD:**
+       - Write failing test first
+       - Implement minimal code to pass
+       - Refactor if needed
+
+    2. **Follow Standards:**
+       - Match existing code patterns
+       - Use project conventions
+       - Handle errors consistently
+
+    3. **Document Decisions:**
+       - Comment non-obvious choices
+       - Update docs if API changes
+
+    4. **Output Format:**
+       Provide your implementation following the output schema:
+       - Summary of what was done
+       - Files created/modified with key code snippets
+       - Test results
+       - Next steps
+
+    ## Files Context
+    {relevant existing file contents if needed}
+```
+
+## Step 4: Code Review Checkpoints
+
+At review checkpoints (after every 3-5 tasks), run parallel code review:
+
+```
+REQUIRED SUB-SKILL: Use ring-default:requesting-code-review
+
+Dispatch all 3 reviewers in parallel:
+- ring-default:code-reviewer (architecture, patterns)
+- ring-default:business-logic-reviewer (correctness, edge cases)
+- ring-default:security-reviewer (OWASP, auth, validation)
+```
+
+**Handle findings by severity:**
+
+| Severity | Action |
+|----------|--------|
+| Critical | Fix immediately, re-run all reviewers |
+| High | Fix immediately, re-run all reviewers |
+| Medium | Fix immediately, re-run all reviewers |
+| Low | Add `TODO(review):` comment |
+| Cosmetic | Add `FIXME(nitpick):` comment |
+
+**Proceed only when:**
+- Zero Critical/High/Medium issues remain
+- All Low issues have TODO comments
+- All Cosmetic issues have FIXME comments
+
+## Step 5: Track Implementation Progress
+
+Maintain progress tracking:
+
+```markdown
+## Implementation Progress
+
+### Completed Tasks
+- [x] Task 1: {description} - {files}
+- [x] Task 2: {description} - {files}
+- [ ] Task 3: {description} - IN PROGRESS
+
+### Files Created
+- `path/to/new/file1.ext`
+- `path/to/new/file2.ext`
+
+### Files Modified
+- `path/to/existing/file1.ext` (lines X-Y)
+- `path/to/existing/file2.ext` (lines A-B)
+
+### Code Review Status
+- Checkpoint 1: PASS (after Task 5)
+- Checkpoint 2: PENDING
+
+### Decisions Made
+- Decision 1: {description}
+- Decision 2: {description}
+
+### Issues Encountered
+- Issue 1: {description} - Resolution: {how fixed}
+```
+
+## Step 6: Document Implementation Decisions
+
+Record decisions made during implementation:
+
+```markdown
+## Implementation Decisions
+
+### Decision: {Title}
+**Task:** Task N
+**Context:** Why this came up during implementation
+**Chosen Approach:** What was implemented
+**Alternatives Considered:** Other options
+**Rationale:** Why this approach was selected
+**Impact:** Effects on other parts of the system
+```
+
+Document decisions about:
+- Deviations from original design
+- Performance optimizations
+- Error handling strategies
+- API changes
+- Test coverage choices
+
+## Agent Selection Guide
+
+Use the agent selected in Gate 1 based on technology:
+
+| Stack | Agent |
+|-------|-------|
+| Go backend | `ring-dev-team:backend-engineer-golang` |
+| TypeScript backend | `ring-dev-team:backend-engineer-typescript` |
+| Python backend | `ring-dev-team:backend-engineer-python` |
+| Unknown backend | `ring-dev-team:backend-engineer` |
+| React/Next.js | `ring-dev-team:frontend-engineer` |
+| TypeScript-heavy frontend | `ring-dev-team:frontend-engineer-typescript` |
+| Visual design focus | `ring-dev-team:frontend-designer` |
+
+## TDD Compliance
+
+If TDD is enabled in `docs/STANDARDS.md`, every implementation task follows:
+
+```
+1. RED: Write failing test first
+2. GREEN: Write minimal code to pass
+3. REFACTOR: Clean up while tests pass
+4. COMMIT: Atomic commits per task
+```
+
+**Note:** TDD methodology details (examples, patterns, anti-patterns) are documented in:
+- `docs/STANDARDS.md` → Project-specific TDD configuration
+- Agent knowledge → Implementation agents know TDD when configured
+
+The implementation agent will enforce TDD if configured in STANDARDS.md.
+
+## Handling Implementation Issues
+
+### Test Won't Pass
+
+```
+1. Verify test is correct (check assertion logic)
+2. Check implementation matches test expectations
+3. Look for missing dependencies or imports
+4. Check for environment issues
+5. If stuck: Document and escalate
+```
+
+### Design Change Needed
+
+```
+1. Document the issue with current design
+2. Propose alternative approach
+3. Update plan document if approved
+4. Continue implementation with new approach
+5. Note design change in implementation decisions
+```
+
+### Performance Concerns
+
+```
+1. Document the concern
+2. Add benchmark test if possible
+3. Implement correctness first
+4. Optimize with benchmarks after
+5. Document optimization decisions
+```
+
+## Integration with Standards
+
+Follow `docs/STANDARDS.md` for:
+
+- **Naming conventions**: Variables, functions, files
+- **Code structure**: Directory layout, module organization
+- **Error handling**: Error types, logging format
+- **Testing**: Test file location, naming, coverage
+- **Documentation**: Comments, API docs, README
+- **Git**: Commit message format, branch naming
+
+If no STANDARDS.md exists, derive conventions from Gate 1 analysis.
+
+## Prepare Handoff to Gate 4
+
+After implementation is complete:
+
+```markdown
+## Gate 3 Handoff
+
+**Implementation Status:** COMPLETE/PARTIAL
+
+**Files Created:**
+- {list all new files}
+
+**Files Modified:**
+- {list all modified files}
+
+**Environment Requirements:**
+- New dependencies: {list}
+- New environment variables: {list}
+- New services needed: {list}
+
+**Ready for DevOps:**
+- [ ] Code compiles/builds successfully
+- [ ] All tests pass
+- [ ] Code review passed
+- [ ] No Critical/High/Medium issues
+
+**DevOps Tasks Needed:**
+- [ ] Dockerfile update needed: YES/NO
+- [ ] docker-compose.yml update needed: YES/NO
+- [ ] New environment variables: {list}
+- [ ] New services to containerize: {list}
+```
+
+## Execution Report
+
+| Metric | Value |
+|--------|-------|
+| Duration | Xm Ys |
+| Iterations | N |
+| Result | PASS/FAIL/PARTIAL |
+
+### Details
+- tasks_completed: N/N
+- files_created: N
+- files_modified: N
+- tests_added: N
+- tests_passing: N/N
+- review_checkpoints_passed: N/N
+- agent_used: ring-dev-team:{agent}
+
+### Issues Encountered
+- List any issues or "None"
+
+### Handoff to Next Gate
+- Implementation status (complete/partial)
+- Files created and modified
+- Environment requirements for DevOps
+- Outstanding items (if partial)
