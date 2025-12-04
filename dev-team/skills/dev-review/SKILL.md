@@ -15,8 +15,8 @@ skip_when: |
   - Trivial change (<20 lines, no logic) -> document skip reason
 
 sequence:
-  after: [dev-testing]
-  before: [dev-validation]
+  after: [ring-dev-team:dev-testing]
+  before: [ring-dev-team:dev-validation]
 
 related:
   complementary: [ring-default:requesting-code-review, ring-default:receiving-code-review]

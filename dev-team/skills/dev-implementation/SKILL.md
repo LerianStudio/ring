@@ -16,11 +16,11 @@ skip_when: |
   - Implementation already complete for this task
 
 sequence:
-  before: [dev-devops]
+  before: [ring-dev-team:dev-devops]
 
 related:
-  complementary: [dev-cycle, test-driven-development, requesting-code-review]
-  similar: [subagent-driven-development, executing-plans]
+  complementary: [ring-dev-team:dev-cycle, ring-default:test-driven-development, ring-default:requesting-code-review]
+  similar: [ring-default:subagent-driven-development, ring-default:executing-plans]
 ---
 
 # Code Implementation (Gate 0)

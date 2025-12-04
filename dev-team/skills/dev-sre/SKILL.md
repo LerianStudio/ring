@@ -15,11 +15,11 @@ skip_when: |
   - Pure frontend changes without backend calls
 
 sequence:
-  after: [dev-devops]
-  before: [dev-testing]
+  after: [ring-dev-team:dev-devops]
+  before: [ring-dev-team:dev-testing]
 
 related:
-  complementary: [dev-cycle, dev-devops, dev-testing]
+  complementary: [ring-dev-team:dev-cycle, ring-dev-team:dev-devops, ring-dev-team:dev-testing]
 ---
 
 # SRE Validation (Gate 2)

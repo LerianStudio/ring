@@ -16,7 +16,7 @@ skip_when: |
   - Exploratory/spike work (no metrics tracked)
 
 sequence:
-  after: [dev-validation]
+  after: [ring-dev-team:dev-validation]
 
 related:
   complementary: [ring-default:root-cause-tracing, ring-default:codify-solution]

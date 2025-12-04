@@ -16,10 +16,10 @@ skip_when: |
   - Need to plan tasks first -> use ring-default:writing-plans or ring-pm-team:pre-dev-full
 
 sequence:
-  before: [dev-feedback-loop]
+  before: [ring-dev-team:dev-feedback-loop]
 
 related:
-  complementary: [dev-implementation, dev-devops, dev-sre, dev-testing, dev-review, dev-validation, dev-feedback-loop]
+  complementary: [ring-dev-team:dev-implementation, ring-dev-team:dev-devops, ring-dev-team:dev-sre, ring-dev-team:dev-testing, ring-dev-team:dev-review, ring-dev-team:dev-validation, ring-dev-team:dev-feedback-loop]
 ---
 
 # Development Cycle Orchestrator

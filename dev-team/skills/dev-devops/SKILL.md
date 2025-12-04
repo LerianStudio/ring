@@ -16,11 +16,11 @@ skip_when: |
   - Only documentation changes
 
 sequence:
-  after: [dev-implementation]
-  before: [dev-sre]
+  after: [ring-dev-team:dev-implementation]
+  before: [ring-dev-team:dev-sre]
 
 related:
-  complementary: [dev-implementation, dev-testing]
+  complementary: [ring-dev-team:dev-implementation, ring-dev-team:dev-testing]
 ---
 
 # DevOps Setup (Gate 1)

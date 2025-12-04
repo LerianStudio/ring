@@ -17,7 +17,7 @@ skip_when: |
   - Debugging → use systematic-debugging
 
 related:
-  similar: [using-ring]
+  similar: [ring-default:using-ring]
 ---
 
 # Using Ring Developer Specialists
