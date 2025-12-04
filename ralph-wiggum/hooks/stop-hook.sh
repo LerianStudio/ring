@@ -10,7 +10,9 @@ set -euo pipefail
 # Configuration constants
 readonly MAX_OUTPUT_SIZE_BYTES=1048576  # 1MB limit to prevent OOM
 readonly SESSION_ID_LENGTH=8
-readonly LOCK_TIMEOUT_SECONDS=30
+readonly LOCK_TIMEOUT_SECONDS=5
+readonly MIN_PROMPT_LENGTH=10
+readonly MAX_PROMPT_LENGTH=100000
 
 # Cleanup function for temp files with robust resource handling
 cleanup_lock() {
@@ -104,6 +106,18 @@ fi
 # Extract session_id from state file (handles various YAML quote formats)
 # SYNC-POINT: Format must match setup-ralph-loop.sh output "Session ID: <8-char-alphanumeric>"
 STATE_SESSION_ID=$(grep '^session_id:' "$RALPH_STATE_FILE" | sed 's/^session_id: *//' | sed 's/^["'"'"']//; s/["'"'"']$//' | tr -cd 'a-z0-9')
+
+# Defense-in-depth: Validate session ID length (should be exactly SESSION_ID_LENGTH chars)
+# This catches corrupted state files or injection attempts
+if [[ -n "$STATE_SESSION_ID" ]] && [[ ${#STATE_SESSION_ID} -ne $SESSION_ID_LENGTH ]]; then
+  echo "⚠️  Ralph loop: Invalid session ID length (got ${#STATE_SESSION_ID}, expected $SESSION_ID_LENGTH)" >&2
+  echo "   File: $RALPH_STATE_FILE" >&2
+  echo "   This may indicate state file corruption or tampering." >&2
+  echo "   Ralph loop is stopping." >&2
+  rm "$RALPH_STATE_FILE"
+  echo '{"decision": "approve"}'
+  exit 0
+fi
 
 if [[ -n "$TRANSCRIPT_PATH_CHECK" ]] && [[ -f "$TRANSCRIPT_PATH_CHECK" ]] && [[ -n "$STATE_SESSION_ID" ]]; then
   # Check if this session's transcript contains evidence of starting this specific loop
@@ -278,32 +292,76 @@ if [[ -z "$PROMPT_TEXT" ]]; then
   exit 0
 fi
 
+# Validate prompt length (defense against corrupted/malicious state files)
+PROMPT_LENGTH=${#PROMPT_TEXT}
+if [[ $PROMPT_LENGTH -lt $MIN_PROMPT_LENGTH ]]; then
+  echo "⚠️  Ralph loop: Prompt too short (${PROMPT_LENGTH} chars, min ${MIN_PROMPT_LENGTH})." >&2
+  echo "   File: $RALPH_STATE_FILE" >&2
+  echo "   This may indicate state file corruption." >&2
+  echo "   Ralph loop is stopping. Run /ralph-wiggum:ralph-loop again." >&2
+  rm "$RALPH_STATE_FILE"
+  echo '{"decision": "approve"}'
+  exit 0
+fi
+
+if [[ $PROMPT_LENGTH -gt $MAX_PROMPT_LENGTH ]]; then
+  echo "⚠️  Ralph loop: Prompt too long (${PROMPT_LENGTH} chars, max ${MAX_PROMPT_LENGTH})." >&2
+  echo "   File: $RALPH_STATE_FILE" >&2
+  echo "   Truncating prompt to continue (may affect results)." >&2
+  PROMPT_TEXT="${PROMPT_TEXT:0:$MAX_PROMPT_LENGTH}"
+fi
+
 # Update iteration in frontmatter with file locking (if available) and secure temp file
 LOCK_FILE="${RALPH_STATE_FILE}.lock"
 
-if [[ "$HAS_FLOCK" = true ]]; then
-  # Use flock for atomic read-modify-write to prevent race conditions
-  exec {LOCK_FD}>"$LOCK_FILE"
-  if ! flock -n "$LOCK_FD"; then
-    echo "⚠️  Ralph loop: Another operation in progress. Retrying..." >&2
-    flock "$LOCK_FD"  # Wait for lock
+# Atomic file update with proper locking and timeout
+update_state_file() {
+  local lock_acquired=false
+
+  if [[ "$HAS_FLOCK" = true ]]; then
+    # Use flock with timeout to prevent deadlocks
+    exec {LOCK_FD}>"$LOCK_FILE"
+    if flock -w "$LOCK_TIMEOUT_SECONDS" "$LOCK_FD" 2>/dev/null; then
+      lock_acquired=true
+    else
+      echo "⚠️  Ralph loop: Could not acquire lock within ${LOCK_TIMEOUT_SECONDS}s. Proceeding without lock." >&2
+    fi
   fi
-fi
 
-# Use mktemp for secure temp file creation (prevents symlink attacks)
-# Set restrictive umask for temp file (consistent with generate-skills-ref.sh)
-old_umask=$(umask)
-umask 077
-TEMP_FILE=$(mktemp "${RALPH_STATE_FILE}.XXXXXX")
-umask "$old_umask"
-sed "s/^iteration: .*/iteration: $NEXT_ITERATION/" "$RALPH_STATE_FILE" > "$TEMP_FILE"
-mv "$TEMP_FILE" "$RALPH_STATE_FILE"
+  # Use mktemp for secure temp file creation (prevents symlink attacks)
+  # Set restrictive umask for temp file (consistent with generate-skills-ref.sh)
+  local old_umask
+  old_umask=$(umask)
+  umask 077
+  TEMP_FILE=$(mktemp "${RALPH_STATE_FILE}.XXXXXX")
+  umask "$old_umask"
 
-# Release lock if we acquired one
-if [[ "$HAS_FLOCK" = true ]]; then
-  exec {LOCK_FD}>&-
-  rm -f "$LOCK_FILE"
-fi
+  # Atomic write: write to temp file then rename (atomic on POSIX)
+  if sed "s/^iteration: .*/iteration: $NEXT_ITERATION/" "$RALPH_STATE_FILE" > "$TEMP_FILE" 2>/dev/null; then
+    # Sync to disk before rename to ensure durability
+    # Note: sync behavior varies by OS (Linux syncs file, macOS syncs all disks)
+    # The || true ensures graceful degradation if sync is unavailable
+    sync "$TEMP_FILE" 2>/dev/null || true
+    if mv "$TEMP_FILE" "$RALPH_STATE_FILE" 2>/dev/null; then
+      # Success
+      :
+    else
+      echo "⚠️  Ralph loop: Failed to update state file. Cleaning up." >&2
+      rm -f "$TEMP_FILE" 2>/dev/null || true
+    fi
+  else
+    echo "⚠️  Ralph loop: Failed to write temp file. Cleaning up." >&2
+    rm -f "$TEMP_FILE" 2>/dev/null || true
+  fi
+
+  # Release lock if we acquired one
+  if [[ "$lock_acquired" = true ]]; then
+    exec {LOCK_FD}>&-
+    rm -f "$LOCK_FILE" 2>/dev/null || true
+  fi
+}
+
+update_state_file
 
 # Build system message with iteration count and completion promise info
 if [[ "$COMPLETION_PROMISE" != "null" ]] && [[ -n "$COMPLETION_PROMISE" ]]; then

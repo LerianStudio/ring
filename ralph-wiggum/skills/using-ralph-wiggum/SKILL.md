@@ -94,7 +94,7 @@ The key insight: **the prompt never changes** - Claude improves by reading its o
 ```
 
 **Parameters:**
-- `PROMPT` - Your task description (required)
+- `PROMPT` - Your task description (required, 10-100,000 characters)
 - `--max-iterations N` - Safety limit (recommended, default: unlimited)
 - `--completion-promise TEXT` - Phrase that signals completion
 
@@ -238,6 +238,9 @@ Original prompt here...
 3. **Active Loop Detection** - Prevents accidental overwrites of running loops
 4. **Cancel Command** - Immediately stop any running loop
 5. **Completion Promise** - Explicit signal that work is done
+6. **Prompt Validation** - Enforces min (10 chars) and max (100,000 chars) prompt length
+7. **Atomic File Operations** - State files use atomic write patterns to prevent corruption
+8. **File Locking** - Uses flock (when available) to prevent race conditions
 
 ---
 
@@ -276,6 +279,8 @@ Ralph complements other Ring workflows:
 - Check if `.claude/ralph-loop-*.local.md` was created
 - Verify the prompt is properly quoted
 - Check for "already active" error (cancel existing loop first)
+- Ensure prompt is at least 10 characters (minimum length)
+- Ensure prompt is under 100,000 characters (maximum length)
 
 **Loop not stopping?**
 - Ensure `<promise>TEXT</promise>` exactly matches `--completion-promise`
