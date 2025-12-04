@@ -172,7 +172,7 @@ Apply VERDICT rules:
 
 | Condition | VERDICT | Action |
 |-----------|---------|--------|
-| All 3 reviewers PASS, no Critical/High | **PASS** | Proceed to Gate 4 |
+| All 3 reviewers PASS, no Critical/High | **PASS** | Proceed to Gate 5 |
 | Any Critical finding | **FAIL** | Return to Gate 0 |
 | 2+ High findings | **FAIL** | Return to Gate 0 |
 | 1 High finding | **NEEDS_DISCUSSION** | Evaluate with stakeholder |

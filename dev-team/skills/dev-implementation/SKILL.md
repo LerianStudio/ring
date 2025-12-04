@@ -311,12 +311,12 @@ Follow `docs/STANDARDS.md` for:
 
 If no STANDARDS.md exists, derive conventions from Gate 1 analysis.
 
-## Prepare Handoff to Gate 4
+## Prepare Handoff to Gate 1
 
 After implementation is complete:
 
 ```markdown
-## Gate 3 Handoff
+## Gate 0 Handoff
 
 **Implementation Status:** COMPLETE/PARTIAL
 
