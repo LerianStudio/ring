@@ -4,7 +4,7 @@ description: Unified code improvement with multiple modes for refactor, standard
 argument-hint: [--mode=refactor|standardize|simplify|beautify] [--target=<path>] [--git-scope=<scope>] [--apply-fixes]
 ---
 
-# /code-quality:code-improve
+# /ring-dev-team:quality:code-improve
 
 ## Instructions
 
@@ -31,20 +31,20 @@ This command provides mode-based code improvement functionality, allowing develo
 
 ```bash
 # Refactor Mode - Architectural improvements
-/code-quality:code-improve --mode=refactor --target=src/components/   # Refactor components
-/code-quality:code-improve --mode=refactor --git-scope=branch         # Refactor branch changes
+/ring-dev-team:quality:code-improve --mode=refactor --target=src/components/   # Refactor components
+/ring-dev-team:quality:code-improve --mode=refactor --git-scope=branch         # Refactor branch changes
 
 # Standardize Mode - Consistency improvements
-/code-quality:code-improve --mode=standardize --target=src/           # Standardize directory
-/code-quality:code-improve --mode=standardize --git-scope=staged      # Standardize staged files
+/ring-dev-team:quality:code-improve --mode=standardize --target=src/           # Standardize directory
+/ring-dev-team:quality:code-improve --mode=standardize --git-scope=staged      # Standardize staged files
 
 # Simplify Mode - Complexity reduction
-/code-quality:code-improve --mode=simplify --target=src/utils/        # Simplify utilities
-/code-quality:code-improve --mode=simplify --git-scope=all-changes    # Simplify all changes
+/ring-dev-team:quality:code-improve --mode=simplify --target=src/utils/        # Simplify utilities
+/ring-dev-team:quality:code-improve --mode=simplify --git-scope=all-changes    # Simplify all changes
 
 # Beautify Mode - Readability improvements
-/code-quality:code-improve --mode=beautify --target=src/hooks/        # Beautify hooks
-/code-quality:code-improve --mode=beautify --apply-fixes              # Auto-apply safe fixes
+/ring-dev-team:quality:code-improve --mode=beautify --target=src/hooks/        # Beautify hooks
+/ring-dev-team:quality:code-improve --mode=beautify --apply-fixes              # Auto-apply safe fixes
 ```
 
 ## Process

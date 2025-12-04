@@ -4,7 +4,7 @@ description: Answer questions about project structure and documentation without 
 argument-hint: [--question=<question>]
 ---
 
-# /shared:question
+# /ring-dev-team:planning:question
 
 ## Context
 
@@ -55,16 +55,16 @@ This command is designed for information gathering and project understanding. It
 
 ```bash
 # Ask about project architecture
-/shared:question --question="How is the authentication system structured?"
+/ring-dev-team:planning:question --question="How is the authentication system structured?"
 
 # Understand component organization
-/shared:question --question="Where are the React components located and how are they organized?"
+/ring-dev-team:planning:question --question="Where are the React components located and how are they organized?"
 
 # Learn about configuration
-/shared:question --question="What configuration files are used and what do they control?"
+/ring-dev-team:planning:question --question="What configuration files are used and what do they control?"
 
 # Explore testing setup
-/shared:question --question="How is testing set up in this project and what frameworks are used?"
+/ring-dev-team:planning:question --question="How is testing set up in this project and what frameworks are used?"
 ```
 
 ## Formatting

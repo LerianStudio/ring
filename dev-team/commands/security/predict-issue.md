@@ -3,7 +3,7 @@ allowed-tools: Grep(*), Glob(*), Read(*), TodoWrite(*), Bash(*)
 description: Analyze codebase to predict potential problems before they impact the project
 ---
 
-# /shared:predict-issue
+# /ring-dev-team:security:predict-issue
 
 ## Context
 

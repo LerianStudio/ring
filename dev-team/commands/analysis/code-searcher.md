@@ -4,7 +4,7 @@ description: Comprehensive codebase analysis and forensic examination with optio
 argument-hint: [--search-target=<pattern>]
 ---
 
-# /shared:documentation:code-searcher
+# /ring-dev-team:analysis:code-searcher
 
 ## Instructions
 

@@ -4,7 +4,7 @@ description: Intelligent documentation management that analyzes changes and upda
 argument-hint: [--mode=update|overview] [--focus=<docs>] [--git-scope=<scope>]
 ---
 
-# /shared:documentation:document
+# /ring-dev-team:documentation:document
 
 ## Overview
 
@@ -15,18 +15,18 @@ I'll intelligently manage your project documentation by analyzing what actually 
 ### Git-focused documentation (recommended for active development)
 
 ```bash
-/shared:documentation:document --git-scope=all-changes --mode=update     # Document recent changes
-/shared:documentation:document --git-scope=branch --mode=update          # Document feature branch changes
-/shared:documentation:document --git-scope=staged --mode=overview        # Overview docs for staged changes
-/shared:documentation:document --git-scope=last-commit                   # Document last commit changes
+/ring-dev-team:documentation:document --git-scope=all-changes --mode=update     # Document recent changes
+/ring-dev-team:documentation:document --git-scope=branch --mode=update          # Document feature branch changes
+/ring-dev-team:documentation:document --git-scope=staged --mode=overview        # Overview docs for staged changes
+/ring-dev-team:documentation:document --git-scope=last-commit                   # Document last commit changes
 ```
 
 ### Traditional documentation modes
 
 ```bash
-/shared:documentation:document --mode=update --focus=API                 # Update API documentation
-/shared:documentation:document --mode=overview                           # Full documentation overview
-/shared:documentation:document --mode=update                             # Update all affected documentation
+/ring-dev-team:documentation:document --mode=update --focus=API                 # Update API documentation
+/ring-dev-team:documentation:document --mode=overview                           # Full documentation overview
+/ring-dev-team:documentation:document --mode=update                             # Update all affected documentation
 ```
 
 ## Arguments
@@ -252,21 +252,21 @@ Simply run `/document` after any significant work:
 **After analyzing code:**
 
 ```bash
-/shared:documentation:analyze-codebase && /shared:documentation:document
+/ring-dev-team:analysis:analyze-codebase && /ring-dev-team:documentation:document
 # Analyzes entire codebase, then updates docs to match reality
 ```
 
 **After major refactoring:**
 
 ```bash
-/shared:code-quality:fix-imports && /shared:code-quality:refactor && /shared:documentation:document
+/ring-dev-team:quality:fix-imports && /ring-dev-team:quality:refactor && /ring-dev-team:documentation:document
 # Fixes imports, formats code, updates architecture docs
 ```
 
 **Before creating PR:**
 
 ```bash
-/shared:code-quality:code-review && /shared:documentation:document
+/ring-dev-team:quality:code-review && /ring-dev-team:documentation:document
 # Reviews code, then ensures docs reflect any issues found
 ```
 

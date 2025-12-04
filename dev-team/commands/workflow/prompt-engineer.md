@@ -4,7 +4,7 @@ description: Expert prompt engineering and optimization for LLMs and AI systems
 argument-hint: [<description or @file>] (text description or file reference)
 ---
 
-# /shared:utils:prompt-engineer
+# /ring-dev-team:workflow:prompt-engineer
 
 Expert prompt engineering service for crafting effective prompts for LLMs and AI systems. This command specializes in creating optimized prompts using proven techniques and patterns.
 
@@ -66,19 +66,19 @@ Expert prompt engineering service for crafting effective prompts for LLMs and AI
 
 ```bash
 # Create a code review assistant prompt
-/shared:utils:prompt-engineer "Create a code review assistant"
+/ring-dev-team:workflow:prompt-engineer "Create a code review assistant"
 
 # Reference a file with requirements
-/shared:utils:prompt-engineer @requirements.md
+/ring-dev-team:workflow:prompt-engineer @requirements.md
 
 # Debug performance issues
-/shared:utils:prompt-engineer "Help debug React performance issues"
+/ring-dev-team:workflow:prompt-engineer "Help debug React performance issues"
 
 # Create analysis prompts
-/shared:utils:prompt-engineer "Analyze financial data trends"
+/ring-dev-team:workflow:prompt-engineer "Analyze financial data trends"
 
 # Generate creative writing assistant
-/shared:utils:prompt-engineer "Technical documentation writing assistant"
+/ring-dev-team:workflow:prompt-engineer "Technical documentation writing assistant"
 ```
 
 ## Required Output Format

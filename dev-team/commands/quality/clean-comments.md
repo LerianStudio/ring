@@ -4,7 +4,7 @@ description: Clean comments following clean code principles - remove redundant, 
 argument-hint: [--file-pattern=<pattern>] [--git-scope=<scope>] [--dry-run]
 ---
 
-# /shared:code-quality:clean-comments
+# /ring-dev-team:quality:clean-comments
 
 ## Context
 
@@ -14,18 +14,18 @@ This command analyzes comments in your codebase and removes those that violate c
 
 ```bash
 # First understand the codebase architecture and patterns
-/documentation:analyze-codebase
+/ring-dev-team:analysis:analyze-codebase
 
 # Then clean comments with architectural context
-/code-quality:clean-comments
+/ring-dev-team:quality:clean-comments
 
 # Or combine both commands for precision cleanup
-/documentation:analyze-codebase && /code-quality:clean-comments
+/ring-dev-team:analysis:analyze-codebase && /ring-dev-team:quality:clean-comments
 ```
 
 ### Integration Benefits
 
-When used with `/documentation:analyze-codebase`, this command:
+When used with `/ring-dev-team:analysis:analyze-codebase`, this command:
 
 - **Preserves architectural documentation** - Keeps comments explaining system design and patterns
 - **Context-aware cleaning** - Understands which comments are critical for complex modules
@@ -54,55 +54,55 @@ Clean comments in code following clean code principles. Remove redundant, obviou
 
 ```bash
 # Clean comments in git changes only (recommended for active development)
-/code-quality:clean-comments --git-scope=all-changes
+/ring-dev-team:quality:clean-comments --git-scope=all-changes
 
 # Clean comments in staged files only
-/code-quality:clean-comments --git-scope=staged
+/ring-dev-team:quality:clean-comments --git-scope=staged
 
 # Clean comments in files changed from main branch
-/code-quality:clean-comments --git-scope=branch
+/ring-dev-team:quality:clean-comments --git-scope=branch
 
 # Clean comments in entire codebase (traditional approach)
-/code-quality:clean-comments
+/ring-dev-team:quality:clean-comments
 
 # Clean git changes in JavaScript files only
-/code-quality:clean-comments --git-scope=all-changes --file-pattern="**/*.js"
+/ring-dev-team:quality:clean-comments --git-scope=all-changes --file-pattern="**/*.js"
 
 # Dry run to see what would be cleaned in git changes
-/code-quality:clean-comments --git-scope=all-changes --dry-run
+/ring-dev-team:quality:clean-comments --git-scope=all-changes --dry-run
 
 # Clean specific commit range
-/code-quality:clean-comments --git-scope=commit-range=HEAD~3..HEAD
+/ring-dev-team:quality:clean-comments --git-scope=commit-range=HEAD~3..HEAD
 ```
 
 ### Integrated Usage (Recommended)
 
 ```bash
 # Comprehensive analysis followed by precision cleanup
-/documentation:analyze-codebase && /code-quality:clean-comments
+/ring-dev-team:analysis:analyze-codebase && /ring-dev-team:quality:clean-comments
 
 # Architecture-aware cleanup with dry run
-/documentation:analyze-codebase && /code-quality:clean-comments --dry-run
+/ring-dev-team:analysis:analyze-codebase && /ring-dev-team:quality:clean-comments --dry-run
 
 # Focus on specific component with full context
-/documentation:analyze-codebase lib/components && /code-quality:clean-comments --file-pattern="lib/components/**/*"
+/ring-dev-team:analysis:analyze-codebase lib/components && /ring-dev-team:quality:clean-comments --file-pattern="lib/components/**/*"
 ```
 
 ### Git-Focused Workflow (Fastest)
 
 ```bash
 # Clean comments in current changes before commit
-/code-quality:clean-comments --git-scope=all-changes
+/ring-dev-team:quality:clean-comments --git-scope=all-changes
 
 # Clean comments in staged files only
-/code-quality:clean-comments --git-scope=staged --dry-run
-/code-quality:clean-comments --git-scope=staged
+/ring-dev-team:quality:clean-comments --git-scope=staged --dry-run
+/ring-dev-team:quality:clean-comments --git-scope=staged
 
 # Review and clean feature branch changes
-/code-quality:clean-comments --git-scope=branch
+/ring-dev-team:quality:clean-comments --git-scope=branch
 
 # Clean comments in last commit (useful for interactive rebase)
-/code-quality:clean-comments --git-scope=last-commit
+/ring-dev-team:quality:clean-comments --git-scope=last-commit
 ```
 
 **Before:**

@@ -4,7 +4,7 @@ description: Format text in markdown syntax or fix existing markdown files with 
 argument-hint: [--input=<file-path-or-text>]
 ---
 
-# /shared:utils:markdown-syntax
+# /ring-dev-team:utils:markdown-syntax
 
 ## Instructions
 
@@ -12,9 +12,9 @@ Format text in markdown syntax or identify and fix issues in existing markdown f
 
 This command can be used in several ways:
 
-1. **Fix existing markdown file**: `/shared:utils:markdown-syntax --input=path/to/file.md`
-2. **Format text as markdown**: `/shared:utils:markdown-syntax --input="Your text content here"`
-3. **Preview changes without saving (recommended)**: `/shared:utils:markdown-syntax --input=path/to/file.md --dry-run`
+1. **Fix existing markdown file**: `/ring-dev-team:utils:markdown-syntax --input=path/to/file.md`
+2. **Format text as markdown**: `/ring-dev-team:utils:markdown-syntax --input="Your text content here"`
+3. **Preview changes without saving (recommended)**: `/ring-dev-team:utils:markdown-syntax --input=path/to/file.md --dry-run`
 
 ## Context
 
@@ -86,17 +86,17 @@ This command ensures all markdown files and text content follow standard markdow
 
 ```bash
 # Analyze and fix all markdown issues in README.md
-/shared:utils:markdown-syntax --input=README.md
+/ring-dev-team:utils:markdown-syntax --input=README.md
 ```
 
 ```bash
 # Preview the changes for README.md without saving them
-/shared:utils:markdown-syntax --input=README.md --dry-run
+/ring-dev-team:utils:markdown-syntax --input=README.md --dry-run
 ```
 
 ```bash
 # Format a string of text with proper markdown syntax
-/shared:utils:markdown-syntax --input="This is a header\n\nSome text with **bold** and *italic* formatting."
+/ring-dev-team:utils:markdown-syntax --input="This is a header\n\nSome text with **bold** and *italic* formatting."
 ```
 
 ## Requirements

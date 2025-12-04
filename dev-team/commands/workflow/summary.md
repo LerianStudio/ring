@@ -4,7 +4,7 @@ description: Summarize everything discussed in current chat conversation with st
 argument-hint: []
 ---
 
-# /shared:summary
+# /ring-dev-team:workflow:summary
 
 ## Instructions
 
@@ -59,7 +59,7 @@ If the conversation included code, config, or CLI commands essential for reprodu
 ## Example
 
 ```bash
-/shared:summary
+/ring-dev-team:workflow:summary
 ```
 
 **Arguments:**

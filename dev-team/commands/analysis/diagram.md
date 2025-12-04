@@ -4,7 +4,7 @@ description: Generate architecture, flow, and relationship diagrams using ASCII 
 argument-hint: [--type=architecture|flow|sequence|class|entity] [--scope=<path>]
 ---
 
-# /shared:documentation:diagram
+# /ring-dev-team:analysis:diagram
 
 ## Instructions
 
@@ -13,7 +13,7 @@ Generate architecture, flow, and relationship diagrams from code structure and d
 ## Usage
 
 ```bash
-/shared:documentation:diagram [--type=architecture|flow|sequence|class|entity] [--scope=<path>]
+/ring-dev-team:analysis:diagram [--type=architecture|flow|sequence|class|entity] [--scope=<path>]
 ```
 
 **Arguments:**
@@ -337,15 +337,15 @@ async function generateArchitectureDiagram(rootPath: string) {
 ```
 ## Output Format
 
-**Save all diagrams to:** `docs/shared:documentation:diagrams/[type]/[diagram-name].md`
+**Save all diagrams to:** `docs/ring-dev-team:analysis:diagrams/[type]/[diagram-name].md`
 
 Examples:
 
-- Architecture diagram → `docs/shared:documentation:diagrams/architecture/system-overview.md`
-- Flow diagram → `docs/shared:documentation:diagrams/flow/user-authentication.md`
-- Sequence diagram → `docs/shared:documentation:diagrams/sequence/order-processing.md`
-- Class diagram → `docs/shared:documentation:diagrams/class/user-management.md`
-- Entity diagram → `docs/shared:documentation:diagrams/entity/database-schema.md`
+- Architecture diagram → `docs/ring-dev-team:analysis:diagrams/architecture/system-overview.md`
+- Flow diagram → `docs/ring-dev-team:analysis:diagrams/flow/user-authentication.md`
+- Sequence diagram → `docs/ring-dev-team:analysis:diagrams/sequence/order-processing.md`
+- Class diagram → `docs/ring-dev-team:analysis:diagrams/class/user-management.md`
+- Entity diagram → `docs/ring-dev-team:analysis:diagrams/entity/database-schema.md`
 
 ```markdown
 # ${DiagramType} Diagram: ${DiagramName}
