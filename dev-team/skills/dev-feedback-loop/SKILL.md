@@ -19,7 +19,7 @@ sequence:
   after: [ring-dev-team:dev-validation]
 
 related:
-  complementary: [ring-default:root-cause-tracing, ring-default:codify-solution]
+  complementary: [ring-dev-team:dev-cycle, ring-dev-team:dev-validation]
 ---
 
 # Dev Feedback Loop
@@ -46,7 +46,7 @@ Base score of 100 points, with deductions for inefficiencies:
 
 ### Score Calculation Formula
 
-```
+```text
 assertiveness_score = 100
                     - min(30, (extra_iterations * 10))
                     - (review_fail * 20)
@@ -258,15 +258,10 @@ Human decision on how to proceed:
 
 Save report to standardized location:
 
-```bash
-# Create feedback directory if needed
-mkdir -p .ring/dev-team/feedback
+**Directory:** `.ring/dev-team/feedback/`
+**Filename:** `cycle-YYYY-MM-DD.md`
 
-# Write report
-cat > .ring/dev-team/feedback/cycle-YYYY-MM-DD.md << 'EOF'
-[Report content]
-EOF
-```
+Create the feedback directory if it doesn't exist, then write the report content to the file.
 
 Report format:
 

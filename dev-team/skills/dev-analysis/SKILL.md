@@ -221,7 +221,7 @@ Two-phase analysis using specialized agents:
 
 **Dispatch:** `ring-default:codebase-explorer` (Opus)
 
-```text
+```yaml
 Task tool:
   subagent_type: "ring-default:codebase-explorer"
   model: "opus"
@@ -240,28 +240,41 @@ Task tool:
 
 ### Phase 2: Specialized Dimension Analysis (Parallel)
 
-Dispatch 3 agents in parallel to analyze specific dimensions:
+Dispatch 3 agents in parallel (single message, 3 Task tool calls) to analyze specific dimensions:
 
-```text
-Task tool (3 parallel calls):
+```yaml
+# Task 1: Testing Analysis
+Task tool:
+  subagent_type: "ring-dev-team:qa-analyst"
+  model: "opus"
+  prompt: |
+    Analyze test coverage and patterns:
+    - Test coverage percentage
+    - Test patterns (table-driven, AAA)
+    - TDD compliance
+    - Missing test cases
 
-1. ring-dev-team:qa-analyst
-   - Test coverage percentage
-   - Test patterns (table-driven, AAA)
-   - TDD compliance
-   - Missing test cases
+# Task 2: DevOps Analysis
+Task tool:
+  subagent_type: "ring-dev-team:devops-engineer"
+  model: "opus"
+  prompt: |
+    Analyze infrastructure setup:
+    - Dockerfile exists and follows best practices
+    - docker-compose.yml configuration
+    - CI/CD pipeline presence
+    - Environment management (.env.example)
 
-2. ring-dev-team:devops-engineer
-   - Dockerfile exists and follows best practices
-   - docker-compose.yml configuration
-   - CI/CD pipeline presence
-   - Environment management (.env.example)
-
-3. ring-dev-team:sre
-   - Metrics endpoint (/metrics)
-   - Health check endpoints (/health, /ready)
-   - Structured logging
-   - Tracing setup
+# Task 3: SRE Analysis
+Task tool:
+  subagent_type: "ring-dev-team:sre"
+  model: "opus"
+  prompt: |
+    Analyze observability setup:
+    - Metrics endpoint (/metrics)
+    - Health check endpoints (/health, /ready)
+    - Structured logging
+    - Tracing setup
 ```
 
 **Output:** Dimension-specific findings to merge with exploration_results.
@@ -429,16 +442,23 @@ and project standards.
 
 ## Step 7: User Approval
 
-Present the generated plan and ask for approval:
+Present the generated plan and ask for approval using AskUserQuestion tool:
 
-```text
+```yaml
 AskUserQuestion:
-  question: "Review the refactoring plan. How do you want to proceed?"
-  options:
-    - "Approve all" → Save tasks.md, proceed to dev-cycle
-    - "Approve with changes" → Let user edit tasks.md, then proceed
-    - "Critical only" → Filter to only Critical/High priority tasks
-    - "Cancel" → Abort, keep analysis report only
+  questions:
+    - question: "Review the refactoring plan. How do you want to proceed?"
+      header: "Approval"
+      multiSelect: false
+      options:
+        - label: "Approve all"
+          description: "Save tasks.md, proceed to dev-cycle execution"
+        - label: "Approve with changes"
+          description: "Let user edit tasks.md first, then proceed"
+        - label: "Critical only"
+          description: "Filter to only Critical/High priority tasks"
+        - label: "Cancel"
+          description: "Abort execution, keep analysis report only"
 ```
 
 ## Step 8: Save Artifacts
