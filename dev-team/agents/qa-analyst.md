@@ -167,6 +167,214 @@ Invoke this agent when the task involves:
 - Naming conventions → Check STANDARDS.md or follow codebase patterns
 - API testing → Use Postman/Newman per existing patterns
 
+## Testing Standards
+
+The following testing standards MUST be followed when designing and implementing tests:
+
+### Test-Driven Development (TDD)
+
+When TDD is enabled in project STANDARDS.md, follow the RED-GREEN-REFACTOR cycle:
+
+#### The TDD Cycle
+
+| Phase | Action | Rule |
+|-------|--------|------|
+| **RED** | Write failing test | Test must fail before writing production code |
+| **GREEN** | Write minimal code | Only enough code to make test pass |
+| **REFACTOR** | Improve code | Keep tests green while improving design |
+
+#### TDD Compliance Rules
+
+1. **Test file must exist before implementation**
+2. **Test must produce failure output (RED)**
+3. **Only then write implementation (GREEN)**
+4. **Refactor while keeping tests green**
+
+#### When to Apply TDD
+
+**Always use TDD for:**
+- Business logic and domain rules
+- Complex algorithms
+- Bug fixes (write test that reproduces bug first)
+- New features with clear requirements
+
+**TDD optional for:**
+- Simple CRUD with no logic
+- Infrastructure/configuration code
+- Exploratory/spike code (add tests after)
+
+### Test Pyramid
+
+| Level | Scope | Speed | Coverage Focus |
+|-------|-------|-------|----------------|
+| **Unit** | Single function/class | Fast (ms) | Business logic, edge cases |
+| **Integration** | Multiple components | Medium (s) | Database, APIs, services |
+| **E2E** | Full system | Slow (min) | Critical user journeys |
+
+### Coverage Requirements
+
+| Code Type | Minimum Coverage | Target |
+|-----------|-----------------|--------|
+| Business logic | 80% | 90%+ |
+| API endpoints | 70% | 80%+ |
+| Utilities | 60% | 70%+ |
+| Infrastructure | 50% | 60%+ |
+
+### Test Naming Convention
+
+```
+# Pattern
+Test{Unit}_{Scenario}_{ExpectedResult}
+
+# Examples
+TestOrderService_CreateOrder_WithValidItems_ReturnsOrder
+TestOrderService_CreateOrder_WithEmptyItems_ReturnsError
+TestMoney_Add_SameCurrency_ReturnsSum
+TestUserRepository_FindByEmail_NonExistent_ReturnsNull
+```
+
+### Test Structure (AAA Pattern)
+
+```python
+# Python example
+def test_create_user_with_valid_data_returns_user():
+    # Arrange
+    input_data = {"email": "test@example.com", "name": "Test"}
+    mock_repo = Mock(spec=UserRepository)
+    mock_repo.save.return_value = User(id="1", **input_data)
+    service = UserService(repository=mock_repo)
+
+    # Act
+    result = service.create_user(input_data)
+
+    # Assert
+    assert result.id == "1"
+    assert result.email == "test@example.com"
+    mock_repo.save.assert_called_once()
+```
+
+```typescript
+// TypeScript example
+describe('UserService', () => {
+  it('should create user with valid data', async () => {
+    // Arrange
+    const input = { email: 'test@example.com', name: 'Test' };
+    const mockRepo = mock<UserRepository>();
+    mockRepo.save.mockResolvedValue({ id: '1', ...input });
+    const service = new UserService(mockRepo);
+
+    // Act
+    const result = await service.createUser(input);
+
+    // Assert
+    expect(result.id).toBe('1');
+    expect(result.email).toBe(input.email);
+  });
+});
+```
+
+```go
+// Go example (table-driven)
+func TestCreateUser(t *testing.T) {
+    tests := []struct {
+        name    string
+        input   CreateUserInput
+        want    *User
+        wantErr error
+    }{
+        {
+            name:  "valid user",
+            input: CreateUserInput{Name: "John", Email: "john@example.com"},
+            want:  &User{Name: "John", Email: "john@example.com"},
+        },
+        {
+            name:    "invalid email",
+            input:   CreateUserInput{Name: "John", Email: "invalid"},
+            wantErr: ErrInvalidEmail,
+        },
+    }
+
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            got, err := CreateUser(tt.input)
+            if tt.wantErr != nil {
+                require.ErrorIs(t, err, tt.wantErr)
+                return
+            }
+            require.NoError(t, err)
+            assert.Equal(t, tt.want.Name, got.Name)
+        })
+    }
+}
+```
+
+### API Testing Best Practices
+
+#### Postman/Newman Standards
+
+```json
+{
+  "name": "Create User",
+  "request": {
+    "method": "POST",
+    "url": "{{baseUrl}}/api/users",
+    "body": {
+      "mode": "raw",
+      "raw": "{\"email\": \"test@example.com\", \"name\": \"Test\"}"
+    }
+  },
+  "test": [
+    "pm.test('Status code is 201', () => pm.response.to.have.status(201))",
+    "pm.test('Response has user id', () => pm.expect(pm.response.json().id).to.exist)"
+  ]
+}
+```
+
+### E2E Testing Best Practices
+
+#### Playwright Standards
+
+```typescript
+test.describe('User Registration', () => {
+  test('should register new user successfully', async ({ page }) => {
+    // Navigate
+    await page.goto('/register');
+
+    // Fill form
+    await page.fill('[data-testid="email"]', 'test@example.com');
+    await page.fill('[data-testid="password"]', 'Password123!');
+    await page.fill('[data-testid="confirm-password"]', 'Password123!');
+
+    // Submit
+    await page.click('[data-testid="submit"]');
+
+    // Assert
+    await expect(page).toHaveURL('/dashboard');
+    await expect(page.getByText('Welcome')).toBeVisible();
+  });
+});
+```
+
+### Test Data Management
+
+- Use factories for consistent test data
+- Clean up test data after each test
+- Use isolated databases for integration tests
+- Never use production data in tests
+
+### QA Checklist
+
+Before marking tests complete:
+
+- [ ] Test naming follows convention
+- [ ] Tests follow AAA pattern
+- [ ] Edge cases covered (null, empty, boundary values)
+- [ ] Error scenarios tested
+- [ ] Happy path tested
+- [ ] Coverage meets minimum threshold
+- [ ] No flaky tests
+- [ ] Tests run in CI pipeline
+
 ## What This Agent Does NOT Handle
 
 - Application code development (use `ring-dev-team:backend-engineer` or `ring-dev-team:frontend-engineer`)

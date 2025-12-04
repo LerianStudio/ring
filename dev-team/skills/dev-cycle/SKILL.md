@@ -1,8 +1,8 @@
 ---
-name: development-cycle
+name: dev-cycle
 description: |
-  Main orchestrator for the 5-gate development cycle system. Loads tasks/subtasks
-  from PM team output and executes through implementation, devops, testing, review,
+  Main orchestrator for the 6-gate development cycle system. Loads tasks/subtasks
+  from PM team output and executes through implementation, devops, SRE, testing, review,
   and validation gates with state persistence and metrics collection.
 
 trigger: |
@@ -19,26 +19,27 @@ sequence:
   before: [dev-feedback-loop]
 
 related:
-  complementary: [dev-implementation, dev-devops-setup, dev-testing, dev-review, dev-validation, dev-feedback-loop]
+  complementary: [dev-implementation, dev-devops, dev-sre, dev-testing, dev-review, dev-validation, dev-feedback-loop]
 ---
 
 # Development Cycle Orchestrator
 
 ## Overview
 
-The development cycle orchestrator loads tasks/subtasks from PM team output (or manual task files) and executes through 5 quality gates. Tasks are loaded at initialization - no separate import gate.
+The development cycle orchestrator loads tasks/subtasks from PM team output (or manual task files) and executes through 6 quality gates. Tasks are loaded at initialization - no separate import gate.
 
-**Announce at start:** "I'm using the development-cycle skill to orchestrate task execution through 5 gates."
+**Announce at start:** "I'm using the dev-cycle skill to orchestrate task execution through 6 gates."
 
-## The 5 Gates
+## The 6 Gates
 
 | Gate | Skill | Purpose | Agent |
 |------|-------|---------|-------|
 | 0 | dev-implementation | Write code following TDD | Based on task language/domain |
-| 1 | dev-devops-setup | Infrastructure and deployment | ring-dev-team:devops-engineer |
-| 2 | dev-testing | E2E and integration tests | ring-dev-team:qa-analyst |
-| 3 | dev-review | Parallel code review | ring-default:*-reviewer (3x parallel) |
-| 4 | dev-validation | Final acceptance validation | N/A (verification) |
+| 1 | dev-devops | Infrastructure and deployment | ring-dev-team:devops-engineer |
+| 2 | dev-sre | Observability (metrics, health, logging) | ring-dev-team:sre |
+| 3 | dev-testing | Unit tests for acceptance criteria | ring-dev-team:qa-analyst |
+| 4 | dev-review | Parallel code review | ring-default:*-reviewer (3x parallel) |
+| 5 | dev-validation | Final acceptance validation | N/A (verification) |
 
 ## Integrated PM → Dev Workflow
 
@@ -84,9 +85,10 @@ The development cycle orchestrator loads tasks/subtasks from PM team output (or 
 For each task in order (T-001 → T-002 → T-003):
   Gate 0: Implementation (TDD autonomous)
   Gate 1: DevOps (if needed)
-  Gate 2: Testing
-  Gate 3: Review (3 parallel)
-  Gate 4: Validation
+  Gate 2: SRE (observability)
+  Gate 3: Testing
+  Gate 4: Review (3 parallel)
+  Gate 5: Validation
   → Next task
 ```
 
@@ -104,9 +106,10 @@ For each task in order (T-001 → T-002 → T-003):
   │  └─ All subtasks complete for this task
   │
   ├─ Gate 1: DevOps (if needed)
-  ├─ Gate 2: Testing
-  ├─ Gate 3: Review (3 parallel)
-  └─ Gate 4: Validation
+  ├─ Gate 2: SRE (observability)
+  ├─ Gate 3: Testing
+  ├─ Gate 4: Review (3 parallel)
+  └─ Gate 5: Validation
 
   → Next task (T-002)
 ```
@@ -141,6 +144,7 @@ State is persisted to `.ring/dev-team/current-cycle.json`:
       "gate_progress": {
         "implementation": {"status": "in_progress", "started_at": "..."},
         "devops": {"status": "pending"},
+        "sre": {"status": "pending"},
         "testing": {"status": "pending"},
         "review": {"status": "pending"},
         "validation": {"status": "pending"}
@@ -295,7 +299,7 @@ For current task without subtasks:
 
 ## Step 3: Gate 1 - DevOps (Per Task)
 
-**REQUIRED SUB-SKILL:** Use ring-dev-team:dev-devops-setup
+**REQUIRED SUB-SKILL:** Use ring-dev-team:dev-devops
 
 ```
 For current task:
@@ -329,7 +333,45 @@ For current task:
 5. Update state and proceed to Gate 2
 ```
 
-## Step 4: Gate 2 - Testing (Per Task)
+## Step 4: Gate 2 - SRE (Per Task)
+
+**REQUIRED SUB-SKILL:** Use ring-dev-team:dev-sre
+
+```
+For current task:
+
+1. Record gate start timestamp
+2. Check if task requires SRE observability:
+   - New service or API?
+   - External dependencies added?
+   - Performance-critical changes?
+
+3. If SRE needed:
+   Task tool:
+     subagent_type: "ring-dev-team:sre"
+     prompt: |
+       Implement observability for: [task_id]
+
+       Service Information:
+       - Language: [Go/TypeScript/Python]
+       - Service type: [API/Worker/Batch]
+       - External dependencies: [list]
+
+       Requirements:
+       - Prometheus metrics at /metrics
+       - Health endpoints (/health, /ready)
+       - Structured JSON logging
+       - OpenTelemetry tracing (if external calls)
+
+       Report: files created, metrics added, endpoints verified.
+
+4. If SRE not needed:
+   - Mark as "skipped" with reason
+
+5. Update state and proceed to Gate 3
+```
+
+## Step 5: Gate 3 - Testing (Per Task)
 
 **REQUIRED SUB-SKILL:** Use ring-dev-team:dev-testing
 
@@ -363,10 +405,10 @@ For current task:
    - Increment metrics.review_iterations
 5. If tests pass:
    - Update state
-   - Proceed to Gate 3
+   - Proceed to Gate 4
 ```
 
-## Step 5: Gate 3 - Review (Per Task)
+## Step 6: Gate 4 - Review (Per Task)
 
 **REQUIRED SUB-SKILL:** Use ring-default:requesting-code-review
 
@@ -409,10 +451,10 @@ For current task:
 
 6. When all issues resolved:
    - Update state
-   - Proceed to Gate 4
+   - Proceed to Gate 5
 ```
 
-## Step 6: Gate 4 - Validation (Per Task)
+## Step 7: Gate 5 - Validation (Per Task)
 
 ```
 For current task:
@@ -442,7 +484,7 @@ For current task:
 6. Record gate end timestamp
 ```
 
-## Step 7: Cycle Completion
+## Step 8: Cycle Completion
 
 ```
 When all tasks completed:
@@ -534,6 +576,7 @@ On any error:
 |------|----------|--------|
 | Implementation | Xm Ys | in_progress |
 | DevOps | - | pending |
+| SRE | - | pending |
 | Testing | - | pending |
 | Review | - | pending |
 | Validation | - | pending |

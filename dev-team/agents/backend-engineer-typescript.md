@@ -649,6 +649,396 @@ npm ci  # In CI/CD, not npm install
 # Enable Dependabot or Snyk
 ```
 
+## Language Standards
+
+The following TypeScript standards MUST be followed when implementing code:
+
+### Version
+
+- TypeScript 5.0+
+- Node.js 20+ (LTS)
+
+### Strict Mode Configuration
+
+```json
+{
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "forceConsistentCasingInFileNames": true
+  }
+}
+```
+
+### Frameworks & Libraries
+
+#### HTTP
+
+| Library | Use Case |
+|---------|----------|
+| Fastify | High-performance APIs |
+| Express | General purpose, large ecosystem |
+| NestJS | Enterprise, full-featured |
+| Hono | Edge/serverless, multi-runtime |
+| tRPC | End-to-end type safety |
+
+#### Database
+
+| Library | Use Case |
+|---------|----------|
+| Prisma | Type-safe ORM (recommended) |
+| Drizzle | SQL-like, lightweight |
+| TypeORM | Enterprise, decorators |
+| Kysely | Type-safe query builder |
+
+#### Validation
+
+| Library | Use Case |
+|---------|----------|
+| Zod | Runtime validation + types (recommended) |
+| io-ts | Functional validation |
+| class-validator | Decorator-based |
+
+#### Testing
+
+| Library | Use Case |
+|---------|----------|
+| Vitest | Fast, Vite-native |
+| Jest | Full-featured, mature |
+| Supertest | HTTP testing |
+| testcontainers | Integration tests |
+
+### Type Safety Rules
+
+#### Forbidden Patterns
+
+```typescript
+// NEVER use `any`
+const data: any = await fetchData(); // FORBIDDEN
+
+// NEVER use type assertions without validation
+const user = data as User; // FORBIDDEN (without runtime check)
+
+// NEVER use non-null assertion without guarantee
+const name = user!.name; // FORBIDDEN
+
+// NEVER ignore TypeScript errors
+// @ts-ignore // FORBIDDEN
+// @ts-expect-error // Only with explanation
+```
+
+#### Required Patterns
+
+```typescript
+// ALWAYS use `unknown` for external data
+const data: unknown = await fetchData();
+
+// ALWAYS validate before narrowing
+if (isUser(data)) {
+  console.log(data.name); // Now safe
+}
+
+// ALWAYS use discriminated unions for state
+type State =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'success'; data: User }
+  | { status: 'error'; error: Error };
+
+// ALWAYS use branded types for IDs
+type UserId = string & { readonly __brand: 'UserId' };
+type TenantId = string & { readonly __brand: 'TenantId' };
+```
+
+### Zod Validation
+
+```typescript
+import { z } from 'zod';
+
+// Define schema (source of truth)
+const UserSchema = z.object({
+  id: z.string().uuid(),
+  email: z.string().email(),
+  role: z.enum(['admin', 'user']),
+  createdAt: z.coerce.date(),
+});
+
+// Infer TypeScript type
+type User = z.infer<typeof UserSchema>;
+
+// Validate at boundaries
+function parseUser(data: unknown): User {
+  return UserSchema.parse(data); // Throws ZodError if invalid
+}
+
+// Safe parsing (doesn't throw)
+const result = UserSchema.safeParse(data);
+if (result.success) {
+  console.log(result.data.email);
+} else {
+  console.error(result.error.issues);
+}
+```
+
+### Error Handling
+
+#### Result Type Pattern
+
+```typescript
+type Result<T, E = Error> =
+  | { ok: true; value: T }
+  | { ok: false; error: E };
+
+const ok = <T>(value: T): Result<T, never> => ({ ok: true, value });
+const err = <E>(error: E): Result<never, E> => ({ ok: false, error });
+
+// Usage
+async function createUser(data: CreateUserInput): Promise<Result<User, ValidationError | DbError>> {
+  const validation = UserSchema.safeParse(data);
+  if (!validation.success) {
+    return err(new ValidationError(validation.error));
+  }
+
+  try {
+    const user = await db.user.create({ data: validation.data });
+    return ok(user);
+  } catch (e) {
+    return err(new DbError(e));
+  }
+}
+```
+
+### Testing Patterns
+
+#### Test Structure
+
+```typescript
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+
+describe('UserService', () => {
+  let service: UserService;
+  let mockRepo: MockProxy<UserRepository>;
+
+  beforeEach(() => {
+    mockRepo = mock<UserRepository>();
+    service = new UserService(mockRepo);
+  });
+
+  describe('createUser', () => {
+    it('should create user with valid input', async () => {
+      // Arrange
+      const input = { email: 'test@example.com', name: 'Test' };
+      mockRepo.save.mockResolvedValue({ id: '1', ...input });
+
+      // Act
+      const result = await service.createUser(input);
+
+      // Assert
+      expect(result.ok).toBe(true);
+      if (result.ok) {
+        expect(result.value.email).toBe(input.email);
+      }
+    });
+
+    it('should return error for invalid email', async () => {
+      const input = { email: 'invalid', name: 'Test' };
+
+      const result = await service.createUser(input);
+
+      expect(result.ok).toBe(false);
+    });
+  });
+});
+```
+
+#### Test Naming Convention
+
+```
+describe('{Unit}') → describe('{method}') → it('should {expected} when {condition}')
+
+Examples:
+- it('should return user when valid id provided')
+- it('should throw ValidationError when email is invalid')
+- it('should return empty array when no users exist')
+```
+
+### Logging Standards
+
+```typescript
+import pino from 'pino';
+
+const logger = pino({
+  level: process.env.LOG_LEVEL ?? 'info',
+  formatters: {
+    level: (label) => ({ level: label }),
+  },
+});
+
+// Structured logging
+logger.info({ userId, action: 'create' }, 'User created');
+logger.error({ err, requestId }, 'Request failed');
+
+// FORBIDDEN - sensitive data
+logger.info({ password }); // NEVER
+logger.info({ token }); // NEVER
+logger.info({ creditCard }); // NEVER
+```
+
+### Architecture Patterns
+
+#### Clean Architecture Structure
+
+```
+/src
+  /domain           # Business entities (no dependencies)
+    /entities
+    /errors
+    /events
+  /application      # Use cases (depends on domain)
+    /services
+    /ports          # Interfaces for adapters
+  /infrastructure   # Implementations (depends on application)
+    /repositories
+    /external
+  /presentation     # HTTP handlers (depends on application)
+    /routes
+    /middleware
+```
+
+#### Repository Pattern
+
+```typescript
+// Port (interface in application layer)
+interface UserRepository {
+  findById(id: UserId): Promise<User | null>;
+  findByEmail(email: string): Promise<User | null>;
+  save(user: User): Promise<User>;
+  delete(id: UserId): Promise<void>;
+}
+
+// Adapter (implementation in infrastructure layer)
+class PrismaUserRepository implements UserRepository {
+  constructor(private readonly prisma: PrismaClient) {}
+
+  async findById(id: UserId): Promise<User | null> {
+    const data = await this.prisma.user.findUnique({ where: { id } });
+    return data ? this.toDomain(data) : null;
+  }
+
+  private toDomain(data: PrismaUser): User {
+    return UserSchema.parse(data);
+  }
+}
+```
+
+### DDD Patterns (TypeScript Implementation)
+
+#### Value Object
+
+```typescript
+class Money {
+  private constructor(
+    readonly amount: number,
+    readonly currency: string
+  ) {}
+
+  static create(amount: number, currency: string): Result<Money> {
+    if (amount < 0) return err(new Error('Amount cannot be negative'));
+    if (!['USD', 'EUR', 'BRL'].includes(currency)) {
+      return err(new Error('Invalid currency'));
+    }
+    return ok(new Money(amount, currency));
+  }
+
+  add(other: Money): Result<Money> {
+    if (this.currency !== other.currency) {
+      return err(new Error('Currency mismatch'));
+    }
+    return Money.create(this.amount + other.amount, this.currency);
+  }
+
+  equals(other: Money): boolean {
+    return this.amount === other.amount && this.currency === other.currency;
+  }
+}
+```
+
+#### Entity
+
+```typescript
+class User {
+  constructor(
+    readonly id: UserId,
+    private _email: string,
+    private _name: string,
+    readonly createdAt: Date
+  ) {}
+
+  get email(): string { return this._email; }
+  get name(): string { return this._name; }
+
+  changeName(newName: string): Result<void> {
+    if (newName.length < 2) {
+      return err(new Error('Name too short'));
+    }
+    this._name = newName;
+    return ok(undefined);
+  }
+
+  equals(other: User): boolean {
+    return this.id === other.id;
+  }
+}
+```
+
+### Async Patterns
+
+```typescript
+// Use Promise.all for independent operations
+const [users, products] = await Promise.all([
+  userRepo.findAll(),
+  productRepo.findAll(),
+]);
+
+// Use for...of for sequential operations
+for (const user of users) {
+  await processUser(user);
+}
+
+// Use AsyncLocalStorage for context
+import { AsyncLocalStorage } from 'async_hooks';
+
+const requestContext = new AsyncLocalStorage<{ requestId: string; tenantId: string }>();
+
+// Middleware
+app.use((req, res, next) => {
+  requestContext.run({ requestId: req.id, tenantId: req.tenantId }, next);
+});
+
+// Access anywhere
+function getRequestId(): string | undefined {
+  return requestContext.getStore()?.requestId;
+}
+```
+
+### Checklist
+
+Before submitting TypeScript code, verify:
+
+- [ ] `strict: true` in tsconfig.json
+- [ ] No `any` types (use `unknown` and narrow)
+- [ ] Zod schemas for external data validation
+- [ ] Branded types for domain IDs
+- [ ] Result type for operations that can fail
+- [ ] Tests follow describe/it structure
+- [ ] Sensitive data not logged
+- [ ] ESLint passes with no warnings
+
 ## What This Agent Does NOT Handle
 
 - Frontend/UI development (use `ring-dev-team:frontend-engineer`)

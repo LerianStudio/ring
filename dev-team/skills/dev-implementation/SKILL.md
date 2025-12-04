@@ -16,10 +16,10 @@ skip_when: |
   - Implementation already complete for this task
 
 sequence:
-  before: [dev-devops-setup]
+  before: [dev-devops]
 
 related:
-  complementary: [development-cycle, test-driven-development, requesting-code-review]
+  complementary: [dev-cycle, test-driven-development, requesting-code-review]
   similar: [subagent-driven-development, executing-plans]
 ---
 

@@ -441,9 +441,115 @@ Remember:
 
 **Skills:**
 - using-dev-team: Plugin introduction and agent selection guide
-- writing-code: Developer agent selection and invocation patterns
+- dev-writing-code: Developer agent selection and invocation patterns
+- dev-cycle: 6-gate development workflow (Implementation → DevOps → SRE → Testing → Review → Validation)
+- dev-analysis: Analyze codebase against STANDARDS.md, generate refactoring tasks
+
+**Commands:**
+- `/ring-dev-team:dev-cycle` – Execute development cycle for tasks
+- `/ring-dev-team:dev-refactor` – Analyze and refactor existing codebase
 
 **Note:** If a skill documents a developer agent but you can't find it, you may not have ring-dev-team enabled. Check `.claude-plugin/marketplace.json` or install ring-dev-team plugin.
+
+---
+
+## Development Workflows
+
+The dev-team plugin provides three unified workflows that all use the same 5-gate development cycle:
+
+### 1. New Project / Feature (via PM Team)
+
+```
+/ring-pm-team:pre-dev-feature "Add user authentication"
+                    │
+                    ▼
+         docs/pre-dev/auth/tasks.md
+                    │
+                    ▼
+/ring-dev-team:dev-cycle docs/pre-dev/auth/tasks.md
+                    │
+                    ▼
+         6-Gate Development Cycle
+```
+
+### 2. Direct Task Execution
+
+```
+/ring-dev-team:dev-cycle docs/tasks/sprint-001.md
+                    │
+                    ▼
+         6-Gate Development Cycle
+```
+
+### 3. Refactoring Existing Code
+
+```
+/ring-dev-team:dev-refactor
+        │
+        ▼
+┌─────────────────────────────┐
+│      dev-analysis           │
+│                             │
+│  • Scan codebase            │
+│  • Compare vs STANDARDS.md  │
+│  • Identify gaps            │
+│  • Generate tasks.md        │
+│  • User approval            │
+└─────────────────────────────┘
+        │
+        ▼
+docs/refactor/{timestamp}/tasks.md
+        │
+        ▼
+/ring-dev-team:dev-cycle docs/refactor/{timestamp}/tasks.md
+        │
+        ▼
+         6-Gate Development Cycle
+```
+
+### The 6-Gate Development Cycle
+
+All workflows converge to the same execution process:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                   6-GATE DEVELOPMENT CYCLE                  │
+├─────────────────────────────────────────────────────────────┤
+│ Gate 0: Implementation                                      │
+│         • TDD: RED → GREEN → REFACTOR                       │
+│         • Agents: backend-engineer-*, frontend-engineer-*   │
+├─────────────────────────────────────────────────────────────┤
+│ Gate 1: DevOps Setup                                        │
+│         • Dockerfile, docker-compose.yml, .env.example      │
+│         • Agent: devops-engineer                            │
+├─────────────────────────────────────────────────────────────┤
+│ Gate 2: SRE Validation                                      │
+│         • Metrics, health checks, structured logging        │
+│         • Agent: sre                                        │
+├─────────────────────────────────────────────────────────────┤
+│ Gate 3: Testing                                             │
+│         • Unit tests, coverage ≥ 80%                        │
+│         • Agent: qa-analyst                                 │
+├─────────────────────────────────────────────────────────────┤
+│ Gate 4: Review                                              │
+│         • 3 reviewers IN PARALLEL                           │
+│         • code-reviewer, business-logic, security           │
+├─────────────────────────────────────────────────────────────┤
+│ Gate 5: Validation                                          │
+│         • User approval: APPROVED / REJECTED                │
+│         • Evidence for each acceptance criterion            │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Workflow Summary
+
+| Scenario | Command | Input | Process |
+|----------|---------|-------|---------|
+| New feature | `/ring-pm-team:pre-dev-*` → `/ring-dev-team:dev-cycle` | User request | PM creates tasks → Dev executes |
+| Direct tasks | `/ring-dev-team:dev-cycle` | tasks.md | Execute 6 gates |
+| Refactoring | `/ring-dev-team:dev-refactor` | Existing codebase | Analyze → Generate tasks → Execute 6 gates |
+
+**Key Principle:** All development follows the same standardized 6-gate process, whether it's a new feature, a bug fix, or a refactoring effort.
 
 ---
 

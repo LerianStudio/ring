@@ -1,16 +1,16 @@
 ---
 name: dev-review
 description: |
-  Development cycle review gate (Gate 3) - executes parallel code review with 3 specialized
+  Development cycle review gate (Gate 4) - executes parallel code review with 3 specialized
   reviewers, aggregates findings, and determines VERDICT for gate passage.
 
 trigger: |
-  - After testing gate complete (Gate 2)
+  - After testing gate complete (Gate 3)
   - Implementation ready for review
   - Before validation gate
 
 skip_when: |
-  - Tests not passing -> complete Gate 2 first
+  - Tests not passing -> complete Gate 3 first
   - Already reviewed with no changes since -> proceed to validation
   - Trivial change (<20 lines, no logic) -> document skip reason
 
@@ -22,7 +22,7 @@ related:
   complementary: [ring-default:requesting-code-review, ring-default:receiving-code-review]
 ---
 
-# Dev Review (Gate 3)
+# Dev Review (Gate 4)
 
 ## Overview
 
@@ -33,7 +33,7 @@ Execute comprehensive code review using 3 specialized reviewers IN PARALLEL. Agg
 ## Prerequisites
 
 Before starting this gate:
-- All tests pass (Gate 2 complete)
+- All tests pass (Gate 3 complete)
 - Implementation is feature-complete
 - Code is committed (or ready to diff)
 
@@ -204,7 +204,7 @@ Any Critical issue?
    // FIXME(review): [Issue description]
    // Reported by: [reviewer] on [date]
    ```
-4. Proceed to Gate 4 (Validation)
+4. Proceed to Gate 5 (Validation)
 
 ### VERDICT: FAIL
 

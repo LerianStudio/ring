@@ -134,6 +134,300 @@ Invoke this agent when the task involves:
 - Styling → Check STANDARDS.md or follow codebase conventions
 - Forms → Use React Hook Form + Zod per frontend.md
 
+## Domain Standards
+
+The following frontend standards MUST be followed when implementing code:
+
+### Stack
+
+- **Framework**: React 18+ / Next.js 14+
+- **Language**: TypeScript (strict mode)
+- **Styling**: TailwindCSS
+- **State**: TanStack Query (server) + Zustand (client)
+- **Forms**: React Hook Form + Zod
+- **Testing**: Vitest + Testing Library + Playwright
+
+### Component Patterns
+
+#### File Structure
+
+```
+/src
+  /components
+    /ui           # Primitives (Button, Input, Card)
+    /features     # Feature-specific components
+    /layouts      # Page layouts
+  /hooks          # Custom hooks
+  /lib            # Utilities
+  /stores         # Zustand stores
+  /types          # TypeScript types
+```
+
+#### Component Organization
+
+```typescript
+// components/features/UserProfile/index.ts (barrel export)
+export { UserProfile } from './UserProfile';
+export type { UserProfileProps } from './UserProfile';
+
+// components/features/UserProfile/UserProfile.tsx
+interface UserProfileProps {
+  userId: string;
+  onEdit?: () => void;
+}
+
+export function UserProfile({ userId, onEdit }: UserProfileProps) {
+  // Component logic
+}
+```
+
+### State Management
+
+#### Server State (TanStack Query)
+
+```typescript
+// hooks/useUser.ts
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+export function useUser(userId: string) {
+  return useQuery({
+    queryKey: ['user', userId],
+    queryFn: () => fetchUser(userId),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+export function useUpdateUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: updateUser,
+    onSuccess: (data) => {
+      queryClient.setQueryData(['user', data.id], data);
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+    },
+  });
+}
+```
+
+#### Client State (Zustand)
+
+```typescript
+// stores/uiStore.ts
+import { create } from 'zustand';
+
+interface UIStore {
+  sidebarOpen: boolean;
+  toggleSidebar: () => void;
+  theme: 'light' | 'dark';
+  setTheme: (theme: 'light' | 'dark') => void;
+}
+
+export const useUIStore = create<UIStore>((set) => ({
+  sidebarOpen: true,
+  toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
+  theme: 'light',
+  setTheme: (theme) => set({ theme }),
+}));
+```
+
+### Forms
+
+#### React Hook Form + Zod
+
+```typescript
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+
+const schema = z.object({
+  email: z.string().email('Invalid email'),
+  password: z.string().min(8, 'Min 8 characters'),
+});
+
+type FormData = z.infer<typeof schema>;
+
+function LoginForm() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({
+    resolver: zodResolver(schema),
+  });
+
+  const onSubmit = async (data: FormData) => {
+    await login(data);
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <input {...register('email')} />
+      {errors.email && <span>{errors.email.message}</span>}
+
+      <input type="password" {...register('password')} />
+      {errors.password && <span>{errors.password.message}</span>}
+
+      <button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? 'Loading...' : 'Login'}
+      </button>
+    </form>
+  );
+}
+```
+
+### Testing
+
+#### Component Tests
+
+```typescript
+import { render, screen, userEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+
+describe('LoginForm', () => {
+  it('should submit with valid data', async () => {
+    const onSubmit = vi.fn();
+    render(<LoginForm onSubmit={onSubmit} />);
+
+    await userEvent.type(screen.getByLabelText(/email/i), 'test@example.com');
+    await userEvent.type(screen.getByLabelText(/password/i), 'password123');
+    await userEvent.click(screen.getByRole('button', { name: /login/i }));
+
+    expect(onSubmit).toHaveBeenCalledWith({
+      email: 'test@example.com',
+      password: 'password123',
+    });
+  });
+
+  it('should show validation errors', async () => {
+    render(<LoginForm />);
+
+    await userEvent.click(screen.getByRole('button', { name: /login/i }));
+
+    expect(screen.getByText(/invalid email/i)).toBeInTheDocument();
+  });
+});
+```
+
+#### E2E Tests (Playwright)
+
+```typescript
+import { test, expect } from '@playwright/test';
+
+test.describe('Login Flow', () => {
+  test('should login successfully', async ({ page }) => {
+    await page.goto('/login');
+
+    await page.fill('[data-testid="email"]', 'test@example.com');
+    await page.fill('[data-testid="password"]', 'password123');
+    await page.click('[data-testid="submit"]');
+
+    await expect(page).toHaveURL('/dashboard');
+    await expect(page.getByText(/welcome/i)).toBeVisible();
+  });
+});
+```
+
+### Accessibility
+
+- ARIA labels for interactive elements
+- Keyboard navigation support
+- Focus management
+- Color contrast (WCAG AA minimum)
+- Screen reader testing
+
+```typescript
+// Good accessibility example
+<button
+  aria-label="Close dialog"
+  aria-describedby="dialog-description"
+  onClick={onClose}
+>
+  <CloseIcon aria-hidden="true" />
+</button>
+```
+
+### Performance
+
+- React.memo for expensive renders
+- useMemo/useCallback for referential stability
+- Code splitting with dynamic imports
+- Image optimization with next/image
+- Bundle analysis with webpack-bundle-analyzer
+
+```typescript
+// Lazy loading
+const HeavyComponent = lazy(() => import('./HeavyComponent'));
+
+// Memoization
+const MemoizedList = memo(function List({ items }: { items: Item[] }) {
+  return items.map((item) => <ListItem key={item.id} item={item} />);
+});
+```
+
+### Error Handling
+
+```typescript
+// Error boundary
+class ErrorBoundary extends Component<Props, State> {
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    logError(error, info);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <ErrorFallback error={this.state.error} />;
+    }
+    return this.props.children;
+  }
+}
+
+// With TanStack Query
+const { data, error, isLoading } = useUser(userId);
+
+if (isLoading) return <Skeleton />;
+if (error) return <ErrorMessage error={error} />;
+return <UserProfile user={data} />;
+```
+
+### Styling (TailwindCSS)
+
+```typescript
+// Use cn() utility for conditional classes
+import { cn } from '@/lib/utils';
+
+function Button({ variant, className, ...props }: ButtonProps) {
+  return (
+    <button
+      className={cn(
+        'px-4 py-2 rounded-md font-medium',
+        variant === 'primary' && 'bg-blue-600 text-white',
+        variant === 'secondary' && 'bg-gray-200 text-gray-900',
+        className
+      )}
+      {...props}
+    />
+  );
+}
+```
+
+### Checklist
+
+Before submitting frontend code, verify:
+
+- [ ] TypeScript strict mode enabled
+- [ ] Components have proper prop types
+- [ ] Server state managed with TanStack Query
+- [ ] Forms use React Hook Form + Zod
+- [ ] Tests cover happy path and edge cases
+- [ ] Accessibility reviewed (ARIA, keyboard)
+- [ ] No console errors or warnings
+- [ ] ESLint passes
+
 ## What This Agent Does NOT Handle
 
 - Backend API development (use `ring-dev-team:backend-engineer` or language-specific variant)

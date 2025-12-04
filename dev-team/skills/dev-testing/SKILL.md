@@ -1,12 +1,12 @@
 ---
 name: dev-testing
 description: |
-  Development cycle testing gate (Gate 2) - ensures unit test coverage for all
+  Development cycle testing gate (Gate 3) - ensures unit test coverage for all
   acceptance criteria using TDD methodology (RED-GREEN-REFACTOR).
   Focus: Unit tests only. Integration/E2E tests handled separately in CI/CD.
 
 trigger: |
-  - After implementation complete (Gate 0/1)
+  - After implementation and SRE complete (Gate 0/1/2)
   - Task has acceptance criteria requiring test coverage
   - Need to verify implementation meets requirements
 
@@ -16,14 +16,14 @@ skip_when: |
   - Already has full test coverage verified -> proceed to review
 
 sequence:
-  after: [dev-implementation, dev-devops-setup]
+  after: [dev-implementation, dev-devops, dev-sre]
   before: [dev-review]
 
 related:
   complementary: [ring-default:test-driven-development, ring-dev-team:qa-analyst]
 ---
 
-# Dev Testing (Gate 2)
+# Dev Testing (Gate 3)
 
 ## Overview
 
@@ -191,7 +191,7 @@ Mark each criterion with test status:
 
 ## Gate Exit Criteria
 
-Before proceeding to Gate 3 (Review):
+Before proceeding to Gate 4 (Review):
 
 - [ ] Every acceptance criterion has at least one unit test
 - [ ] All tests follow TDD cycle (RED verified before GREEN)

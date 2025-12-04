@@ -1,16 +1,16 @@
 ---
 name: dev-validation
 description: |
-  Development cycle validation gate (Gate 4) - validates all acceptance criteria are met
+  Development cycle validation gate (Gate 5) - validates all acceptance criteria are met
   and requires explicit user approval before completion.
 
 trigger: |
-  - After review gate passes (Gate 3)
+  - After review gate passes (Gate 4)
   - Implementation and tests complete
   - Need user sign-off on acceptance criteria
 
 skip_when: |
-  - Review not passed -> complete Gate 3 first
+  - Review not passed -> complete Gate 4 first
   - Already validated and approved -> proceed to completion
   - No acceptance criteria defined -> request criteria first
 
@@ -21,7 +21,7 @@ related:
   complementary: [ring-default:verification-before-completion]
 ---
 
-# Dev Validation (Gate 4)
+# Dev Validation (Gate 5)
 
 ## Overview
 
@@ -32,8 +32,8 @@ Final validation gate requiring explicit user approval. Present evidence that ea
 ## Prerequisites
 
 Before starting this gate:
-- All tests pass (Gate 2 verified)
-- Code review passed (Gate 3 VERDICT: PASS)
+- All tests pass (Gate 3 verified)
+- Code review passed (Gate 4 VERDICT: PASS)
 - Implementation is complete and stable
 
 ## Step 1: Gather Validation Evidence
@@ -231,7 +231,7 @@ Please review the evidence above and provide your decision:
    ```
 
 3. Return to Gate 0 with rejection details
-4. After remediation, restart from Gate 2 (Testing)
+4. After remediation, restart from Gate 3 (Testing)
 5. Track rejection in feedback loop (assertiveness penalty)
 
 ## Step 6: Document Validation Outcome

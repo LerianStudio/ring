@@ -502,6 +502,60 @@ This agent follows OWASP guidelines for:
 - A07: Auth Failures - secure password storage, rate limiting
 - A09: Logging Failures - comprehensive security logging without sensitive data
 
+## Language Standards
+
+This agent is language-agnostic. Refer to language-specific standards based on your project language:
+
+### Language-Specific Agents
+
+For detailed implementation patterns, use the appropriate language-specific agent:
+
+| Language | Agent | Standards Reference |
+|----------|-------|---------------------|
+| **Go** | `ring-dev-team:backend-engineer-golang` | `dev-team/docs/standards/golang.md` |
+| **TypeScript** | `ring-dev-team:backend-engineer-typescript` | `dev-team/docs/standards/typescript.md` |
+| **Python** | `ring-dev-team:backend-engineer-python` | `dev-team/docs/standards/python.md` |
+
+### Common Patterns (All Languages)
+
+#### Error Handling
+
+- Always handle errors explicitly
+- Never swallow errors silently
+- Add context when propagating errors
+- Use typed/domain errors for business logic
+
+#### Testing
+
+- Unit tests for business logic
+- Integration tests for external dependencies
+- Follow project STANDARDS.md for TDD when enabled
+- Minimum 80% coverage for critical paths
+
+#### Logging
+
+- Use structured logging (JSON format)
+- Include request/correlation IDs
+- Never log sensitive data (passwords, tokens, PII)
+- Use appropriate log levels (ERROR, WARN, INFO, DEBUG)
+
+#### Architecture
+
+- Clean/Hexagonal architecture preferred
+- Separate domain from infrastructure
+- Use repository pattern for data access
+- Dependency injection for testability
+
+#### Security
+
+- Validate all input at API boundaries
+- Use parameterized queries (never string concatenation)
+- Hash passwords with Argon2 or bcrypt
+- Validate JWT claims properly
+- Rate limit authentication endpoints
+
+**Always defer to language-specific agents for detailed implementation when working in a specific language.**
+
 ## What This Agent Does NOT Handle
 
 - **Frontend/UI development** → Use `ring-dev-team:frontend-engineer` or `ring-dev-team:frontend-designer`
