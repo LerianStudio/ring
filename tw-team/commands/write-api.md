@@ -142,4 +142,6 @@ Task tool:
 
 **Errors:** 400 (Bad Request), 401 (Unauthorized), 403 (Forbidden), 404 (Not Found), 409 (Conflict), 422 (Invalid), 429 (Rate Limited), 500 (Server Error)
 
-Now proceed with documenting: **$ARGUMENTS.endpoint**
+## Proceed
+
+**Endpoint to document:** $ARGUMENTS.endpoint
