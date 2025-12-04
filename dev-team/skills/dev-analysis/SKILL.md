@@ -222,16 +222,24 @@ Two-phase analysis using specialized agents:
 
 ### Phase 1: Architecture Analysis
 
-**Use skill:** `ring-dev-team:dev-exploration`
+**Dispatch:** `ring-default:codebase-explorer` (Opus)
 
-This skill executes `ring-default:codebase-explorer` (Opus) to gather:
-- Directory structure compliance
-- Architectural patterns (DDD, Clean Arch, Hexagonal)
-- Anti-patterns and technical debt
-- Naming conventions compliance
-- Dependency direction analysis
+```
+Task tool:
+  subagent_type: "ring-default:codebase-explorer"
+  model: "opus"
+  prompt: |
+    Analyze this {language} codebase against these standards: {standards_file}
 
-**Output:** `exploration_results` with patterns found, anti-patterns, and insights.
+    Focus on:
+    - Directory structure compliance
+    - DDD patterns (Entities, Value Objects, Aggregates, Repositories)
+    - Clean/Hexagonal Architecture (dependency direction)
+    - Anti-patterns and technical debt
+    - Naming conventions
+```
+
+**Output:** Architectural insights, patterns found, anti-patterns detected.
 
 ### Phase 2: Specialized Dimension Analysis (Parallel)
 
@@ -508,7 +516,6 @@ output_schema:
 
 | Skill | Purpose |
 |-------|---------|
-| `dev-exploration` | Executes codebase-explorer for architectural insights (Step 3, Phase 1) |
 | `dev-cycle` | Executes refactoring tasks through 6 gates (after approval) |
 
 ## Key Principles
