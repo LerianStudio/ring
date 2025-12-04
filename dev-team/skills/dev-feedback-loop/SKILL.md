@@ -361,12 +361,12 @@ Based on patterns, generate specific improvements:
 ```markdown
 ## Skill Improvement Suggestions
 
-### dev-testing
+### ring-dev-team:dev-testing
 - Issue: TDD RED phase often skipped
 - Suggestion: Add mandatory failure output capture
 - Specific change: Require paste of test failure before GREEN phase
 
-### dev-review
+### ring-dev-team:dev-review
 - Issue: Same security issues recurring
 - Suggestion: Add pre-review security checklist
 - Specific change: Gate entry requires security self-check
