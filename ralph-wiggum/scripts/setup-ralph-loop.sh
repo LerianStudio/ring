@@ -6,6 +6,10 @@
 
 set -euo pipefail
 
+# Configuration constants (SYNC-POINT: keep in sync with stop-hook.sh)
+readonly MIN_PROMPT_LENGTH=10
+readonly MAX_PROMPT_LENGTH=100000
+
 # Parse arguments
 PROMPT_PARTS=()
 MAX_ITERATIONS=0
@@ -22,7 +26,7 @@ USAGE:
   /ralph-loop [PROMPT...] [OPTIONS]
 
 ARGUMENTS:
-  PROMPT...    Initial prompt to start the loop (can be multiple words without quotes)
+  PROMPT...    Initial prompt to start the loop (10-100,000 characters)
 
 OPTIONS:
   --max-iterations <n>           Maximum iterations before auto-stop (default: unlimited)
@@ -99,7 +103,13 @@ HELP_EOF
         echo "   Note: Multi-word promises must be quoted!" >&2
         exit 1
       fi
-      COMPLETION_PROMISE="$2"
+      # Normalize whitespace: trim leading/trailing and collapse internal whitespace
+      # This ensures "TASK  COMPLETE" matches "TASK COMPLETE" during detection
+      COMPLETION_PROMISE=$(echo "$2" | sed 's/^[[:space:]]*//; s/[[:space:]]*$//; s/[[:space:]]\+/ /g')
+      if [[ -z "$COMPLETION_PROMISE" ]]; then
+        echo "❌ Error: --completion-promise cannot be only whitespace" >&2
+        exit 1
+      fi
       shift 2
       ;;
     *)
@@ -125,6 +135,30 @@ if [[ -z "$PROMPT" ]]; then
   echo "     /ralph-loop --completion-promise 'DONE' Refactor code" >&2
   echo "" >&2
   echo "   For all options: /ralph-loop --help" >&2
+  exit 1
+fi
+
+# Validate prompt length
+PROMPT_LENGTH=${#PROMPT}
+if [[ $PROMPT_LENGTH -lt $MIN_PROMPT_LENGTH ]]; then
+  echo "❌ Error: Prompt too short (${PROMPT_LENGTH} characters, minimum ${MIN_PROMPT_LENGTH})" >&2
+  echo "" >&2
+  echo "   Your prompt should describe the task clearly." >&2
+  echo "" >&2
+  echo "   Examples of good prompts:" >&2
+  echo "     'Build a REST API for todos with CRUD operations'" >&2
+  echo "     'Fix the authentication bug in login.ts'" >&2
+  echo "     'Refactor the cache layer to use Redis'" >&2
+  exit 1
+fi
+
+if [[ $PROMPT_LENGTH -gt $MAX_PROMPT_LENGTH ]]; then
+  echo "❌ Error: Prompt too long (${PROMPT_LENGTH} characters, maximum ${MAX_PROMPT_LENGTH})" >&2
+  echo "" >&2
+  echo "   Consider:" >&2
+  echo "     - Breaking down the task into smaller steps" >&2
+  echo "     - Moving detailed requirements to a file and referencing it" >&2
+  echo "     - Using a more concise description" >&2
   exit 1
 fi
 
@@ -211,10 +245,15 @@ else
   COMPLETION_PROMISE_YAML="null"
 fi
 
-# Create state file with restricted permissions from the start (umask 077 = 600 mode)
-(
-    umask 077
-    cat > "$RALPH_STATE_FILE" <<EOF
+# Create state file with restricted permissions using atomic write pattern
+# Write to temp file first, then rename (atomic on POSIX filesystems)
+create_state_file() {
+    local temp_file
+    temp_file=$(mktemp ".claude/ralph-loop-${SESSION_ID}.XXXXXX")
+
+    # Write content to temp file with restrictive permissions
+    chmod 600 "$temp_file"
+    cat > "$temp_file" <<EOF
 ---
 active: true
 session_id: "$SESSION_ID"
@@ -226,7 +265,26 @@ started_at: "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
 $PROMPT
 EOF
-)
+
+    # Sync to disk before rename for durability
+    # Note: sync behavior varies by OS (Linux syncs file, macOS syncs all disks)
+    # The || true ensures graceful degradation if sync is unavailable
+    sync "$temp_file" 2>/dev/null || true
+
+    # Atomic rename
+    if ! mv "$temp_file" "$RALPH_STATE_FILE" 2>/dev/null; then
+        echo "❌ Error: Failed to create state file" >&2
+        rm -f "$temp_file" 2>/dev/null || true
+        # Release lock if held
+        if [[ "$HAS_FLOCK" = true ]]; then
+            exec 9>&-
+            rm -f "$LOCK_FILE"
+        fi
+        exit 1
+    fi
+}
+
+create_state_file
 
 # Output setup message
 # SYNC-POINT: "Session ID: $SESSION_ID" format must match stop-hook.sh grep pattern
