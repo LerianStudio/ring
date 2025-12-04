@@ -15,10 +15,10 @@ Analyzes current git branch changes and generates comprehensive pull request des
 This command examines only the commits made on your current feature branch (compared to its base branch like develop/main) to generate a detailed pull request description that follows the standard template structure.
 
 ```bash
-/shared:development:pr-generator
-/shared:development:pr-generator --title="Add user authentication system"
-/shared:development:pr-generator --issue=123
-/shared:development:pr-generator --title="Fix login bug" --issue=456
+/ring-dev-team:workflow:pr-generator
+/ring-dev-team:workflow:pr-generator --title="Add user authentication system"
+/ring-dev-team:workflow:pr-generator --issue=123
+/ring-dev-team:workflow:pr-generator --title="Fix login bug" --issue=456
 ```
 
 ## Process
@@ -137,7 +137,7 @@ Fixes # (issue)
 ### Basic Feature Addition
 
 ```bash
-/shared:development:pr-generator
+/ring-dev-team:workflow:pr-generator
 ```
 
 **Output in pull-request.md:**
@@ -178,7 +178,7 @@ Manual testing of login/logout flow, unit tests for authentication endpoints, in
 ### With Custom Title and Issue
 
 ```bash
-/shared:development:pr-generator --title="Fix authentication timeout issue" --issue=789
+/ring-dev-team:workflow:pr-generator --title="Fix authentication timeout issue" --issue=789
 ```
 
 **Output:**

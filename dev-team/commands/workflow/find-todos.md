@@ -4,7 +4,7 @@ description: Find and organize TODO comments and unfinished work markers in the 
 argument-hint: [--pattern=<pattern>] [--git-scope=<scope>]
 ---
 
-# /shared:find-todos
+# /ring-dev-team:workflow:find-todos
 
 ## Context
 
@@ -16,14 +16,14 @@ I'll locate all TODO comments and unfinished work markers in your codebase.
 
 ```bash
 # Git-focused TODO discovery (recommended for active development)
-/shared:find-todos --git-scope=all-changes               # Find TODOs in changed files
-/shared:find-todos --git-scope=staged                   # Find TODOs in staged files
-/shared:find-todos --git-scope=branch                   # Find TODOs in branch changes
-/shared:find-todos --git-scope=last-commit              # Find TODOs in last commit
+/ring-dev-team:workflow:find-todos --git-scope=all-changes               # Find TODOs in changed files
+/ring-dev-team:workflow:find-todos --git-scope=staged                   # Find TODOs in staged files
+/ring-dev-team:workflow:find-todos --git-scope=branch                   # Find TODOs in branch changes
+/ring-dev-team:workflow:find-todos --git-scope=last-commit              # Find TODOs in last commit
 
 # Traditional pattern-based search
-/shared:find-todos --pattern="TODO|FIXME"               # Find specific patterns
-/shared:find-todos                                      # Find all TODO markers
+/ring-dev-team:workflow:find-todos --pattern="TODO|FIXME"               # Find specific patterns
+/ring-dev-team:workflow:find-todos                                      # Find all TODO markers
 ```
 
 **Arguments:**

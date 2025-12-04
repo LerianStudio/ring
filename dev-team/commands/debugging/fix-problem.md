@@ -4,7 +4,7 @@ description: Unified problem resolution with multiple sources for error messages
 argument-hint: [--input=<file-path-or-text>] [--git-scope=<scope>]
 ---
 
-# /shared:development:fix-problem
+# /ring-dev-team:debugging:fix-problem
 
 Unified problem resolution command supporting multiple input sources for comprehensive debugging and issue resolution.
 
@@ -16,15 +16,15 @@ Problem resolution involves systematic investigation across different input type
 
 ```bash
 # Git-focused problem resolution (recommended for active development)
-/shared:development:fix-problem --input="TypeError: Cannot read property 'id' of undefined" --git-scope=all-changes
-/shared:development:fix-problem --input="API returns 500 on user login" --git-scope=branch
-/shared:development:fix-problem --input=issues/bug-report.md --git-scope=staged
+/ring-dev-team:debugging:fix-problem --input="TypeError: Cannot read property 'id' of undefined" --git-scope=all-changes
+/ring-dev-team:debugging:fix-problem --input="API returns 500 on user login" --git-scope=branch
+/ring-dev-team:debugging:fix-problem --input=issues/bug-report.md --git-scope=staged
 
 # Traditional problem resolution
-/shared:development:fix-problem --input="TypeError: Cannot read property 'id' of undefined"
-/shared:development:fix-problem --input=issues/bug-report.md
-/shared:development:fix-problem --input="API returns 500 on user login"
-/shared:development:fix-problem --input="Memory leak in production after 24 hours"
+/ring-dev-team:debugging:fix-problem --input="TypeError: Cannot read property 'id' of undefined"
+/ring-dev-team:debugging:fix-problem --input=issues/bug-report.md
+/ring-dev-team:debugging:fix-problem --input="API returns 500 on user login"
+/ring-dev-team:debugging:fix-problem --input="Memory leak in production after 24 hours"
 ```
 
 **Arguments:**
@@ -115,7 +115,7 @@ target_files=$(process_git_scope "$git_scope")
 ### Error Source Example
 
 ```bash
-/shared:development:fix-problem --source=error --input="TypeError: Cannot read property 'id' of undefined"
+/ring-dev-team:debugging:fix-problem --source=error --input="TypeError: Cannot read property 'id' of undefined"
 ```
 
 **Process Flow**:
@@ -137,7 +137,7 @@ target_files=$(process_git_scope "$git_scope")
 ### Issue Source Example
 
 ```bash
-/shared:development:fix-problem --source=issue --input=issues/login-bug-report.md
+/ring-dev-team:debugging:fix-problem --source=issue --input=issues/login-bug-report.md
 ```
 
 **Expected Issue File Format**:
@@ -194,7 +194,7 @@ Button click has no effect, user remains on login page
 
 ```bash
 
-/shared:development:fix-problem --source=description --input="Users report slow page loading after recent deployment"
+/ring-dev-team:debugging:fix-problem --source=description --input="Users report slow page loading after recent deployment"
 ```
 
 **Process Flow**:

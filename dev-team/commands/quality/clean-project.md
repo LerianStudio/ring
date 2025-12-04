@@ -4,7 +4,7 @@ description: Clean up development artifacts while preserving working code with s
 argument-hint: [--dry-run] [--verbose] [--git-scope=<scope>]
 ---
 
-# /shared:utils:clean-project
+# /ring-dev-team:quality:clean-project
 
 ## Instructions
 
@@ -88,22 +88,22 @@ Focuses cleanup on directories with git changes, preserving build artifacts in u
 
 ```bash
 # Clean artifacts in directories with any git changes
-/shared:utils:clean-project --git-scope=all
+/ring-dev-team:quality:clean-project --git-scope=all
 
 # Clean artifacts in staged file directories
-/shared:utils:clean-project --git-scope=staged
+/ring-dev-team:quality:clean-project --git-scope=staged
 
 # Clean artifacts in feature branch directories
-/shared:utils:clean-project --git-scope=branch
+/ring-dev-team:quality:clean-project --git-scope=branch
 
 # Clean artifacts in directories touched by last commit
-/shared:utils:clean-project --git-scope=last-commit
+/ring-dev-team:quality:clean-project --git-scope=last-commit
 
 # Show what would be cleaned with dry-run
-/shared:utils:clean-project --git-scope=staged --dry-run
+/ring-dev-team:quality:clean-project --git-scope=staged --dry-run
 
 # Verbose output showing git context
-/shared:utils:clean-project --git-scope=all --verbose
+/ring-dev-team:quality:clean-project --git-scope=all --verbose
 ```
 
 **Benefits:**

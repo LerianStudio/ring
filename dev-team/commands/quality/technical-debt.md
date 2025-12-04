@@ -4,7 +4,7 @@ description: Assess and prioritize technical debt with actionable remediation st
 argument-hint: [--target=<project-path-or-component>] [--git-scope=<scope>]
 ---
 
-# /shared:code-quality:technical-debt
+# /ring-dev-team:quality:technical-debt
 
 ## Context
 
@@ -27,47 +27,47 @@ Assess and prioritize technical debt in the specified project or component with 
 ### Usage
 
 ```
-/shared:code-quality:technical-debt --target=<project-path-or-component>
+/ring-dev-team:quality:technical-debt --target=<project-path-or-component>
 ```
 
 **Examples:**
 
 ```bash
 # Git-focused debt analysis (recommended for feature development)
-/shared:code-quality:technical-debt --git-scope=all-changes        # Analyze debt in current changes
-/shared:code-quality:technical-debt --git-scope=branch               # Analyze debt introduced in feature branch
-/shared:code-quality:technical-debt --git-scope=staged              # Analyze debt in staged changes
+/ring-dev-team:quality:technical-debt --git-scope=all-changes        # Analyze debt in current changes
+/ring-dev-team:quality:technical-debt --git-scope=branch               # Analyze debt introduced in feature branch
+/ring-dev-team:quality:technical-debt --git-scope=staged              # Analyze debt in staged changes
 
 # Traditional project-wide analysis
-/shared:code-quality:technical-debt --target=.                       # Analyze entire project
-/shared:code-quality:technical-debt --target=src/auth               # Analyze auth module
-/shared:code-quality:technical-debt --target=backend/api            # Analyze API layer
+/ring-dev-team:quality:technical-debt --target=.                       # Analyze entire project
+/ring-dev-team:quality:technical-debt --target=src/auth               # Analyze auth module
+/ring-dev-team:quality:technical-debt --target=backend/api            # Analyze API layer
 
 # Combined approaches
-/shared:code-quality:technical-debt --git-scope=branch --target=src/ # Analyze branch changes in src/ only
+/ring-dev-team:quality:technical-debt --git-scope=branch --target=src/ # Analyze branch changes in src/ only
 ```
 
 ## Examples
 
 ```
-/shared:code-quality:technical-debt --target=<project-path-or-component>
+/ring-dev-team:quality:technical-debt --target=<project-path-or-component>
 ```
 
 **Examples:**
 
 ```bash
 # Git-focused debt analysis (recommended for feature development)
-/shared:code-quality:technical-debt --git-scope=all-changes        # Analyze debt in current changes
-/shared:code-quality:technical-debt --git-scope=branch               # Analyze debt introduced in feature branch
-/shared:code-quality:technical-debt --git-scope=staged              # Analyze debt in staged changes
+/ring-dev-team:quality:technical-debt --git-scope=all-changes        # Analyze debt in current changes
+/ring-dev-team:quality:technical-debt --git-scope=branch               # Analyze debt introduced in feature branch
+/ring-dev-team:quality:technical-debt --git-scope=staged              # Analyze debt in staged changes
 
 # Traditional project-wide analysis
-/shared:code-quality:technical-debt --target=.                       # Analyze entire project
-/shared:code-quality:technical-debt --target=src/auth               # Analyze auth module
-/shared:code-quality:technical-debt --target=backend/api            # Analyze API layer
+/ring-dev-team:quality:technical-debt --target=.                       # Analyze entire project
+/ring-dev-team:quality:technical-debt --target=src/auth               # Analyze auth module
+/ring-dev-team:quality:technical-debt --target=backend/api            # Analyze API layer
 
 # Combined approaches
-/shared:code-quality:technical-debt --git-scope=branch --target=src/ # Analyze branch changes in src/ only
+/ring-dev-team:quality:technical-debt --git-scope=branch --target=src/ # Analyze branch changes in src/ only
 ```
 
 ## Process

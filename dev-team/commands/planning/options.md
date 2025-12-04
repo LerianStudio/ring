@@ -4,7 +4,7 @@ description: Analyze different approaches for tasks or problems with comprehensi
 argument-hint: [--task=<task-or-problem-description>]
 ---
 
-# /shared:options
+# /ring-dev-team:planning:options
 
 ## Context
 
@@ -13,7 +13,7 @@ Analyze different approaches for the given task or problem, providing a comprehe
 ## Usage
 
 ```bash
-/shared:options --task="<task-or-problem-description>"
+/ring-dev-team:planning:options --task="<task-or-problem-description>"
 ```
 
 **Arguments:**
@@ -96,5 +96,5 @@ Create a comparison table:
 ## Example
 
 ```
-/shared:options --task="Implement user authentication for our web application"
+/ring-dev-team:planning:options --task="Implement user authentication for our web application"
 ```

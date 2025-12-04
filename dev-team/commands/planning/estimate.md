@@ -4,7 +4,7 @@ description: Generate accurate project time estimates using historical data and 
 argument-hint: [--task=<task-description>]
 ---
 
-# /shared:planning:estimate
+# /ring-dev-team:planning:estimate
 
 ## Context
 

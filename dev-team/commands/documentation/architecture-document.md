@@ -3,7 +3,7 @@ allowed-tools: Read, Write, Edit, Bash
 argument-hint: [--framework=<framework>] [--format=c4-model|arc42|adr|plantuml] (optional: specify documentation framework preference)
 ---
 
-# /shared:documentation:architecture-document
+# /ring-dev-team:documentation:architecture-document
 
 ## Instructions
 

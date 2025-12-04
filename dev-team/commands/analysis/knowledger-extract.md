@@ -4,7 +4,7 @@ description: Extract and document domain knowledge, business logic, and architec
 argument-hint: [--focus-path=<file-or-directory-path>] (optional: emphasize specific area while extracting domain knowledge from entire codebase)
 ---
 
-# /shared:documentation:knowledger-extract
+# /ring-dev-team:analysis:knowledger-extract
 
 ## Instructions
 
@@ -13,9 +13,9 @@ Extract and document domain knowledge, business logic, and architectural pattern
 ## Usage Options
 
 ```bash
-/shared:documentation:knowledger-extract                                      # Extract domain knowledge from entire codebase
-/shared:documentation:knowledger-extract --focus-path=src/models/             # Emphasize models while analyzing full codebase
-/shared:documentation:knowledger-extract --focus-path=src/services/           # Emphasize services while analyzing full codebase
+/ring-dev-team:analysis:knowledger-extract                                      # Extract domain knowledge from entire codebase
+/ring-dev-team:analysis:knowledger-extract --focus-path=src/models/             # Emphasize models while analyzing full codebase
+/ring-dev-team:analysis:knowledger-extract --focus-path=src/services/           # Emphasize services while analyzing full codebase
 ```
 
 ## Arguments
