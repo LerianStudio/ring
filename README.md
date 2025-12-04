@@ -240,10 +240,21 @@ No "should work" → Only "does work" with proof
 - `testing-skills-with-subagents` - Skill validation
 - `testing-agents-with-subagents` - Subagent-specific testing
 
-### Developer Skills (ring-dev-team plugin - 1 skill)
+### Developer Skills (ring-dev-team plugin - 10 skills)
 
 **Code Development:**
 - `ring-dev-team:using-dev-team` - Introduction to developer specialist agents
+- `ring-dev-team:dev-analysis` - Codebase analysis against standards
+- `ring-dev-team:dev-cycle` - 6-gate development workflow orchestrator
+
+**6-Gate Workflow Skills:**
+- `ring-dev-team:dev-implementation` - Gate 0: TDD implementation
+- `ring-dev-team:dev-devops` - Gate 1: DevOps setup (Docker, compose)
+- `ring-dev-team:dev-sre` - Gate 2: Observability setup
+- `ring-dev-team:dev-testing` - Gate 3: Test coverage
+- `ring-dev-team:dev-review` - Gate 4: Parallel code review
+- `ring-dev-team:dev-validation` - Gate 5: User approval
+- `ring-dev-team:dev-feedback-loop` - Assertiveness scoring and metrics
 
 ### Product Planning Skills (ring-pm-team plugin - 10 skills)
 
