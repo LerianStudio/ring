@@ -135,7 +135,7 @@ func TestCreateUser(t *testing.T) {
 
 ### Test Naming Convention
 
-```
+```text
 Test{Unit}_{Scenario}_{ExpectedResult}
 
 Examples:
@@ -227,7 +227,7 @@ golangci-lint run ./...
 
 ### Hexagonal Architecture (Ports & Adapters)
 
-```
+```text
 /internal
   /domain          # Business entities (no dependencies)
     user.go
@@ -410,7 +410,7 @@ func (o *Order) PullEvents() []DomainEvent {
 
 ## Directory Structure
 
-```
+```text
 /cmd
   /api                 # Main application entry
     main.go
