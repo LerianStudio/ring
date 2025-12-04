@@ -6,6 +6,7 @@ version: 1.1.0
 last_updated: 2025-01-25
 type: specialist
 changelog:
+  - 1.1.0: Added multi-tenancy patterns and security best practices
   - 1.0.0: Initial release
 output_schema:
   format: "markdown"
