@@ -51,7 +51,7 @@ Before starting analysis:
 
 ### 1. Architecture Analysis
 
-```
+```text
 Checks:
 ├── DDD Patterns (if enabled in STANDARDS.md)
 │   ├── Entities have identity comparison
@@ -74,7 +74,7 @@ Checks:
 
 ### 2. Code Quality Analysis
 
-```
+```text
 Checks:
 ├── Naming Conventions
 │   ├── Files match pattern (snake_case, kebab-case, etc.)
@@ -103,7 +103,7 @@ Checks:
 
 ### 3. Testing Analysis
 
-```
+```text
 Checks:
 ├── Test Coverage
 │   ├── Current coverage percentage
@@ -128,7 +128,7 @@ Checks:
 
 ### 4. DevOps Analysis
 
-```
+```text
 Checks:
 ├── Containerization
 │   ├── Dockerfile exists
@@ -156,7 +156,7 @@ Checks:
 
 First, identify the primary language(s) of the project:
 
-```
+```text
 Language Detection:
 ├── go.mod exists → Go project
 │   └── Standards: backend-engineer-golang.md
@@ -184,7 +184,7 @@ Output:
 
 Load standards from multiple sources based on detected language:
 
-```
+```text
 Standards Loading Order:
 1. Project-specific standards (if exist):
    - docs/STANDARDS.md → Project conventions
@@ -221,7 +221,7 @@ Two-phase analysis using specialized agents:
 
 **Dispatch:** `ring-default:codebase-explorer` (Opus)
 
-```
+```text
 Task tool:
   subagent_type: "ring-default:codebase-explorer"
   model: "opus"
@@ -242,7 +242,7 @@ Task tool:
 
 Dispatch 3 agents in parallel to analyze specific dimensions:
 
-```
+```text
 Task tool (3 parallel calls):
 
 1. ring-dev-team:qa-analyst
@@ -317,7 +317,7 @@ Merge results from all agents into a structured report:
 
 Group related issues into logical refactoring tasks:
 
-```
+```text
 Grouping Strategy:
 1. By bounded context / module
 2. By dependency order (fix dependencies first)
@@ -431,7 +431,7 @@ and project standards.
 
 Present the generated plan and ask for approval:
 
-```
+```text
 AskUserQuestion:
   question: "Review the refactoring plan. How do you want to proceed?"
   options:
@@ -445,7 +445,7 @@ AskUserQuestion:
 
 Save analysis report and tasks to project:
 
-```
+```text
 docs/refactor/{timestamp}/
 ├── analysis-report.md    # Full analysis with all findings
 ├── tasks.md              # Approved refactoring tasks
