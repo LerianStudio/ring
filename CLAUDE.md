@@ -513,6 +513,7 @@ output_schema:
 5. **Never ignore skill when applicable** - "Simple task" is not an excuse
 6. **Never use panic() in Go** - Error handling required
 7. **Never commit incomplete code** - No "TODO: implement" comments
+8. **Never commit manually** - Always use `/ring-default:commit` command
 
 ### Compliance Rules
 ```bash
@@ -530,6 +531,11 @@ output_schema:
 - Check for applicable skills before ANY task
 - If skill exists for task → MUST use it
 - Announce non-obvious skill usage
+
+# Commit compliance (default/commands/commit.md)
+- ALWAYS use /ring-default:commit for all commits
+- Never write git commit commands manually
+- Command enforces: conventional commits, trailers, no emoji signatures
 ```
 
 ### Session Context
