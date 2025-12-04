@@ -234,6 +234,74 @@ Deployment Topology:
   Traffic: Load balanced with health checks
 ```
 
+## API Pattern Decisions
+
+During TRD creation, certain architectural patterns require explicit decisions. These decisions should be made during the TRD phase, not deferred to implementation.
+
+### Pagination Strategy (REQUIRED for List Endpoints)
+
+If the feature includes **list/browse** functionality, you **MUST** decide the pagination strategy during TRD.
+
+**Decision Prompt for User:**
+
+```
+The feature includes list endpoints. I need to determine the pagination strategy.
+
+Based on the entity characteristics, I recommend [RECOMMENDED OPTION].
+
+Which pagination strategy should be used?
+
+A) Cursor-Based Pagination
+   - Best for: High-volume data (>10k records), infinite scroll, real-time feeds
+   - Trade-off: Cannot jump to arbitrary pages
+   - Performance: O(1) - constant time regardless of dataset size
+
+B) Page-Based (Offset) Pagination
+   - Best for: Low-volume data, administrative interfaces
+   - Trade-off: Performance degrades with large offsets
+   - Performance: O(n) - slower as page number increases
+
+C) Page-Based with Total Count
+   - Best for: When UI needs "Page X of Y" display
+   - Trade-off: Additional COUNT query overhead
+   - Performance: Two queries per request
+
+D) No Pagination
+   - Best for: Very small, bounded datasets (<100 items always)
+   - Trade-off: All data loaded at once
+
+E) Other - Please describe your requirements
+   - Use this if you have specific pagination needs not covered above
+```
+
+**Decision Criteria:**
+
+| Factor | Cursor-Based | Page-Based |
+|--------|--------------|------------|
+| Dataset size | >10k records typical | <10k records typical |
+| Real-time data | Yes - data changes frequently | No - data is stable |
+| Jump to page | Not required | Required |
+| Performance | Critical | Not critical |
+| UI pattern | Infinite scroll, "Load more" | Traditional page numbers |
+
+**Document the Decision:**
+
+In the TRD, include the pagination decision in the API design section:
+
+```yaml
+API Patterns:
+  Pagination:
+    Strategy: Cursor-Based  # or Page-Based, Page-Based with Total, None
+    Rationale: High-volume entity with real-time updates
+    Reference: See project standards for implementation details
+```
+
+**Implementation Reference:**
+
+After TRD approval, developers should reference the project's Go standards document for implementation patterns (e.g., `docs/standards/golang.md` - Pagination Patterns section).
+
+---
+
 ## Architecture Decision Records (ADRs)
 
 When making major decisions, document them abstractly:
