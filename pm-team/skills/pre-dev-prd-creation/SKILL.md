@@ -302,7 +302,7 @@ Action:
 
 ## Output Location
 
-**Always output to**: `docs/pre-development/prd/prd-[feature-name].md`
+**Always output to**: `docs/pre-dev/{feature-name}/prd.md`
 
 ## After PRD Approval
 

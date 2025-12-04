@@ -467,7 +467,7 @@ Action:
 
 ## Output Location
 
-**Always output to**: `docs/pre-development/feature-map/feature-map-[feature-name].md`
+**Always output to**: `docs/pre-dev/{feature-name}/feature-map.md`
 
 ## After Feature Map Approval
 

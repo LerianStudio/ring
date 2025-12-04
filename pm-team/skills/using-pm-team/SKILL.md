@@ -134,7 +134,7 @@ Pre-dev workflow ensures:
 
 ### Gate 1: Product Requirements
 **Skill:** `pre-dev-prd-creation`
-**Output:** `docs/pre-dev/{feature}/PRD.md`
+**Output:** `docs/pre-dev/{feature}/prd.md`
 
 **What:** Business requirements document
 **Covers:**
@@ -171,7 +171,7 @@ Pre-dev workflow ensures:
 
 ### Gate 3: Technical Requirements
 **Skill:** `pre-dev-trd-creation`
-**Output:** `docs/pre-dev/{feature}/TRD.md`
+**Output:** `docs/pre-dev/{feature}/trd.md`
 
 **What:** Technical architecture document
 **Covers:**
@@ -190,7 +190,7 @@ Pre-dev workflow ensures:
 
 ### Gate 4: API Design (Large Track Only)
 **Skill:** `pre-dev-api-design`
-**Output:** `docs/pre-dev/{feature}/API.md`
+**Output:** `docs/pre-dev/{feature}/api-design.md`
 
 **What:** API contracts & boundaries
 **Covers:**
@@ -228,7 +228,7 @@ Pre-dev workflow ensures:
 
 ### Gate 6: Dependencies (Large Track Only)
 **Skill:** `pre-dev-dependency-map`
-**Output:** `docs/pre-dev/{feature}/dependencies.md`
+**Output:** `docs/pre-dev/{feature}/dependency-map.md`
 
 **What:** Technology & library selection
 **Covers:**
@@ -266,7 +266,7 @@ Pre-dev workflow ensures:
 
 ### Gate 8: Subtask Creation (Large Track Only)
 **Skill:** `pre-dev-subtask-creation`
-**Output:** `docs/pre-dev/{feature}/subtasks.md`
+**Output:** `docs/pre-dev/{feature}/subtasks/`
 
 **What:** Ultra-atomic task breakdown
 **Covers:**
@@ -322,12 +322,12 @@ Skill tool: "ring-pm-team:pre-dev-task-breakdown"
 
 ```
 docs/pre-dev/{feature}/
-├── PRD.md                 # Gate 1: Business requirements
+├── prd.md                 # Gate 1: Business requirements
 ├── feature-map.md         # Gate 2: Feature relationships (large only)
-├── TRD.md                 # Gate 3: Technical architecture
-├── API.md                 # Gate 4: API contracts (large only)
+├── trd.md                 # Gate 3: Technical architecture
+├── api-design.md          # Gate 4: API contracts (large only)
 ├── data-model.md          # Gate 5: Entity schemas (large only)
-├── dependencies.md        # Gate 6: Tech choices (large only)
+├── dependency-map.md      # Gate 6: Tech choices (large only)
 ├── tasks.md               # Gate 7: Implementation tasks
 └── subtasks.md            # Gate 8: Ultra-atomic tasks (large only)
 ```

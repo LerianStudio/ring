@@ -288,7 +288,7 @@ Action:
 
 ## Output Location
 
-**Always output to**: `docs/pre-development/trd/trd-[feature-name].md`
+**Always output to**: `docs/pre-dev/{feature-name}/trd.md`
 
 ## After TRD Approval
 
