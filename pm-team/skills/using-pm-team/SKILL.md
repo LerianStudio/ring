@@ -329,7 +329,7 @@ docs/pre-dev/{feature}/
 ├── data-model.md          # Gate 5: Entity schemas (large only)
 ├── dependency-map.md      # Gate 6: Tech choices (large only)
 ├── tasks.md               # Gate 7: Implementation tasks
-└── subtasks.md            # Gate 8: Ultra-atomic tasks (large only)
+└── subtasks/              # Gate 8: Ultra-atomic tasks (large only)
 ```
 
 ---
