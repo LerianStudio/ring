@@ -1,16 +1,16 @@
 ---
 name: dev-review
 description: |
-  Development cycle review gate (Gate 6) - executes parallel code review with 3 specialized
+  Development cycle review gate (Gate 3) - executes parallel code review with 3 specialized
   reviewers, aggregates findings, and determines VERDICT for gate passage.
 
 trigger: |
-  - After testing gate complete (Gate 5)
+  - After testing gate complete (Gate 2)
   - Implementation ready for review
   - Before validation gate
 
 skip_when: |
-  - Tests not passing -> complete Gate 5 first
+  - Tests not passing -> complete Gate 2 first
   - Already reviewed with no changes since -> proceed to validation
   - Trivial change (<20 lines, no logic) -> document skip reason
 
@@ -22,7 +22,7 @@ related:
   complementary: [ring-default:requesting-code-review, ring-default:receiving-code-review]
 ---
 
-# Dev Review (Gate 6)
+# Dev Review (Gate 3)
 
 ## Overview
 
@@ -33,7 +33,7 @@ Execute comprehensive code review using 3 specialized reviewers IN PARALLEL. Agg
 ## Prerequisites
 
 Before starting this gate:
-- All tests pass (Gate 5 complete)
+- All tests pass (Gate 2 complete)
 - Implementation is feature-complete
 - Code is committed (or ready to diff)
 
@@ -172,9 +172,9 @@ Apply VERDICT rules:
 
 | Condition | VERDICT | Action |
 |-----------|---------|--------|
-| All 3 reviewers PASS, no Critical/High | **PASS** | Proceed to Gate 7 |
-| Any Critical finding | **FAIL** | Return to Gate 3 |
-| 2+ High findings | **FAIL** | Return to Gate 3 |
+| All 3 reviewers PASS, no Critical/High | **PASS** | Proceed to Gate 4 |
+| Any Critical finding | **FAIL** | Return to Gate 0 |
+| 2+ High findings | **FAIL** | Return to Gate 0 |
 | 1 High finding | **NEEDS_DISCUSSION** | Evaluate with stakeholder |
 | Only Medium/Low findings | **PASS** | Track issues, proceed |
 
@@ -204,7 +204,7 @@ Any Critical issue?
    // FIXME(review): [Issue description]
    // Reported by: [reviewer] on [date]
    ```
-4. Proceed to Gate 7 (Validation)
+4. Proceed to Gate 4 (Validation)
 
 ### VERDICT: FAIL
 
@@ -216,7 +216,7 @@ Any Critical issue?
    1. [Critical] [Description] - File: X, Line: Y
    2. [High] [Description] - File: X, Line: Y
    ```
-3. Return to Gate 3 (Implementation) with findings
+3. Return to Gate 0 (Implementation) with findings
 4. After fixes, re-run ALL 3 reviewers (full parallel review)
 5. Do NOT cherry-pick which reviewers to re-run
 
@@ -315,7 +315,7 @@ If still FAIL after 3 iterations:
 | Findings | X Critical, Y High, Z Medium, W Low |
 | Fixes Applied | N |
 | VERDICT | PASS/FAIL/NEEDS_DISCUSSION |
-| Result | Gate passed / Returned to Gate 3 / Awaiting decision |
+| Result | Gate passed / Returned to Gate 0 / Awaiting decision |
 
 ## Pushing Back on Reviewers
 

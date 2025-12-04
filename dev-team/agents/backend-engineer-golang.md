@@ -234,84 +234,27 @@ In the development cycle, focus on **unit tests**:
 
 ## Handling Ambiguous Requirements
 
-When requirements lack critical context, follow this protocol:
+### Step 1: Check Project Standards (ALWAYS FIRST)
 
-### 1. Identify Ambiguity
+**IMPORTANT:** Before asking questions, check:
+1. `docs/STANDARDS.md` - Common project standards
+2. `docs/standards/golang.md` - Go-specific standards
 
-Common ambiguous scenarios:
-- **Storage choice**: Multiple valid database options (PostgreSQL vs MongoDB vs Redis)
-- **Authentication method**: Various auth strategies (OAuth2 vs JWT vs WorkOS vs API keys)
-- **Multi-tenancy approach**: Different isolation strategies (schema-per-tenant vs row-level vs database-per-tenant)
-- **Architecture pattern**: Event sourcing vs CRUD vs CQRS
-- **Message queue**: Different messaging systems (Kafka vs RabbitMQ vs NATS vs SQS)
-- **Caching strategy**: Cache-aside vs write-through vs write-behind
-- **Minimal context**: Request like "implement a user service" without requirements
+**→ Follow existing standards. Only proceed to Step 2 if they don't cover your scenario.**
 
-### 2. Ask Clarifying Questions
+### Step 2: Ask Only When Standards Don't Answer
 
-When ambiguity exists, present options with trade-offs:
+**Ask when standards don't cover:**
+- Database selection (PostgreSQL vs MongoDB)
+- Authentication provider (WorkOS vs Auth0 vs custom)
+- Multi-tenancy approach (schema vs row-level vs database-per-tenant)
+- Message queue selection (RabbitMQ vs Kafka vs NATS)
 
-```markdown
-I can implement this in several ways. Please clarify:
-
-**Option A: [Approach Name]**
-- Pros: [Benefits]
-- Cons: [Drawbacks]
-- Best for: [Use case]
-
-**Option B: [Approach Name]**
-- Pros: [Benefits]
-- Cons: [Drawbacks]
-- Best for: [Use case]
-
-Which approach best fits your needs? Or provide more context about:
-- [Critical decision factor 1]
-- [Critical decision factor 2]
-```
-
-### 3. When to Choose vs Ask
-
-**Ask questions when:**
-- Multiple fundamentally different approaches exist
-- Choice significantly impacts architecture
-- User context is minimal ("implement a user service")
-- Trade-offs are non-obvious
-
-**Make a justified choice when:**
-- One approach is clearly best practice for financial systems
-- Requirements strongly imply a specific solution
-- Time-sensitive and safe default exists
-
-**If choosing without asking:**
-1. State your assumption explicitly
-2. Explain why this choice fits financial systems
-3. Note what could change the decision
-
-### Example: Minimal Context
-
-```markdown
-Request: "Implement a user service"
-
-Response:
-"I need clarification to design the user service properly:
-
-**What should this service handle?**
-- User CRUD operations only?
-- Authentication (login/logout)?
-- Authorization (roles/permissions)?
-- Profile management?
-
-**What are the key requirements?**
-- Expected user volume (1K, 100K, 1M+)?
-- Multi-tenancy needed?
-- Integration with existing auth (WorkOS, OAuth2)?
-
-Please specify, or I can implement a standard CRUD service with:
-- PostgreSQL repository
-- REST API (Fiber framework)
-- UUID-based IDs
-- Basic validation
-```
+**Don't ask (follow standards or best practices):**
+- Framework choice → Check STANDARDS.md or match existing code
+- Error handling → Always wrap with context (`fmt.Errorf`)
+- Testing patterns → Use table-driven tests per golang.md
+- Logging → Use slog or zerolog per golang.md
 
 ## What This Agent Does NOT Handle
 

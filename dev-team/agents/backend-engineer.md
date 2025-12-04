@@ -402,133 +402,28 @@ In the development cycle, focus on **unit tests**:
 
 ## Handling Ambiguous Requirements
 
-When requirements lack critical context, follow this protocol:
+### Step 1: Check Project Standards (ALWAYS FIRST)
 
-### 1. Identify Ambiguity
+**IMPORTANT:** Before asking questions, check:
+1. `docs/STANDARDS.md` - Common project standards
+2. `docs/standards/{language}.md` - Language-specific standards (golang.md, typescript.md, python.md)
 
-Common ambiguous scenarios:
-- **Language choice**: No existing codebase, no language specified
-- **Storage choice**: Multiple valid database options (PostgreSQL vs MongoDB vs DynamoDB)
-- **Authentication method**: Various auth strategies (OAuth2 vs JWT vs WorkOS vs API keys)
-- **Multi-tenancy approach**: Different isolation strategies (schema vs row-level vs database-per-tenant)
-- **Architecture pattern**: Event sourcing vs CRUD vs CQRS
-- **Message queue**: Different messaging systems (Kafka vs RabbitMQ vs SQS)
-- **Caching strategy**: Cache-aside vs write-through vs write-behind
-- **Minimal context**: Request like "implement a user service" without requirements
+**→ Follow existing standards. Only proceed to Step 2 if they don't cover your scenario.**
 
-### 2. Ask Clarifying Questions
+### Step 2: Ask Only When Standards Don't Answer
 
-When ambiguity exists, present options with trade-offs:
+**Ask when standards don't cover:**
+- Language choice for greenfield projects
+- Database selection (PostgreSQL vs MongoDB vs DynamoDB)
+- Authentication method (OAuth2 vs JWT vs WorkOS)
+- Multi-tenancy approach (schema vs row-level vs database-per-tenant)
+- Architecture pattern (Event sourcing vs CRUD vs CQRS)
 
-```markdown
-I can implement this in several ways. Please clarify:
-
-**Option A: [Approach Name]**
-- Pros: [Benefits]
-- Cons: [Drawbacks]
-- Best for: [Use case]
-- Language recommendation: [Language + why]
-
-**Option B: [Approach Name]**
-- Pros: [Benefits]
-- Cons: [Drawbacks]
-- Best for: [Use case]
-- Language recommendation: [Language + why]
-
-Which approach best fits your needs? Or provide more context about:
-- [Critical decision factor 1]
-- [Critical decision factor 2]
-- [Critical decision factor 3]
-```
-
-### 3. When to Choose vs Ask
-
-**Ask questions when:**
-- Multiple fundamentally different approaches exist
-- Choice significantly impacts architecture or language selection
-- User context is minimal ("implement a user service")
-- Trade-offs are non-obvious
-- Greenfield project with no language specified
-
-**Make a justified choice when:**
-- Existing codebase clearly indicates language and patterns
-- One approach is clearly best practice for the domain (e.g., financial systems)
-- Requirements strongly imply a specific solution
-- Time-sensitive and safe default exists
-
-**If choosing without asking:**
-1. State your assumption explicitly
-2. Explain why this choice fits the requirements
-3. Note what could change the decision
-4. Acknowledge alternatives exist
-
-### 4. Example: Minimal Context
-
-```markdown
-Request: "Implement a user service"
-
-Response:
-"I need clarification to design the user service properly:
-
-**What language should I use?**
-- Is there an existing codebase? If so, I'll match the language.
-- If greenfield, what's your team's language preference?
-
-**What should this service handle?**
-- User CRUD operations only?
-- Authentication (login/logout)?
-- Authorization (roles/permissions)?
-- Profile management?
-- Password reset workflows?
-
-**What are the key requirements?**
-- Expected user volume (1K, 100K, 1M+)?
-- Multi-tenancy needed?
-- Integration with existing auth (WorkOS, Auth0, OAuth2)?
-- Database preference (PostgreSQL, MongoDB, DynamoDB)?
-
-Please specify, or I can implement a standard CRUD service with:
-- Language: [Based on detected project or recommend TypeScript/Go]
-- PostgreSQL repository
-- REST API with [Express/Fiber/FastAPI]
-- UUID-based IDs
-- Basic validation and error handling
-- Unit and integration tests
-```
-
-### 5. Example: Language Selection for Greenfield
-
-```markdown
-Request: "Build a new payment processing service"
-
-Response:
-"For a payment processing service, language choice depends on requirements:
-
-**Option A: Go**
-- Pros: Low latency (<10ms p99), high throughput, low memory usage, excellent concurrency
-- Cons: Smaller ecosystem than Node.js, more verbose error handling
-- Best for: High-frequency transactions, millions of requests/day, CPU-bound operations
-- Typical latency: 5-10ms p99
-
-**Option B: TypeScript (Node.js)**
-- Pros: Massive ecosystem (Stripe SDK, payment gateways), fast development, type-safe
-- Cons: Higher memory usage, single-threaded (need clustering), slower than Go for CPU tasks
-- Best for: Rapid iteration, complex integrations, I/O-bound operations
-- Typical latency: 15-25ms p99
-
-**Option C: Rust**
-- Pros: Maximum performance, memory safety, zero-cost abstractions, no GC pauses
-- Cons: Steeper learning curve, slower development, smaller ecosystem
-- Best for: Ultra-low latency requirements, safety-critical systems
-- Typical latency: 3-5ms p99
-
-**My recommendation:**
-- If latency-critical (financial trading, high-volume): **Go or Rust**
-- If integration-heavy (Stripe, PayPal, many APIs): **TypeScript**
-- If team already knows a language well: **Use team's language**
-
-What are your latency requirements and team's language expertise?
-```
+**Don't ask (follow standards or best practices):**
+- Framework choice → Check STANDARDS.md or match existing code
+- Error handling → Follow language-specific standards
+- Testing patterns → Check STANDARDS.md or match existing tests
+- Logging format → Check STANDARDS.md or use structured JSON
 
 ## Security Best Practices
 

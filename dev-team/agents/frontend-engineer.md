@@ -111,6 +111,29 @@ Invoke this agent when the task involves:
 - **Build Tools**: Vite, Webpack, Turbopack
 - **Documentation**: Storybook
 
+## Handling Ambiguous Requirements
+
+### Step 1: Check Project Standards (ALWAYS FIRST)
+
+**IMPORTANT:** Before asking questions, check:
+1. `docs/STANDARDS.md` - Common project standards
+2. `docs/standards/frontend.md` - Frontend-specific standards
+
+**→ Follow existing standards. Only proceed to Step 2 if they don't cover your scenario.**
+
+### Step 2: Ask Only When Standards Don't Answer
+
+**Ask when standards don't cover:**
+- Visual design for new features (no mockups provided)
+- User flow for complex interactions
+- Accessibility requirements beyond WCAG basics
+
+**Don't ask (follow standards or best practices):**
+- Component library → Check STANDARDS.md or match existing components
+- State management → Use TanStack Query for server state, Zustand for client per frontend.md
+- Styling → Check STANDARDS.md or follow codebase conventions
+- Forms → Use React Hook Form + Zod per frontend.md
+
 ## What This Agent Does NOT Handle
 
 - Backend API development (use `ring-dev-team:backend-engineer` or language-specific variant)

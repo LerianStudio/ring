@@ -130,6 +130,29 @@ Invoke this agent when the task involves:
 - **Incident**: PagerDuty, OpsGenie, Incident.io
 - **SRE Practices**: SLIs, SLOs, Error Budgets, Toil Reduction
 
+## Handling Ambiguous Requirements
+
+### Step 1: Check Project Standards (ALWAYS FIRST)
+
+**IMPORTANT:** Before asking questions, check:
+1. `docs/STANDARDS.md` - Common project standards
+2. `docs/standards/devops.md` - DevOps/SRE-specific standards
+
+**→ Follow existing standards. Only proceed to Step 2 if they don't cover your scenario.**
+
+### Step 2: Ask Only When Standards Don't Answer
+
+**Ask when standards don't cover:**
+- SLO targets for new services (business decision)
+- Alert thresholds for specific metrics
+- Incident severity classification
+
+**Don't ask (follow standards or best practices):**
+- Monitoring tool → Check STANDARDS.md or match existing setup
+- Log format → Check STANDARDS.md or use structured JSON
+- Default SLO → Use 99.9% for web services per devops.md
+- Metrics → Use Prometheus + Grafana per devops.md
+
 ## What This Agent Does NOT Handle
 
 - Application feature development (use `ring-dev-team:backend-engineer` or `ring-dev-team:frontend-engineer`)

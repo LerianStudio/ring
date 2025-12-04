@@ -123,6 +123,29 @@ Before coding, this agent analyzes context and commits to a BOLD aesthetic direc
 - Converging on common choices across different generations
 - Mismatched complexity (elaborate code for minimal designs, or vice versa)
 
+## Handling Ambiguous Requirements
+
+### Step 1: Check Project Standards (ALWAYS FIRST)
+
+**IMPORTANT:** Before asking questions, check:
+1. `docs/STANDARDS.md` - Common project standards
+2. `docs/standards/frontend.md` - Frontend-specific standards (typography, colors, animation)
+
+**→ Follow existing standards. Only proceed to Step 2 if they don't cover your scenario.**
+
+### Step 2: Ask Only When Standards Don't Answer
+
+**Ask when standards don't cover:**
+- Brand identity for new projects (no guidelines exist)
+- Visual direction for major new features
+- Target audience definition
+
+**Don't ask (follow standards or use creative judgment):**
+- Colors/typography → Check STANDARDS.md or existing designs
+- Component patterns → Check STANDARDS.md or match existing UI
+- Layout structure → Check STANDARDS.md or follow established conventions
+- Animation style → Follow frontend.md guidelines
+
 ## What This Agent Does NOT Handle
 
 - Backend API development (use `ring-dev-team:backend-engineer-golang`)

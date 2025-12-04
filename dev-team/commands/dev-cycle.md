@@ -52,21 +52,20 @@ Execute the development cycle for tasks in a markdown file.
 
 | Gate | Skill | Description |
 |------|-------|-------------|
-| 0 | `dev-import-tasks` | Parse and validate tasks |
-| 1 | `dev-analysis` | Analyze codebase context |
-| 2 | `dev-design` | Create technical design |
-| 3 | `dev-implementation` | Implement code |
-| 4 | `dev-devops-setup` | Create Docker/compose |
-| 5 | `dev-testing` | Write and run tests |
-| 6 | `dev-review` | Code review (3 reviewers) |
-| 7 | `dev-validation` | Manual validation |
+| 0 | `dev-implementation` | Implement code (TDD) |
+| 1 | `dev-devops-setup` | Create Docker/compose |
+| 2 | `dev-testing` | Write and run tests |
+| 3 | `dev-review` | Code review (3 reviewers) |
+| 4 | `dev-validation` | Final validation |
+
+**Note:** Tasks are loaded at initialization, not as a separate gate.
 
 After all tasks: `dev-feedback-loop` generates metrics report.
 
 ## Output
 
-- **State file**: `dev-team/state/current-cycle.json`
-- **Feedback report**: `docs/feedback/cycle-YYYY-MM-DD.md`
+- **State file**: `.ring/dev-team/current-cycle.json`
+- **Feedback report**: `.ring/dev-team/feedback/cycle-YYYY-MM-DD.md`
 
 ## Related Commands
 

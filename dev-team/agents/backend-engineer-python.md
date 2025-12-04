@@ -472,126 +472,27 @@ settings = Settings()
 
 ## Handling Ambiguous Requirements
 
-When requirements lack critical context, follow this protocol:
+### Step 1: Check Project Standards (ALWAYS FIRST)
 
-### 1. Identify Ambiguity
+**IMPORTANT:** Before asking questions, check:
+1. `docs/STANDARDS.md` - Common project standards
+2. `docs/standards/python.md` - Python-specific standards
 
-Common ambiguous scenarios:
-- **Framework choice**: FastAPI vs Django vs Flask
-- **Database ORM**: SQLAlchemy vs Django ORM vs raw SQL
-- **Async vs Sync**: When to use async/await vs traditional sync code
-- **Data validation**: Pydantic vs marshmallow vs custom validation
-- **Task queue**: Celery vs RQ vs arq vs direct async tasks
-- **Multi-tenancy approach**: Schema-based vs row-level security vs database-per-tenant
-- **Type checking strictness**: Basic type hints vs mypy strict mode
-- **Minimal context**: Request like "implement a user API" without specifications
+**→ Follow existing standards. Only proceed to Step 2 if they don't cover your scenario.**
 
-### 2. Ask Clarifying Questions
+### Step 2: Ask Only When Standards Don't Answer
 
-When ambiguity exists, present options with trade-offs:
+**Ask when standards don't cover:**
+- Database selection (PostgreSQL vs MongoDB)
+- Authentication provider (WorkOS vs Auth0 vs custom)
+- Multi-tenancy approach (schema vs row-level vs database-per-tenant)
+- Message queue selection (RabbitMQ vs Kafka vs Celery)
 
-```markdown
-I can implement this in several ways. Please clarify:
-
-**Option A: [Approach Name]**
-- Pros: [Benefits]
-- Cons: [Drawbacks]
-- Best for: [Use case]
-- Example: [Code snippet or architecture]
-
-**Option B: [Approach Name]**
-- Pros: [Benefits]
-- Cons: [Drawbacks]
-- Best for: [Use case]
-- Example: [Code snippet or architecture]
-
-Which approach best fits your needs? Or provide more context about:
-- [Critical decision factor 1]
-- [Critical decision factor 2]
-```
-
-### 3. When to Choose vs Ask
-
-**Ask questions when:**
-- Multiple frameworks could work (FastAPI vs Django)
-- Choice significantly impacts architecture (sync vs async)
-- User context is minimal ("implement a user service")
-- Performance vs simplicity trade-offs exist
-- Different Python versions supported (3.9 vs 3.11+)
-
-**Make a justified choice when:**
-- One approach is clearly best practice (Pydantic for validation)
-- Requirements strongly imply a specific solution (high concurrency → async)
-- Time-sensitive and safe default exists (FastAPI for new APIs)
-- Type safety is critical (always use type hints + mypy)
-
-**If choosing without asking:**
-1. State your assumption explicitly
-2. Explain why this choice fits the requirements
-3. Note what could change the decision
-
-### Example: Minimal Context
-
-```markdown
-Request: "Implement a user API"
-
-Response:
-"I need clarification to design the user API properly:
-
-**What framework should I use?**
-- FastAPI: Modern async, auto-documentation, type-safe (recommended for new APIs)
-- Django: Full-featured, ORM included, admin panel (best for CRUD-heavy apps)
-- Flask: Lightweight, flexible, traditional (best for simple microservices)
-
-**What are the requirements?**
-- Expected load (requests per second)?
-- Database choice (PostgreSQL, MongoDB, other)?
-- Authentication needed (JWT, OAuth2, WorkOS)?
-- Multi-tenancy required?
-
-**What endpoints are needed?**
-- CRUD operations (create, read, update, delete)?
-- Authentication (login, logout, token refresh)?
-- User search and filtering?
-- Profile management?
-
-Please specify, or I can implement a standard REST API with:
-- FastAPI framework (async, type-safe)
-- PostgreSQL with SQLAlchemy
-- Pydantic models for validation
-- JWT authentication
-- Comprehensive type hints + mypy
-```
-
-### Example: Framework Choice
-
-```markdown
-Request: "Build a REST API for financial transactions"
-
-Response:
-"For financial transactions, I recommend:
-
-**FastAPI** (Recommended)
-- Pros: Async by default (high concurrency), type-safe with Pydantic, auto OpenAPI docs
-- Cons: Async requires careful handling, smaller ecosystem than Django
-- Best for: High-performance APIs, microservices, real-time data
-
-**Django REST Framework**
-- Pros: Batteries included, mature ecosystem, admin panel, ORM built-in
-- Cons: Sync by default (async support limited), heavier framework
-- Best for: Complex business logic, many CRUD endpoints, admin interface needed
-
-For financial systems handling high transaction volumes, FastAPI with:
-- Async PostgreSQL (asyncpg)
-- Pydantic for decimal precision and validation
-- SQLAlchemy 2.0 async ORM
-- Comprehensive type hints (mypy strict mode)
-
-Does this align with your requirements? Or do you need:
-- Admin interface → Django might be better
-- Existing Django codebase → DRF for consistency
-- Extreme simplicity → Flask
-```
+**Don't ask (follow standards or best practices):**
+- Framework choice → Check STANDARDS.md or match existing code
+- Type hints → Required on all functions per python.md
+- Validation → Use Pydantic per python.md
+- Async patterns → Follow python.md conventions
 
 ## Security Best Practices
 

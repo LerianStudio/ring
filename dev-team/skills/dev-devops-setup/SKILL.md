@@ -1,17 +1,17 @@
 ---
 name: dev-devops-setup
 description: |
-  Gate 4 of the development cycle. Creates/updates Docker configuration,
+  Gate 1 of the development cycle. Creates/updates Docker configuration,
   docker-compose setup, and environment variables for local development
   and deployment readiness.
 
 trigger: |
-  - Gate 4 of development cycle
-  - Implementation complete from Gate 3
+  - Gate 1 of development cycle
+  - Implementation complete from Gate 0
   - Need containerization or environment setup
 
 skip_when: |
-  - No code implementation exists (need Gate 3 first)
+  - No code implementation exists (need Gate 0 first)
   - Project has no Docker requirements
   - Only documentation changes
 
@@ -23,7 +23,7 @@ related:
   complementary: [dev-implementation, dev-testing]
 ---
 
-# DevOps Setup (Gate 4)
+# DevOps Setup (Gate 1)
 
 ## Overview
 
@@ -524,9 +524,9 @@ docker-compose logs app | grep -i error
 - [ ] Application can connect to database
 - [ ] Application can connect to Redis (if used)
 
-## Step 8: Prepare Handoff to Gate 5
+## Step 8: Prepare Handoff to Gate 2
 
-Package the following for Gate 5 (Testing):
+Package the following for Gate 2 (Testing):
 
 ```markdown
 ## Gate 4 Handoff

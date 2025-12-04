@@ -470,125 +470,27 @@ if (result.ok) {
 
 ## Handling Ambiguous Requirements
 
-When requirements lack critical context, follow this protocol:
+### Step 1: Check Project Standards (ALWAYS FIRST)
 
-### 1. Identify Ambiguity
+**IMPORTANT:** Before asking questions, check:
+1. `docs/STANDARDS.md` - Common project standards
+2. `docs/standards/typescript.md` - TypeScript-specific standards
 
-Common ambiguous scenarios:
-- **Runtime choice**: Node.js vs Deno vs Bun (affects dependencies and APIs)
-- **Framework selection**: Express vs Fastify vs NestJS vs Hono (different patterns)
-- **ORM choice**: Prisma vs Drizzle vs TypeORM (different type safety levels)
-- **Validation library**: Zod vs Yup vs class-validator (affects schema design)
-- **Architecture pattern**: Clean Architecture vs layered vs functional
-- **Authentication provider**: Auth0 vs Clerk vs Supabase vs WorkOS vs custom
-- **Multi-tenancy approach**: Schema-based vs row-level vs database-per-tenant
-- **Minimal context**: Request like "implement a user API" without requirements
+**→ Follow existing standards. Only proceed to Step 2 if they don't cover your scenario.**
 
-### 2. Ask Clarifying Questions
+### Step 2: Ask Only When Standards Don't Answer
 
-When ambiguity exists, present options with trade-offs:
+**Ask when standards don't cover:**
+- Database selection (PostgreSQL vs MongoDB)
+- Authentication provider (WorkOS vs Auth0 vs custom)
+- Multi-tenancy approach (schema vs row-level vs database-per-tenant)
+- Message queue selection (RabbitMQ vs Kafka vs SQS)
 
-```markdown
-I can implement this in several ways. Please clarify:
-
-**Option A: [Approach Name]**
-- Pros: [Benefits]
-- Cons: [Drawbacks]
-- Best for: [Use case]
-- Type Safety: [Level of compile-time guarantees]
-
-**Option B: [Approach Name]**
-- Pros: [Benefits]
-- Cons: [Drawbacks]
-- Best for: [Use case]
-- Type Safety: [Level of compile-time guarantees]
-
-Which approach best fits your needs? Or provide more context about:
-- [Critical decision factor 1]
-- [Critical decision factor 2]
-```
-
-### 3. When to Choose vs Ask
-
-**Ask questions when:**
-- Multiple fundamentally different approaches exist
-- Choice significantly impacts type safety or architecture
-- User context is minimal ("implement a user service")
-- Trade-offs involve runtime vs framework selection
-- Authentication provider selection needed
-
-**Make a justified choice when:**
-- One approach provides clearly superior type safety
-- Requirements strongly imply a specific solution (e.g., "end-to-end type safety" implies tRPC)
-- Industry best practice exists (Prisma for PostgreSQL, Zod for validation)
-- Time-sensitive and safe default exists
-
-**If choosing without asking:**
-1. State your assumption explicitly
-2. Explain why this choice maximizes type safety
-3. Note what could change the decision
-
-### Example: Minimal Context
-
-```markdown
-Request: "Implement a user API"
-
-Response:
-"I need clarification to design the user API properly:
-
-**What runtime and framework?**
-- Node.js with Express (most common)?
-- Fastify (better performance)?
-- Hono (edge-first, multi-runtime)?
-- NestJS (enterprise patterns with DI)?
-
-**What database and ORM?**
-- PostgreSQL with Prisma (best type safety)?
-- PostgreSQL with Drizzle (SQL-like queries)?
-- MongoDB with Mongoose?
-
-**Type safety requirements?**
-- End-to-end type safety (use tRPC)?
-- Standard REST API with OpenAPI?
-- GraphQL with TypeGraphQL/Pothos?
-
-**Authentication needs?**
-- JWT-based auth?
-- OAuth2 integration?
-- Third-party provider (Auth0, Clerk, WorkOS)?
-
-Please specify, or I can implement a standard REST API with:
-- Node.js + Fastify (performance + good TypeScript support)
-- PostgreSQL + Prisma (excellent type safety)
-- Zod validation (runtime + compile-time safety)
-- JWT authentication
-- UUID-based IDs with branded types
-```
-
-### Example: Runtime Selection
-
-```markdown
-Request: "Build an API for user management"
-
-Response:
-"To choose the right runtime and stack, I need to understand:
-
-**Runtime Environment:**
-- **Node.js**: Largest ecosystem, best library support, mature
-- **Deno**: Built-in TypeScript, secure by default, modern APIs
-- **Bun**: Fastest performance, Node.js compatible, still maturing
-
-**Deployment Target:**
-- Traditional servers/containers (any runtime works)
-- Edge computing (prefer Hono + Deno/Bun)
-- Serverless (Node.js has best Lambda support)
-- Vercel/Cloudflare Workers (Deno/Bun better)
-
-What's your deployment environment? Or I'll default to:
-- Node.js 20+ with Fastify (proven, reliable, excellent TypeScript)
-- Prisma + PostgreSQL (type-safe database layer)
-- Zod for validation (compile-time + runtime safety)
-```
+**Don't ask (follow standards or best practices):**
+- Framework choice → Check STANDARDS.md or match existing code
+- Type safety → Always use strict mode, branded types per typescript.md
+- Validation → Use Zod per typescript.md
+- Error handling → Use Result type pattern per typescript.md
 
 ## Security Best Practices
 

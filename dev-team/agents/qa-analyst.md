@@ -13,14 +13,17 @@ output_schema:
     - name: "Summary"
       pattern: "^## Summary"
       required: true
-    - name: "Implementation"
-      pattern: "^## Implementation"
+    - name: "Test Strategy"
+      pattern: "^## Test Strategy"
       required: true
-    - name: "Files Changed"
-      pattern: "^## Files Changed"
+    - name: "Test Cases"
+      pattern: "^## Test Cases"
       required: true
-    - name: "Testing"
-      pattern: "^## Testing"
+    - name: "Test Results"
+      pattern: "^## Test Results"
+      required: true
+    - name: "Coverage"
+      pattern: "^## Coverage"
       required: true
     - name: "Next Steps"
       pattern: "^## Next Steps"
@@ -141,6 +144,28 @@ Invoke this agent when the task involves:
 - **Reporting**: Allure, CTRF, TestRail
 - **CI Integration**: GitHub Actions, Jenkins, GitLab CI
 - **Test Management**: TestRail, Zephyr, qTest
+
+## Handling Ambiguous Requirements
+
+### Step 1: Check Project Standards (ALWAYS FIRST)
+
+**IMPORTANT:** Before asking questions, check:
+1. `docs/STANDARDS.md` - Common project standards (TDD, coverage requirements)
+
+**→ Follow existing standards. Only proceed to Step 2 if they don't cover your scenario.**
+
+### Step 2: Ask Only When Standards Don't Answer
+
+**Ask when standards don't cover:**
+- Which specific features need testing (vague request: "add tests")
+- Test data strategy for this specific feature
+- Priority of test types when time-constrained
+
+**Don't ask (follow standards or best practices):**
+- Coverage thresholds → Check STANDARDS.md or use 80%
+- Test framework → Check STANDARDS.md or match existing tests
+- Naming conventions → Check STANDARDS.md or follow codebase patterns
+- API testing → Use Postman/Newman per existing patterns
 
 ## What This Agent Does NOT Handle
 

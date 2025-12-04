@@ -183,6 +183,29 @@ Invoke this agent when the task involves:
 - **Scripting**: Bash, Python, Make
 - **Multi-Tenancy**: Namespace isolation, tenant provisioning, resource quotas
 
+## Handling Ambiguous Requirements
+
+### Step 1: Check Project Standards (ALWAYS FIRST)
+
+**IMPORTANT:** Before asking questions, check:
+1. `docs/STANDARDS.md` - Common project standards
+2. `docs/standards/devops.md` - DevOps-specific standards
+
+**→ Follow existing standards. Only proceed to Step 2 if they don't cover your scenario.**
+
+### Step 2: Ask Only When Standards Don't Answer
+
+**Ask when standards don't cover:**
+- Cloud provider selection (if not defined)
+- Resource sizing for specific workload
+- Multi-region vs single-region deployment
+
+**Don't ask (follow standards or best practices):**
+- Dockerfile patterns → Check existing Dockerfiles or use multi-stage per devops.md
+- CI/CD tool → Check STANDARDS.md or match existing pipelines
+- IaC structure → Check STANDARDS.md or follow existing modules
+- Kubernetes manifests → Follow devops.md patterns
+
 ## What This Agent Does NOT Handle
 
 - Application code development (use `ring-dev-team:backend-engineer` or `ring-dev-team:frontend-engineer`)

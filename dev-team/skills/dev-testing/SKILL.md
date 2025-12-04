@@ -1,18 +1,18 @@
 ---
 name: dev-testing
 description: |
-  Development cycle testing gate (Gate 5) - ensures unit test coverage for all
+  Development cycle testing gate (Gate 2) - ensures unit test coverage for all
   acceptance criteria using TDD methodology (RED-GREEN-REFACTOR).
   Focus: Unit tests only. Integration/E2E tests handled separately in CI/CD.
 
 trigger: |
-  - After implementation complete (Gate 3/4)
+  - After implementation complete (Gate 0/1)
   - Task has acceptance criteria requiring test coverage
   - Need to verify implementation meets requirements
 
 skip_when: |
   - No acceptance criteria defined -> request criteria first
-  - Implementation not started -> complete Gate 3 first
+  - Implementation not started -> complete Gate 0 first
   - Already has full test coverage verified -> proceed to review
 
 sequence:
@@ -23,7 +23,7 @@ related:
   complementary: [ring-default:test-driven-development, ring-dev-team:qa-analyst]
 ---
 
-# Dev Testing (Gate 5)
+# Dev Testing (Gate 2)
 
 ## Overview
 
@@ -36,7 +36,7 @@ Ensure every acceptance criterion has at least one **unit test** proving it work
 ## Prerequisites
 
 Before starting this gate:
-- Implementation code exists (Gate 3 complete)
+- Implementation code exists (Gate 0 complete)
 - Acceptance criteria are clearly defined
 - Test framework is configured and working
 
@@ -191,7 +191,7 @@ Mark each criterion with test status:
 
 ## Gate Exit Criteria
 
-Before proceeding to Gate 6 (Review):
+Before proceeding to Gate 3 (Review):
 
 - [ ] Every acceptance criterion has at least one unit test
 - [ ] All tests follow TDD cycle (RED verified before GREEN)
@@ -204,9 +204,9 @@ Before proceeding to Gate 6 (Review):
 
 If tests fail during execution:
 
-1. **Do NOT proceed** to Gate 6
+1. **Do NOT proceed** to Gate 3
 2. Identify root cause:
-   - Implementation bug -> Return to Gate 3
+   - Implementation bug -> Return to Gate 0
    - Test bug -> Fix test, re-run TDD cycle
    - Missing requirement -> Document gap, consult stakeholder
 3. Fix and re-run full suite

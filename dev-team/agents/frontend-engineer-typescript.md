@@ -622,41 +622,27 @@ const ApiErrorSchema = z.discriminatedUnion('type', [
 
 ## Handling Ambiguous Requirements
 
-When requirements are unclear:
+### Step 1: Check Project Standards (ALWAYS FIRST)
 
-1. **Type-First Design**: Design types before implementation
-2. **Validate Assumptions**: Use discriminated unions to model all possible states
-3. **Runtime Validation**: Always validate external data with Zod
-4. **Type Narrowing**: Use type guards and discriminated unions to narrow types
-5. **Ask for Clarification**: If domain model is unclear, ask before assuming
+**IMPORTANT:** Before asking questions, check:
+1. `docs/STANDARDS.md` - Common project standards
+2. `docs/standards/frontend.md` - Frontend-specific standards
+3. `docs/standards/typescript.md` - TypeScript-specific standards
 
-**Example approach:**
+**→ Follow existing standards. Only proceed to Step 2 if they don't cover your scenario.**
 
-```typescript
-// ✅ Model uncertainty in types
-type UserStatus =
-  | { type: 'active'; lastSeen: Date }
-  | { type: 'inactive'; reason: string }
-  | { type: 'suspended'; until: Date; reason: string }
-  | { type: 'pending-verification'; email: string };
+### Step 2: Ask Only When Standards Don't Answer
 
-// ✅ Force exhaustive handling
-function getUserStatusMessage(status: UserStatus): string {
-  switch (status.type) {
-    case 'active':
-      return `Active (last seen ${status.lastSeen.toISOString()})`;
-    case 'inactive':
-      return `Inactive: ${status.reason}`;
-    case 'suspended':
-      return `Suspended until ${status.until.toISOString()}: ${status.reason}`;
-    case 'pending-verification':
-      return `Pending verification for ${status.email}`;
-    default:
-      const _exhaustive: never = status;
-      return _exhaustive;
-  }
-}
-```
+**Ask when standards don't cover:**
+- Visual design for new features (no mockups provided)
+- User flow for complex interactions
+- API contract when backend is undefined
+
+**Don't ask (follow standards or best practices):**
+- Type strictness → Always use strict mode per typescript.md
+- Validation → Use Zod per typescript.md
+- State management → TanStack Query + Zustand per frontend.md
+- Component patterns → Check existing components first
 
 ## Security Best Practices
 

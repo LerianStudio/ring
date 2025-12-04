@@ -1,28 +1,27 @@
 ---
 name: dev-validation
 description: |
-  Development cycle validation gate (Gate 7) - validates all acceptance criteria are met
+  Development cycle validation gate (Gate 4) - validates all acceptance criteria are met
   and requires explicit user approval before completion.
 
 trigger: |
-  - After review gate passes (Gate 6)
+  - After review gate passes (Gate 3)
   - Implementation and tests complete
   - Need user sign-off on acceptance criteria
 
 skip_when: |
-  - Review not passed -> complete Gate 6 first
+  - Review not passed -> complete Gate 3 first
   - Already validated and approved -> proceed to completion
   - No acceptance criteria defined -> request criteria first
 
 sequence:
   after: [dev-review]
-  before: [dev-completion]
 
 related:
   complementary: [ring-default:verification-before-completion]
 ---
 
-# Dev Validation (Gate 7)
+# Dev Validation (Gate 4)
 
 ## Overview
 
@@ -33,8 +32,8 @@ Final validation gate requiring explicit user approval. Present evidence that ea
 ## Prerequisites
 
 Before starting this gate:
-- All tests pass (Gate 5 verified)
-- Code review passed (Gate 6 VERDICT: PASS)
+- All tests pass (Gate 2 verified)
+- Code review passed (Gate 3 VERDICT: PASS)
 - Implementation is complete and stable
 
 ## Step 1: Gather Validation Evidence
@@ -196,7 +195,7 @@ Please review the evidence above and provide your decision:
    ```
 
 2. Update task status
-3. Proceed to completion (Gate 8)
+3. Proceed to feedback loop
 4. Trigger feedback loop for metrics
 
 ### Decision: REJECTED
@@ -228,11 +227,11 @@ Please review the evidence above and provide your decision:
    2. [Additional test needed]
    3. [Documentation update]
 
-   **Return to:** Gate 3 (Implementation)
+   **Return to:** Gate 0 (Implementation)
    ```
 
-3. Return to Gate 3 with rejection details
-4. After remediation, restart from Gate 5 (Testing)
+3. Return to Gate 0 with rejection details
+4. After remediation, restart from Gate 2 (Testing)
 5. Track rejection in feedback loop (assertiveness penalty)
 
 ## Step 6: Document Validation Outcome
@@ -264,7 +263,7 @@ OR
 ### Next Steps
 [Proceed to completion]
 OR
-[Return to Gate 3 for: ...]
+[Return to Gate 0 for: ...]
 ```
 
 ## Validation Best Practices
@@ -331,7 +330,7 @@ If some criteria pass but others fail:
 | Evidence Collected | X automated, Y manual |
 | User Decision | APPROVED/REJECTED |
 | Rejection Reason | [if applicable] |
-| Result | Gate passed / Returned to Gate 3 |
+| Result | Gate passed / Returned to Gate 0 |
 
 ## Edge Cases
 

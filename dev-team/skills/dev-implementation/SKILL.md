@@ -1,45 +1,44 @@
 ---
 name: dev-implementation
 description: |
-  Gate 3 of the development cycle. Executes code implementation following the technical
-  design from Gate 2. Uses the specialized agent selected in Gate 1 to implement
-  according to project standards defined in docs/STANDARDS.md (including TDD if configured).
+  Gate 0 of the development cycle. Executes code implementation using the appropriate
+  specialized agent based on task content and project language. Handles both tasks
+  with subtasks (step-by-step) and tasks without (TDD autonomous). Follows project
+  standards defined in docs/STANDARDS.md.
 
 trigger: |
-  - Gate 3 of development cycle
-  - Technical design document exists from Gate 2
+  - Gate 0 of development cycle
+  - Tasks loaded at initialization
   - Ready to write code
 
 skip_when: |
-  - No technical design exists (need Gate 2 first)
-  - No agent selected (need Gate 1 analysis)
-  - Design document has unresolved questions
+  - Tasks not loaded (initialization incomplete)
+  - Implementation already complete for this task
 
 sequence:
-  after: [dev-design]
   before: [dev-devops-setup]
 
 related:
-  complementary: [dev-design, test-driven-development, requesting-code-review]
+  complementary: [development-cycle, test-driven-development, requesting-code-review]
   similar: [subagent-driven-development, executing-plans]
 ---
 
-# Code Implementation (Gate 3)
+# Code Implementation (Gate 0)
 
 ## Overview
 
 This skill executes the implementation phase of the development cycle. It:
-- Follows the technical design from Gate 2
-- Uses the specialized agent selected in Gate 1
+- Selects the appropriate specialized agent based on task content
 - Applies project standards from docs/STANDARDS.md
+- Follows TDD methodology
 - Documents implementation decisions
 
 ## Prerequisites
 
-Before starting Gate 3:
+Before starting Gate 1:
 
-1. **Gate 2 Complete**: Technical design document exists at `docs/plans/YYYY-MM-DD-{feature}.md`
-2. **Agent Selected**: Implementation agent from Gate 1 analysis:
+1. **Gate 0 Complete**: Tasks imported and validated
+2. **Agent Selection**: Automatically determined based on task content:
    - `ring-dev-team:backend-engineer-golang`
    - `ring-dev-team:backend-engineer-typescript`
    - `ring-dev-team:backend-engineer-python`

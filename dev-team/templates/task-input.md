@@ -63,9 +63,9 @@ S | M | L | XL
 | Campo | Descrição | Comportamento se ausente |
 |-------|-----------|-------------------------|
 | `### Requisitos Técnicos` | Especificações técnicas | Inferido do contexto e STANDARDS.md |
-| `### Referências` | Links para PRD/TRD | Skill dev-design gera mini-TRD |
+| `### Referências` | Links para PRD/TRD | Usado como contexto na implementação |
 | `### Prioridade` | Ordem de execução | Processado na ordem do arquivo |
-| `### Estimativa` | Tamanho da task | Estimado no Gate 1 (analysis) |
+| `### Estimativa` | Tamanho da task | Usada para planejamento |
 
 ---
 
@@ -178,7 +178,7 @@ M
 
 ## Validação
 
-O Gate 0 (`dev-import-tasks`) valida o arquivo:
+Na inicialização do ciclo, o arquivo é validado:
 
 ### Erros (bloqueiam processamento)
 - Task sem título (`## Task: ...`)

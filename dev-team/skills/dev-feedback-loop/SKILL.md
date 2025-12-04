@@ -16,7 +16,7 @@ skip_when: |
   - Exploratory/spike work (no metrics tracked)
 
 sequence:
-  after: [dev-validation, dev-completion]
+  after: [dev-validation]
 
 related:
   complementary: [ring-default:root-cause-tracing, ring-default:codify-solution]
@@ -78,13 +78,11 @@ After task completion, gather all gate data:
 ### Gate Transitions
 | Gate | Iterations | Duration | Outcome |
 |------|------------|----------|---------|
-| Gate 1: Planning | 1 | 15m | PASS |
-| Gate 2: Design | 2 | 45m | PASS (1 revision) |
-| Gate 3: Implementation | 1 | 2h 30m | PASS |
-| Gate 4: Refinement | 1 | 30m | PASS |
-| Gate 5: Testing | 2 | 1h 15m | PASS (coverage gap) |
-| Gate 6: Review | 1 | 20m | PASS |
-| Gate 7: Validation | 1 | 10m | APPROVED |
+| Gate 0: Implementation | 1 | 2h 30m | PASS |
+| Gate 1: DevOps | 1 | 30m | PASS |
+| Gate 2: Testing | 2 | 1h 15m | PASS (coverage gap) |
+| Gate 3: Review | 1 | 20m | PASS |
+| Gate 4: Validation | 1 | 10m | APPROVED |
 
 ### Review Findings
 - Code reviewer: PASS (2 Low issues)
@@ -108,7 +106,7 @@ Apply formula with collected metrics:
 Base Score: 100
 
 Deductions:
-- Extra iterations: 2 (Gate 2 + Gate 5) = -20
+- Extra iterations: 2 (Gate 1 + Gate 2) = -20
 - Review FAIL: 0 = -0
 - NEEDS_DISCUSSION: 0 = -0
 - Unmet criteria: 0 = -0
@@ -154,9 +152,9 @@ Rating: Good
 - **Root cause:** N+1 query not detected during implementation
 
 ### Corrective Actions
-1. Add edge case checklist to Gate 1 (planning)
-2. Add security checklist to Gate 3 (implementation)
-3. Add performance test to Gate 5 before validation
+1. Add edge case checklist to Gate 0 (implementation)
+2. Add security checklist to Gate 0 (implementation)
+3. Add performance test to Gate 2 before validation
 
 ### Prevention Measures
 1. Update implementation skill with security reminders
@@ -174,7 +172,7 @@ Rating: Good
 ## GATE BLOCKED - Human Intervention Required
 
 **Task:** [TASK-ID]
-**Gate:** Gate 6 (Review)
+**Gate:** Gate 3 (Review)
 **Iterations:** 4 (exceeds limit of 3)
 
 ### Iteration History
@@ -261,10 +259,10 @@ Save report to standardized location:
 
 ```bash
 # Create feedback directory if needed
-mkdir -p docs/feedback
+mkdir -p .ring/dev-team/feedback
 
 # Write report
-cat > docs/feedback/cycle-YYYY-MM-DD.md << 'EOF'
+cat > .ring/dev-team/feedback/cycle-YYYY-MM-DD.md << 'EOF'
 [Report content]
 EOF
 ```
@@ -398,7 +396,7 @@ Based on patterns, generate specific improvements:
 | Threshold Alerts | X |
 | Root Cause Analyses | Y |
 | Improvement Suggestions | Z |
-| Report Location | docs/feedback/cycle-YYYY-MM-DD.md |
+| Report Location | .ring/dev-team/feedback/cycle-YYYY-MM-DD.md |
 
 ## Anti-Patterns
 

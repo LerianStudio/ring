@@ -1,9 +1,9 @@
 ---
 name: development-cycle
 description: |
-  Main orchestrator for the 8-gate development cycle system. Manages task execution
-  through import, analysis, design, implementation, devops, testing, review, and
-  validation gates with state persistence and metrics collection.
+  Main orchestrator for the 5-gate development cycle system. Loads tasks/subtasks
+  from PM team output and executes through implementation, devops, testing, review,
+  and validation gates with state persistence and metrics collection.
 
 trigger: |
   - Starting a new development cycle with a task file
@@ -13,40 +13,107 @@ trigger: |
 skip_when: |
   - Single simple task without quality gates -> execute directly
   - Already in a specific gate skill -> let that gate complete
-  - Need to plan tasks first -> use ring-default:writing-plans
+  - Need to plan tasks first -> use ring-default:writing-plans or ring-pm-team:pre-dev-full
 
 sequence:
-  after: [dev-import-tasks]
   before: [dev-feedback-loop]
 
 related:
-  complementary: [dev-import-tasks, dev-analysis, dev-design, dev-implementation, dev-devops, dev-testing, dev-review, dev-validation, dev-feedback-loop]
+  complementary: [dev-implementation, dev-devops-setup, dev-testing, dev-review, dev-validation, dev-feedback-loop]
 ---
 
 # Development Cycle Orchestrator
 
 ## Overview
 
-The development cycle orchestrator manages task execution through 8 quality gates. It receives a markdown file with tasks (or a --resume flag), iterates through each task individually, and ensures quality at every stage.
+The development cycle orchestrator loads tasks/subtasks from PM team output (or manual task files) and executes through 5 quality gates. Tasks are loaded at initialization - no separate import gate.
 
-**Announce at start:** "I'm using the development-cycle skill to orchestrate task execution through 8 gates."
+**Announce at start:** "I'm using the development-cycle skill to orchestrate task execution through 5 gates."
 
-## The 8 Gates
+## The 5 Gates
 
 | Gate | Skill | Purpose | Agent |
 |------|-------|---------|-------|
-| 0 | dev-import-tasks | Parse and validate task markdown | N/A (parsing) |
-| 1 | dev-analysis | Analyze codebase context, recommend agent | ring-default:codebase-explorer |
-| 2 | dev-design | Create technical design | Recommended from Gate 1 |
-| 3 | dev-implementation | Write code following TDD | Recommended from Gate 1 |
-| 4 | dev-devops | Infrastructure and deployment | ring-dev-team:devops-engineer |
-| 5 | dev-testing | E2E and integration tests | ring-dev-team:qa-analyst |
-| 6 | dev-review | Parallel code review | ring-default:*-reviewer (3x parallel) |
-| 7 | dev-validation | Final acceptance validation | N/A (verification) |
+| 0 | dev-implementation | Write code following TDD | Based on task language/domain |
+| 1 | dev-devops-setup | Infrastructure and deployment | ring-dev-team:devops-engineer |
+| 2 | dev-testing | E2E and integration tests | ring-dev-team:qa-analyst |
+| 3 | dev-review | Parallel code review | ring-default:*-reviewer (3x parallel) |
+| 4 | dev-validation | Final acceptance validation | N/A (verification) |
+
+## Integrated PM → Dev Workflow
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      PM TEAM OUTPUT                              │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  Option A: Tasks only                                           │
+│  └─ docs/pre-dev/{feature}/tasks.md                             │
+│     ├─ T-001: Task with requirements + acceptance criteria      │
+│     ├─ T-002: Task with requirements + acceptance criteria      │
+│     └─ T-003: Task with requirements + acceptance criteria      │
+│                                                                  │
+│  Option B: Tasks + Subtasks                                     │
+│  └─ docs/pre-dev/{feature}/                                     │
+│     ├─ tasks.md (T-001, T-002, T-003)                          │
+│     └─ subtasks/                                                │
+│        ├─ T-001/                                                │
+│        │  ├─ ST-001-01.md (step-by-step instructions)          │
+│        │  ├─ ST-001-02.md                                      │
+│        │  └─ ST-001-03.md                                      │
+│        ├─ T-002/                                                │
+│        │  └─ ST-002-01.md                                      │
+│        └─ T-003/                                                │
+│           ├─ ST-003-01.md                                      │
+│           └─ ST-003-02.md                                      │
+│                                                                  │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                   DEV TEAM EXECUTION                             │
+│              /ring-dev-team:dev-cycle                            │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## Execution Order
+
+### Tasks Only (no subtasks)
+
+```
+For each task in order (T-001 → T-002 → T-003):
+  Gate 0: Implementation (TDD autonomous)
+  Gate 1: DevOps (if needed)
+  Gate 2: Testing
+  Gate 3: Review (3 parallel)
+  Gate 4: Validation
+  → Next task
+```
+
+### Tasks + Subtasks
+
+```
+For each task in order (T-001 → T-002 → T-003):
+  │
+  ├─ Gate 0: Implementation
+  │  │
+  │  │  For each subtask in order (ST-001-01 → ST-001-02 → ST-001-03):
+  │  │    Execute step-by-step instructions
+  │  │    Commit after each subtask
+  │  │
+  │  └─ All subtasks complete for this task
+  │
+  ├─ Gate 1: DevOps (if needed)
+  ├─ Gate 2: Testing
+  ├─ Gate 3: Review (3 parallel)
+  └─ Gate 4: Validation
+
+  → Next task (T-002)
+```
 
 ## State Management
 
-State is persisted to `dev-team/state/current-cycle.json`:
+State is persisted to `.ring/dev-team/current-cycle.json`:
 
 ```json
 {
@@ -58,23 +125,26 @@ State is persisted to `dev-team/state/current-cycle.json`:
   "status": "in_progress|completed|failed|paused",
   "current_task_index": 0,
   "current_gate": 0,
+  "current_subtask_index": 0,
   "tasks": [
     {
-      "id": "TASK-001",
+      "id": "T-001",
       "title": "Task title",
       "status": "pending|in_progress|completed|failed|blocked",
+      "subtasks": [
+        {
+          "id": "ST-001-01",
+          "file": "subtasks/T-001/ST-001-01.md",
+          "status": "pending|completed"
+        }
+      ],
       "gate_progress": {
-        "import": {"status": "completed", "started_at": "...", "completed_at": "..."},
-        "analysis": {"status": "in_progress", "started_at": "..."},
-        "design": {"status": "pending"},
-        "implementation": {"status": "pending"},
+        "implementation": {"status": "in_progress", "started_at": "..."},
         "devops": {"status": "pending"},
         "testing": {"status": "pending"},
         "review": {"status": "pending"},
         "validation": {"status": "pending"}
       },
-      "recommended_agent": null,
-      "complexity": null,
       "artifacts": {}
     }
   ],
@@ -91,13 +161,35 @@ State is persisted to `dev-team/state/current-cycle.json`:
 ### New Cycle (with task file path)
 
 ```
-Input: path/to/tasks.md
+Input: path/to/tasks.md OR path/to/pre-dev/{feature}/
 
-1. Verify file exists
-2. Generate cycle_id (UUID)
-3. Initialize state file at dev-team/state/current-cycle.json
-4. Record started_at timestamp
-5. Proceed to Gate 0
+1. Detect input type:
+   - If file: Load tasks.md directly
+   - If directory: Load tasks.md + discover subtasks/
+
+2. Build execution order:
+   a. Read tasks from tasks.md (ordered by appearance)
+   b. For each task, check for subtasks directory:
+      - If exists: Load subtask files in order (ST-XXX-01, 02, 03...)
+      - If not: Task will use TDD autonomous mode
+
+3. Initialize state:
+   - Generate cycle_id (UUID)
+   - Create .ring/dev-team/current-cycle.json
+   - Populate tasks array with subtask references
+   - Set current_task_index = 0
+   - Set current_gate = 0
+   - Set current_subtask_index = 0
+
+4. Display execution plan:
+   "Loaded X tasks with Y total subtasks:
+   - T-001: 3 subtasks
+   - T-002: 1 subtask
+   - T-003: 2 subtasks (TDD autonomous)
+
+   Starting execution..."
+
+5. Proceed to Gate 0 for first task
 ```
 
 ### Resume Cycle (with --resume flag)
@@ -105,128 +197,105 @@ Input: path/to/tasks.md
 ```
 Input: --resume
 
-1. Load dev-team/state/current-cycle.json
+1. Load .ring/dev-team/current-cycle.json
 2. Validate state file exists and is valid
 3. Display resume summary:
    - Cycle started: [timestamp]
    - Tasks: [completed]/[total]
    - Current task: [id] - [title]
+   - Current subtask: [id] (if applicable)
    - Current gate: [gate_name]
 4. Ask user to confirm resume
-5. Continue from current_gate of current_task
+5. Continue from current position
 ```
 
-## Step 2: Gate 0 - Import Tasks
-
-**REQUIRED SUB-SKILL:** Use ring-dev-team:dev-import-tasks
-
-```
-1. Record gate start timestamp
-2. Invoke: Skill tool: "ring-dev-team:dev-import-tasks"
-   - Pass: source_file path
-3. Receive: List of validated tasks
-4. Update state:
-   - Populate tasks array
-   - Set current_task_index = 0
-   - Set current_gate = 1
-5. Record gate end timestamp
-6. Calculate and store gate duration
-```
-
-**On ERROR:**
-- Log error to state
-- Set status = "failed"
-- Report to user with remediation steps
-- Do NOT proceed
-
-**On WARNING:**
-- Log warnings to state
-- Continue to next gate
-
-## Step 3: Gate 1 - Analysis (Per Task)
-
-**REQUIRED SUB-SKILL:** Use ring-dev-team:dev-analysis
-
-```
-For current task:
-
-1. Record gate start timestamp
-2. Invoke: Skill tool: "ring-dev-team:dev-analysis"
-   - Pass: task details from state
-3. Receive:
-   - recommended_agent (e.g., ring-dev-team:backend-engineer-golang)
-   - complexity (S/M/L/XL)
-   - affected_files list
-   - risks list
-   - project_config (from docs/STANDARDS.md if exists)
-4. Update task in state:
-   - recommended_agent
-   - complexity
-   - gate_progress.analysis.status = "completed"
-   - artifacts.analysis = {affected_files, risks, project_config}
-5. Record gate end timestamp
-6. Proceed to Gate 2
-```
-
-## Step 4: Gate 2 - Design (Per Task)
-
-**REQUIRED SUB-SKILL:** Use ring-dev-team:dev-design
-
-```
-For current task:
-
-1. Record gate start timestamp
-2. Invoke: Skill tool: "ring-dev-team:dev-design"
-   - Pass: task details, analysis artifacts
-3. Receive: Technical design document
-4. Update state:
-   - gate_progress.design.status = "completed"
-   - artifacts.design = {document_path, decisions}
-5. Record gate end timestamp
-6. Proceed to Gate 3
-```
-
-## Step 5: Gate 3 - Implementation (Per Task)
+## Step 2: Gate 0 - Implementation (Per Task)
 
 **REQUIRED SUB-SKILL:** Use ring-dev-team:dev-implementation
 
+### With Subtasks
+
 ```
-For current task:
+For current task with subtasks:
 
 1. Record gate start timestamp
-2. Dispatch to recommended_agent (from Gate 1):
+2. Determine agent based on task content (same logic as without subtasks)
+
+3. For each subtask in order:
+   a. Read subtask file (ST-XXX-NN.md)
+   b. Dispatch agent with subtask instructions:
+      Task tool:
+        subagent_type: "[selected_agent]"
+        prompt: |
+          Execute subtask: [subtask_id]
+
+          Follow these step-by-step instructions exactly:
+          [subtask file content]
+
+          Commit after completing this subtask.
+          Report: files changed, tests run, results.
+
+   c. Update state:
+      - Mark subtask as completed
+      - Increment current_subtask_index
+
+   d. Continue to next subtask
+
+4. When all subtasks complete:
+   - gate_progress.implementation.status = "completed"
+   - Reset current_subtask_index = 0
+   - Proceed to Gate 1
+```
+
+### Without Subtasks (TDD Autonomous)
+
+```
+For current task without subtasks:
+
+1. Record gate start timestamp
+2. Determine appropriate agent based on task content:
+   - Go files/go.mod → ring-dev-team:backend-engineer-golang
+   - TypeScript backend → ring-dev-team:backend-engineer-typescript
+   - Python → ring-dev-team:backend-engineer-python
+   - React/Frontend → ring-dev-team:frontend-engineer-typescript
+   - Infrastructure → ring-dev-team:devops-engineer
+   - Generic → ring-dev-team:backend-engineer
+
+3. Dispatch to selected agent:
    Task tool:
-     subagent_type: "[recommended_agent]"
+     subagent_type: "[selected_agent]"
      prompt: |
        Implement task: [task_id] - [title]
 
-       Requirements:
+       Functional Requirements:
        [functional_requirements]
 
-       Technical Specs:
+       Technical Requirements:
        [technical_requirements]
 
-       Design:
-       [design_document_content]
+       Acceptance Criteria:
+       [acceptance_criteria]
 
-       Affected Files:
-       [affected_files]
+       Follow TDD methodology (ring-default:test-driven-development):
+       1. Write failing test
+       2. Run test (verify RED)
+       3. Implement minimal code
+       4. Run test (verify GREEN)
+       5. Refactor if needed
+       6. Commit
 
-       Follow TDD (ring-default:test-driven-development).
-       Commit your changes.
        Report: files changed, tests written, test results.
 
-3. Receive: Implementation report
-4. Update state:
+4. Receive: Implementation report
+5. Update state:
    - gate_progress.implementation.status = "completed"
    - artifacts.implementation = {files_changed, commit_sha}
-5. Record gate end timestamp
-6. Proceed to Gate 4
+6. Proceed to Gate 1
 ```
 
-## Step 6: Gate 4 - DevOps (Per Task)
+## Step 3: Gate 1 - DevOps (Per Task)
 
-**REQUIRED SUB-SKILL:** Use ring-dev-team:dev-devops
+**REQUIRED SUB-SKILL:** Use ring-dev-team:dev-devops-setup
 
 ```
 For current task:
@@ -236,6 +305,7 @@ For current task:
    - Infrastructure changes?
    - New service deployment?
    - CI/CD updates?
+
 3. If DevOps needed:
    Task tool:
      subagent_type: "ring-dev-team:devops-engineer"
@@ -255,10 +325,11 @@ For current task:
 
 4. If DevOps not needed:
    - Mark as "skipped" with reason
-5. Update state and proceed to Gate 5
+
+5. Update state and proceed to Gate 2
 ```
 
-## Step 7: Gate 5 - Testing (Per Task)
+## Step 4: Gate 2 - Testing (Per Task)
 
 **REQUIRED SUB-SKILL:** Use ring-dev-team:dev-testing
 
@@ -288,14 +359,14 @@ For current task:
 3. Receive: Test report
 4. If tests fail:
    - Log failure
-   - Loop back to Gate 3 (Implementation) with failure details
+   - Loop back to Gate 0 (Implementation) with failure details
    - Increment metrics.review_iterations
 5. If tests pass:
    - Update state
-   - Proceed to Gate 6
+   - Proceed to Gate 3
 ```
 
-## Step 8: Gate 6 - Review (Per Task)
+## Step 5: Gate 3 - Review (Per Task)
 
 **REQUIRED SUB-SKILL:** Use ring-default:requesting-code-review
 
@@ -327,21 +398,21 @@ For current task:
 3. Wait for all reviewers to complete
 4. Aggregate findings by severity:
    - Critical/High/Medium: Must fix
-   - Low: Add TODO comment
-   - Cosmetic: Add FIXME comment
+   - Low: Add TODO(review): comment
+   - Cosmetic: Add FIXME(nitpick): comment
 
 5. If Critical/High/Medium issues found:
-   - Dispatch fix to recommended_agent
+   - Dispatch fix to implementation agent
    - Re-run all 3 reviewers in parallel
    - Increment metrics.review_iterations
-   - Repeat until clean
+   - Repeat until clean (max 3 iterations)
 
 6. When all issues resolved:
    - Update state
-   - Proceed to Gate 7
+   - Proceed to Gate 4
 ```
 
-## Step 9: Gate 7 - Validation (Per Task)
+## Step 6: Gate 4 - Validation (Per Task)
 
 ```
 For current task:
@@ -361,7 +432,7 @@ For current task:
 4. If validation passes:
    - Set task status = "completed"
    - Move to next task (current_task_index++)
-   - Reset current_gate = 1
+   - Reset current_gate = 0
 
 5. If validation fails:
    - Log failure reasons
@@ -371,7 +442,7 @@ For current task:
 6. Record gate end timestamp
 ```
 
-## Step 10: Cycle Completion
+## Step 7: Cycle Completion
 
 ```
 When all tasks completed:
@@ -387,40 +458,40 @@ When all tasks completed:
    - completed_at = timestamp
 
 3. Generate cycle report:
-   | Task | Duration | Review Iterations | Status |
-   |------|----------|-------------------|--------|
-   | TASK-001 | 45m | 2 | PASS |
-   | TASK-002 | 32m | 1 | PASS |
+   | Task | Subtasks | Duration | Review Iterations | Status |
+   |------|----------|----------|-------------------|--------|
+   | T-001 | 3 | 45m | 2 | PASS |
+   | T-002 | 1 | 32m | 1 | PASS |
+   | T-003 | 0 (TDD) | 28m | 0 | PASS |
 
-4. Invoke dev-feedback-loop skill (if defined)
+4. **REQUIRED:** Invoke dev-feedback-loop skill for metrics tracking
 
 5. Report to user:
    "Development cycle completed.
    Tasks: X/X completed
+   Subtasks executed: Y
    Total time: Xh Xm
    Review iterations: X
 
    See detailed report in state file."
 ```
 
-## Review Gate Failure Handling
+## Quick Commands
 
-When Gate 6 (Review) returns FAIL:
+```bash
+# Full PM workflow then dev execution
+/ring-pm-team:pre-dev-full my-feature
+/ring-dev-team:dev-cycle docs/pre-dev/my-feature/
 
-```
-1. Parse reviewer findings
-2. Categorize issues by severity
-3. For Critical/High/Medium:
-   a. Dispatch fix to recommended_agent with specific issues
-   b. Agent makes fixes and commits
-   c. Re-run ALL 3 reviewers in parallel
-   d. Repeat until clean or max iterations (3)
+# Simple PM workflow then dev execution
+/ring-pm-team:pre-dev-feature my-feature
+/ring-dev-team:dev-cycle docs/pre-dev/my-feature/tasks.md
 
-4. If max iterations exceeded:
-   - Set task status = "blocked"
-   - Pause cycle
-   - Report to user for manual intervention
-   - Store detailed failure context in state
+# Manual task file
+/ring-dev-team:dev-cycle docs/tasks/sprint-001.md
+
+# Resume interrupted cycle
+/ring-dev-team:dev-cycle --resume
 ```
 
 ## Error Recovery
@@ -461,24 +532,11 @@ On any error:
 ### Gate Timings
 | Gate | Duration | Status |
 |------|----------|--------|
-| Import | Xm Ys | completed |
-| Analysis | Xm Ys | completed |
-| Design | Xm Ys | completed |
 | Implementation | Xm Ys | in_progress |
 | DevOps | - | pending |
 | Testing | - | pending |
 | Review | - | pending |
 | Validation | - | pending |
 
-### Issues Encountered
-- [List any errors, warnings, or blockers]
-- Or "None"
-
 ### State File Location
-`dev-team/state/current-cycle.json`
-
-### Handoff to Next Gate
-- Current task: [task_id]
-- Next gate: [gate_name]
-- Prerequisites met: [yes/no]
-- Blocking issues: [list or "none"]
+`.ring/dev-team/current-cycle.json`
