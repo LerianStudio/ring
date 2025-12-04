@@ -1,8 +1,9 @@
 ---
 name: dev-analysis
 description: |
-  Analyzes existing codebase against project STANDARDS.md to identify gaps in architecture,
-  code quality, testing, and DevOps. Generates a refactoring tasks.md file compatible with dev-cycle.
+  Analyzes existing codebase against standards to identify gaps in architecture, code quality,
+  testing, and DevOps. Auto-detects project language and uses appropriate agent standards
+  (Go, TypeScript, Frontend, DevOps, SRE). Generates refactoring tasks.md compatible with dev-cycle.
 
 trigger: |
   - User wants to refactor existing project to follow standards
@@ -13,7 +14,7 @@ trigger: |
 skip_when: |
   - Greenfield project → Use /ring-pm-team:pre-dev-* instead
   - Single file fix → Use dev-cycle directly
-  - No STANDARDS.md exists → Create standards first
+  - Unknown language (no go.mod, package.json, etc.) → Specify language manually
 
 sequence:
   before: [dev-cycle]
@@ -29,19 +30,22 @@ This skill analyzes an existing codebase to identify gaps between current implem
 
 ## What This Skill Does
 
-1. **Scans codebase** against `docs/STANDARDS.md` (or `dev-team/docs/STANDARDS.md` as reference)
-2. **Identifies gaps** in 4 dimensions: Architecture, Code, Testing, DevOps
-3. **Prioritizes findings** by impact and effort
-4. **Generates tasks.md** in the same format as PM Team output
-5. **User approves** the plan before execution via dev-cycle
+1. **Detects project language** (Go, TypeScript, Python) from manifest files
+2. **Loads appropriate standards** from agent definitions (golang.md, typescript.md, etc.)
+3. **Scans codebase** against standards in 4 dimensions: Architecture, Code, Testing, DevOps
+4. **Identifies gaps** and prioritizes findings by impact and effort
+5. **Generates tasks.md** in the same format as PM Team output
+6. **User approves** the plan before execution via dev-cycle
 
 ## Prerequisites
 
 Before starting analysis:
 
 1. **Project root identified**: Know where the codebase lives
-2. **Standards available**: Either project has `docs/STANDARDS.md` or will use dev-team defaults
+2. **Language detectable**: Project has go.mod, package.json, or similar manifest
 3. **Scope defined**: Full project or specific directories
+
+**Note:** Standards are auto-loaded from agent definitions based on detected language. Project-specific `docs/STANDARDS.md` overrides defaults if present.
 
 ## Analysis Dimensions
 
@@ -148,43 +152,116 @@ Checks:
     └── Linting enforced
 ```
 
-## Step 1: Load Standards
+## Step 1: Detect Project Language
 
-First, identify which standards to use:
-
-```
-Check order:
-1. Project's docs/STANDARDS.md → Use if exists
-2. Project's docs/standards/{language}.md → Use for language-specific
-3. Fall back to dev-team/docs/STANDARDS.md → Use as reference template
-
-If no standards exist:
-→ STOP
-→ Ask user: "No STANDARDS.md found. Create one first?"
-→ Offer to copy template from dev-team/docs/STANDARDS.md
-```
-
-## Step 2: Scan Codebase
-
-Dispatch parallel agents to analyze each dimension:
+First, identify the primary language(s) of the project:
 
 ```
-Task tool (parallel):
+Language Detection:
+├── go.mod exists → Go project
+│   └── Standards: backend-engineer-golang.md
+│
+├── package.json exists
+│   ├── Has "react" or "next" dependency → Frontend TypeScript
+│   │   └── Standards: frontend-engineer-typescript.md
+│   ├── Has backend deps (express, fastify, nestjs) → Backend TypeScript
+│   │   └── Standards: backend-engineer-typescript.md
+│   └── Otherwise → Generic TypeScript
+│       └── Standards: Check for frontend/backend patterns
+│
+├── pyproject.toml OR requirements.txt exists → Python project
+│   └── Standards: (use generic backend standards)
+│
+├── Dockerfile exists → Check for DevOps standards
+│   └── Standards: devops-engineer.md
+│
+└── Multiple languages detected → Use all applicable standards
 
-┌─────────────────────┬─────────────────────┬─────────────────────┬─────────────────────┐
-│ Architecture Agent  │ Code Quality Agent  │ Testing Agent       │ DevOps Agent        │
-│                     │                     │                     │                     │
-│ subagent: Explore   │ subagent: Explore   │ subagent: Explore   │ subagent: Explore   │
-│                     │                     │                     │                     │
-│ Analyze:            │ Analyze:            │ Analyze:            │ Analyze:            │
-│ - Directory layout  │ - Naming patterns   │ - Test coverage     │ - Dockerfile        │
-│ - DDD patterns      │ - Error handling    │ - Test patterns     │ - docker-compose    │
-│ - Dependencies      │ - Forbidden code    │ - Test naming       │ - CI/CD config      │
-│ - Layer separation  │ - Security issues   │ - Missing tests     │ - Env management    │
-└─────────────────────┴─────────────────────┴─────────────────────┴─────────────────────┘
+Output:
+- Primary language: {Go/TypeScript/Python/etc.}
+- Project type: {Backend API/Frontend/Full-stack/CLI}
+- Agent standards to use: {list of agent files}
 ```
 
-## Step 3: Compile Findings
+## Step 2: Load Standards
+
+Load standards from multiple sources based on detected language:
+
+```
+Standards Loading Order:
+1. Project-specific standards (if exist):
+   - docs/STANDARDS.md → Project conventions
+   - docs/standards/{language}.md → Language overrides
+
+2. Ring agent standards (embedded in agents):
+   ┌─────────────────────────────────────────────────────────────┐
+   │ Language/Domain    │ Agent with Standards                   │
+   ├────────────────────┼────────────────────────────────────────┤
+   │ Go                 │ dev-team/agents/backend-engineer-golang.md     │
+   │ TypeScript Backend │ dev-team/agents/backend-engineer-typescript.md │
+   │ Frontend JS/TS     │ dev-team/agents/frontend-engineer.md           │
+   │ Frontend TS        │ dev-team/agents/frontend-engineer-typescript.md│
+   │ DevOps/Infra       │ dev-team/agents/devops-engineer.md             │
+   │ SRE/Observability  │ dev-team/agents/sre.md                         │
+   │ Testing/QA         │ dev-team/agents/qa-analyst.md                  │
+   └────────────────────┴────────────────────────────────────────┘
+
+3. Merge strategy:
+   - Project standards override agent defaults
+   - Agent standards provide comprehensive baseline
+   - Report which standards are being used
+
+If no project standards AND language unknown:
+→ Ask user: "Detected languages: {list}. Which standards should I use?"
+→ Options: [Go, TypeScript Backend, TypeScript Frontend, DevOps, All]
+```
+
+## Step 3: Scan Codebase
+
+Two-phase analysis using specialized agents:
+
+### Phase 1: Architecture Analysis
+
+**Use skill:** `ring-dev-team:dev-exploration`
+
+This skill executes `ring-default:codebase-explorer` (Opus) to gather:
+- Directory structure compliance
+- Architectural patterns (DDD, Clean Arch, Hexagonal)
+- Anti-patterns and technical debt
+- Naming conventions compliance
+- Dependency direction analysis
+
+**Output:** `exploration_results` with patterns found, anti-patterns, and insights.
+
+### Phase 2: Specialized Dimension Analysis (Parallel)
+
+Dispatch 3 agents in parallel to analyze specific dimensions:
+
+```
+Task tool (3 parallel calls):
+
+1. ring-dev-team:qa-analyst
+   - Test coverage percentage
+   - Test patterns (table-driven, AAA)
+   - TDD compliance
+   - Missing test cases
+
+2. ring-dev-team:devops-engineer
+   - Dockerfile exists and follows best practices
+   - docker-compose.yml configuration
+   - CI/CD pipeline presence
+   - Environment management (.env.example)
+
+3. ring-dev-team:sre
+   - Metrics endpoint (/metrics)
+   - Health check endpoints (/health, /ready)
+   - Structured logging
+   - Tracing setup
+```
+
+**Output:** Dimension-specific findings to merge with exploration_results.
+
+## Step 4: Compile Findings
 
 Merge results from all agents into a structured report:
 
@@ -231,7 +308,7 @@ Merge results from all agents into a structured report:
 ...
 ```
 
-## Step 4: Prioritize and Group
+## Step 5: Prioritize and Group
 
 Group related issues into logical refactoring tasks:
 
@@ -262,7 +339,7 @@ Example grouping:
     └── DEVOPS-002: Create docker-compose.yml
 ```
 
-## Step 5: Generate tasks.md
+## Step 6: Generate tasks.md
 
 Create refactoring tasks in the same format as PM Team output:
 
@@ -345,7 +422,7 @@ and project standards.
 ...
 ```
 
-## Step 6: User Approval
+## Step 7: User Approval
 
 Present the generated plan and ask for approval:
 
@@ -359,7 +436,7 @@ AskUserQuestion:
     - "Cancel" → Abort, keep analysis report only
 ```
 
-## Step 7: Save Artifacts
+## Step 8: Save Artifacts
 
 Save analysis report and tasks to project:
 
@@ -370,7 +447,7 @@ docs/refactor/{timestamp}/
 └── original-standards.md # Snapshot of standards used
 ```
 
-## Step 8: Handoff to dev-cycle
+## Step 9: Handoff to dev-cycle
 
 If approved, the workflow continues:
 
@@ -379,12 +456,13 @@ If approved, the workflow continues:
 /ring-dev-team:dev-cycle docs/refactor/{timestamp}/tasks.md
 ```
 
-This executes each refactoring task through the standard 5-gate process:
+This executes each refactoring task through the standard 6-gate process:
 - Gate 0: Implementation (TDD)
 - Gate 1: DevOps Setup
-- Gate 2: Testing
-- Gate 3: Review (3 parallel reviewers)
-- Gate 4: Validation (user approval)
+- Gate 2: SRE (Observability)
+- Gate 3: Testing
+- Gate 4: Review (3 parallel reviewers)
+- Gate 5: Validation (user approval)
 
 ## Output Schema
 
@@ -426,39 +504,12 @@ output_schema:
 /ring-dev-team:dev-refactor --analyze-only
 ```
 
-## Integration with dev-cycle
+## Related Skills
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                 /ring-dev-team:dev-refactor                     │
-└─────────────────────────────────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      dev-analysis                           │
-│                                                             │
-│  1. Load STANDARDS.md                                       │
-│  2. Scan codebase (4 parallel agents)                       │
-│  3. Compile findings                                        │
-│  4. Prioritize and group                                    │
-│  5. Generate tasks.md                                       │
-│  6. User approval                                           │
-│  7. Save artifacts                                          │
-└─────────────────────────────────────────────────────────────┘
-                           │
-                           ▼ (if approved)
-┌─────────────────────────────────────────────────────────────┐
-│              /ring-dev-team:dev-cycle                       │
-│              docs/refactor/{timestamp}/tasks.md             │
-│                                                             │
-│  For each REFACTOR-XXX task:                                │
-│    Gate 0: Implementation (TDD)                             │
-│    Gate 1: DevOps Setup                                     │
-│    Gate 2: Testing                                          │
-│    Gate 3: Review (3 reviewers)                             │
-│    Gate 4: Validation                                       │
-└─────────────────────────────────────────────────────────────┘
-```
+| Skill | Purpose |
+|-------|---------|
+| `dev-exploration` | Executes codebase-explorer for architectural insights (Step 3, Phase 1) |
+| `dev-cycle` | Executes refactoring tasks through 6 gates (after approval) |
 
 ## Key Principles
 
