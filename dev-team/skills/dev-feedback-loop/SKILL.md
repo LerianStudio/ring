@@ -107,15 +107,15 @@ Apply formula with collected metrics:
 Base Score: 100
 
 Deductions:
-- Extra iterations: 2 (Gate 1 + Gate 2) = -20
+- Extra iterations: 1 (Gate 3) = -10
 - Review FAIL: 0 = -0
 - NEEDS_DISCUSSION: 0 = -0
 - Unmet criteria: 0 = -0
 - User REJECTED: No = -0
 
-**Final Score: 80 / 100**
+**Final Score: 90 / 100**
 
-Rating: Good
+Rating: Excellent
 ```
 
 ## Step 3: Threshold Alerts
