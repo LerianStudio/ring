@@ -426,7 +426,7 @@ The dev-team plugin provides three unified workflows that all use the same 6-gat
 
 ### 1. New Project / Feature (via PM Team)
 
-```
+```text
 /ring-pm-team:pre-dev-feature "Add user authentication"
                     │
                     ▼
@@ -441,7 +441,7 @@ The dev-team plugin provides three unified workflows that all use the same 6-gat
 
 ### 2. Direct Task Execution
 
-```
+```text
 /ring-dev-team:dev-cycle docs/tasks/sprint-001.md
                     │
                     ▼
@@ -450,7 +450,7 @@ The dev-team plugin provides three unified workflows that all use the same 6-gat
 
 ### 3. Refactoring Existing Code
 
-```
+```text
 /ring-dev-team:dev-refactor
         │
         ▼
@@ -478,7 +478,7 @@ docs/refactor/{timestamp}/tasks.md
 
 All workflows converge to the same execution process:
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │                   6-GATE DEVELOPMENT CYCLE                  │
 ├─────────────────────────────────────────────────────────────┤
