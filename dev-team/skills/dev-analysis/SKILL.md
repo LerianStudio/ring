@@ -169,9 +169,6 @@ Language Detection:
 │   └── Otherwise → Generic TypeScript
 │       └── Standards: Check for frontend/backend patterns
 │
-├── pyproject.toml OR requirements.txt exists → Python project
-│   └── Standards: (use generic backend standards)
-│
 ├── Dockerfile exists → Check for DevOps standards
 │   └── Standards: devops-engineer.md
 │

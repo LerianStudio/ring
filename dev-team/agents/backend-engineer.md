@@ -406,7 +406,7 @@ In the development cycle, focus on **unit tests**:
 
 **IMPORTANT:** Before asking questions, check:
 1. `docs/STANDARDS.md` - Common project standards
-2. `docs/standards/{language}.md` - Language-specific standards (golang.md, typescript.md, python.md)
+2. Language-specific agent definitions contain embedded standards
 
 **→ Follow existing standards. Only proceed to Step 2 if they don't cover your scenario.**
 
@@ -514,7 +514,6 @@ For detailed implementation patterns, use the appropriate language-specific agen
 |----------|-------|---------------------|
 | **Go** | `ring-dev-team:backend-engineer-golang` | `dev-team/docs/standards/golang.md` |
 | **TypeScript** | `ring-dev-team:backend-engineer-typescript` | `dev-team/docs/standards/typescript.md` |
-| **Python** | `ring-dev-team:backend-engineer-python` | `dev-team/docs/standards/python.md` |
 
 ### Common Patterns (All Languages)
 
