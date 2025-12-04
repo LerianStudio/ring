@@ -545,6 +545,9 @@ output_schema:
 - ALWAYS use /ring-default:commit for all commits
 - Never write git commit commands manually
 - Command enforces: conventional commits, trailers, no emoji signatures
+- MUST use --trailer parameter for AI identification (NOT in message body)
+- Format: git commit -m "msg" --trailer "Generated-by: Claude" --trailer "AI-Model: <model>"
+- NEVER use HEREDOC to include trailers in message body
 ```
 
 ### Session Context
