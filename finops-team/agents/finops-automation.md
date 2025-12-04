@@ -85,10 +85,14 @@ This guide contains:
 - Reporter .tpl template syntax and patterns
 - Essential filters for Brazilian regulatory compliance
 - Date and number formatting patterns
-- Template patterns for BACEN XML, RFB e-Financeira, DIMP
+- Template patterns for BACEN XML, RFB e-Financeira, DIMP, Open Banking
 - HTML report templates, TXT fixed-width formats
 - Best practices and common pitfalls
 - Testing checklist before delivery
+
+**Additional Documentation:**
+- Open Finance Brasil: `.claude/docs/regulatory/templates/BACEN/OpenBanking/open-banking-brasil.md`
+- APIX Reference: `.claude/docs/regulatory/templates/BACEN/OpenBanking/apix-reference.md`
 
 ---
 
