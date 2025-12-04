@@ -455,7 +455,7 @@ Remember:
 
 ## Development Workflows
 
-The dev-team plugin provides three unified workflows that all use the same 5-gate development cycle:
+The dev-team plugin provides three unified workflows that all use the same 6-gate development cycle:
 
 ### 1. New Project / Feature (via PM Team)
 

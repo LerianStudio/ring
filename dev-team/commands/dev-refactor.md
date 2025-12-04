@@ -84,12 +84,13 @@ Analyze existing codebase against standards and execute refactoring through dev-
 │              /ring-dev-team:dev-cycle                       │
 │              docs/refactor/{timestamp}/tasks.md             │
 │                                                             │
-│  Standard 5-gate process for each task:                     │
+│  Standard 6-gate process for each task:                     │
 │  • Gate 0: Implementation (TDD)                             │
 │  • Gate 1: DevOps Setup                                     │
-│  • Gate 2: Testing                                          │
-│  • Gate 3: Review (3 parallel reviewers)                    │
-│  • Gate 4: Validation                                       │
+│  • Gate 2: SRE (Observability)                              │
+│  • Gate 3: Testing                                          │
+│  • Gate 4: Review (3 parallel reviewers)                    │
+│  • Gate 5: Validation                                       │
 └─────────────────────────────────────────────────────────────┘
 ```
 

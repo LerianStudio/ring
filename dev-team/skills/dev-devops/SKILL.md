@@ -17,7 +17,7 @@ skip_when: |
 
 sequence:
   after: [dev-implementation]
-  before: [dev-testing]
+  before: [dev-sre]
 
 related:
   complementary: [dev-implementation, dev-testing]
