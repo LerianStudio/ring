@@ -116,7 +116,7 @@ Invoke this agent when the task involves:
 ### Step 1: Check Project Standards (ALWAYS FIRST)
 
 **IMPORTANT:** Before asking questions, check:
-1. `docs/STANDARDS.md` - Common project standards
+1. `docs/PROJECT_RULES.md` - Common project standards
 2. `docs/standards/frontend.md` - Frontend-specific standards
 
 **→ Follow existing standards. Only proceed to Step 2 if they don't cover your scenario.**
@@ -129,9 +129,9 @@ Invoke this agent when the task involves:
 - Accessibility requirements beyond WCAG basics
 
 **Don't ask (follow standards or best practices):**
-- Component library → Check STANDARDS.md or match existing components
+- Component library → Check PROJECT_RULES.md or match existing components
 - State management → Use TanStack Query for server state, Zustand for client per frontend.md
-- Styling → Check STANDARDS.md or follow codebase conventions
+- Styling → Check PROJECT_RULES.md or follow codebase conventions
 - Forms → Use React Hook Form + Zod per frontend.md
 
 ## Domain Standards

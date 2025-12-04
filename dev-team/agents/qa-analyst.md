@@ -150,7 +150,7 @@ Invoke this agent when the task involves:
 ### Step 1: Check Project Standards (ALWAYS FIRST)
 
 **IMPORTANT:** Before asking questions, check:
-1. `docs/STANDARDS.md` - Common project standards (TDD, coverage requirements)
+1. `docs/PROJECT_RULES.md` - Common project standards (TDD, coverage requirements)
 
 **→ Follow existing standards. Only proceed to Step 2 if they don't cover your scenario.**
 
@@ -162,9 +162,9 @@ Invoke this agent when the task involves:
 - Priority of test types when time-constrained
 
 **Don't ask (follow standards or best practices):**
-- Coverage thresholds → Check STANDARDS.md or use 80%
-- Test framework → Check STANDARDS.md or match existing tests
-- Naming conventions → Check STANDARDS.md or follow codebase patterns
+- Coverage thresholds → Check PROJECT_RULES.md or use 80%
+- Test framework → Check PROJECT_RULES.md or match existing tests
+- Naming conventions → Check PROJECT_RULES.md or follow codebase patterns
 - API testing → Use Postman/Newman per existing patterns
 
 ## Testing Standards
@@ -173,7 +173,7 @@ The following testing standards MUST be followed when designing and implementing
 
 ### Test-Driven Development (TDD)
 
-When TDD is enabled in project STANDARDS.md, follow the RED-GREEN-REFACTOR cycle:
+When TDD is enabled in project PROJECT_RULES.md, follow the RED-GREEN-REFACTOR cycle:
 
 #### The TDD Cycle
 

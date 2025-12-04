@@ -16,7 +16,7 @@ Analyze existing codebase against standards and execute refactoring through dev-
 
 | Option | Description | Example |
 |--------|-------------|---------|
-| `--standards PATH` | Custom standards file | `--standards docs/MY_STANDARDS.md` |
+| `--standards PATH` | Custom standards file | `--standards docs/MY_PROJECT_RULES.md` |
 | `--analyze-only` | Generate report without executing | `--analyze-only` |
 | `--critical-only` | Only Critical and High priority issues | `--critical-only` |
 | `--dry-run` | Show what would be analyzed | `--dry-run` |
@@ -53,7 +53,7 @@ Analyze existing codebase against standards and execute refactoring through dev-
 │ Load Standards    │                │ Scan Codebase     │
 │                   │                │ (4 dimensions)    │
 │ 1. Project's      │                │                   │
-│    STANDARDS.md   │                │ • Architecture    │
+│    PROJECT_RULES.md   │                │ • Architecture    │
 │ 2. Or dev-team    │                │ • Code Quality    │
 │    defaults       │                │ • Testing         │
 └───────────────────┘                │ • DevOps          │
@@ -126,7 +126,7 @@ Analyze existing codebase against standards and execute refactoring through dev-
 
 ## Prerequisites
 
-1. **Standards file**: Either `docs/STANDARDS.md` in project or use dev-team defaults
+1. **Standards file**: Either `docs/PROJECT_RULES.md` in project or use dev-team defaults
 2. **Git repository**: Project should be under version control
 3. **Readable codebase**: Access to source files
 

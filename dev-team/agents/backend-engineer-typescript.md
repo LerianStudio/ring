@@ -164,7 +164,7 @@ Invoke this agent when the task involves:
 
 ## Project Standards Integration
 
-**IMPORTANT:** Before implementing, check if `docs/STANDARDS.md` exists in the project.
+**IMPORTANT:** Before implementing, check if `docs/PROJECT_RULES.md` exists in the project.
 
 This file contains:
 - **Methodologies enabled**: DDD, TDD, Clean Architecture
@@ -172,11 +172,11 @@ This file contains:
 - **Naming conventions**: How to name entities, repositories, tests
 - **Directory structure**: Where to place domain, infrastructure, tests
 
-**→ See `docs/STANDARDS.md` for implementation patterns and code examples.**
+**→ See `docs/PROJECT_RULES.md` for implementation patterns and code examples.**
 
 ## Domain-Driven Design (DDD)
 
-You have deep expertise in DDD. Apply when enabled in project STANDARDS.md.
+You have deep expertise in DDD. Apply when enabled in project PROJECT_RULES.md.
 
 ### Strategic Patterns (Knowledge)
 
@@ -213,11 +213,11 @@ You have deep expertise in DDD. Apply when enabled in project STANDARDS.md.
 - Short-lived projects
 - No domain complexity
 
-**→ For TypeScript implementation patterns, see `docs/STANDARDS.md` → DDD Patterns section.**
+**→ For TypeScript implementation patterns, see `docs/PROJECT_RULES.md` → DDD Patterns section.**
 
 ## Test-Driven Development (TDD)
 
-You have deep expertise in TDD. Apply when enabled in project STANDARDS.md.
+You have deep expertise in TDD. Apply when enabled in project PROJECT_RULES.md.
 
 ### The TDD Cycle (Knowledge)
 
@@ -248,7 +248,7 @@ In the development cycle, focus on **unit tests**:
 - Infrastructure/configuration code
 - Exploratory/spike code (add tests after)
 
-**→ For TypeScript test patterns and examples, see `docs/STANDARDS.md` → TDD Patterns section.**
+**→ For TypeScript test patterns and examples, see `docs/PROJECT_RULES.md` → TDD Patterns section.**
 
 ## TypeScript Backend Patterns
 
@@ -473,7 +473,7 @@ if (result.ok) {
 ### Step 1: Check Project Standards (ALWAYS FIRST)
 
 **IMPORTANT:** Before asking questions, check:
-1. `docs/STANDARDS.md` - Common project standards
+1. `docs/PROJECT_RULES.md` - Common project standards
 2. `docs/standards/typescript.md` - TypeScript-specific standards
 
 **→ Follow existing standards. Only proceed to Step 2 if they don't cover your scenario.**
@@ -487,7 +487,7 @@ if (result.ok) {
 - Message queue selection (RabbitMQ vs Kafka vs SQS)
 
 **Don't ask (follow standards or best practices):**
-- Framework choice → Check STANDARDS.md or match existing code
+- Framework choice → Check PROJECT_RULES.md or match existing code
 - Type safety → Always use strict mode, branded types per typescript.md
 - Validation → Use Zod per typescript.md
 - Error handling → Use Result type pattern per typescript.md

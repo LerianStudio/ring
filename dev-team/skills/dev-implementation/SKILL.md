@@ -4,7 +4,7 @@ description: |
   Gate 0 of the development cycle. Executes code implementation using the appropriate
   specialized agent based on task content and project language. Handles both tasks
   with subtasks (step-by-step) and tasks without (TDD autonomous). Follows project
-  standards defined in docs/STANDARDS.md.
+  standards defined in docs/PROJECT_RULES.md.
 
 trigger: |
   - Gate 0 of development cycle
@@ -29,7 +29,7 @@ related:
 
 This skill executes the implementation phase of the development cycle. It:
 - Selects the appropriate specialized agent based on task content
-- Applies project standards from docs/STANDARDS.md
+- Applies project standards from docs/PROJECT_RULES.md
 - Follows TDD methodology
 - Documents implementation decisions
 
@@ -45,7 +45,7 @@ Before starting Gate 1:
    - `ring-dev-team:frontend-engineer-typescript`
    - `ring-dev-team:frontend-engineer`
    - `ring-dev-team:frontend-designer`
-3. **Standards Available**: Project standards at `docs/STANDARDS.md` (or conventions from analysis)
+3. **Standards Available**: Project standards at `docs/PROJECT_RULES.md` (or conventions from analysis)
 
 ## Step 1: Prepare Implementation Context
 
@@ -55,7 +55,7 @@ Gather all necessary context:
 Required:
 - Technical design: docs/plans/YYYY-MM-DD-{feature}.md
 - Selected agent: ring-dev-team:{agent}
-- Project standards: docs/STANDARDS.md
+- Project standards: docs/PROJECT_RULES.md
 
 Optional:
 - PRD/TRD: docs/pre-dev/{feature}/
@@ -120,7 +120,7 @@ Task tool:
     {paste task from plan}
 
     ## Project Standards
-    {paste docs/STANDARDS.md content}
+    {paste docs/PROJECT_RULES.md content}
 
     ## Context from Plan
     **Goal:** {goal from plan}
@@ -251,7 +251,7 @@ Use the agent selected in Gate 1 based on technology:
 
 ## TDD Compliance
 
-If TDD is enabled in `docs/STANDARDS.md`, every implementation task follows:
+If TDD is enabled in `docs/PROJECT_RULES.md`, every implementation task follows:
 
 ```
 1. RED: Write failing test first
@@ -261,10 +261,10 @@ If TDD is enabled in `docs/STANDARDS.md`, every implementation task follows:
 ```
 
 **Note:** TDD methodology details (examples, patterns, anti-patterns) are documented in:
-- `docs/STANDARDS.md` → Project-specific TDD configuration
+- `docs/PROJECT_RULES.md` → Project-specific TDD configuration
 - Agent knowledge → Implementation agents know TDD when configured
 
-The implementation agent will enforce TDD if configured in STANDARDS.md.
+The implementation agent will enforce TDD if configured in PROJECT_RULES.md.
 
 ## Handling Implementation Issues
 
@@ -300,7 +300,7 @@ The implementation agent will enforce TDD if configured in STANDARDS.md.
 
 ## Integration with Standards
 
-Follow `docs/STANDARDS.md` for:
+Follow `docs/PROJECT_RULES.md` for:
 
 - **Naming conventions**: Variables, functions, files
 - **Code structure**: Directory layout, module organization
@@ -309,7 +309,7 @@ Follow `docs/STANDARDS.md` for:
 - **Documentation**: Comments, API docs, README
 - **Git**: Commit message format, branch naming
 
-If no STANDARDS.md exists, derive conventions from Gate 1 analysis.
+If no PROJECT_RULES.md exists, derive conventions from Gate 1 analysis.
 
 ## Prepare Handoff to Gate 1
 

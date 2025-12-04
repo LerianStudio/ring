@@ -45,7 +45,7 @@ Before starting analysis:
 2. **Language detectable**: Project has go.mod, package.json, or similar manifest
 3. **Scope defined**: Full project or specific directories
 
-**Note:** Standards are auto-loaded from agent definitions based on detected language. Project-specific `docs/STANDARDS.md` overrides defaults if present.
+**Note:** Standards are auto-loaded from agent definitions based on detected language. Project-specific `docs/PROJECT_RULES.md` overrides defaults if present.
 
 ## Analysis Dimensions
 
@@ -53,7 +53,7 @@ Before starting analysis:
 
 ```text
 Checks:
-├── DDD Patterns (if enabled in STANDARDS.md)
+├── DDD Patterns (if enabled in PROJECT_RULES.md)
 │   ├── Entities have identity comparison
 │   ├── Value Objects are immutable
 │   ├── Aggregates enforce invariants
@@ -67,7 +67,7 @@ Checks:
 │   └── Adapters implement ports
 │
 └── Directory Structure
-    ├── Matches STANDARDS.md layout
+    ├── Matches PROJECT_RULES.md layout
     ├── Separation of concerns
     └── No circular dependencies
 ```
@@ -187,7 +187,7 @@ Load standards from multiple sources based on detected language:
 ```text
 Standards Loading Order:
 1. Project-specific standards (if exist):
-   - docs/STANDARDS.md → Project conventions
+   - docs/PROJECT_RULES.md → Project conventions
    - docs/standards/{language}.md → Language overrides
 
 2. Ring agent standards (embedded in agents):
@@ -287,7 +287,7 @@ Merge results from all agents into a structured report:
 # Analysis Report: {project-name}
 
 **Generated:** {date}
-**Standards:** {path to STANDARDS.md used}
+**Standards:** {path to PROJECT_RULES.md used}
 **Scope:** {directories analyzed}
 
 ## Summary
@@ -389,7 +389,7 @@ port/adapter boundaries following hexagonal architecture.
 
 ### Technical Notes
 - Files to modify: src/domain/*.go
-- Pattern: See STANDARDS.md → Hexagonal Architecture section
+- Pattern: See PROJECT_RULES.md → Hexagonal Architecture section
 - Related issues: ARCH-001, ARCH-003, ARCH-005
 
 ### Issues Addressed
@@ -420,7 +420,7 @@ and project standards.
 
 ### Technical Notes
 - Use errors.Is/As for error checking
-- See STANDARDS.md → Error Handling section
+- See PROJECT_RULES.md → Error Handling section
 
 ### Issues Addressed
 | ID | Description | Location |
@@ -523,7 +523,7 @@ output_schema:
 /ring-dev-team:dev-refactor src/domain
 
 # Analyze with custom standards
-/ring-dev-team:dev-refactor --standards path/to/STANDARDS.md
+/ring-dev-team:dev-refactor --standards path/to/PROJECT_RULES.md
 
 # Analysis only (no execution)
 /ring-dev-team:dev-refactor --analyze-only
@@ -538,7 +538,7 @@ output_schema:
 ## Key Principles
 
 1. **Same workflow**: Refactoring uses the same dev-cycle as new features
-2. **Standards-driven**: All analysis is based on project STANDARDS.md
+2. **Standards-driven**: All analysis is based on project PROJECT_RULES.md
 3. **Traceable**: Every task links back to specific issues found
 4. **Incremental**: Can approve subset of tasks (critical only, etc.)
 5. **Reversible**: Original analysis preserved for reference

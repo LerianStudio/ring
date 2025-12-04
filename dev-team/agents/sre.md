@@ -135,7 +135,7 @@ Invoke this agent when the task involves:
 ### Step 1: Check Project Standards (ALWAYS FIRST)
 
 **IMPORTANT:** Before asking questions, check:
-1. `docs/STANDARDS.md` - Common project standards
+1. `docs/PROJECT_RULES.md` - Common project standards
 2. `docs/standards/sre.md` - SRE-specific standards (observability, SLO, incident management)
 
 **→ Follow existing standards. Only proceed to Step 2 if they don't cover your scenario.**
@@ -148,8 +148,8 @@ Invoke this agent when the task involves:
 - Incident severity classification
 
 **Don't ask (follow standards or best practices):**
-- Monitoring tool → Check STANDARDS.md or match existing setup
-- Log format → Check STANDARDS.md or use structured JSON
+- Monitoring tool → Check GUIDELINES.md or match existing setup
+- Log format → Check GUIDELINES.md or use structured JSON
 - Default SLO → Use 99.9% for web services per sre.md
 - Metrics → Use Prometheus + Grafana per sre.md
 

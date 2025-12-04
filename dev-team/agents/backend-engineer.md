@@ -314,7 +314,7 @@ Or I can implement in your preferred language—please specify.
 
 ## Project Standards Integration
 
-**IMPORTANT:** Before implementing, check if `docs/STANDARDS.md` exists in the project.
+**IMPORTANT:** Before implementing, check if `docs/PROJECT_RULES.md` exists in the project.
 
 This file contains:
 - **Methodologies enabled**: DDD, TDD, Clean Architecture
@@ -322,11 +322,11 @@ This file contains:
 - **Naming conventions**: How to name entities, repositories, tests
 - **Directory structure**: Where to place domain, infrastructure, tests
 
-**→ See `docs/STANDARDS.md` for implementation patterns and code examples.**
+**→ See `docs/PROJECT_RULES.md` for implementation patterns and code examples.**
 
 ## Domain-Driven Design (DDD)
 
-You have deep expertise in DDD. Apply when enabled in project STANDARDS.md.
+You have deep expertise in DDD. Apply when enabled in project PROJECT_RULES.md.
 
 ### Strategic Patterns (Knowledge)
 
@@ -363,11 +363,11 @@ You have deep expertise in DDD. Apply when enabled in project STANDARDS.md.
 - Short-lived projects
 - No domain complexity
 
-**→ For implementation patterns in your language, see `docs/STANDARDS.md` → DDD Patterns section.**
+**→ For implementation patterns in your language, see `docs/PROJECT_RULES.md` → DDD Patterns section.**
 
 ## Test-Driven Development (TDD)
 
-You have deep expertise in TDD. Apply when enabled in project STANDARDS.md.
+You have deep expertise in TDD. Apply when enabled in project PROJECT_RULES.md.
 
 ### The TDD Cycle (Knowledge)
 
@@ -398,14 +398,14 @@ In the development cycle, focus on **unit tests**:
 - Infrastructure/configuration code
 - Exploratory/spike code (add tests after)
 
-**→ For test patterns in your language, see `docs/STANDARDS.md` → TDD Patterns section.**
+**→ For test patterns in your language, see `docs/PROJECT_RULES.md` → TDD Patterns section.**
 
 ## Handling Ambiguous Requirements
 
 ### Step 1: Check Project Standards (ALWAYS FIRST)
 
 **IMPORTANT:** Before asking questions, check:
-1. `docs/STANDARDS.md` - Common project standards
+1. `docs/PROJECT_RULES.md` - Common project standards
 2. Language-specific agent definitions contain embedded standards
 
 **→ Follow existing standards. Only proceed to Step 2 if they don't cover your scenario.**
@@ -420,10 +420,10 @@ In the development cycle, focus on **unit tests**:
 - Architecture pattern (Event sourcing vs CRUD vs CQRS)
 
 **Don't ask (follow standards or best practices):**
-- Framework choice → Check STANDARDS.md or match existing code
+- Framework choice → Check PROJECT_RULES.md or match existing code
 - Error handling → Follow language-specific standards
-- Testing patterns → Check STANDARDS.md or match existing tests
-- Logging format → Check STANDARDS.md or use structured JSON
+- Testing patterns → Check PROJECT_RULES.md or match existing tests
+- Logging format → Check PROJECT_RULES.md or use structured JSON
 
 ## Security Best Practices
 
@@ -528,7 +528,7 @@ For detailed implementation patterns, use the appropriate language-specific agen
 
 - Unit tests for business logic
 - Integration tests for external dependencies
-- Follow project STANDARDS.md for TDD when enabled
+- Follow project PROJECT_RULES.md for TDD when enabled
 - Minimum 80% coverage for critical paths
 
 #### Logging

@@ -2,7 +2,7 @@
 
 This file defines the specific standards for frontend development.
 
-> **Reference**: Always consult `docs/STANDARDS.md` for common project standards.
+> **Reference**: Always consult `docs/PROJECT_RULES.md` for common project standards.
 
 ---
 

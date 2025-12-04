@@ -128,7 +128,7 @@ Before coding, this agent analyzes context and commits to a BOLD aesthetic direc
 ### Step 1: Check Project Standards (ALWAYS FIRST)
 
 **IMPORTANT:** Before asking questions, check:
-1. `docs/STANDARDS.md` - Common project standards
+1. `docs/PROJECT_RULES.md` - Common project standards
 2. `docs/standards/frontend.md` - Frontend-specific standards (typography, colors, animation)
 
 **→ Follow existing standards. Only proceed to Step 2 if they don't cover your scenario.**
@@ -141,9 +141,9 @@ Before coding, this agent analyzes context and commits to a BOLD aesthetic direc
 - Target audience definition
 
 **Don't ask (follow standards or use creative judgment):**
-- Colors/typography → Check STANDARDS.md or existing designs
-- Component patterns → Check STANDARDS.md or match existing UI
-- Layout structure → Check STANDARDS.md or follow established conventions
+- Colors/typography → Check PROJECT_RULES.md or existing designs
+- Component patterns → Check PROJECT_RULES.md or match existing UI
+- Layout structure → Check PROJECT_RULES.md or follow established conventions
 - Animation style → Follow frontend.md guidelines
 
 ## Domain Standards

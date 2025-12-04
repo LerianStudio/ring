@@ -625,7 +625,7 @@ const ApiErrorSchema = z.discriminatedUnion('type', [
 ### Step 1: Check Project Standards (ALWAYS FIRST)
 
 **IMPORTANT:** Before asking questions, check:
-1. `docs/STANDARDS.md` - Common project standards
+1. `docs/PROJECT_RULES.md` - Common project standards
 2. `docs/standards/frontend.md` - Frontend-specific standards
 3. `docs/standards/typescript.md` - TypeScript-specific standards
 

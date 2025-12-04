@@ -185,7 +185,7 @@ Invoke this agent when the task involves:
 
 ## Project Standards Integration
 
-**IMPORTANT:** Before implementing, check if `docs/STANDARDS.md` exists in the project.
+**IMPORTANT:** Before implementing, check if `docs/PROJECT_RULES.md` exists in the project.
 
 This file contains:
 - **Methodologies enabled**: GitOps, Infrastructure as Code, CI/CD patterns
@@ -193,14 +193,14 @@ This file contains:
 - **Naming conventions**: How to name resources, environments, pipelines
 - **Directory structure**: Where to place manifests, terraform modules, charts
 
-**→ See `docs/STANDARDS.md` for implementation patterns and code examples.**
+**→ See `docs/PROJECT_RULES.md` for implementation patterns and code examples.**
 
 ## Handling Ambiguous Requirements
 
 ### Step 1: Check Project Standards (ALWAYS FIRST)
 
 **IMPORTANT:** Before asking questions, check if these files exist in the current project:
-1. `docs/STANDARDS.md` - Common project standards
+1. `docs/PROJECT_RULES.md` - Common project standards
 2. `docs/standards/devops.md` - DevOps-specific standards
 
 **→ Follow existing standards. Only proceed to Step 2 if they don't cover your scenario.**
@@ -214,8 +214,8 @@ This file contains:
 
 **Don't ask (follow standards or best practices):**
 - Dockerfile patterns → Check existing Dockerfiles or use multi-stage per devops.md
-- CI/CD tool → Check STANDARDS.md or match existing pipelines
-- IaC structure → Check STANDARDS.md or follow existing modules
+- CI/CD tool → Check PROJECT_RULES.md or match existing pipelines
+- IaC structure → Check PROJECT_RULES.md or follow existing modules
 - Kubernetes manifests → Follow devops.md patterns
 
 ## Domain Standards
