@@ -94,7 +94,7 @@ For each task in order (T-001 → T-002 → T-003):
   Gate 4: Review (3 parallel)
   Gate 5: Validation
   ──────────────────────────────────
-  🔒 CHECKPOINT: Subtask Approval (Step 7.1)   [if manual_per_subtask]
+  🔒 CHECKPOINT: Unit Approval (Step 7.1)      [if manual_per_subtask]
      - Present completion summary
      - Wait for: Continue / Test First / Stop
   ──────────────────────────────────
@@ -122,21 +122,21 @@ T-001 (has 3 subtasks):
   │    Gate 4: Review (3 parallel)
   │    Gate 5: Validation
   │    ──────────────────────────────────
-  │    🔒 CHECKPOINT: Subtask Approval    [if manual_per_subtask]
+  │    🔒 CHECKPOINT: Unit Approval       [if manual_per_subtask]
   │    ──────────────────────────────────
   │    ✓ Subtask complete
   │
   ├─ ST-001-02:
   │    Gate 0 → Gate 5 (same as above)
   │    ──────────────────────────────────
-  │    🔒 CHECKPOINT: Subtask Approval    [if manual_per_subtask]
+  │    🔒 CHECKPOINT: Unit Approval       [if manual_per_subtask]
   │    ──────────────────────────────────
   │    ✓ Subtask complete
   │
   └─ ST-001-03:
        Gate 0 → Gate 5 (same as above)
        ──────────────────────────────────
-       🔒 CHECKPOINT: Subtask Approval    [if manual_per_subtask]
+       🔒 CHECKPOINT: Unit Approval       [if manual_per_subtask]
        ──────────────────────────────────
        ✓ Subtask complete
 
@@ -150,7 +150,7 @@ T-001 (has 3 subtasks):
 T-002 (no subtasks → task is execution unit):
   Gate 0 → Gate 5
   ──────────────────────────────────
-  🔒 CHECKPOINT: Subtask Approval         [if manual_per_subtask]
+  🔒 CHECKPOINT: Unit Approval            [if manual_per_subtask]
   🔒 CHECKPOINT: Task Approval            [if manual_per_subtask OR manual_per_task]
   ──────────────────────────────────
   ✓ T-002 complete
@@ -159,9 +159,9 @@ T-002 (no subtasks → task is execution unit):
 
 EXECUTION MODES SUMMARY:
 ┌────────────────────┬─────────────────────┬───────────────────┐
-│ Mode               │ Step 7.1 (subtask)  │ Step 7.2 (task)   │
+│ Mode               │ Step 7.1 (unit)     │ Step 7.2 (task)   │
 ├────────────────────┼─────────────────────┼───────────────────┤
-│ manual_per_subtask │ ✓ Every subtask     │ ✓ Every task      │
+│ manual_per_subtask │ ✓ Every unit        │ ✓ Every task      │
 │ manual_per_task    │ ✗ Skip              │ ✓ Every task      │
 │ automatic          │ ✗ Skip              │ ✗ Skip            │
 └────────────────────┴─────────────────────┴───────────────────┘
@@ -296,13 +296,13 @@ Input: --resume
 4. Handle paused states:
 
    If status = "paused_for_approval":
-     - Display: "Paused waiting for subtask approval after [subtask_id]"
-     - Re-present Step 7.1 checkpoint (subtask summary + approval question)
+     - Display: "Paused waiting for unit approval after [unit_id]"
+     - Re-present Step 7.1 checkpoint (unit summary + approval question)
 
    If status = "paused_for_testing":
-     - Display: "Paused for manual testing of subtask [subtask_id]"
+     - Display: "Paused for manual testing of unit [unit_id]"
      - Ask: "Have you finished testing? Ready to continue?"
-     - If yes: Proceed to next subtask (or Step 7.2 if last subtask)
+     - If yes: Proceed to next unit (or Step 7.2 if last unit)
      - If no: Keep paused
 
    If status = "paused_for_task_approval":
@@ -569,14 +569,14 @@ For current execution unit:
 5. If validation passes:
    - Set unit status = "completed"
    - Record gate end timestamp
-   - Proceed to Step 7.1 (Subtask Approval Checkpoint)
+   - Proceed to Step 7.1 (Execution Unit Approval)
 ```
 
-## Step 7.1: Subtask Approval Checkpoint (Conditional)
+## Step 7.1: Execution Unit Approval (Conditional)
 
 **This checkpoint depends on `execution_mode`:**
-- `manual_per_subtask` → Execute this checkpoint (approve each subtask)
-- `manual_per_task` → Skip (proceed directly to next subtask, or Step 7.2 if last subtask)
+- `manual_per_subtask` → Execute this checkpoint (approve each execution unit)
+- `manual_per_task` → Skip (proceed directly to next unit, or Step 7.2 if last unit)
 - `automatic` → Skip entirely
 
 ```text
@@ -584,7 +584,7 @@ After Gate 5 validation passes:
 
 0. Check execution_mode from state:
    - If "automatic": Skip to next execution unit (no checkpoint)
-   - If "manual_per_task": Skip to next subtask (or Step 7.2 if last subtask)
+   - If "manual_per_task": Skip to next unit (or Step 7.2 if last unit)
    - If "manual_per_subtask": Continue with checkpoint below
 
 1. Set status = "paused_for_approval"
@@ -592,9 +592,9 @@ After Gate 5 validation passes:
 
 3. Present completion summary to user:
    ┌─────────────────────────────────────────────────┐
-   │ ✓ SUBTASK COMPLETED                             │
+   │ ✓ EXECUTION UNIT COMPLETED                      │
    ├─────────────────────────────────────────────────┤
-   │ Subtask: [subtask_id] - [title]                 │
+   │ Unit: [unit_id] - [title]                       │
    │ Parent Task: [task_id] - [task_title]           │
    │                                                  │
    │ Gates Passed:                                    │
@@ -614,30 +614,30 @@ After Gate 5 validation passes:
    │   - file2_test.go                               │
    │   - ...                                         │
    │                                                  │
-   │ Next: [next_subtask_id] - [next_title]           │
-   │       OR "Last subtask - proceed to task approval" │
+   │ Next: [next_unit_id] - [next_title]             │
+   │       OR "Last unit - proceed to task approval" │
    └─────────────────────────────────────────────────┘
 
 4. **ASK FOR EXPLICIT APPROVAL using AskUserQuestion tool:**
 
-   Question: "Ready to proceed to the next subtask?"
+   Question: "Ready to proceed to the next execution unit?"
    Options:
-     a) "Continue" - Proceed to next subtask
-     b) "Test First" - Manually test this subtask before continuing
+     a) "Continue" - Proceed to next unit
+     b) "Test First" - Manually test this unit before continuing
      c) "Stop Here" - Pause cycle (can resume later with --resume)
 
 5. Handle user response:
 
    If "Continue":
      - Set status = "in_progress"
-     - Check if more subtasks in current task
-     - If yes: Move to next subtask, reset to Gate 0
+     - Check if more units in current task
+     - If yes: Move to next unit, reset to Gate 0
      - If no: Proceed to Step 7.2 (Task Approval Checkpoint)
 
    If "Test First":
      - Set status = "paused_for_testing"
      - Save state
-     - Output: "Cycle paused. Test subtask [subtask_id] and run:
+     - Output: "Cycle paused. Test unit [unit_id] and run:
                 /ring-dev-team:dev-cycle --resume
                 when ready to continue."
      - STOP execution (do not proceed)
@@ -645,7 +645,7 @@ After Gate 5 validation passes:
    If "Stop Here":
      - Set status = "paused"
      - Save state
-     - Output: "Cycle paused at subtask [subtask_id]. Resume with:
+     - Output: "Cycle paused at unit [unit_id]. Resume with:
                 /ring-dev-team:dev-cycle --resume"
      - STOP execution (do not proceed)
 ```
@@ -729,7 +729,7 @@ After completing all subtasks of a task:
      - STOP execution
 ```
 
-**Note:** For tasks without subtasks, both Step 7.1 and Step 7.2 are executed in sequence (unit approval, then task approval).
+**Note:** For tasks without subtasks, the task itself is the execution unit, so both Step 7.1 (unit approval) and Step 7.2 (task approval) are executed in sequence.
 
 ## Step 8: Cycle Completion
 
