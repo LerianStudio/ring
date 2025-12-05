@@ -189,6 +189,41 @@ Add FIXME comments in the code for these issues:
 // Location: file.ext:line
 ```
 
+## Reviewer Failure Handling
+
+If any reviewer fails during execution (timeout, error, incomplete output):
+
+### Single Reviewer Failure
+
+1. **Do NOT aggregate partial results** - Wait for all 3 reviewers
+2. **Retry the failed reviewer once:**
+   ```
+   Task tool (retry failed reviewer):
+     model: "opus"
+     description: "Retry [reviewer-name] review"
+     prompt: [same parameters as original]
+   ```
+3. **If retry fails:** Report which reviewer failed and why
+4. **Continue with available results** only if user explicitly approves
+
+### Multiple Reviewer Failures
+
+1. **Stop and report** - Do not provide partial review
+2. **Investigate root cause:**
+   - Large codebase? Consider chunking files
+   - Timeout? Increase timeout or reduce scope
+   - Error? Check file paths and permissions
+3. **Retry all failed reviewers** after addressing root cause
+
+### Incomplete Output Detection
+
+Signs that a reviewer produced incomplete output:
+- Missing required sections (check output_schema in agent definition)
+- Verdict present but no issues listed
+- Summary only without detailed analysis
+
+**Action:** Re-dispatch the reviewer with explicit instruction to include all required sections.
+
 ## Remember
 
 1. **All reviewers are independent** - They run in parallel, not sequentially
@@ -198,3 +233,4 @@ Add FIXME comments in the code for these issues:
 5. **Consolidate findings by severity** - Group all issues across reviewers
 6. **Provide clear action guidance** - Tell user exactly what to fix vs. document
 7. **Overall FAIL if any reviewer fails** - One failure means work needs fixes
+8. **Retry failed reviewers once** - Don't give up on first failure

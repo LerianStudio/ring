@@ -30,7 +30,7 @@ Write comprehensive implementation subtasks assuming the engineer has zero conte
 
 **Context:** This should be run after Gate 7 validation (approved tasks exist).
 
-**Save subtasks to:** `docs/pre-development/subtasks/T-[task-id]/ST-[task-id]-[number]-[description].md`
+**Save subtasks to:** `docs/pre-dev/{feature-name}/subtasks/T-[task-id]/ST-[task-id]-[number]-[description].md`
 
 ## When to Use
 
@@ -411,7 +411,7 @@ Action:
 
 After creating subtasks, offer execution choice:
 
-**"Subtasks complete and saved to `docs/pre-development/subtasks/T-[id]/`. Two execution options:**
+**"Subtasks complete and saved to `docs/pre-dev/{feature-name}/subtasks/T-[id]/`. Two execution options:**
 
 **1. Subagent-Driven (this session)** - I dispatch fresh subagent per subtask, review between subtasks, fast iteration
 

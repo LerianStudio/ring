@@ -275,17 +275,30 @@ After fixing Critical/High issues:
 
 1. **Always re-run ALL 3 reviewers** (not just the one that found the issue)
 2. Fixes may introduce new issues in other domains
-3. Parallel execution makes full re-review fast (~3-5 minutes)
+3. Parallel execution makes full re-review fast
 4. Update aggregated findings
 5. Re-determine VERDICT
 
+### Timing Expectations
+
+| Iteration | Expected Duration | Notes |
+|-----------|-------------------|-------|
+| 1st review | 3-5 minutes | Initial parallel review |
+| 2nd review (after fixes) | 3-5 minutes | Full re-review, same duration |
+| 3rd review (final) | 3-5 minutes | Last automated attempt |
+
+**Total maximum time:** ~15-20 minutes (including fix time between iterations)
+
 **Maximum iterations:** 3 review cycles
+
+### Escalation After Max Iterations
 
 If still FAIL after 3 iterations:
 - Stop automated process
 - Request human intervention
-- Document recurring issues
+- Document recurring issues pattern
 - Consider architectural changes
+- Escalate to senior developer or architect
 
 ## Anti-Patterns
 

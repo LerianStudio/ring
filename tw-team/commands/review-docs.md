@@ -105,6 +105,8 @@ Task tool:
 | No examples | API without code | Add examples |
 | Long sentences | 40+ words | Split into multiple |
 
-Now proceed with reviewing documentation.
+## Proceed
 
-$ARGUMENTS.file ? Read the file at: **$ARGUMENTS.file** : Paste or specify the documentation to review.
+**Documentation to review:** $ARGUMENTS.file
+
+If no file path was provided, paste the documentation content or specify a file path now.

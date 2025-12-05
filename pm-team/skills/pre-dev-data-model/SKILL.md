@@ -672,7 +672,7 @@ Action:
 
 ## Output Location
 
-**Always output to**: `docs/pre-development/data-model/data-model-[feature-name].md`
+**Always output to**: `docs/pre-dev/{feature-name}/data-model.md`
 
 ## After Data Model Approval
 

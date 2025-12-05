@@ -394,7 +394,7 @@ Action:
 
 ## Output Location
 
-**Always output to**: `docs/pre-development/dependencies/dep-map-[feature-name].md`
+**Always output to**: `docs/pre-dev/{feature-name}/dependency-map.md`
 
 ## After Dependency Map Approval
 
