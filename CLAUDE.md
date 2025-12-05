@@ -8,7 +8,7 @@ Ring is a comprehensive skills library and workflow system for AI agents that en
 
 **Active Plugins:**
 - **ring-default**: 21 core skills, 7 slash commands, 5 specialized agents
-- **ring-dev-team**: 10 development skills, 5 slash commands, 9 developer agents (Backend [generic], Backend Go, Backend TypeScript, DevOps, Frontend [generic], Frontend TypeScript, Frontend Designer, QA, SRE)
+- **ring-dev-team**: 10 development skills, 5 slash commands, 7 developer agents (Backend Go, Backend TypeScript, DevOps, Frontend TypeScript, Frontend Designer, QA, SRE)
 - **ring-finops-team**: 6 regulatory skills, 2 FinOps agents
 - **ring-pm-team**: 10 product planning skills, 3 research agents, 2 slash commands
 - **ralph-wiggum**: 1 skill for iterative AI development loops using Stop hooks
@@ -121,12 +121,10 @@ ring/                                  # Monorepo root
 │   │   ├── dev-sre/               # Gate 2: Observability setup
 │   │   ├── dev-testing/           # Gate 3: Test coverage
 │   │   └── dev-validation/        # Gate 5: User approval
-│   └── agents/                    # 9 specialized developer agents
-│       ├── backend-engineer.md             # Backend specialist (language agnostic)
+│   └── agents/                    # 7 specialized developer agents
 │       ├── backend-engineer-golang.md      # Go backend specialist
 │       ├── backend-engineer-typescript.md  # TypeScript/Node.js backend specialist
 │       ├── devops-engineer.md              # DevOps infrastructure specialist
-│       ├── frontend-engineer.md            # Frontend specialist (language agnostic)
 │       ├── frontend-engineer-typescript.md # TypeScript/React/Next.js specialist
 │       ├── frontend-designer.md            # Visual design specialist
 │       ├── qa-analyst.md                   # Quality assurance specialist
@@ -412,7 +410,7 @@ output_schema:
       required: true
 ```
 
-**Used by:** All backend engineers (`ring-dev-team:backend-engineer`, `ring-dev-team:backend-engineer-golang`, `ring-dev-team:backend-engineer-typescript`), all frontend engineers except designer (`ring-dev-team:frontend-engineer`, `ring-dev-team:frontend-engineer-typescript`), `ring-dev-team:devops-engineer`, `ring-dev-team:qa-analyst`, `ring-dev-team:sre`, `ring-finops-team:finops-automation`
+**Used by:** All backend engineers (`ring-dev-team:backend-engineer-golang`, `ring-dev-team:backend-engineer-typescript`), all frontend engineers except designer (`ring-dev-team:frontend-engineer-typescript`), `ring-dev-team:devops-engineer`, `ring-dev-team:qa-analyst`, `ring-dev-team:sre`, `ring-finops-team:finops-automation`
 
 **Analysis Schema** (for agents that analyze and recommend):
 ```yaml

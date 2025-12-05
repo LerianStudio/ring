@@ -74,7 +74,7 @@ ring/                                  # Monorepo root
 | Plugin | Description | Components |
 |--------|-------------|------------|
 | **ring-default** | Core skills library | 21 skills, 5 agents, 7 commands |
-| **ring-dev-team** | Developer agents | 2 skills, 9 specialized developer agents |
+| **ring-dev-team** | Developer agents | 10 skills, 7 specialized developer agents |
 | **ring-finops-team** | FinOps & regulatory compliance | 6 skills, 2 agents |
 | **ring-pm-team** | Product planning workflows | 10 skills, 2 commands |
 | **ralph-wiggum** | Iterative AI development loops | 1 skill, 3 commands, Stop hook |
@@ -119,11 +119,9 @@ default/agents/
 **Structure (ring-dev-team plugin):**
 ```
 dev-team/agents/
-├── backend-engineer.md            # Language-agnostic backend specialist
 ├── backend-engineer-golang.md     # Go backend specialist for financial systems
 ├── backend-engineer-typescript.md # TypeScript/Node.js backend specialist
 ├── devops-engineer.md             # DevOps infrastructure specialist
-├── frontend-engineer.md           # Language-agnostic frontend specialist
 ├── frontend-engineer-typescript.md # TypeScript/React/Next.js frontend specialist
 ├── frontend-designer.md           # Visual design specialist
 ├── qa-analyst.md                  # Quality assurance specialist

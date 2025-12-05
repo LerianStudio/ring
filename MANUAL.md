@@ -196,11 +196,9 @@ Use when you need expert depth in specific domains:
 
 | Agent | Specialization | Technologies |
 |-------|----------------|--------------|
-| `ring-dev-team:backend-engineer` | Language-agnostic backend design | API architecture, system design, microservices patterns |
 | `ring-dev-team:backend-engineer-golang` | Go microservices & APIs | Fiber, gRPC, PostgreSQL, MongoDB, Kafka, OAuth2 |
 | `ring-dev-team:backend-engineer-typescript` | TypeScript/Node.js backend | Express, NestJS, Prisma, TypeORM, GraphQL |
 | `ring-dev-team:devops-engineer` | Infrastructure & CI/CD | Docker, Kubernetes, Terraform, GitHub Actions |
-| `ring-dev-team:frontend-engineer` | React/Next.js dashboards | React, TypeScript, Tailwind, state management |
 | `ring-dev-team:frontend-engineer-typescript` | TypeScript frontend specialist | React, Next.js, Vue, type-safe state management |
 | `ring-dev-team:frontend-designer` | Visual design & aesthetics | Typography, motion, CSS, distinctive UI |
 | `ring-dev-team:qa-analyst` | Quality assurance | Test strategy, automation, coverage |
@@ -292,11 +290,9 @@ These enforce quality standards:
 | Need | Agent to Use |
 |------|-------------|
 | General code quality review | 3 parallel reviewers via `/ring-default:codereview` |
-| Language-agnostic backend design | `ring-dev-team:backend-engineer` |
 | Go backend expertise | `ring-dev-team:backend-engineer-golang` |
 | TypeScript/Node.js backend | `ring-dev-team:backend-engineer-typescript` |
 | Infrastructure/DevOps | `ring-dev-team:devops-engineer` |
-| React/Next.js frontend | `ring-dev-team:frontend-engineer` |
 | TypeScript frontend specialist | `ring-dev-team:frontend-engineer-typescript` |
 | Visual design & aesthetics | `ring-dev-team:frontend-designer` |
 | Deep codebase analysis | `ring-default:codebase-explorer` |

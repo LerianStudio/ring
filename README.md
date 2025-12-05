@@ -16,7 +16,7 @@ Without Ring, AI assistants often:
 Ring solves this by:
 - **Enforcing proven workflows** - Test-driven development, systematic debugging, proper planning
 - **Providing 55 specialized skills** - From brainstorming to production deployment (21 core + 10 dev-team + 10 product planning + 6 FinOps + 1 ralph-wiggum + 7 technical writing)
-- **22 specialized agents** - 5 review/planning agents + 9 developer agents + 3 research agents + 2 FinOps agents + 3 technical writing agents
+- **20 specialized agents** - 5 review/planning agents + 7 developer agents + 3 research agents + 2 FinOps agents + 3 technical writing agents
 - **Automating skill discovery** - Skills load automatically at session start
 - **Preventing common failures** - Built-in anti-patterns and mandatory checklists
 
@@ -31,11 +31,9 @@ Ring solves this by:
 - Use `/ring-default:codereview` command to orchestrate parallel review workflow
 
 **Developer Agents (dev-team plugin):**
-- `ring-dev-team:backend-engineer` - Language-agnostic backend specialist (adapts to Go/TypeScript/etc)
 - `ring-dev-team:backend-engineer-golang` - Go backend specialist for financial systems
 - `ring-dev-team:backend-engineer-typescript` - TypeScript/Node.js backend specialist (Express, NestJS, Fastify)
 - `ring-dev-team:devops-engineer` - DevOps infrastructure specialist
-- `ring-dev-team:frontend-engineer` - React/Next.js specialist (JavaScript-first)
 - `ring-dev-team:frontend-engineer-typescript` - TypeScript-first React/Next.js specialist
 - `ring-dev-team:frontend-designer` - Visual design specialist
 - `ring-dev-team:qa-analyst` - Quality assurance specialist
@@ -414,12 +412,10 @@ ring/                                  # Monorepo root
 │   ├── lib/                        # Infrastructure utilities (9 scripts)
 │   └── docs/                       # Documentation
 ├── dev-team/                      # Developer Agents plugin (ring-dev-team)
-│   └── agents/                      # 9 specialized developer agents
-│       ├── backend-engineer.md         # Language-agnostic backend specialist
+│   └── agents/                      # 7 specialized developer agents
 │       ├── backend-engineer-golang.md  # Go backend specialist
 │       ├── backend-engineer-typescript.md # TypeScript/Node.js backend specialist
 │       ├── devops-engineer.md          # DevOps infrastructure
-│       ├── frontend-engineer.md        # React/Next.js specialist (JavaScript-first)
 │       ├── frontend-engineer-typescript.md # TypeScript-first React/Next.js specialist
 │       ├── frontend-designer.md        # Visual design specialist
 │       ├── qa-analyst.md               # Quality assurance

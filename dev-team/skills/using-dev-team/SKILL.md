@@ -28,38 +28,9 @@ The ring-dev-team plugin provides 9 specialized developer agents. Use them via `
 
 ---
 
-## 9 Developer Specialists
+## 7 Developer Specialists
 
-### 1. Backend Engineer (Language-Agnostic)
-**`ring-dev-team:backend-engineer`**
-
-**Specializations:**
-- Language-agnostic backend design (adapts to Go/TypeScript/Python/Java/Rust)
-- Microservices architecture patterns
-- API design (REST, GraphQL, gRPC)
-- Database modeling & optimization
-- Authentication & authorization
-- Message queues & event-driven systems
-- Caching strategies
-
-**Use When:**
-- You need backend expertise without language commitment
-- Designing multi-language systems
-- Comparing backend approaches across languages
-- Architecture that might use multiple languages
-- Language choice is not yet decided
-
-**Example dispatch:**
-```
-Task tool:
-  subagent_type: "ring-dev-team:backend-engineer"
-  model: "opus"
-  prompt: "Design a user authentication service, recommend the best language and explain trade-offs"
-```
-
----
-
-### 2. Backend Engineer (Go)
+### 1. Backend Engineer (Go)
 **`ring-dev-team:backend-engineer-golang`**
 
 **Specializations:**
@@ -86,7 +57,7 @@ Task tool:
 
 ---
 
-### 3. Backend Engineer (TypeScript/Node.js)
+### 2. Backend Engineer (TypeScript/Node.js)
 **`ring-dev-team:backend-engineer-typescript`**
 
 **Specializations:**
@@ -115,7 +86,7 @@ Task tool:
 
 ---
 
-### 4. DevOps Engineer
+### 3. DevOps Engineer
 **`ring-dev-team:devops-engineer`**
 
 **Specializations:**
@@ -142,35 +113,7 @@ Task tool:
 
 ---
 
-### 5. Frontend Engineer
-**`ring-dev-team:frontend-engineer`**
-
-**Specializations:**
-- React/Next.js application architecture
-- TypeScript for type safety
-- State management (Redux, Zustand, Context)
-- Component design patterns
-- Form handling and validation
-- CSS-in-JS and styling solutions
-
-**Use When:**
-- Building React/Next.js applications
-- Implementing complex UI components
-- State management design
-- Performance optimization for frontend
-- Accessibility improvements
-
-**Example dispatch:**
-```
-Task tool:
-  subagent_type: "ring-dev-team:frontend-engineer"
-  model: "opus"
-  prompt: "Design a React dashboard with real-time data updates and TypeScript"
-```
-
----
-
-### 6. Frontend Engineer (TypeScript)
+### 4. Frontend Engineer (TypeScript)
 **`ring-dev-team:frontend-engineer-typescript`**
 
 **Specializations:**
@@ -199,7 +142,7 @@ Task tool:
 
 ---
 
-### 7. Frontend Designer
+### 5. Frontend Designer
 **`ring-dev-team:frontend-designer`**
 
 **Specializations:**
@@ -225,11 +168,11 @@ Task tool:
   prompt: "Create a brutalist landing page for a tech startup with bold typography and unexpected layouts"
 ```
 
-**Note:** Use `ring-dev-team:frontend-designer` for visual aesthetics and design excellence. Use `ring-dev-team:frontend-engineer` for complex state management, business logic, and application architecture.
+**Note:** Use `ring-dev-team:frontend-designer` for visual aesthetics and design excellence. Use `ring-dev-team:frontend-engineer-typescript` for complex state management, business logic, and application architecture.
 
 ---
 
-### 8. QA Analyst
+### 6. QA Analyst
 **`ring-dev-team:qa-analyst`**
 
 **Specializations:**
@@ -257,7 +200,7 @@ Task tool:
 
 ---
 
-### 9. Site Reliability Engineer (SRE)
+### 7. Site Reliability Engineer (SRE)
 **`ring-dev-team:sre`**
 
 **Specializations:**
@@ -289,56 +232,52 @@ Task tool:
 
 | Need | Specialist | Use Case |
 |------|-----------|----------|
-| Backend (language-agnostic, multi-language) | Backend Engineer | Architecture without language commitment |
 | Go API, database, concurrency | Backend Engineer (Go) | Go-specific service architecture |
 | TypeScript/Node.js backend, NestJS, Express | Backend Engineer (TypeScript) | TypeScript backend services |
 | CI/CD, Docker, Kubernetes, IaC | DevOps Engineer | Deployment pipelines, infrastructure |
-| React, TypeScript, components, state | Frontend Engineer | General UI development, performance |
-| Advanced TypeScript, type-safe frontend, tRPC | Frontend Engineer (TypeScript) | Type-safe React/Next.js projects |
+| TypeScript React/Next.js, type-safe frontend, tRPC | Frontend Engineer (TypeScript) | Type-safe React/Next.js projects |
 | Visual design, typography, motion, aesthetics | Frontend Designer | Distinctive UI, design systems |
 | Test strategy, E2E, coverage | QA Analyst | Testing architecture, automation |
 | Monitoring, SLOs, performance, reliability | SRE | Observability, incident response |
 
 ---
 
-## Choosing Between Generalist and Specialist Agents
+## Choosing the Right Specialist
 
 ### Backend Engineers
 
-**Use `ring-dev-team:backend-engineer` (language-agnostic) when:**
-- Language hasn't been decided yet
-- Comparing multiple language options
-- Multi-language system architecture
-- You want recommendations on language choice
+**Use `ring-dev-team:backend-engineer-golang` when:**
+- Building Go microservices
+- Database optimization with Go
+- gRPC, concurrency, performance optimization
+- Go-specific patterns and idioms
 
-**Use language-specific engineers when:**
-- Language is already decided
-- You need framework-specific guidance (NestJS, FastAPI, etc.)
-- Performance optimization for specific runtime
-- Language-specific patterns and idioms
+**Use `ring-dev-team:backend-engineer-typescript` when:**
+- Building TypeScript/Node.js backends
+- NestJS, Express, Fastify frameworks
+- Prisma/TypeORM integration
+- Full-stack TypeScript projects
 
 **Example decision:**
-- "Should I use Go or TypeScript?" → **`ring-dev-team:backend-engineer`** (agnostic)
-- "How do I optimize this Go service?" → **`ring-dev-team:backend-engineer-golang`**
+- "Build a high-performance Go API" → **`ring-dev-team:backend-engineer-golang`**
+- "Build a NestJS service with Prisma" → **`ring-dev-team:backend-engineer-typescript`**
 
 ### Frontend Engineers
 
-**Use `ring-dev-team:frontend-engineer` (general) when:**
-- Standard React/Next.js projects
-- TypeScript is used but not central concern
-- Focus on component design, state, architecture
-- General frontend best practices
-
-**Use `ring-dev-team:frontend-engineer-typescript` when:**
-- TypeScript is central to project success
-- Need advanced type patterns (branded types, generics)
+**Use `ring-dev-team:frontend-engineer-typescript` for all frontend work:**
+- React/Next.js applications
+- Type-safe state management
+- Component libraries with TypeScript
 - Type-safe API integration (tRPC, Zod)
-- Migrating JavaScript to TypeScript
-- Strict type safety requirements
+
+**Use `ring-dev-team:frontend-designer` for:**
+- Visual design excellence
+- Typography, motion, aesthetics
+- Distinctive UI that avoids generic AI aesthetics
 
 **Example decision:**
-- "Build a React dashboard" → **`ring-dev-team:frontend-engineer`**
-- "Build type-safe full-stack with tRPC" → **`ring-dev-team:frontend-engineer-typescript`**
+- "Build a React dashboard" → **`ring-dev-team:frontend-engineer-typescript`**
+- "Create a visually striking landing page" → **`ring-dev-team:frontend-designer`**
 
 ---
 

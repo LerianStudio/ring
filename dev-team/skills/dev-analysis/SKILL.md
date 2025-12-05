@@ -196,7 +196,6 @@ Standards Loading Order:
    ├────────────────────┼────────────────────────────────────────┤
    │ Go                 │ dev-team/agents/backend-engineer-golang.md     │
    │ TypeScript Backend │ dev-team/agents/backend-engineer-typescript.md │
-   │ Frontend JS/TS     │ dev-team/agents/frontend-engineer.md           │
    │ Frontend TS        │ dev-team/agents/frontend-engineer-typescript.md│
    │ DevOps/Infra       │ dev-team/agents/devops-engineer.md             │
    │ SRE/Observability  │ dev-team/agents/sre.md                         │

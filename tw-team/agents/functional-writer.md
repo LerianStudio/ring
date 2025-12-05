@@ -182,7 +182,7 @@ Show, don't just tell. Provide realistic examples for technical concepts.
 - API endpoint documentation (use `ring-tw-team:api-writer`)
 - Documentation quality review (use `ring-tw-team:docs-reviewer`)
 - Code implementation (use `ring-dev-team:*` agents)
-- Technical architecture decisions (use `ring-dev-team:backend-engineer`)
+- Technical architecture decisions (use `ring-dev-team:backend-engineer-golang` or `ring-dev-team:backend-engineer-typescript`)
 
 ## Output Expectations
 

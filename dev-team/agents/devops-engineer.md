@@ -520,7 +520,7 @@ Before deploying infrastructure:
 
 ## What This Agent Does NOT Handle
 
-- Application code development (use `ring-dev-team:backend-engineer` or `ring-dev-team:frontend-engineer`)
+- Application code development (use `ring-dev-team:backend-engineer-golang`, `ring-dev-team:backend-engineer-typescript`, or `ring-dev-team:frontend-engineer-typescript`)
 - Production monitoring and incident response (use `ring-dev-team:sre`)
 - Test case design and execution (use `ring-dev-team:qa-analyst`)
 - Application performance optimization (use `ring-dev-team:sre`)

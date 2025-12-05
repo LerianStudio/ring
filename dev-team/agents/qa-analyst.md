@@ -377,8 +377,8 @@ Before marking tests complete:
 
 ## What This Agent Does NOT Handle
 
-- Application code development (use `ring-dev-team:backend-engineer` or `ring-dev-team:frontend-engineer`)
+- Application code development (use `ring-dev-team:backend-engineer-golang`, `ring-dev-team:backend-engineer-typescript`, or `ring-dev-team:frontend-engineer-typescript`)
 - CI/CD pipeline infrastructure (use `ring-dev-team:devops-engineer`)
 - Production monitoring and alerting (use `ring-dev-team:sre`)
 - Infrastructure provisioning (use `ring-dev-team:devops-engineer`)
-- Performance optimization implementation (use `ring-dev-team:sre` or `ring-dev-team:backend-engineer`)
+- Performance optimization implementation (use `ring-dev-team:sre` or language-specific backend engineer)

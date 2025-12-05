@@ -41,9 +41,7 @@ Before starting Gate 1:
 2. **Agent Selection**: Automatically determined based on task content:
    - `ring-dev-team:backend-engineer-golang`
    - `ring-dev-team:backend-engineer-typescript`
-   - `ring-dev-team:backend-engineer`
    - `ring-dev-team:frontend-engineer-typescript`
-   - `ring-dev-team:frontend-engineer`
    - `ring-dev-team:frontend-designer`
 3. **Standards Available**: Project standards at `docs/PROJECT_RULES.md` (or conventions from analysis)
 
@@ -244,9 +242,7 @@ Use the agent selected in Gate 1 based on technology:
 |-------|-------|
 | Go backend | `ring-dev-team:backend-engineer-golang` |
 | TypeScript backend | `ring-dev-team:backend-engineer-typescript` |
-| Unknown backend | `ring-dev-team:backend-engineer` |
-| React/Next.js | `ring-dev-team:frontend-engineer` |
-| TypeScript-heavy frontend | `ring-dev-team:frontend-engineer-typescript` |
+| React/Next.js frontend | `ring-dev-team:frontend-engineer-typescript` |
 | Visual design focus | `ring-dev-team:frontend-designer` |
 
 ## TDD Compliance

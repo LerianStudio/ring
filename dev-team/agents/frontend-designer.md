@@ -416,7 +416,7 @@ Before submitting design implementations:
 
 - Backend API development (use `ring-dev-team:backend-engineer-golang`)
 - DevOps and deployment infrastructure (use `ring-dev-team:devops-engineer`)
-- Complex state management and business logic (use `ring-dev-team:frontend-engineer`)
+- Complex state management and business logic (use `ring-dev-team:frontend-engineer-typescript`)
 - Database design and data modeling (use `ring-dev-team:backend-engineer-golang`)
 - Testing strategy and QA automation (use `ring-dev-team:qa-analyst`)
 - Performance optimization and monitoring (use `ring-dev-team:sre`)

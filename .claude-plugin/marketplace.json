@@ -29,7 +29,7 @@
     },
     {
       "name": "ring-dev-team",
-      "description": "9 specialized developer agents + 10 development skills + 5 slash commands: 6-gate development cycle (implementation→devops→SRE→testing→review→validation), integrated with PM team output. Language-agnostic Backend, Go/TypeScript Backend specialists, DevOps Engineer, Frontend (JavaScript + TypeScript specialists), Frontend Designer, QA Analyst, and SRE. Complete development team coverage with TDD, observability, and security best practices.",
+      "description": "7 specialized developer agents + 10 development skills + 5 slash commands: 6-gate development cycle (implementation→devops→SRE→testing→review→validation), integrated with PM team output. Go/TypeScript Backend specialists, DevOps Engineer, Frontend TypeScript specialist, Frontend Designer, QA Analyst, and SRE. Complete development team coverage with TDD, observability, and security best practices.",
       "version": "0.5.0",
       "source": "./dev-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/dev-team",

@@ -356,7 +356,6 @@ For current execution unit:
    - TypeScript backend → ring-dev-team:backend-engineer-typescript
    - React/Frontend → ring-dev-team:frontend-engineer-typescript
    - Infrastructure → ring-dev-team:devops-engineer
-   - Generic → ring-dev-team:backend-engineer
 
 3. Dispatch to selected agent:
    Task tool:

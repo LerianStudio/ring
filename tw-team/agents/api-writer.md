@@ -223,8 +223,8 @@ Brief description of what this endpoint does.
 
 - Conceptual documentation (use `ring-tw-team:functional-writer`)
 - Documentation review (use `ring-tw-team:docs-reviewer`)
-- API implementation (use `ring-dev-team:backend-engineer`)
-- API design decisions (use `ring-dev-team:backend-engineer`)
+- API implementation (use `ring-dev-team:backend-engineer-golang` or `ring-dev-team:backend-engineer-typescript`)
+- API design decisions (use `ring-dev-team:backend-engineer-golang` or `ring-dev-team:backend-engineer-typescript`)
 
 ## Output Expectations
 
