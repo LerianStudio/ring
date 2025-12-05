@@ -265,6 +265,13 @@ Input: path/to/tasks.md OR path/to/pre-dev/{feature}/
      - "manual_per_task" → Checkpoint only after tasks complete (Step 7.2 only)
      - "automatic" → No checkpoints, continuous execution
 
+   **MANDATORY - Do NOT skip this step:**
+   - Do NOT infer mode from user hints ("run quickly", "trivial tasks", "simple fixes")
+   - Do NOT skip the question to save time - it takes 5 seconds
+   - User comments about speed are CONTEXT, not mode selection
+   - Only EXPLICIT selection (a/b/c) from AskUserQuestion is valid
+   - "Simple task" is NOT an excuse to skip mode selection
+
 6. Confirm and start:
    - Display selected mode
    - Output: "Starting development cycle in [mode] mode..."
