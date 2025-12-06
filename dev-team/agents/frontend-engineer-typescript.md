@@ -666,6 +666,27 @@ const ApiErrorSchema = z.discriminatedUnion('type', [
 - **Testing**: Jest + Testing Library with type-safe mocks and fixtures
 - **Build**: TypeScript project references, path aliases, strict mode
 
+## Standards Loading (MANDATORY)
+
+**Before ANY implementation, load BOTH sources:**
+
+### Step 1: Read Local PROJECT_RULES.md (HARD GATE)
+```
+Read docs/PROJECT_RULES.md
+```
+**MANDATORY:** Project-specific technical information that must always be considered. Cannot proceed without reading this file.
+
+### Step 2: Fetch Ring Frontend Standards (HARD GATE)
+```
+WebFetch: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/frontend.md
+```
+**MANDATORY:** Base technical standards that must always be applied.
+
+### Apply Both
+- Ring Standards = Base technical patterns (error handling, testing, architecture)
+- PROJECT_RULES.md = Project tech stack and specific patterns
+- **Both are complementary. Neither excludes the other. Both must be followed.**
+
 ## Handling Ambiguous Requirements
 
 ### Step 1: Check Project Standards (ALWAYS FIRST)

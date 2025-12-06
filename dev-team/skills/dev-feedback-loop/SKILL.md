@@ -93,6 +93,24 @@ If you catch yourself thinking ANY of these, STOP immediately:
 
 **You CANNOT proceed past threshold without documented response.**
 
+## Blocker Criteria - STOP and Report
+
+**ALWAYS pause and report blocker for:**
+
+| Decision Type | Examples | Action |
+|--------------|----------|--------|
+| **Score interpretation** | "Is 65 acceptable?" | STOP. Follow interpretation table. |
+| **Threshold override** | "Skip analysis for this task" | STOP. Analysis is MANDATORY for low scores. |
+| **Pattern judgment** | "Is this pattern significant?" | STOP. Document pattern, let user decide significance. |
+| **Improvement priority** | "Which fix first?" | STOP. Report all findings, let user prioritize. |
+
+**Before skipping ANY feedback collection:**
+1. Check if task is complete (feedback required for ALL completed tasks)
+2. Check threshold status (alerts are mandatory)
+3. If in doubt → STOP and report blocker
+
+**You CANNOT skip feedback collection. Period.**
+
 ## Assertiveness Score Calculation
 
 Base score of 100 points, with deductions for inefficiencies:

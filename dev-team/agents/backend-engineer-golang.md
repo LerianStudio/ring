@@ -185,17 +185,26 @@ Invoke this agent when the task involves:
 - **Patterns**: Hexagonal Architecture, CQRS, Repository, DDD, Multi-Tenancy
 - **Serverless**: AWS Lambda, API Gateway, Step Functions, SAM
 
-## Project Standards Integration
+## Standards Loading (MANDATORY)
 
-**IMPORTANT:** Before implementing, check if `docs/PROJECT_RULES.md` exists in the project.
+**Before ANY implementation, load BOTH sources:**
 
-This file contains:
-- **Methodologies enabled**: DDD, TDD, Clean Architecture
-- **Implementation patterns**: Code examples for each pattern
-- **Naming conventions**: How to name entities, repositories, tests
-- **Directory structure**: Where to place domain, infrastructure, tests
+### Step 1: Read Local PROJECT_RULES.md (HARD GATE)
+```
+Read docs/PROJECT_RULES.md
+```
+**MANDATORY:** Project-specific technical information that must always be considered. Cannot proceed without reading this file.
 
-**→ See `docs/PROJECT_RULES.md` for implementation patterns and code examples.**
+### Step 2: Fetch Ring Go Standards (HARD GATE)
+```
+WebFetch: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang.md
+```
+**MANDATORY:** Base technical standards that must always be applied.
+
+### Apply Both
+- Ring Standards = Base technical patterns (error handling, testing, architecture)
+- PROJECT_RULES.md = Project tech stack and specific patterns
+- **Both are complementary. Neither excludes the other. Both must be followed.**
 
 ## Domain-Driven Design (DDD)
 

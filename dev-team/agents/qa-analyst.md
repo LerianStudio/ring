@@ -13,24 +13,21 @@ output_schema:
     - name: "Summary"
       pattern: "^## Summary"
       required: true
-    - name: "Test Strategy"
-      pattern: "^## Test Strategy"
+    - name: "Implementation"
+      pattern: "^## Implementation"
       required: true
-    - name: "Test Cases"
-      pattern: "^## Test Cases"
+      description: "Test strategy, cases, and methodology implemented"
+    - name: "Files Changed"
+      pattern: "^## Files Changed"
       required: true
-    - name: "Test Results"
-      pattern: "^## Test Results"
+      description: "Test files created or modified"
+    - name: "Testing"
+      pattern: "^## Testing"
       required: true
-    - name: "Coverage"
-      pattern: "^## Coverage"
-      required: true
+      description: "Test results and coverage metrics"
     - name: "Next Steps"
       pattern: "^## Next Steps"
       required: true
-    - name: "Blockers"
-      pattern: "^## Blockers"
-      required: false
   error_handling:
     on_blocker: "pause_and_report"
     escalation_path: "orchestrator"

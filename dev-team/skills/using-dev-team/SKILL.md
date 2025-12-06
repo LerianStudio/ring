@@ -1,7 +1,7 @@
 ---
 name: using-dev-team
 description: |
-  9 specialist developer agents for backend (Go/TypeScript), DevOps, frontend,
+  7 specialist developer agents for backend (Go/TypeScript), DevOps, frontend,
   design, QA, and SRE. Dispatch when you need deep technology expertise.
 
 trigger: |
@@ -22,7 +22,7 @@ related:
 
 # Using Ring Developer Specialists
 
-The ring-dev-team plugin provides 9 specialized developer agents. Use them via `Task tool with subagent_type:`.
+The ring-dev-team plugin provides 7 specialized developer agents. Use them via `Task tool with subagent_type:`.
 
 **Remember:** Follow the **ORCHESTRATOR principle** from `ring-default:using-ring`. Dispatch agents to handle complexity; don't operate tools directly.
 
@@ -336,11 +336,9 @@ Remember:
 ## Available in This Plugin
 
 **Agents:**
-- backend-engineer (language-agnostic)
 - backend-engineer-golang
 - backend-engineer-typescript
 - devops-engineer
-- frontend-engineer
 - frontend-engineer-typescript
 - frontend-designer
 - qa-analyst
