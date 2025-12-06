@@ -9,7 +9,7 @@ This file defines the specific standards for frontend development.
 ## Framework
 
 - React 18+ / Next.js 14+
-- TypeScript strict mode (ver `typescript.md`)
+- TypeScript strict mode (see `typescript.md`)
 
 ---
 
