@@ -343,30 +343,53 @@ Standards Loading Order:
 1. Project-specific standards (REQUIRED):
    - docs/PROJECT_RULES.md → Project conventions (MANDATORY)
 
-2. Ring standards files (dev-team/docs/standards/):
-   - golang.md, typescript.md, frontend.md, devops.md, sre.md
+2. Ring standards files via WebFetch (based on detected language):
+   Use WebFetch tool to load from GitHub raw URLs
 
-3. Ring agent standards (embedded in agents):
-   ┌─────────────────────────────────────────────────────────────┐
-   │ Language/Domain    │ Agent with Standards                   │
-   ├────────────────────┼────────────────────────────────────────┤
-   │ Go                 │ dev-team/agents/backend-engineer-golang.md     │
-   │ TypeScript Backend │ dev-team/agents/backend-engineer-typescript.md │
-   │ Frontend TS        │ dev-team/agents/frontend-engineer-typescript.md│
-   │ DevOps/Infra       │ dev-team/agents/devops-engineer.md             │
-   │ SRE/Observability  │ dev-team/agents/sre.md                         │
-   │ Testing/QA         │ dev-team/agents/qa-analyst.md                  │
-   └────────────────────┴────────────────────────────────────────┘
-
-4. Merge strategy:
+3. Merge strategy:
    - PROJECT_RULES.md is REQUIRED (verified in Step 0)
    - Project standards override Ring standards
-   - Ring standards override agent defaults
+   - Ring standards provide base technical patterns
    - Report which standards are being used
 
 Note: "If no project standards" scenario is BLOCKED in Step 0.
       This step only executes after PROJECT_RULES.md is verified.
 ```
+
+### Ring Standards Loading (via WebFetch)
+
+Based on detected language from Step 1, fetch the appropriate Ring standards:
+
+| Detected Language | WebFetch URL |
+|-------------------|--------------|
+| Go | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang.md` |
+| TypeScript Backend | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md` |
+| Frontend (React/Next.js) | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/frontend.md` |
+| DevOps/Infra | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/devops.md` |
+| SRE/Observability | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/sre.md` |
+
+**Example WebFetch calls based on detection:**
+
+```yaml
+# If go.mod detected → Fetch Go standards
+WebFetch:
+  url: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang.md
+  prompt: "Extract all coding standards, patterns, and requirements"
+
+# If package.json with React/Next.js → Fetch Frontend standards
+WebFetch:
+  url: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/frontend.md
+  prompt: "Extract all frontend standards, patterns, and requirements"
+
+# If Dockerfile exists → Also fetch DevOps standards
+WebFetch:
+  url: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/devops.md
+  prompt: "Extract all DevOps standards for containerization and CI/CD"
+```
+
+**Multiple languages:** If project has multiple languages (e.g., Go backend + React frontend), fetch ALL applicable standards and merge them.
+
+**MANDATORY:** Ring standards are base technical patterns that must always be applied. Project standards (PROJECT_RULES.md) override Ring standards where they conflict.
 
 ## Step 3: Scan Codebase
 
