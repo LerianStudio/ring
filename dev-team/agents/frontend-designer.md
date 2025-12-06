@@ -174,10 +174,17 @@ Read docs/PROJECT_RULES.md
 **MANDATORY:** Project-specific design guidelines (brand colors, typography, spacing). Cannot proceed without reading this file.
 
 ### Step 2: Fetch Ring Frontend Standards (HARD GATE)
-```
-WebFetch: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/frontend.md
-```
-**MANDATORY:** Base design standards that must always be applied.
+
+**MANDATORY ACTION:** You MUST use the WebFetch tool NOW:
+
+| Parameter | Value |
+|-----------|-------|
+| url | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/frontend.md` |
+| prompt | "Extract all frontend design standards, patterns, and requirements" |
+
+**Execute this WebFetch before proceeding.** Do NOT continue until standards are loaded and understood.
+
+If WebFetch fails → STOP and report blocker. Cannot proceed without Ring standards.
 
 ### Apply Both
 - Ring Standards = Base design patterns (typography, color systems, animation)

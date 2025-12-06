@@ -196,10 +196,17 @@ Read docs/PROJECT_RULES.md
 **MANDATORY:** Project-specific technical information that must always be considered. Cannot proceed without reading this file.
 
 ### Step 2: Fetch Ring Go Standards (HARD GATE)
-```
-WebFetch: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang.md
-```
-**MANDATORY:** Base technical standards that must always be applied.
+
+**MANDATORY ACTION:** You MUST use the WebFetch tool NOW:
+
+| Parameter | Value |
+|-----------|-------|
+| url | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang.md` |
+| prompt | "Extract all Go coding standards, patterns, and requirements" |
+
+**Execute this WebFetch before proceeding.** Do NOT continue until standards are loaded and understood.
+
+If WebFetch fails → STOP and report blocker. Cannot proceed without Ring standards.
 
 ### Apply Both
 - Ring Standards = Base technical patterns (error handling, testing, architecture)
