@@ -125,7 +125,8 @@ ring/                                  # Monorepo root
 │       ├── backend-engineer-golang.md      # Go backend specialist
 │       ├── backend-engineer-typescript.md  # TypeScript/Node.js backend specialist
 │       ├── devops-engineer.md              # DevOps infrastructure specialist
-│       ├── frontend-engineer-typescript.md # TypeScript/React/Next.js specialist
+│       ├── frontend-engineer.md            # Frontend specialist (React/Next.js)
+│       ├── frontend-bff-engineer-typescript.md # BFF (Backend for Frontend) specialist
 │       ├── frontend-designer.md            # Visual design specialist
 │       ├── qa-analyst.md                   # Quality assurance specialist
 │       └── sre.md                          # Site reliability engineer
@@ -285,10 +286,10 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 - Located: `default/skills/using-ring/SKILL.md`
 
 **Ring Dev Team Plugin:**
-- `ring-dev-team:using-dev-team` → 9 specialist developer agents
+- `ring-dev-team:using-dev-team` → 8 specialist developer agents
 - Auto-loads when ring-dev-team plugin is enabled
 - Located: `dev-team/skills/using-dev-team/SKILL.md`
-- Agents (invoke as `ring-dev-team:{agent-name}`): backend-engineer, backend-engineer-golang, backend-engineer-typescript, devops-engineer, frontend-engineer, frontend-engineer-typescript, frontend-designer, qa-analyst, sre
+- Agents (invoke as `ring-dev-team:{agent-name}`): backend-engineer-golang, backend-engineer-typescript, devops-engineer, frontend-engineer, frontend-bff-engineer-typescript, frontend-designer, qa-analyst, sre
 
 **Ring FinOps Team Plugin:**
 - `using-finops-team` → 2 FinOps agents for Brazilian compliance
@@ -410,7 +411,7 @@ output_schema:
       required: true
 ```
 
-**Used by:** `ring-dev-team:backend-engineer-golang`, `ring-dev-team:backend-engineer-typescript`, `ring-dev-team:frontend-engineer-typescript`, `ring-dev-team:devops-engineer`, `ring-dev-team:qa-analyst`, `ring-dev-team:sre`, `ring-finops-team:finops-automation`
+**Used by:** `ring-dev-team:backend-engineer-golang`, `ring-dev-team:backend-engineer-typescript`, `ring-dev-team:frontend-engineer`, `ring-dev-team:frontend-bff-engineer-typescript`, `ring-dev-team:devops-engineer`, `ring-dev-team:qa-analyst`, `ring-dev-team:sre`, `ring-finops-team:finops-automation`
 
 **Analysis Schema** (for agents that analyze and recommend):
 ```yaml

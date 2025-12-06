@@ -159,7 +159,8 @@ Before starting Gate 0:
 3. **Agent Selection**: Automatically determined based on task content:
    - `ring-dev-team:backend-engineer-golang`
    - `ring-dev-team:backend-engineer-typescript`
-   - `ring-dev-team:frontend-engineer-typescript`
+   - `ring-dev-team:frontend-engineer`
+   - `ring-dev-team:frontend-bff-engineer-typescript`
    - `ring-dev-team:frontend-designer`
 
 **Note:** PROJECT_RULES.md should already be validated by dev-cycle (Step 0), but Gate 0 double-checks as defense-in-depth.
@@ -366,7 +367,8 @@ Use the agent selected in Gate 1 based on technology:
 |-------|-------|
 | Go backend | `ring-dev-team:backend-engineer-golang` |
 | TypeScript backend | `ring-dev-team:backend-engineer-typescript` |
-| React/Next.js frontend | `ring-dev-team:frontend-engineer-typescript` |
+| React/Next.js frontend | `ring-dev-team:frontend-engineer` |
+| BFF layer (Next.js API Routes) | `ring-dev-team:frontend-bff-engineer-typescript` |
 | Visual design focus | `ring-dev-team:frontend-designer` |
 
 ## TDD Compliance

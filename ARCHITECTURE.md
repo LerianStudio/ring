@@ -122,7 +122,8 @@ dev-team/agents/
 ├── backend-engineer-golang.md     # Go backend specialist for financial systems
 ├── backend-engineer-typescript.md # TypeScript/Node.js backend specialist
 ├── devops-engineer.md             # DevOps infrastructure specialist
-├── frontend-engineer-typescript.md # TypeScript/React/Next.js frontend specialist
+├── frontend-engineer.md           # React/Next.js frontend specialist
+├── frontend-bff-engineer-typescript.md # BFF (Backend for Frontend) specialist
 ├── frontend-designer.md           # Visual design specialist
 ├── qa-analyst.md                  # Quality assurance specialist
 └── sre.md                         # Site reliability engineer

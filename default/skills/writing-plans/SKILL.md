@@ -124,7 +124,7 @@ Plans should specify which specialized agents to use for each task type. During 
 | Task Type | Agent Pattern | Examples |
 |-----------|---------------|----------|
 | Backend API/services | `ring-dev-team:backend-engineer-*` | `backend-engineer-golang`, `backend-engineer-typescript` |
-| Frontend UI/components | `ring-dev-team:frontend-engineer-*` | `frontend-engineer`, `frontend-engineer-typescript` |
+| Frontend UI/components | `ring-dev-team:frontend-engineer-*` | `frontend-engineer`, `frontend-bff-engineer-typescript` |
 | Infrastructure/CI/CD | `ring-dev-team:devops-engineer` | Single agent |
 | Testing strategy | `ring-dev-team:qa-analyst` | Single agent |
 | Monitoring/reliability | `ring-dev-team:sre` | Single agent |
@@ -133,7 +133,7 @@ Plans should specify which specialized agents to use for each task type. During 
 ```markdown
 ## Recommended Agents
 - Backend tasks: `ring-dev-team:backend-engineer-golang` (or language variant: `-python`, `-typescript`)
-- Frontend tasks: `ring-dev-team:frontend-engineer-typescript` (or generic `frontend-engineer`)
+- Frontend tasks: `ring-dev-team:frontend-engineer` (or `frontend-bff-engineer-typescript` for BFF layer)
 - Fallback: `general-purpose` (built-in Claude agent, no ring- prefix needed)
 ```
 

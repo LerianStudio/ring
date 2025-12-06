@@ -113,36 +113,66 @@ Task tool:
 
 ---
 
-### 4. Frontend Engineer (TypeScript)
-**`ring-dev-team:frontend-engineer-typescript`**
+### 4. Frontend Engineer
+**`ring-dev-team:frontend-engineer`**
 
 **Specializations:**
-- TypeScript-first React/Next.js architecture
-- Advanced TypeScript patterns (generics, utilities, branded types)
-- Type-safe state management (Zustand, Redux Toolkit)
-- Type-safe API integration (tRPC, React Query)
-- Component library with strict TypeScript
-- Server Components with TypeScript (Next.js App Router)
-- Type-safe routing & form validation
+- React/Next.js application architecture
+- TypeScript for type safety
+- State management (Redux, Zustand, Context)
+- Component design patterns
+- Form handling and validation
+- CSS-in-JS and styling solutions
 
 **Use When:**
-- Building TypeScript-first frontend projects
-- Requiring advanced type safety (e.g., branded types, strict inference)
-- Type-safe full-stack integration (tRPC)
-- Migrating JavaScript frontend to TypeScript
-- Complex TypeScript patterns (conditional types, mapped types)
+- Building React/Next.js applications
+- Implementing complex UI components
+- State management design
+- Performance optimization for frontend
+- Accessibility improvements
 
 **Example dispatch:**
 ```
 Task tool:
-  subagent_type: "ring-dev-team:frontend-engineer-typescript"
+  subagent_type: "ring-dev-team:frontend-engineer"
   model: "opus"
-  prompt: "Design a type-safe React dashboard with tRPC, Zod validation, and branded types"
+  prompt: "Design a React dashboard with real-time data updates and TypeScript"
 ```
 
 ---
 
-### 5. Frontend Designer
+### 5. Frontend BFF Engineer (TypeScript)
+**`ring-dev-team:frontend-bff-engineer-typescript`**
+
+**Specializations:**
+- BFF (Backend for Frontend) architecture with Next.js API Routes
+- Clean Architecture with Domain/Application/Infrastructure layers
+- Domain-Driven Design (DDD) - Entities, Repositories, Value Objects
+- Hexagonal Architecture - Ports and Adapters pattern
+- Inversify dependency injection container
+- Use Case orchestration with @LogOperation decorators
+- DTO/Mapper patterns for layer separation
+- Repository pattern with abstract interfaces
+
+**Use When:**
+- Building BFF layer with Next.js API Routes
+- Implementing Clean Architecture in TypeScript
+- Need DDD patterns for complex business domains
+- API layer orchestration (not frontend UI)
+- Server-side data aggregation and transformation
+- Type-safe backend services for frontend consumption
+
+**Example dispatch:**
+```
+Task tool:
+  subagent_type: "ring-dev-team:frontend-bff-engineer-typescript"
+  model: "opus"
+  prompt: "Design a BFF endpoint for account management using Clean Architecture, repository pattern, and Inversify DI"
+```
+
+---
+
+### 6. Frontend Designer
 **`ring-dev-team:frontend-designer`**
 
 **Specializations:**
@@ -235,7 +265,8 @@ Task tool:
 | Go API, database, concurrency | Backend Engineer (Go) | Go-specific service architecture |
 | TypeScript/Node.js backend, NestJS, Express | Backend Engineer (TypeScript) | TypeScript backend services |
 | CI/CD, Docker, Kubernetes, IaC | DevOps Engineer | Deployment pipelines, infrastructure |
-| TypeScript React/Next.js, type-safe frontend, tRPC | Frontend Engineer (TypeScript) | Type-safe React/Next.js projects |
+| React, TypeScript, components, state | Frontend Engineer | General UI development, performance |
+| BFF layer, Clean Architecture, DDD | Frontend BFF Engineer (TypeScript) | Next.js API Routes BFF layer |
 | Visual design, typography, motion, aesthetics | Frontend Designer | Distinctive UI, design systems |
 | Test strategy, E2E, coverage | QA Analyst | Testing architecture, automation |
 | Monitoring, SLOs, performance, reliability | SRE | Observability, incident response |
@@ -264,19 +295,26 @@ Task tool:
 
 ### Frontend Engineers
 
-**Use `ring-dev-team:frontend-engineer-typescript` for all frontend work:**
-- React/Next.js applications
+**Use `ring-dev-team:frontend-engineer` when:**
+- Standard React/Next.js projects
+- Focus on component design, state, architecture
+- General frontend best practices
 - Type-safe state management
-- Component libraries with TypeScript
-- Type-safe API integration (tRPC, Zod)
 
-**Use `ring-dev-team:frontend-designer` for:**
+**Use `ring-dev-team:frontend-bff-engineer-typescript` when:**
+- Building BFF layer with Next.js API Routes
+- Need Clean Architecture/DDD patterns
+- API orchestration and data transformation
+- Server-side business logic for frontend
+
+**Use `ring-dev-team:frontend-designer` when:**
 - Visual design excellence
 - Typography, motion, aesthetics
 - Distinctive UI that avoids generic AI aesthetics
 
 **Example decision:**
-- "Build a React dashboard" → **`ring-dev-team:frontend-engineer-typescript`**
+- "Build a React dashboard" → **`ring-dev-team:frontend-engineer`**
+- "Build BFF layer with Clean Architecture" → **`ring-dev-team:frontend-bff-engineer-typescript`**
 - "Create a visually striking landing page" → **`ring-dev-team:frontend-designer`**
 
 ---
@@ -339,7 +377,8 @@ Remember:
 - backend-engineer-golang
 - backend-engineer-typescript
 - devops-engineer
-- frontend-engineer-typescript
+- frontend-engineer
+- frontend-bff-engineer-typescript
 - frontend-designer
 - qa-analyst
 - sre

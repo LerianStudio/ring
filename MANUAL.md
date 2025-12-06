@@ -199,7 +199,8 @@ Use when you need expert depth in specific domains:
 | `ring-dev-team:backend-engineer-golang` | Go microservices & APIs | Fiber, gRPC, PostgreSQL, MongoDB, Kafka, OAuth2 |
 | `ring-dev-team:backend-engineer-typescript` | TypeScript/Node.js backend | Express, NestJS, Prisma, TypeORM, GraphQL |
 | `ring-dev-team:devops-engineer` | Infrastructure & CI/CD | Docker, Kubernetes, Terraform, GitHub Actions |
-| `ring-dev-team:frontend-engineer-typescript` | TypeScript frontend specialist | React, Next.js, Vue, type-safe state management |
+| `ring-dev-team:frontend-engineer` | React/Next.js frontend | React, TypeScript, Tailwind, state management |
+| `ring-dev-team:frontend-bff-engineer-typescript` | BFF (Backend for Frontend) | Next.js API Routes, Clean Architecture, DDD |
 | `ring-dev-team:frontend-designer` | Visual design & aesthetics | Typography, motion, CSS, distinctive UI |
 | `ring-dev-team:qa-analyst` | Quality assurance | Test strategy, automation, coverage |
 | `ring-dev-team:sre` | Site reliability & ops | Monitoring, alerting, incident response, SLOs |
@@ -293,7 +294,8 @@ These enforce quality standards:
 | Go backend expertise | `ring-dev-team:backend-engineer-golang` |
 | TypeScript/Node.js backend | `ring-dev-team:backend-engineer-typescript` |
 | Infrastructure/DevOps | `ring-dev-team:devops-engineer` |
-| TypeScript frontend specialist | `ring-dev-team:frontend-engineer-typescript` |
+| React/Next.js frontend | `ring-dev-team:frontend-engineer` |
+| BFF API layer (Next.js API Routes) | `ring-dev-team:frontend-bff-engineer-typescript` |
 | Visual design & aesthetics | `ring-dev-team:frontend-designer` |
 | Deep codebase analysis | `ring-default:codebase-explorer` |
 | Regulatory compliance | `ring-finops-team:finops-analyzer` |
