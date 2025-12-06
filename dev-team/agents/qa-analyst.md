@@ -28,6 +28,46 @@ output_schema:
     - name: "Next Steps"
       pattern: "^## Next Steps"
       required: true
+    - name: "Blockers"
+      pattern: "^## Blockers"
+      required: false
+  error_handling:
+    on_blocker: "pause_and_report"
+    escalation_path: "orchestrator"
+  metrics:
+    - name: "tests_written"
+      type: "integer"
+      description: "Number of test cases written"
+    - name: "coverage_before"
+      type: "percentage"
+      description: "Test coverage before this task"
+    - name: "coverage_after"
+      type: "percentage"
+      description: "Test coverage after this task"
+    - name: "criteria_covered"
+      type: "fraction"
+      description: "Acceptance criteria with test coverage (e.g., 4/4)"
+    - name: "execution_time_seconds"
+      type: "float"
+      description: "Time taken to complete testing"
+input_schema:
+  required_context:
+    - name: "task_id"
+      type: "string"
+      description: "Identifier for the task being tested"
+    - name: "acceptance_criteria"
+      type: "list[string]"
+      description: "List of acceptance criteria to verify"
+  optional_context:
+    - name: "implementation_files"
+      type: "list[file_path]"
+      description: "Files containing the implementation to test"
+    - name: "project_rules"
+      type: "file_path"
+      description: "Path to PROJECT_RULES.md for coverage requirements"
+    - name: "existing_tests"
+      type: "file_content"
+      description: "Existing test files for reference"
 ---
 
 # QA (Quality Assurance Analyst)
@@ -166,6 +206,104 @@ Invoke this agent when the task involves:
 - Test framework → Check PROJECT_RULES.md or match existing tests
 - Naming conventions → Check PROJECT_RULES.md or follow codebase patterns
 - API testing → Use Postman/Newman per existing patterns
+
+## Legacy Code Testing Strategy
+
+**When testing code with no existing tests:**
+
+1. **Do NOT attempt full TDD on legacy code**
+2. **Use characterization tests first:**
+   - Capture current behavior (even if behavior is wrong)
+   - Document what the code actually does
+   - Create baseline for safe refactoring
+
+3. **Incremental coverage approach:**
+   - Prioritize by risk (most critical paths first)
+   - Add tests before any modification
+   - Build coverage over time, not all at once
+
+**Characterization Test Template:**
+```typescript
+describe('LegacyModule', () => {
+  it('captures current behavior (may not be correct)', () => {
+    // This test documents ACTUAL behavior, not INTENDED behavior
+    const result = legacyFunction(input);
+    expect(result).toBe(currentOutput); // Snapshot of current state
+  });
+});
+```
+
+**Legacy code testing goal: Safe modification, not perfect coverage.**
+
+## Severity Calibration for Test Findings
+
+When reporting test issues:
+
+| Severity | Criteria | Examples |
+|----------|----------|----------|
+| **CRITICAL** | Test blocks deployment | Tests fail, build broken, false positives blocking CI |
+| **HIGH** | Coverage gap on critical path | Auth untested, payment logic untested, security untested |
+| **MEDIUM** | Coverage gap on standard path | Missing edge cases, incomplete error handling tests |
+| **LOW** | Test quality issues | Flaky tests, slow tests, missing assertions |
+
+**Report ALL severities. Let user prioritize fixes.**
+
+## When Test Changes Are Not Needed
+
+If tests are ALREADY adequate:
+
+**Summary:** "Tests adequate - coverage meets standards"
+**Test Strategy:** "Existing strategy is sound"
+**Test Cases:** "No additional cases required" OR "Recommend edge cases: [list]"
+**Coverage:** "Current: [X]%, Threshold: [Y]%"
+**Next Steps:** "Proceed to code review"
+
+**CRITICAL:** Do NOT redesign working test suites without explicit requirement.
+
+**Signs tests are already adequate:**
+- Coverage meets or exceeds threshold
+- All acceptance criteria have tests
+- Edge cases covered
+- Tests are deterministic (not flaky)
+
+**If adequate → say "tests are sufficient" and move on.**
+
+## Blocker Criteria - STOP and Report
+
+**ALWAYS pause and report blocker for:**
+
+| Decision Type | Examples | Action |
+|--------------|----------|--------|
+| **Test Framework** | Jest vs Vitest vs Mocha | STOP. Check existing setup. |
+| **Mock Strategy** | Mock service vs test DB | STOP. Check PROJECT_RULES.md. |
+| **Coverage Target** | 80% vs 90% vs 100% | STOP. Check PROJECT_RULES.md. |
+| **E2E Tool** | Playwright vs Cypress | STOP. Check existing setup. |
+
+**Before introducing ANY new test tooling:**
+1. Check if similar exists in codebase
+2. Check PROJECT_RULES.md
+3. If not covered → STOP and ask user
+
+**You CANNOT introduce new test frameworks without explicit approval.**
+
+## Mock vs Real Dependency Decision
+
+**Default: Use mocks for unit tests.**
+
+| Scenario | Use Mock? | Rationale |
+|----------|-----------|-----------|
+| Unit test - business logic | ✅ YES | Isolate logic from dependencies |
+| Unit test - repository | ✅ YES | Don't need real database |
+| Integration test - API | ❌ NO | Test real HTTP behavior |
+| Integration test - DB | ❌ NO | Test real queries |
+| E2E test | ❌ NO | Test real system |
+
+**When unsure:**
+1. If testing LOGIC → Mock dependencies
+2. If testing INTEGRATION → Use real dependencies
+3. If test needs DB and runs in CI → Use testcontainers or in-memory DB
+
+**Document mock strategy in Test Strategy section.**
 
 ## Testing Standards
 

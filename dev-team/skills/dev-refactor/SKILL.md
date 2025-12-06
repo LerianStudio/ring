@@ -37,6 +37,88 @@ This skill analyzes an existing codebase to identify gaps between current implem
 5. **Generates tasks.md** in the same format as PM Team output
 6. **User approves** the plan before execution via dev-cycle
 
+## Foundational Principle
+
+**REFACTORING ANALYSIS IS NOT OPTIONAL FOR CODEBASES WITH TECHNICAL DEBT**
+
+When user requests refactoring or improvement:
+1. **NEVER** skip analysis because "code works"
+2. **ALWAYS** analyze all 4 dimensions
+3. **DOCUMENT** all findings, not just critical
+4. **PRESERVE** full analysis even if user filters later
+
+**Cost comparison:**
+- Cost of refactoring now: Known, bounded
+- Cost of compounding debt: Unknown, unbounded
+
+**Analysis now saves 10x effort later.**
+
+## Pressure Resistance
+
+**Codebase analysis is MANDATORY when requested. Pressure scenarios and required responses:**
+
+| Pressure Type | Request | Agent Response |
+|---------------|---------|----------------|
+| **Works Fine** | "Code works, skip analysis" | "Working ≠ maintainable. Analysis reveals hidden technical debt." |
+| **Time** | "No time for full analysis" | "Partial analysis = partial picture. Technical debt compounds daily." |
+| **Legacy** | "Standards don't apply to legacy" | "Legacy code needs analysis MOST. Document gaps for improvement." |
+| **Critical Only** | "Only fix critical issues" | "Medium issues become critical. Document all, prioritize later." |
+
+**Non-negotiable principle:** If user requests refactoring analysis, complete ALL 4 dimensions (Architecture, Code, Testing, DevOps).
+
+## Common Rationalizations - REJECTED
+
+| Excuse | Reality |
+|--------|---------|
+| "Code works fine" | Working ≠ maintainable. Analysis finds hidden debt. |
+| "Too time-consuming" | Cost of analysis < cost of compounding debt. |
+| "Standards don't fit us" | Then document YOUR standards. Analysis still reveals gaps. |
+| "Only critical matters" | Today's medium = tomorrow's critical. Document all. |
+| "Legacy gets a pass" | Legacy sets precedent. Analysis shows what to improve. |
+| "Team has their own way" | Document "their way" as standards. Analyze against it. |
+
+## Red Flags - STOP
+
+If you catch yourself thinking ANY of these, STOP immediately:
+
+- "Code works, no need to analyze"
+- "This is too time-consuming"
+- "Standards don't apply here"
+- "Only critical issues matter"
+- "Legacy code is exempt"
+- "That's just how we do it here"
+
+**All of these indicate analysis violation. Complete full 4-dimension analysis.**
+
+## Analysis Dimensions - ALL REQUIRED
+
+**Every analysis MUST cover all 4 dimensions:**
+
+| Dimension | What It Checks | Skip Allowed? |
+|-----------|---------------|---------------|
+| Architecture | Patterns, structure, dependencies | ❌ NO |
+| Code Quality | Standards compliance, complexity, naming | ❌ NO |
+| Testing | Coverage, test quality, TDD compliance | ❌ NO |
+| DevOps | Containerization, CI/CD, infrastructure | ❌ NO |
+
+**If user says "only check X":**
+- Check X thoroughly
+- Check other dimensions briefly
+- Report: "Full analysis recommended for dimensions: [Y, Z]"
+
+**NEVER produce partial analysis without noting gaps.**
+
+## Cancellation Documentation - MANDATORY
+
+**If user cancels analysis at approval step:**
+
+1. **ASK:** "Why is analysis being cancelled?"
+2. **DOCUMENT:** Save reason to `docs/refactor/{timestamp}/cancelled-reason.md`
+3. **PRESERVE:** Keep partial analysis artifacts
+4. **NOTE:** "Analysis cancelled by user: [reason]. Partial findings preserved."
+
+**Cancellation without documentation is NOT allowed.**
+
 ## Prerequisites
 
 Before starting analysis:

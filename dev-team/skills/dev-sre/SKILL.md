@@ -20,6 +20,40 @@ sequence:
 
 related:
   complementary: [ring-dev-team:dev-cycle, ring-dev-team:dev-devops, ring-dev-team:dev-testing]
+
+verification:
+  automated:
+    - command: "curl -sf http://localhost:8080/metrics"
+      description: "Metrics endpoint responds"
+      success_pattern: "http_requests_total|process_|go_"
+    - command: "curl -sf http://localhost:8080/health"
+      description: "Health endpoint responds 200"
+      success_pattern: "200|ok|healthy"
+    - command: "curl -sf http://localhost:8080/ready"
+      description: "Ready endpoint responds"
+      success_pattern: "200|ready"
+    - command: "docker-compose logs app 2>&1 | head -5 | jq -e '.level'"
+      description: "Logs are JSON structured"
+      success_pattern: "info|debug|warn|error"
+  manual:
+    - "Verify /metrics includes custom metrics (http_requests_total, etc.)"
+    - "Verify /ready returns 503 when database is down"
+    - "Verify logs include trace_id when tracing is enabled"
+
+examples:
+  - name: "API service observability"
+    context: "Go API with PostgreSQL dependency"
+    expected_output: |
+      - /metrics endpoint with http_requests_total, http_request_duration_seconds
+      - /health returns 200 when process running
+      - /ready checks database connectivity
+      - JSON structured logging with trace correlation
+  - name: "Background worker observability"
+    context: "Job processor service"
+    expected_output: |
+      - /metrics with jobs_processed_total, job_duration_seconds
+      - /health returns 200 when worker running
+      - Queue depth metrics if applicable
 ---
 
 # SRE Validation (Gate 2)
@@ -33,6 +67,74 @@ This skill validates and implements observability requirements for the implement
 - OpenTelemetry tracing instrumentation
 - Grafana dashboard (if required)
 - Alert rules (if required)
+
+## Pressure Resistance
+
+**Gate 2 (SRE/Observability) is MANDATORY before production. Pressure scenarios and required responses:**
+
+| Pressure Type | Request | Agent Response |
+|---------------|---------|----------------|
+| **Later** | "Add observability post-launch" | "No observability = no visibility into production issues. REQUIRED before deploy." |
+| **Logs Only** | "Logs are enough for MVP" | "Logs show what happened. Metrics show it's happening. Health enables recovery. All required." |
+| **Optional** | "Health checks are optional" | "Without health checks, Kubernetes can't detect failures. REQUIRED." |
+| **MVP** | "It's just MVP, skip metrics" | "MVP without metrics = blind MVP. You won't know if it's working." |
+
+**Non-negotiable principle:** Minimum viable observability = metrics + health checks + structured logs. No exceptions.
+
+## Common Rationalizations - REJECTED
+
+| Excuse | Reality |
+|--------|---------|
+| "Add metrics later" | Later = never. Retrofitting is 10x harder. |
+| "Logs are sufficient" | Logs are forensic. Metrics are preventive. Both required. |
+| "Health checks are optional" | Without /health, you can't detect service death. Required. |
+| "It's just an internal tool" | Internal tools fail too. Observability required. |
+| "Dashboard can come later" | Dashboard is optional. Metrics endpoint is not. |
+| "Too much overhead for MVP" | Observability is minimal overhead, maximum value. |
+
+## Red Flags - STOP
+
+If you catch yourself thinking ANY of these, STOP immediately:
+
+- "We'll add observability after launch"
+- "Logs are enough for now"
+- "Health checks aren't critical for MVP"
+- "Metrics add too much overhead"
+- "It's just an internal service"
+- "We can monitor manually"
+
+**All of these indicate Gate 2 violation. Implement observability now.**
+
+## Mandatory Requirements
+
+**Gate 2 is NOT OPTIONAL.** Services cannot proceed to production without:
+
+| Requirement | Status | Notes |
+|-------------|--------|-------|
+| `/metrics` endpoint | **REQUIRED** | Prometheus-compatible metrics |
+| `/health` endpoint | **REQUIRED** | Returns 200 when healthy |
+| `/ready` endpoint | **REQUIRED** | Returns 200 when ready for traffic |
+| Structured JSON logs | **REQUIRED** | With trace_id correlation |
+| Grafana dashboard | Recommended | Can defer for non-critical services |
+| Alert rules | Recommended | Required if service has SLO |
+
+**Can be deferred with explicit approval:**
+- Grafana dashboard (if service non-critical)
+- Alert rules (if no SLOs defined yet)
+- Distributed tracing (for standalone workers only)
+
+## Handling Pushback
+
+When user or stakeholder pushes back on observability:
+
+**Response template:**
+"Observability is not optional for production services. Without it:
+- We cannot detect failures automatically
+- We cannot measure SLO compliance
+- We cannot debug production issues efficiently
+- We cannot enable auto-recovery
+
+If time-constrained, reduce FEATURE scope, not observability scope."
 
 ## Prerequisites
 

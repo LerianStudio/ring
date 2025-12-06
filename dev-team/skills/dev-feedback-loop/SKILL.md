@@ -30,6 +30,69 @@ Continuous improvement system that tracks development cycle effectiveness throug
 
 **Core principle:** What gets measured gets improved. Track every gate transition to identify systemic issues.
 
+## Pressure Resistance
+
+**Feedback collection is MANDATORY for all completed tasks. Pressure scenarios and required responses:**
+
+| Pressure Type | Request | Agent Response |
+|---------------|---------|----------------|
+| **Simple Task** | "Task was simple, skip feedback" | "Simple tasks contribute to patterns. Collect metrics for ALL tasks." |
+| **Perfect Score** | "Score 100, feedback unnecessary" | "High scores need tracking too. Document what went well for replication." |
+| **User Approved** | "User approved, skip retrospective" | "Approval ≠ feedback. Collect metrics regardless of outcome." |
+| **No Issues** | "No issues found, nothing to report" | "No issues IS data. Document absence of problems for baseline." |
+
+**Non-negotiable principle:** Feedback MUST be collected for EVERY completed task, regardless of outcome or complexity.
+
+## Common Rationalizations - REJECTED
+
+| Excuse | Reality |
+|--------|---------|
+| "Task was too simple" | Simple tasks still contribute to cycle patterns. Track all. |
+| "Perfect score, no insights" | Perfect scores reveal what works. Document for replication. |
+| "User is happy, skip analysis" | Happiness ≠ process quality. Collect metrics objectively. |
+| "Same as last time" | Patterns only visible with data. Each task adds to baseline. |
+| "Feedback is subjective" | Metrics are objective. Assertiveness score has formula. |
+| "No time for retrospective" | Retrospective prevents future time waste. Investment, not cost. |
+
+## Red Flags - STOP
+
+If you catch yourself thinking ANY of these, STOP immediately:
+
+- "This task was too simple to track"
+- "Perfect outcome, no need for feedback"
+- "User approved, skip the metrics"
+- "Same pattern as before, skip analysis"
+- "Feedback is subjective anyway"
+- "No time for retrospective"
+
+**All of these indicate feedback loop violation. Collect metrics for EVERY task.**
+
+## Mandatory Feedback Collection
+
+**Non-negotiable:** Feedback MUST be collected for EVERY completed task, regardless of:
+
+| Factor | Still Collect? | Reason |
+|--------|---------------|--------|
+| Task complexity | ✅ YES | Simple tasks reveal patterns |
+| Outcome quality | ✅ YES | 100-score tasks need tracking |
+| User satisfaction | ✅ YES | Approval ≠ process quality |
+| Time pressure | ✅ YES | Metrics take <5 min |
+| "Nothing to report" | ✅ YES | Absence of issues is data |
+
+**Consequence:** Skipping feedback breaks continuous improvement loop and masks systemic issues.
+
+## Threshold Alerts - MANDATORY RESPONSE
+
+**When thresholds are breached, response is REQUIRED:**
+
+| Alert | Threshold | Required Action |
+|-------|-----------|-----------------|
+| Task score | < 70 | Document what went wrong. Identify root cause. |
+| Gate iterations | > 3 | STOP. Request human intervention. Document blocker. |
+| Cycle average | < 80 | Deep analysis required. Pattern identification mandatory. |
+
+**You CANNOT proceed past threshold without documented response.**
+
 ## Assertiveness Score Calculation
 
 Base score of 100 points, with deductions for inefficiencies:

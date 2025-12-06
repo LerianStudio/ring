@@ -21,6 +21,38 @@ sequence:
 
 related:
   complementary: [ring-default:test-driven-development, ring-dev-team:qa-analyst]
+
+verification:
+  automated:
+    - command: "go test ./... -cover 2>&1 | grep -E 'coverage:|PASS|FAIL'"
+      description: "Go tests pass with coverage"
+      success_pattern: "PASS.*coverage: [8-9][0-9]|100"
+      failure_pattern: "FAIL|coverage: [0-7][0-9]"
+    - command: "npm test -- --coverage 2>&1 | grep -E 'Tests:|Coverage'"
+      description: "TypeScript tests pass with coverage"
+      success_pattern: "Tests:.*passed|Coverage.*[8-9][0-9]|100"
+      failure_pattern: "failed|Coverage.*[0-7][0-9]"
+  manual:
+    - "Every acceptance criterion has at least one test in traceability matrix"
+    - "RED phase failure output was captured before GREEN phase"
+    - "No skipped or pending tests for this task"
+
+examples:
+  - name: "TDD for auth service"
+    context: "AC-1: User can login with valid credentials"
+    expected_flow: |
+      1. Write TestAuthService_Login_WithValidCredentials
+      2. Run test - FAIL (no implementation)
+      3. Implement Login method
+      4. Run test - PASS
+      5. Update traceability matrix: AC-1 -> auth_test.go:15
+  - name: "Coverage gap fix"
+    context: "Coverage at 72%, need 80%"
+    expected_flow: |
+      1. Identify uncovered lines
+      2. Write tests for edge cases
+      3. Re-run coverage report
+      4. Verify 80%+ achieved
 ---
 
 # Dev Testing (Gate 3)
@@ -32,6 +64,59 @@ Ensure every acceptance criterion has at least one **unit test** proving it work
 **Core principle:** Untested acceptance criteria are unverified claims. Each criterion MUST map to at least one executable unit test.
 
 **Scope:** This gate focuses on unit tests. Integration and E2E tests are handled separately (CI/CD pipeline, QA phase).
+
+## Pressure Resistance
+
+**Gate 3 (Testing) enforces MANDATORY unit test coverage. Pressure scenarios and required responses:**
+
+| Pressure Type | Request | Agent Response |
+|---------------|---------|----------------|
+| **Manual Testing** | "I manually tested everything" | "Manual tests are not executable, not repeatable. Write unit tests." |
+| **Close Enough** | "78% coverage, close to 80%" | "80% is MINIMUM, not target. 78% = FAIL. Write more tests." |
+| **Integration** | "My integration tests cover this" | "Gate 3 = unit tests only. Integration tests are separate scope." |
+| **Time** | "Tests will slow us down" | "Tests prevent rework. No tests = more time debugging later." |
+
+**Non-negotiable principle:** Coverage threshold is MANDATORY minimum, not aspirational target. Below threshold = FAIL.
+
+## Common Rationalizations - REJECTED
+
+| Excuse | Reality |
+|--------|---------|
+| "Manual testing validates all criteria" | Manual tests are not executable, not repeatable, not automatable. Gate 3 requires unit tests. |
+| "Coverage is 78%, close enough to 80%" | Threshold is mandatory minimum. 78% = FAIL. No exceptions. |
+| "Integration tests are better verification" | Gate 3 scope is unit tests only. Integration tests are different gate. |
+| "We can add tests later in CI/CD" | Gate 3 exit criteria require tests NOW. Later = never. |
+| "These mocks make it a unit test" | If you hit DB/API/filesystem, it's integration. Mock the interface. |
+| "All criteria tested, coverage low" | Write edge case tests until threshold met. |
+
+## Red Flags - STOP
+
+If you catch yourself thinking ANY of these, STOP immediately:
+
+- "Manual testing already validated this"
+- "Close enough to coverage threshold"
+- "These integration tests prove it better"
+- "We can add tests after review"
+- "All criteria covered, percentage doesn't matter"
+- "Tests slow down development"
+
+**All of these indicate Gate 3 violation. Write unit tests until threshold met.**
+
+## Unit Test vs Integration Test
+
+**Gate 3 requires UNIT tests. Know the difference:**
+
+| Type | Characteristics | Gate 3? |
+|------|----------------|---------|
+| **Unit** ✅ | Mocks all external dependencies, tests single function | YES |
+| **Integration** ❌ | Hits real database/API/filesystem | NO - separate scope |
+
+**If you're thinking "but my test needs the database":**
+- That's an integration test
+- Mock the repository interface
+- Test the business logic, not the database
+
+**"Mocking the database driver" is still integration. Mock the INTERFACE.**
 
 ## Prerequisites
 
@@ -196,7 +281,10 @@ Before proceeding to Gate 4 (Review):
 - [ ] Every acceptance criterion has at least one unit test
 - [ ] All tests follow TDD cycle (RED verified before GREEN)
 - [ ] Full test suite passes (0 failures)
-- [ ] Coverage meets project threshold (typically 80%+)
+- [ ] **Coverage MUST meet 80% minimum** (or project-defined threshold in PROJECT_RULES.md). This is MANDATORY, not aspirational.
+  - Below threshold = FAIL
+  - No exceptions for "close enough"
+  - All acceptance criteria MUST have executable tests
 - [ ] Traceability matrix complete and updated
 - [ ] No skipped or pending tests for this task
 

@@ -15,11 +15,47 @@ skip_when: |
   - Already in a specific gate skill -> let that gate complete
   - Need to plan tasks first -> use ring-default:writing-plans or ring-pm-team:pre-dev-full
 
+NOT_skip_when: |
+  - "Task is simple" → Simple ≠ risk-free. Execute gates.
+  - "Tests already pass" → Tests ≠ review. Different concerns.
+  - "Time pressure" → Pressure ≠ permission. Document and proceed.
+  - "Already did N gates" → Sunk cost is irrelevant. Complete all gates.
+
 sequence:
   before: [ring-dev-team:dev-feedback-loop]
 
 related:
   complementary: [ring-dev-team:dev-implementation, ring-dev-team:dev-devops, ring-dev-team:dev-sre, ring-dev-team:dev-testing, ring-dev-team:dev-review, ring-dev-team:dev-validation, ring-dev-team:dev-feedback-loop]
+
+verification:
+  automated:
+    - command: "test -f .ring/dev-team/state/cycle-state.json"
+      description: "State file exists"
+      success_pattern: "exit 0"
+    - command: "cat .ring/dev-team/state/cycle-state.json | jq '.current_gate'"
+      description: "Current gate is valid"
+      success_pattern: "[0-5]"
+  manual:
+    - "All gates for current task show PASS in state file"
+    - "No tasks have status 'blocked' for more than 3 iterations"
+
+examples:
+  - name: "New feature from PM workflow"
+    invocation: "/ring-dev-team:dev-cycle docs/pre-dev/auth/tasks.md"
+    expected_flow: |
+      1. Load tasks with subtasks from tasks.md
+      2. Ask user for checkpoint mode (per-task/per-gate/continuous)
+      3. Execute Gate 0-5 for each task sequentially
+      4. Generate feedback report after completion
+  - name: "Resume interrupted cycle"
+    invocation: "/ring-dev-team:dev-cycle --resume"
+    expected_state: "Continues from last saved gate in cycle-state.json"
+  - name: "Execute with per-gate checkpoints"
+    invocation: "/ring-dev-team:dev-cycle tasks.md --checkpoint per-gate"
+    expected_flow: |
+      1. Execute Gate 0, pause for approval
+      2. User approves, execute Gate 1, pause
+      3. Continue until all gates complete
 ---
 
 # Development Cycle Orchestrator
@@ -29,6 +65,44 @@ related:
 The development cycle orchestrator loads tasks/subtasks from PM team output (or manual task files) and executes through 6 quality gates. Tasks are loaded at initialization - no separate import gate.
 
 **Announce at start:** "I'm using the dev-cycle skill to orchestrate task execution through 6 gates."
+
+## Pressure Resistance
+
+**This skill enforces MANDATORY gates. Pressure scenarios and required responses:**
+
+| Pressure Type | Request | Agent Response |
+|---------------|---------|----------------|
+| **Time** | "Production down, skip gates" | "Gates prevent production issues. Automatic mode = 20 min. Skipping gates increases risk." |
+| **Sunk Cost** | "Already did 4 gates, skip review" | "Each gate catches different issues. Prior gates don't reduce review value. Review = 10 min." |
+| **Authority** | "Director override, ship now" | "Cannot skip GATES based on authority. Can skip CHECKPOINTS (automatic mode). Gates are non-negotiable." |
+| **Simplicity** | "Simple fix, skip gates" | "Simple tasks often have complex impacts. Gates required unless: <5 lines, no deps, >90% existing coverage." |
+
+**Non-negotiable principle:** Execution mode selection affects CHECKPOINTS (user approval pauses), not GATES (quality checks). ALL gates execute regardless of mode.
+
+## Common Rationalizations - REJECTED
+
+| Excuse | Reality |
+|--------|---------|
+| "Task is simple, skip gates" | Simple tasks have complex impacts. Gates catch what you don't see. |
+| "Already passed N gates" | Each gate catches different issues. Sunk cost is irrelevant. |
+| "Manager approved skipping" | Authority cannot override quality gates. Document the pressure. |
+| "Tests pass, skip review" | Tests verify code works. Review verifies code is correct, secure, maintainable. |
+| "Automatic mode means faster" | Automatic mode skips CHECKPOINTS, not GATES. Same quality, less interruption. |
+| "We'll fix issues post-merge" | Post-merge fixes are 10x more expensive. Gates exist to prevent this. |
+
+## Red Flags - STOP
+
+If you catch yourself thinking ANY of these, STOP immediately:
+
+- "This task is too simple for gates"
+- "We already passed most gates"
+- "Manager/Director said to skip"
+- "Tests pass, review is redundant"
+- "We can fix issues later"
+- "Automatic mode will handle it"
+- "Just this once won't hurt"
+
+**All of these indicate you're about to violate mandatory workflow. Return to gate execution.**
 
 ## The 6 Gates
 
