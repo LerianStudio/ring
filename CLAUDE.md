@@ -8,7 +8,7 @@ Ring is a comprehensive skills library and workflow system for AI agents that en
 
 **Active Plugins:**
 - **ring-default**: 21 core skills, 7 slash commands, 5 specialized agents
-- **ring-dev-team**: 2 developer skills, 10 specialized developer agents (Backend [generic], Backend Go, Backend TypeScript, Backend Python, DevOps, Frontend [generic], Frontend TypeScript, Frontend Designer, QA, SRE)
+- **ring-dev-team**: 10 development skills, 5 slash commands, 7 developer agents (Backend Go, Backend TypeScript, DevOps, Frontend TypeScript, Frontend Designer, QA, SRE)
 - **ring-finops-team**: 6 regulatory skills, 2 FinOps agents
 - **ring-pm-team**: 10 product planning skills, 3 research agents, 2 slash commands
 - **ralph-wiggum**: 1 skill for iterative AI development loops using Stop hooks
@@ -16,7 +16,7 @@ Ring is a comprehensive skills library and workflow system for AI agents that en
 
 **Note:** Plugin versions are managed in `.claude-plugin/marketplace.json`
 
-**Total: 47 skills (21 + 2 + 6 + 10 + 1 + 7) across 6 plugins**
+**Total: 55 skills (21 + 10 + 6 + 10 + 1 + 7) across 6 plugins**
 
 The architecture uses markdown-based skill definitions with YAML frontmatter, auto-discovered at session start via hooks, and executed through Claude Code's native Skill/Task tools.
 
@@ -110,16 +110,22 @@ ring/                                  # Monorepo root
 │   │   └── claude-md-reminder.sh  # CLAUDE.md reminder on prompt submit
 │   └── docs/                      # Documentation
 ├── dev-team/                      # Developer Agents plugin (ring-dev-team)
-│   ├── skills/                    # 2 developer skills
+│   ├── skills/                    # 10 developer skills
 │   │   ├── using-dev-team/        # Plugin introduction
-│   │   └── writing-code/          # Developer agent selection
-│   └── agents/                    # 10 specialized developer agents
-│       ├── backend-engineer.md             # Backend specialist (language agnostic)
+│   │   ├── dev-refactor/          # Codebase analysis against standards
+│   │   ├── dev-cycle/             # 6-gate development workflow orchestrator
+│   │   ├── dev-devops/            # Gate 1: DevOps setup (Docker, compose)
+│   │   ├── dev-feedback-loop/     # Assertiveness scoring and metrics
+│   │   ├── dev-implementation/    # Gate 0: TDD implementation
+│   │   ├── dev-review/            # Gate 4: Parallel code review
+│   │   ├── dev-sre/               # Gate 2: Observability setup
+│   │   ├── dev-testing/           # Gate 3: Test coverage
+│   │   └── dev-validation/        # Gate 5: User approval
+│   └── agents/                    # 7 specialized developer agents
 │       ├── backend-engineer-golang.md      # Go backend specialist
 │       ├── backend-engineer-typescript.md  # TypeScript/Node.js backend specialist
-│       ├── backend-engineer-python.md      # Python backend specialist
 │       ├── devops-engineer.md              # DevOps infrastructure specialist
-│       ├── frontend-engineer.md            # Frontend specialist (language agnostic)
+│       ├── frontend-engineer.md            # Frontend specialist (React/Next.js)
 │       ├── frontend-bff-engineer-typescript.md # BFF (Backend for Frontend) specialist
 │       ├── frontend-designer.md            # Visual design specialist
 │       ├── qa-analyst.md                   # Quality assurance specialist
@@ -280,10 +286,10 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 - Located: `default/skills/using-ring/SKILL.md`
 
 **Ring Dev Team Plugin:**
-- `using-dev-team` → 10 specialist developer agents
+- `ring-dev-team:using-dev-team` → 8 specialist developer agents
 - Auto-loads when ring-dev-team plugin is enabled
 - Located: `dev-team/skills/using-dev-team/SKILL.md`
-- Agents (invoke as `ring-dev-team:{agent-name}`): backend-engineer, backend-engineer-golang, backend-engineer-typescript, backend-engineer-python, devops-engineer, frontend-engineer, frontend-bff-engineer-typescript, frontend-designer, qa-analyst, sre
+- Agents (invoke as `ring-dev-team:{agent-name}`): backend-engineer-golang, backend-engineer-typescript, devops-engineer, frontend-engineer, frontend-bff-engineer-typescript, frontend-designer, qa-analyst, sre
 
 **Ring FinOps Team Plugin:**
 - `using-finops-team` → 2 FinOps agents for Brazilian compliance
@@ -405,7 +411,7 @@ output_schema:
       required: true
 ```
 
-**Used by:** All backend engineers (`ring-dev-team:backend-engineer`, `ring-dev-team:backend-engineer-golang`, `ring-dev-team:backend-engineer-typescript`, `ring-dev-team:backend-engineer-python`), `ring-dev-team:frontend-engineer`, `ring-dev-team:frontend-bff-engineer-typescript`, `ring-dev-team:devops-engineer`, `ring-dev-team:qa-analyst`, `ring-dev-team:sre`, `ring-finops-team:finops-automation`
+**Used by:** `ring-dev-team:backend-engineer-golang`, `ring-dev-team:backend-engineer-typescript`, `ring-dev-team:frontend-engineer`, `ring-dev-team:frontend-bff-engineer-typescript`, `ring-dev-team:devops-engineer`, `ring-dev-team:qa-analyst`, `ring-dev-team:sre`, `ring-finops-team:finops-automation`
 
 **Analysis Schema** (for agents that analyze and recommend):
 ```yaml
@@ -515,6 +521,7 @@ output_schema:
 5. **Never ignore skill when applicable** - "Simple task" is not an excuse
 6. **Never use panic() in Go** - Error handling required
 7. **Never commit incomplete code** - No "TODO: implement" comments
+8. **Never commit manually** - Always use `/ring-default:commit` command
 
 ### Compliance Rules
 ```bash
@@ -532,6 +539,14 @@ output_schema:
 - Check for applicable skills before ANY task
 - If skill exists for task → MUST use it
 - Announce non-obvious skill usage
+
+# Commit compliance (default/commands/commit.md)
+- ALWAYS use /ring-default:commit for all commits
+- Never write git commit commands manually
+- Command enforces: conventional commits, trailers, no emoji signatures
+- MUST use --trailer parameter for AI identification (NOT in message body)
+- Format: git commit -m "msg" --trailer "Generated-by: Claude" --trailer "AI-Model: <model>"
+- NEVER use HEREDOC to include trailers in message body
 ```
 
 ### Session Context
@@ -545,7 +560,7 @@ The system loads at SessionStart (from `default/` plugin):
 - Active plugins: 6 (`ring-default`, `ring-dev-team`, `ring-finops-team`, `ring-pm-team`, `ralph-wiggum`, `ring-tw-team`)
 - Plugin versions: See `.claude-plugin/marketplace.json`
 - Core plugin: `default/` (21 skills, 5 agents, 7 commands)
-- Developer agents plugin: `dev-team/` (2 skills, 10 specialized developer agents)
+- Developer agents plugin: `dev-team/` (10 skills, 9 agents, 5 commands)
 - FinOps plugin: `finops-team/` (6 skills, 2 agents)
 - Product planning plugin: `pm-team/` (10 skills, 3 research agents, 2 commands)
 - Ralph plugin: `ralph-wiggum/` (1 skill, 3 commands, Stop hook)

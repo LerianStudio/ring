@@ -15,8 +15,8 @@ Without Ring, AI assistants often:
 
 Ring solves this by:
 - **Enforcing proven workflows** - Test-driven development, systematic debugging, proper planning
-- **Providing 47 specialized skills** - From brainstorming to production deployment (21 core + 2 dev-team + 10 product planning + 6 FinOps + 1 ralph-wiggum + 7 technical writing)
-- **23 specialized agents** - 5 review/planning agents + 10 developer role agents + 3 research agents + 2 FinOps agents + 3 technical writing agents
+- **Providing 55 specialized skills** - From brainstorming to production deployment (21 core + 10 dev-team + 10 product planning + 6 FinOps + 1 ralph-wiggum + 7 technical writing)
+- **20 specialized agents** - 5 review/planning agents + 7 developer agents + 3 research agents + 2 FinOps agents + 3 technical writing agents
 - **Automating skill discovery** - Skills load automatically at session start
 - **Preventing common failures** - Built-in anti-patterns and mandatory checklists
 
@@ -31,12 +31,10 @@ Ring solves this by:
 - Use `/ring-default:codereview` command to orchestrate parallel review workflow
 
 **Developer Agents (dev-team plugin):**
-- `ring-dev-team:backend-engineer` - Language-agnostic backend specialist (adapts to Go/TypeScript/Python/etc)
 - `ring-dev-team:backend-engineer-golang` - Go backend specialist for financial systems
 - `ring-dev-team:backend-engineer-typescript` - TypeScript/Node.js backend specialist (Express, NestJS, Fastify)
-- `ring-dev-team:backend-engineer-python` - Python backend specialist (FastAPI, Django, Flask)
 - `ring-dev-team:devops-engineer` - DevOps infrastructure specialist
-- `ring-dev-team:frontend-engineer` - React/Next.js specialist (JavaScript-first)
+- `ring-dev-team:frontend-engineer` - React/Next.js frontend specialist
 - `ring-dev-team:frontend-bff-engineer-typescript` - BFF (Backend for Frontend) with Clean Architecture
 - `ring-dev-team:frontend-designer` - Visual design specialist
 - `ring-dev-team:qa-analyst` - Quality assurance specialist
@@ -241,11 +239,21 @@ No "should work" → Only "does work" with proof
 - `testing-skills-with-subagents` - Skill validation
 - `testing-agents-with-subagents` - Subagent-specific testing
 
-### Developer Skills (ring-dev-team plugin - 2 skills)
+### Developer Skills (ring-dev-team plugin - 10 skills)
 
 **Code Development:**
-- `using-dev-team` - Introduction to developer specialist agents
-- `writing-code` - Best practices for code implementation
+- `ring-dev-team:using-dev-team` - Introduction to developer specialist agents
+- `ring-dev-team:dev-refactor` - Codebase analysis against standards
+- `ring-dev-team:dev-cycle` - 6-gate development workflow orchestrator
+
+**6-Gate Workflow Skills:**
+- `ring-dev-team:dev-implementation` - Gate 0: TDD implementation
+- `ring-dev-team:dev-devops` - Gate 1: DevOps setup (Docker, compose)
+- `ring-dev-team:dev-sre` - Gate 2: Observability setup
+- `ring-dev-team:dev-testing` - Gate 3: Test coverage
+- `ring-dev-team:dev-review` - Gate 4: Parallel code review
+- `ring-dev-team:dev-validation` - Gate 5: User approval
+- `ring-dev-team:dev-feedback-loop` - Assertiveness scoring and metrics
 
 ### Product Planning Skills (ring-pm-team plugin - 10 skills)
 
@@ -405,13 +413,11 @@ ring/                                  # Monorepo root
 │   ├── lib/                        # Infrastructure utilities (9 scripts)
 │   └── docs/                       # Documentation
 ├── dev-team/                      # Developer Agents plugin (ring-dev-team)
-│   └── agents/                      # 10 specialized developer agents
-│       ├── backend-engineer.md         # Language-agnostic backend specialist
+│   └── agents/                      # 8 specialized developer agents
 │       ├── backend-engineer-golang.md  # Go backend specialist
 │       ├── backend-engineer-typescript.md # TypeScript/Node.js backend specialist
-│       ├── backend-engineer-python.md  # Python backend specialist
 │       ├── devops-engineer.md          # DevOps infrastructure
-│       ├── frontend-engineer.md        # React/Next.js specialist (JavaScript-first)
+│       ├── frontend-engineer.md        # React/Next.js frontend specialist
 │       ├── frontend-bff-engineer-typescript.md # BFF (Backend for Frontend) specialist
 │       ├── frontend-designer.md        # Visual design specialist
 │       ├── qa-analyst.md               # Quality assurance

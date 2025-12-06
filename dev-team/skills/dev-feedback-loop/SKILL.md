@@ -13,13 +13,16 @@ trigger: |
 skip_when: |
   - Task still in progress -> wait for completion
   - Feedback already recorded for this task -> proceed
-  - Exploratory/spike work (no metrics tracked)
+
+NOT_skip_when: |
+  - "Exploratory/spike work" → ALL work produces learnings. Track metrics for spikes too.
+  - "Just experimenting" → Experiments need metrics to measure success. No exceptions.
 
 sequence:
-  after: [dev-validation, dev-completion]
+  after: [ring-dev-team:dev-validation]
 
 related:
-  complementary: [ring-default:root-cause-tracing, ring-default:codify-solution]
+  complementary: [ring-dev-team:dev-cycle, ring-dev-team:dev-validation]
 ---
 
 # Dev Feedback Loop
@@ -29,6 +32,91 @@ related:
 Continuous improvement system that tracks development cycle effectiveness through assertiveness scores, identifies recurring failure patterns, and generates actionable improvement suggestions.
 
 **Core principle:** What gets measured gets improved. Track every gate transition to identify systemic issues.
+
+## Pressure Resistance
+
+**Feedback collection is MANDATORY for all completed tasks. Pressure scenarios and required responses:**
+
+| Pressure Type | Request | Agent Response |
+|---------------|---------|----------------|
+| **Simple Task** | "Task was simple, skip feedback" | "Simple tasks contribute to patterns. Collect metrics for ALL tasks." |
+| **Perfect Score** | "Score 100, feedback unnecessary" | "High scores need tracking too. Document what went well for replication." |
+| **User Approved** | "User approved, skip retrospective" | "Approval ≠ feedback. Collect metrics regardless of outcome." |
+| **No Issues** | "No issues found, nothing to report" | "No issues IS data. Document absence of problems for baseline." |
+
+**Non-negotiable principle:** Feedback MUST be collected for EVERY completed task, regardless of outcome or complexity.
+
+## Common Rationalizations - REJECTED
+
+| Excuse | Reality |
+|--------|---------|
+| "It was just a spike/experiment" | Spikes produce learnings. Track what worked and what didn't. |
+| "Exploratory work, no metrics" | Exploration needs metrics to measure success. Track ALL work. |
+| "Task was too simple" | Simple tasks still contribute to cycle patterns. Track all. |
+| "Perfect score, no insights" | Perfect scores reveal what works. Document for replication. |
+| "User is happy, skip analysis" | Happiness ≠ process quality. Collect metrics objectively. |
+| "Same as last time" | Patterns only visible with data. Each task adds to baseline. |
+| "Feedback is subjective" | Metrics are objective. Assertiveness score has formula. |
+| "No time for retrospective" | Retrospective prevents future time waste. Investment, not cost. |
+
+## Red Flags - STOP
+
+If you catch yourself thinking ANY of these, STOP immediately:
+
+- "It was just a spike, no need to track"
+- "Exploratory work doesn't need metrics"
+- "This task was too simple to track"
+- "Perfect outcome, no need for feedback"
+- "User approved, skip the metrics"
+- "Same pattern as before, skip analysis"
+- "Feedback is subjective anyway"
+- "No time for retrospective"
+
+**All of these indicate feedback loop violation. Collect metrics for EVERY task.**
+
+## Mandatory Feedback Collection
+
+**Non-negotiable:** Feedback MUST be collected for EVERY completed task, regardless of:
+
+| Factor | Still Collect? | Reason |
+|--------|---------------|--------|
+| Task complexity | ✅ YES | Simple tasks reveal patterns |
+| Outcome quality | ✅ YES | 100-score tasks need tracking |
+| User satisfaction | ✅ YES | Approval ≠ process quality |
+| Time pressure | ✅ YES | Metrics take <5 min |
+| "Nothing to report" | ✅ YES | Absence of issues is data |
+
+**Consequence:** Skipping feedback breaks continuous improvement loop and masks systemic issues.
+
+## Threshold Alerts - MANDATORY RESPONSE
+
+**When thresholds are breached, response is REQUIRED:**
+
+| Alert | Threshold | Required Action |
+|-------|-----------|-----------------|
+| Task score | < 70 | Document what went wrong. Identify root cause. |
+| Gate iterations | > 3 | STOP. Request human intervention. Document blocker. |
+| Cycle average | < 80 | Deep analysis required. Pattern identification mandatory. |
+
+**You CANNOT proceed past threshold without documented response.**
+
+## Blocker Criteria - STOP and Report
+
+**ALWAYS pause and report blocker for:**
+
+| Decision Type | Examples | Action |
+|--------------|----------|--------|
+| **Score interpretation** | "Is 65 acceptable?" | STOP. Follow interpretation table. |
+| **Threshold override** | "Skip analysis for this task" | STOP. Analysis is MANDATORY for low scores. |
+| **Pattern judgment** | "Is this pattern significant?" | STOP. Document pattern, let user decide significance. |
+| **Improvement priority** | "Which fix first?" | STOP. Report all findings, let user prioritize. |
+
+**Before skipping ANY feedback collection:**
+1. Check if task is complete (feedback required for ALL completed tasks)
+2. Check threshold status (alerts are mandatory)
+3. If in doubt → STOP and report blocker
+
+**You CANNOT skip feedback collection. Period.**
 
 ## Assertiveness Score Calculation
 
@@ -46,7 +134,7 @@ Base score of 100 points, with deductions for inefficiencies:
 
 ### Score Calculation Formula
 
-```
+```text
 assertiveness_score = 100
                     - min(30, (extra_iterations * 10))
                     - (review_fail * 20)
@@ -78,13 +166,12 @@ After task completion, gather all gate data:
 ### Gate Transitions
 | Gate | Iterations | Duration | Outcome |
 |------|------------|----------|---------|
-| Gate 1: Planning | 1 | 15m | PASS |
-| Gate 2: Design | 2 | 45m | PASS (1 revision) |
-| Gate 3: Implementation | 1 | 2h 30m | PASS |
-| Gate 4: Refinement | 1 | 30m | PASS |
-| Gate 5: Testing | 2 | 1h 15m | PASS (coverage gap) |
-| Gate 6: Review | 1 | 20m | PASS |
-| Gate 7: Validation | 1 | 10m | APPROVED |
+| Gate 0: Implementation | 1 | 2h 30m | PASS |
+| Gate 1: DevOps | 1 | 30m | PASS |
+| Gate 2: SRE | 1 | 25m | PASS |
+| Gate 3: Testing | 2 | 1h 15m | PASS (coverage gap) |
+| Gate 4: Review | 1 | 20m | PASS |
+| Gate 5: Validation | 1 | 10m | APPROVED |
 
 ### Review Findings
 - Code reviewer: PASS (2 Low issues)
@@ -108,15 +195,15 @@ Apply formula with collected metrics:
 Base Score: 100
 
 Deductions:
-- Extra iterations: 2 (Gate 2 + Gate 5) = -20
+- Extra iterations: 1 (Gate 3) = -10
 - Review FAIL: 0 = -0
 - NEEDS_DISCUSSION: 0 = -0
 - Unmet criteria: 0 = -0
 - User REJECTED: No = -0
 
-**Final Score: 80 / 100**
+**Final Score: 90 / 100**
 
-Rating: Good
+Rating: Excellent
 ```
 
 ## Step 3: Threshold Alerts
@@ -139,11 +226,11 @@ Rating: Good
 
 ### Root Cause Investigation
 
-#### Why did Gate 3 require 3 iterations?
-- Iteration 1: Initial implementation incomplete
-- Iteration 2: Edge case handling missing
-- Iteration 3: Performance optimization needed
-- **Root cause:** Requirements unclear on edge cases
+#### Why did Gate 3 (Testing) require 3 iterations?
+- Iteration 1: Coverage below 80% threshold (67% actual)
+- Iteration 2: Edge case tests missing for null inputs
+- Iteration 3: Integration test failures due to missing fixtures
+- **Root cause:** TDD RED phase skipped, tests written after implementation
 
 #### Why did review FAIL?
 - Critical finding: SQL injection vulnerability
@@ -154,14 +241,14 @@ Rating: Good
 - **Root cause:** N+1 query not detected during implementation
 
 ### Corrective Actions
-1. Add edge case checklist to Gate 1 (planning)
-2. Add security checklist to Gate 3 (implementation)
-3. Add performance test to Gate 5 before validation
+1. Enforce TDD RED phase verification at Gate 0 (Implementation)
+2. Add security checklist to Gate 0 (Implementation)
+3. Add performance test to Gate 3 (Testing) before Gate 4 (Review)
 
 ### Prevention Measures
-1. Update implementation skill with security reminders
-2. Add performance gate before review
-3. Clarify requirements process
+1. Update ring-dev-team:dev-implementation skill with TDD compliance check
+2. Update ring-dev-team:dev-testing skill to require coverage proof before exit
+3. Add security self-review before gate exit
 ```
 
 ### Gate Iterations > 3
@@ -174,7 +261,7 @@ Rating: Good
 ## GATE BLOCKED - Human Intervention Required
 
 **Task:** [TASK-ID]
-**Gate:** Gate 6 (Review)
+**Gate:** Gate 4 (Review)
 **Iterations:** 4 (exceeds limit of 3)
 
 ### Iteration History
@@ -259,15 +346,10 @@ Human decision on how to proceed:
 
 Save report to standardized location:
 
-```bash
-# Create feedback directory if needed
-mkdir -p docs/feedback
+**Directory:** `.ring/dev-team/feedback/`
+**Filename:** `cycle-YYYY-MM-DD.md`
 
-# Write report
-cat > docs/feedback/cycle-YYYY-MM-DD.md << 'EOF'
-[Report content]
-EOF
-```
+Create the feedback directory if it doesn't exist, then write the report content to the file.
 
 Report format:
 
@@ -291,12 +373,12 @@ Report format:
 ### By Gate
 | Gate | Avg Iterations | Avg Duration | Pass Rate |
 |------|----------------|--------------|-----------|
-| Planning | 1.1 | 20m | 100% |
-| Design | 1.3 | 35m | 100% |
-| Implementation | 1.2 | 2h | 100% |
-| Testing | 1.5 | 1h | 95% |
-| Review | 1.4 | 25m | 85% |
-| Validation | 1.1 | 15m | 90% |
+| Gate 0: Implementation | 1.2 | 2h | 100% |
+| Gate 1: DevOps | 1.1 | 30m | 100% |
+| Gate 2: SRE | 1.1 | 25m | 100% |
+| Gate 3: Testing | 1.5 | 1h | 95% |
+| Gate 4: Review | 1.4 | 25m | 85% |
+| Gate 5: Validation | 1.1 | 15m | 90% |
 
 ### By Penalty Type
 | Penalty | Occurrences | Total Points Lost |
@@ -310,7 +392,7 @@ Report format:
 ## Patterns Identified
 
 ### Positive Patterns
-1. Planning gate consistently single-iteration
+1. DevOps gate (Gate 1) consistently single-iteration
 2. Implementation quality improving (fewer review issues)
 
 ### Negative Patterns
@@ -362,12 +444,12 @@ Based on patterns, generate specific improvements:
 ```markdown
 ## Skill Improvement Suggestions
 
-### dev-testing
+### ring-dev-team:dev-testing
 - Issue: TDD RED phase often skipped
 - Suggestion: Add mandatory failure output capture
 - Specific change: Require paste of test failure before GREEN phase
 
-### dev-review
+### ring-dev-team:dev-review
 - Issue: Same security issues recurring
 - Suggestion: Add pre-review security checklist
 - Specific change: Gate entry requires security self-check
@@ -398,7 +480,7 @@ Based on patterns, generate specific improvements:
 | Threshold Alerts | X |
 | Root Cause Analyses | Y |
 | Improvement Suggestions | Z |
-| Report Location | docs/feedback/cycle-YYYY-MM-DD.md |
+| Report Location | .ring/dev-team/feedback/cycle-YYYY-MM-DD.md |
 
 ## Anti-Patterns
 

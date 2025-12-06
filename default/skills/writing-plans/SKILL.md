@@ -123,7 +123,7 @@ Plans should specify which specialized agents to use for each task type. During 
 
 | Task Type | Agent Pattern | Examples |
 |-----------|---------------|----------|
-| Backend API/services | `ring-dev-team:backend-engineer-*` | `backend-engineer-golang`, `backend-engineer-python`, `backend-engineer-typescript` |
+| Backend API/services | `ring-dev-team:backend-engineer-*` | `backend-engineer-golang`, `backend-engineer-typescript` |
 | Frontend UI/components | `ring-dev-team:frontend-engineer-*` | `frontend-engineer`, `frontend-bff-engineer-typescript` |
 | Infrastructure/CI/CD | `ring-dev-team:devops-engineer` | Single agent |
 | Testing strategy | `ring-dev-team:qa-analyst` | Single agent |

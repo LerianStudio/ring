@@ -44,8 +44,8 @@ Cycle ID: 2024-01-15-143000
 Status: cancelled
 Completed: 3/5 tasks
 
-State saved to: dev-team/state/current-cycle.json
-Partial report: docs/feedback/cycle-2024-01-15-partial.md
+State saved to: .ring/dev-team/current-cycle.json
+Partial report: .ring/dev-team/feedback/cycle-2024-01-15-partial.md
 
 To resume later:
   /ring-dev-team:dev-cycle --resume
@@ -72,4 +72,4 @@ Check status with:
 
 Now checking for active cycle to cancel...
 
-Read state from: `dev-team/state/current-cycle.json`
+Read state from: `.ring/dev-team/current-cycle.json`

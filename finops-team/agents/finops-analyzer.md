@@ -70,6 +70,8 @@ You have access to critical regulatory documentation and data dictionaries:
 
 2. **Official Documentation:** (organized by regulatory authority)
    - `.claude/docs/regulatory/templates/BACEN/CADOC/cadoc-4010-4016.md` - BACEN CADOC official specifications
+   - `.claude/docs/regulatory/templates/BACEN/OpenBanking/open-banking-brasil.md` - Open Finance Brasil regulatory guide
+   - `.claude/docs/regulatory/templates/BACEN/OpenBanking/apix-reference.md` - APIX implementation reference
    - `.claude/docs/regulatory/templates/RFB/EFINANCEIRA/efinanceira.md` - RFB e-Financeira official manual
    - `.claude/docs/regulatory/templates/RFB/DIMP/dimp-v10-manual.md` - DIMP v10 official documentation
    - `.claude/docs/regulatory/templates/reporter-guide.md` - Reporter platform technical guide
@@ -79,7 +81,7 @@ You have access to critical regulatory documentation and data dictionaries:
    - Contains data_source, api_resource, api_field, full_path
    - Includes transformation rules and validation
 
-3. **System APIs:** Via MCP tools
+4. **System APIs:** Via MCP tools
    - Midaz API schema - Core ledger fields
    - CRM API schema - Customer data fields
    - Reporter API schema - Template submission fields

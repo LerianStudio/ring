@@ -462,7 +462,7 @@ Action:
 
 ## Output Location
 
-**Always output to**: `docs/pre-development/tasks/tasks-[feature-name].md`
+**Always output to**: `docs/pre-dev/{feature-name}/tasks.md`
 
 ## After Task Breakdown Approval
 

@@ -1,28 +1,58 @@
 ---
 name: dev-validation
 description: |
-  Development cycle validation gate (Gate 7) - validates all acceptance criteria are met
+  Development cycle validation gate (Gate 5) - validates all acceptance criteria are met
   and requires explicit user approval before completion.
 
 trigger: |
-  - After review gate passes (Gate 6)
+  - After review gate passes (Gate 4)
   - Implementation and tests complete
   - Need user sign-off on acceptance criteria
 
 skip_when: |
-  - Review not passed -> complete Gate 6 first
+  - Review not passed -> complete Gate 4 first
   - Already validated and approved -> proceed to completion
   - No acceptance criteria defined -> request criteria first
 
 sequence:
-  after: [dev-review]
-  before: [dev-completion]
+  after: [ring-dev-team:dev-review]
 
 related:
   complementary: [ring-default:verification-before-completion]
+
+verification:
+  automated:
+    - command: "go test ./... 2>&1 | grep -c PASS"
+      description: "All tests pass"
+      success_pattern: "[1-9][0-9]*"
+    - command: "cat .ring/dev-team/state/cycle-state.json | jq '.gates[4].verdict'"
+      description: "Review gate passed"
+      success_pattern: "PASS"
+  manual:
+    - "User has provided explicit APPROVED or REJECTED decision"
+    - "All acceptance criteria have verified evidence"
+    - "Validation checklist presented to user"
+
+examples:
+  - name: "Successful validation"
+    context: "4 acceptance criteria, all tests pass"
+    expected_flow: |
+      1. Gather evidence for each criterion
+      2. Build validation checklist with evidence types
+      3. Present to user with APPROVED/REJECTED options
+      4. User selects APPROVED
+      5. Document approval, proceed to feedback loop
+  - name: "Validation rejection"
+    context: "AC-3 not met (response time too slow)"
+    expected_flow: |
+      1. Present validation checklist
+      2. User identifies AC-3 failure
+      3. User selects REJECTED with reason
+      4. Create remediation task
+      5. Return to Gate 0 for fixes
 ---
 
-# Dev Validation (Gate 7)
+# Dev Validation (Gate 5)
 
 ## Overview
 
@@ -30,11 +60,80 @@ Final validation gate requiring explicit user approval. Present evidence that ea
 
 **Core principle:** Passing tests and code review do not guarantee requirements are met. User validation confirms implementation matches intent.
 
+## Pressure Resistance
+
+**Gate 5 (Validation) requires EXPLICIT user approval. Pressure scenarios and required responses:**
+
+| Pressure Type | Request | Agent Response |
+|---------------|---------|----------------|
+| **User Busy** | "User is busy, assume approval" | "CANNOT assume approval. Wait for explicit response. Document pending status." |
+| **Tests Pass** | "Tests pass, validation redundant" | "Tests verify code works. Validation verifies it meets REQUIREMENTS. Different concerns." |
+| **Minor Issues** | "Fix issues after approval" | "No partial approval. REJECTED with issues, fix first, then re-validate." |
+| **Implied Approval** | "User didn't object" | "Silence ≠ approval. Require explicit 'APPROVED' or 'REJECTED: reason'." |
+
+**Non-negotiable principle:** User MUST respond with "APPROVED" or "REJECTED: [reason]". No other responses accepted.
+
+## Common Rationalizations - REJECTED
+
+| Excuse | Reality |
+|--------|---------|
+| "User is unavailable" | Unavailability ≠ approval. STOP and wait. Document pending. |
+| "Tests prove it works" | Tests verify behavior. User validates requirements alignment. |
+| "Minor issues can wait" | No partial approval. Fix issues, then revalidate. |
+| "User seemed happy" | Seeming ≠ approval. Require explicit response. |
+| "Implicit approval after demo" | Demo ≠ approval. Ask for explicit decision. |
+| "User approved similar before" | Past ≠ present. Each validation requires fresh approval. |
+
+## Red Flags - STOP
+
+If you catch yourself thinking ANY of these, STOP immediately:
+
+- "User is busy, I'll assume approval"
+- "Tests pass, validation is redundant"
+- "These minor issues can be fixed later"
+- "User didn't say no, so it's approved"
+- "User seemed satisfied with the demo"
+- "Previous similar work was approved"
+
+**All of these indicate Gate 5 violation. Wait for explicit "APPROVED" or "REJECTED".**
+
+## Awaiting Approval - STOP ALL WORK
+
+**When validation request is presented:**
+
+1. **STOP ALL WORK** on this feature, module, and related code
+2. **DO NOT** proceed to documentation, refactoring, or "quick fixes"
+3. **DO NOT** work on "unrelated" tasks in the same codebase
+4. **WAIT** for explicit user response
+
+**User unavailability is NOT permission to:**
+- Assume approval
+- Work on "low-risk" next steps
+- Redefine criteria as "already met"
+- Proceed with "we'll fix issues later"
+
+**Document pending status and WAIT.**
+
+## Approval Format - MANDATORY
+
+**User MUST respond with exactly one of:**
+
+✅ **"APPROVED"** - All criteria verified, proceed to next gate
+✅ **"REJECTED: [specific reason]"** - Issues found, fix and revalidate
+
+**NOT acceptable:**
+- ❌ "Looks good" (vague)
+- ❌ "👍" (ambiguous)
+- ❌ Silence (not a response)
+- ❌ "Approved with minor issues" (partial = REJECTED)
+
+**If user provides ambiguous response, ask for explicit APPROVED or REJECTED.**
+
 ## Prerequisites
 
 Before starting this gate:
-- All tests pass (Gate 5 verified)
-- Code review passed (Gate 6 VERDICT: PASS)
+- All tests pass (Gate 3 verified)
+- Code review passed (Gate 4 VERDICT: PASS)
 - Implementation is complete and stable
 
 ## Step 1: Gather Validation Evidence
@@ -196,7 +295,7 @@ Please review the evidence above and provide your decision:
    ```
 
 2. Update task status
-3. Proceed to completion (Gate 8)
+3. Proceed to feedback loop
 4. Trigger feedback loop for metrics
 
 ### Decision: REJECTED
@@ -228,11 +327,11 @@ Please review the evidence above and provide your decision:
    2. [Additional test needed]
    3. [Documentation update]
 
-   **Return to:** Gate 3 (Implementation)
+   **Return to:** Gate 0 (Implementation)
    ```
 
-3. Return to Gate 3 with rejection details
-4. After remediation, restart from Gate 5 (Testing)
+3. Return to Gate 0 with rejection details
+4. After remediation, restart from Gate 3 (Testing)
 5. Track rejection in feedback loop (assertiveness penalty)
 
 ## Step 6: Document Validation Outcome
@@ -264,7 +363,7 @@ OR
 ### Next Steps
 [Proceed to completion]
 OR
-[Return to Gate 3 for: ...]
+[Return to Gate 0 for: ...]
 ```
 
 ## Validation Best Practices
@@ -331,7 +430,7 @@ If some criteria pass but others fail:
 | Evidence Collected | X automated, Y manual |
 | User Decision | APPROVED/REJECTED |
 | Rejection Reason | [if applicable] |
-| Result | Gate passed / Returned to Gate 3 |
+| Result | Gate passed / Returned to Gate 0 |
 
 ## Edge Cases
 

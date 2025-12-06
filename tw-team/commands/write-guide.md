@@ -126,4 +126,6 @@ Definition paragraph
 ## Summary
 ```
 
-Now proceed with documenting: **$ARGUMENTS.topic**
+## Proceed
+
+**Topic to document:** $ARGUMENTS.topic

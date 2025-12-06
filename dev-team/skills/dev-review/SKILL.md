@@ -1,28 +1,63 @@
 ---
 name: dev-review
 description: |
-  Development cycle review gate (Gate 6) - executes parallel code review with 3 specialized
+  Development cycle review gate (Gate 4) - executes parallel code review with 3 specialized
   reviewers, aggregates findings, and determines VERDICT for gate passage.
 
 trigger: |
-  - After testing gate complete (Gate 5)
+  - After testing gate complete (Gate 3)
   - Implementation ready for review
   - Before validation gate
 
 skip_when: |
-  - Tests not passing -> complete Gate 5 first
+  - Tests not passing -> complete Gate 3 first
   - Already reviewed with no changes since -> proceed to validation
-  - Trivial change (<20 lines, no logic) -> document skip reason
+
+NOT_skip_when: |
+  - "Trivial change" → Security issues fit in 1 line. ALL changes require review. No exceptions.
+  - "Only N lines" → Line count is irrelevant. AI doesn't negotiate. Review ALL changes.
 
 sequence:
-  after: [dev-testing]
-  before: [dev-validation]
+  after: [ring-dev-team:dev-testing]
+  before: [ring-dev-team:dev-validation]
 
 related:
   complementary: [ring-default:requesting-code-review, ring-default:receiving-code-review]
+
+verification:
+  automated:
+    - command: "cat .ring/dev-team/state/cycle-state.json | jq '.gates[4].code_reviewer.verdict'"
+      description: "Code reviewer verdict captured"
+      success_pattern: "PASS|FAIL|NEEDS_DISCUSSION"
+    - command: "cat .ring/dev-team/state/cycle-state.json | jq '.gates[4].aggregate_verdict'"
+      description: "Aggregate verdict determined"
+      success_pattern: "PASS|FAIL"
+  manual:
+    - "All 3 reviewers dispatched in parallel (single message with 3 Task calls)"
+    - "Critical/High issues addressed before PASS verdict"
+    - "Review findings documented with file:line references"
+
+examples:
+  - name: "Clean review pass"
+    context: "Implementation with no security issues"
+    expected_flow: |
+      1. Dispatch 3 reviewers in parallel
+      2. Code reviewer: PASS (2 Low)
+      3. Business logic reviewer: PASS (0 issues)
+      4. Security reviewer: PASS (0 issues)
+      5. Aggregate VERDICT: PASS
+      6. Proceed to Gate 5
+  - name: "Review with critical finding"
+    context: "SQL injection vulnerability found"
+    expected_flow: |
+      1. Dispatch 3 reviewers in parallel
+      2. Security reviewer: FAIL (1 Critical)
+      3. Aggregate VERDICT: FAIL
+      4. Return to Gate 0 for fixes
+      5. Re-run review after fix
 ---
 
-# Dev Review (Gate 6)
+# Dev Review (Gate 4)
 
 ## Overview
 
@@ -30,10 +65,69 @@ Execute comprehensive code review using 3 specialized reviewers IN PARALLEL. Agg
 
 **Core principle:** Three perspectives catch more bugs than one. Parallel execution = 3x faster feedback.
 
+## Pressure Resistance
+
+**Gate 4 (Review) requires ALL 3 reviewers in parallel. Pressure scenarios and required responses:**
+
+| Pressure Type | Request | Agent Response |
+|---------------|---------|----------------|
+| **One Reviewer** | "One reviewer is enough" | "3 reviewers catch different issues. Code=architecture, Business=logic, Security=vulnerabilities. All required." |
+| **Cosmetic Only** | "Only cosmetic issues, skip fixes" | "Cosmetic issues affect maintainability. Fix or document with FIXME. No silent ignoring." |
+| **Skip Re-review** | "Passed first time, skip re-review" | "After ANY fix, re-run ALL 3 reviewers. Fixes can introduce new issues." |
+| **Time** | "Review takes too long" | "3 parallel reviewers = 10 min total. Sequential = 30 min. Parallel is faster." |
+
+**Non-negotiable principle:** ALL 3 reviewers MUST run in a SINGLE message with 3 Task tool calls. Sequential = violation.
+
+## Common Rationalizations - REJECTED
+
+| Excuse | Reality |
+|--------|---------|
+| "Trivial change, skip review" | Security vulnerabilities fit in 1 line. ALL changes require ALL 3 reviewers. |
+| "Only N lines changed" | Line count is irrelevant. SQL injection is 1 line. Review ALL changes. |
+| "Code reviewer covers security" | Code reviewer checks architecture. Security reviewer checks OWASP. Different expertise. |
+| "Only found LOW issues" | LOW issues accumulate into technical debt. Document in TODO or fix. |
+| "Small fix, no re-review needed" | Small fixes can have big impacts. Re-run ALL reviewers after ANY change. |
+| "One reviewer said PASS" | PASS requires ALL 3 reviewers. One PASS + one FAIL = overall FAIL. |
+| "Business logic is tested" | Tests check behavior. Review checks intent, edge cases, requirements alignment. |
+| "Security scan passed" | Security scanners miss logic flaws. Human reviewer required. |
+
+## Red Flags - STOP
+
+If you catch yourself thinking ANY of these, STOP immediately:
+
+- "This change is too trivial for review"
+- "Only N lines, skip review"
+- "One reviewer found nothing, skip the others"
+- "These are just cosmetic issues"
+- "Small fix doesn't need re-review"
+- "Sequential reviews are fine this time"
+- "Security scanner covers security review"
+- "Business tests cover business review"
+
+**All of these indicate Gate 4 violation. Run ALL 3 reviewers in parallel.**
+
+## Parallel Execution - MANDATORY
+
+**You MUST dispatch all 3 reviewers in a SINGLE message:**
+
+```
+Task tool #1: ring-default:code-reviewer
+Task tool #2: ring-default:business-logic-reviewer
+Task tool #3: ring-default:security-reviewer
+```
+
+**VIOLATIONS:**
+- ❌ Running reviewers one at a time
+- ❌ Running 2 reviewers, skipping 1
+- ❌ Running reviewers in separate messages
+- ❌ Skipping re-review after fixes
+
+**The ONLY acceptable pattern is 3 Task tools in 1 message.**
+
 ## Prerequisites
 
 Before starting this gate:
-- All tests pass (Gate 5 complete)
+- All tests pass (Gate 3 complete)
 - Implementation is feature-complete
 - Code is committed (or ready to diff)
 
@@ -172,9 +266,9 @@ Apply VERDICT rules:
 
 | Condition | VERDICT | Action |
 |-----------|---------|--------|
-| All 3 reviewers PASS, no Critical/High | **PASS** | Proceed to Gate 7 |
-| Any Critical finding | **FAIL** | Return to Gate 3 |
-| 2+ High findings | **FAIL** | Return to Gate 3 |
+| All 3 reviewers PASS, no Critical/High | **PASS** | Proceed to Gate 5 |
+| Any Critical finding | **FAIL** | Return to Gate 0 |
+| 2+ High findings | **FAIL** | Return to Gate 0 |
 | 1 High finding | **NEEDS_DISCUSSION** | Evaluate with stakeholder |
 | Only Medium/Low findings | **PASS** | Track issues, proceed |
 
@@ -204,7 +298,7 @@ Any Critical issue?
    // FIXME(review): [Issue description]
    // Reported by: [reviewer] on [date]
    ```
-4. Proceed to Gate 7 (Validation)
+4. Proceed to Gate 5 (Validation)
 
 ### VERDICT: FAIL
 
@@ -216,7 +310,7 @@ Any Critical issue?
    1. [Critical] [Description] - File: X, Line: Y
    2. [High] [Description] - File: X, Line: Y
    ```
-3. Return to Gate 3 (Implementation) with findings
+3. Return to Gate 0 (Implementation) with findings
 4. After fixes, re-run ALL 3 reviewers (full parallel review)
 5. Do NOT cherry-pick which reviewers to re-run
 
@@ -275,17 +369,30 @@ After fixing Critical/High issues:
 
 1. **Always re-run ALL 3 reviewers** (not just the one that found the issue)
 2. Fixes may introduce new issues in other domains
-3. Parallel execution makes full re-review fast (~3-5 minutes)
+3. Parallel execution makes full re-review fast
 4. Update aggregated findings
 5. Re-determine VERDICT
 
+### Timing Expectations
+
+| Iteration | Expected Duration | Notes |
+|-----------|-------------------|-------|
+| 1st review | 3-5 minutes | Initial parallel review |
+| 2nd review (after fixes) | 3-5 minutes | Full re-review, same duration |
+| 3rd review (final) | 3-5 minutes | Last automated attempt |
+
+**Total maximum time:** ~15-20 minutes (including fix time between iterations)
+
 **Maximum iterations:** 3 review cycles
+
+### Escalation After Max Iterations
 
 If still FAIL after 3 iterations:
 - Stop automated process
 - Request human intervention
-- Document recurring issues
+- Document recurring issues pattern
 - Consider architectural changes
+- Escalate to senior developer or architect
 
 ## Anti-Patterns
 
@@ -315,7 +422,7 @@ If still FAIL after 3 iterations:
 | Findings | X Critical, Y High, Z Medium, W Low |
 | Fixes Applied | N |
 | VERDICT | PASS/FAIL/NEEDS_DISCUSSION |
-| Result | Gate passed / Returned to Gate 3 / Awaiting decision |
+| Result | Gate passed / Returned to Gate 0 / Awaiting decision |
 
 ## Pushing Back on Reviewers
 

@@ -99,11 +99,9 @@ User saying "don't wait", "don't ask questions", or "just execute" does NOT skip
 | Task Type | Preferred Agent | Fallback |
 |-----------|-----------------|----------|
 | Backend (Go) | `ring-dev-team:backend-engineer-golang` | `general-purpose` |
-| Backend (Python) | `ring-dev-team:backend-engineer-python` | `general-purpose` |
 | Backend (TypeScript) | `ring-dev-team:backend-engineer-typescript` | `general-purpose` |
-| Backend (other) | `ring-dev-team:backend-engineer` | `general-purpose` |
+| Frontend (React/Next.js) | `ring-dev-team:frontend-engineer` | `general-purpose` |
 | Frontend (BFF/API Routes) | `ring-dev-team:frontend-bff-engineer-typescript` | `general-purpose` |
-| Frontend (other) | `ring-dev-team:frontend-engineer` | `general-purpose` |
 | Infrastructure | `ring-dev-team:devops-engineer` | `general-purpose` |
 | Testing | `ring-dev-team:qa-analyst` | `general-purpose` |
 | Reliability | `ring-dev-team:sre` | `general-purpose` |

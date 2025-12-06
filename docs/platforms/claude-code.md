@@ -77,7 +77,7 @@ Task tool with subagent_type="ring-dev-team:backend-engineer-golang"
 **Categories** (invoke as `ring-{plugin}:{agent-name}`):
 - **Review agents** (`ring-default:`): code-reviewer, business-logic-reviewer, security-reviewer
 - **Planning agents** (`ring-default:`): write-plan, codebase-explorer
-- **Developer agents** (`ring-dev-team:`): 10 language/role specialists
+- **Developer agents** (`ring-dev-team:`): 9 language/role specialists
 - **FinOps agents** (`ring-finops-team:`): finops-analyzer, finops-automation
 - **TW agents** (`ring-tw-team:`): functional-writer, api-writer, docs-reviewer
 

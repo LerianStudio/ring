@@ -1,29 +1,61 @@
 ---
-name: dev-devops-setup
+name: dev-devops
 description: |
-  Gate 4 of the development cycle. Creates/updates Docker configuration,
+  Gate 1 of the development cycle. Creates/updates Docker configuration,
   docker-compose setup, and environment variables for local development
   and deployment readiness.
 
 trigger: |
-  - Gate 4 of development cycle
-  - Implementation complete from Gate 3
+  - Gate 1 of development cycle
+  - Implementation complete from Gate 0
   - Need containerization or environment setup
 
 skip_when: |
-  - No code implementation exists (need Gate 3 first)
+  - No code implementation exists (need Gate 0 first)
   - Project has no Docker requirements
   - Only documentation changes
 
 sequence:
-  after: [dev-implementation]
-  before: [dev-testing]
+  after: [ring-dev-team:dev-implementation]
+  before: [ring-dev-team:dev-sre]
 
 related:
-  complementary: [dev-implementation, dev-testing]
+  complementary: [ring-dev-team:dev-implementation, ring-dev-team:dev-testing]
+
+verification:
+  automated:
+    - command: "docker-compose build"
+      description: "Docker images build successfully"
+      success_pattern: "Successfully built|successfully"
+      failure_pattern: "error|failed|Error"
+    - command: "docker-compose up -d && sleep 10 && docker-compose ps"
+      description: "All services start and are healthy"
+      success_pattern: "Up|running|healthy"
+      failure_pattern: "Exit|exited|unhealthy"
+    - command: "curl -sf http://localhost:8080/health || curl -sf http://localhost:3000/health"
+      description: "Health endpoint responds"
+      success_pattern: "200|ok|healthy"
+  manual:
+    - "Verify docker-compose ps shows all services as 'Up (healthy)'"
+    - "Verify .env.example documents all required environment variables"
+
+examples:
+  - name: "New Go service"
+    context: "Gate 0 completed Go API implementation"
+    expected_output: |
+      - Dockerfile with multi-stage build
+      - docker-compose.yml with app, postgres, redis
+      - .env.example with all variables documented
+      - docs/LOCAL_SETUP.md created
+  - name: "Add Redis to existing service"
+    context: "Implementation added caching, needs Redis"
+    expected_output: |
+      - docker-compose.yml updated with redis service
+      - .env.example updated with REDIS_URL
+      - Health check updated to verify Redis connection
 ---
 
-# DevOps Setup (Gate 4)
+# DevOps Setup (Gate 1)
 
 ## Overview
 
@@ -33,12 +65,70 @@ This skill configures the development and deployment infrastructure:
 - Documents environment variables in .env.example
 - Verifies the containerized application works
 
+## Pressure Resistance
+
+**Gate 1 (DevOps) is MANDATORY for all containerizable applications. Pressure scenarios and required responses:**
+
+| Pressure Type | Request | Agent Response |
+|---------------|---------|----------------|
+| **Works Locally** | "App runs fine without Docker" | "Local ≠ production. Docker ensures reproducible environments. REQUIRED." |
+| **Complexity** | "Docker adds unnecessary complexity" | "Docker removes environment complexity. One command to run = simpler." |
+| **Later** | "We'll containerize before production" | "Later = never. Containerize now while context is fresh." |
+| **Simple App** | "Just use docker run" | "docker-compose ensures reproducibility. Even single-service apps need it." |
+
+**Non-negotiable principle:** If the application can run in a container, it MUST be containerized in Gate 1.
+
+## Common Rationalizations - REJECTED
+
+| Excuse | Reality |
+|--------|---------|
+| "Works fine locally" | Your machine ≠ production. Docker = consistency. |
+| "Docker is overkill for this" | Docker is baseline, not overkill. Complexity is hidden, not added. |
+| "We'll add Docker later" | Later = never. Context lost = mistakes made. |
+| "Just need docker run" | docker-compose is reproducible. docker run is not documented. |
+| "CI/CD will handle Docker" | CI/CD uses your Dockerfile. No Dockerfile = no CI/CD. |
+| "It's just a script/tool" | Scripts need reproducible environments too. Containerize. |
+
+## Red Flags - STOP
+
+If you catch yourself thinking ANY of these, STOP immediately:
+
+- "This works fine without Docker"
+- "Docker is too complex for this project"
+- "We can add containerization later"
+- "docker run is good enough"
+- "It's just an internal tool"
+- "The developer can set up their own environment"
+
+**All of these indicate Gate 1 violation. Proceed with containerization.**
+
+## Gate 1 Requirements
+
+**MANDATORY unless ALL skip_when conditions apply:**
+- All services MUST be containerized with Docker
+- docker-compose.yml REQUIRED for any app with:
+  - Database dependency
+  - Multiple services
+  - Environment variables
+  - External API calls
+
+**INVALID Skip Reasons:**
+- ❌ "Application runs fine locally without Docker"
+- ❌ "Docker adds complexity we don't need yet"
+- ❌ "We'll containerize before production"
+- ❌ "Just use docker run instead of compose"
+
+**VALID Skip Reasons:**
+- ✅ Only documentation changes (no code)
+- ✅ Library/SDK with no runtime component
+- ✅ Project explicitly documented as non-containerized (rare)
+
 ## Prerequisites
 
-Before starting Gate 4:
+Before starting Gate 1:
 
-1. **Gate 3 Complete**: Code implementation is done
-2. **Environment Requirements**: List from Gate 3 handoff:
+1. **Gate 0 Complete**: Code implementation is done
+2. **Environment Requirements**: List from Gate 0 handoff:
    - New dependencies
    - New environment variables
    - New services needed
@@ -46,10 +136,10 @@ Before starting Gate 4:
 
 ## Step 1: Analyze DevOps Requirements
 
-Review Gate 3 handoff and existing configuration:
+Review Gate 0 handoff and existing configuration:
 
 ```
-From Gate 3 Handoff:
+From Gate 0 Handoff:
 - New dependencies: {list}
 - New environment variables: {list}
 - New services needed: {list}
@@ -70,7 +160,7 @@ Actions Needed:
 
 ## Step 2: Dispatch DevOps Agent
 
-Dispatch `ring-dev-team:devops-engineer` for infrastructure setup:
+**MANDATORY:** Dispatch `ring-dev-team:devops-engineer` for infrastructure setup:
 
 ```
 Task tool:
@@ -80,7 +170,7 @@ Task tool:
     Set up Docker configuration for the implemented feature.
 
     ## Implementation Summary
-    {paste Gate 3 handoff}
+    {paste Gate 0 handoff}
 
     ## Existing Configuration
     {paste existing Dockerfile, docker-compose.yml, .env.example if they exist}
@@ -88,7 +178,7 @@ Task tool:
     ## Requirements
 
     ### Dockerfile
-    If creating new or updating existing:
+    **MANDATORY:** If creating new or updating existing:
     - Use multi-stage build for minimal image size
     - Include only production dependencies
     - Set appropriate USER (non-root)
@@ -524,12 +614,12 @@ docker-compose logs app | grep -i error
 - [ ] Application can connect to database
 - [ ] Application can connect to Redis (if used)
 
-## Step 8: Prepare Handoff to Gate 5
+## Step 8: Prepare Handoff to Gate 2
 
-Package the following for Gate 5 (Testing):
+Package the following for Gate 2 (Testing):
 
 ```markdown
-## Gate 4 Handoff
+## Gate 1 Handoff
 
 **DevOps Status:** COMPLETE/PARTIAL
 

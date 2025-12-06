@@ -86,7 +86,6 @@ Plans specify recommended agents for execution:
 | Task Type | Recommended Agent |
 |-----------|-------------------|
 | Backend (Go) | `ring-dev-team:backend-engineer-golang` |
-| Backend (Python) | `ring-dev-team:backend-engineer-python` |
 | Backend (TypeScript) | `ring-dev-team:backend-engineer-typescript` |
 | Frontend (BFF/API Routes) | `ring-dev-team:frontend-bff-engineer-typescript` |
 | Infrastructure | `ring-dev-team:devops-engineer` |

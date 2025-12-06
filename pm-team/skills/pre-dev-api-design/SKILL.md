@@ -680,7 +680,7 @@ Action:
 
 ## Output Location
 
-**Always output to**: `docs/pre-development/api-design/api-contracts-[feature-name].md`
+**Always output to**: `docs/pre-dev/{feature-name}/api-design.md`
 
 ## After API Design Approval
 
