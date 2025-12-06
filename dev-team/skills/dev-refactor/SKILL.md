@@ -157,7 +157,7 @@ Why is this mandatory?
 | "It's a small project" | Small projects need standards too. Start right. |
 | "Just use best practices" | "Best" varies by context. YOUR rules define YOUR best. |
 
-**Note:** After PROJECT_RULES.md check passes, standards are loaded from agent definitions based on detected language. Project-specific rules override agent defaults.
+**Note:** After PROJECT_RULES.md check passes, Ring standards are loaded via WebFetch based on detected language. Both project-specific rules AND Ring standards are required - no override, both are necessary and complementary.
 
 ## Analysis Dimensions
 
@@ -348,8 +348,8 @@ Standards Loading Order:
 
 3. Merge strategy:
    - PROJECT_RULES.md is REQUIRED (verified in Step 0)
-   - Project standards override Ring standards
-   - Ring standards provide base technical patterns
+   - Ring standards via WebFetch are REQUIRED (this step)
+   - Both are necessary and complementary - no override
    - Report which standards are being used
 
 Note: "If no project standards" scenario is BLOCKED in Step 0.
@@ -424,7 +424,7 @@ Blocker:
     Analysis CANNOT proceed without Ring standards.
 ```
 
-**NON-NEGOTIABLE:** Ring standards provide base technical patterns that MUST be loaded before analysis. Project standards (PROJECT_RULES.md) override Ring standards where they conflict, but both are required.
+**NON-NEGOTIABLE:** Ring standards provide base technical patterns that MUST be loaded before analysis. Both Ring standards AND Project standards (PROJECT_RULES.md) are required - no override, both are necessary and complementary.
 
 ## Step 3: Scan Codebase
 
