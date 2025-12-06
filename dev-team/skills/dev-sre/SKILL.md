@@ -151,7 +151,7 @@ Before starting Gate 2:
 
 1. **Gate 0 Complete**: Code implementation is done
 2. **Gate 1 Complete**: DevOps setup (Dockerfile, docker-compose) is done
-3. **SRE Standards**: `docs/standards/sre.md` or `dev-team/docs/standards/sre.md`
+3. **Standards**: `docs/PROJECT_RULES.md` (local project) + Ring SRE Standards via WebFetch (`https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/sre.md`)
 
 ## Step 1: Analyze Observability Requirements
 
