@@ -126,8 +126,38 @@ Before starting analysis:
 1. **Project root identified**: Know where the codebase lives
 2. **Language detectable**: Project has go.mod, package.json, or similar manifest
 3. **Scope defined**: Full project or specific directories
+4. **PROJECT_RULES.md exists**: MANDATORY - analysis cannot proceed without it
 
-**Note:** Standards are auto-loaded from agent definitions based on detected language. Project-specific `docs/PROJECT_RULES.md` overrides defaults if present.
+### PROJECT_RULES.md is MANDATORY
+
+**This is a HARD GATE. Do NOT proceed without PROJECT_RULES.md.**
+
+```text
+Check sequence:
+1. Look for: docs/PROJECT_RULES.md
+2. If not found: Look for docs/STANDARDS.md (legacy name)
+3. If not found: STOP - Cannot analyze without project standards
+
+BLOCKER response if missing:
+"Cannot proceed with refactoring analysis.
+
+REQUIRED: docs/PROJECT_RULES.md must exist.
+
+Why is this mandatory?
+- Agent defaults are GENERIC, not tailored to YOUR project
+- Analysis without project standards = incomplete findings
+- Refactoring must target YOUR conventions, not generic ones
+
+**Common Rationalizations - REJECTED:**
+
+| Excuse | Reality |
+|--------|---------|
+| "Agent defaults are fine" | Defaults are generic. YOUR project has specific conventions. |
+| "We'll add it later" | Analysis now with wrong standards = rework later. |
+| "It's a small project" | Small projects need standards too. Start right. |
+| "Just use best practices" | "Best" varies by context. YOUR rules define YOUR best. |
+
+**Note:** After PROJECT_RULES.md check passes, standards are loaded from agent definitions based on detected language. Project-specific rules override agent defaults.
 
 ## Analysis Dimensions
 
@@ -234,9 +264,51 @@ Checks:
     └── Linting enforced
 ```
 
+## Step 0: Verify PROJECT_RULES.md Exists (HARD GATE)
+
+**This step is NON-NEGOTIABLE. Analysis CANNOT proceed without project standards.**
+
+```text
+Check sequence:
+1. Check: docs/PROJECT_RULES.md
+2. Check: docs/STANDARDS.md (legacy name)
+3. Check: --standards argument (if provided)
+
+Decision:
+├── Found → Proceed to Step 1
+└── NOT Found → STOP with blocker
+```
+
+**If PROJECT_RULES.md is missing:**
+
+```yaml
+# STOP - Do not proceed. Report blocker:
+Blocker:
+  type: "missing_prerequisite"
+  message: |
+    Cannot proceed with refactoring analysis.
+
+    REQUIRED: docs/PROJECT_RULES.md must exist.
+
+    Why is this mandatory?
+    - Agent defaults are GENERIC, not tailored to YOUR project
+    - Analysis without project standards = incomplete findings
+    - Refactoring must target YOUR conventions, not generic ones
+```
+
+**Pressure Resistance for Step 0:**
+
+| Pressure | Response |
+|----------|----------|
+| "Just use defaults" | "Defaults are generic. YOUR project needs YOUR rules. Create PROJECT_RULES.md." |
+| "We don't have standards" | "Then this is the perfect time to define them. Use the template as starting point." |
+| "Skip this, analyze anyway" | "Cannot skip. Analysis without target = meaningless findings." |
+
+---
+
 ## Step 1: Detect Project Language
 
-First, identify the primary language(s) of the project:
+After PROJECT_RULES.md is verified, identify the primary language(s) of the project:
 
 ```text
 Language Detection:
@@ -285,13 +357,13 @@ Standards Loading Order:
    └────────────────────┴────────────────────────────────────────┘
 
 3. Merge strategy:
+   - PROJECT_RULES.md is REQUIRED (verified in Step 0)
    - Project standards override agent defaults
    - Agent standards provide comprehensive baseline
    - Report which standards are being used
 
-If no project standards AND language unknown:
-→ Ask user: "Detected languages: {list}. Which standards should I use?"
-→ Options: [Go, TypeScript Backend, TypeScript Frontend, DevOps, All]
+Note: "If no project standards" scenario is BLOCKED in Step 0.
+      This step only executes after PROJECT_RULES.md is verified.
 ```
 
 ## Step 3: Scan Codebase

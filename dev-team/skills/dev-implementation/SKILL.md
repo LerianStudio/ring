@@ -42,13 +42,22 @@ agent_selection:
     - pattern: "*.css|*.scss"
       keywords: ["design", "visual", "aesthetic", "styling", "ui"]
       agent: "ring-dev-team:frontend-designer"
-  fallback: "ring-dev-team:backend-engineer-golang"
+  fallback: "ASK_USER"  # Do NOT assume language - ask user
   detection_order:
     - "Check task.type field in tasks.md"
     - "Look for file patterns in task description"
     - "Detect project language from go.mod/package.json"
     - "Match keywords in task title/description"
-    - "Use fallback if no match"
+    - "If no match → ASK USER (do not assume)"
+  on_detection_failure: |
+    If language cannot be detected, use AskUserQuestion:
+    Question: "Could not detect project language. Which agent should implement this task?"
+    Options:
+      - "Go Backend" → ring-dev-team:backend-engineer-golang
+      - "TypeScript Backend" → ring-dev-team:backend-engineer-typescript
+      - "TypeScript Frontend" → ring-dev-team:frontend-engineer-typescript
+      - "Frontend Design" → ring-dev-team:frontend-designer
+    NEVER assume Go. Wrong agent = wrong patterns = rework.
 
 verification:
   automated:
@@ -134,15 +143,26 @@ If you catch yourself thinking ANY of these, STOP immediately:
 
 ## Prerequisites
 
-Before starting Gate 1:
+Before starting Gate 0:
 
-1. **Gate 0 Complete**: Tasks imported and validated
-2. **Agent Selection**: Automatically determined based on task content:
+1. **PROJECT_RULES.md EXISTS** (MANDATORY - HARD GATE):
+   ```text
+   Check sequence:
+   1. Check: docs/PROJECT_RULES.md
+   2. Check: docs/STANDARDS.md (legacy name)
+
+   If NOT found → STOP with blocker:
+   "Cannot implement without project standards.
+   REQUIRED: docs/PROJECT_RULES.md"
+   ```
+2. **Tasks imported and validated**: From dev-cycle initialization
+3. **Agent Selection**: Automatically determined based on task content:
    - `ring-dev-team:backend-engineer-golang`
    - `ring-dev-team:backend-engineer-typescript`
    - `ring-dev-team:frontend-engineer-typescript`
    - `ring-dev-team:frontend-designer`
-3. **Standards Available**: Project standards at `docs/PROJECT_RULES.md` (or conventions from analysis)
+
+**Note:** PROJECT_RULES.md should already be validated by dev-cycle (Step 0), but Gate 0 double-checks as defense-in-depth.
 
 ## Step 1: Prepare Implementation Context
 

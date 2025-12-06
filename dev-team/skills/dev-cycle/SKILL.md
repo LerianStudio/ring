@@ -112,7 +112,7 @@ If you catch yourself thinking ANY of these, STOP immediately:
 | 1 | dev-devops | Infrastructure and deployment | ring-dev-team:devops-engineer |
 | 2 | dev-sre | Observability (metrics, health, logging) | ring-dev-team:sre |
 | 3 | dev-testing | Unit tests for acceptance criteria | ring-dev-team:qa-analyst |
-| 4 | dev-review | Parallel code review | ring-default:*-reviewer (3x parallel) |
+| 4 | dev-review | Parallel code review | ring-default:code-reviewer, ring-default:business-logic-reviewer, ring-default:security-reviewer (3x parallel) |
 | 5 | dev-validation | Final acceptance validation | N/A (verification) |
 
 ## Integrated PM → Dev Workflow
@@ -294,6 +294,50 @@ State is persisted to `.ring/dev-team/current-cycle.json`:
   }
 }
 ```
+
+## Step 0: Verify PROJECT_RULES.md Exists (HARD GATE)
+
+**This step is NON-NEGOTIABLE. Cycle CANNOT proceed without project standards.**
+
+Before initializing or resuming any cycle, verify that project standards exist:
+
+```text
+Check sequence:
+1. Check: docs/PROJECT_RULES.md
+2. Check: docs/STANDARDS.md (legacy name)
+3. If --resume: Check state file references a valid standards path
+
+Decision:
+├── Found → Proceed to Step 1
+└── NOT Found → STOP with blocker
+```
+
+**If PROJECT_RULES.md is missing:**
+
+```yaml
+# STOP - Do not proceed. Report blocker:
+Blocker:
+  type: "missing_prerequisite"
+  message: |
+    Cannot start development cycle without project standards.
+
+    REQUIRED: docs/PROJECT_RULES.md must exist.
+
+    Why is this mandatory?
+    - Agents need standards to follow during implementation
+    - Code review validates against YOUR standards, not generic ones
+    - TDD tests must verify YOUR requirements, not assumptions
+```
+
+**Pressure Resistance for Step 0:**
+
+| Pressure | Response |
+|----------|----------|
+| "Standards slow us down" | "No standards = no target. Agents will guess. Guessing = rework." |
+| "Use defaults" | "Defaults are generic. YOUR project has specific conventions." |
+| "Create standards later" | "Later = after implementation = refactoring. Define now." |
+
+---
 
 ## Step 1: Initialize or Resume
 
