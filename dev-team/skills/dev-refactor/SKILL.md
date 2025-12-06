@@ -356,9 +356,11 @@ Note: "If no project standards" scenario is BLOCKED in Step 0.
       This step only executes after PROJECT_RULES.md is verified.
 ```
 
-### Ring Standards Loading (via WebFetch)
+### Ring Standards Loading via WebFetch (HARD GATE - MANDATORY)
 
-Based on detected language from Step 1, fetch the appropriate Ring standards:
+**This is a HARD GATE. Do NOT proceed without fetching Ring standards via WebFetch.**
+
+Based on detected language from Step 1, you MUST fetch the appropriate Ring standards:
 
 | Detected Language | WebFetch URL |
 |-------------------|--------------|
@@ -368,20 +370,20 @@ Based on detected language from Step 1, fetch the appropriate Ring standards:
 | DevOps/Infra | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/devops.md` |
 | SRE/Observability | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/sre.md` |
 
-**Example WebFetch calls based on detection:**
+**Required WebFetch calls based on detection:**
 
 ```yaml
-# If go.mod detected → Fetch Go standards
+# If go.mod detected → MUST Fetch Go standards
 WebFetch:
   url: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang.md
   prompt: "Extract all coding standards, patterns, and requirements"
 
-# If package.json with React/Next.js → Fetch Frontend standards
+# If package.json with React/Next.js → MUST Fetch Frontend standards
 WebFetch:
   url: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/frontend.md
   prompt: "Extract all frontend standards, patterns, and requirements"
 
-# If Dockerfile exists → Also fetch DevOps standards
+# If Dockerfile exists → MUST Also fetch DevOps standards
 WebFetch:
   url: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/devops.md
   prompt: "Extract all DevOps standards for containerization and CI/CD"
@@ -389,7 +391,40 @@ WebFetch:
 
 **Multiple languages:** If project has multiple languages (e.g., Go backend + React frontend), fetch ALL applicable standards and merge them.
 
-**MANDATORY:** Ring standards are base technical patterns that must always be applied. Project standards (PROJECT_RULES.md) override Ring standards where they conflict.
+### Pressure Resistance for Ring Standards Loading
+
+**Common Rationalizations - REJECTED:**
+
+| Excuse | Reality |
+|--------|---------|
+| "I already know the standards" | Standards evolve. Fetch ensures latest version. |
+| "WebFetch is slow" | Analysis accuracy > speed. Fetch is mandatory. |
+| "Project has its own standards" | Project standards OVERRIDE, not REPLACE. Both are needed. |
+| "Standards are embedded in agents" | Agents have summaries. Full standards are in dedicated files. |
+| "Network is unavailable" | STOP. Cannot analyze without standards. Report blocker. |
+
+**If WebFetch fails:**
+
+```yaml
+Blocker:
+  type: "standards_fetch_failed"
+  message: |
+    Cannot proceed with refactoring analysis.
+
+    REQUIRED: Ring standards must be fetched via WebFetch.
+
+    Attempted URL: {url}
+    Error: {error_message}
+
+    Resolution:
+    - Check network connectivity
+    - Verify GitHub is accessible
+    - Retry the WebFetch call
+
+    Analysis CANNOT proceed without Ring standards.
+```
+
+**NON-NEGOTIABLE:** Ring standards provide base technical patterns that MUST be loaded before analysis. Project standards (PROJECT_RULES.md) override Ring standards where they conflict, but both are required.
 
 ## Step 3: Scan Codebase
 
