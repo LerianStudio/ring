@@ -12,7 +12,10 @@ trigger: |
 skip_when: |
   - Tests not passing -> complete Gate 3 first
   - Already reviewed with no changes since -> proceed to validation
-  - Trivial change (<20 lines, no logic) -> document skip reason
+
+NOT_skip_when: |
+  - "Trivial change" → Security issues fit in 1 line. ALL changes require review. No exceptions.
+  - "Only N lines" → Line count is irrelevant. AI doesn't negotiate. Review ALL changes.
 
 sequence:
   after: [ring-dev-team:dev-testing]
@@ -79,6 +82,8 @@ Execute comprehensive code review using 3 specialized reviewers IN PARALLEL. Agg
 
 | Excuse | Reality |
 |--------|---------|
+| "Trivial change, skip review" | Security vulnerabilities fit in 1 line. ALL changes require ALL 3 reviewers. |
+| "Only N lines changed" | Line count is irrelevant. SQL injection is 1 line. Review ALL changes. |
 | "Code reviewer covers security" | Code reviewer checks architecture. Security reviewer checks OWASP. Different expertise. |
 | "Only found LOW issues" | LOW issues accumulate into technical debt. Document in TODO or fix. |
 | "Small fix, no re-review needed" | Small fixes can have big impacts. Re-run ALL reviewers after ANY change. |
@@ -90,6 +95,8 @@ Execute comprehensive code review using 3 specialized reviewers IN PARALLEL. Agg
 
 If you catch yourself thinking ANY of these, STOP immediately:
 
+- "This change is too trivial for review"
+- "Only N lines, skip review"
 - "One reviewer found nothing, skip the others"
 - "These are just cosmetic issues"
 - "Small fix doesn't need re-review"

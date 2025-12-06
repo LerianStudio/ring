@@ -13,7 +13,10 @@ trigger: |
 skip_when: |
   - Task still in progress -> wait for completion
   - Feedback already recorded for this task -> proceed
-  - Exploratory/spike work (no metrics tracked)
+
+NOT_skip_when: |
+  - "Exploratory/spike work" → ALL work produces learnings. Track metrics for spikes too.
+  - "Just experimenting" → Experiments need metrics to measure success. No exceptions.
 
 sequence:
   after: [ring-dev-team:dev-validation]
@@ -47,6 +50,8 @@ Continuous improvement system that tracks development cycle effectiveness throug
 
 | Excuse | Reality |
 |--------|---------|
+| "It was just a spike/experiment" | Spikes produce learnings. Track what worked and what didn't. |
+| "Exploratory work, no metrics" | Exploration needs metrics to measure success. Track ALL work. |
 | "Task was too simple" | Simple tasks still contribute to cycle patterns. Track all. |
 | "Perfect score, no insights" | Perfect scores reveal what works. Document for replication. |
 | "User is happy, skip analysis" | Happiness ≠ process quality. Collect metrics objectively. |
@@ -58,6 +63,8 @@ Continuous improvement system that tracks development cycle effectiveness throug
 
 If you catch yourself thinking ANY of these, STOP immediately:
 
+- "It was just a spike, no need to track"
+- "Exploratory work doesn't need metrics"
 - "This task was too simple to track"
 - "Perfect outcome, no need for feedback"
 - "User approved, skip the metrics"

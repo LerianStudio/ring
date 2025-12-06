@@ -11,9 +11,9 @@ trigger: |
   - Need structured, gate-based task execution with quality checkpoints
 
 skip_when: |
-  - Single simple task without quality gates -> execute directly
   - Already in a specific gate skill -> let that gate complete
   - Need to plan tasks first -> use ring-default:writing-plans or ring-pm-team:pre-dev-full
+  - Human explicitly requests manual implementation (non-AI workflow)
 
 NOT_skip_when: |
   - "Task is simple" → Simple ≠ risk-free. Execute gates.
@@ -75,7 +75,7 @@ The development cycle orchestrator loads tasks/subtasks from PM team output (or 
 | **Time** | "Production down, skip gates" | "Gates prevent production issues. Automatic mode = 20 min. Skipping gates increases risk." |
 | **Sunk Cost** | "Already did 4 gates, skip review" | "Each gate catches different issues. Prior gates don't reduce review value. Review = 10 min." |
 | **Authority** | "Director override, ship now" | "Cannot skip GATES based on authority. Can skip CHECKPOINTS (automatic mode). Gates are non-negotiable." |
-| **Simplicity** | "Simple fix, skip gates" | "Simple tasks often have complex impacts. Gates required unless: <5 lines, no deps, >90% existing coverage." |
+| **Simplicity** | "Simple fix, skip gates" | "Simple tasks have complex impacts. AI doesn't negotiate. ALL tasks require ALL gates. No exceptions." |
 
 **Non-negotiable principle:** Execution mode selection affects CHECKPOINTS (user approval pauses), not GATES (quality checks). ALL gates execute regardless of mode.
 

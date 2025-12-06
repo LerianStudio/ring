@@ -11,8 +11,11 @@ trigger: |
 
 skip_when: |
   - No service implementation (documentation only)
-  - Task explicitly marks observability as not required
-  - Pure frontend changes without backend calls
+
+NOT_skip_when: |
+  - "Task says observability not required" → AI cannot self-exempt. ALL services need observability.
+  - "Pure frontend" → If it calls ANY API, backend needs observability. Frontend-only = static HTML.
+  - "MVP doesn't need metrics" → MVP without metrics = blind MVP. No exceptions.
 
 sequence:
   after: [ring-dev-team:dev-devops]
@@ -91,6 +94,9 @@ This skill validates and implements observability requirements for the implement
 | "It's just an internal tool" | Internal tools fail too. Observability required. |
 | "Dashboard can come later" | Dashboard is optional. Metrics endpoint is not. |
 | "Too much overhead for MVP" | Observability is minimal overhead, maximum value. |
+| "Task says observability not needed" | AI cannot self-exempt. Tasks don't override gates. |
+| "Pure frontend, no backend calls" | If it calls ANY API, backend needs observability. Frontend-only = static HTML. |
+| "It's just MVP" | MVP without metrics = blind MVP. You won't know if it's working. |
 
 ## Red Flags - STOP
 
@@ -102,6 +108,9 @@ If you catch yourself thinking ANY of these, STOP immediately:
 - "Metrics add too much overhead"
 - "It's just an internal service"
 - "We can monitor manually"
+- "Task says observability not required"
+- "Pure frontend, no backend impact"
+- "It's just MVP, we'll add metrics later"
 
 **All of these indicate Gate 2 violation. Implement observability now.**
 
