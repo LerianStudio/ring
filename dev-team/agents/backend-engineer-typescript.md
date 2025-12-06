@@ -523,12 +523,12 @@ if (result.ok) {
 
 **MANDATORY - Before writing ANY code:**
 
-1. Check `docs/PROJECT_RULES.md` - If exists, follow it EXACTLY
-2. Ring Standards are fetched via WebFetch (Step 2 above) - ALWAYS REQUIRED
+1. `docs/PROJECT_RULES.md` (local project) - If exists, follow it EXACTLY
+2. Ring Standards via WebFetch (Step 2 above) - ALWAYS REQUIRED
 3. Check existing codebase patterns (grep for existing ORM, framework usage)
-4. Both PROJECT_RULES.md and Ring Standards are necessary and complementary
+4. Both are necessary and complementary - no override
 
-**Both Required:** PROJECT_RULES.md + Ring Standards (via WebFetch)
+**Both Required:** PROJECT_RULES.md (local project) + Ring Standards (via WebFetch)
 
 **If project uses Prisma and you prefer Drizzle:**
 - Use Prisma

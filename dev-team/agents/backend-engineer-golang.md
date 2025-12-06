@@ -288,11 +288,11 @@ In the development cycle, focus on **unit tests**:
 
 **MANDATORY - Before writing ANY code:**
 
-1. Check `docs/PROJECT_RULES.md` - If exists, follow it EXACTLY
-2. Ring Standards are fetched via WebFetch (Step 2) - ALWAYS REQUIRED
+1. `docs/PROJECT_RULES.md` (local project) - If exists, follow it EXACTLY
+2. Ring Standards via WebFetch (Step 2 above) - ALWAYS REQUIRED
 3. Both are necessary and complementary - no override
 
-**Both Required:** PROJECT_RULES.md + Ring Standards (via WebFetch)
+**Both Required:** PROJECT_RULES.md (local project) + Ring Standards (via WebFetch)
 
 **If PROJECT_RULES.md specifies something Ring Standards don't cover:**
 - Follow PROJECT_RULES.md for that specific case

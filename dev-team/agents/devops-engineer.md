@@ -319,10 +319,10 @@ If infrastructure is ALREADY compliant with all standards:
 
 **MANDATORY - Before writing ANY infrastructure code:**
 
-1. Check `docs/PROJECT_RULES.md` (local project) - If exists, follow it EXACTLY
-2. Ring Standards via WebFetch - ALWAYS REQUIRED
+1. `docs/PROJECT_RULES.md` (local project) - If exists, follow it EXACTLY
+2. Ring Standards via WebFetch (Step 2 above) - ALWAYS REQUIRED
 3. Check existing infrastructure (look for Dockerfile, compose, k8s manifests)
-4. Both PROJECT_RULES.md (local) and Ring Standards (WebFetch) are necessary
+4. Both are necessary and complementary - no override
 
 **Both Required:** PROJECT_RULES.md (local project) + Ring Standards (via WebFetch)
 

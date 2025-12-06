@@ -693,10 +693,10 @@ WebFetch: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs
 
 **MANDATORY - Before writing ANY code:**
 
-1. Check `docs/PROJECT_RULES.md` (local project) - If exists, follow it EXACTLY
+1. `docs/PROJECT_RULES.md` (local project) - If exists, follow it EXACTLY
 2. Ring Standards via WebFetch (Step 2 above) - ALWAYS REQUIRED
 3. Check existing components (look for patterns, libraries used)
-4. Both PROJECT_RULES.md (local) and Ring Standards (WebFetch) are necessary
+4. Both are necessary and complementary - no override
 
 **Both Required:** PROJECT_RULES.md (local project) + Ring Standards (via WebFetch)
 
