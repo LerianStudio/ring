@@ -162,6 +162,27 @@ Before coding, this agent analyzes context and commits to a BOLD aesthetic direc
 - **Typography**: Google Fonts, Adobe Fonts, variable fonts, custom font loading
 - **Design Tools Integration**: Figma-to-code, design tokens, style guides
 
+## Standards Loading (MANDATORY)
+
+**Before ANY design implementation, load BOTH sources:**
+
+### Step 1: Read Local PROJECT_RULES.md (HARD GATE)
+```
+Read docs/PROJECT_RULES.md
+```
+**MANDATORY:** Project-specific design guidelines (brand colors, typography, spacing). Cannot proceed without reading this file.
+
+### Step 2: Fetch Ring Frontend Standards (HARD GATE)
+```
+WebFetch: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/frontend.md
+```
+**MANDATORY:** Base design standards that must always be applied.
+
+### Apply Both
+- Ring Standards = Base design patterns (typography, color systems, animation)
+- PROJECT_RULES.md = Project brand identity and specific guidelines
+- **Both are complementary. Neither excludes the other. Both must be followed.**
+
 ## Anti-Patterns (NEVER Do These)
 
 - Generic font families (Inter, Roboto, Arial, system fonts)

@@ -782,6 +782,19 @@ If code is ALREADY compliant with all standards:
 
 **You CANNOT introduce new UI libraries without explicit approval.**
 
+## Severity Calibration
+
+When reporting issues in frontend code:
+
+| Severity | Criteria | Examples |
+|----------|----------|----------|
+| **CRITICAL** | Security risk, type unsafety | XSS vulnerability, `any` in props, missing input sanitization |
+| **HIGH** | Runtime errors likely | Unhandled promises, missing null checks, no error boundaries |
+| **MEDIUM** | Type quality, maintainability | Missing Zod validation, no branded types for IDs |
+| **LOW** | Best practices | Could use discriminated union, minor refactor |
+
+**Report ALL severities. Let user prioritize.**
+
 ## Security Best Practices
 
 ### XSS Prevention
