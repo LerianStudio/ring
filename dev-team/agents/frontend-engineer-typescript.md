@@ -693,12 +693,12 @@ WebFetch: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs
 
 **MANDATORY - Before writing ANY code:**
 
-1. Check `docs/PROJECT_RULES.md` - If exists, follow it EXACTLY
-2. Check `docs/standards/frontend.md` - If exists, follow it EXACTLY
+1. Check `docs/PROJECT_RULES.md` (local project) - If exists, follow it EXACTLY
+2. Ring Standards via WebFetch (Step 2 above) - ALWAYS REQUIRED
 3. Check existing components (look for patterns, libraries used)
-4. If nothing specified → Use embedded standards
+4. Both PROJECT_RULES.md (local) and Ring Standards (WebFetch) are necessary
 
-**Hierarchy:** PROJECT_RULES.md > docs/standards > Existing patterns > Embedded Standards
+**Both Required:** PROJECT_RULES.md (local project) + Ring Standards (via WebFetch)
 
 **If project uses CSS Modules and you prefer Tailwind:**
 - Use CSS Modules

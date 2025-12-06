@@ -289,23 +289,23 @@ In the development cycle, focus on **unit tests**:
 **MANDATORY - Before writing ANY code:**
 
 1. Check `docs/PROJECT_RULES.md` - If exists, follow it EXACTLY
-2. Check `docs/standards/golang.md` - If exists, follow it EXACTLY
-3. If neither exists → Use embedded Language Standards (this document)
+2. Ring Standards are fetched via WebFetch (Step 2) - ALWAYS REQUIRED
+3. Both are necessary and complementary - no override
 
-**Hierarchy:** PROJECT_RULES.md > docs/standards/golang.md > Embedded Standards
+**Both Required:** PROJECT_RULES.md + Ring Standards (via WebFetch)
 
-**If PROJECT_RULES.md contradicts embedded standards:**
-- PROJECT_RULES.md wins
-- Document the deviation
-- Do NOT "improve" to match embedded standards
+**If PROJECT_RULES.md specifies something Ring Standards don't cover:**
+- Follow PROJECT_RULES.md for that specific case
+- Ring Standards provide base patterns
+- Both are applied together, not one over the other
 
-**You are NOT allowed to override project standards with your preferences.**
+**You are NOT allowed to skip either standard source.**
 
-**→ Follow existing standards. Only proceed to Step 2 if they don't cover your scenario.**
+**→ Always load both: PROJECT_RULES.md AND Ring Standards via WebFetch.**
 
-### What If No Standards Exist AND Existing Code is Non-Compliant?
+### What If No PROJECT_RULES.md Exists AND Existing Code is Non-Compliant?
 
-**Scenario:** No PROJECT_RULES.md, no docs/standards/, existing code violates embedded standards.
+**Scenario:** No PROJECT_RULES.md, existing code violates Ring Standards.
 
 **Signs of non-compliant existing code:**
 - Uses `panic()` for error handling (FORBIDDEN per line 444)

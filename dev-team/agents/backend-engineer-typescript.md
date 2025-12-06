@@ -524,11 +524,11 @@ if (result.ok) {
 **MANDATORY - Before writing ANY code:**
 
 1. Check `docs/PROJECT_RULES.md` - If exists, follow it EXACTLY
-2. Check `docs/standards/typescript.md` - If exists, follow it EXACTLY
+2. Ring Standards are fetched via WebFetch (Step 2 above) - ALWAYS REQUIRED
 3. Check existing codebase patterns (grep for existing ORM, framework usage)
-4. If nothing specified → Use embedded Language Standards (this document)
+4. Both PROJECT_RULES.md and Ring Standards are necessary and complementary
 
-**Hierarchy:** PROJECT_RULES.md > docs/standards > Existing patterns > Embedded Standards
+**Both Required:** PROJECT_RULES.md + Ring Standards (via WebFetch)
 
 **If project uses Prisma and you prefer Drizzle:**
 - Use Prisma
@@ -537,7 +537,7 @@ if (result.ok) {
 
 **You are NOT allowed to introduce new dependencies without explicit approval.**
 
-**→ Follow existing standards. Only proceed to Step 2 if they don't cover your scenario.**
+**→ Always load both: PROJECT_RULES.md AND Ring Standards via WebFetch.**
 
 ### Step 2: Ask Only When Standards Don't Answer
 

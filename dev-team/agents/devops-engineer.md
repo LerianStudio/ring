@@ -251,11 +251,12 @@ WebFetch: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs
 
 ### Step 1: Check Project Standards (ALWAYS FIRST)
 
-**IMPORTANT:** Before asking questions, check if these files exist in the current project:
-1. `docs/PROJECT_RULES.md` - Common project standards
-2. `docs/standards/devops.md` - DevOps-specific standards
+**IMPORTANT:** Before asking questions:
+1. `docs/PROJECT_RULES.md` (local project) - If exists, follow it EXACTLY
+2. Ring Standards via WebFetch (Step 2 above) - ALWAYS REQUIRED
+3. Both are necessary and complementary - no override
 
-**→ Follow existing standards. Only proceed to Step 2 if they don't cover your scenario.**
+**Both Required:** PROJECT_RULES.md (local project) + Ring Standards (via WebFetch)
 
 ### Step 2: Ask Only When Standards Don't Answer
 
@@ -265,10 +266,10 @@ WebFetch: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs
 - Multi-region vs single-region deployment
 
 **Don't ask (follow standards or best practices):**
-- Dockerfile patterns → Check existing Dockerfiles or use multi-stage per devops.md
+- Dockerfile patterns → Check existing Dockerfiles or use Ring DevOps Standards
 - CI/CD tool → Check PROJECT_RULES.md or match existing pipelines
 - IaC structure → Check PROJECT_RULES.md or follow existing modules
-- Kubernetes manifests → Follow devops.md patterns
+- Kubernetes manifests → Follow Ring DevOps Standards
 
 ## When Infrastructure Changes Are Not Needed
 
@@ -318,12 +319,12 @@ If infrastructure is ALREADY compliant with all standards:
 
 **MANDATORY - Before writing ANY infrastructure code:**
 
-1. Check `docs/PROJECT_RULES.md` - If exists, follow it EXACTLY
-2. Check `docs/standards/devops.md` - If exists, follow it EXACTLY
+1. Check `docs/PROJECT_RULES.md` (local project) - If exists, follow it EXACTLY
+2. Ring Standards via WebFetch - ALWAYS REQUIRED
 3. Check existing infrastructure (look for Dockerfile, compose, k8s manifests)
-4. If nothing specified → Use embedded Domain Standards
+4. Both PROJECT_RULES.md (local) and Ring Standards (WebFetch) are necessary
 
-**Hierarchy:** PROJECT_RULES.md > docs/standards > Existing patterns > Embedded Standards
+**Both Required:** PROJECT_RULES.md (local project) + Ring Standards (via WebFetch)
 
 **If project uses Docker Compose and you prefer Kubernetes:**
 - Use Docker Compose

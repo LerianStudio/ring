@@ -67,9 +67,10 @@ input_schema:
       description: "Technical constraints (framework, performance, a11y)"
 project_rules_integration:
   check_first:
-    - "docs/PROJECT_RULES.md"
-    - "docs/standards/frontend.md"
-  override_when: "brand_identity_not_defined"
+    - "docs/PROJECT_RULES.md (local project)"
+  ring_standards:
+    - "WebFetch: Ring Frontend Standards (MANDATORY)"
+  both_required: true
 ---
 
 # Frontend Designer
@@ -196,11 +197,12 @@ WebFetch: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs
 
 ### Step 1: Check Project Standards (ALWAYS FIRST)
 
-**IMPORTANT:** Before asking questions, check:
-1. `docs/PROJECT_RULES.md` - Common project standards
-2. `docs/standards/frontend.md` - Frontend-specific standards (typography, colors, animation)
+**IMPORTANT:** Before asking questions:
+1. `docs/PROJECT_RULES.md` (local project) - If exists, follow it EXACTLY
+2. Ring Standards via WebFetch (Step 2 above) - ALWAYS REQUIRED
+3. Both are necessary and complementary - no override
 
-**→ Follow existing standards. Only proceed to Step 2 if they don't cover your scenario.**
+**Both Required:** PROJECT_RULES.md (local project) + Ring Standards (via WebFetch)
 
 ### Step 2: Ask Only When Standards Don't Answer
 
@@ -274,10 +276,11 @@ If design is ALREADY distinctive and standards-compliant:
 | **Animation Level** | Minimal vs Rich | STOP. Check accessibility needs. |
 
 **Before making major visual decisions:**
-1. Check `docs/PROJECT_RULES.md`
-2. Check `docs/standards/frontend.md`
-3. If brand guidelines exist → follow them EXACTLY
-4. If not specified → STOP and ask
+1. Check `docs/PROJECT_RULES.md` (local project)
+2. Ring Standards via WebFetch - ALWAYS REQUIRED
+3. Both are necessary and complementary
+4. If brand guidelines exist → follow them EXACTLY
+5. If not specified → STOP and ask
 
 **You CANNOT override existing brand identity without explicit approval.**
 

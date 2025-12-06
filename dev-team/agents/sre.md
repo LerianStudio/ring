@@ -179,11 +179,12 @@ WebFetch: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs
 
 ### Step 1: Check Project Standards (ALWAYS FIRST)
 
-**IMPORTANT:** Before asking questions, check:
-1. `docs/PROJECT_RULES.md` - Common project standards
-2. `docs/standards/sre.md` - SRE-specific standards (observability, SLO, incident management)
+**IMPORTANT:** Before asking questions:
+1. `docs/PROJECT_RULES.md` (local project) - If exists, follow it EXACTLY
+2. Ring Standards via WebFetch (Step 2 above) - ALWAYS REQUIRED
+3. Both are necessary and complementary - no override
 
-**→ Follow existing standards. Only proceed to Step 2 if they don't cover your scenario.**
+**Both Required:** PROJECT_RULES.md (local project) + Ring Standards (via WebFetch)
 
 ### Step 2: Ask Only When Standards Don't Answer
 
