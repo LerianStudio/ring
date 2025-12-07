@@ -28,6 +28,10 @@ output_schema:
     - name: "Next Steps"
       pattern: "^## Next Steps"
       required: true
+    - name: "Blockers"
+      pattern: "^## Blockers"
+      required: false
+      description: "Decisions requiring user input before proceeding"
   error_handling:
     on_blocker: "pause_and_report"
     escalation_path: "orchestrator"
