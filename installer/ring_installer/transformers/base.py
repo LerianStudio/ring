@@ -136,16 +136,27 @@ class BaseTransformer(ABC):
         frontmatter: Dict[str, Any] = {}
         body = content
 
-        if content.startswith("---"):
-            end_marker = content.find("---", 3)
+        # Skip leading HTML comment blocks and whitespace
+        trimmed = content.lstrip()
+        if trimmed.startswith("<!--"):
+            comment_end = trimmed.find("-->")
+            if comment_end != -1:
+                trimmed = trimmed[comment_end + 3 :].lstrip()
+
+        if trimmed.startswith("---"):
+            end_marker = trimmed.find("---", 3)
             if end_marker != -1:
-                yaml_content = content[3:end_marker].strip()
+                yaml_content = trimmed[3:end_marker].strip()
                 try:
                     if YAML_AVAILABLE:
                         frontmatter = yaml.safe_load(yaml_content) or {}
                 except Exception:
                     pass
-                body = content[end_marker + 3:].strip()
+                body = trimmed[end_marker + 3 :].strip()
+            else:
+                body = trimmed
+        else:
+            body = trimmed
 
         return frontmatter, body
 
