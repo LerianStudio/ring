@@ -90,6 +90,7 @@ Execute comprehensive code review using 3 specialized reviewers IN PARALLEL. Agg
 | "One reviewer said PASS" | PASS requires ALL 3 reviewers. One PASS + one FAIL = overall FAIL. |
 | "Business logic is tested" | Tests check behavior. Review checks intent, edge cases, requirements alignment. |
 | "Security scan passed" | Security scanners miss logic flaws. Human reviewer required. |
+| "CSS can't have security issues" | CSS can have XSS (user-controlled classes), clickjacking (z-index manipulation), data exfiltration (CSS injection). ALL code needs security review. |
 | "Only MEDIUM issues, can proceed" | MEDIUM issues must be fixed OR documented with FIXME. No silent ignoring. |
 | "Document MEDIUM and ship" | Documentation ≠ resolution. Fix now, or add FIXME with timeline. |
 | "Risk-accept MEDIUM issues" | Risk acceptance requires explicit user approval, not agent decision. |
@@ -106,6 +107,7 @@ If you catch yourself thinking ANY of these, STOP immediately:
 - "Sequential reviews are fine this time"
 - "Security scanner covers security review"
 - "Business tests cover business review"
+- "CSS can't have security issues"
 - "Only MEDIUM issues, not blocking"
 - "Risk-accept these findings"
 
@@ -147,6 +149,12 @@ Task tool #3: ring-default:security-reviewer
 - ❌ Skipping re-review after fixes
 
 **The ONLY acceptable pattern is 3 Task tools in 1 message.**
+
+**If you already dispatched reviewers sequentially (separate messages):**
+1. STOP immediately - this is a violation
+2. Discard sequential results (they're incomplete context)
+3. Re-dispatch ALL 3 reviewers in a SINGLE message with 3 Task tool calls
+4. Sequential dispatch wastes time AND misses cross-domain insights
 
 ## Prerequisites
 
