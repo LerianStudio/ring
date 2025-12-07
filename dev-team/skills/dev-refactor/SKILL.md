@@ -378,9 +378,6 @@ Task tool:
   prompt: |
     Analyze this {language} codebase for refactoring opportunities.
 
-    **Project Standards (from PROJECT_RULES.md):**
-    {project_rules_content}
-
     Focus on:
     - Directory structure compliance
     - DDD patterns (Entities, Value Objects, Aggregates, Repositories)
@@ -391,13 +388,15 @@ Task tool:
     Return findings with severity (Critical/High/Medium/Low) and specific file locations.
 ```
 
+**Note:** The codebase-explorer agent reads `docs/PROJECT_RULES.md` automatically per its Standards Loading section.
+
 **Output:** Architectural insights, patterns found, anti-patterns detected.
 
 ### Phase 2: Specialized Dimension Analysis (Parallel)
 
 Dispatch 3 agents in parallel (single message, 3 Task tool calls). Each agent will:
-1. Load its Ring standards via WebFetch (as defined in agent definition)
-2. Apply both Ring standards AND PROJECT_RULES.md
+1. Read `docs/PROJECT_RULES.md` automatically (per Standards Loading section)
+2. Load its Ring standards via WebFetch (as defined in agent definition)
 3. Return dimension-specific findings
 
 ```yaml
@@ -407,9 +406,6 @@ Task tool:
   model: "opus"
   prompt: |
     Analyze test coverage and patterns for refactoring.
-
-    **Project Standards (from PROJECT_RULES.md):**
-    {project_rules_content}
 
     Check:
     - Test coverage percentage
@@ -426,16 +422,12 @@ Task tool:
   prompt: |
     Analyze infrastructure setup for refactoring.
 
-    **Project Standards (from PROJECT_RULES.md):**
-    {project_rules_content}
-
     Check:
     - Dockerfile exists and follows best practices
     - docker-compose.yml configuration
     - CI/CD pipeline presence
     - Environment management (.env.example)
 
-    Note: Load Ring DevOps standards via WebFetch as per your agent definition.
     Return findings with severity and specific file locations.
 
 # Task 3: SRE Analysis
@@ -445,18 +437,16 @@ Task tool:
   prompt: |
     Analyze observability setup for refactoring.
 
-    **Project Standards (from PROJECT_RULES.md):**
-    {project_rules_content}
-
     Check:
     - Metrics endpoint (/metrics)
     - Health check endpoints (/health, /ready)
     - Structured logging
     - Tracing setup
 
-    Note: Load Ring SRE standards via WebFetch as per your agent definition.
     Return findings with severity and specific file locations.
 ```
+
+**Note:** Each agent reads `docs/PROJECT_RULES.md` and loads Ring standards automatically per their Standards Loading sections. No need to inject standards in the prompt.
 
 **Output:** Dimension-specific findings with severities to compile in Step 4.
 
