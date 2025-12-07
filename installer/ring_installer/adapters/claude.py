@@ -5,6 +5,7 @@ Claude Code is the primary target platform for Ring, so this adapter
 performs minimal transformation (essentially a passthrough).
 """
 
+import os
 from pathlib import Path
 from typing import Dict, Optional, Any
 
@@ -99,8 +100,22 @@ class ClaudeAdapter(PlatformAdapter):
             Path to ~/.claude directory
         """
         if self._install_path is None:
-            base_path = self.config.get("install_path", "~/.claude")
-            self._install_path = Path(base_path).expanduser()
+            env_path = Path(
+                self.config.get("install_path", "~/.claude")
+            ).expanduser()
+            override = os.environ.get("CLAUDE_CONFIG_PATH")
+            if override:
+                candidate = Path(override).expanduser().resolve()
+                home = Path.home().resolve()
+                try:
+                    candidate.relative_to(home)
+                    env_path = candidate
+                except ValueError:
+                    import logging
+                    logging.getLogger(__name__).warning(
+                        "CLAUDE_CONFIG_PATH=%s ignored: path must be under home", override
+                    )
+            self._install_path = env_path
         return self._install_path
 
     def get_component_mapping(self) -> Dict[str, Dict[str, str]]:

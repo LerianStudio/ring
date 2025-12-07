@@ -93,6 +93,23 @@ def get_platform_info(platform_id: str) -> PlatformInfo:
     return _detect_platform(platform_id)
 
 
+def _validate_env_path(env_var: str, candidate: str, default: Path) -> Path:
+    """Validate an environment-provided path, falling back to default if unsafe."""
+    path = Path(candidate).expanduser().resolve()
+    home = Path.home().resolve()
+
+    try:
+        path.relative_to(home)
+        return path
+    except ValueError:
+        logger.warning(
+            "Ignoring %s=%s: path must be under home directory",
+            env_var,
+            candidate,
+        )
+        return Path(default).expanduser().resolve()
+
+
 def _detect_platform(platform_id: str) -> PlatformInfo:
     """
     Detect a specific platform.
@@ -224,12 +241,12 @@ def _detect_generic_cli_platform(
     Returns:
         PlatformInfo with detection results
     """
-    # Allow environment variable override for config path
+    # Allow environment variable override for config path (validated)
     env_var = f"{platform_id.upper()}_CONFIG_PATH"
     env_path = os.environ.get(env_var)
 
     if env_path:
-        config_path = Path(env_path).expanduser()
+        config_path = _validate_env_path(env_var, env_path, Path.home() / config_dir_name)
     else:
         config_path = Path.home() / config_dir_name
 
@@ -267,8 +284,10 @@ def _detect_generic_cli_platform(
                         version_match = re.search(r"(\d+\.\d+\.\d+)", result.stdout)
                         if version_match:
                             info.version = version_match.group(1)
-                except (subprocess.TimeoutExpired, subprocess.SubprocessError, FileNotFoundError):
-                    pass
+                except subprocess.TimeoutExpired:
+                    logger.warning("Binary %s timed out during version check", binary)
+                except (subprocess.SubprocessError, FileNotFoundError) as e:
+                    logger.debug("Binary %s version check failed: %s", binary, e)
             else:
                 logger.warning(
                     "Binary %s found at %s but path is not in allowed locations",
@@ -326,7 +345,7 @@ def _detect_cursor() -> PlatformInfo:
     # Allow environment variable override for config path
     env_path = os.environ.get("CURSOR_CONFIG_PATH")
     if env_path:
-        config_path = Path(env_path).expanduser()
+        config_path = _validate_env_path("CURSOR_CONFIG_PATH", env_path, Path.home() / ".cursor")
     else:
         config_path = Path.home() / ".cursor"
 
@@ -372,7 +391,7 @@ def _detect_cline() -> PlatformInfo:
     # Allow environment variable override for config path
     env_path = os.environ.get("CLINE_CONFIG_PATH")
     if env_path:
-        config_path = Path(env_path).expanduser()
+        config_path = _validate_env_path("CLINE_CONFIG_PATH", env_path, Path.home() / ".cline")
     else:
         config_path = Path.home() / ".cline"
 
