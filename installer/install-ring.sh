@@ -3,9 +3,11 @@
 # Ring Multi-Platform Installer
 # Installs Ring skills to Claude Code, Factory AI, Cursor, and/or Cline
 set -euo pipefail
+export LC_ALL=C
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 RING_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+export PYTHONPATH="$RING_ROOT/installer${PYTHONPATH:+:$PYTHONPATH}"
 
 echo "================================================"
 echo "Ring Multi-Platform Installer"
@@ -52,6 +54,31 @@ echo ""
 
 # Check if running with arguments (non-interactive mode)
 if [ $# -gt 0 ]; then
+    # Validate args for obvious shell metacharacters
+    for arg in "$@"; do
+        if [[ "$arg" == *[\\\;\&\|\`\$\>]* ]]; then
+            echo "${RED}Error: Unsupported characters in argument: $arg${RESET}"
+            exit 1
+        fi
+    done
+
+    # Verify module exists before exec
+    if [ ! -f "$RING_ROOT/installer/ring_installer/__main__.py" ]; then
+        echo "${RED}Error: ring_installer module not found at $RING_ROOT/installer/ring_installer${RESET}"
+        exit 1
+    fi
+
+    # Optional integrity check for marketplace.json when checksum provided
+    if [ -n "${MARKETPLACE_JSON_SHA256:-}" ]; then
+        if [ -f "$RING_ROOT/.claude-plugin/marketplace.json" ]; then
+            ACTUAL_HASH=$(openssl dgst -sha256 "$RING_ROOT/.claude-plugin/marketplace.json" | awk '{print $2}')
+            if [ "$ACTUAL_HASH" != "$MARKETPLACE_JSON_SHA256" ]; then
+                echo "${RED}marketplace.json integrity check failed${RESET}"
+                exit 1
+            fi
+        fi
+    fi
+
     # Direct passthrough to Python module
     cd "$RING_ROOT"
     exec "$PYTHON_CMD" -m installer.ring_installer "$@"
@@ -70,8 +97,9 @@ echo ""
 
 read -p "Enter choice(s) separated by comma (e.g., 1,2,3) [default: 6]: " choices
 
-# Validate input only contains expected characters
-if [[ -n "$choices" ]] && ! [[ "$choices" =~ ^[1-6,[:space:]]*$ ]]; then
+# Validate input only contains expected characters (locale-independent)
+LC_ALL=C
+if [[ -n "$choices" ]] && ! [[ "$choices" =~ ^[1-6,\ ]*$ ]]; then
     echo "${RED}Error: Invalid input. Please enter numbers 1-6 separated by commas.${RESET}"
     exit 1
 fi

@@ -32,8 +32,21 @@
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+# Warn on overly-permissive execution policy
+$currentPolicy = Get-ExecutionPolicy -Scope CurrentUser
+if ($currentPolicy -eq "Unrestricted") {
+    Write-Host "Warning: Running with Unrestricted execution policy. Consider 'Set-ExecutionPolicy -Scope CurrentUser RemoteSigned'." -ForegroundColor Yellow
+}
+
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RingRoot = Split-Path -Parent $ScriptDir
+
+# Ensure local installer package is importable
+if ($env:PYTHONPATH) {
+    $env:PYTHONPATH = "$RingRoot/installer;$env:PYTHONPATH"
+} else {
+    $env:PYTHONPATH = "$RingRoot/installer"
+}
 
 Write-Host "================================================" -ForegroundColor Cyan
 Write-Host "Ring Multi-Platform Installer" -ForegroundColor Cyan
