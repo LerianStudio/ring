@@ -45,9 +45,264 @@ Use this skill when:
 - Asked to create technical design or architecture document
 - Before making technology choices
 
+---
+
+## ⛔ HARD BLOCK: Tech Stack Definition (Step 0)
+
+**This is a HARD GATE. Do NOT proceed without defining the tech stack.**
+
+Before designing architecture, you MUST determine the technology stack that will be used for implementation. This decision is made HERE in the TRD so that:
+1. Architecture patterns align with chosen stack capabilities
+2. Gates 4-6 inherit this decision (no repeated questions)
+3. Ring Standards can be loaded to inform architectural patterns
+
+### Step 0.1: Auto-Detect or Ask User
+
+**First, attempt auto-detection:**
+
+```text
+Language Detection:
+├── go.mod exists → Go project
+├── package.json exists
+│   ├── Has "react" or "next" → Frontend TypeScript
+│   ├── Has backend deps (express, fastify, nestjs) → Backend TypeScript
+│   └── Otherwise → Generic TypeScript
+└── Multiple languages → Ask user to confirm
+```
+
+**If auto-detection fails or is ambiguous, ASK:**
+
+```yaml
+AskUserQuestion:
+  questions:
+    - question: "What is the primary technology stack for this feature?"
+      header: "Tech Stack"
+      multiSelect: true
+      options:
+        - label: "Go (Backend)"
+          description: "Backend services, APIs, microservices in Go"
+        - label: "TypeScript (Backend)"
+          description: "Node.js backend with Express, Fastify, or NestJS"
+        - label: "TypeScript (Frontend)"
+          description: "React, Next.js, or similar frontend frameworks"
+        - label: "Full-Stack TypeScript"
+          description: "Both frontend and backend in TypeScript"
+```
+
+### Step 0.2: Load Ring Standards via WebFetch (MANDATORY)
+
+**Based on tech stack selection, load the corresponding Ring Standards.**
+
+**Available Ring Standards:**
+
+| Standard | URL | Purpose |
+|----------|-----|---------|
+| **golang.md** | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang.md` | Go backend patterns, error handling, DDD |
+| **typescript.md** | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md` | TypeScript backend patterns, Node.js standards |
+| **frontend.md** | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/frontend.md` | React, Next.js, UI/UX patterns |
+| **devops.md** | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/devops.md` | Docker, CI/CD, infrastructure patterns |
+| **sre.md** | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/sre.md` | Observability, health checks, logging, tracing |
+
+**Standards to Load by Tech Stack:**
+
+| Tech Stack | Standards to Load |
+|------------|-------------------|
+| Go (Backend) | golang.md + devops.md + sre.md |
+| TypeScript (Backend) | typescript.md + devops.md + sre.md |
+| TypeScript (Frontend) | frontend.md + devops.md |
+| Full-Stack TypeScript | typescript.md + frontend.md + devops.md + sre.md |
+
+**WebFetch Commands:**
+
+```yaml
+# For Go Backend:
+WebFetch:
+  url: "https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang.md"
+  prompt: "Extract architectural patterns, directory structure, error handling patterns, and DDD guidelines"
+
+# For TypeScript Backend:
+WebFetch:
+  url: "https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md"
+  prompt: "Extract architectural patterns, type safety requirements, async patterns, and error handling"
+
+# For TypeScript Frontend:
+WebFetch:
+  url: "https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/frontend.md"
+  prompt: "Extract component patterns, state management, performance patterns, and accessibility requirements"
+
+# ALWAYS load DevOps (all stacks):
+WebFetch:
+  url: "https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/devops.md"
+  prompt: "Extract containerization patterns, CI/CD requirements, and infrastructure standards"
+
+# ALWAYS load SRE (for backend stacks):
+WebFetch:
+  url: "https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/sre.md"
+  prompt: "Extract health check patterns, logging standards, tracing requirements, and observability guidelines"
+```
+
+### Step 0.3: Read PROJECT_RULES.md (MANDATORY)
+
+```text
+Check sequence:
+1. Look for: docs/PROJECT_RULES.md
+2. If not found: Look for docs/STANDARDS.md (legacy name)
+3. If not found: STOP - Cannot proceed without project standards
+```
+
+### Step 0.4: Analyze PRD and Suggest Project-Specific Technologies
+
+**Read the PRD and suggest technologies/components that best address the solution requirements.**
+
+These suggestions are **project-specific** and will be documented in `docs/PROJECT_RULES.md` (created in Gate 6).
+
+**Ring Standards vs PROJECT_RULES.md:**
+
+| Ring Standards | PROJECT_RULES.md |
+|----------------|------------------|
+| Coding patterns | Specific technologies |
+| Observability standards | Auth provider choice |
+| Logging format | Database choice |
+| Error handling | Message broker choice |
+| Shared across ALL projects | Specific to THIS project |
+
+**Process:**
+
+```text
+1. Read docs/pre-dev/{feature-name}/PRD.md
+2. Extract product requirements
+3. Suggest technologies that address each requirement
+4. Present suggestions to user
+5. User confirms or modifies
+6. Document in TRD metadata → Used by Gate 6 to create PROJECT_RULES.md
+```
+
+**AI reads PRD and suggests:**
+
+Based on the PRD requirements, suggest technologies that can best address the solution. Present to user like:
+
+```markdown
+## Technology Suggestions Based on PRD
+
+I read the PRD and identified these requirements that need specific technologies:
+
+**[Requirement 1 from PRD]**
+→ Suggested: [Technology] because [reason based on PRD context]
+
+**[Requirement 2 from PRD]**
+→ Suggested: [Technology] because [reason based on PRD context]
+
+...
+
+Do you agree with these suggestions? You can modify any of them.
+```
+
+**Ask user to confirm deployment model and suggestions:**
+
+```yaml
+AskUserQuestion:
+  questions:
+    - question: "What deployment model for this project?"
+      header: "Deployment"
+      multiSelect: false
+      options:
+        - label: "Cloud"
+          description: "Managed cloud services"
+        - label: "On-Premise"
+          description: "Self-hosted infrastructure"
+        - label: "Hybrid"
+          description: "Mix of both"
+```
+
+### Step 0.5: Document Tech Stack in TRD Metadata
+
+**The TRD MUST include all decisions. Gate 6 uses this to create PROJECT_RULES.md.**
+
+```yaml
+# At the top of docs/pre-dev/{feature}/trd.md
+
+---
+feature: {feature-name}
+gate: 3
+
+deployment:
+  model: Cloud  # or On-Premise, Hybrid
+
+tech_stack:
+  primary: Go  # or TypeScript
+  standards_loaded:
+    - golang.md
+    - devops.md
+    - sre.md
+
+# Project-specific technology decisions (used to generate PROJECT_RULES.md in Gate 6)
+project_technologies:
+  # Each entry references what PRD requirement it addresses
+  # AI suggested, user confirmed/modified
+
+  # Example entries - actual values come from PRD analysis:
+  - category: "Authentication"
+    prd_requirement: "[quote from PRD]"
+    choice: "[user confirmed technology]"
+    rationale: "[why this fits]"
+
+  - category: "Database"
+    prd_requirement: "[quote from PRD]"
+    choice: "[user confirmed technology]"
+    rationale: "[why this fits]"
+
+  - category: "Message Broker"
+    prd_requirement: "[quote from PRD]"
+    choice: "[user confirmed technology]"
+    rationale: "[why this fits]"
+
+  # ... more based on PRD analysis
+---
+```
+
+**This metadata flows to:**
+- Gate 4 (API Design): Protocol patterns
+- Gate 5 (Data Model): Storage patterns
+- **Gate 6 (Dependency Map): Creates `docs/PROJECT_RULES.md` with concrete versions**
+
+### BLOCKER Response if Step 0 Not Completed
+
+```yaml
+Blocker:
+  type: "missing_prerequisite"
+  message: |
+    ⛔ HARD BLOCK: Cannot proceed with TRD.
+
+    REQUIRED before architecture design:
+    1. Tech stack defined (auto-detected or user-selected) ❌
+    2. Ring Standards loaded via WebFetch ❌
+    3. docs/PROJECT_RULES.md exists and read ❌
+
+    Why is this mandatory?
+    - Architecture patterns depend on tech stack capabilities
+    - Ring Standards inform best practices for chosen stack
+    - Gates 4-6 inherit this decision
+
+    Resolution:
+    - Answer tech stack question OR verify manifest files exist
+    - Retry WebFetch for Ring Standards
+    - Create docs/PROJECT_RULES.md if missing
+```
+
+### Pressure Resistance for Step 0
+
+| Pressure | Response |
+|----------|----------|
+| "Tech stack doesn't matter for architecture" | "Architecture patterns vary by language. Go patterns ≠ TypeScript patterns. Define stack first." |
+| "We'll decide tech stack later" | "Later = Dependency Map. But architecture NOW needs to know capabilities. Define stack." |
+| "Just use generic patterns" | "Generic patterns miss stack-specific best practices. 5 min to define saves rework." |
+| "Skip to save time" | "Skipping causes Gates 4-6 to ask again. Define once here, inherit everywhere." |
+
+---
+
 ## Mandatory Workflow
 
-### Phase 1: Technical Analysis (Inputs Required)
+### Phase 1: Technical Analysis (After Step 0)
 1. **Approved PRD** (Gate 1 passed) - business requirements locked (REQUIRED)
 2. **Approved Feature Map** (Gate 2 passed) - feature relationships mapped (OPTIONAL - check `docs/pre-dev/<feature-name>/feature-map.md`)
 3. **Identify non-functional requirements** (performance, security, scalability)

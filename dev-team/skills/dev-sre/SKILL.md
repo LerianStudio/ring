@@ -1,13 +1,14 @@
 ---
 name: dev-sre
 description: |
-  Gate 2 of the development cycle. Validates and implements observability requirements
-  including metrics, health checks, logging, tracing, and dashboards following SRE standards.
+  Gate 2 of the development cycle. VALIDATES that observability was correctly implemented
+  by developers. Does NOT implement observability code - only validates it.
 
 trigger: |
   - Gate 2 of development cycle
-  - DevOps setup complete from Gate 1
-  - Service needs observability (metrics, logging, tracing)
+  - Gate 0 (Implementation) complete with observability code
+  - Gate 1 (DevOps) setup complete
+  - Service needs observability validation (metrics, logging, tracing)
 
 skip_when: |
   - No service implementation (documentation only)
@@ -26,9 +27,6 @@ related:
 
 verification:
   automated:
-    - command: "curl -sf http://localhost:8080/metrics"
-      description: "Metrics endpoint responds"
-      success_pattern: "http_requests_total|process_|go_"
     - command: "curl -sf http://localhost:8080/health"
       description: "Health endpoint responds 200"
       success_pattern: "200|ok|healthy"
@@ -39,37 +37,48 @@ verification:
       description: "Logs are JSON structured"
       success_pattern: "info|debug|warn|error"
   manual:
-    - "Verify /metrics includes custom metrics (http_requests_total, etc.)"
     - "Verify /ready returns 503 when database is down"
     - "Verify logs include trace_id when tracing is enabled"
 
 examples:
-  - name: "API service observability"
+  - name: "API service observability validation"
     context: "Go API with PostgreSQL dependency"
     expected_output: |
-      - /metrics endpoint with http_requests_total, http_request_duration_seconds
       - /health returns 200 when process running
       - /ready checks database connectivity
       - JSON structured logging with trace correlation
-  - name: "Background worker observability"
+  - name: "Background worker observability validation"
     context: "Job processor service"
     expected_output: |
-      - /metrics with jobs_processed_total, job_duration_seconds
       - /health returns 200 when worker running
-      - Queue depth metrics if applicable
+      - Structured JSON logging
 ---
 
 # SRE Validation (Gate 2)
 
 ## Overview
 
-This skill validates and implements observability requirements for the implemented service:
+This skill VALIDATES that observability was correctly implemented by developers:
 - Prometheus metrics exposed at `/metrics`
 - Health check endpoints (`/health`, `/ready`)
 - Structured logging with trace correlation
 - OpenTelemetry tracing instrumentation
 - Grafana dashboard (if required)
 - Alert rules (if required)
+
+## CRITICAL: Role Clarification
+
+**Developers IMPLEMENT observability. SRE VALIDATES it.**
+
+| Who | Responsibility |
+|-----|----------------|
+| **Developers** (Gate 0) | IMPLEMENT observability following Ring Standards |
+| **SRE Agent** (Gate 2) | VALIDATE that observability is correctly implemented |
+
+**If observability is missing or incorrect:**
+1. SRE reports issues with severity levels
+2. Issues go back to developers to fix
+3. SRE re-validates after fixes
 
 ## Pressure Resistance
 
@@ -130,7 +139,7 @@ If you catch yourself thinking ANY of these, STOP immediately:
 - "Core functionality done"
 - "Observability is enhancement"
 
-**All of these indicate Gate 2 violation. Implement observability now.**
+**All of these indicate Gate 2 violation. Return to developers to implement observability.**
 
 ## "Feature Complete" Redefinition Prevention
 
@@ -203,9 +212,9 @@ Before starting Gate 2:
 2. **Gate 1 Complete**: DevOps setup (Dockerfile, docker-compose) is done
 3. **Standards**: `docs/PROJECT_RULES.md` (local project) + Ring SRE Standards via WebFetch (`https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/sre.md`)
 
-## Step 1: Analyze Observability Requirements
+## Step 1: Analyze Observability Implementation
 
-Review implementation and determine what's needed:
+Review what developers implemented in Gate 0 and validate:
 
 ```
 From Gate 0/1 Handoff:
@@ -213,102 +222,70 @@ From Gate 0/1 Handoff:
 - Language: Go / TypeScript / Python
 - External dependencies: {list databases, caches, APIs}
 
-Observability Requirements:
-- [ ] Metrics endpoint (/metrics)
+Observability to Validate:
 - [ ] Health endpoints (/health, /ready)
 - [ ] Structured logging
-- [ ] Distributed tracing
-- [ ] Grafana dashboard
-- [ ] Alert rules
+- [ ] Distributed tracing (if external calls exist)
+- [ ] Grafana dashboard (optional)
+- [ ] Alert rules (optional)
 
-Current Status:
-- Metrics: EXISTS/MISSING
+Current Status (from Gate 0 implementation):
 - Health checks: EXISTS/MISSING
 - Logging: STRUCTURED/UNSTRUCTURED/MISSING
-- Tracing: EXISTS/MISSING
+- Tracing: EXISTS/MISSING/N/A
 ```
 
-## Step 2: Dispatch SRE Agent
+## Step 2: Dispatch SRE Agent for Validation
 
-Dispatch `ring-dev-team:sre` for observability implementation:
+Dispatch `ring-dev-team:sre` to VALIDATE observability implementation:
 
 ```
 Task tool:
   subagent_type: "ring-dev-team:sre"
   model: "opus"
   prompt: |
-    Implement observability for the service.
+    VALIDATE observability implementation for the service.
+
+    **Your role is VALIDATION, not implementation. Developers already implemented observability in Gate 0.**
 
     ## Service Information
     - Language: {Go/TypeScript/Python}
     - Service type: {API/Worker/Batch}
     - External dependencies: {list}
 
-    ## Implementation Summary
-    {paste Gate 0/1 handoff}
+    ## Implementation Summary from Gate 0/1
+    {paste Gate 0/1 handoff - should include observability code already implemented}
 
-    ## Requirements
+    ## Validation Checklist
 
-    ### 1. Metrics (Required)
-    Add Prometheus metrics:
-    - http_requests_total (counter) - method, endpoint, status
-    - http_request_duration_seconds (histogram) - method, endpoint
-    - Any business-specific metrics
+    ### 1. Health Checks (Required)
+    VALIDATE that:
+    - GET /health returns 200 when process running
+    - GET /ready returns 200 when dependencies are healthy
+    - GET /ready returns 503 when dependencies are down
 
-    Expose at GET /metrics
+    ### 2. Structured Logging (Required)
+    VALIDATE that logs:
+    - Are JSON formatted
+    - Include: timestamp, level, message, service
+    - Include trace_id when tracing enabled
+    - Do NOT log sensitive data (passwords, tokens)
 
-    ### 2. Health Checks (Required)
-    - GET /health - Liveness (process running)
-    - GET /ready - Readiness (can serve traffic, checks dependencies)
-
-    ### 3. Structured Logging (Required)
-    Ensure all logs are JSON with fields:
-    - timestamp, level, message, service, trace_id, span_id
-
-    ### 4. Tracing (If external calls exist)
-    Add OpenTelemetry instrumentation:
-    - HTTP client calls
-    - Database queries
-    - Message queue operations
-
-    ### 5. Dashboard (If new service)
-    Create Grafana dashboard JSON with:
-    - Request rate, error rate, latency
-    - Resource usage (CPU, memory)
-    - Dependency health
+    ### 3. Tracing (If external calls exist)
+    VALIDATE that:
+    - Spans created for HTTP handlers
+    - Spans created for database calls
+    - Trace context propagated
 
     ## Output
     Report:
-    - Files created/modified
-    - Metrics added
-    - Endpoints added
-    - Verification commands
+    - Validation results (PASS/FAIL per component)
+    - Issues found (with severity: CRITICAL/HIGH/MEDIUM/LOW)
+    - Verification commands used
+    - Next steps for developers (if issues found)
 ```
 
-## Step 3: Verify Metrics Endpoint
-
-After implementation, verify metrics are exposed:
-
-```bash
-# Start service
-docker-compose up -d
-
-# Check metrics endpoint
-curl http://localhost:8080/metrics
-
-# Expected output should include:
-# - http_requests_total
-# - http_request_duration_seconds_bucket
-# - go_* or nodejs_* or python_* runtime metrics
-```
-
-**Verification checklist:**
-- [ ] `/metrics` returns 200
-- [ ] Custom metrics present (http_requests_total, etc.)
-- [ ] Labels are correct (method, endpoint, status)
-- [ ] Histograms have appropriate buckets
-
-## Step 4: Verify Health Checks
+## Step 3: Validate Health Checks
 
 ```bash
 # Liveness check
@@ -331,7 +308,7 @@ curl http://localhost:8080/ready
 - [ ] `/ready` returns 503 when dependency down
 - [ ] Response includes dependency status details
 
-## Step 5: Verify Logging
+## Step 4: Validate Logging
 
 ```bash
 # Check log format
@@ -347,7 +324,7 @@ docker-compose logs api | head -5
 - [ ] trace_id/span_id present when tracing enabled
 - [ ] No sensitive data logged (passwords, tokens)
 
-## Step 6: Verify Tracing (If Applicable)
+## Step 5: Validate Tracing (If Applicable)
 
 ```bash
 # Make a request that triggers external calls
@@ -366,46 +343,34 @@ docker-compose logs api | grep trace_id
 - [ ] Spans created for external API calls
 - [ ] Trace context propagated across services
 
-## Step 7: Prepare Handoff to Gate 3
+## Step 6: Prepare Handoff to Gate 3
 
 Package the following for Gate 3 (Testing):
 
 ```markdown
 ## Gate 2 Handoff
 
-**SRE Status:** COMPLETE/PARTIAL
+**SRE Validation Status:** COMPLETE/PARTIAL/NEEDS_FIXES
 
-**Observability Implemented:**
-- [ ] Metrics endpoint at /metrics
+**Observability Validated:**
 - [ ] Health endpoint at /health
 - [ ] Ready endpoint at /ready
 - [ ] Structured JSON logging
-- [ ] OpenTelemetry tracing
+- [ ] OpenTelemetry tracing (if applicable)
 
-**Metrics Added:**
-- http_requests_total{method,endpoint,status}
-- http_request_duration_seconds{method,endpoint}
-- {list any custom metrics}
-
-**Files Created/Modified:**
-- {list files}
-
-**Verification Results:**
-- Metrics: PASS/FAIL
+**Validation Results:**
 - Health checks: PASS/FAIL
 - Logging: PASS/FAIL
 - Tracing: PASS/FAIL (or N/A)
 
-**Dashboard Location:** (if created)
-- grafana/dashboards/api.json
-
-**Alert Rules Location:** (if created)
-- prometheus/rules/api.yml
+**Issues Found:**
+- {list issues by severity: CRITICAL/HIGH/MEDIUM/LOW}
+- Or "None"
 
 **Ready for Testing:**
-- [ ] All observability endpoints verified
+- [ ] All observability endpoints validated
 - [ ] Logs are structured
-- [ ] No errors in service startup
+- [ ] No critical/high issues remaining
 ```
 
 ## Observability by Service Type
@@ -413,7 +378,6 @@ Package the following for Gate 3 (Testing):
 ### API Service
 ```
 Required:
-- Metrics (http_requests_total, http_request_duration_seconds)
 - Health checks (/health, /ready)
 - Structured logging
 - Tracing (if calls external services)
@@ -426,24 +390,18 @@ Optional:
 ### Background Worker
 ```
 Required:
-- Metrics (jobs_processed_total, job_duration_seconds, jobs_failed_total)
 - Health check (/health)
 - Structured logging
 
 Optional:
-- Queue depth metrics
 - Tracing
 ```
 
 ### Batch Job
 ```
 Required:
-- Metrics (batch_runs_total, batch_duration_seconds, batch_items_processed)
 - Structured logging
 - Exit code handling
-
-Optional:
-- Progress metrics
 ```
 
 ## Execution Report
@@ -452,22 +410,19 @@ Optional:
 |--------|-------|
 | Duration | Xm Ys |
 | Iterations | N |
-| Result | PASS/FAIL/PARTIAL |
+| Result | PASS/FAIL/NEEDS_FIXES |
 
-### Details
-- metrics_endpoint: VERIFIED/MISSING
+### Validation Details
 - health_endpoint: VERIFIED/MISSING
 - ready_endpoint: VERIFIED/MISSING
 - logging_structured: YES/NO
 - tracing_enabled: YES/NO/N/A
-- dashboard_created: YES/NO/N/A
-- alerts_created: YES/NO/N/A
 
-### Issues Encountered
-- List any issues or "None"
+### Issues Found
+- List issues by severity (CRITICAL/HIGH/MEDIUM/LOW) or "None"
 
 ### Handoff to Next Gate
-- SRE status (complete/partial)
-- Observability endpoints verified
-- Files created/modified
+- SRE validation status (complete/needs_fixes)
+- Observability endpoints validated
+- Issues for developers to fix (if any)
 - Ready for testing: YES/NO
