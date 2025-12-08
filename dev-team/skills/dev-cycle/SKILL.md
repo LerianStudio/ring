@@ -320,7 +320,37 @@ State is persisted to `.ring/dev-team/current-cycle.json`:
         "review": {"status": "pending"},
         "validation": {"status": "pending"}
       },
-      "artifacts": {}
+      "artifacts": {},
+      "agent_outputs": {
+        "implementation": {
+          "agent": "ring-dev-team:backend-engineer-golang",
+          "output": "## Summary\n...",
+          "timestamp": "ISO timestamp",
+          "duration_ms": 0
+        },
+        "devops": null,
+        "sre": {
+          "agent": "ring-dev-team:sre",
+          "output": "## Summary\n...",
+          "timestamp": "ISO timestamp",
+          "duration_ms": 0
+        },
+        "testing": {
+          "agent": "ring-dev-team:qa-analyst",
+          "output": "## Summary\n...",
+          "timestamp": "ISO timestamp",
+          "duration_ms": 0
+        },
+        "review": {
+          "code_reviewer": {"agent": "ring-default:code-reviewer", "output": "...", "timestamp": "..."},
+          "business_logic_reviewer": {"agent": "ring-default:business-logic-reviewer", "output": "...", "timestamp": "..."},
+          "security_reviewer": {"agent": "ring-default:security-reviewer", "output": "...", "timestamp": "..."}
+        },
+        "validation": {
+          "result": "approved|rejected",
+          "timestamp": "ISO timestamp"
+        }
+      }
     }
   ],
   "metrics": {
@@ -537,6 +567,12 @@ For current execution unit:
 5. Update state:
    - gate_progress.implementation.status = "completed"
    - artifacts.implementation = {files_changed, commit_sha}
+   - agent_outputs.implementation = {
+       agent: "[selected_agent]",
+       output: "[full agent output for feedback analysis]",
+       timestamp: "[ISO timestamp]",
+       duration_ms: [execution time]
+     }
 6. Proceed to Gate 1
 ```
 
@@ -572,8 +608,17 @@ For current execution unit:
 
 4. If DevOps not needed:
    - Mark as "skipped" with reason
+   - agent_outputs.devops = null
 
-5. Update state and proceed to Gate 2
+5. If DevOps executed:
+   - agent_outputs.devops = {
+       agent: "ring-dev-team:devops-engineer",
+       output: "[full agent output for feedback analysis]",
+       timestamp: "[ISO timestamp]",
+       duration_ms: [execution time]
+     }
+
+6. Update state and proceed to Gate 2
 ```
 
 ## Step 4: Gate 2 - SRE (Per Execution Unit)
@@ -610,8 +655,17 @@ For current execution unit:
 
 4. If SRE not needed:
    - Mark as "skipped" with reason
+   - agent_outputs.sre = null
 
-5. Update state and proceed to Gate 3
+5. If SRE executed:
+   - agent_outputs.sre = {
+       agent: "ring-dev-team:sre",
+       output: "[full agent output for feedback analysis]",
+       timestamp: "[ISO timestamp]",
+       duration_ms: [execution time]
+     }
+
+6. Update state and proceed to Gate 3
 ```
 
 ## Step 5: Gate 3 - Testing (Per Execution Unit)
@@ -643,11 +697,18 @@ For current execution unit:
        Report: test coverage, test results, any failures.
 
 3. Receive: Test report
-4. If tests fail:
+4. Store agent output:
+   - agent_outputs.testing = {
+       agent: "ring-dev-team:qa-analyst",
+       output: "[full agent output for feedback analysis]",
+       timestamp: "[ISO timestamp]",
+       duration_ms: [execution time]
+     }
+5. If tests fail:
    - Log failure
    - Loop back to Gate 0 (Implementation) with failure details
    - Increment metrics.review_iterations
-5. If tests pass:
+6. If tests pass:
    - Update state
    - Proceed to Gate 4
 ```
@@ -682,18 +743,36 @@ For current execution unit:
      prompt: [same structure]
 
 3. Wait for all reviewers to complete
-4. Aggregate findings by severity:
+4. Store all reviewer outputs:
+   - agent_outputs.review = {
+       code_reviewer: {
+         agent: "ring-default:code-reviewer",
+         output: "[full output for feedback analysis]",
+         timestamp: "[ISO timestamp]"
+       },
+       business_logic_reviewer: {
+         agent: "ring-default:business-logic-reviewer",
+         output: "[full output for feedback analysis]",
+         timestamp: "[ISO timestamp]"
+       },
+       security_reviewer: {
+         agent: "ring-default:security-reviewer",
+         output: "[full output for feedback analysis]",
+         timestamp: "[ISO timestamp]"
+       }
+     }
+5. Aggregate findings by severity:
    - Critical/High/Medium: Must fix
    - Low: Add TODO(review): comment
    - Cosmetic: Add FIXME(nitpick): comment
 
-5. If Critical/High/Medium issues found:
+6. If Critical/High/Medium issues found:
    - Dispatch fix to implementation agent
    - Re-run all 3 reviewers in parallel
    - Increment metrics.review_iterations
    - Repeat until clean (max 3 iterations)
 
-6. When all issues resolved:
+7. When all issues resolved:
    - Update state
    - Proceed to Gate 5
 ```
@@ -723,6 +802,11 @@ For current execution unit:
 5. If validation passes:
    - Set unit status = "completed"
    - Record gate end timestamp
+   - agent_outputs.validation = {
+       result: "approved",
+       timestamp: "[ISO timestamp]",
+       criteria_results: [{criterion, status}]
+     }
    - Proceed to Step 7.1 (Execution Unit Approval)
 ```
 
@@ -817,14 +901,26 @@ After Gate 5 validation passes:
 After completing all subtasks of a task:
 
 0. Check execution_mode from state:
-   - If "automatic": Skip to next task (no checkpoint)
+   - If "automatic": Still run feedback, then skip to next task
    - If "manual_per_subtask" OR "manual_per_task": Continue with checkpoint below
 
 1. Set task status = "completed"
-2. Set cycle status = "paused_for_task_approval"
-3. Save state
 
-4. Present task completion summary:
+2. **Run dev-feedback-loop skill (MANDATORY)**
+   This skill now handles BOTH assertiveness metrics AND prompt quality analysis.
+
+   Invoke: Skill "ring-dev-team:dev-feedback-loop"
+
+   The skill will:
+   a) Calculate assertiveness score for the task
+   b) Dispatch prompt-quality-reviewer agent with agent_outputs from state
+   c) Generate improvement suggestions
+   d) Write feedback to docs/feedbacks/cycle-{date}/{agent}.md
+
+3. Set cycle status = "paused_for_task_approval"
+4. Save state
+
+5. Present task completion summary (with feedback metrics):
    ┌─────────────────────────────────────────────────┐
    │ ✓ TASK COMPLETED                                │
    ├─────────────────────────────────────────────────┤
@@ -838,6 +934,23 @@ After completing all subtasks of a task:
    │ Total Duration: Xh Xm                           │
    │ Total Review Iterations: N                      │
    │                                                  │
+   │ ═══════════════════════════════════════════════ │
+   │ FEEDBACK METRICS                                │
+   │ ═══════════════════════════════════════════════ │
+   │                                                  │
+   │ Assertiveness Score: XX% (Rating)               │
+   │                                                  │
+   │ Prompt Quality by Agent:                        │
+   │   backend-engineer-golang: 90% (Excellent)     │
+   │   qa-analyst: 75% (Acceptable)                 │
+   │   code-reviewer: 88% (Good)                    │
+   │                                                  │
+   │ Improvements Suggested: N                       │
+   │ Feedback Location:                              │
+   │   docs/feedbacks/cycle-YYYY-MM-DD/             │
+   │                                                  │
+   │ ═══════════════════════════════════════════════ │
+   │                                                  │
    │ All Files Changed This Task:                    │
    │   - file1.go                                    │
    │   - file2.go                                    │
@@ -848,7 +961,7 @@ After completing all subtasks of a task:
    │            OR "No more tasks - cycle complete"  │
    └─────────────────────────────────────────────────┘
 
-5. **ASK FOR EXPLICIT APPROVAL using AskUserQuestion tool:**
+6. **ASK FOR EXPLICIT APPROVAL using AskUserQuestion tool:**
 
    Question: "Task [task_id] complete. Ready to start the next task?"
    Options:
@@ -856,7 +969,7 @@ After completing all subtasks of a task:
      b) "Integration Test" - User wants to test the full task integration
      c) "Stop Here" - Pause cycle
 
-6. Handle user response:
+7. Handle user response:
 
    If "Continue":
      - Set status = "in_progress"
