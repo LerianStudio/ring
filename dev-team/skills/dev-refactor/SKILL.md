@@ -405,88 +405,143 @@ This file contains:
 
 ## Step 3: Scan Codebase
 
-Two-phase analysis using specialized agents. Each agent loads its own Ring standards via WebFetch.
+All analysis uses specialized Lerian agents that load Ring standards via WebFetch. This ensures analysis is done by the same agents that will implement fixes, providing consistency and domain expertise.
 
-### Phase 1: Architecture Analysis
+### Agent Selection Based on Language Detection
 
-**Dispatch:** `ring-default:codebase-explorer` (Opus)
+Select the appropriate code analysis agent based on Step 1 language detection:
 
-```yaml
-Task tool:
-  subagent_type: "ring-default:codebase-explorer"
-  model: "opus"
-  prompt: |
-    Analyze this {language} codebase for refactoring opportunities.
+| Language/Project Type | Code Analysis Agent |
+|-----------------------|---------------------|
+| Go (`go.mod` exists) | `ring-dev-team:backend-engineer-golang` |
+| TypeScript Backend (express, fastify, nestjs) | `ring-dev-team:backend-engineer-typescript` |
+| TypeScript Frontend (react, next) | `ring-dev-team:frontend-bff-engineer-typescript` |
+| Frontend Design/CSS | `ring-dev-team:frontend-designer` |
+| Mixed/Multiple | Dispatch multiple code agents in parallel |
 
-    Focus on:
-    - Directory structure compliance
-    - DDD patterns (Entities, Value Objects, Aggregates, Repositories)
-    - Clean/Hexagonal Architecture (dependency direction)
-    - Anti-patterns and technical debt
-    - Naming conventions
+### Parallel Analysis Dispatch (Single Message, 4-5 Task Tools)
 
-    Return findings with severity (Critical/High/Medium/Low) and specific file locations.
-```
+**IMPORTANT:** All agents MUST be dispatched in a SINGLE message with multiple Task tool calls. This is a parallel dispatch, NOT sequential.
 
-**Note:** The codebase-explorer agent reads `docs/PROJECT_RULES.md` automatically per its Standards Loading section.
-
-**Output:** Architectural insights, patterns found, anti-patterns detected.
-
-### Phase 2: Specialized Dimension Analysis (Parallel)
-
-Dispatch 3 agents in parallel (single message, 3 Task tool calls). Each agent will:
+Each agent will:
 1. Read `docs/PROJECT_RULES.md` automatically (per Standards Loading section)
 2. Load its Ring standards via WebFetch (as defined in agent definition)
 3. Return dimension-specific findings
 
 ```yaml
-# Task 1: Testing Analysis
+# Task 1: Code & Architecture Analysis (language-specific)
+# Select based on language detection from Step 1:
+
+# For Go projects:
+Task tool:
+  subagent_type: "ring-dev-team:backend-engineer-golang"
+  model: "opus"
+  prompt: |
+    **MODE: ANALYSIS ONLY** (do not implement, only report findings)
+
+    Analyze this Go codebase for refactoring opportunities.
+
+    Focus on:
+    - Directory structure compliance with PROJECT_RULES.md
+    - DDD patterns (Entities, Value Objects, Aggregates, Repositories)
+    - Clean/Hexagonal Architecture (dependency direction)
+    - Error handling patterns (no ignored errors, proper wrapping)
+    - Naming conventions (files, functions, constants)
+    - Anti-patterns and technical debt
+    - Security issues (input validation, SQL injection, secrets)
+
+    Return findings with severity (Critical/High/Medium/Low), location (file:line), issue, and recommendation.
+
+# For TypeScript Backend projects:
+Task tool:
+  subagent_type: "ring-dev-team:backend-engineer-typescript"
+  model: "opus"
+  prompt: |
+    **MODE: ANALYSIS ONLY** (do not implement, only report findings)
+
+    Analyze this TypeScript backend codebase for refactoring opportunities.
+
+    Focus on:
+    - Directory structure compliance with PROJECT_RULES.md
+    - Clean Architecture patterns
+    - Type safety (no `any`, proper interfaces)
+    - Error handling patterns
+    - Async/await patterns
+    - Security issues
+
+    Return findings with severity, location, issue, and recommendation.
+
+# For TypeScript Frontend/BFF projects:
+Task tool:
+  subagent_type: "ring-dev-team:frontend-bff-engineer-typescript"
+  model: "opus"
+  prompt: |
+    **MODE: ANALYSIS ONLY** (do not implement, only report findings)
+
+    Analyze this TypeScript frontend/BFF codebase for refactoring opportunities.
+
+    Focus on:
+    - Component structure and patterns
+    - State management
+    - API layer architecture
+    - Type safety
+    - Performance patterns
+
+    Return findings with severity, location, issue, and recommendation.
+
+# Task 2: Testing Analysis (ALWAYS included)
 Task tool:
   subagent_type: "ring-dev-team:qa-analyst"
   model: "opus"
   prompt: |
+    **MODE: ANALYSIS ONLY** (do not implement, only report findings)
+
     Analyze test coverage and patterns for refactoring.
 
     Check:
-    - Test coverage percentage
-    - Test patterns (table-driven, AAA)
-    - TDD compliance
-    - Missing test cases
+    - Test coverage percentage (minimum 80% required)
+    - Test patterns (table-driven for Go, AAA structure)
+    - TDD compliance indicators
+    - Missing test cases for critical paths
+    - Test naming conventions
+    - Mock usage and test isolation
 
     Return findings with severity and specific file locations.
 
-# Task 2: DevOps Analysis
+# Task 3: DevOps Analysis (ALWAYS included)
 Task tool:
   subagent_type: "ring-dev-team:devops-engineer"
   model: "opus"
   prompt: |
+    **MODE: ANALYSIS ONLY** (do not implement, only report findings)
+
     Analyze infrastructure setup for refactoring.
 
     Check:
-    - Dockerfile exists and follows best practices
-    - docker-compose.yml configuration
-    - CI/CD pipeline presence
-    - Environment management (.env.example)
+    - Dockerfile exists and follows best practices (multi-stage, non-root, health check)
+    - docker-compose.yml configuration (services, volumes, depends_on)
+    - Environment management (.env.example with all vars documented)
 
     Return findings with severity and specific file locations.
 
-# Task 3: SRE Analysis
+# Task 4: SRE Analysis (ALWAYS included)
 Task tool:
   subagent_type: "ring-dev-team:sre"
   model: "opus"
   prompt: |
+    **MODE: ANALYSIS ONLY** (do not implement, only report findings)
+
     Analyze observability setup for refactoring.
 
     Check:
-    - Metrics endpoint (/metrics)
-    - Health check endpoints (/health, /ready)
-    - Structured logging
-    - Tracing setup
+    - Health check endpoints (/health liveness, /ready readiness)
+    - Structured JSON logging with correlation IDs
+    - Tracing setup per Ring standards
 
     Return findings with severity and specific file locations.
 ```
 
-**Note:** Each agent reads `docs/PROJECT_RULES.md` and loads Ring standards automatically per their Standards Loading sections. No need to inject standards in the prompt.
+**Note:** Each agent reads `docs/PROJECT_RULES.md` and loads Ring standards automatically. The `**MODE: ANALYSIS ONLY**` prefix ensures they report findings without implementing changes.
 
 **Output:** Dimension-specific findings with severities to compile in Step 4.
 
@@ -495,7 +550,7 @@ Task tool:
 **Collect outputs from all dispatched agents and merge into structured report.**
 
 Each agent returns findings in their output. The dev-refactor skill must:
-1. **Collect** all agent outputs (codebase-explorer, qa-analyst, devops-engineer, sre)
+1. **Collect** all agent outputs (backend-engineer-*, qa-analyst, devops-engineer, sre)
 2. **Parse** findings from each output (severity, location, issue, recommendation)
 3. **Deduplicate** overlapping findings
 4. **Categorize** by dimension (Architecture, Code Quality, Testing, DevOps)
