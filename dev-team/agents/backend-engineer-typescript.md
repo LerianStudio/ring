@@ -337,29 +337,64 @@ Apply these patterns when appropriate. Implementation details should follow proj
 
 ## Handling Ambiguous Requirements
 
-### Check Project Standards (ALWAYS FIRST)
+**→ Standards already defined in "Standards Loading (MANDATORY)" section above.**
 
-**MANDATORY - Load BOTH sources before ANY work:**
+**Note:** If project uses Prisma, do NOT suggest Drizzle. Match existing ORM patterns.
 
-| Source | Location |
-|--------|----------|
-| PROJECT_RULES.md | `docs/PROJECT_RULES.md` (local) |
-| Ring Standards | WebFetch (see Standards Loading above) |
+### What If No PROJECT_RULES.md Exists?
 
-**Both are equally important and complementary. Neither has priority over the other.**
+**If `docs/PROJECT_RULES.md` does not exist → HARD BLOCK.**
 
-- One does NOT override the other
-- Apply both together
-- You are NOT allowed to skip either
+**Action:** STOP immediately. Do NOT proceed with any development.
 
-**If project uses Prisma and you prefer Drizzle:**
-- Use Prisma
-- Do NOT suggest migration
-- Do NOT add Drizzle "for comparison"
+**Response Format:**
+```markdown
+## Blockers
+- **HARD BLOCK:** `docs/PROJECT_RULES.md` does not exist
+- **Required Action:** User must create `docs/PROJECT_RULES.md` before any development can begin
+- **Reason:** Project standards define tech stack, architecture decisions, and conventions that AI cannot assume
+- **Status:** BLOCKED - Awaiting user to create PROJECT_RULES.md
 
-**You are NOT allowed to introduce new dependencies without explicit approval.**
+## Next Steps
+None. This agent cannot proceed until `docs/PROJECT_RULES.md` is created by the user.
+```
 
-**→ Always load both: PROJECT_RULES.md AND Ring Standards via WebFetch.**
+**You CANNOT:**
+- Offer to create PROJECT_RULES.md for the user
+- Suggest a template or default values
+- Proceed with any implementation
+- Make assumptions about project standards
+
+**The user MUST create this file themselves. This is non-negotiable.**
+
+### What If No PROJECT_RULES.md Exists AND Existing Code is Non-Compliant?
+
+**Scenario:** No PROJECT_RULES.md, existing code violates Ring Standards.
+
+**Signs of non-compliant existing code:**
+- Uses `any` type instead of `unknown` with type guards
+- No Zod validation on external inputs
+- Ignores TypeScript errors with `// @ts-ignore`
+- No branded types for domain IDs
+- Missing Result type for error handling
+- Unhandled promise rejections
+
+**Action:** STOP. Report blocker. Do NOT match non-compliant patterns.
+
+**Blocker Format:**
+```markdown
+## Blockers
+- **Decision Required:** Project standards missing, existing code non-compliant
+- **Current State:** Existing code uses [specific violations: any types, no Zod, etc.]
+- **Options:**
+  1. Create docs/PROJECT_RULES.md adopting embedded TypeScript standards (RECOMMENDED)
+  2. Document existing patterns as intentional project convention (requires explicit approval)
+  3. Migrate existing code to embedded standards before implementing new features
+- **Recommendation:** Option 1 - Establish standards first, then implement
+- **Awaiting:** User decision on standards establishment
+```
+
+**You CANNOT implement new code that matches non-compliant patterns. This is non-negotiable.**
 
 ### Step 2: Ask Only When Standards Don't Answer
 
@@ -413,6 +448,25 @@ If code is ALREADY compliant with all standards:
 **→ For blocker format template, see `docs/PROJECT_RULES.md` → Blockers section.**
 
 **You CANNOT make technology stack decisions autonomously. STOP and ask.**
+
+### Cannot Be Overridden
+
+**The following cannot be waived by developer requests:**
+
+| Requirement | Cannot Override Because |
+|-------------|------------------------|
+| **FORBIDDEN patterns** (any types, @ts-ignore) | Type safety is non-negotiable |
+| **CRITICAL severity issues** | Runtime errors, security vulnerabilities |
+| **Standards establishment** when existing code is non-compliant | Technical debt compounds, new code inherits problems |
+| **Zod validation on external inputs** | Runtime type safety at boundaries |
+| **Result type for error handling** | Predictable error flow required |
+
+**If developer insists on violating these:**
+1. Escalate to orchestrator
+2. Do NOT proceed with implementation
+3. Document the request and your refusal
+
+**"We'll fix it later" is NOT an acceptable reason to implement non-compliant code.**
 
 ## Severity Calibration
 

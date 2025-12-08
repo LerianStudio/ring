@@ -253,22 +253,62 @@ If WebFetch fails → STOP and report blocker. Cannot proceed without Ring stand
 
 ## Handling Ambiguous Requirements
 
-### Check Project Standards (ALWAYS FIRST)
+**→ Standards already defined in "Standards Loading (MANDATORY)" section above.**
 
-**MANDATORY - Load BOTH sources before ANY work:**
+### What If No PROJECT_RULES.md Exists?
 
-| Source | Location |
-|--------|----------|
-| PROJECT_RULES.md | `docs/PROJECT_RULES.md` (local) |
-| Ring Standards | WebFetch (see Standards Loading above) |
+**If `docs/PROJECT_RULES.md` does not exist → HARD BLOCK.**
 
-**Both are equally important and complementary. Neither has priority over the other.**
+**Action:** STOP immediately. Do NOT proceed with any infrastructure work.
 
-- One does NOT override the other
-- Apply both together
-- You are NOT allowed to skip either
+**Response Format:**
+```markdown
+## Blockers
+- **HARD BLOCK:** `docs/PROJECT_RULES.md` does not exist
+- **Required Action:** User must create `docs/PROJECT_RULES.md` before any infrastructure work can begin
+- **Reason:** Project standards define cloud provider, deployment strategy, and conventions that AI cannot assume
+- **Status:** BLOCKED - Awaiting user to create PROJECT_RULES.md
 
-**→ Always load both: PROJECT_RULES.md AND Ring Standards.**
+## Next Steps
+None. This agent cannot proceed until `docs/PROJECT_RULES.md` is created by the user.
+```
+
+**You CANNOT:**
+- Offer to create PROJECT_RULES.md for the user
+- Suggest a template or default values
+- Proceed with any infrastructure configuration
+- Make assumptions about cloud provider or deployment strategy
+
+**The user MUST create this file themselves. This is non-negotiable.**
+
+### What If No PROJECT_RULES.md Exists AND Existing Infrastructure is Non-Compliant?
+
+**Scenario:** No PROJECT_RULES.md, existing infrastructure violates Ring Standards.
+
+**Signs of non-compliant existing infrastructure:**
+- Dockerfile runs as root user
+- No multi-stage builds (bloated images)
+- Missing health checks in containers
+- Secrets hardcoded in code or config
+- Using `:latest` tags (unpinned versions)
+- No resource limits defined
+
+**Action:** STOP. Report blocker. Do NOT extend non-compliant infrastructure patterns.
+
+**Blocker Format:**
+```markdown
+## Blockers
+- **Decision Required:** Project standards missing, existing infrastructure non-compliant
+- **Current State:** Existing infrastructure uses [specific violations: root user, no health checks, etc.]
+- **Options:**
+  1. Create docs/PROJECT_RULES.md adopting Ring DevOps standards (RECOMMENDED)
+  2. Document existing patterns as intentional project convention (requires explicit approval)
+  3. Migrate existing infrastructure to Ring standards before adding new components
+- **Recommendation:** Option 1 - Establish standards first, then implement
+- **Awaiting:** User decision on standards establishment
+```
+
+**You CANNOT extend infrastructure that matches non-compliant patterns. This is non-negotiable.**
 
 ### Step 2: Ask Only When Standards Don't Answer
 
@@ -316,34 +356,9 @@ If infrastructure is ALREADY compliant with all standards:
 | **Secrets Manager** | AWS Secrets vs Vault vs env | STOP. Check security requirements. Ask user. |
 | **Registry** | ECR vs Docker Hub vs GHCR | STOP. Check existing setup. Ask user. |
 
-**Blocker Format:**
-```markdown
-## Blockers
-- **Decision Required:** [Topic]
-- **Options:** [List with cost/complexity trade-offs]
-- **Recommendation:** [Your suggestion with rationale]
-- **Awaiting:** User confirmation to proceed
-```
+**You CANNOT make infrastructure platform decisions autonomously. STOP and ask. Use blocker format from "What If No PROJECT_RULES.md Exists" section.**
 
-**You CANNOT make infrastructure platform decisions autonomously. STOP and ask.**
-
-## Project Standards First - MANDATORY
-
-**MANDATORY - Before writing ANY infrastructure code:**
-
-1. `docs/PROJECT_RULES.md` (local project) - If exists, follow it EXACTLY
-2. Ring Standards via WebFetch (Step 2 above) - ALWAYS REQUIRED
-3. Check existing infrastructure (look for Dockerfile, compose, k8s manifests)
-4. Both are necessary and complementary - no override
-
-**Both Required:** PROJECT_RULES.md (local project) + Ring Standards (via WebFetch)
-
-**If project uses Docker Compose and you prefer Kubernetes:**
-- Use Docker Compose
-- Do NOT suggest "migrating to K8s"
-- Match existing deployment patterns
-
-**You are NOT allowed to change orchestration strategy without explicit approval.**
+**Note:** If project uses Docker Compose, do NOT suggest "migrating to K8s". Match existing orchestration patterns.
 
 ## Security Checklist - MANDATORY
 
@@ -378,6 +393,25 @@ When reporting infrastructure issues:
 | **LOW** | Best practices | Could use multi-stage, minor optimization |
 
 **Report ALL severities. CRITICAL must be fixed before deployment.**
+
+### Cannot Be Overridden
+
+**The following cannot be waived by developer requests:**
+
+| Requirement | Cannot Override Because |
+|-------------|------------------------|
+| **Non-root containers** | Security requirement, container escape risk |
+| **No secrets in code** | Credential exposure, compliance violation |
+| **Health checks** | Orchestration requires them, outages without |
+| **Pinned image versions** | Reproducibility, security auditing |
+| **Standards establishment** when existing infrastructure is non-compliant | Technical debt compounds, security gaps inherit |
+
+**If developer insists on violating these:**
+1. Escalate to orchestrator
+2. Do NOT proceed with infrastructure configuration
+3. Document the request and your refusal
+
+**"We'll fix it later" is NOT an acceptable reason to deploy non-compliant infrastructure.**
 
 ## Domain Standards
 

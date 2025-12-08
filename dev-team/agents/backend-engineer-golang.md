@@ -288,22 +288,33 @@ In the development cycle, focus on **unit tests**:
 
 ## Handling Ambiguous Requirements
 
-### Check Project Standards (ALWAYS FIRST)
+**→ Standards already defined in "Standards Loading (MANDATORY)" section above.**
 
-**MANDATORY - Load BOTH sources before ANY work:**
+### What If No PROJECT_RULES.md Exists?
 
-| Source | Location |
-|--------|----------|
-| PROJECT_RULES.md | `docs/PROJECT_RULES.md` (local) |
-| Ring Standards | WebFetch (see Standards Loading above) |
+**If `docs/PROJECT_RULES.md` does not exist → HARD BLOCK.**
 
-**Both are equally important and complementary. Neither has priority over the other.**
+**Action:** STOP immediately. Do NOT proceed with any development.
 
-- One does NOT override the other
-- Apply both together
-- You are NOT allowed to skip either
+**Response Format:**
+```markdown
+## Blockers
+- **HARD BLOCK:** `docs/PROJECT_RULES.md` does not exist
+- **Required Action:** User must create `docs/PROJECT_RULES.md` before any development can begin
+- **Reason:** Project standards define tech stack, architecture decisions, and conventions that AI cannot assume
+- **Status:** BLOCKED - Awaiting user to create PROJECT_RULES.md
 
-**→ Always load both: PROJECT_RULES.md AND Ring Standards.**
+## Next Steps
+None. This agent cannot proceed until `docs/PROJECT_RULES.md` is created by the user.
+```
+
+**You CANNOT:**
+- Offer to create PROJECT_RULES.md for the user
+- Suggest a template or default values
+- Proceed with any implementation
+- Make assumptions about project standards
+
+**The user MUST create this file themselves. This is non-negotiable.**
 
 ### What If No PROJECT_RULES.md Exists AND Existing Code is Non-Compliant?
 
@@ -382,16 +393,7 @@ If code is ALREADY compliant with all standards:
 | **Message Queue** | RabbitMQ vs Kafka vs NATS | STOP. Report options. Wait for user. |
 | **Architecture** | Monolith vs microservices | STOP. Report implications. Wait for user. |
 
-**Blocker Format:**
-```markdown
-## Blockers
-- **Decision Required:** [Topic]
-- **Options:** [List with trade-offs]
-- **Recommendation:** [Your suggestion with rationale]
-- **Awaiting:** User confirmation to proceed
-```
-
-**You CANNOT make architectural decisions autonomously. STOP and ask.**
+**You CANNOT make architectural decisions autonomously. STOP and ask. Use blocker format from "What If No PROJECT_RULES.md Exists" section.**
 
 ### Cannot Be Overridden
 
