@@ -1,8 +1,9 @@
 ---
 name: dev-feedback-loop
 description: |
-  Development cycle feedback system - calculates assertiveness scores, aggregates cycle
-  metrics, performs root cause analysis on failures, and generates improvement reports.
+  Development cycle feedback system - calculates assertiveness scores, analyzes prompt
+  quality for all agents executed, aggregates cycle metrics, performs root cause analysis
+  on failures, and generates improvement reports to docs/feedbacks/cycle-{date}/.
 
 trigger: |
   - After task completion (any gate outcome)
@@ -205,7 +206,116 @@ Base score of 100 points, with deductions for inefficiencies:
 
 **Apply formula:** Base 100 - deductions (extra iterations, review failures, unmet criteria) = Final Score / 100. Map to rating per interpretation table.
 
-## Step 3: Threshold Alerts
+## Step 3: Analyze Prompt Quality (Agents Only)
+
+After calculating assertiveness, analyze prompt quality for all **agents** that executed in the task.
+
+### 3.1 Load Agent Outputs
+
+Read `agent_outputs` from `.ring/dev-team/current-cycle.json`:
+
+```text
+Agents to analyze (if executed, not null):
+  - implementation: backend-engineer-golang | backend-engineer-typescript
+  - devops: devops-engineer
+  - sre: sre
+  - testing: qa-analyst
+  - review: code-reviewer, business-logic-reviewer, security-reviewer
+```
+
+### 3.2 Dispatch Prompt Quality Reviewer
+
+```text
+Task tool:
+  subagent_type: "ring-dev-team:prompt-quality-reviewer"
+  prompt: |
+    Analyze prompt quality for agents in task [task_id].
+
+    Agent outputs from state:
+    [agent_outputs]
+
+    For each agent:
+    1. Load definition from dev-team/agents/ or default/agents/
+    2. Extract rules: MUST, MUST NOT, ask_when, output_schema
+    3. Compare output vs rules
+    4. Calculate score
+    5. Identify gaps with evidence
+    6. Generate improvements
+
+    Return structured analysis per agent.
+```
+
+### 3.3 Write Feedback Files
+
+**Directory:** `docs/feedbacks/cycle-YYYY-MM-DD/`
+
+**One file per agent**, accumulating all tasks that used that agent.
+
+**File:** `docs/feedbacks/cycle-YYYY-MM-DD/{agent-name}.md`
+
+```markdown
+# Prompt Feedback: {agent-name}
+
+**Cycle:** YYYY-MM-DD
+**Total Executions:** N
+**Average Score:** XX%
+
+---
+
+## Task T-001 (Gate X)
+
+**Score:** XX/100
+**Rating:** {rating}
+
+### Gaps Found
+
+| Category | Rule | Evidence | Impact |
+|----------|------|----------|--------|
+| MUST | [rule text] | [quote from output] | -X |
+
+### What Went Well
+
+- [positive observation]
+
+---
+
+## Task T-002 (Gate X)
+
+**Score:** XX/100
+...
+
+---
+
+## Consolidated Improvements
+
+### Priority 1: [Title]
+
+**Occurrences:** X/Y tasks
+**Impact:** +X points expected
+**File:** dev-team/agents/{agent}.md
+
+**Current text (line ~N):**
+```
+[existing prompt]
+```
+
+**Suggested addition:**
+```markdown
+[new prompt text]
+```
+
+### Priority 2: [Title]
+...
+```
+
+### 3.4 Append to Existing File
+
+If file already exists (from previous task in same cycle), **append** the new task section before "## Consolidated Improvements" and update:
+- Total Executions count
+- Average Score
+- Consolidated Improvements (re-analyze patterns)
+
+## Step 4: Threshold Alerts
 
 | Alert | Trigger | Action | Report Contents |
 |-------|---------|--------|-----------------|
