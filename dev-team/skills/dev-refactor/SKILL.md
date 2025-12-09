@@ -30,17 +30,85 @@ This skill analyzes an existing codebase to identify gaps between current implem
 
 ---
 
-## ⛔ HARD GATES - READ BEFORE EXECUTING
+## ⛔ STEP 0: PROJECT_RULES.md VALIDATION (EXECUTE FIRST)
+
+**THIS IS THE FIRST ACTION. Execute BEFORE reading any other section.**
+
+### Validation Sequence
+
+```text
+1. Check: Does docs/PROJECT_RULES.md exist?
+   └── YES → Continue to "HARD GATES" section below
+   └── NO  → OUTPUT BLOCKER AND TERMINATE (see below)
+```
+
+### If File Does Not Exist → MANDATORY BLOCKER OUTPUT
+
+**⛔ You MUST output this EXACT response and TERMINATE immediately:**
+
+```markdown
+## ⛔ HARD BLOCK: PROJECT_RULES.md Not Found
+
+**Status:** BLOCKED - Cannot proceed with analysis
+
+### What Was Checked
+- ❌ `docs/PROJECT_RULES.md` - Not found
+
+### Why This Is a Hard Gate
+PROJECT_RULES.md defines the project's specific standards, architecture decisions,
+and conventions. Without it, there is NO baseline to compare against.
+
+**Analysis without standards = meaningless comparison.**
+
+### What This Agent CANNOT Do
+- ❌ Use "default best practices" as a substitute
+- ❌ Infer standards from existing code patterns
+- ❌ Proceed with partial analysis
+- ❌ Use Ring standards alone (they complement, not replace project rules)
+
+### Required Action
+The project owner must create `docs/PROJECT_RULES.md` defining:
+- Architecture patterns (hexagonal, clean, DDD, etc.)
+- Code conventions (naming, error handling, logging)
+- Testing requirements (coverage thresholds, patterns)
+- DevOps standards (containerization, CI/CD)
+
+### Next Steps
+1. User creates `docs/PROJECT_RULES.md` manually
+2. Re-run `/ring-dev-team:dev-refactor` after file exists
+
+**This skill terminates here. No further analysis will be performed.**
+```
+
+### Post-Blocker Behavior (MANDATORY)
+
+After outputting the blocker above:
+1. **TERMINATE** - Do not continue to any other step
+2. **Do NOT** offer to create PROJECT_RULES.md for the user
+3. **Do NOT** suggest workarounds or alternatives
+4. **Do NOT** analyze using "default" or "industry" standards
+
+### Gate 0 Rationalizations - DO NOT THINK THESE
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "I'll use default Go/TypeScript best practices" | Best practices ≠ project standards. Every project has unique decisions. | Output blocker, TERMINATE |
+| "Existing code shows the patterns to follow" | Existing code may BE the problem. Can't use debt as standard. | Output blocker, TERMINATE |
+| "Ring standards are enough" | Ring standards are BASE. PROJECT_RULES.md adds project-specific decisions. | Output blocker, TERMINATE |
+| "Code works, so I can infer the standards" | Working ≠ correct. Inference = guessing = wrong analysis. | Output blocker, TERMINATE |
+| "Small project doesn't need formal standards" | Small projects grow. Standards prevent debt accumulation. | Output blocker, TERMINATE |
+| "User didn't ask for standards, just analysis" | Analysis requires baseline. No baseline = no analysis possible. | Output blocker, TERMINATE |
+| "I can analyze and recommend standards later" | Recommend against what baseline? Analysis is meaningless without reference. | Output blocker, TERMINATE |
+
+---
+
+## ⛔ HARD GATES - READ AFTER STEP 0 PASSES
 
 **This skill has TWO mandatory hard gates. Violation of either gate is a SKILL FAILURE.**
 
-### Gate 1: PROJECT_RULES.md (Prerequisite)
+### Gate 1: PROJECT_RULES.md (Prerequisite) ✓
 
-| Check | Action |
-|-------|--------|
-| `docs/PROJECT_RULES.md` exists | Proceed |
-| `docs/STANDARDS.md` exists (legacy) | Proceed |
-| Neither exists | **STOP** - Cannot analyze without project standards |
+**Already validated in Step 0 above.** If you reached this section, PROJECT_RULES.md exists.
 
 ### Gate 2: Agent Dispatch (Execution)
 
@@ -98,7 +166,8 @@ This skill analyzes an existing codebase to identify gaps between current implem
 | "I'll just read the files directly" | Violates 3-file rule, incomplete analysis | Dispatch specialized agents |
 | "One agent is enough" | 4 dimensions require 4 specialized agents | Dispatch all 4 in parallel |
 | "Sequential dispatch is fine" | Wastes time, skill requires parallel | Single message, 4 agents |
-| "PROJECT_RULES.md not needed" | Cannot analyze without project standards | STOP, require file first |
+
+**Note:** PROJECT_RULES.md rationalizations are covered in "STEP 0: PROJECT_RULES.md VALIDATION" at the top of this skill.
 
 #### Analysis Scope Rationalizations
 
@@ -146,7 +215,8 @@ This skill analyzes an existing codebase to identify gaps between current implem
 ### Execution Checklist - MUST COMPLETE IN ORDER
 
 ```
-Step 0: [ ] PROJECT_RULES.md exists? → If NO, STOP
+Step 0: [ ] PROJECT_RULES.md exists? → If NO, output blocker and TERMINATE
+         ⚠️ See "STEP 0: PROJECT_RULES.md VALIDATION" at top of skill
 Step 1: [ ] Language detected? → go.mod / package.json found
 Step 2: [ ] PROJECT_RULES.md read?
 Step 3: [ ] 4 agents dispatched in SINGLE message? → If NO, re-dispatch
@@ -159,6 +229,8 @@ Step 9: [ ] Handoff to dev-cycle (if approved)?
 ```
 
 **SKIP PREVENTION:** You CANNOT proceed to Step N+1 without completing Step N. No exceptions.
+
+**Step 0 is NON-NEGOTIABLE:** If PROJECT_RULES.md doesn't exist, you MUST output the blocker template from the top of this skill and terminate. No rationalizations allowed.
 
 #### Prompt Prefix (REQUIRED)
 
@@ -381,11 +453,11 @@ Checks:
     └── Linting enforced
 ```
 
-## Step 0: Verify PROJECT_RULES.md Exists
+## Step 0: Verify PROJECT_RULES.md Exists ✓
 
-**⛔ See "HARD GATES" section above - Gate 1**
+**⛔ Already covered in "STEP 0: PROJECT_RULES.md VALIDATION" at the top of this skill.**
 
-Check for `docs/PROJECT_RULES.md` or `docs/STANDARDS.md`. If neither exists, STOP.
+If you reached this section, validation passed. Proceed to Step 1.
 
 ---
 
