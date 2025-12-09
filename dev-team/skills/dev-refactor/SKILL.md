@@ -28,6 +28,166 @@ related:
 
 This skill analyzes an existing codebase to identify gaps between current implementation and project standards, then generates a structured refactoring plan compatible with the dev-cycle workflow.
 
+---
+
+## ⛔ HARD GATES - READ BEFORE EXECUTING
+
+**This skill has TWO mandatory hard gates. Violation of either gate is a SKILL FAILURE.**
+
+### Gate 1: PROJECT_RULES.md (Prerequisite)
+
+| Check | Action |
+|-------|--------|
+| `docs/PROJECT_RULES.md` exists | Proceed |
+| `docs/STANDARDS.md` exists (legacy) | Proceed |
+| Neither exists | **STOP** - Cannot analyze without project standards |
+
+### Gate 2: Agent Dispatch (Execution)
+
+**⛔ FORBIDDEN:** Using generic agents (`Explore`, `general-purpose`, `ring-default:codebase-explorer`) for codebase analysis.
+
+**⛔ MANDATORY:** Use ONLY `ring-dev-team:*` specialized agents.
+
+#### Agent Selection by Language
+
+| Manifest Found | Language | REQUIRED Agent |
+|----------------|----------|----------------|
+| `go.mod` | Go | `ring-dev-team:backend-engineer-golang` |
+| `package.json` + react/next/vue | Frontend TS | `ring-dev-team:frontend-bff-engineer-typescript` |
+| `package.json` + express/fastify/nestjs | Backend TS | `ring-dev-team:backend-engineer-typescript` |
+| `Dockerfile` only | DevOps | `ring-dev-team:devops-engineer` |
+| Multiple manifests | Mixed | Dispatch ALL applicable language agents |
+
+#### 4-Agent Parallel Dispatch (Step 3)
+
+**All 4 agents MUST be dispatched in a SINGLE message (parallel execution):**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  SINGLE Task tool message with 4 parallel agent calls:      │
+│                                                             │
+│  1. ring-dev-team:{language-agent}  → Code/Architecture     │
+│  2. ring-dev-team:qa-analyst        → Testing               │
+│  3. ring-dev-team:devops-engineer   → DevOps                │
+│  4. ring-dev-team:sre               → SRE/Observability     │
+└─────────────────────────────────────────────────────────────┘
+```
+
+#### Violations - STOP IMMEDIATELY
+
+| Violation | Why It's Wrong | Required Action |
+|-----------|----------------|-----------------|
+| Using `Explore` agent | Generic, lacks language-specific standards | Re-dispatch with correct agent |
+| Using `general-purpose` agent | No specialized Go/TS knowledge | Re-dispatch with correct agent |
+| Using `ring-default:codebase-explorer` | Architecture-only, missing code quality | Re-dispatch with correct agent |
+| Dispatching agents sequentially | Wastes time, should be parallel | Re-send as single message |
+| Dispatching < 4 agents | Incomplete analysis | Add missing agents |
+| Reading >3 files directly | Violates 3-file rule | Use agents instead |
+
+**If you already violated a gate:** STOP current approach. Re-execute with correct agents.
+
+### Pressure Resistance - DO NOT RATIONALIZE
+
+**If you catch yourself thinking ANY of these, STOP immediately:**
+
+#### Agent & Execution Rationalizations
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "Explore agent is faster" | Generic agent lacks language-specific standards | Use `ring-dev-team:*` agent |
+| "I'll just read the files directly" | Violates 3-file rule, incomplete analysis | Dispatch specialized agents |
+| "One agent is enough" | 4 dimensions require 4 specialized agents | Dispatch all 4 in parallel |
+| "Sequential dispatch is fine" | Wastes time, skill requires parallel | Single message, 4 agents |
+| "PROJECT_RULES.md not needed" | Cannot analyze without project standards | STOP, require file first |
+
+#### Analysis Scope Rationalizations
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "Code works fine" | Working ≠ maintainable. Analysis finds hidden debt. | Complete full analysis |
+| "Code works, skip analysis" | Working ≠ maintainable. Technical debt hidden. | Complete all 4 dimensions |
+| "Too time-consuming" | Cost of analysis < cost of compounding debt | Complete full analysis |
+| "No time for full analysis" | Partial analysis = partial picture | All 4 dimensions required |
+| "Standards don't fit us" | Document YOUR standards. Analysis still reveals gaps. | Analyze against project rules |
+| "Only critical matters" | Today's medium = tomorrow's critical | Document all severities |
+| "Only critical issues matter" | Medium issues become critical over time | Document all, prioritize later |
+| "Legacy gets a pass" | Legacy sets precedent. Analysis shows what to improve. | Document all gaps |
+| "Standards don't apply to legacy" | Legacy needs analysis MOST | Full analysis required |
+| "Team has their own way" | Document "their way" as standards. Analyze against it. | Use PROJECT_RULES.md |
+| "That's just how we do it here" | Undocumented patterns = inconsistent patterns | Document in PROJECT_RULES.md |
+
+#### ROI & Justification Rationalizations
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "ROI of refactoring is low" | ROI calculation requires analysis. Can't calculate without data. | Complete analysis first |
+| "ROI doesn't justify full analysis" | You can't know ROI without the analysis data | Complete analysis, then evaluate |
+| "Partial analysis is enough" | Partial analysis = partial picture. Hidden debt in skipped areas. | All 4 dimensions required |
+| "Partial analysis is sufficient" | Missing dimensions = missing problems | Complete all dimensions |
+| "3 years without bugs = stable" | No bugs ≠ no debt. Time doesn't validate architecture. | Full architecture analysis |
+| "3+ years stable = no debt" | Stability ≠ maintainability. Debt compounds silently. | Complete analysis |
+| "Analysis is overkill" | Analysis is the MINIMUM. Refactoring without analysis is guessing. | Complete all steps |
+| "Code smells ≠ problems" | Code smells ARE problems. They slow development and cause bugs. | Document all findings |
+| "Code smells aren't real problems" | Smells indicate deeper issues. They compound over time. | Document all severities |
+| "No specific problem motivating" | Technical debt IS the problem. Analysis quantifies it. | Complete analysis |
+| "No specific problem to solve" | Unknown problems are still problems. Analysis reveals them. | Full 4-dimension scan |
+
+#### Completion Rationalizations
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "Analysis complete, user can decide" | Analysis without action guidance is incomplete. | Generate tasks.md |
+| "Analysis is done, user decides next" | Skill requires tasks.md generation | Generate tasks.md before completing |
+| "Findings documented, my job done" | Findings → Tasks → Execution. Documentation alone changes nothing. | Generate tasks.md |
+| "Documented findings, job complete" | Tasks.md is mandatory output | Complete Step 6 (tasks.md) |
+
+**Non-negotiable:** These gates exist because specialized agents load Ring standards via WebFetch and have domain expertise. Generic agents do NOT have this capability.
+
+### Execution Checklist - MUST COMPLETE IN ORDER
+
+```
+Step 0: [ ] PROJECT_RULES.md exists? → If NO, STOP
+Step 1: [ ] Language detected? → go.mod / package.json found
+Step 2: [ ] PROJECT_RULES.md read?
+Step 3: [ ] 4 agents dispatched in SINGLE message? → If NO, re-dispatch
+Step 4: [ ] Agent outputs compiled into analysis-report.md?
+Step 5: [ ] Findings grouped into REFACTOR-XXX tasks?
+Step 6: [ ] tasks.md generated? → If NO, skill is INCOMPLETE
+Step 7: [ ] User approval requested via AskUserQuestion?
+Step 8: [ ] Artifacts saved to docs/refactor/{timestamp}/?
+Step 9: [ ] Handoff to dev-cycle (if approved)?
+```
+
+**SKIP PREVENTION:** You CANNOT proceed to Step N+1 without completing Step N. No exceptions.
+
+#### Prompt Prefix (REQUIRED)
+
+All agent prompts MUST start with:
+```
+**MODE: ANALYSIS ONLY** - Analyze codebase for refactoring.
+Return findings with: severity (Critical/High/Medium/Low), location (file:line), issue, recommendation.
+```
+
+#### Example: Go Project Dispatch
+
+```
+Task tool calls (SINGLE message, 4 parallel):
+
+1. subagent_type: "ring-dev-team:backend-engineer-golang"
+   prompt: "**MODE: ANALYSIS ONLY** - Analyze Go codebase for architecture, code quality, error handling, naming conventions, security..."
+
+2. subagent_type: "ring-dev-team:qa-analyst"
+   prompt: "**MODE: ANALYSIS ONLY** - Analyze test coverage (≥80%), test patterns, TDD compliance..."
+
+3. subagent_type: "ring-dev-team:devops-engineer"
+   prompt: "**MODE: ANALYSIS ONLY** - Analyze Dockerfile, docker-compose, .env.example..."
+
+4. subagent_type: "ring-dev-team:sre"
+   prompt: "**MODE: ANALYSIS ONLY** - Analyze health endpoints, structured logging, tracing..."
+```
+
+---
+
 ## What This Skill Does
 
 1. **Detects project language** (Go, TypeScript, Python) from manifest files
@@ -52,59 +212,6 @@ When user requests refactoring or improvement:
 - Cost of compounding debt: Unknown, unbounded
 
 **Analysis now saves 10x effort later.**
-
-## Pressure Resistance
-
-**Codebase analysis is MANDATORY when requested. Pressure scenarios and required responses:**
-
-| Pressure Type | Request | Agent Response |
-|---------------|---------|----------------|
-| **Works Fine** | "Code works, skip analysis" | "Working ≠ maintainable. Analysis reveals hidden technical debt." |
-| **Time** | "No time for full analysis" | "Partial analysis = partial picture. Technical debt compounds daily." |
-| **Legacy** | "Standards don't apply to legacy" | "Legacy code needs analysis MOST. Document gaps for improvement." |
-| **Critical Only** | "Only fix critical issues" | "Medium issues become critical. Document all, prioritize later." |
-
-**Non-negotiable principle:** If user requests refactoring analysis, complete ALL 4 dimensions (Architecture, Code, Testing, DevOps).
-
-## Common Rationalizations - REJECTED
-
-| Excuse | Reality |
-|--------|---------|
-| "Code works fine" | Working ≠ maintainable. Analysis finds hidden debt. |
-| "Too time-consuming" | Cost of analysis < cost of compounding debt. |
-| "Standards don't fit us" | Then document YOUR standards. Analysis still reveals gaps. |
-| "Only critical matters" | Today's medium = tomorrow's critical. Document all. |
-| "Legacy gets a pass" | Legacy sets precedent. Analysis shows what to improve. |
-| "Team has their own way" | Document "their way" as standards. Analyze against it. |
-| "ROI of refactoring is low" | ROI calculation requires analysis. You can't calculate without data. |
-| "Partial analysis is enough" | Partial analysis = partial picture. Hidden debt in skipped areas. |
-| "3 years without bugs = stable" | No bugs ≠ no debt. Time doesn't validate architecture. |
-| "Analysis is overkill" | Analysis is the MINIMUM. Refactoring without analysis is guessing. |
-| "Code smells ≠ problems" | Code smells ARE problems. They slow development and cause bugs. |
-| "No specific problem motivating" | Technical debt IS the problem. Analysis quantifies it. |
-| "Analysis complete, user can decide" | Analysis without action guidance is incomplete. Provide tasks.md. |
-| "Findings documented, my job done" | Findings → Tasks → Execution. Documentation alone changes nothing. |
-
-## Red Flags - STOP
-
-If you catch yourself thinking ANY of these, STOP immediately:
-
-- "Code works, no need to analyze"
-- "This is too time-consuming"
-- "Standards don't apply here"
-- "Only critical issues matter"
-- "Legacy code is exempt"
-- "That's just how we do it here"
-- "ROI doesn't justify full analysis"
-- "Partial analysis is sufficient"
-- "3+ years stable = no debt"
-- "Analysis is overkill"
-- "Code smells aren't real problems"
-- "No specific problem to solve"
-- "Analysis is done, user decides next"
-- "Documented findings, job complete"
-
-**All of these indicate analysis violation. Complete full 4-dimension analysis.**
 
 ## Analysis-to-Action Pipeline - MANDATORY
 
@@ -161,43 +268,13 @@ If you catch yourself thinking ANY of these, STOP immediately:
 
 ## Prerequisites
 
-Before starting analysis:
+**⛔ See "HARD GATES" section above for mandatory checks.**
 
+Before starting analysis:
 1. **Project root identified**: Know where the codebase lives
 2. **Language detectable**: Project has go.mod, package.json, or similar manifest
 3. **Scope defined**: Full project or specific directories
-4. **PROJECT_RULES.md exists**: MANDATORY - analysis cannot proceed without it
-
-### PROJECT_RULES.md is MANDATORY
-
-**This is a HARD GATE. Do NOT proceed without PROJECT_RULES.md.**
-
-```text
-Check sequence:
-1. Look for: docs/PROJECT_RULES.md
-2. If not found: Look for docs/STANDARDS.md (legacy name)
-3. If not found: STOP - Cannot analyze without project standards
-
-BLOCKER response if missing:
-"Cannot proceed with refactoring analysis.
-
-REQUIRED: docs/PROJECT_RULES.md must exist.
-
-Why is this mandatory?
-- Agent defaults are GENERIC, not tailored to YOUR project
-- Analysis without project standards = incomplete findings
-- Refactoring must target YOUR conventions, not generic ones
-
-**Common Rationalizations - REJECTED:**
-
-| Excuse | Reality |
-|--------|---------|
-| "Agent defaults are fine" | Defaults are generic. YOUR project has specific conventions. |
-| "We'll add it later" | Analysis now with wrong standards = rework later. |
-| "It's a small project" | Small projects need standards too. Start right. |
-| "Just use best practices" | "Best" varies by context. YOUR rules define YOUR best. |
-
-**Note:** After PROJECT_RULES.md check passes, specialized agents are dispatched. Each agent loads its own Ring standards via WebFetch (e.g., devops-engineer loads devops.md, sre loads sre.md). The dev-refactor skill only reads PROJECT_RULES.md locally - it does NOT do WebFetch itself.
+4. **PROJECT_RULES.md exists**: Gate 1 in HARD GATES section
 
 ## Analysis Dimensions
 
@@ -304,75 +381,19 @@ Checks:
     └── Linting enforced
 ```
 
-## Step 0: Verify PROJECT_RULES.md Exists (HARD GATE)
+## Step 0: Verify PROJECT_RULES.md Exists
 
-**This step is NON-NEGOTIABLE. Analysis CANNOT proceed without project standards.**
+**⛔ See "HARD GATES" section above - Gate 1**
 
-```text
-Check sequence:
-1. Check: docs/PROJECT_RULES.md
-2. Check: docs/STANDARDS.md (legacy name)
-3. Check: --standards argument (if provided)
-
-Decision:
-├── Found → Proceed to Step 1
-└── NOT Found → STOP with blocker
-```
-
-**If PROJECT_RULES.md is missing:**
-
-```yaml
-# STOP - Do not proceed. Report blocker:
-Blocker:
-  type: "missing_prerequisite"
-  message: |
-    Cannot proceed with refactoring analysis.
-
-    REQUIRED: docs/PROJECT_RULES.md must exist.
-
-    Why is this mandatory?
-    - Agent defaults are GENERIC, not tailored to YOUR project
-    - Analysis without project standards = incomplete findings
-    - Refactoring must target YOUR conventions, not generic ones
-```
-
-**Pressure Resistance for Step 0:**
-
-| Pressure | Response |
-|----------|----------|
-| "Just use defaults" | "Defaults are generic. YOUR project needs YOUR rules. Create PROJECT_RULES.md." |
-| "We don't have standards" | "Then this is the perfect time to define them. Use the template as starting point." |
-| "Skip this, analyze anyway" | "Cannot skip. Analysis without target = meaningless findings." |
+Check for `docs/PROJECT_RULES.md` or `docs/STANDARDS.md`. If neither exists, STOP.
 
 ---
 
 ## Step 1: Detect Project Language
 
-After PROJECT_RULES.md is verified, identify the primary language(s) of the project:
+**⛔ See "HARD GATES" section above - Gate 2 → Agent Selection by Language**
 
-```text
-Language Detection:
-├── go.mod exists → Go project
-│   └── Standards: backend-engineer-golang.md
-│
-├── package.json exists
-│   ├── Has "react" or "next" dependency → Frontend TypeScript
-│   │   └── Standards: frontend-bff-engineer-typescript.md
-│   ├── Has backend deps (express, fastify, nestjs) → Backend TypeScript
-│   │   └── Standards: backend-engineer-typescript.md
-│   └── Otherwise → Generic TypeScript
-│       └── Standards: Check for frontend/backend patterns
-│
-├── Dockerfile exists → Check for DevOps standards
-│   └── Standards: devops-engineer.md
-│
-└── Multiple languages detected → Use all applicable standards
-
-Output:
-- Primary language: {Go/TypeScript/Python/etc.}
-- Project type: {Backend API/Frontend/Full-stack/CLI}
-- Agent standards to use: {list of agent files}
-```
+Detect manifest files (`go.mod`, `package.json`) to determine which `ring-dev-team:*` agent to use.
 
 ## Step 2: Read PROJECT_RULES.md
 
@@ -405,143 +426,15 @@ This file contains:
 
 ## Step 3: Scan Codebase
 
-All analysis uses specialized Lerian agents that load Ring standards via WebFetch. This ensures analysis is done by the same agents that will implement fixes, providing consistency and domain expertise.
+**⛔ See "HARD GATES" section above - Gate 2 → 4-Agent Parallel Dispatch**
 
-### Agent Selection Based on Language Detection
+Dispatch ALL 4 agents in a SINGLE message:
+1. `ring-dev-team:{language-agent}` - Code/Architecture
+2. `ring-dev-team:qa-analyst` - Testing
+3. `ring-dev-team:devops-engineer` - DevOps
+4. `ring-dev-team:sre` - SRE/Observability
 
-Select the appropriate code analysis agent based on Step 1 language detection:
-
-| Language/Project Type | Code Analysis Agent |
-|-----------------------|---------------------|
-| Go (`go.mod` exists) | `ring-dev-team:backend-engineer-golang` |
-| TypeScript Backend (express, fastify, nestjs) | `ring-dev-team:backend-engineer-typescript` |
-| TypeScript Frontend (react, next) | `ring-dev-team:frontend-bff-engineer-typescript` |
-| Frontend Design/CSS | `ring-dev-team:frontend-designer` |
-| Mixed/Multiple | Dispatch multiple code agents in parallel |
-
-### Parallel Analysis Dispatch (Single Message, 4-5 Task Tools)
-
-**IMPORTANT:** All agents MUST be dispatched in a SINGLE message with multiple Task tool calls. This is a parallel dispatch, NOT sequential.
-
-Each agent will:
-1. Read `docs/PROJECT_RULES.md` automatically (per Standards Loading section)
-2. Load its Ring standards via WebFetch (as defined in agent definition)
-3. Return dimension-specific findings
-
-```yaml
-# Task 1: Code & Architecture Analysis (language-specific)
-# Select based on language detection from Step 1:
-
-# For Go projects:
-Task tool:
-  subagent_type: "ring-dev-team:backend-engineer-golang"
-  model: "opus"
-  prompt: |
-    **MODE: ANALYSIS ONLY** (do not implement, only report findings)
-
-    Analyze this Go codebase for refactoring opportunities.
-
-    Focus on:
-    - Directory structure compliance with PROJECT_RULES.md
-    - DDD patterns (Entities, Value Objects, Aggregates, Repositories)
-    - Clean/Hexagonal Architecture (dependency direction)
-    - Error handling patterns (no ignored errors, proper wrapping)
-    - Naming conventions (files, functions, constants)
-    - Anti-patterns and technical debt
-    - Security issues (input validation, SQL injection, secrets)
-
-    Return findings with severity (Critical/High/Medium/Low), location (file:line), issue, and recommendation.
-
-# For TypeScript Backend projects:
-Task tool:
-  subagent_type: "ring-dev-team:backend-engineer-typescript"
-  model: "opus"
-  prompt: |
-    **MODE: ANALYSIS ONLY** (do not implement, only report findings)
-
-    Analyze this TypeScript backend codebase for refactoring opportunities.
-
-    Focus on:
-    - Directory structure compliance with PROJECT_RULES.md
-    - Clean Architecture patterns
-    - Type safety (no `any`, proper interfaces)
-    - Error handling patterns
-    - Async/await patterns
-    - Security issues
-
-    Return findings with severity, location, issue, and recommendation.
-
-# For TypeScript Frontend/BFF projects:
-Task tool:
-  subagent_type: "ring-dev-team:frontend-bff-engineer-typescript"
-  model: "opus"
-  prompt: |
-    **MODE: ANALYSIS ONLY** (do not implement, only report findings)
-
-    Analyze this TypeScript frontend/BFF codebase for refactoring opportunities.
-
-    Focus on:
-    - Component structure and patterns
-    - State management
-    - API layer architecture
-    - Type safety
-    - Performance patterns
-
-    Return findings with severity, location, issue, and recommendation.
-
-# Task 2: Testing Analysis (ALWAYS included)
-Task tool:
-  subagent_type: "ring-dev-team:qa-analyst"
-  model: "opus"
-  prompt: |
-    **MODE: ANALYSIS ONLY** (do not implement, only report findings)
-
-    Analyze test coverage and patterns for refactoring.
-
-    Check:
-    - Test coverage percentage (minimum 80% required)
-    - Test patterns (table-driven for Go, AAA structure)
-    - TDD compliance indicators
-    - Missing test cases for critical paths
-    - Test naming conventions
-    - Mock usage and test isolation
-
-    Return findings with severity and specific file locations.
-
-# Task 3: DevOps Analysis (ALWAYS included)
-Task tool:
-  subagent_type: "ring-dev-team:devops-engineer"
-  model: "opus"
-  prompt: |
-    **MODE: ANALYSIS ONLY** (do not implement, only report findings)
-
-    Analyze infrastructure setup for refactoring.
-
-    Check:
-    - Dockerfile exists and follows best practices (multi-stage, non-root, health check)
-    - docker-compose.yml configuration (services, volumes, depends_on)
-    - Environment management (.env.example with all vars documented)
-
-    Return findings with severity and specific file locations.
-
-# Task 4: SRE Analysis (ALWAYS included)
-Task tool:
-  subagent_type: "ring-dev-team:sre"
-  model: "opus"
-  prompt: |
-    **MODE: ANALYSIS ONLY** (do not implement, only report findings)
-
-    Analyze observability setup for refactoring.
-
-    Check:
-    - Health check endpoints (/health liveness, /ready readiness)
-    - Structured JSON logging with correlation IDs
-    - Tracing setup per Ring standards
-
-    Return findings with severity and specific file locations.
-```
-
-**Note:** Each agent reads `docs/PROJECT_RULES.md` and loads Ring standards automatically. The `**MODE: ANALYSIS ONLY**` prefix ensures they report findings without implementing changes.
+All prompts MUST start with `**MODE: ANALYSIS ONLY**`.
 
 **Output:** Dimension-specific findings with severities to compile in Step 4.
 
