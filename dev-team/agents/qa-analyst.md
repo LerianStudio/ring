@@ -10,6 +10,14 @@ changelog:
 output_schema:
   format: "markdown"
   required_sections:
+    - name: "VERDICT"
+      pattern: "^## VERDICT: (PASS|FAIL)$"
+      required: true
+      description: "PASS if coverage meets threshold and all tests pass; FAIL otherwise"
+    - name: "Coverage Validation"
+      pattern: "^## Coverage Validation"
+      required: true
+      description: "Threshold comparison showing actual vs required coverage"
     - name: "Summary"
       pattern: "^## Summary"
       required: true
@@ -49,6 +57,15 @@ output_schema:
     - name: "coverage_after"
       type: "percentage"
       description: "Test coverage after this task"
+    - name: "coverage_threshold"
+      type: "percentage"
+      description: "Required coverage threshold from PROJECT_RULES.md or Ring default (85%)"
+    - name: "coverage_delta"
+      type: "percentage"
+      description: "Difference between actual and required coverage (positive = above, negative = below)"
+    - name: "threshold_met"
+      type: "boolean"
+      description: "Whether coverage meets or exceeds threshold"
     - name: "criteria_covered"
       type: "fraction"
       description: "Acceptance criteria with test coverage (e.g., 4/4)"
@@ -451,12 +468,50 @@ When TDD is enabled in project PROJECT_RULES.md, follow the RED-GREEN-REFACTOR c
 
 ### Coverage Requirements
 
-| Code Type | Minimum Coverage | Target |
-|-----------|-----------------|--------|
-| Business logic | 80% | 90%+ |
-| API endpoints | 70% | 80%+ |
-| Utilities | 60% | 70%+ |
-| Infrastructure | 50% | 60%+ |
+**Note:** These are historical reference values. The **Ring minimum (85%)** or **PROJECT_RULES.md threshold** takes precedence for gate validation. These per-type targets are advisory for prioritizing where to add tests.
+
+| Code Type | Advisory Target | Notes |
+|-----------|-----------------|-------|
+| Business logic | 90%+ | Highest priority - core domain |
+| API endpoints | 85%+ | Request/response handling |
+| Utilities | 80%+ | Shared helper functions |
+| Infrastructure | 70%+ | Config, setup code |
+
+**Gate 3 validation uses OVERALL coverage against threshold (85% minimum or PROJECT_RULES.md).**
+
+## Coverage Threshold Validation (MANDATORY)
+
+### The Rule
+
+```
+Coverage ≥ threshold → VERDICT: PASS → Proceed to Gate 4
+Coverage < threshold → VERDICT: FAIL → Return to Gate 0
+```
+
+### Threshold
+
+- **Default:** 85% (Ring minimum)
+- **Custom:** Can be set higher in `docs/PROJECT_RULES.md`
+- **Cannot** be set lower than 85%
+
+### On FAIL
+
+Provide gap analysis so implementation agent knows what to test:
+
+```markdown
+## VERDICT: FAIL
+
+## Coverage Validation
+| Metric | Value |
+|--------|-------|
+| Required | 85% |
+| Actual | 72% |
+| Gap | -13% |
+
+### What Needs Tests
+1. [file:lines] - [reason]
+2. [file:lines] - [reason]
+```
 
 ### Test Naming Convention
 
@@ -613,57 +668,61 @@ Before marking tests complete:
 - [ ] No flaky tests
 - [ ] Tests run in CI pipeline
 
-## Example Output
+## Example Output (PASS)
 
 ```markdown
+## VERDICT: PASS
+
+## Coverage Validation
+| Required | Actual | Result |
+|----------|--------|--------|
+| 85% | 92% | ✅ PASS |
+
 ## Summary
-
-Created unit tests for UserService covering all acceptance criteria with TDD methodology.
-
-## Implementation
-
-- Wrote tests for user creation, validation, and error handling
-- Used mocks for repository dependencies
-- Followed AAA pattern (Arrange-Act-Assert)
-- Achieved 92% branch coverage
+Created unit tests for UserService. Coverage 92% meets threshold.
 
 ## Files Changed
-
-| File | Action | Lines |
-|------|--------|-------|
-| src/services/user-service.test.ts | Created | +145 |
+| File | Action |
+|------|--------|
+| [test file] | Created |
 
 ## Testing
-
 ### Test Execution
-```bash
-$ npm test
-PASS src/services/user-service.test.ts
-  UserService
-    createUser
-      ✓ should create user with valid input (12ms)
-      ✓ should return error for invalid email (5ms)
-      ✓ should return error for duplicate email (8ms)
-    findById
-      ✓ should return user when exists (4ms)
-      ✓ should return null when not found (3ms)
-
-Test Suites: 1 passed, 1 total
-Tests: 5 passed, 5 total
-Coverage: 92.3%
-```
-
-| Metric | Value |
-|--------|-------|
-| Tests Written | 5 |
-| Coverage Before | 65% |
-| Coverage After | 92% |
-| Criteria Covered | 5/5 |
+Tests: 5 passed | Coverage: 92%
 
 ## Next Steps
+Proceed to Gate 4 (Review)
+```
 
-- Add edge case tests for password validation
-- Create integration tests with test database
+## Example Output (FAIL)
+
+```markdown
+## VERDICT: FAIL
+
+## Coverage Validation
+| Required | Actual | Gap |
+|----------|--------|-----|
+| 85% | 72% | -13% |
+
+### What Needs Tests
+1. [auth file]:45-52 - error handling uncovered
+2. [user file]:23-30 - validation branch missing
+3. [utils file]:12-18 - edge case
+
+## Summary
+Coverage 72% below threshold. Returning to Gate 0.
+
+## Files Changed
+| File | Action |
+|------|--------|
+| [test file] | Created |
+
+## Testing
+### Test Execution
+Tests: 3 passed | Coverage: 72%
+
+## Next Steps
+**BLOCKED** - Return to Gate 0 to add tests for uncovered code listed above.
 ```
 
 ## What This Agent Does NOT Handle

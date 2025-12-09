@@ -319,6 +319,24 @@ Before proceeding to Gate 4 (Review):
   - All acceptance criteria MUST have executable tests
 - [ ] Traceability matrix complete and updated
 - [ ] No skipped or pending tests for this task
+- [ ] **QA Analyst VERDICT = PASS** (mandatory for gate progression)
+
+## QA Verdict Handling
+
+QA Analyst returns **VERDICT: PASS** or **VERDICT: FAIL**.
+
+```
+PASS (coverage ≥ threshold) → Proceed to Gate 4 (Review)
+FAIL (coverage < threshold) → Return to Gate 0 (Implementation)
+```
+
+### On FAIL
+
+1. QA provides gap analysis (what needs tests)
+2. Dev-cycle returns to Gate 0 with this analysis
+3. Implementation agent adds the missing tests
+4. Gate 3 re-runs
+5. **Max 3 attempts**, then escalate to user
 
 ## Handling Test Failures
 
