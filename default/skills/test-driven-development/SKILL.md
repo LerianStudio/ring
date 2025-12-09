@@ -157,47 +157,16 @@ Then start over with TDD.
 
 **The rule has ZERO exceptions. ZERO.**
 
-### Consequences of NOT Deleting (ABSOLUTE FACTS)
+### Consequences of NOT Deleting
 
-**If you commit code without TDD:**
+Untested code WILL cause production incidents. These are CERTAINTIES:
 
-**IMMEDIATE consequences:**
-- Your partner will ALWAYS lose trust in you permanently
-- Code review tomorrow will ALWAYS reject the entire feature
-- Every bug found in this code will result in you being assigned 100% of the debugging work at 2am
-- Your partner will ALWAYS assign you only bug fixes (no new features) for the next 6 months
+- **Trust:** Partner loses confidence permanently. PRs rejected. Assigned bug duty.
+- **Production:** Incident within 30 days. Worst timing (holiday, 3am). Postmortem responsibility.
+- **Career:** Reputation as "cuts corners" follows you. Promotion blocked.
+- **Personal:** Anniversary debugging. Technical debt haunts for years.
 
-**PRODUCTION consequences:**
-- This untested code WILL cause a production incident within 30 days
-- The incident WILL happen at the worst possible time (holiday, weekend, 3am)
-- You WILL be personally responsible for the incident postmortem
-- The incident WILL cost the company minimum $50,000 in lost revenue
-- Your performance review WILL be marked as "Does not follow engineering standards"
-
-**CAREER consequences:**
-- Committing untested code is grounds for immediate termination in 73% of companies
-- Your partner WILL mention this in your next performance review
-- You WILL NOT receive promotion consideration for 2 years minimum
-- Future code reviews WILL be 10x more scrutinous on all your work
-- Your reputation as "cuts corners" WILL follow you
-
-**TEAM consequences:**
-- Your team WILL lose confidence in your work
-- All your future PRs WILL require 3x more reviewers
-- You WILL be excluded from critical projects
-- Other engineers WILL be assigned to "verify" your work
-- You WILL become known as the person who ships bugs
-
-**PERSONAL consequences:**
-- You WILL spend your anniversary debugging production issues
-- The relationship damage from work stress WILL be worse than missing one dinner
-- You WILL be called during every holiday when this code breaks
-- The technical debt WILL haunt you for years
-- You WILL regret not deleting it every single time it breaks
-
-**These are not possibilities. These are CERTAINTIES.**
-
-**Every developer who kept untested code thinking "this time is different" experienced these consequences.**
+❌ "This time is different" → Every developer who thought this experienced these consequences.
 
 ### The ONLY Acceptable Action
 
@@ -242,71 +211,17 @@ rm /tmp/auth-feature/src/utils.ts
 
 ## Red-Green-Refactor
 
-```dot
-digraph tdd_cycle {
-    rankdir=LR;
-    red [label="RED\nWrite failing test", shape=box, style=filled, fillcolor="#ffcccc"];
-    verify_red [label="Verify fails\ncorrectly", shape=diamond];
-    green [label="GREEN\nMinimal code", shape=box, style=filled, fillcolor="#ccffcc"];
-    verify_green [label="Verify passes\nAll green", shape=diamond];
-    refactor [label="REFACTOR\nClean up", shape=box, style=filled, fillcolor="#ccccff"];
-    next [label="Next", shape=ellipse];
-
-    red -> verify_red;
-    verify_red -> green [label="yes"];
-    verify_red -> red [label="wrong\nfailure"];
-    green -> verify_green;
-    verify_green -> refactor [label="yes"];
-    verify_green -> green [label="no"];
-    refactor -> verify_green [label="stay\ngreen"];
-    verify_green -> next;
-    next -> red;
-}
-```
+**Cycle:** RED (write failing test) → verify fails → GREEN (minimal code) → verify passes → REFACTOR (clean up) → verify still green → repeat
 
 ### RED - Write Failing Test
 
 Write one minimal test showing what should happen.
 
-<Good>
-```typescript
-test('retries failed operations 3 times', async () => {
-  let attempts = 0;
-  const operation = () => {
-    attempts++;
-    if (attempts < 3) throw new Error('fail');
-    return 'success';
-  };
+**GOOD:** `test('retries failed operations 3 times', ...)` - clear name, tests real behavior, one thing.
 
-  const result = await retryOperation(operation);
+**BAD:** `test('retry works', ...)` with mocks - vague name, tests mock not code.
 
-  expect(result).toBe('success');
-  expect(attempts).toBe(3);
-});
-```
-Clear name, tests real behavior, one thing
-</Good>
-
-**Time limit:** Writing a test should take <5 minutes. Longer = over-engineering.
-
-If your test needs:
-- Complex mocks → Testing wrong thing
-- Lots of setup → Design too complex
-- Multiple assertions → Split into multiple tests
-
-<Bad>
-```typescript
-test('retry works', async () => {
-  const mock = jest.fn()
-    .mockRejectedValueOnce(new Error())
-    .mockRejectedValueOnce(new Error())
-    .mockResolvedValueOnce('success');
-  await retryOperation(mock);
-  expect(mock).toHaveBeenCalledTimes(3);
-});
-```
-Vague name, tests mock not code
-</Bad>
+**Time limit:** <5 minutes. Complex mocks → testing wrong thing. Lots of setup → design too complex. Multiple assertions → split tests.
 
 **Requirements:**
 - One behavior
@@ -352,37 +267,7 @@ Confirm:
 
 Write simplest code to pass the test.
 
-<Good>
-```typescript
-async function retryOperation<T>(fn: () => Promise<T>): Promise<T> {
-  for (let i = 0; i < 3; i++) {
-    try {
-      return await fn();
-    } catch (e) {
-      if (i === 2) throw e;
-    }
-  }
-  throw new Error('unreachable');
-}
-```
-Just enough to pass
-</Good>
-
-<Bad>
-```typescript
-async function retryOperation<T>(
-  fn: () => Promise<T>,
-  options?: {
-    maxRetries?: number;
-    backoff?: 'linear' | 'exponential';
-    onRetry?: (attempt: number) => void;
-  }
-): Promise<T> {
-  // YAGNI
-}
-```
-Over-engineered
-</Bad>
+**GOOD:** Simple loop with try/catch, just enough to pass. **BAD:** Adding options, backoff, callbacks (YAGNI).
 
 Don't add features, refactor other code, or "improve" beyond the test.
 
@@ -426,53 +311,13 @@ Next failing test for next feature.
 
 ## Why Order Matters
 
-**"I'll write tests after to verify it works"**
-
-Tests written after code pass immediately. Passing immediately proves nothing:
-- Might test wrong thing
-- Might test implementation, not behavior
-- Might miss edge cases you forgot
-- You never saw it catch the bug
-
-Test-first forces you to see the test fail, proving it actually tests something.
-
-**"I already manually tested all the edge cases"**
-
-Manual testing is ad-hoc. You think you tested everything but:
-- No record of what you tested
-- Can't re-run when code changes
-- Easy to forget cases under pressure
-- "It worked when I tried it" ≠ comprehensive
-
-Automated tests are systematic. They run the same way every time.
-
-**"Deleting X hours of work is wasteful"**
-
-Sunk cost fallacy. The time is already gone. Your choice now:
-- Delete and rewrite with TDD (X more hours, high confidence)
-- Keep it and add tests after (30 min, low confidence, likely bugs)
-
-The "waste" is keeping code you can't trust. Working code without real tests is technical debt.
-
-**"TDD is dogmatic, being pragmatic means adapting"**
-
-TDD IS pragmatic:
-- Finds bugs before commit (faster than debugging after)
-- Prevents regressions (tests catch breaks immediately)
-- Documents behavior (tests show how to use code)
-- Enables refactoring (change freely, tests catch breaks)
-
-"Pragmatic" shortcuts = debugging in production = slower.
-
-**"Tests after achieve the same goals - it's spirit not ritual"**
-
-No. Tests-after answer "What does this do?" Tests-first answer "What should this do?"
-
-Tests-after are biased by your implementation. You test what you built, not what's required. You verify remembered edge cases, not discovered ones.
-
-Tests-first force edge case discovery before implementing. Tests-after verify you remembered everything (you didn't).
-
-30 minutes of tests after ≠ TDD. You get coverage, lose proof tests work.
+| Argument | Reality |
+|----------|---------|
+| "Tests after verify it works" | Tests-after pass immediately → proves nothing. Test-first forces failure → proves test works. |
+| "Already manually tested" | Ad-hoc ≠ systematic. No record, can't re-run, easy to forget under pressure. |
+| "Deleting X hours is wasteful" | Sunk cost fallacy. Keeping unverified code = tech debt. Delete → rewrite with confidence. |
+| "TDD is dogmatic" | TDD IS pragmatic: catches bugs pre-commit, prevents regressions, documents behavior, enables refactoring. |
+| "Spirit not ritual" | Tests-after = "what does this do?" Tests-first = "what should this do?" Different questions. |
 
 ## Common Rationalizations
 
@@ -510,40 +355,7 @@ Tests-first force edge case discovery before implementing. Tests-after verify yo
 
 ## Example: Bug Fix
 
-**Bug:** Empty email accepted
-
-**RED**
-```typescript
-test('rejects empty email', async () => {
-  const result = await submitForm({ email: '' });
-  expect(result.error).toBe('Email required');
-});
-```
-
-**Verify RED**
-```bash
-$ npm test
-FAIL: expected 'Email required', got undefined
-```
-
-**GREEN**
-```typescript
-function submitForm(data: FormData) {
-  if (!data.email?.trim()) {
-    return { error: 'Email required' };
-  }
-  // ...
-}
-```
-
-**Verify GREEN**
-```bash
-$ npm test
-PASS
-```
-
-**REFACTOR**
-Extract validation for multiple fields if needed.
+**Bug:** Empty email accepted → **RED:** `test('rejects empty email', ...)` → **Verify RED:** `FAIL: expected 'Email required', got undefined` → **GREEN:** Add `if (!data.email?.trim()) return { error: 'Email required' }` → **Verify GREEN:** `PASS` → **REFACTOR:** Extract validation if needed.
 
 ## Verification Checklist
 
@@ -587,60 +399,15 @@ Apply ALL patterns when using this skill.
 
 ---
 
-## When You Violate This Skill
+## Violation Recovery Quick Reference
 
-### Violation: Wrote implementation before test
+| Violation | Detection | Recovery |
+|-----------|-----------|----------|
+| **Code before test** | Implementation exists, no test file | DELETE code (`rm`), write test, verify RED, reimplement |
+| **FALSE GREEN** | Test passes immediately, no implementation | Test is broken - make stricter until it fails correctly |
+| **Kept "reference"** | Stash/backup/clipboard exists | Delete permanently (`git stash drop`, `rm`), start fresh |
 
-**How to detect:**
-- Implementation file exists or modified
-- No test file exists yet
-- Git diff shows implementation changed before test
-
-**Recovery procedure:**
-1. Stash or delete the implementation code: `git stash` or `rm [file]`
-2. Write the failing test first
-3. Run test to verify it fails: `npm test` or `pytest`
-4. Rewrite the implementation to make test pass
-
-**Why recovery matters:**
-The test must fail first to prove it actually tests something. If implementation exists first, you can't verify the test works - it might be passing for the wrong reason or not testing anything at all.
-
----
-
-### Violation: Test passes without implementation (FALSE GREEN)
-
-**How to detect:**
-- Wrote test
-- Test passes immediately
-- Haven't written implementation yet
-
-**Recovery procedure:**
-1. Test is broken - delete or fix it
-2. Make test stricter until it fails
-3. Verify failure shows expected error
-4. Then implement to make it pass
-
-**Why recovery matters:**
-A test that passes without implementation is useless - it's not testing the right thing.
-
----
-
-### Violation: Kept code "as reference" instead of deleting
-
-**How to detect:**
-- Stashed implementation with `git stash`
-- Moved file to `.bak` or similar
-- Copied to clipboard "just in case"
-- Commented out instead of deleting
-
-**Recovery procedure:**
-1. Find the kept code (stash, backup, clipboard)
-2. Delete it permanently: `git stash drop`, `rm`, clear clipboard
-3. Verify code is truly gone
-4. Start RED phase fresh
-
-**Why recovery matters:**
-Keeping code means you'll adapt it instead of implementing from tests. The whole point is to implement fresh, guided by tests. Delete means delete.
+**Why recovery matters:** Test must fail first to prove it tests something. Keeping code means you'll adapt it instead of implementing from tests.
 
 ---
 

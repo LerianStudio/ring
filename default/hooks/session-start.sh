@@ -57,7 +57,6 @@ if command -v git &> /dev/null; then
                 claude plugin install ring-dev-team &> /dev/null || true
                 claude plugin install ring-finops-team &> /dev/null || true
                 claude plugin install ring-pm-team &> /dev/null || true
-                claude plugin install ralph-wiggum &> /dev/null || true
                 claude plugin install ring-tw-team &> /dev/null || true
             fi
         fi

@@ -127,50 +127,16 @@ One test case proves nothing. Three tests are suspicious. Six tests are minimum 
 
 ### Example Test Suite for Code Reviewer
 
-```markdown
-## Test Case 1: Known SQL Injection
-**Input:** Function with string concatenation in SQL query
-**Expected:** CRITICAL finding, references OWASP A03:2021
-**Actual:** [Run agent, record output]
-
-## Test Case 2: Clean Authentication
-**Input:** Well-implemented JWT validation with proper error handling
-**Expected:** No findings or LOW-severity suggestions only
-**Actual:** [Run agent, record output]
-
-## Test Case 3: Ambiguous Error Handling
-**Input:** Error caught but only logged, not re-thrown
-**Expected:** MEDIUM finding about silent failures
-**Actual:** [Run agent, record output]
-
-## Test Case 4: Empty File
-**Input:** Empty source file
-**Expected:** Graceful handling, no crash, maybe LOW finding
-**Actual:** [Run agent, record output]
-```
+| Test | Input | Expected |
+|------|-------|----------|
+| SQL Injection | String concatenation in SQL | CRITICAL, OWASP A03:2021 |
+| Clean Auth | Proper JWT validation | No findings or LOW only |
+| Ambiguous Error | Caught but only logged | MEDIUM silent failure |
+| Empty File | Empty source | Graceful handling |
 
 ### Running the Test
 
-```markdown
-Use Task tool to dispatch agent:
-
-Task(
-  subagent_type="ring-default:code-reviewer",
-  prompt="""
-  Review this code for security issues:
-
-  ```python
-  def get_user(user_id):
-      query = "SELECT * FROM users WHERE id = " + user_id
-      return db.execute(query)
-  ```
-
-  Provide findings with severity levels.
-  """
-)
-```
-
-**Document exact output.** Don't summarize - capture verbatim.
+Dispatch via Task tool with test input → **Document exact output verbatim** (don't summarize).
 
 ## GREEN Phase: Fix Agent Definition (Make Tests Pass)
 
@@ -188,97 +154,31 @@ Write/update agent definition addressing specific failures documented in RED pha
 
 ### Example Fix: Severity Calibration
 
-**RED Phase Failure:**
-```
-Agent marked hardcoded password as MEDIUM instead of CRITICAL
-```
+**RED Failure:** Agent marked hardcoded password as MEDIUM instead of CRITICAL
 
-**GREEN Phase Fix (add to agent definition):**
-```markdown
-## Severity Calibration
-
-**CRITICAL:** Immediate exploitation possible
-- Hardcoded secrets (passwords, API keys, tokens)
-- SQL injection with user input
-- Authentication bypass
-
-**HIGH:** Exploitation requires additional steps
-- Missing input validation
-- Improper error handling exposing internals
-
-**MEDIUM:** Security weakness, not directly exploitable
-- Missing rate limiting
-- Verbose error messages
-
-**LOW:** Best practice violations
-- Missing security headers
-- Outdated dependencies (no known CVEs)
-```
+**GREEN Fix:** Add severity calibration: CRITICAL (hardcoded secrets, SQL injection, auth bypass), HIGH (missing validation, error exposure), MEDIUM (rate limiting, verbose errors), LOW (headers, deps)
 
 ### Re-run Tests
 
-After fixing, re-run ALL test cases:
-
-```markdown
-## Test Results After Fix
-
-| Test Case | Expected | Actual | Pass/Fail |
-|-----------|----------|--------|-----------|
-| SQL Injection | CRITICAL | CRITICAL |  PASS |
-| Clean Auth | No findings | No findings |  PASS |
-| Ambiguous Error | MEDIUM | MEDIUM |  PASS |
-| Empty File | Graceful | Graceful |  PASS |
-```
-
-If any test fails: continue fixing, re-test.
+After fixing, re-run ALL test cases. If any fail → continue fixing, re-test.
 
 ## VERIFY GREEN: Output Verification
 
 **Goal:** Confirm agent produces correct, well-structured outputs consistently.
 
-### Output Schema Compliance
-
-If agent has defined output schema, verify compliance:
-
-```markdown
-## Expected Schema
-- Summary (1-2 sentences)
-- Findings (array of {severity, location, description, recommendation})
-- Overall assessment (PASS/FAIL with conditions)
-
-## Actual Output Analysis
-- Summary:  Present, correct format
-- Findings:  Array, all fields present
-- Overall assessment: L Missing conditions for FAIL
-```
-
 ### Accuracy Metrics
 
-Track agent accuracy across test suite:
-
-| Metric | Target | Actual |
-|--------|--------|--------|
-| True Positives (found real issues) | 100% | [X]% |
-| False Positives (flagged non-issues) | <10% | [X]% |
-| False Negatives (missed real issues) | <5% | [X]% |
-| Severity Accuracy | >90% | [X]% |
-| Schema Compliance | 100% | [X]% |
+| Metric | Target |
+|--------|--------|
+| True Positives | 100% |
+| False Positives | <10% |
+| False Negatives | <5% |
+| Severity Accuracy | >90% |
+| Schema Compliance | 100% |
 
 ### Consistency Testing
 
-Run same test input 3 times. Outputs should be consistent:
-
-```markdown
-## Consistency Test: SQL Injection Input
-
-Run 1: CRITICAL, SQL injection, line 3
-Run 2: CRITICAL, SQL injection, line 3
-Run 3: CRITICAL, SQL injection, line 3
-
-Consistency:  100% (all runs identical findings)
-```
-
-Inconsistency indicates agent definition is ambiguous.
+Run same input 3 times → outputs should be identical. Inconsistency indicates ambiguous agent definition.
 
 ## REFACTOR Phase: Edge Cases and Robustness
 
@@ -296,126 +196,34 @@ Agent passes basic tests? Now test edge cases.
 
 ### Stress Testing
 
-```markdown
-## Stress Test: Large File
-
-**Input:** 5000-line file with 20 known issues scattered throughout
-**Expected:** All 20 issues found, reasonable response time
-**Actual:** [Run agent, record output]
-
-## Stress Test: Complex Nesting
-
-**Input:** 15-level deep callback hell
-**Expected:** Findings about complexity, maintainability
-**Actual:** [Run agent, record output]
-```
+Test edge cases: Large file (5000 lines, 20 issues), Complex nesting (15-level deep). Verify all issues found with reasonable response time.
 
 ### Ambiguity Testing
 
-```markdown
-## Ambiguity Test: Context-Dependent Security
-
-**Input:**
-```python
-# Internal admin tool, not exposed to users
-password = "admin123"  # Default for local dev
-```
-
-**Expected:** Agent should note context but still flag
-**Actual:** [Run agent, record output]
-
-**Analysis:** Does agent handle nuance appropriately?
-```
+Test context-dependent cases (e.g., hardcoded password with "local dev" comment). Agent should flag but acknowledge context.
 
 ### Plugging Holes
 
-For each edge case failure, add explicit handling:
-
-**Before:**
-```markdown
-Review code for security issues.
-```
-
-**After:**
-```markdown
-Review code for security issues.
-
-**Edge case handling:**
+For each edge case failure, add explicit handling to agent definition:
 - Empty files: Return "No code to review" with PASS
-- Large files (>5K lines): Focus on high-risk patterns first
-- Minified code: Note limitations, review what's readable
+- Large files: Focus on high-risk patterns first
+- Minified code: Note limitations
 - Context comments: Consider but don't use to dismiss issues
-```
-
 ## Testing Parallel Agent Workflows
 
-When agents run in parallel (like 3 reviewers), test the combined workflow:
-
-### Parallel Consistency
-
-```markdown
-## Parallel Test: Same Input to All Reviewers
-
-Input: Authentication module with mixed issues
-
-| Reviewer | Findings | Overlap |
-|----------|----------|---------|
-| code-reviewer | 5 findings | - |
-| business-logic-reviewer | 3 findings | 1 shared |
-| security-reviewer | 4 findings | 2 shared |
-
-Analysis:
-- Total unique findings: 9
-- Appropriate overlap (security issues found by both security and code reviewer)
-- No contradictions
-```
-
-### Aggregation Testing
-
-```markdown
-## Aggregation Test: Severity Consistency
-
-Same issue found by multiple reviewers:
-
-| Reviewer | Finding | Severity |
-|----------|---------|----------|
-| code-reviewer | Missing null check | MEDIUM |
-| business-logic-reviewer | Missing null check | HIGH |
-
-Problem: Inconsistent severity for same issue
-Fix: Align severity calibration across all reviewers
-```
+When agents run in parallel (like 3 reviewers), test combined workflow:
+- **Parallel Consistency**: Same input to all reviewers → check findings overlap appropriately, no contradictions
+- **Aggregation Testing**: Same issue found by multiple reviewers → severity should be consistent; fix misalignments
 
 ## Agent Testing Checklist
 
-Before deploying agent, verify you followed RED-GREEN-REFACTOR:
+**RED Phase:** Create test inputs (known issues, clean, edge cases) → Run agent → Document failures verbatim
 
-**RED Phase:**
-- [ ] Created test inputs (known issues, clean code, edge cases)
-- [ ] Ran agent with test inputs
-- [ ] Documented failures verbatim (missing findings, wrong severity, bad format)
+**GREEN Phase:** Update agent definition → Re-run tests → All pass
 
-**GREEN Phase:**
-- [ ] Updated agent definition addressing specific failures
-- [ ] Re-ran test inputs
-- [ ] All basic tests now pass
+**REFACTOR Phase:** Test edge cases → Test stress scenarios → Add explicit handling → Verify consistency (3+ runs) → Test parallel integration (if applicable) → Re-run ALL tests after each change
 
-**REFACTOR Phase:**
-- [ ] Tested edge cases (empty, large, unusual, ambiguous)
-- [ ] Tested stress scenarios (many issues, complex code)
-- [ ] Added explicit edge case handling to definition
-- [ ] Verified consistency (multiple runs produce same results)
-- [ ] Verified schema compliance
-- [ ] Tested parallel workflow integration (if applicable)
-- [ ] Re-ran ALL tests after each change
-
-**Metrics (for reviewer agents):**
-- [ ] True positive rate: >95%
-- [ ] False positive rate: <10%
-- [ ] False negative rate: <5%
-- [ ] Severity accuracy: >90%
-- [ ] Schema compliance: 100%
-- [ ] Consistency: >95%
+**Metrics (reviewer agents):** True positive >95%, False positive <10%, False negative <5%, Severity accuracy >90%, Schema compliance 100%, Consistency >95%
 
 ## Prohibited Testing Shortcuts
 
@@ -451,45 +259,19 @@ Before deploying agent, verify you followed RED-GREEN-REFACTOR:
 
 ## Common Mistakes
 
-**L Testing with only "happy path" inputs**
-Agent works with obvious issues but misses subtle ones.
- Fix: Include ambiguous cases and edge cases in test suite.
+| Mistake | Fix |
+|---------|-----|
+| Testing only "happy path" inputs | Include ambiguous + edge cases |
+| Not documenting exact outputs | Capture verbatim, compare to expected |
+| Fixing without re-running all tests | Re-run entire suite after each change |
+| Testing single agent in isolation (parallel workflow) | Test parallel dispatch + aggregation |
+| Not testing consistency | Run same input 3+ times |
+| Skipping severity calibration | Add explicit severity examples |
+| Not testing edge cases | Test empty, large, unusual, ambiguous |
+| Single test case validation | Minimum 4-6 test cases per agent type |
+| Manual UI testing as substitute | Document all test inputs and expected outputs |
+| Skipping re-test for "small" changes | Re-run full suite after ANY modification |
 
-**L Not documenting exact outputs**
-"Agent was wrong" doesn't tell you what to fix.
- Fix: Capture agent output verbatim, compare to expected.
-
-**L Fixing without re-running all tests**
-Fix one issue, break another.
- Fix: Re-run entire test suite after each change.
-
-**L Testing single agent in isolation when used in parallel**
-Individual agents work, but combined workflow fails.
- Fix: Test parallel dispatch and output aggregation.
-
-**L Not testing consistency**
-Agent gives different answers for same input.
- Fix: Run same input 3+ times, verify consistent output.
-
-**L Skipping severity calibration**
-Agent finds issues but severity is inconsistent.
- Fix: Add explicit severity examples to agent definition.
-
-**L Not testing edge cases**
-Agent works for normal code, crashes on edge cases.
- Fix: Test empty, large, unusual, and ambiguous inputs.
-
-**Single test case validation**
-"One test passed" proves nothing about agent behavior.
-Fix: Minimum 4-6 test cases per agent type.
-
-**Manual UI testing as substitute**
-Ad-hoc testing doesn't create reproducible baselines.
-Fix: Document all test inputs and expected outputs.
-
-**Skipping re-test for "small" changes**
-One-line prompt changes can break everything.
-Fix: Re-run full suite after ANY modification.
 
 ## Rationalization Table
 
@@ -545,69 +327,23 @@ If you catch yourself thinking ANY of these, STOP. You're about to violate the I
 
 ### Step 1: Create Test Suite
 
-```markdown
-# security-reviewer Test Suite
+| Test | Input | Expected |
+|------|-------|----------|
+| SQL Injection | `"SELECT * FROM users WHERE id = " + user_id` | CRITICAL, OWASP A03:2021 |
+| Parameterized (Clean) | `db.execute(query, [user_id])` | No findings |
+| Hardcoded Secret | `API_KEY = "sk-1234..."` | CRITICAL |
+| Env Variable (Clean) | `os.environ.get("API_KEY")` | No findings |
+| Empty File | (empty) | Graceful handling |
+| Ambiguous | `password = "dev123"  # Local dev` | Flag with context |
 
-## Test 1: SQL Injection (Known Critical)
-Input: `query = "SELECT * FROM users WHERE id = " + user_id`
-Expected: CRITICAL, SQL injection, OWASP A03:2021
+**Step 2: RED Phase** - Run tests, document failures: Test 1 marked HIGH not CRITICAL, Test 3 missed, Test 5 errored, Test 6 dismissed.
 
-## Test 2: Parameterized Query (Clean)
-Input: `query = "SELECT * FROM users WHERE id = ?"; db.execute(query, [user_id])`
-Expected: No security findings
+**Step 3: GREEN Phase** - Fix definition: Add severity calibration (SQL=CRITICAL), hardcoded secrets pattern, empty file handling, "context comments dont dismiss issues".
 
-## Test 3: Hardcoded Secret (Known Critical)
-Input: `API_KEY = "sk-1234567890abcdef"`
-Expected: CRITICAL, hardcoded secret
+**Step 4: Re-run** - All tests pass with correct severities and handling.
 
-## Test 4: Environment Variable (Clean)
-Input: `API_KEY = os.environ.get("API_KEY")`
-Expected: No security findings (or LOW suggestion for validation)
+**Step 5: REFACTOR** - Add edge cases: minified code, 10K line file, mixed languages, nested vulnerabilities. Run, fix, repeat.
 
-## Test 5: Empty File
-Input: (empty)
-Expected: Graceful handling
-
-## Test 6: Ambiguous - Internal Tool
-Input: `password = "dev123"  # Local development only`
-Expected: Flag but acknowledge context
-```
-
-### Step 2: Run RED Phase
-
-```
-Test 1: L Found issue but marked HIGH not CRITICAL
-Test 2:  No findings
-Test 3: L Missed entirely
-Test 4:  No findings
-Test 5: L Error: "No code provided"
-Test 6: L Dismissed due to comment
-```
-
-### Step 3: GREEN Phase - Fix Definition
-
-Add to agent:
-1. Severity calibration with SQL injection = CRITICAL
-2. Explicit check for hardcoded secrets pattern
-3. Empty file handling instruction
-4. "Context comments don't dismiss security issues"
-
-### Step 4: Re-run Tests
-
-```
-Test 1:  CRITICAL
-Test 2:  No findings
-Test 3:  CRITICAL
-Test 4:  No findings
-Test 5:  "No code to review"
-Test 6:  Flagged with context acknowledgment
-```
-
-### Step 5: REFACTOR - Edge Cases
-
-Add tests for: minified code, 10K line file, mixed languages, nested vulnerabilities.
-
-Run, fix, repeat until all pass.
 
 ## The Bottom Line
 

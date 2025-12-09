@@ -1,6 +1,6 @@
 # Ring Marketplace Manual
 
-Quick reference guide for the Ring skills library and workflow system. This monorepo provides 6 plugins with 55 skills, 20 agents, and 20 slash commands for enforcing proven software engineering practices.
+Quick reference guide for the Ring skills library and workflow system. This monorepo provides 5 plugins with 55 skills, 20 agents, and 18 slash commands for enforcing proven software engineering practices.
 
 ---
 
@@ -18,13 +18,13 @@ Quick reference guide for the Ring skills library and workflow system. This mono
 │  │ Agents(5)       │  │ Agents(7)       │  │ Agents(2)       │              │
 │  │ Cmds(7)         │  │ Cmds(5)         │  │                 │              │
 │  └─────────────────┘  └─────────────────┘  └─────────────────┘              │
-│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐              │
-│  │ ring-pm-team    │  │ ralph-wiggum    │  │ ring-tw-team    │              │
-│  │    (plugin)     │  │    (plugin)     │  │    (plugin)     │              │
-│  │ Skills(10)      │  │ Skills(1)       │  │ Skills(7)       │              │
-│  │ Cmds(2)         │  │ Cmds(3)         │  │ Agents(3)       │              │
-│  │                 │  │                 │  │ Cmds(3)         │              │
-│  └─────────────────┘  └─────────────────┘  └─────────────────┘              │
+│  ┌─────────────────┐  ┌─────────────────┐                                    │
+│  │ ring-pm-team    │  │ ring-tw-team    │                                    │
+│  │    (plugin)     │  │    (plugin)     │                                    │
+│  │ Skills(10)      │  │ Skills(7)       │                                    │
+│  │ Cmds(2)         │  │ Agents(3)       │                                    │
+│  │                 │  │ Cmds(3)         │                                    │
+│  └─────────────────┘  └─────────────────┘                                    │
 └─────────────────────────────────────────────────────────────────────────────┘
 
                               HOW IT WORKS
@@ -79,7 +79,7 @@ Ring is auto-loaded at session start. Three ways to invoke Ring capabilities:
 ## 📋 Slash Commands
 
 All commands prefixed with `/ring-default:` for default plugin commands.
-Other plugins require full prefix: `/ring-dev-team:`, `/ring-finops-team:`, `/ring-pm-team:`, `/ring-tw-team:`, etc.
+Other plugins require full prefix: `/ring-dev-team:`, `/ring-finops-team:`, `/ring-pm-team:`, `/ring-tw-team:`.
 
 ### Project & Feature Workflows
 
@@ -98,6 +98,7 @@ Other plugins require full prefix: `/ring-dev-team:`, `/ring-finops-team:`, `/ri
 |---------|----------|---------|
 | `/ring-default:codereview [files-or-paths]` | Dispatch 3 parallel code reviewers | `/ring-default:codereview src/auth/` |
 | `/ring-default:commit [message]` | Create git commit with AI trailers | `/ring-default:commit "fix(auth): improve token validation"` |
+| `/ring-default:lint [path]` | Run lint and dispatch agents to fix all issues | `/ring-default:lint src/` |
 
 ### Development Cycle (ring-dev-team)
 
@@ -109,16 +110,6 @@ Other plugins require full prefix: `/ring-dev-team:`, `/ring-finops-team:`, `/ri
 | `/ring-dev-team:dev-report` | Generate development cycle report | `/ring-dev-team:dev-report` |
 | `/ring-dev-team:dev-cancel` | Cancel active development cycle | `/ring-dev-team:dev-cancel` |
 
-### Iterative AI Development (ralph-wiggum)
-
-| Command | Use Case | Example |
-|---------|----------|---------|
-| `/ralph-wiggum:ralph-loop PROMPT [options]` | Start autonomous iterative loop | `/ralph-wiggum:ralph-loop "Build API. Output <promise>DONE</promise> when tests pass." --completion-promise "DONE" --max-iterations 20` |
-| `/ralph-wiggum:cancel-ralph` | Cancel active Ralph loop | `/ralph-wiggum:cancel-ralph` |
-| `/ralph-wiggum:help` | Explain Ralph technique | `/ralph-wiggum:help` |
-
-**Ralph options:** `--max-iterations N` (safety limit), `--completion-promise TEXT` (completion signal)
-
 ### Technical Writing (Documentation)
 
 | Command | Use Case | Example |
@@ -126,28 +117,6 @@ Other plugins require full prefix: `/ring-dev-team:`, `/ring-finops-team:`, `/ri
 | `/ring-tw-team:write-guide [topic]` | Start writing a functional guide | `/ring-tw-team:write-guide authentication` |
 | `/ring-tw-team:write-api [endpoint]` | Start writing API documentation | `/ring-tw-team:write-api POST /accounts` |
 | `/ring-tw-team:review-docs [file]` | Review documentation for quality | `/ring-tw-team:review-docs docs/guide.md` |
-
-**When Ralph Works Well:**
-
-| ✅ Good Fit | Why |
-|-------------|-----|
-| "Make all tests pass" | Clear, verifiable success criteria |
-| "Implement features from spec" | Additive work visible in files |
-| "Fix CI pipeline errors" | Objective pass/fail feedback |
-| Greenfield with clear requirements | Progress is self-evident |
-
-**When Ralph Struggles:**
-
-| ❌ Poor Fit | Why |
-|-------------|-----|
-| "Design a good API" | Requires judgment, no objective criteria |
-| "Refactor for maintainability" | Success is subjective |
-| "Debug intermittent failure" | May not reproduce consistently |
-| Exploratory/architectural work | Needs human course-correction |
-
-**Key insight:** Ralph excels at **verifiable, additive tasks** where progress is visible in files. It struggles with tasks requiring design judgment or strategic pivoting.
-
-**Session isolation:** Each Claude session gets its own Ralph state file (`ralph-loop-{session-id}.local.md`), so you can run multiple sessions concurrently.
 
 ---
 
@@ -318,7 +287,7 @@ These enforce quality standards:
 ### Session Startup
 
 1. SessionStart hook runs automatically
-2. All 48 skills are auto-discovered and available
+2. All 54 skills are auto-discovered and available
 3. `using-ring` workflow is activated (skill checking is now mandatory)
 
 ### Agent Dispatching

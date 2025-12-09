@@ -84,24 +84,9 @@ API docs, syntax guides, tool documentation (office docs)
 
 ## Directory Structure
 
+`skills/skill-name/SKILL.md` (required) + optional supporting files. Flat namespace.
 
-```
-skills/
-  skill-name/
-    SKILL.md              # Main reference (required)
-    supporting-file.*     # Only if needed
-```
-
-**Flat namespace** - all skills in one searchable namespace
-
-**Separate files for:**
-1. **Heavy reference** (100+ lines) - API docs, comprehensive syntax
-2. **Reusable tools** - Scripts, utilities, templates
-
-**Keep inline:**
-- Principles and concepts
-- Code patterns (< 50 lines)
-- Everything else
+**Separate files for:** Heavy reference (100+ lines), reusable tools. **Keep inline:** Principles, code patterns (<50 lines).
 
 ## SKILL.md Structure
 
@@ -117,35 +102,12 @@ skills/
 ```markdown
 ---
 name: Skill-Name-With-Hyphens
-description: Use when [specific triggering conditions and symptoms] - [what the skill does and how it helps, written in third person]
+description: Use when [triggers/symptoms] - [what it does, third person]
 ---
-
 # Skill Name
-
-## Overview
-What is this? Core principle in 1-2 sentences.
-
-## When to Use
-[Small inline flowchart IF decision non-obvious]
-
-Bullet list with SYMPTOMS and use cases
-When NOT to use
-
-## Core Pattern (for techniques/patterns)
-Before/after code comparison
-
-## Quick Reference
-Table or bullets for scanning common operations
-
-## Implementation
-Inline code for simple patterns
-Link to file for heavy reference or reusable tools
-
-## Common Mistakes
-What goes wrong + fixes
-
-## Real-World Impact (optional)
-Concrete results
+## Overview (1-2 sentences), ## When to Use (symptoms, NOT to use)
+## Core Pattern (before/after code), ## Quick Reference (table for scanning)
+## Implementation (inline or link), ## Common Mistakes, ## Real-World Impact (optional)
 ```
 
 
@@ -166,22 +128,10 @@ Concrete results
 - If skill is technology-specific, make that explicit in the trigger
 - Write in third person (injected into system prompt)
 
-```yaml
-# ❌ BAD: Too abstract, vague, doesn't include when to use
-description: For async testing
-
-# ❌ BAD: First person
-description: I can help you with async tests when they're flaky
-
-# ❌ BAD: Mentions technology but skill isn't specific to it
-description: Use when tests use setTimeout/sleep and are flaky
-
-# ✅ GOOD: Starts with "Use when", describes problem, then what it does
-description: Use when tests have race conditions, timing dependencies, or pass/fail inconsistently - replaces arbitrary timeouts with condition polling for reliable async tests
-
-# ✅ GOOD: Technology-specific skill with explicit trigger
-description: Use when using React Router and handling authentication redirects - provides patterns for protected routes and auth state management
-```
+| Quality | Example |
+|---------|---------|
+| **BAD** | `For async testing` (vague), `I can help...` (first person), `setTimeout/sleep` (tech-specific but skill isn't) |
+| **GOOD** | `Use when tests have race conditions... - replaces timeouts with condition polling` (problem + solution) |
 
 ### 2. Keyword Coverage
 
@@ -209,53 +159,9 @@ Use words agents would search for:
 
 **Rationale:** Complex skills need extensive rationalization prevention and complete templates. Don't artificially compress at the cost of effectiveness.
 
-**Techniques:**
+**Techniques:** Reference `--help` instead of documenting flags. Cross-reference other skills instead of repeating. Compress examples (42 words → 20 words). Don't repeat cross-referenced content.
 
-**Move details to tool help:**
-```bash
-# ❌ BAD: Document all flags in SKILL.md
-search-conversations supports --text, --both, --after DATE, --before DATE, --limit N
-
-# ✅ GOOD: Reference --help
-search-conversations supports multiple modes and filters. Run --help for details.
-```
-
-**Use cross-references:**
-```markdown
-# ❌ BAD: Repeat workflow details
-When searching, dispatch subagent with template...
-[20 lines of repeated instructions]
-
-# ✅ GOOD: Reference other skill
-Always use subagents (50-100x context savings). REQUIRED: Use [other-skill-name] for workflow.
-```
-
-**Compress examples:**
-```markdown
-# ❌ BAD: Verbose example (42 words)
-your human partner: "How did we handle authentication errors in React Router before?"
-You: I'll search past conversations for React Router authentication patterns.
-[Dispatch subagent with search query: "React Router authentication error handling 401"]
-
-# ✅ GOOD: Minimal example (20 words)
-Partner: "How did we handle auth errors in React Router?"
-You: Searching...
-[Dispatch subagent → synthesis]
-```
-
-**Eliminate redundancy:**
-- Don't repeat what's in cross-referenced skills
-- Don't explain what's obvious from command
-- Don't include multiple examples of same pattern
-
-**Verification:**
-```bash
-wc -w skills/path/SKILL.md
-# Bootstrap skills: <150 words
-# Technique skills: <500 words
-# Discipline skills: <2,000 words
-# Process skills: <4,000 words
-```
+**Verify:** `wc -w skills/path/SKILL.md` (check against word counts above)
 
 **Name by what you DO or core insight:**
 - ✅ `condition-based-waiting` > `async-test-helpers`
@@ -281,81 +187,19 @@ Use skill name only, with explicit requirement markers:
 
 ## Flowchart Usage
 
-```dot
-digraph when_flowchart {
-    "Need to show information?" [shape=diamond];
-    "Decision where I might go wrong?" [shape=diamond];
-    "Use markdown" [shape=box];
-    "Small inline flowchart" [shape=box];
-
-    "Need to show information?" -> "Decision where I might go wrong?" [label="yes"];
-    "Decision where I might go wrong?" -> "Small inline flowchart" [label="yes"];
-    "Decision where I might go wrong?" -> "Use markdown" [label="no"];
-}
-```
-
-**Use flowcharts ONLY for:**
-- Non-obvious decision points
-- Process loops where you might stop too early
-- "When to use A vs B" decisions
-
-**Never use flowcharts for:**
-- Reference material → Tables, lists
-- Code examples → Markdown blocks
-- Linear instructions → Numbered lists
-- Labels without semantic meaning (step1, helper2)
-
-See @graphviz-conventions.dot for graphviz style rules.
+**Only for:** Non-obvious decisions, process loops, "A vs B" choices. **Never for:** Reference (→tables), code (→blocks), linear steps (→lists). See graphviz-conventions.dot for conventions.
 
 ## Code Examples
 
-**One excellent example beats many mediocre ones**
-
-Choose most relevant language:
-- Testing techniques → TypeScript/JavaScript
-- System debugging → Shell/Python
-- Data processing → Python
-
-**Good example:**
-- Complete and runnable
-- Well-commented explaining WHY
-- From real scenario
-- Shows pattern clearly
-- Ready to adapt (not generic template)
-
-**Don't:**
-- Implement in 5+ languages
-- Create fill-in-the-blank templates
-- Write contrived examples
-
-You're good at porting - one great example is enough.
+**One excellent example in most relevant language.** Complete, well-commented WHY, real scenario, ready to adapt. Don't: multi-language, fill-in-blank templates, contrived examples.
 
 ## File Organization
 
-### Self-Contained Skill
-```
-defense-in-depth/
-  SKILL.md    # Everything inline
-```
-When: All content fits, no heavy reference needed
-
-### Skill with Reusable Tool
-```
-condition-based-waiting/
-  SKILL.md    # Overview + patterns
-  example.ts  # Working helpers to adapt
-```
-When: Tool is reusable code, not just narrative
-
-### Skill with Heavy Reference
-```
-pptx/
-  SKILL.md       # Overview + workflows
-  pptxgenjs.md   # 600 lines API reference
-  ooxml.md       # 500 lines XML structure
-  scripts/       # Executable tools
-```
-When: Reference material too large for inline
+| Type | Structure | When |
+|------|-----------|------|
+| **Self-Contained** | `skill/SKILL.md` only | All content fits inline |
+| **With Tool** | `SKILL.md` + `example.ts` | Reusable code, not narrative |
+| **Heavy Reference** | `SKILL.md` + `*.md` refs + `scripts/` | Reference >100 lines |
 
 ## The Iron Law (Same as TDD)
 
@@ -380,52 +224,12 @@ Edit skill without testing? Same violation.
 
 ## Testing All Skill Types
 
-Different skill types need different test approaches:
-
-### Discipline-Enforcing Skills (rules/requirements)
-
-**Examples:** TDD, verification-before-completion, designing-before-coding
-
-**Test with:**
-- Academic questions: Do they understand the rules?
-- Pressure scenarios: Do they comply under stress?
-- Multiple pressures combined: time + sunk cost + exhaustion
-- Identify rationalizations and add explicit counters
-
-**Success criteria:** Agent follows rule under maximum pressure
-
-### Technique Skills (how-to guides)
-
-**Examples:** condition-based-waiting, root-cause-tracing, defensive-programming
-
-**Test with:**
-- Application scenarios: Can they apply the technique correctly?
-- Variation scenarios: Do they handle edge cases?
-- Missing information tests: Do instructions have gaps?
-
-**Success criteria:** Agent successfully applies technique to new scenario
-
-### Pattern Skills (mental models)
-
-**Examples:** reducing-complexity, information-hiding concepts
-
-**Test with:**
-- Recognition scenarios: Do they recognize when pattern applies?
-- Application scenarios: Can they use the mental model?
-- Counter-examples: Do they know when NOT to apply?
-
-**Success criteria:** Agent correctly identifies when/how to apply pattern
-
-### Reference Skills (documentation/APIs)
-
-**Examples:** API documentation, command references, library guides
-
-**Test with:**
-- Retrieval scenarios: Can they find the right information?
-- Application scenarios: Can they use what they found correctly?
-- Gap testing: Are common use cases covered?
-
-**Success criteria:** Agent finds and correctly applies reference information
+| Skill Type | Examples | Test With | Success Criteria |
+|------------|----------|-----------|------------------|
+| **Discipline** (rules) | TDD, verification | Pressure scenarios (time + sunk cost + exhaustion), academic questions | Agent follows rule under maximum pressure |
+| **Technique** (how-to) | condition-based-waiting, root-cause-tracing | Application + variation + gap testing | Agent applies technique to new scenario |
+| **Pattern** (mental model) | reducing-complexity | Recognition + application + counter-examples | Agent identifies when/how to apply |
+| **Reference** (docs/APIs) | API docs, command refs | Retrieval + application + gap testing | Agent finds and applies info correctly |
 
 ## Common Rationalizations for Skipping Testing
 
@@ -450,25 +254,9 @@ Skills that enforce discipline (like TDD) need to resist rationalization. Agents
 
 ### Close Every Loophole Explicitly
 
-Don't just state the rule - forbid specific workarounds:
-
-<Bad>
-```markdown
-Write code before test? Delete it.
-```
-</Bad>
-
-<Good>
-```markdown
-Write code before test? Delete it. Start over.
-
-**No exceptions:**
-- Don't keep it as "reference"
-- Don't "adapt" it while writing tests
-- Don't look at it
-- Delete means delete
-```
-</Good>
+Don't just state rule - forbid specific workarounds:
+- **BAD:** `Write code before test? Delete it.`
+- **GOOD:** Add `Delete it. Start over.` + explicit `No exceptions:` list (don't keep as reference, don't adapt, don't look, delete means delete)
 
 ### Address "Spirit vs Letter" Arguments
 
@@ -518,53 +306,22 @@ description: use when implementing any feature or bugfix, before writing impleme
 
 ## RED-GREEN-REFACTOR for Skills
 
-Follow the TDD cycle:
+| Phase | Action |
+|-------|--------|
+| **RED** | Run pressure scenario WITHOUT skill → document choices/rationalizations verbatim |
+| **GREEN** | Write skill addressing specific failures → verify agent complies |
+| **REFACTOR** | Find new rationalizations → add counters → re-test until bulletproof |
 
-### RED: Write Failing Test (Baseline)
-
-Run pressure scenario with subagent WITHOUT the skill. Document exact behavior:
-- What choices did they make?
-- What rationalizations did they use (verbatim)?
-- Which pressures triggered violations?
-
-This is "watch the test fail" - you must see what agents naturally do before writing the skill.
-
-### GREEN: Write Minimal Skill
-
-Write skill that addresses those specific rationalizations. Don't add extra content for hypothetical cases.
-
-Run same scenarios WITH skill. Agent should now comply.
-
-### REFACTOR: Close Loopholes
-
-Agent found new rationalization? Add explicit counter. Re-test until bulletproof.
-
-**REQUIRED SUB-SKILL:** Use ring-default:testing-skills-with-subagents for the complete testing methodology:
-- How to write pressure scenarios
-- Pressure types (time, sunk cost, authority, exhaustion)
-- Plugging holes systematically
-- Meta-testing techniques
+**REQUIRED SUB-SKILL:** Use ring-default:testing-skills-with-subagents for pressure scenarios, pressure types, hole-plugging, meta-testing.
 
 ## Anti-Patterns
 
-### ❌ Narrative Example
-"In session 2025-10-03, we found empty projectDir caused..."
-**Why bad:** Too specific, not reusable
-
-### ❌ Multi-Language Dilution
-example-js.js, example-py.py, example-go.go
-**Why bad:** Mediocre quality, maintenance burden
-
-### ❌ Code in Flowcharts
-```dot
-step1 [label="import fs"];
-step2 [label="read file"];
-```
-**Why bad:** Can't copy-paste, hard to read
-
-### ❌ Generic Labels
-helper1, helper2, step3, pattern4
-**Why bad:** Labels should have semantic meaning
+| Pattern | Example | Why Bad |
+|---------|---------|---------|
+| **Narrative** | "In session 2025-10-03, we found..." | Too specific, not reusable |
+| **Multi-language** | example-js.js, example-py.py | Mediocre quality, maintenance burden |
+| **Code in flowcharts** | `step1 [label="import fs"]` | Can't copy-paste, hard to read |
+| **Generic labels** | helper1, step3, pattern4 | Labels need semantic meaning |
 
 ## STOP: Before Moving to Next Skill
 
@@ -581,42 +338,15 @@ Deploying untested skills = deploying untested code. It's a violation of quality
 
 ## Skill Creation Checklist (TDD Adapted)
 
-**IMPORTANT: Use TodoWrite to create todos for EACH checklist item below.**
+**Use TodoWrite for each phase.**
 
-**RED Phase - Write Failing Test:**
-- [ ] Create pressure scenarios (3+ combined pressures for discipline skills)
-- [ ] Run scenarios WITHOUT skill - document baseline behavior verbatim
-- [ ] Identify patterns in rationalizations/failures
-
-**GREEN Phase - Write Minimal Skill:**
-- [ ] Name uses only letters, numbers, hyphens (no parentheses/special chars)
-- [ ] YAML frontmatter with only name and description (max 1024 chars)
-- [ ] Description starts with "Use when..." and includes specific triggers/symptoms
-- [ ] Description written in third person
-- [ ] Keywords throughout for search (errors, symptoms, tools)
-- [ ] Clear overview with core principle
-- [ ] Address specific baseline failures identified in RED
-- [ ] Code inline OR link to separate file
-- [ ] One excellent example (not multi-language)
-- [ ] Run scenarios WITH skill - verify agents now comply
-
-**REFACTOR Phase - Close Loopholes:**
-- [ ] Identify NEW rationalizations from testing
-- [ ] Add explicit counters (if discipline skill)
-- [ ] Build rationalization table from all test iterations
-- [ ] Create red flags list
-- [ ] Re-test until bulletproof
-
-**Quality Checks:**
-- [ ] Small flowchart only if decision non-obvious
-- [ ] Quick reference table
-- [ ] Common mistakes section
-- [ ] No narrative storytelling
-- [ ] Supporting files only for tools or heavy reference
-
-**Deployment:**
-- [ ] Commit skill to git and push to your fork (if configured)
-- [ ] Consider contributing back via PR (if broadly useful)
+| Phase | Requirements |
+|-------|--------------|
+| **RED** | 3+ pressure scenarios, run WITHOUT skill, document rationalizations verbatim |
+| **GREEN** | Name (letters/numbers/hyphens), YAML frontmatter (<1024 chars), description starts "Use when...", third person, keywords, address baseline failures, one excellent example, verify compliance |
+| **REFACTOR** | New rationalizations → add counters, build rationalization table, create red flags, re-test |
+| **Quality** | Flowchart only if non-obvious, quick ref table, common mistakes, no narrative |
+| **Deploy** | Commit and push, consider contributing PR |
 
 ## Discovery Workflow
 

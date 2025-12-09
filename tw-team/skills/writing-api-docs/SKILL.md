@@ -27,313 +27,130 @@ related:
 
 API reference documentation describes what each endpoint does, its parameters, request/response formats, and error conditions. It focuses on the "what" rather than the "why."
 
----
-
 ## API Reference Principles
 
-### RESTful and Predictable
-- Follow standard HTTP methods and status codes
-- Use consistent URL patterns
-- Document idempotency behavior
-
-### Consistent Formats
-- Requests and responses use JSON
-- Clear typing and structures
-- Standard error format
-
-### Explicit Versioning
-- Document version in URL path
-- Note backward compatibility
-- Mark deprecated fields clearly
+- **RESTful and Predictable:** Standard HTTP methods, consistent URL patterns, document idempotency
+- **Consistent Formats:** JSON requests/responses, clear typing, standard error format
+- **Explicit Versioning:** Version in URL path, backward compatibility notes, deprecated fields marked
 
 ---
 
 ## Endpoint Documentation Structure
 
-### Basic Structure
-
-```markdown
-# Endpoint Name
-
-Brief description of what this endpoint does.
-
-## Request
-
-### HTTP Method and Path
-
-`POST /v1/organizations/{organizationId}/ledgers/{ledgerId}/accounts`
-
-### Path Parameters
-
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| organizationId | uuid | Yes | The unique identifier of the Organization |
-| ledgerId | uuid | Yes | The unique identifier of the Ledger |
-
-### Request Body
-
-```json
-{
-  "name": "string",
-  "assetCode": "string",
-  "type": "string"
-}
-```
-
-### Request Body Fields
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| name | string | Yes | The name of the Account |
-| assetCode | string | Yes | The code of the Asset (e.g., "BRL", "USD") |
-| type | string | No | The account type classification |
-
-## Response
-
-### Success Response (201 Created)
-
-```json
-{
-  "id": "3172933b-50d2-4b17-96aa-9b378d6a6eac",
-  "name": "Customer Account",
-  "assetCode": "BRL",
-  "status": {
-    "code": "ACTIVE"
-  },
-  "createdAt": "2024-01-15T10:30:00Z"
-}
-```
-
-### Response Fields
-
-| Field | Type | Description |
-|-------|------|-------------|
-| id | uuid | The unique identifier of the created Account |
-| name | string | The name of the Account |
-| createdAt | timestamptz | Timestamp of creation (UTC) |
-
-## Errors
-
-| Status Code | Error Code | Description |
-|-------------|------------|-------------|
-| 400 | INVALID_REQUEST | Request body validation failed |
-| 404 | LEDGER_NOT_FOUND | The specified Ledger does not exist |
-| 409 | ACCOUNT_EXISTS | An account with this alias already exists |
-```
+| Section | Content |
+|---------|---------|
+| **Title** | Endpoint name |
+| **Description** | Brief description of what the endpoint does |
+| **HTTP Method + Path** | `POST /v1/organizations/{orgId}/ledgers/{ledgerId}/accounts` |
+| **Path Parameters** | Table: Parameter, Type, Required, Description |
+| **Query Parameters** | Table: Parameter, Type, Default, Description |
+| **Request Body** | JSON example + fields table |
+| **Success Response** | Status code + JSON example + fields table |
+| **Errors** | Table: Status Code, Error Code, Description |
 
 ---
 
 ## Field Description Patterns
 
-### Basic Field Description
-
-```markdown
-| name | string | The name of the Account |
-```
-
-### Field with Constraints
-
-```markdown
-| code | string | The asset code (max 10 characters, uppercase) |
-```
-
-### Field with Example
-
-```markdown
-| email | string | User email address (e.g., "user@example.com") |
-```
-
-### Required vs Optional
-
-```markdown
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| name | string | Yes | The name of the Account |
-| alias | string | No | A user-friendly identifier. If omitted, uses the account ID |
-```
-
-### Deprecated Fields
-
-```markdown
-| chartOfAccountsGroupName | string | **[Deprecated]** Use `route` instead. The name of the group. |
-```
+| Type | Pattern |
+|------|---------|
+| Basic | `name: string — The name of the Account` |
+| With constraints | `code: string — The asset code (max 10 chars, uppercase)` |
+| With example | `email: string — Email address (e.g., "user@example.com")` |
+| Deprecated | `chartOfAccountsGroupName: string — **[Deprecated]** Use \`route\` instead` |
 
 ---
 
 ## Data Types Reference
 
-Use consistent type names across all documentation:
-
 | Type | Description | Example |
 |------|-------------|---------|
 | `uuid` | UUID v4 identifier | `3172933b-50d2-4b17-96aa-9b378d6a6eac` |
 | `string` | Text value | `"Customer Account"` |
-| `text` | Long text value | `"Detailed description..."` |
 | `integer` | Whole number | `42` |
-| `boolean` | True/false value | `true` |
-| `timestamptz` | ISO 8601 timestamp (UTC) | `2024-01-15T10:30:00Z` |
+| `boolean` | True/false | `true` |
+| `timestamptz` | ISO 8601 (UTC) | `2024-01-15T10:30:00Z` |
 | `jsonb` | JSON object | `{"key": "value"}` |
 | `array` | List of values | `["item1", "item2"]` |
-| `enum` | One of predefined values | `currency`, `crypto`, `commodity` |
+| `enum` | Predefined values | `currency`, `crypto` |
 
 ---
 
 ## Request/Response Examples
 
-### Complete Request Example
-
-Always show a realistic, working example:
-
-```json
-{
-  "name": "João Silva - Checking",
-  "assetCode": "BRL",
-  "type": "checking",
-  "alias": "@joao_checking",
-  "metadata": {
-    "customerId": "cust_123456",
-    "branch": "0001"
-  }
-}
-```
-
-### Complete Response Example
-
-Show all fields that would be returned:
-
-```json
-{
-  "id": "3172933b-50d2-4b17-96aa-9b378d6a6eac",
-  "organizationId": "7c3e4f2a-1b8d-4e5c-9f0a-2d3e4f5a6b7c",
-  "ledgerId": "1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d",
-  "name": "João Silva - Checking",
-  "assetCode": "BRL",
-  "type": "checking",
-  "alias": "@joao_checking",
-  "status": {
-    "code": "ACTIVE",
-    "description": null
-  },
-  "metadata": {
-    "customerId": "cust_123456",
-    "branch": "0001"
-  },
-  "createdAt": "2024-01-15T10:30:00Z",
-  "updatedAt": "2024-01-15T10:30:00Z",
-  "deletedAt": null
-}
-```
+**Rules:**
+- Show realistic, working examples (not "foo", "bar")
+- Show all fields that would be returned
+- Use actual UUIDs, timestamps, realistic data
 
 ---
 
 ## Error Documentation
 
-### Standard Error Format
-
+**Standard error format:**
 ```json
 {
   "code": "ACCOUNT_NOT_FOUND",
   "message": "The specified account does not exist",
-  "details": {
-    "accountId": "invalid-uuid"
-  }
+  "details": { "accountId": "invalid-uuid" }
 }
 ```
 
-### Error Table Format
+**Error table:**
 
-| Status Code | Error Code | Description | Resolution |
-|-------------|------------|-------------|------------|
-| 400 | INVALID_REQUEST | Request validation failed | Check request body format |
-| 401 | UNAUTHORIZED | Missing or invalid authentication | Provide valid API key |
-| 403 | FORBIDDEN | Insufficient permissions | Contact admin for access |
-| 404 | NOT_FOUND | Resource does not exist | Verify the resource ID |
-| 409 | CONFLICT | Resource already exists | Use a different identifier |
-| 422 | UNPROCESSABLE_ENTITY | Business rule violation | Check business constraints |
+| Status | Code | Description | Resolution |
+|--------|------|-------------|------------|
+| 400 | INVALID_REQUEST | Validation failed | Check request format |
+| 401 | UNAUTHORIZED | Missing/invalid auth | Provide valid API key |
+| 403 | FORBIDDEN | Insufficient permissions | Contact admin |
+| 404 | NOT_FOUND | Resource doesn't exist | Verify resource ID |
+| 409 | CONFLICT | Resource already exists | Use different identifier |
+| 422 | UNPROCESSABLE_ENTITY | Business rule violation | Check constraints |
+| 429 | TOO_MANY_REQUESTS | Rate limit exceeded | Retry after delay |
 | 500 | INTERNAL_ERROR | Server error | Retry or contact support |
 
 ---
 
 ## HTTP Status Codes
 
-### Success Codes
+**Success:** 200 (GET/PUT/PATCH), 201 (POST creates), 204 (DELETE)
 
-| Code | Usage |
-|------|-------|
-| 200 OK | Successful GET, PUT, PATCH |
-| 201 Created | Successful POST that creates a resource |
-| 204 No Content | Successful DELETE |
+**Client errors:** 400 (malformed), 401 (no auth), 403 (no permission), 404 (not found), 409 (conflict), 422 (invalid semantics), 429 (rate limit)
 
-### Error Codes
-
-| Code | Usage |
-|------|-------|
-| 400 Bad Request | Malformed request syntax |
-| 401 Unauthorized | Missing or invalid authentication |
-| 403 Forbidden | Valid auth but insufficient permissions |
-| 404 Not Found | Resource does not exist |
-| 409 Conflict | Resource state conflict (e.g., duplicate) |
-| 422 Unprocessable Entity | Valid syntax but invalid semantics |
-| 429 Too Many Requests | Rate limit exceeded |
-| 500 Internal Server Error | Server-side error |
+**Server errors:** 500 (internal)
 
 ---
 
 ## Pagination Documentation
 
-When an endpoint returns paginated results:
-
-```markdown
-### Query Parameters
+For paginated endpoints, document query parameters:
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| limit | integer | 10 | Number of results per page (max 100) |
-| page | integer | 1 | Page number to retrieve |
+| limit | integer | 10 | Results per page (max 100) |
+| page | integer | 1 | Page number |
 
-### Pagination Response
-
-```json
-{
-  "items": [...],
-  "page": 1,
-  "limit": 10,
-  "totalItems": 150,
-  "totalPages": 15
-}
-```
-```
+Response includes: `items`, `page`, `limit`, `totalItems`, `totalPages`
 
 ---
 
-## API Versioning Notes
+## Versioning Notes
 
-When documenting versioned APIs:
-
-```markdown
 > **Note:** You're viewing documentation for the **current version** (v3).
-> For previous versions, use the version switcher.
-```
 
-For deprecated endpoints:
-
-```markdown
-> **Deprecated:** This endpoint will be removed in v4. Use [/v3/accounts](link) instead.
-```
+For deprecated: `> **Deprecated:** This endpoint will be removed in v4. Use [/v3/accounts](link) instead.`
 
 ---
 
 ## Quality Checklist
 
-Before finishing API documentation, verify:
-
-- [ ] HTTP method and path are correct
+- [ ] HTTP method and path correct
 - [ ] All path parameters documented
 - [ ] All query parameters documented
 - [ ] All request body fields documented with types
 - [ ] All response fields documented with types
-- [ ] Required vs optional fields are clear
+- [ ] Required vs optional clear
 - [ ] Realistic request/response examples included
 - [ ] All error codes documented
-- [ ] Deprecated fields are marked
+- [ ] Deprecated fields marked
 - [ ] Links to related endpoints included

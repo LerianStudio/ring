@@ -30,81 +30,37 @@ Jumping from PRD to TRD without mapping creates:
 - Architectures that don't match feature interaction patterns
 - Missing integration points discovered late
 - Poor module boundaries that cross feature concerns
-- Difficulty prioritizing work without understanding dependencies
 
 **The Feature Map answers**: How do features relate, group, and interact at a business level?
 **The Feature Map never answers**: How we'll technically implement those features (that's TRD).
 
-## When to Use This Skill
-
-Use this skill when:
-- PRD has passed Gate 1 validation
-- About to start technical architecture (TRD)
-- Need to understand feature scope and relationships
-- Multiple features have complex interactions
-- Unclear how to group or prioritize features
-
 ## Mandatory Workflow
 
-### Phase 1: Feature Analysis (Inputs Required)
-1. **Approved PRD** (Gate 1 passed) - business requirements locked
-2. **Extract all features** from PRD
-3. **Identify user journeys** across features
-4. **Map feature interactions** and dependencies
-
-### Phase 2: Feature Mapping
-1. **Categorize features** (Core/Supporting/Enhancement/Integration)
-2. **Group into domains** (logical business groupings)
-3. **Map user journeys** (how users flow through features)
-4. **Identify integration points** (where features interact)
-5. **Define boundaries** (what each feature owns)
-6. **Visualize relationships** (diagrams or structured text)
-7. **Prioritize by value** (core vs. nice-to-have)
-
-### Phase 3: Gate 2 Validation
-**MANDATORY CHECKPOINT** - Must pass before proceeding to TRD:
-- [ ] All PRD features are mapped
-- [ ] Feature categories are clearly defined
-- [ ] Domain groupings are logical and cohesive
-- [ ] User journeys are complete (start to finish)
-- [ ] Integration points are identified
-- [ ] Feature boundaries are clear (no overlap)
-- [ ] Priority levels support phased delivery
-- [ ] No technical implementation details included
+| Phase | Activities |
+|-------|------------|
+| **1. Feature Analysis** | Load approved PRD (Gate 1); extract all features; identify user journeys; map feature interactions and dependencies |
+| **2. Feature Mapping** | Categorize (Core/Supporting/Enhancement/Integration); group into domains; map user journeys; identify integration points; define boundaries; visualize relationships; prioritize by value |
+| **3. Gate 2 Validation** | All PRD features mapped; categories defined; domains logical; journeys complete; integration points identified; boundaries clear; priorities support phased delivery; no technical details |
 
 ## Explicit Rules
 
-### ✅ DO Include in Feature Map
-- Feature list (extracted from PRD)
-- Feature categories (Core/Supporting/Enhancement/Integration)
-- Domain groupings (logical business areas)
-- User journey maps (how users move through features)
-- Feature interactions (which features depend on/trigger others)
-- Integration points (where features exchange data/events)
-- Feature boundaries (what each feature owns)
-- Priority levels (MVP vs. future phases)
-- Scope visualization (what's in/out of each phase)
+### ✅ DO Include
+Feature list (from PRD), categories (Core/Supporting/Enhancement/Integration), domain groupings (business areas), user journey maps, feature interactions, integration points, feature boundaries, priority levels, scope visualization
 
-### ❌ NEVER Include in Feature Map
-- Technical architecture or component design
-- Technology choices or framework decisions
-- Database schemas or API specifications
-- Implementation approaches or algorithms
-- Infrastructure or deployment concerns
-- Code structure or file organization
-- Protocol choices or data formats
+### ❌ NEVER Include
+Technical architecture/components, technology choices/frameworks, database schemas/API specs, implementation approaches, infrastructure/deployment, code structure, protocols/data formats
 
-### Feature Categorization Rules
-1. **Core**: Must have for MVP, blocks other features
-2. **Supporting**: Enables core features, medium priority
-3. **Enhancement**: Improves existing features, nice-to-have
-4. **Integration**: Connects to external systems, varies by need
+### Categorization Rules
+- **Core**: Must have for MVP, blocks other features
+- **Supporting**: Enables core features, medium priority
+- **Enhancement**: Improves existing features, nice-to-have
+- **Integration**: Connects to external systems
 
 ### Domain Grouping Rules
-1. Group features by business capability (not technical layer)
-2. Each domain should have cohesive, related features
-3. Minimize cross-domain dependencies
-4. Name domains by business function (User Management, Payment Processing)
+- Group by business capability (not technical layer)
+- Each domain = cohesive related features
+- Minimize cross-domain dependencies
+- Name by business function (User Management, Payment Processing)
 
 ## Rationalization Table
 
@@ -137,357 +93,59 @@ If you catch yourself writing any of these in a Feature Map, **STOP**:
 
 ## Gate 2 Validation Checklist
 
-Before proceeding to TRD, verify:
+| Category | Requirements |
+|----------|--------------|
+| **Feature Completeness** | All PRD features included; clear descriptions; categories assigned; none missing |
+| **Grouping Clarity** | Domains logically cohesive; clear boundaries; cross-domain deps minimized; business function names |
+| **Journey Mapping** | Primary journeys documented (start to finish); features touched shown; happy/error paths; handoffs identified |
+| **Integration Points** | All interactions identified; data/event exchange points marked; directional deps clear; circular deps resolved |
+| **Priority & Phasing** | MVP features identified; rationale documented; incremental value delivery; deps don't block MVP |
 
-**Feature Completeness**:
-- [ ] All PRD features are included in map
-- [ ] Each feature has clear description and purpose
-- [ ] Feature categories are assigned (Core/Supporting/Enhancement/Integration)
-- [ ] No features are missing or overlooked
+**Gate Result:** ✅ PASS → TRD | ⚠️ CONDITIONAL (clarify boundaries) | ❌ FAIL (poor groupings/missing features)
 
-**Grouping Clarity**:
-- [ ] Domains are logically cohesive (related business capabilities)
-- [ ] Domain boundaries are clear (no overlapping responsibilities)
-- [ ] Cross-domain dependencies are minimized
-- [ ] Domain names reflect business function (not technical layer)
+## Feature Map Template Structure
 
-**Journey Mapping**:
-- [ ] Primary user journeys are documented (start to finish)
-- [ ] Journeys show which features users touch
-- [ ] Happy path and error scenarios covered
-- [ ] Handoff points between features identified
+Output to `docs/pre-dev/{feature-name}/feature-map.md` with these sections:
 
-**Integration Points**:
-- [ ] All feature interactions are identified
-- [ ] Data/event exchange points are marked
-- [ ] Directional dependencies are clear (A depends on B)
-- [ ] Circular dependencies are flagged and resolved
+| Section | Content |
+|---------|---------|
+| **Overview** | PRD reference, status, last updated |
+| **Feature Inventory** | Tables by category (Core/Supporting/Enhancement/Integration): Feature ID, Name, Description, User Value, Dependencies |
+| **Domain Groupings** | Per domain: Purpose, Features list, Boundaries (Owns/Consumes/Provides), Integration Points (→/←) |
+| **User Journeys** | Per journey: User Type, Goal, Path (steps with features, integrations, success/failure), Cross-Domain Interactions |
+| **Feature Interaction Map** | ASCII/text diagram with relationships, Dependency Matrix table (Feature, Depends On, Blocks, Optional) |
+| **Phasing Strategy** | Per phase: Goal, Timeline, Features, User Value, Success Criteria, Triggers for next phase |
+| **Scope Boundaries** | In Scope, Out of Scope (with rationale), Assumptions, Constraints |
+| **Risk Assessment** | Feature Complexity Risks table, Integration Risks table |
+| **Gate 2 Validation** | Date, validator, checklist, approval, next step |
 
-**Priority & Phasing**:
-- [ ] MVP features clearly identified
-- [ ] Priority rationale is documented
-- [ ] Phasing supports incremental value delivery
-- [ ] Dependencies don't block MVP delivery
+## Common Violations
 
-**Gate Result**:
-- ✅ **PASS**: All checkboxes checked → Proceed to TRD
-- ⚠️ **CONDITIONAL**: Clarify ambiguous boundaries → Re-validate
-- ❌ **FAIL**: Features poorly grouped or missing → Rework
-
-## Feature Map Template
-
-Use this structure:
-
-```markdown
-# Feature Map: [Project/Feature Name]
-
-## Overview
-- **PRD Reference**: [Link to approved PRD]
-- **Last Updated**: [Date]
-- **Status**: Draft / Under Review / Approved
-
-## Feature Inventory
-
-### Core Features (MVP)
-| Feature ID | Feature Name | Description | User Value | Dependencies |
-|------------|--------------|-------------|------------|--------------|
-| F-001 | [Name] | [Brief description] | [What users gain] | [Other features] |
-| F-002 | [Name] | [Brief description] | [What users gain] | [Other features] |
-
-### Supporting Features
-| Feature ID | Feature Name | Description | User Value | Dependencies |
-|------------|--------------|-------------|------------|--------------|
-| F-101 | [Name] | [Brief description] | [What users gain] | [Other features] |
-
-### Enhancement Features (Post-MVP)
-| Feature ID | Feature Name | Description | User Value | Dependencies |
-|------------|--------------|-------------|------------|--------------|
-| F-201 | [Name] | [Brief description] | [What users gain] | [Other features] |
-
-### Integration Features
-| Feature ID | Feature Name | Description | User Value | Dependencies |
-|------------|--------------|-------------|------------|--------------|
-| F-301 | [Name] | [Brief description] | [What users gain] | [Other features] |
-
-## Domain Groupings
-
-### Domain 1: [Business Domain Name]
-**Purpose**: [What business capability this domain provides]
-
-**Features**:
-- F-001: [Feature name]
-- F-002: [Feature name]
-- F-101: [Feature name]
-
-**Boundaries**:
-- **Owns**: [What data/processes this domain is responsible for]
-- **Consumes**: [What it needs from other domains]
-- **Provides**: [What it offers to other domains]
-
-**Integration Points**:
-- → Domain 2: [What/why they interact]
-- ← Domain 3: [What/why they interact]
-
-### Domain 2: [Business Domain Name]
-[Same structure as Domain 1]
-
-## User Journeys
-
-### Journey 1: [Journey Name]
-**User Type**: [Primary persona from PRD]
-**Goal**: [What user wants to accomplish]
-
-**Path**:
-1. **[Feature F-001]**: [User action and feature response]
-   - Integration: [If interacts with another feature]
-2. **[Feature F-002]**: [User action and feature response]
-3. **[Feature F-003]**: [User action and feature response]
-   - Success: [What happens on success]
-   - Failure: [What happens on failure, which feature handles]
-
-**Cross-Domain Interactions**:
-- Domain 1 → Domain 2: [What data/event passes between]
-- Domain 2 → Domain 3: [What data/event passes between]
-
-### Journey 2: [Journey Name]
-[Same structure]
-
-## Feature Interaction Map
-
-### High-Level Relationships
-```
-[Visual or structured text showing feature relationships]
-
-Example:
-┌─────────────────┐
-│  User Auth      │ (Core)
-│  F-001          │
-└────────┬────────┘
-         │ provides identity to
-         ↓
-┌─────────────────┐     ┌──────────────────┐
-│ User Profile    │────→│ File Upload      │
-│ F-002           │     │ F-003            │
-└─────────────────┘     └──────────────────┘
-   (Core)                  (Supporting)
-         │
-         │ triggers
-         ↓
-┌─────────────────┐
-│ Notifications   │
-│ F-101           │
-└─────────────────┘
-   (Supporting)
-```
-
-### Dependency Matrix
-| Feature | Depends On | Blocks | Optional |
-|---------|-----------|--------|----------|
-| F-001 | None | F-002, F-003 | - |
-| F-002 | F-001 | F-101 | F-003 |
-| F-003 | F-001 | None | F-002 |
-| F-101 | F-002 | None | - |
-
-## Phasing Strategy
-
-### Phase 1 - MVP (Core Features)
-**Goal**: [Minimum viable product goal]
-**Timeline**: [Estimated timeframe]
-
-**Features**:
-- F-001: User Auth
-- F-002: User Profile
-- F-003: File Upload
-
-**User Value**: [What users can do after Phase 1]
-**Success Criteria**: [How we measure Phase 1 success]
-
-### Phase 2 - Enhancement
-**Goal**: [Enhancement goal]
-**Triggers**: [What conditions trigger Phase 2]
-
-**Features**:
-- F-101: Notifications
-- F-102: Advanced Search
-- F-201: Social Sharing
-
-**User Value**: [What users gain in Phase 2]
-
-### Phase 3 - Integration
-**Goal**: [Integration goal]
-
-**Features**:
-- F-301: External Payment Gateway
-- F-302: Third-party Analytics
-
-**User Value**: [What users gain in Phase 3]
-
-## Scope Boundaries
-
-### In Scope (This Feature Map)
-- [Feature area 1]
-- [Feature area 2]
-- [Feature area 3]
-
-### Out of Scope (Future / Other Projects)
-- [Feature area X] - Rationale: [Why out of scope]
-- [Feature area Y] - Rationale: [Why out of scope]
-
-### Assumptions
-- [Assumption 1 about features or interactions]
-- [Assumption 2]
-
-### Constraints
-- [Business constraint 1 that affects feature scope]
-- [Business constraint 2]
-
-## Risk Assessment
-
-### Feature Complexity Risks
-| Feature | Complexity | Risk | Mitigation |
-|---------|-----------|------|------------|
-| F-001 | High | User adoption | [How to mitigate] |
-| F-003 | Medium | Scope creep | [How to mitigate] |
-
-### Integration Risks
-| Integration Point | Risk | Impact | Mitigation |
-|-------------------|------|--------|------------|
-| F-001 → F-002 | [Risk description] | High | [Mitigation] |
-| F-002 → F-101 | [Risk description] | Medium | [Mitigation] |
-
-## Gate 2 Validation
-
-**Validation Date**: [Date]
-**Validated By**: [Person/team]
-
-- [ ] All PRD features mapped
-- [ ] Domain groupings are logical
-- [ ] User journeys are complete
-- [ ] Integration points identified
-- [ ] Priorities support phased delivery
-- [ ] No technical details included
-- [ ] Ready for TRD architecture design
-
-**Approval**: ☐ Approved | ☐ Needs Revision | ☐ Rejected
-**Next Step**: Proceed to TRD Creation (pre-dev-trd-creation)
-```
-
-## Common Violations and Fixes
-
-### Violation 1: Technical Details in Feature Descriptions
-❌ **Wrong**:
-```markdown
-### F-001: User Authentication
-- Description: JWT-based auth with PostgreSQL session storage
-- Dependencies: Database, Redis cache, OAuth2 service
-```
-
-✅ **Correct**:
-```markdown
-### F-001: User Authentication
-- Description: Users can create accounts and securely log in
-- User Value: Access to personalized features
-- Dependencies: None (foundational)
-- Blocks: F-002 (Profile), F-003 (Upload)
-```
-
-### Violation 2: Technical Components in Domain Groupings
-❌ **Wrong**:
-```markdown
-### Domain: Auth Services
-- AuthService component
-- TokenValidator component
-- SessionManager component
-```
-
-✅ **Correct**:
-```markdown
-### Domain: User Identity
-**Purpose**: Managing user accounts, authentication, and session lifecycle
-
-**Features**:
-- F-001: User Registration
-- F-002: User Login
-- F-003: Session Management
-- F-004: Password Recovery
-
-**Boundaries**:
-- **Owns**: User credentials, session state, login history
-- **Provides**: Identity verification to all other domains
-- **Consumes**: Email service for notifications
-```
-
-### Violation 3: Implementation in Integration Points
-❌ **Wrong**:
-```markdown
-### Integration Points
-- User Auth → Profile: REST API call to /api/profile with JWT
-- Profile → Storage: S3 upload via pre-signed URL
-```
-
-✅ **Correct**:
-```markdown
-### Integration Points
-- User Auth → Profile: Provides verified user identity
-- Profile → File Storage: Requests secure file storage for user uploads
-- File Storage → Notifications: Triggers notification when upload completes
-```
+| Violation | Wrong | Correct |
+|-----------|-------|---------|
+| **Tech in Features** | `F-001: JWT-based auth with PostgreSQL sessions, Deps: Database, Redis cache` | `F-001: Users can create accounts and log in, User Value: Access personalized features, Deps: None (foundational), Blocks: F-002, F-003` |
+| **Tech in Domains** | `Domain: Auth Services with AuthService, TokenValidator, SessionManager components` | `Domain: User Identity - Purpose: Managing user accounts and sessions. Features: Registration, Login, Session Mgmt, Password Recovery. Owns: credentials, session state. Provides: identity verification` |
+| **Tech in Integration** | `User Auth → Profile: REST API call to /api/profile with JWT` | `User Auth → Profile: Provides verified user identity` |
 
 ## Confidence Scoring
 
-```yaml
-Confidence Factors:
-  Feature Coverage: [0-25]
-    - All PRD features mapped: 25
-    - Most features mapped: 15
-    - Some features missing: 5
+| Factor | Points | Criteria |
+|--------|--------|----------|
+| Feature Coverage | 0-25 | All mapped: 25, Most: 15, Some missing: 5 |
+| Relationship Clarity | 0-25 | All documented: 25, Most clear: 15, Unclear: 5 |
+| Domain Cohesion | 0-25 | Logically cohesive: 25, Mostly: 15, Poor boundaries: 5 |
+| Journey Completeness | 0-25 | All paths: 25, Primary: 15, Incomplete: 5 |
 
-  Relationship Clarity: [0-25]
-    - All interactions documented: 25
-    - Most interactions clear: 15
-    - Relationships unclear: 5
+**Action:** 80+ proceed to TRD | 50-79 address gaps | <50 rework groupings
 
-  Domain Cohesion: [0-25]
-    - Domains are logically cohesive: 25
-    - Domains mostly cohesive: 15
-    - Poor domain boundaries: 5
+## Output & After Approval
 
-  Journey Completeness: [0-25]
-    - All user paths mapped: 25
-    - Primary paths mapped: 15
-    - Journeys incomplete: 5
+**Output to:** `docs/pre-dev/{feature-name}/feature-map.md`
 
-Total: [0-100]
-
-Action:
-  80+: Feature map complete, proceed to TRD
-  50-79: Address gaps, re-validate
-  <50: Rework groupings and relationships
-```
-
-## Output Location
-
-**Always output to**: `docs/pre-dev/{feature-name}/feature-map.md`
-
-## After Feature Map Approval
-
-1. ✅ Lock the Feature Map - feature scope and relationships are now reference
-2. 🎯 Use Feature Map as input for TRD (next phase)
-3. 🚫 Never add technical architecture to Feature Map retroactively
+1. ✅ Lock Feature Map - scope and relationships are now reference
+2. 🎯 Use as input for TRD (next phase)
+3. 🚫 Never add technical architecture retroactively
 4. 📋 Keep business features separate from technical components
-
-## Quality Self-Check
-
-Before declaring Feature Map complete, verify:
-- [ ] All PRD features are included and categorized
-- [ ] Domain groupings are cohesive and logical
-- [ ] User journeys show cross-feature flows
-- [ ] Integration points are identified (WHAT interacts, not HOW)
-- [ ] Feature boundaries are clear (no overlap)
-- [ ] Priority levels support phased delivery
-- [ ] Dependencies don't create circular blocks
-- [ ] Zero technical implementation details present
-- [ ] Gate 2 validation checklist 100% complete
 
 ## The Bottom Line
 
@@ -496,11 +154,5 @@ Before declaring Feature Map complete, verify:
 The Feature Map is business-level feature relationships only. Period. No components. No APIs. No databases.
 
 Technical architecture goes in TRD. That's the next phase. Wait for it.
-
-Violating this separation means:
-- You're constraining architecture before understanding feature interactions
-- Feature groupings become coupled to technical layers
-- You can't objectively design architecture that matches business needs
-- Boundaries become technical instead of business-driven
 
 **Map the features. Understand relationships. Then architect in TRD.**

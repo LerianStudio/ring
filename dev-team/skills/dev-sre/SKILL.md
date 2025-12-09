@@ -193,16 +193,7 @@ If you catch yourself thinking ANY of these, STOP immediately:
 
 ## Handling Pushback
 
-When user or stakeholder pushes back on observability:
-
-**Response template:**
-"Observability is not optional for production services. Without it:
-- We cannot detect failures automatically
-- We cannot measure SLO compliance
-- We cannot debug production issues efficiently
-- We cannot enable auto-recovery
-
-If time-constrained, reduce FEATURE scope, not observability scope."
+**Response:** "Observability is not optional. Without it: no auto-detection of failures, no SLO measurement, no efficient debugging, no auto-recovery. If time-constrained, reduce FEATURE scope, not observability scope."
 
 ## Prerequisites
 
@@ -214,195 +205,41 @@ Before starting Gate 2:
 
 ## Step 1: Analyze Observability Implementation
 
-Review what developers implemented in Gate 0 and validate:
-
-```
-From Gate 0/1 Handoff:
-- Service type: API / Worker / Batch Job
-- Language: Go / TypeScript / Python
-- External dependencies: {list databases, caches, APIs}
-
-Observability to Validate:
-- [ ] Health endpoints (/health, /ready)
-- [ ] Structured logging
-- [ ] Distributed tracing (if external calls exist)
-- [ ] Grafana dashboard (optional)
-- [ ] Alert rules (optional)
-
-Current Status (from Gate 0 implementation):
-- Health checks: EXISTS/MISSING
-- Logging: STRUCTURED/UNSTRUCTURED/MISSING
-- Tracing: EXISTS/MISSING/N/A
-```
+Review Gate 0/1 handoff: Service type (API/Worker/Batch), Language, External dependencies. Check status of: Health endpoints, Structured logging, Tracing, Dashboard/Alerts (optional).
 
 ## Step 2: Dispatch SRE Agent for Validation
 
-Dispatch `ring-dev-team:sre` to VALIDATE observability implementation:
+**Dispatch:** `Task(subagent_type: "ring-dev-team:sre")` - VALIDATE observability (not implement). Include service info (type, language, deps) and Gate 0/1 handoff. Agent validates: Health endpoints, JSON logging, Tracing. Returns: PASS/FAIL per component, issues by severity.
 
-```
-Task tool:
-  subagent_type: "ring-dev-team:sre"
-  model: "opus"
-  prompt: |
-    VALIDATE observability implementation for the service.
+## Steps 3-5: Validate Health, Logging, Tracing
 
-    **Your role is VALIDATION, not implementation. Developers already implemented observability in Gate 0.**
-
-    ## Service Information
-    - Language: {Go/TypeScript/Python}
-    - Service type: {API/Worker/Batch}
-    - External dependencies: {list}
-
-    ## Implementation Summary from Gate 0/1
-    {paste Gate 0/1 handoff - should include observability code already implemented}
-
-    ## Validation Checklist
-
-    ### 1. Health Checks (Required)
-    VALIDATE that:
-    - GET /health returns 200 when process running
-    - GET /ready returns 200 when dependencies are healthy
-    - GET /ready returns 503 when dependencies are down
-
-    ### 2. Structured Logging (Required)
-    VALIDATE that logs:
-    - Are JSON formatted
-    - Include: timestamp, level, message, service
-    - Include trace_id when tracing enabled
-    - Do NOT log sensitive data (passwords, tokens)
-
-    ### 3. Tracing (If external calls exist)
-    VALIDATE that:
-    - Spans created for HTTP handlers
-    - Spans created for database calls
-    - Trace context propagated
-
-    ## Output
-    Report:
-    - Validation results (PASS/FAIL per component)
-    - Issues found (with severity: CRITICAL/HIGH/MEDIUM/LOW)
-    - Verification commands used
-    - Next steps for developers (if issues found)
-```
-
-## Step 3: Validate Health Checks
-
-```bash
-# Liveness check
-curl http://localhost:8080/health
-# Expected: 200 OK
-
-# Readiness check
-curl http://localhost:8080/ready
-# Expected: 200 OK with dependency status
-
-# Readiness when dependency down
-docker-compose stop db
-curl http://localhost:8080/ready
-# Expected: 503 Service Unavailable
-```
-
-**Verification checklist:**
-- [ ] `/health` returns 200 when process running
-- [ ] `/ready` returns 200 when all dependencies up
-- [ ] `/ready` returns 503 when dependency down
-- [ ] Response includes dependency status details
-
-## Step 4: Validate Logging
-
-```bash
-# Check log format
-docker-compose logs api | head -5
-
-# Expected JSON format:
-# {"timestamp":"2024-01-15T10:30:00Z","level":"info","message":"Request completed",...}
-```
-
-**Verification checklist:**
-- [ ] Logs are JSON formatted
-- [ ] Required fields present: timestamp, level, message, service
-- [ ] trace_id/span_id present when tracing enabled
-- [ ] No sensitive data logged (passwords, tokens)
-
-## Step 5: Validate Tracing (If Applicable)
-
-```bash
-# Make a request that triggers external calls
-curl http://localhost:8080/api/users
-
-# Check Jaeger UI (if configured)
-# http://localhost:16686
-
-# Or check logs for trace context
-docker-compose logs api | grep trace_id
-```
-
-**Verification checklist:**
-- [ ] Spans created for HTTP handlers
-- [ ] Spans created for database calls
-- [ ] Spans created for external API calls
-- [ ] Trace context propagated across services
+| Component | Validation Commands | Expected |
+|-----------|--------------------|---------:|
+| **Health** | `curl localhost:8080/health` | 200 OK |
+| **Ready** | `curl localhost:8080/ready` | 200 OK (with dep status) |
+| **Ready (dep down)** | `docker-compose stop db && curl localhost:8080/ready` | 503 |
+| **Logging** | `docker-compose logs app \| head -5 \| jq .` | JSON with timestamp/level/message/service |
+| **Tracing** | `docker-compose logs app \| grep trace_id` | trace_id/span_id present |
 
 ## Step 6: Prepare Handoff to Gate 3
 
-Package the following for Gate 3 (Testing):
+**Gate 2 Handoff contents:**
 
-```markdown
-## Gate 2 Handoff
-
-**SRE Validation Status:** COMPLETE/PARTIAL/NEEDS_FIXES
-
-**Observability Validated:**
-- [ ] Health endpoint at /health
-- [ ] Ready endpoint at /ready
-- [ ] Structured JSON logging
-- [ ] OpenTelemetry tracing (if applicable)
-
-**Validation Results:**
-- Health checks: PASS/FAIL
-- Logging: PASS/FAIL
-- Tracing: PASS/FAIL (or N/A)
-
-**Issues Found:**
-- {list issues by severity: CRITICAL/HIGH/MEDIUM/LOW}
-- Or "None"
-
-**Ready for Testing:**
-- [ ] All observability endpoints validated
-- [ ] Logs are structured
-- [ ] No critical/high issues remaining
-```
+| Section | Content |
+|---------|---------|
+| **Status** | COMPLETE/PARTIAL/NEEDS_FIXES |
+| **Validated** | /health ✓, /ready ✓, JSON logging ✓, Tracing (if applicable) ✓ |
+| **Results** | Health: PASS/FAIL, Logging: PASS/FAIL, Tracing: PASS/FAIL/N/A |
+| **Issues** | List by severity (CRITICAL/HIGH/MEDIUM/LOW) or "None" |
+| **Ready for Testing** | All endpoints validated ✓, Logs structured ✓, No Critical/High ✓ |
 
 ## Observability by Service Type
 
-### API Service
-```
-Required:
-- Health checks (/health, /ready)
-- Structured logging
-- Tracing (if calls external services)
-
-Optional:
-- Grafana dashboard
-- Alert rules
-```
-
-### Background Worker
-```
-Required:
-- Health check (/health)
-- Structured logging
-
-Optional:
-- Tracing
-```
-
-### Batch Job
-```
-Required:
-- Structured logging
-- Exit code handling
-```
+| Service Type | Required | Optional |
+|--------------|----------|----------|
+| **API Service** | Health checks (/health, /ready), Structured logging, Tracing (if calls external services) | Grafana dashboard, Alert rules |
+| **Background Worker** | Health check (/health), Structured logging | Tracing |
+| **Batch Job** | Structured logging, Exit code handling | — |
 
 ## Execution Report
 

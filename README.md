@@ -2,7 +2,7 @@
 
 **Proven engineering practices, enforced through skills.**
 
-Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **6 active plugins** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches to common development tasks.
+Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **5 active plugins** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches to common development tasks.
 
 ## ✨ Why Ring?
 
@@ -15,7 +15,7 @@ Without Ring, AI assistants often:
 
 Ring solves this by:
 - **Enforcing proven workflows** - Test-driven development, systematic debugging, proper planning
-- **Providing 55 specialized skills** - From brainstorming to production deployment (21 core + 10 dev-team + 10 product planning + 6 FinOps + 1 ralph-wiggum + 7 technical writing)
+- **Providing 55 specialized skills** - From brainstorming to production deployment (22 core + 10 dev-team + 10 product planning + 6 FinOps + 7 technical writing)
 - **20 specialized agents** - 5 review/planning agents + 7 developer agents + 3 research agents + 2 FinOps agents + 3 technical writing agents
 - **Automating skill discovery** - Skills load automatically at session start
 - **Preventing common failures** - Built-in anti-patterns and mandatory checklists
@@ -173,7 +173,7 @@ When you start a new Claude Code session with Ring installed, you'll see:
 - test-driven-development (RED-GREEN-REFACTOR cycle)
 - systematic-debugging (4-phase root cause analysis)
 - verification-before-completion (Evidence before claims)
-... and 44 more skills
+... and 50 more skills
 ```
 
 ## 🎯 Core Skills
@@ -208,17 +208,18 @@ Run command → Paste output → Then claim
 No "should work" → Only "does work" with proof
 ```
 
-## 📚 All 55 Skills (Across 6 Plugins)
+## 📚 All 55 Skills (Across 5 Plugins)
 
-### Core Skills (ring-default plugin - 21 skills)
+### Core Skills (ring-default plugin - 22 skills)
 
-**Testing & Debugging (6):**
+**Testing & Debugging (7):**
 - `test-driven-development` - Write test first, watch fail, minimal code
 - `systematic-debugging` - 4-phase root cause investigation
 - `verification-before-completion` - Evidence before claims
 - `testing-anti-patterns` - Common test pitfalls to avoid
 - `condition-based-waiting` - Replace timeouts with conditions
 - `defense-in-depth` - Multi-layer validation
+- `linting-codebase` - Parallel lint fixing with agent dispatch
 
 **Collaboration & Planning (10):**
 - `brainstorming` - Structured design refinement
@@ -278,11 +279,6 @@ No "should work" → Only "does work" with proof
 - `regulatory-templates-gate2` - Field mapping validation
 - `regulatory-templates-gate3` - Template file generation
 
-### Ralph Wiggum (ralph-wiggum plugin - 1 skill)
-
-**Iterative Development:**
-- `using-ralph-wiggum` - Ralph Wiggum iterative loop technique guide
-
 ### Technical Writing Skills (ring-tw-team plugin - 7 skills)
 
 **Documentation Creation:**
@@ -296,17 +292,17 @@ No "should work" → Only "does work" with proof
 
 ## 🎮 Interactive Commands
 
-Ring provides 20 slash commands across 5 plugins for common workflows.
+Ring provides 18 slash commands across 4 plugins for common workflows.
 
 ### Core Workflows (ring-default)
 
 - `/ring-default:codereview [files-or-paths]` - Dispatch 3 parallel code reviewers for comprehensive review
-- `/ring-default:codify [description]` - Document a solved problem to build searchable knowledge base
 - `/ring-default:commit [message]` - Create git commit with AI identification via Git trailers
 - `/ring-default:worktree [branch-name]` - Create isolated git workspace for parallel development
 - `/ring-default:brainstorm [topic]` - Interactive design refinement using Socratic method
 - `/ring-default:write-plan [feature]` - Create detailed implementation plan with bite-sized tasks
 - `/ring-default:execute-plan [path]` - Execute plan in batches with review checkpoints
+- `/ring-default:lint [path]` - Run lint checks and dispatch parallel agents to fix all issues
 
 ### Product Planning (ring-pm-team)
 
@@ -320,12 +316,6 @@ Ring provides 20 slash commands across 5 plugins for common workflows.
 - `/ring-dev-team:dev-status` - Show current gate progress
 - `/ring-dev-team:dev-report` - Generate development cycle report
 - `/ring-dev-team:dev-cancel` - Cancel active development cycle
-
-### Ralph Wiggum (Iterative AI Loops)
-
-- `/ralph-wiggum:ralph-loop "PROMPT" --max-iterations N --completion-promise "TEXT"` - Start autonomous iterative loop
-- `/ralph-wiggum:cancel-ralph` - Cancel active Ralph loop
-- `/ralph-wiggum:help` - Explain Ralph technique and examples
 
 ### Technical Writing (ring-tw-team)
 
@@ -400,7 +390,7 @@ Claude: Dispatching all 3 reviewers in parallel...
 ```
 ring/                                  # Monorepo root
 ├── .claude-plugin/
-│   └── marketplace.json              # Multi-plugin marketplace config (7 active plugins)
+│   └── marketplace.json              # Multi-plugin marketplace config (5 active plugins)
 ├── default/                          # Core Ring plugin (ring-default)
 │   ├── skills/                       # 21 core skills
 │   │   ├── skill-name/
@@ -439,11 +429,6 @@ ring/                                  # Monorepo root
 ├── pm-team/                    # Product Planning plugin (ring-pm-team)
 │   └── skills/                      # 10 pre-dev workflow skills
 │       └── pre-dev-*/              # PRD, TRD, API, Data, Tasks
-├── ralph-wiggum/                    # Iterative AI loops plugin (ralph-wiggum)
-│   ├── commands/                    # 3 slash commands (ralph-loop, cancel-ralph, help)
-│   ├── hooks/                       # SessionStart and Stop hooks
-│   ├── scripts/                     # Setup utilities
-│   └── skills/                      # using-ralph-wiggum skill
 ├── tw-team/                         # Technical Writing plugin (ring-tw-team)
 │   ├── skills/                      # 7 documentation skills
 │   ├── agents/                      # 3 technical writing agents

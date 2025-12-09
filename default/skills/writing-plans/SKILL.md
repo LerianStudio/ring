@@ -34,130 +34,40 @@ This skill dispatches a specialized agent to write comprehensive implementation 
 
 ## The Process
 
-**Step 1: Dispatch the write-plan agent**
+**Step 1:** Dispatch write-plan agent via `Task(subagent_type: "general-purpose", model: "opus")` with instructions to load `ring-default:write-plan` agent, create bite-sized tasks (2-5 min each), include exact file paths/complete code/verification steps, and save to `docs/plans/YYYY-MM-DD-<feature-name>.md`.
 
-Use the Task tool to launch the specialized planning agent:
-
-```
-Task(
-  subagent_type: "general-purpose",
-  description: "Write implementation plan",
-  prompt: "Use the ring-default:write-plan agent to create a comprehensive implementation plan.
-
-  Load the ring-default:write-plan agent definition and follow all instructions to:
-  - Understand the feature scope
-  - Read relevant codebase files
-  - Create bite-sized tasks (2-5 min each)
-  - Include exact file paths, complete code, and verification steps
-  - Add code review checkpoints
-  - Pass the Zero-Context Test
-
-  Save the plan to docs/plans/YYYY-MM-DD-<feature-name>.md and report back with execution options.",
-  model: "opus"
-)
-```
-
-**Step 2: Ask user about execution**
-
-After the agent completes and saves the plan, use `AskUserQuestion` to determine next steps:
-
-```
-AskUserQuestion(
-  questions: [{
-    header: "Execution",
-    question: "The plan is ready. Would you like to execute it now or save it for later?",
-    options: [
-      { label: "Execute now", description: "Start implementation in current session using subagent-driven development" },
-      { label: "Execute in parallel session", description: "Open a new agent session in the worktree for batch execution" },
-      { label: "Save for later", description: "Keep the plan for manual review before execution" }
-    ],
-    multiSelect: false
-  }]
-)
-```
-
-**Based on response:**
-- **Execute now** → Use `ring-default:subagent-driven-development` skill
-- **Execute in parallel session** → Instruct user to open new session and use `ring-default:executing-plans`
-- **Save for later** → Report plan location and end workflow
+**Step 2:** Ask user via `AskUserQuestion`: "Execute now?" Options: (1) Execute now → `ring-default:subagent-driven-development` (2) Parallel session → user opens new session with `ring-default:executing-plans` (3) Save for later → report location and end
 
 ## Why Use an Agent?
 
-**Context preservation:** Plan writing requires reading many files and analyzing architecture. Using a dedicated agent keeps the main supervisor's context clean.
-
-**Model power:** The agent runs on Opus for comprehensive planning and attention to detail.
-
-**Separation of concerns:** The supervisor orchestrates workflows, the agent focuses on deep planning work.
+**Context preservation** (reading many files keeps supervisor clean) | **Model power** (Opus for comprehensive planning) | **Separation of concerns** (supervisor orchestrates, agent plans)
 
 ## What the Agent Does
 
-The write-plan agent will:
-1. Explore the codebase to understand architecture
-2. Identify all files that need modification
-3. Break the feature into bite-sized tasks (2-5 minutes each)
-4. Write complete, copy-paste ready code for each task
-5. Include exact commands with expected output
-6. Add code review checkpoints after task batches
-7. Verify the plan passes the Zero-Context Test
-8. Save to `docs/plans/YYYY-MM-DD-<feature-name>.md`
-9. Report back (supervisor then uses `AskUserQuestion` for execution choice)
+Explore codebase → identify files → break into bite-sized tasks (2-5 min) → write complete code → include exact commands → add review checkpoints → verify Zero-Context Test → save to `docs/plans/YYYY-MM-DD-<feature>.md` → report back
 
 ## Requirements for Plans
 
-The agent ensures every plan includes:
-- ✅ Header with goal, architecture, tech stack, prerequisites
-- ✅ Verification commands with expected output
-- ✅ Exact file paths (never "somewhere in src")
-- ✅ Complete code (never "add validation here")
-- ✅ Bite-sized steps separated by verification
-- ✅ Failure recovery steps
-- ✅ Code review checkpoints with severity-based handling
-- ✅ Passes Zero-Context Test (executable with only the document)
-- ✅ **Recommended agents per task** (see Agent Selection below)
+Every plan: Header (goal, architecture, tech stack) | Verification commands with expected output | Exact file paths (never "somewhere in src") | Complete code (never "add validation here") | Bite-sized steps with verification | Failure recovery | Review checkpoints | Zero-Context Test | **Recommended agents per task**
 
-## Agent Selection for Execution
+## Agent Selection
 
-Plans should specify which specialized agents to use for each task type. During execution, prefer specialized agents over general-purpose when available.
-
-**Pattern matching for agent selection:**
-
-| Task Type | Agent Pattern | Examples |
-|-----------|---------------|----------|
-| Backend API/services | `ring-dev-team:backend-engineer-*` | `backend-engineer-golang`, `backend-engineer-typescript` |
-| Frontend UI/components/BFF | `ring-dev-team:frontend-bff-engineer-typescript` | Single agent |
-| Infrastructure/CI/CD | `ring-dev-team:devops-engineer` | Single agent |
-| Testing strategy | `ring-dev-team:qa-analyst` | Single agent |
-| Monitoring/reliability | `ring-dev-team:sre` | Single agent |
-
-**Plan header should include:**
-```markdown
-## Recommended Agents
-- Backend tasks: `ring-dev-team:backend-engineer-golang` (or language variant: `-python`, `-typescript`)
-- Frontend tasks: `ring-dev-team:frontend-bff-engineer-typescript`
-- Fallback: `general-purpose` (built-in Claude agent, no ring- prefix needed)
-```
-
-**Agent availability check:** If `ring-dev-team` plugin is not installed, execution falls back to Claude's built-in `general-purpose` agent automatically.
+| Task Type | Agent |
+|-----------|-------|
+| Backend API/services | `ring-dev-team:backend-engineer-{golang,typescript}` |
+| Frontend/BFF | `ring-dev-team:frontend-bff-engineer-typescript` |
+| Infra/CI/CD | `ring-dev-team:devops-engineer` |
+| Testing | `ring-dev-team:qa-analyst` |
+| Reliability | `ring-dev-team:sre` |
+| Fallback | `general-purpose` (built-in, no prefix) |
 
 ## Execution Options Reference
 
-When user selects an execution mode via `AskUserQuestion`:
-
-**1. Execute now (Subagent-Driven)**
-- Dispatches fresh subagent per task in current session
-- Code review between tasks
-- Fast iteration with quality gates
-- Uses `ring-default:subagent-driven-development`
-
-**2. Execute in parallel session**
-- User opens new agent session in the worktree
-- Batch execution with human review checkpoints
-- Uses `ring-default:executing-plans`
-
-**3. Save for later**
-- Plan saved to `docs/plans/YYYY-MM-DD-<feature-name>.md`
-- User reviews plan manually before deciding on execution
-- Can invoke `ring-default:executing-plans` later with the plan file
+| Option | Description |
+|--------|-------------|
+| **Execute now** | Fresh subagent per task, code review between tasks → `ring-default:subagent-driven-development` |
+| **Parallel session** | User opens new session, batch execution with human review → `ring-default:executing-plans` |
+| **Save for later** | Plan at `docs/plans/YYYY-MM-DD-<feature>.md`, manual review before execution |
 
 ## Required Patterns
 

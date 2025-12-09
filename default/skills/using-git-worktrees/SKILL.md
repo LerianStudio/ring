@@ -31,131 +31,44 @@ Git worktrees create isolated workspaces sharing the same repository, allowing w
 
 ## Directory Selection Process
 
-Follow this priority order:
-
-### 1. Check Existing Directories
+**Priority order:** (1) Existing `.worktrees/` or `worktrees/` (2) CLAUDE.md preference (3) Ask user
 
 ```bash
-# Check in priority order
-ls -d .worktrees 2>/dev/null     # Preferred (hidden)
-ls -d worktrees 2>/dev/null      # Alternative
+ls -d .worktrees worktrees 2>/dev/null   # Check existing (prefer .worktrees)
+grep -i "worktree.*director" CLAUDE.md    # Check project preference
 ```
 
-**If found:** Use that directory. If both exist, `.worktrees` wins.
-
-### 2. Check CLAUDE.md
-
-```bash
-grep -i "worktree.*director" CLAUDE.md 2>/dev/null
-```
-
-**If preference specified:** Use it without asking.
-
-### 3. Ask User
-
-If no directory exists and no CLAUDE.md preference:
-
-```
-No worktree directory found. Where should I create worktrees?
-
-1. .worktrees/ (project-local, hidden)
-2. ~/.config/ring/worktrees/<project-name>/ (global location)
-
-Which would you prefer?
-```
+**If none found, ask:** `.worktrees/` (project-local, hidden) OR `~/.config/ring/worktrees/<project>/` (global)
 
 ## Safety Verification
 
-### For Project-Local Directories (.worktrees or worktrees)
+**Project-local directories:** MUST verify .gitignore before creating: `grep -q "^\.worktrees/$\|^worktrees/$" .gitignore`
+- If NOT in .gitignore: Add it → commit → proceed (fix broken things immediately)
+- **Why critical:** Prevents accidentally committing worktree contents
 
-**MUST verify .gitignore before creating worktree:**
-
-```bash
-# Check if directory pattern in .gitignore
-grep -q "^\.worktrees/$" .gitignore || grep -q "^worktrees/$" .gitignore
-```
-
-**If NOT in .gitignore:**
-
-Per Jesse's rule "Fix broken things immediately":
-1. Add appropriate line to .gitignore
-2. Commit the change
-3. Proceed with worktree creation
-
-**Why critical:** Prevents accidentally committing worktree contents to repository.
-
-### For Global Directory (~/.config/ring/worktrees)
-
-No .gitignore verification needed - outside project entirely.
+**Global directory (~/.config/ring/worktrees):** No verification needed - outside project.
 
 ## Creation Steps
 
-### 1. Detect Project Name
-
 ```bash
+# 1. Detect project
 project=$(basename "$(git rev-parse --show-toplevel)")
-```
 
-### 2. Create Worktree
+# 2. Create worktree (path = $LOCATION/$BRANCH or ~/.config/ring/worktrees/$project/$BRANCH)
+git worktree add "$path" -b "$BRANCH_NAME" && cd "$path"
 
-```bash
-# Determine full path
-case $LOCATION in
-  .worktrees|worktrees)
-    path="$LOCATION/$BRANCH_NAME"
-    ;;
-  ~/.config/ring/worktrees/*)
-    path="~/.config/ring/worktrees/$project/$BRANCH_NAME"
-    ;;
-esac
+# 3. Auto-detect and run setup
+[ -f package.json ] && npm install
+[ -f Cargo.toml ] && cargo build
+[ -f requirements.txt ] && pip install -r requirements.txt
+[ -f pyproject.toml ] && poetry install
+[ -f go.mod ] && go mod download
 
-# Create worktree with new branch
-git worktree add "$path" -b "$BRANCH_NAME"
-cd "$path"
-```
-
-### 3. Run Project Setup
-
-Auto-detect and run appropriate setup:
-
-```bash
-# Node.js
-if [ -f package.json ]; then npm install; fi
-
-# Rust
-if [ -f Cargo.toml ]; then cargo build; fi
-
-# Python
-if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-if [ -f pyproject.toml ]; then poetry install; fi
-
-# Go
-if [ -f go.mod ]; then go mod download; fi
-```
-
-### 4. Verify Clean Baseline
-
-Run tests to ensure worktree starts clean:
-
-```bash
-# Examples - use project-appropriate command
-npm test
-cargo test
-pytest
-go test ./...
+# 4. Verify clean baseline (npm test / cargo test / pytest / go test ./...)
 ```
 
 **If tests fail:** Report failures, ask whether to proceed or investigate.
-
-**If tests pass:** Report ready.
-
-### 5. Report Location
-
-```
-Worktree ready at <full-path>
-Tests passing (<N> tests, 0 failures)
-Ready to implement <feature-name>
-```
+**If tests pass:** Report: `Worktree ready at <path> | Tests passing (<N> tests) | Ready to implement <feature>`
 
 ## Quick Reference
 
@@ -171,37 +84,16 @@ Ready to implement <feature-name>
 
 ## Common Mistakes
 
-**Skipping .gitignore verification**
-- **Problem:** Worktree contents get tracked, pollute git status
-- **Fix:** Always grep .gitignore before creating project-local worktree
-
-**Assuming directory location**
-- **Problem:** Creates inconsistency, violates project conventions
-- **Fix:** Follow priority: existing > CLAUDE.md > ask
-
-**Proceeding with failing tests**
-- **Problem:** Can't distinguish new bugs from pre-existing issues
-- **Fix:** Report failures, get explicit permission to proceed
-
-**Hardcoding setup commands**
-- **Problem:** Breaks on projects using different tools
-- **Fix:** Auto-detect from project files (package.json, etc.)
+| Mistake | Problem | Fix |
+|---------|---------|-----|
+| Skip .gitignore verification | Worktree contents tracked, pollute git status | Always grep .gitignore first |
+| Assuming directory location | Inconsistency, violates conventions | Follow priority: existing > CLAUDE.md > ask |
+| Proceeding with failing tests | Can't distinguish new vs pre-existing bugs | Report failures, get permission |
+| Hardcoding setup commands | Breaks on different tools | Auto-detect from project files |
 
 ## Example Workflow
 
-```
-You: I'm using the using-git-worktrees skill to set up an isolated workspace.
-
-[Check .worktrees/ - exists]
-[Verify .gitignore - contains .worktrees/]
-[Create worktree: git worktree add .worktrees/auth -b feature/auth]
-[Run npm install]
-[Run npm test - 47 passing]
-
-Worktree ready at /Users/jesse/myproject/.worktrees/auth
-Tests passing (47 tests, 0 failures)
-Ready to implement auth feature
-```
+Announce → Check `.worktrees/` exists → Verify .gitignore → `git worktree add .worktrees/auth -b feature/auth` → `npm install` → `npm test` (47 passing) → Report ready
 
 ## Red Flags
 

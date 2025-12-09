@@ -34,80 +34,22 @@ Mixing business and technical concerns creates:
 **The PRD answers**: WHAT we're building and WHY it matters to users and business.
 **The PRD never answers**: HOW we'll build it or WHERE components will live.
 
-## When to Use This Skill
-
-Use this skill when:
-- Starting a new product or major feature
-- User asks to "plan", "design", or "architect" something
-- About to write code without documented requirements
-- Tempted to add technical details to business requirements
-- Asked to create a PRD or requirements document
-
 ## Mandatory Workflow
 
-### Phase 0: Load Research Findings (if available)
-
-Before writing the PRD, check for research output from Gate 0:
-
-```bash
-# Check if research.md exists
-ls docs/pre-dev/{feature-name}/research.md 2>/dev/null
-```
-
-**If research.md exists:**
-1. Load `docs/pre-dev/{feature-name}/research.md`
-2. Review codebase patterns (from ring-pm-team:repo-research-analyst)
-3. Review best practices (from ring-pm-team:best-practices-researcher)
-4. Review framework constraints (from ring-pm-team:framework-docs-researcher)
-
-**Required PRD Enhancements from Research:**
-- Reference existing patterns with `file:line` notation where relevant
-- Cite knowledge base findings from `docs/solutions/` if applicable
-- Note any constraints discovered that affect requirements
-- Include external best practice URLs as references
-
-**If research.md doesn't exist:** Proceed without research context (not recommended for complex features).
-
-### Phase 1: Problem Discovery
-1. **Define the problem** without solution bias
-2. **Identify users** specifically (not "users" generally)
-3. **Quantify pain** with metrics or qualitative evidence
-
-### Phase 2: Business Requirements
-1. **Write Executive Summary** (problem + solution + impact in 3 sentences)
-2. **Create User Personas** with real goals and frustrations
-3. **Write User Stories** in format: "As [persona], I want [action] so that [benefit]"
-4. **Define Success Metrics** that are measurable
-5. **Set Scope Boundaries** (in/out explicitly)
-
-### Phase 3: Gate 1 Validation
-**MANDATORY CHECKPOINT** - Must pass before proceeding to Feature Map:
-- [ ] Problem is clearly articulated
-- [ ] Impact is quantified or qualified
-- [ ] Users are specifically identified
-- [ ] Features address core problem
-- [ ] Success metrics are measurable
-- [ ] In/out of scope is explicit
+| Phase | Activities |
+|-------|------------|
+| **0. Load Research** | Check `docs/pre-dev/{feature}/research.md`; review codebase patterns, best practices, framework constraints; reference findings with `file:line` notation |
+| **1. Problem Discovery** | Define problem without solution bias; identify specific users; quantify pain with metrics/evidence |
+| **2. Business Requirements** | Executive summary (3 sentences); user personas (goals, frustrations); user stories (As/I want/So that); success metrics (measurable); scope boundaries (in/out) |
+| **3. Gate 1 Validation** | Problem articulated; impact quantified; users identified; features address problem; metrics measurable; scope explicit |
 
 ## Explicit Rules
 
 ### ✅ DO Include in PRD
-- Problem definition and user pain points
-- User personas with demographics, goals, frustrations
-- User stories with acceptance criteria
-- Feature requirements (WHAT it does, not HOW)
-- Success metrics (user adoption, satisfaction, business KPIs)
-- Scope boundaries (in/out explicitly)
-- Go-to-market considerations
+Problem definition and user pain points, user personas (demographics, goals, frustrations), user stories with acceptance criteria, feature requirements (WHAT not HOW), success metrics (adoption, satisfaction, KPIs), scope boundaries (in/out explicitly), go-to-market considerations
 
 ### ❌ NEVER Include in PRD
-- Architecture diagrams or component design
-- Technology choices (languages, frameworks, databases)
-- Implementation approaches or algorithms
-- Database schemas or API specifications
-- Code examples or package dependencies
-- Infrastructure needs or deployment strategies
-- System integration patterns
+Architecture diagrams or component design, technology choices (languages, frameworks, databases), implementation approaches or algorithms, database schemas or API specifications, code examples or package dependencies, infrastructure needs or deployment strategies, system integration patterns
 
 ### Separation Rules
 1. **If it's a technology name** → Not in PRD (goes in Dependency Map)
@@ -153,176 +95,43 @@ If you catch yourself writing or thinking any of these in a PRD, **STOP**:
 
 ## Gate 1 Validation Checklist
 
-Before proceeding to TRD, verify:
+| Category | Requirements |
+|----------|--------------|
+| **Problem Definition** | Problem articulated (1-2 sentences); impact quantified/qualified; users specifically identified; current workarounds documented |
+| **Solution Value** | Features address core problem; success metrics measurable; ROI case documented; user value clear per feature |
+| **Scope Clarity** | In-scope items explicit; out-of-scope with rationale; assumptions documented; business dependencies identified |
+| **Market Fit** | Differentiation clear; value proposition validated; business case sound; go-to-market outlined |
 
-**Problem Definition**:
-- [ ] Problem is clearly articulated in 1-2 sentences
-- [ ] Impact is quantified (metrics) or qualified (evidence)
-- [ ] Users are specifically identified (not just "users")
-- [ ] Current workarounds are documented
+**Gate Result:** ✅ PASS → Feature Map | ⚠️ CONDITIONAL (address gaps) | ❌ FAIL (return to discovery)
 
-**Solution Value**:
-- [ ] Features address the core problem (not feature creep)
-- [ ] Success metrics are measurable and specific
-- [ ] ROI case is reasonable and documented
-- [ ] User value is clear for each feature
+## Common Violations
 
-**Scope Clarity**:
-- [ ] In-scope items are explicitly listed
-- [ ] Out-of-scope items are explicitly listed with rationale
-- [ ] Assumptions are documented
-- [ ] Dependencies are identified (business, not technical)
-
-**Market Fit**:
-- [ ] Differentiation from alternatives is clear
-- [ ] User value proposition is validated
-- [ ] Business case is sound
-- [ ] Go-to-market approach outlined
-
-**Gate Result**:
-- ✅ **PASS**: All checkboxes checked → Proceed to Feature Map (`pre-dev-feature-map`)
-- ⚠️ **CONDITIONAL**: Address specific gaps → Re-validate
-- ❌ **FAIL**: Multiple issues → Return to discovery
-
-## Common Violations and Fixes
-
-### Violation 1: Technical Details in Features
-❌ **Wrong**:
-```markdown
-**FR-001: User Authentication**
-- Use JWT tokens for session management
-- Store passwords with bcrypt
-- Implement OAuth2 with Google/GitHub providers
-```
-
-✅ **Correct**:
-```markdown
-**FR-001: User Authentication**
-- Description: Users can create accounts and securely log in
-- User Value: Access personalized content without re-entering credentials
-- Success Criteria: 95% of users successfully authenticate on first attempt
-- Priority: Must-have
-```
-
-### Violation 2: Implementation in User Stories
-❌ **Wrong**:
-```markdown
-As a user, I want to store my data in PostgreSQL
-so that queries are fast.
-```
-
-✅ **Correct**:
-```markdown
-As a user, I want to see my dashboard load in under 2 seconds
-so that I can quickly access my information.
-```
-
-### Violation 3: Architecture in Problem Definition
-❌ **Wrong**:
-```markdown
-**Problem**: Our microservices architecture doesn't support
-real-time notifications, so users miss important updates.
-```
-
-✅ **Correct**:
-```markdown
-**Problem**: Users miss important updates because they must
-manually refresh the page. 78% of users report missing
-time-sensitive information.
-```
-
-### Violation 4: Authority-Based Technical Bypass
-❌ **Wrong** (CEO requests):
-```markdown
-## MVP Scope
-
-MVP (3 months):
-- Stripe for payment processing (fastest integration)
-- Support EUR, GBP, JPY
-- Store conversions in PostgreSQL (we already use it)
-
-Phase 2:
-- Maybe switch to Adyen if Stripe doesn't scale
-```
-
-✅ **Correct** (abstracted):
-```markdown
-## MVP Scope
-
-Phase 1 - Market Validation (0-3 months):
-- **Payment Processing**: Integrate with existing payment vendor (2-week integration timeline)
-- **Currency Support**: EUR, GBP, JPY (covers 65% of international traffic)
-- **Data Storage**: Leverage existing database infrastructure (zero operational overhead)
-- **Success Criteria**: 100 transactions in 30 days, <5% failure rate
-
-Phase 2 - Scale & Optimize (4-6 months):
-- **Trigger**: >1,000 monthly transactions OR processing costs >$50k/month
-- **Scope**: Additional currencies based on Phase 1 demand data
-- **Optimization**: Re-evaluate payment processor if fees exceed 3% of revenue
-
-**Constraint Rationale**: Phase 1 prioritizes speed-to-market over flexibility.
-Technical decisions will be documented in TRD with specific vendor selection.
-```
-
-**Key Principle**: Authority figures (CEO, CTO, investors) may REQUEST technical specifics, but your job is to ABSTRACT them. "We'll use Stripe" becomes "existing payment vendor". "PostgreSQL" becomes "existing database infrastructure". The capability is documented; the implementation waits for TRD.
+| Violation | Wrong | Correct |
+|-----------|-------|---------|
+| **Tech in Features** | "FR-001: Use JWT tokens for session, bcrypt for passwords, OAuth2 with Google" | "FR-001: Users can create accounts and securely log in. Value: Access personalized content. Success: 95% authenticate first attempt" |
+| **Implementation in Stories** | "As user, I want to store data in PostgreSQL so queries are fast" | "As user, I want dashboard to load in <2 seconds so I can quickly access information" |
+| **Architecture in Problem** | "Our microservices architecture doesn't support real-time notifications" | "Users miss important updates because they must manually refresh. 78% report missing time-sensitive info" |
+| **Authority-Based Bypass** | "MVP: Stripe for payments, PostgreSQL (we already use it)" | "Phase 1: Integrate with existing payment vendor (2-week timeline); leverage existing database infrastructure. TRD will document specific vendor selection" |
 
 ## Confidence Scoring
 
-Use this to adjust your interaction with the user:
+| Factor | Points | Criteria |
+|--------|--------|----------|
+| Market Validation | 0-25 | Direct user feedback: 25, Market research: 15, Assumptions: 5 |
+| Problem Clarity | 0-25 | Quantified pain: 25, Qualitative evidence: 15, Hypothetical: 5 |
+| Solution Fit | 0-25 | Proven pattern: 25, Adjacent pattern: 15, Novel: 5 |
+| Business Value | 0-25 | Clear ROI: 25, Indirect value: 15, Uncertain: 5 |
 
-```yaml
-Confidence Factors:
-  Market Validation: [0-25]
-    - Direct user feedback: 25
-    - Market research: 15
-    - Assumptions: 5
+**Action:** 80+ autonomous | 50-79 present options | <50 ask discovery questions
 
-  Problem Clarity: [0-25]
-    - Quantified pain: 25
-    - Qualitative evidence: 15
-    - Hypothetical: 5
+## Output & After Approval
 
-  Solution Fit: [0-25]
-    - Proven pattern: 25
-    - Adjacent pattern: 15
-    - Novel approach: 5
+**Output to:** `docs/pre-dev/{feature-name}/prd.md`
 
-  Business Value: [0-25]
-    - Clear ROI: 25
-    - Indirect value: 15
-    - Uncertain: 5
-
-Total: [0-100]
-
-Action:
-  80+: Generate complete PRD autonomously
-  50-79: Present options for user selection
-  <50: Ask discovery questions
-```
-
-## Output Location
-
-**Always output to**: `docs/pre-dev/{feature-name}/prd.md`
-
-## After PRD Approval
-
-1. ✅ Lock the PRD - no more changes without formal amendment
-2. 🎯 Use PRD as input for Feature Map (next phase: `pre-dev-feature-map`)
-3. 🚫 Never add technical details to PRD retroactively
-4. 📋 Keep business/technical concerns strictly separated
-
-## Quality Self-Check
-
-Before declaring PRD complete, verify:
-- [ ] Zero technical implementation details present
-- [ ] All technology names removed
-- [ ] User needs clearly articulated
-- [ ] Success metrics are measurable and specific
-- [ ] Scope boundaries are explicit and justified
-- [ ] Business value is clearly justified
-- [ ] User journeys are complete (current vs. proposed)
-- [ ] Risks are identified with business impact
-- [ ] Gate 1 validation checklist 100% complete
+1. ✅ Lock the PRD - no changes without formal amendment
+2. 🎯 Use as input for Feature Map (`pre-dev-feature-map`)
+3. 🚫 Never add technical details retroactively
+4. 📋 Keep business/technical strictly separated
 
 ## The Bottom Line
 
@@ -331,11 +140,5 @@ Before declaring PRD complete, verify:
 The PRD is business-only. Period. No exceptions. No "just this once". No "but it's relevant".
 
 Technical details go in TRD. That's the next phase. Wait for it.
-
-Violating this separation means:
-- You're optimizing for technical convenience, not user needs
-- Requirements will change and break your technical assumptions
-- You can't objectively evaluate technical alternatives
-- The business case becomes coupled to implementation choices
 
 **Follow the separation. Your future self will thank you.**

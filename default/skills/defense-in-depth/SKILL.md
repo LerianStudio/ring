@@ -38,104 +38,29 @@ Different layers catch different cases:
 
 ## The Four Layers
 
-### Layer 1: Entry Point Validation
-**Purpose:** Reject obviously invalid input at API boundary
-
-```typescript
-function createProject(name: string, workingDirectory: string) {
-  if (!workingDirectory || workingDirectory.trim() === '') {
-    throw new Error('workingDirectory cannot be empty');
-  }
-  if (!existsSync(workingDirectory)) {
-    throw new Error(`workingDirectory does not exist: ${workingDirectory}`);
-  }
-  if (!statSync(workingDirectory).isDirectory()) {
-    throw new Error(`workingDirectory is not a directory: ${workingDirectory}`);
-  }
-  // ... proceed
-}
-```
-
-### Layer 2: Business Logic Validation
-**Purpose:** Ensure data makes sense for this operation
-
-```typescript
-function initializeWorkspace(projectDir: string, sessionId: string) {
-  if (!projectDir) {
-    throw new Error('projectDir required for workspace initialization');
-  }
-  // ... proceed
-}
-```
-
-### Layer 3: Environment Guards
-**Purpose:** Prevent dangerous operations in specific contexts
-
-```typescript
-async function gitInit(directory: string) {
-  // In tests, refuse git init outside temp directories
-  if (process.env.NODE_ENV === 'test') {
-    const normalized = normalize(resolve(directory));
-    const tmpDir = normalize(resolve(tmpdir()));
-
-    if (!normalized.startsWith(tmpDir)) {
-      throw new Error(
-        `Refusing git init outside temp dir during tests: ${directory}`
-      );
-    }
-  }
-  // ... proceed
-}
-```
-
-### Layer 4: Debug Instrumentation
-**Purpose:** Capture context for forensics
-
-```typescript
-async function gitInit(directory: string) {
-  const stack = new Error().stack;
-  logger.debug('About to git init', {
-    directory,
-    cwd: process.cwd(),
-    stack,
-  });
-  // ... proceed
-}
-```
+| Layer | Purpose | Example |
+|-------|---------|---------|
+| **1. Entry Point** | Reject invalid input at API boundary | `if (!workingDir \|\| !existsSync(workingDir)) throw new Error(...)` |
+| **2. Business Logic** | Ensure data makes sense for operation | `if (!projectDir) throw new Error('projectDir required')` |
+| **3. Environment Guards** | Prevent dangerous ops in contexts | `if (NODE_ENV === 'test' && !path.startsWith(tmpdir())) throw...` |
+| **4. Debug Instrumentation** | Capture context for forensics | `logger.debug('About to git init', { directory, cwd, stack })` |
 
 ## Applying the Pattern
 
-When you find a bug:
+**Steps:** (1) Trace data flow (origin → error) (2) Map all checkpoints (3) Add validation at each layer (4) Test each layer (try to bypass layer 1, verify layer 2 catches it)
 
-1. **Trace the data flow** - Where does bad value originate? Where used?
-2. **Map all checkpoints** - List every point data passes through
-3. **Add validation at each layer** - Entry, business, environment, debug
-4. **Test each layer** - Try to bypass layer 1, verify layer 2 catches it
+## Example
 
-## Example from Session
+**Bug:** Empty `projectDir` caused `git init` in source code
 
-Bug: Empty `projectDir` caused `git init` in source code
+**Flow:** Test setup (`''`) → `Project.create(name, '')` → `WorkspaceManager.createWorkspace('')` → `git init` in `process.cwd()`
 
-**Data flow:**
-1. Test setup → empty string
-2. `Project.create(name, '')`
-3. `WorkspaceManager.createWorkspace('')`
-4. `git init` runs in `process.cwd()`
+**Layers added:** L1: `Project.create()` validates not empty/exists/writable | L2: `WorkspaceManager` validates not empty | L3: Refuse git init outside tmpdir in tests | L4: Stack trace logging
 
-**Four layers added:**
-- Layer 1: `Project.create()` validates not empty/exists/writable
-- Layer 2: `WorkspaceManager` validates projectDir not empty
-- Layer 3: `WorktreeManager` refuses git init outside tmpdir in tests
-- Layer 4: Stack trace logging before git init
-
-**Result:** All 1847 tests passed, bug impossible to reproduce
+**Result:** 1847 tests passed, bug impossible to reproduce
 
 ## Key Insight
 
-All four layers were necessary. During testing, each layer caught bugs the others missed:
-- Different code paths bypassed entry validation
-- Mocks bypassed business logic checks
-- Edge cases on different platforms needed environment guards
-- Debug logging identified structural misuse
+All four layers necessary - each caught bugs others missed: different code paths bypassed entry validation | mocks bypassed business logic | edge cases needed environment guards | debug logging identified structural misuse.
 
 **Don't stop at one validation point.** Add checks at every layer.

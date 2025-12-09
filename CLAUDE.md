@@ -4,19 +4,18 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository Overview
 
-Ring is a comprehensive skills library and workflow system for AI agents that enforces proven software engineering practices through mandatory workflows, parallel code review, and systematic pre-development planning. Currently implemented as a Claude Code plugin marketplace with **6 active plugins**, the skills are agent-agnostic and reusable across different AI systems.
+Ring is a comprehensive skills library and workflow system for AI agents that enforces proven software engineering practices through mandatory workflows, parallel code review, and systematic pre-development planning. Currently implemented as a Claude Code plugin marketplace with **5 active plugins**, the skills are agent-agnostic and reusable across different AI systems.
 
 **Active Plugins:**
-- **ring-default**: 21 core skills, 7 slash commands, 5 specialized agents
+- **ring-default**: 22 core skills, 7 slash commands, 5 specialized agents
 - **ring-dev-team**: 10 development skills, 5 slash commands, 7 developer agents (Backend Go, Backend TypeScript, DevOps, Frontend TypeScript, Frontend Designer, QA, SRE)
 - **ring-finops-team**: 6 regulatory skills, 2 FinOps agents
 - **ring-pm-team**: 10 product planning skills, 3 research agents, 2 slash commands
-- **ralph-wiggum**: 1 skill for iterative AI development loops using Stop hooks
 - **ring-tw-team**: 7 technical writing skills, 3 slash commands, 3 documentation agents (Functional Writer, API Writer, Docs Reviewer)
 
 **Note:** Plugin versions are managed in `.claude-plugin/marketplace.json`
 
-**Total: 55 skills (21 + 10 + 6 + 10 + 1 + 7) across 6 plugins**
+**Total: 55 skills (22 + 10 + 6 + 10 + 7) across 5 plugins**
 
 The architecture uses markdown-based skill definitions with YAML frontmatter, auto-discovered at session start via hooks, and executed through Claude Code's native Skill/Task tools.
 
@@ -85,9 +84,9 @@ See `docs/platforms/` for platform-specific guides.
 ```
 ring/                                  # Monorepo root
 ├── .claude-plugin/
-│   └── marketplace.json              # Multi-plugin marketplace config (7 active plugins)
+│   └── marketplace.json              # Multi-plugin marketplace config (5 active plugins)
 ├── default/                          # Core Ring plugin (ring-default)
-│   ├── skills/                       # 21 core skills
+│   ├── skills/                       # 22 core skills
 │   │   ├── brainstorming/            # Socratic design refinement
 │   │   ├── test-driven-development/  # RED-GREEN-REFACTOR cycle enforcement
 │   │   ├── systematic-debugging/     # 4-phase root cause analysis
@@ -102,7 +101,7 @@ ring/                                  # Monorepo root
 │   ├── commands/                    # 7 slash commands
 │   │   ├── codereview.md           # /ring-default:codereview - dispatch 3 parallel reviewers
 │   │   ├── brainstorm.md           # /ring-default:brainstorm - interactive design
-│   │   └── codify.md               # /ring-default:codify - document solved problems
+│   │   └── lint.md                 # /ring-default:lint - parallel lint fixing
 │   ├── hooks/                      # Session lifecycle
 │   │   ├── hooks.json             # SessionStart, UserPromptSubmit config
 │   │   ├── session-start.sh       # Load skills quick reference
@@ -147,19 +146,6 @@ ring/                                  # Monorepo root
 │   │   └── framework-docs-researcher.md  # Tech stack documentation
 │   └── skills/                    # 10 pre-dev workflow skills
 │       └── pre-dev-*/            # Research→PRD→TRD→API→Data→Tasks
-├── ralph-wiggum/                  # Iterative AI loops plugin (ralph-wiggum)
-│   ├── commands/                  # 3 slash commands
-│   │   ├── ralph-loop.md         # Start iterative loop
-│   │   ├── cancel-ralph.md       # Cancel active loop
-│   │   └── help.md               # Technique guide
-│   ├── hooks/                     # Session and Stop hooks
-│   │   ├── hooks.json            # Hook configuration
-│   │   ├── session-start.sh      # Context injection
-│   │   └── stop-hook.sh          # Loop control via Stop hook
-│   ├── scripts/                   # Setup utilities
-│   │   └── setup-ralph-loop.sh   # State file creation
-│   └── skills/                    # Plugin skill
-│       └── using-ralph-wiggum/   # Ralph technique guide
 ├── tw-team/                       # Technical Writing plugin (ring-tw-team)
 │   ├── skills/                    # 7 documentation skills
 │   │   ├── using-tw-team/        # Plugin introduction
@@ -302,12 +288,6 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 - Located: `pm-team/skills/using-pm-team/SKILL.md`
 - Skills: 8 pre-dev gates for feature planning
 
-**Ralph Wiggum Plugin:**
-- `using-ralph-wiggum` → Iterative AI development loops
-- Auto-loads when ralph-wiggum plugin is enabled
-- Located: `ralph-wiggum/skills/using-ralph-wiggum/SKILL.md`
-- Commands: ralph-loop, cancel-ralph, help
-
 **Ring TW Team Plugin:**
 - `using-tw-team` → 3 technical writing agents for documentation
 - Auto-loads when ring-tw-team plugin is enabled
@@ -367,7 +347,7 @@ Task.parallel([
 - **Hook Scripts**: Must output JSON with success/error fields
 - **Shared Patterns**: Reference via `default/skills/shared-patterns/*.md`
 - **Documentation**: Artifacts in `docs/pre-dev/{feature}/*.md`
-- **Monorepo Layout**: Each plugin (`default/`, `team-*/`, `dev-team/`, `ralph-wiggum/`) is self-contained
+- **Monorepo Layout**: Each plugin (`default/`, `team-*/`, `dev-team/`) is self-contained
 
 ### Naming Conventions
 - Skills: `kebab-case` matching directory name
@@ -556,13 +536,12 @@ The system loads at SessionStart (from `default/` plugin):
 
 **Monorepo Context:**
 - Repository: Monorepo marketplace with multiple plugin collections
-- Active plugins: 6 (`ring-default`, `ring-dev-team`, `ring-finops-team`, `ring-pm-team`, `ralph-wiggum`, `ring-tw-team`)
+- Active plugins: 5 (`ring-default`, `ring-dev-team`, `ring-finops-team`, `ring-pm-team`, `ring-tw-team`)
 - Plugin versions: See `.claude-plugin/marketplace.json`
-- Core plugin: `default/` (21 skills, 5 agents, 7 commands)
+- Core plugin: `default/` (22 skills, 5 agents, 7 commands)
 - Developer agents plugin: `dev-team/` (10 skills, 9 agents, 5 commands)
 - FinOps plugin: `finops-team/` (6 skills, 2 agents)
 - Product planning plugin: `pm-team/` (10 skills, 3 research agents, 2 commands)
-- Ralph plugin: `ralph-wiggum/` (1 skill, 3 commands, Stop hook)
 - Technical writing plugin: `tw-team/` (7 skills, 3 agents, 3 commands)
 - Reserved plugins: `ops-team/`, `pmm-team/` (2 directories)
 - Current git branch: `main`
@@ -585,7 +564,6 @@ Plugin Hooks (inject context at session start):
 ├── dev-team/hooks/session-start.sh       # Developer agents
 ├── finops-team/hooks/session-start.sh    # FinOps agents
 ├── pm-team/hooks/session-start.sh        # Pre-dev skills
-├── ralph-wiggum/hooks/session-start.sh   # Ralph loop commands
 └── tw-team/hooks/session-start.sh        # Technical writing agents
 
 Using-* Skills (plugin introductions):
@@ -593,7 +571,6 @@ Using-* Skills (plugin introductions):
 ├── dev-team/skills/using-dev-team/SKILL.md      # Developer agents guide
 ├── finops-team/skills/using-finops-team/SKILL.md # FinOps guide
 ├── pm-team/skills/using-pm-team/SKILL.md        # Pre-dev workflow
-├── ralph-wiggum/skills/using-ralph-wiggum/SKILL.md # Ralph loops guide
 └── tw-team/skills/using-tw-team/SKILL.md        # Technical writing guide
 
 Agent Cross-References:

@@ -39,146 +39,42 @@ Complete each phase before proceeding to the next.
 
 ### Phase 1: Root Cause Investigation
 
-**MUST complete ALL before Phase 2:**
+**MUST complete ALL before Phase 2 (copy to TodoWrite):**
+□ Error message copied verbatim | □ Reproduction confirmed | □ Recent changes reviewed (`git diff`) | □ Evidence from ALL components | □ Data flow traced (origin → error)
 
-```
-Phase 1 Investigation:
-□ Error message copied verbatim: ___________
-□ Reproduction confirmed: [steps documented]
-□ Recent changes reviewed: [git diff output]
-□ Evidence from ALL components: [list components checked]
-□ Data flow traced: [origin → error location]
-```
+1. **Read Error Messages** - Stack traces completely, line numbers, file paths, error codes. Don't skip warnings.
+2. **Reproduce Consistently** - Exact steps to trigger. Intermittent → gather more data.
+3. **Check Recent Changes** - `git diff`, recent commits, new dependencies, config changes.
+4. **Multi-Component Systems** - Log at each boundary: what enters, what exits, env/config state. Run once, analyze, identify failing layer.
+5. **Trace Data Flow** - Error deep in stack? **Use ring-default:root-cause-tracing skill.** Quick: Where does bad value originate? Trace up call stack, fix at source not symptom.
 
-**Copy this checklist to TodoWrite.**
-
-1. **Read Error Messages**
-   - Stack traces completely
-   - Line numbers, file paths, error codes
-   - Don't skip past warnings
-
-2. **Reproduce Consistently**
-   - Exact steps to trigger
-   - Happens every time? If not → gather more data
-
-3. **Check Recent Changes**
-   - `git diff`, recent commits
-   - New dependencies, config changes
-
-4. **Multi-Component Systems**
-
-   **Add diagnostic instrumentation at EACH boundary:**
-   ```bash
-   # For each layer, log:
-   - What enters component
-   - What exits component
-   - Environment/config state
-   ```
-
-   Run once, analyze evidence, identify failing layer.
-
-5. **Trace Data Flow**
-
-   Error deep in stack? **Use ring-default:root-cause-tracing skill.**
-
-   Quick version:
-   - Where does bad value originate?
-   - Trace up call stack to source
-   - Fix at source, not symptom
-
-**Phase 1 Summary (write before Phase 2):**
-```
-FINDINGS:
-- Error: [exact error]
-- Reproduces: [steps]
-- Recent changes: [commits]
-- Component evidence: [what each shows]
-- Data origin: [where bad data starts]
-```
+**Phase 1 Summary:** Error: [exact] | Reproduces: [steps] | Recent changes: [commits] | Component evidence: [each] | Data origin: [source]
 
 ### Phase 2: Pattern Analysis
 
-1. **Find Working Examples**
-   - Similar working code in codebase
-   - What works that's similar to what's broken?
-
-2. **Compare Against References**
-   - Read reference implementation COMPLETELY
-   - Don't skim - understand fully
-
-3. **Identify Differences**
-   - List EVERY difference (working vs broken)
-   - Don't assume "that can't matter"
-
-4. **Understand Dependencies**
-   - What components, config, environment needed?
-   - What assumptions does it make?
+1. **Find Working Examples** - Similar working code in codebase. What works that's similar to what's broken?
+2. **Compare Against References** - Read reference implementation COMPLETELY. Don't skim - understand fully.
+3. **Identify Differences** - List EVERY difference (working vs broken). Don't assume "that can't matter."
+4. **Understand Dependencies** - What components, config, environment needed? What assumptions does it make?
 
 ### Phase 3: Hypothesis Testing
 
-1. **Form Single Hypothesis**
-   - "I think X is root cause because Y"
-   - Be specific
-
-2. **Test Minimally**
-   - SMALLEST possible change
-   - One variable at a time
-
-3. **Verify and Track**
-   ```
-   Hypothesis #1: [what] → [result]
-   Hypothesis #2: [what] → [result]
-   Hypothesis #3: [what] → [STOP if fails]
-   ```
-
-   **If 3 hypotheses fail:**
-   - STOP immediately
-   - "3 hypotheses failed, architecture review required"
-   - Discuss with partner before more attempts
-
-4. **When You Don't Know**
-   - Say "I don't understand X"
-   - Ask for help
-   - Research more
+1. **Form Single Hypothesis** - "I think X is root cause because Y" - Be specific.
+2. **Test Minimally** - SMALLEST possible change. One variable at a time.
+3. **Verify and Track** - `H#1: [what] → [result] | H#2: [what] → [result] | H#3: [what] → [STOP if fails]`
+   **If 3 hypotheses fail:** STOP immediately → "3 hypotheses failed, architecture review required" → Discuss with partner before more attempts.
+4. **When You Don't Know** - Say "I don't understand X." Ask for help. Research more.
 
 ### Phase 4: Implementation
 
 **Fix root cause, not symptom:**
 
-1. **Create Failing Test**
-   - Simplest reproduction
-   - **Use ring-default:test-driven-development skill**
-
-2. **Implement Single Fix**
-   - Address root cause only
-   - ONE change at a time
-   - No "while I'm here" improvements
-
-3. **Verify Fix**
-   - Test passes?
-   - No other tests broken?
-   - Issue resolved?
-
-4. **If Fix Doesn't Work**
-   - Count fixes attempted
-   - If < 3: Return to Phase 1
-   - **If ≥ 3: STOP → Architecture review required**
-
-5. **After Fix Verified**
-   - Test passes and issue resolved?
-   - **If non-trivial (took > 5 min):** Suggest documentation
-   > "The fix has been verified. Would you like to document this solution for future reference?
-   > Run: `/ring-default:codify`"
-   - **Use ring-default:codify-solution skill** to capture institutional knowledge
-
-6. **If 3+ Fixes Failed: Question Architecture**
-
-   Pattern indicating architectural problem:
-   - Each fix reveals new problem elsewhere
-   - Fixes require massive refactoring
-   - Each fix creates new symptoms
-
-   **STOP and discuss:** Is architecture sound? Should we refactor vs. fix?
+1. **Create Failing Test** - Simplest reproduction. **Use ring-default:test-driven-development skill.**
+2. **Implement Single Fix** - Address root cause only. ONE change at a time. No "while I'm here" improvements.
+3. **Verify Fix** - Test passes? No other tests broken? Issue resolved?
+4. **If Fix Doesn't Work** - Count fixes. If < 3: Return to Phase 1. **If ≥ 3: STOP → Architecture review required.**
+5. **After Fix Verified** - Test passes and issue resolved? Move to post-completion review.
+6. **If 3+ Fixes Failed** - Pattern: each fix reveals new problem elsewhere, requires massive refactoring, creates new symptoms. **STOP and discuss:** Is architecture sound? Should we refactor vs. fix?
 
 ## Time Limits
 
@@ -225,9 +121,6 @@ FINDINGS:
 **Required sub-skills:**
 - **root-cause-tracing** - When error is deep in call stack (Phase 1, Step 5)
 - **test-driven-development** - For failing test case (Phase 4, Step 1)
-
-**Post-completion:**
-- **codify-solution** - Document non-trivial fixes (Phase 4, Step 5)
 
 **Complementary:**
 - **defense-in-depth** - Add validation after finding root cause

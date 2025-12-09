@@ -47,256 +47,25 @@ The ring-dev-team plugin provides 7 specialized developer agents. Use them via `
 
 ## 7 Developer Specialists
 
-### 1. Backend Engineer (Go)
-**`ring-dev-team:backend-engineer-golang`**
+| Agent | Specializations | Use When |
+|-------|-----------------|----------|
+| **`ring-dev-team:backend-engineer-golang`** | Go microservices, PostgreSQL/MongoDB, Kafka/RabbitMQ, OAuth2/JWT, gRPC, concurrency | Go services, DB optimization, auth/authz, concurrency issues |
+| **`ring-dev-team:backend-engineer-typescript`** | TypeScript/Node.js, Express/Fastify/NestJS, Prisma/TypeORM, async patterns, Jest/Vitest | TS backends, JS→TS migration, NestJS design, full-stack TS |
+| **`ring-dev-team:devops-engineer`** | GitHub Actions/GitLab CI, Docker/Compose, Kubernetes, Terraform/Helm, cloud infra | CI/CD pipelines, containerization, K8s, IaC provisioning |
+| **`ring-dev-team:frontend-bff-engineer-typescript`** | Next.js API Routes BFF, Clean/Hexagonal Architecture, DDD patterns, Inversify DI, repository pattern | BFF layer, Clean Architecture, DDD domains, API orchestration |
+| **`ring-dev-team:frontend-designer`** | Bold typography, color systems, animations, unexpected layouts, textures/gradients | Landing pages, portfolios, distinctive dashboards, design systems |
+| **`ring-dev-team:qa-analyst`** | Test strategy, Cypress/Playwright E2E, coverage analysis, API testing, performance | Test planning, E2E suites, coverage gaps, quality gates |
+| **`ring-dev-team:sre`** | Monitoring/logging/tracing, SLOs/alerting, incident response, scalability | Observability setup, alerts, incident planning, reliability |
 
-**Specializations:**
-- Go microservices & API design
-- Database optimization (PostgreSQL, MongoDB)
-- Message queues (Kafka, RabbitMQ)
-- OAuth2, JWT, API security
-- gRPC and performance optimization
-
-**Use When:**
-- Designing Go services from scratch
-- Optimizing database queries
-- Implementing authentication/authorization
-- Troubleshooting concurrency issues
-- Reviewing Go backend architecture
-
-**Example dispatch:**
+**Dispatch template:**
 ```
 Task tool:
-  subagent_type: "ring-dev-team:backend-engineer-golang"
+  subagent_type: "ring-dev-team:{agent-name}"
   model: "opus"
-  prompt: "Design a Go service for user authentication with JWT and OAuth2 support"
+  prompt: "{Your specific request with context}"
 ```
 
----
-
-### 2. Backend Engineer (TypeScript/Node.js)
-**`ring-dev-team:backend-engineer-typescript`**
-
-**Specializations:**
-- TypeScript/Node.js backend services
-- Express, Fastify, NestJS frameworks
-- TypeScript type safety & ORM (Prisma, TypeORM)
-- Node.js performance optimization
-- Async/await patterns & error handling
-- REST & GraphQL APIs
-- Testing with Jest/Vitest
-
-**Use When:**
-- Building TypeScript/Node.js backends
-- Migrating from JavaScript to TypeScript
-- NestJS or Express service design
-- Node.js-specific optimization
-- Full-stack TypeScript projects
-
-**Example dispatch:**
-```
-Task tool:
-  subagent_type: "ring-dev-team:backend-engineer-typescript"
-  model: "opus"
-  prompt: "Design a NestJS service with Prisma ORM for user management"
-```
-
----
-
-### 3. DevOps Engineer
-**`ring-dev-team:devops-engineer`**
-
-**Specializations:**
-- CI/CD pipelines (GitHub Actions, GitLab CI)
-- Containerization (Docker, Docker Compose)
-- Kubernetes deployment & scaling
-- Infrastructure as Code (Terraform, Helm)
-- Cloud infrastructure setup
-
-**Use When:**
-- Setting up deployment pipelines
-- Containerizing applications
-- Managing Kubernetes clusters
-- Infrastructure provisioning
-- Automating infrastructure changes
-
-**Example dispatch:**
-```
-Task tool:
-  subagent_type: "ring-dev-team:devops-engineer"
-  model: "opus"
-  prompt: "Create a GitHub Actions CI/CD pipeline for Go service deployment to Kubernetes"
-```
-
----
-
-
-### 4. Frontend BFF Engineer (TypeScript)
-**`ring-dev-team:frontend-bff-engineer-typescript`**
-
-**Specializations:**
-- BFF (Backend for Frontend) architecture with Next.js API Routes
-- Clean Architecture with Domain/Application/Infrastructure layers
-- Domain-Driven Design (DDD) - Entities, Repositories, Value Objects
-- Hexagonal Architecture - Ports and Adapters pattern
-- Inversify dependency injection container
-- Use Case orchestration with @LogOperation decorators
-- DTO/Mapper patterns for layer separation
-- Repository pattern with abstract interfaces
-
-**Use When:**
-- Building BFF layer with Next.js API Routes
-- Implementing Clean Architecture in TypeScript
-- Need DDD patterns for complex business domains
-- API layer orchestration (not frontend UI)
-- Server-side data aggregation and transformation
-- Type-safe backend services for frontend consumption
-
-**Example dispatch:**
-```
-Task tool:
-  subagent_type: "ring-dev-team:frontend-bff-engineer-typescript"
-  model: "opus"
-  prompt: "Design a BFF endpoint for account management using Clean Architecture, repository pattern, and Inversify DI"
-```
-
----
-
-### 5. Frontend Designer
-**`ring-dev-team:frontend-designer`**
-
-**Specializations:**
-- Distinctive, production-grade UI with high visual design quality
-- Bold typography with characterful, non-generic fonts
-- Cohesive color systems with dominant colors and sharp accents
-- High-impact animations and micro-interactions
-- Unexpected layouts with asymmetry, overlap, and spatial tension
-- Atmosphere through textures, gradients, shadows, and visual depth
-
-**Use When:**
-- Building interfaces where aesthetics matter (landing pages, portfolios, marketing)
-- Creating memorable, visually striking user experiences
-- Designing dashboards with distinctive visual identity
-- Implementing creative motion and interaction design
-- Establishing distinctive visual languages and design systems
-
-**Example dispatch:**
-```
-Task tool:
-  subagent_type: "ring-dev-team:frontend-designer"
-  model: "opus"
-  prompt: "Create a brutalist landing page for a tech startup with bold typography and unexpected layouts"
-```
-
-**Note:** Use `ring-dev-team:frontend-designer` for visual aesthetics and design excellence. Use `ring-dev-team:frontend-bff-engineer-typescript` for complex state management, business logic, and application architecture.
-
----
-
-### 6. QA Analyst
-**`ring-dev-team:qa-analyst`**
-
-**Specializations:**
-- Test strategy & planning
-- E2E test automation (Cypress, Playwright)
-- Unit test coverage analysis
-- API testing strategies
-- Performance testing
-- Compliance validation
-
-**Use When:**
-- Planning testing strategy for features
-- Setting up E2E test suites
-- Improving test coverage
-- API testing and validation
-- Quality gate design
-
-**Example dispatch:**
-```
-Task tool:
-  subagent_type: "ring-dev-team:qa-analyst"
-  model: "opus"
-  prompt: "Create a comprehensive E2E test strategy for user authentication flow"
-```
-
----
-
-### 7. Site Reliability Engineer (SRE)
-**`ring-dev-team:sre`**
-
-**Specializations:**
-- Observability (monitoring, logging, tracing)
-- Alerting strategies & SLOs
-- Incident response automation
-- Performance optimization
-- Scalability analysis
-- System reliability patterns
-
-**Use When:**
-- Designing monitoring/observability systems
-- Setting up alerts and SLOs
-- Incident response planning
-- Performance bottleneck analysis
-- Reliability engineering
-
-**Example dispatch:**
-```
-Task tool:
-  subagent_type: "ring-dev-team:sre"
-  model: "opus"
-  prompt: "Design monitoring and alerting for a Go microservice with 99.9% SLO"
-```
-
----
-
-## Decision Matrix: Which Specialist?
-
-| Need | Specialist | Use Case |
-|------|-----------|----------|
-| Go API, database, concurrency | Backend Engineer (Go) | Go-specific service architecture |
-| TypeScript/Node.js backend, NestJS, Express | Backend Engineer (TypeScript) | TypeScript backend services |
-| CI/CD, Docker, Kubernetes, IaC | DevOps Engineer | Deployment pipelines, infrastructure |
-| BFF layer, Clean Architecture, DDD | Frontend BFF Engineer (TypeScript) | Next.js API Routes BFF layer |
-| Visual design, typography, motion, aesthetics | Frontend Designer | Distinctive UI, design systems |
-| Test strategy, E2E, coverage | QA Analyst | Testing architecture, automation |
-| Monitoring, SLOs, performance, reliability | SRE | Observability, incident response |
-
----
-
-## Choosing the Right Specialist
-
-### Backend Engineers
-
-**Use `ring-dev-team:backend-engineer-golang` when:**
-- Building Go microservices
-- Database optimization with Go
-- gRPC, concurrency, performance optimization
-- Go-specific patterns and idioms
-
-**Use `ring-dev-team:backend-engineer-typescript` when:**
-- Building TypeScript/Node.js backends
-- NestJS, Express, Fastify frameworks
-- Prisma/TypeORM integration
-- Full-stack TypeScript projects
-
-**Example decision:**
-- "Build a high-performance Go API" → **`ring-dev-team:backend-engineer-golang`**
-- "Build a NestJS service with Prisma" → **`ring-dev-team:backend-engineer-typescript`**
-
-### Frontend Engineers
-
-- Building BFF layer with Next.js API Routes
-- Need Clean Architecture/DDD patterns
-- API orchestration and data transformation
-- Server-side business logic for frontend
-
-**Use `ring-dev-team:frontend-designer` when:**
-- Visual design excellence
-- Typography, motion, aesthetics
-- Distinctive UI that avoids generic AI aesthetics
-
-**Example decision:**
-- "Build BFF layer with Clean Architecture" → **`ring-dev-team:frontend-bff-engineer-typescript`**
-- "Create a visually striking landing page" → **`ring-dev-team:frontend-designer`**
+**Note:** `frontend-designer` = visual aesthetics. `frontend-bff-engineer-typescript` = business logic/architecture.
 
 ---
 
@@ -354,125 +123,38 @@ Remember:
 
 ## Available in This Plugin
 
-**Agents:**
-- backend-engineer-golang
-- backend-engineer-typescript
-- devops-engineer
-- frontend-bff-engineer-typescript
-- frontend-designer
-- qa-analyst
-- sre
+**Agents:** See "7 Developer Specialists" table above.
 
-**Skills:**
-- ring-dev-team:using-dev-team: Plugin introduction and agent selection guide
-- ring-dev-team:dev-cycle: 6-gate development workflow (Implementation → DevOps → SRE → Testing → Review → Validation)
-- ring-dev-team:dev-refactor: Analyze codebase against PROJECT_RULES.md, generate refactoring tasks
+**Skills:** `using-dev-team` (this), `dev-cycle` (6-gate workflow), `dev-refactor` (codebase analysis)
 
-**Commands:**
-- `/ring-dev-team:dev-cycle` – Execute development cycle for tasks
-- `/ring-dev-team:dev-refactor` – Analyze and refactor existing codebase
+**Commands:** `/ring-dev-team:dev-cycle` (execute tasks), `/ring-dev-team:dev-refactor` (analyze codebase)
 
-**Note:** If a skill documents a developer agent but you can't find it, you may not have ring-dev-team enabled. Check `.claude-plugin/marketplace.json` or install ring-dev-team plugin.
+**Note:** Missing agents? Check `.claude-plugin/marketplace.json` for ring-dev-team plugin.
 
 ---
 
 ## Development Workflows
 
-The dev-team plugin provides three unified workflows that all use the same 6-gate development cycle:
+All workflows converge to the 6-gate development cycle:
 
-### 1. New Project / Feature (via PM Team)
+| Workflow | Entry Point | Output | Then |
+|----------|-------------|--------|------|
+| **New Feature** | `/ring-pm-team:pre-dev-feature "description"` | `docs/pre-dev/{feature}/tasks.md` | → `/ring-dev-team:dev-cycle tasks.md` |
+| **Direct Tasks** | `/ring-dev-team:dev-cycle tasks.md` | — | Execute 6 gates directly |
+| **Refactoring** | `/ring-dev-team:dev-refactor` | `docs/refactor/{timestamp}/tasks.md` | → `/ring-dev-team:dev-cycle tasks.md` |
 
-```text
-/ring-pm-team:pre-dev-feature "Add user authentication"
-                    │
-                    ▼
-         docs/pre-dev/auth/tasks.md
-                    │
-                    ▼
-/ring-dev-team:dev-cycle docs/pre-dev/auth/tasks.md
-                    │
-                    ▼
-         6-Gate Development Cycle
-```
+**6-Gate Development Cycle:**
 
-### 2. Direct Task Execution
+| Gate | Focus | Agent(s) |
+|------|-------|----------|
+| **0: Implementation** | TDD: RED→GREEN→REFACTOR | `backend-engineer-*`, `frontend-bff-engineer-typescript` |
+| **1: DevOps** | Dockerfile, docker-compose, .env | `devops-engineer` |
+| **2: SRE** | Health checks, logging, metrics | `sre` |
+| **3: Testing** | Unit tests, coverage ≥80% | `qa-analyst` |
+| **4: Review** | 3 reviewers IN PARALLEL | `code-reviewer`, `business-logic`, `security` |
+| **5: Validation** | User approval: APPROVED/REJECTED | User decision |
 
-```text
-/ring-dev-team:dev-cycle docs/tasks/sprint-001.md
-                    │
-                    ▼
-         6-Gate Development Cycle
-```
-
-### 3. Refactoring Existing Code
-
-```text
-/ring-dev-team:dev-refactor
-        │
-        ▼
-┌─────────────────────────────┐
-│      dev-refactor           │
-│                             │
-│  • Scan codebase            │
-│  • Compare vs PROJECT_RULES.md  │
-│  • Identify gaps            │
-│  • Generate tasks.md        │
-│  • User approval            │
-└─────────────────────────────┘
-        │
-        ▼
-docs/refactor/{timestamp}/tasks.md
-        │
-        ▼
-/ring-dev-team:dev-cycle docs/refactor/{timestamp}/tasks.md
-        │
-        ▼
-         6-Gate Development Cycle
-```
-
-### The 6-Gate Development Cycle
-
-All workflows converge to the same execution process:
-
-```text
-┌─────────────────────────────────────────────────────────────┐
-│                   6-GATE DEVELOPMENT CYCLE                  │
-├─────────────────────────────────────────────────────────────┤
-│ Gate 0: Implementation                                      │
-│         • TDD: RED → GREEN → REFACTOR                       │
-│         • Agents: backend-engineer-*, frontend-bff-engineer-typescript   │
-├─────────────────────────────────────────────────────────────┤
-│ Gate 1: DevOps Setup                                        │
-│         • Dockerfile, docker-compose.yml, .env.example      │
-│         • Agent: devops-engineer                            │
-├─────────────────────────────────────────────────────────────┤
-│ Gate 2: SRE Validation                                      │
-│         • Metrics, health checks, structured logging        │
-│         • Agent: sre                                        │
-├─────────────────────────────────────────────────────────────┤
-│ Gate 3: Testing                                             │
-│         • Unit tests, coverage ≥ 80%                        │
-│         • Agent: qa-analyst                                 │
-├─────────────────────────────────────────────────────────────┤
-│ Gate 4: Review                                              │
-│         • 3 reviewers IN PARALLEL                           │
-│         • code-reviewer, business-logic, security           │
-├─────────────────────────────────────────────────────────────┤
-│ Gate 5: Validation                                          │
-│         • User approval: APPROVED / REJECTED                │
-│         • Evidence for each acceptance criterion            │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Workflow Summary
-
-| Scenario | Command | Input | Process |
-|----------|---------|-------|---------|
-| New feature | `/ring-pm-team:pre-dev-*` → `/ring-dev-team:dev-cycle` | User request | PM creates tasks → Dev executes |
-| Direct tasks | `/ring-dev-team:dev-cycle` | tasks.md | Execute 6 gates |
-| Refactoring | `/ring-dev-team:dev-refactor` | Existing codebase | Analyze → Generate tasks → Execute 6 gates |
-
-**Key Principle:** All development follows the same standardized 6-gate process, whether it's a new feature, a bug fix, or a refactoring effort.
+**Key Principle:** All development follows the same 6-gate process.
 
 ---
 

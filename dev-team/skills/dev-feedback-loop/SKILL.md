@@ -185,16 +185,7 @@ Base score of 100 points, with deductions for inefficiencies:
 
 ### Score Calculation Formula
 
-```text
-assertiveness_score = 100
-                    - min(30, (extra_iterations * 10))
-                    - (review_fail * 20)
-                    - (needs_discussion * 10)
-                    - min(40, (unmet_criteria * 10))
-
-if user_rejected:
-    assertiveness_score = 0
-```
+`score = 100 - min(30, extra_iterations*10) - review_fail*20 - needs_discussion*10 - min(40, unmet_criteria*10)` | User rejected → score = 0
 
 ### Score Interpretation
 
@@ -209,53 +200,11 @@ if user_rejected:
 
 ## Step 1: Collect Cycle Metrics
 
-After task completion, gather all gate data:
-
-```markdown
-## Cycle Metrics - [TASK-ID]
-
-### Gate Transitions
-| Gate | Iterations | Duration | Outcome |
-|------|------------|----------|---------|
-| Gate 0: Implementation | 1 | 2h 30m | PASS |
-| Gate 1: DevOps | 1 | 30m | PASS |
-| Gate 2: SRE | 1 | 25m | PASS |
-| Gate 3: Testing | 2 | 1h 15m | PASS (coverage gap) |
-| Gate 4: Review | 1 | 20m | PASS |
-| Gate 5: Validation | 1 | 10m | APPROVED |
-
-### Review Findings
-- Code reviewer: PASS (2 Low issues)
-- Business logic reviewer: PASS (1 Medium issue)
-- Security reviewer: PASS (0 issues)
-- Aggregate VERDICT: PASS
-
-### Validation Outcome
-- Criteria: 4/4 verified
-- Decision: APPROVED
-- Notes: None
-```
+**After task completion, gather:** Gate transitions (gate, iterations, duration, outcome for each Gate 0-5), Review findings (per reviewer verdict + issues), Validation outcome (criteria verified, decision, notes)
 
 ## Step 2: Calculate Assertiveness Score
 
-Apply formula with collected metrics:
-
-```markdown
-## Assertiveness Calculation - [TASK-ID]
-
-Base Score: 100
-
-Deductions:
-- Extra iterations: 1 (Gate 3) = -10
-- Review FAIL: 0 = -0
-- NEEDS_DISCUSSION: 0 = -0
-- Unmet criteria: 0 = -0
-- User REJECTED: No = -0
-
-**Final Score: 90 / 100**
-
-Rating: Excellent
-```
+**Apply formula:** Base 100 - deductions (extra iterations, review failures, unmet criteria) = Final Score / 100. Map to rating per interpretation table.
 
 ## Step 3: Analyze Prompt Quality (Agents Only)
 
@@ -368,268 +317,39 @@ If file already exists (from previous task in same cycle), **append** the new ta
 
 ## Step 4: Threshold Alerts
 
-### Task Score < 70
+| Alert | Trigger | Action | Report Contents |
+|-------|---------|--------|-----------------|
+| **Score < 70** | Individual task assertiveness < 70 | Mandatory root cause analysis | Failure events, "5 Whys" per event, Corrective actions, Prevention measures |
+| **Iterations > 3** | Any gate exceeds 3 iterations | STOP + human intervention | Iteration history, Recurring issue, Options: [Continue/Reassign/Descope/Cancel] |
+| **Avg < 80** | Cycle average below 80 | Deep analysis report | Score distribution, Failure patterns (freq/cause/fix), Improvement plan |
 
-**Trigger:** Individual task assertiveness below 70
-
-**Action:** Mandatory root cause analysis
-
-```markdown
-## Root Cause Analysis - [TASK-ID]
-
-**Score:** 65/100 (Needs Improvement)
-
-### Failure Events
-1. Gate 3 required 3 iterations (extra_iterations = 2)
-2. Review returned FAIL on first pass
-3. 1 criterion unmet at validation
-
-### Root Cause Investigation
-
-#### Why did Gate 3 (Testing) require 3 iterations?
-- Iteration 1: Coverage below 80% threshold (67% actual)
-- Iteration 2: Edge case tests missing for null inputs
-- Iteration 3: Integration test failures due to missing fixtures
-- **Root cause:** TDD RED phase skipped, tests written after implementation
-
-#### Why did review FAIL?
-- Critical finding: SQL injection vulnerability
-- **Root cause:** Security patterns not applied
-
-#### Why was criterion unmet?
-- AC-3: "Response under 200ms" not achieved (actual: 350ms)
-- **Root cause:** N+1 query not detected during implementation
-
-### Corrective Actions
-1. Enforce TDD RED phase verification at Gate 0 (Implementation)
-2. Add security checklist to Gate 0 (Implementation)
-3. Add performance test to Gate 3 (Testing) before Gate 4 (Review)
-
-### Prevention Measures
-1. Update ring-dev-team:dev-implementation skill with TDD compliance check
-2. Update ring-dev-team:dev-testing skill to require coverage proof before exit
-3. Add security self-review before gate exit
-```
-
-### Gate Iterations > 3
-
-**Trigger:** Any gate exceeds 3 iterations
-
-**Action:** Stop execution, request human intervention
-
-```markdown
-## GATE BLOCKED - Human Intervention Required
-
-**Task:** [TASK-ID]
-**Gate:** Gate 4 (Review)
-**Iterations:** 4 (exceeds limit of 3)
-
-### Iteration History
-1. Initial review: FAIL (2 Critical, 3 High)
-2. After fixes: FAIL (1 Critical, 2 High)
-3. After fixes: FAIL (1 Critical, 1 High)
-4. After fixes: FAIL (1 Critical)
-
-### Recurring Issue
-- Same Critical finding persists: "Authentication bypass possible"
-- Fix attempts not addressing root cause
-
-### Recommended Actions
-1. Pair programming session on auth implementation
-2. Architecture review of authentication flow
-3. Consider alternative approach
-
-### BLOCKED UNTIL
-Human decision on how to proceed:
-[ ] Continue with guidance
-[ ] Reassign to different approach
-[ ] Descope feature
-[ ] Cancel task
-```
-
-### Cycle Average < 80
-
-**Trigger:** Average assertiveness across recent tasks below 80
-
-**Action:** Generate deep analysis report
-
-```markdown
-## Deep Analysis Report - Development Cycle Health
-
-**Period:** [Date range]
-**Tasks Analyzed:** 15
-**Average Assertiveness:** 73.2
-
-### Score Distribution
-- Excellent (90-100): 2 tasks (13%)
-- Good (80-89): 4 tasks (27%)
-- Acceptable (70-79): 5 tasks (33%)
-- Needs Improvement (60-69): 3 tasks (20%)
-- Poor (<60): 1 task (7%)
-
-### Common Failure Patterns
-
-#### Pattern 1: Review Failures (40% of low scores)
-- Frequency: 6/15 tasks had review FAIL
-- Common finding: Security issues
-- Root cause: Security checklist not followed
-- Recommendation: Add mandatory security gate
-
-#### Pattern 2: Extra Iterations in Testing (33% of low scores)
-- Frequency: 5/15 tasks needed 2+ test iterations
-- Common finding: Coverage gaps
-- Root cause: TDD not strictly followed
-- Recommendation: Enforce RED phase verification
-
-#### Pattern 3: Validation Rejections (13% of low scores)
-- Frequency: 2/15 tasks rejected at validation
-- Common finding: Misunderstood requirements
-- Root cause: Ambiguous acceptance criteria
-- Recommendation: Require criterion clarification in Gate 1
-
-### Improvement Plan
-
-| Priority | Action | Owner | Target |
-|----------|--------|-------|--------|
-| High | Add security gate between impl and test | Team | Week 1 |
-| High | Enforce TDD RED phase logging | Process | Week 1 |
-| Medium | Criterion clarification template | PM | Week 2 |
-| Low | Pair programming for security tasks | Team | Ongoing |
-
-### Success Metrics
-- Target average assertiveness: 85+
-- Target review FAIL rate: <20%
-- Target validation rejection: <10%
-```
+**Report formats:** RCA = Score → Failure Events → 5 Whys → Root cause → Corrective action | Gate Blocked = History → Issue → BLOCKED UNTIL human decision | Deep Analysis = Distribution → Patterns → Improvement Plan
 
 ## Step 4: Write Feedback Report
 
-Save report to standardized location:
+**Location:** `.ring/dev-team/feedback/cycle-YYYY-MM-DD.md`
 
-**Directory:** `.ring/dev-team/feedback/`
-**Filename:** `cycle-YYYY-MM-DD.md`
+**Required sections:**
 
-Create the feedback directory if it doesn't exist, then write the report content to the file.
-
-Report format:
-
-```markdown
-# Development Cycle Feedback Report
-
-**Date:** YYYY-MM-DD
-**Tasks Completed:** X
-**Average Assertiveness:** XX.X%
-
-## Task Summary
-
-| Task ID | Score | Rating | Key Issue |
-|---------|-------|--------|-----------|
-| TASK-001 | 95 | Excellent | - |
-| TASK-002 | 80 | Good | Extra iteration in testing |
-| TASK-003 | 65 | Needs Improvement | Review FAIL + 2 unmet criteria |
-
-## Aggregate Metrics
-
-### By Gate
-| Gate | Avg Iterations | Avg Duration | Pass Rate |
-|------|----------------|--------------|-----------|
-| Gate 0: Implementation | 1.2 | 2h | 100% |
-| Gate 1: DevOps | 1.1 | 30m | 100% |
-| Gate 2: SRE | 1.1 | 25m | 100% |
-| Gate 3: Testing | 1.5 | 1h | 95% |
-| Gate 4: Review | 1.4 | 25m | 85% |
-| Gate 5: Validation | 1.1 | 15m | 90% |
-
-### By Penalty Type
-| Penalty | Occurrences | Total Points Lost |
-|---------|-------------|-------------------|
-| Extra iterations | 8 | 80 |
-| Review FAIL | 3 | 60 |
-| NEEDS_DISCUSSION | 2 | 20 |
-| Unmet criteria | 4 | 40 |
-| User REJECTED | 0 | 0 |
-
-## Patterns Identified
-
-### Positive Patterns
-1. DevOps gate (Gate 1) consistently single-iteration
-2. Implementation quality improving (fewer review issues)
-
-### Negative Patterns
-1. Testing gate averaging 1.5 iterations (target: 1.0)
-2. Review FAIL rate at 15% (target: <10%)
-
-## Recommendations
-
-### Immediate (This Sprint)
-1. Add TDD compliance check before testing gate
-2. Review security checklist with team
-
-### Short-term (This Month)
-1. Implement performance pre-check
-2. Clarify acceptance criteria template
-
-### Long-term (This Quarter)
-1. Automate assertiveness tracking dashboard
-2. Integrate feedback into retrospectives
-
-## Next Review
-- Date: YYYY-MM-DD (next cycle end)
-- Target assertiveness: 85%
-- Focus areas: Testing iterations, Review pass rate
-```
+| Section | Content |
+|---------|---------|
+| **Header** | Date, Tasks Completed, Average Assertiveness |
+| **Task Summary** | Table: Task ID, Score, Rating, Key Issue |
+| **By Gate** | Table: Gate, Avg Iterations, Avg Duration, Pass Rate |
+| **By Penalty** | Table: Penalty type, Occurrences, Points Lost |
+| **Patterns** | Positive patterns (what works) + Negative patterns (what needs improvement) |
+| **Recommendations** | Immediate (this sprint), Short-term (this month), Long-term (this quarter) |
+| **Next Review** | Date, Target assertiveness, Focus areas |
 
 ## Step 5: Generate Improvement Suggestions
 
-Based on patterns, generate specific improvements:
+**Improvement types based on pattern analysis:**
 
-### For Agents
-
-```markdown
-## Agent Improvement Suggestions
-
-### ring-dev-team:backend-engineer-*
-- Issue: Security findings in 40% of reviews
-- Suggestion: Add security checklist section to agent prompt
-- Specific addition: OWASP Top 10 verification before completion
-
-### ring-dev-team:qa-analyst
-- Issue: Coverage gaps causing test iterations
-- Suggestion: Add coverage threshold check to test completion
-- Specific addition: Fail if coverage < 80% before gate exit
-```
-
-### For Skills
-
-```markdown
-## Skill Improvement Suggestions
-
-### ring-dev-team:dev-testing
-- Issue: TDD RED phase often skipped
-- Suggestion: Add mandatory failure output capture
-- Specific change: Require paste of test failure before GREEN phase
-
-### ring-dev-team:dev-review
-- Issue: Same security issues recurring
-- Suggestion: Add pre-review security checklist
-- Specific change: Gate entry requires security self-check
-```
-
-### For Process
-
-```markdown
-## Process Improvement Suggestions
-
-### Planning Gate
-- Issue: Ambiguous acceptance criteria causing validation rejections
-- Suggestion: Require testable criterion format
-- Template: "Given [context], when [action], then [outcome]"
-
-### Review Gate
-- Issue: Multiple iterations for same issue type
-- Suggestion: Add issue-type-specific checklists
-- Implementation: Security, performance, logic checklists
-```
+| Target | When to Suggest | Format |
+|--------|-----------------|--------|
+| **Agents** | Same issue type recurring in reviews | Agent name → Issue → Suggestion → Specific addition to prompt |
+| **Skills** | Gate consistently needs iterations | Skill name → Issue → Suggestion → Specific change to skill |
+| **Process** | Pattern spans multiple tasks | Process area → Issue → Suggestion → Implementation |
 
 ## Execution Report
 
@@ -661,26 +381,8 @@ Based on patterns, generate specific improvements:
 
 ## Feedback Loop Integration
 
-### With Retrospectives
-
-Include feedback report in sprint retrospectives:
-- Share aggregate metrics
-- Discuss pattern trends
-- Prioritize improvements
-- Assign action items
-
-### With Skill Updates
-
-When patterns indicate skill gaps:
-1. Document specific improvement
-2. Update skill with new guidance
-3. Track if pattern improves
-4. Iterate on skill content
-
-### With Agent Updates
-
-When patterns indicate agent gaps:
-1. Identify specific agent behavior
-2. Update agent prompt/instructions
-3. Track performance change
-4. Validate improvement
+| Integration | Process |
+|-------------|---------|
+| **Retrospectives** | Share metrics → Discuss trends → Prioritize improvements → Assign actions |
+| **Skill Updates** | Document gap → Update skill → Track improvement → Iterate |
+| **Agent Updates** | Identify behavior → Update prompt → Track change → Validate |

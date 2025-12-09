@@ -31,8 +31,7 @@ Ring installs to: `~/.claude/`
 │       ├── dev-team/            # Developer agents plugin
 │       ├── pm-team/             # Product planning plugin
 │       ├── finops-team/         # FinOps plugin
-│       ├── tw-team/             # Technical writing plugin
-│       └── ralph-wiggum/        # Iterative loops plugin
+│       └── tw-team/             # Technical writing plugin
 └── .ring-manifest.json          # Installation tracking
 ```
 
@@ -90,7 +89,6 @@ Slash commands provide quick access to common workflows.
 /ring-default:codereview          # Parallel 3-reviewer dispatch
 /ring-default:brainstorm          # Socratic design refinement
 /ring-pm-team:pre-dev-full        # 8-gate planning workflow
-/ralph-wiggum:ralph-loop          # Iterative AI loops
 ```
 
 ### Hooks

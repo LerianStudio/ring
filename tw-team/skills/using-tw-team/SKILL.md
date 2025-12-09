@@ -26,107 +26,17 @@ The ring-tw-team plugin provides specialized agents for technical documentation.
 
 **Remember:** Follow the **ORCHESTRATOR principle** from `using-ring`. Dispatch agents to handle documentation tasks; don't write complex documentation directly.
 
----
-
 ## 3 Documentation Specialists
 
-### 1. Functional Writer
-**`ring-tw-team:functional-writer`**
-
-**Specializations:**
-- Conceptual documentation and guides
-- Getting started tutorials
-- Feature explanations
-- Best practices documentation
-- Use case documentation
-- Workflow and process guides
-
-**Use When:**
-- Writing new product guides
-- Creating tutorials for features
-- Documenting best practices
-- Writing conceptual explanations
-- Creating "how to" documentation
-
-**Example dispatch:**
-```
-Task tool:
-  subagent_type: "ring-tw-team:functional-writer"
-  model: "opus"
-  prompt: "Write a getting started guide for the authentication feature"
-```
-
----
-
-### 2. API Writer
-**`ring-tw-team:api-writer`**
-
-**Specializations:**
-- REST API reference documentation
-- Endpoint descriptions and examples
-- Request/response schema documentation
-- Error code documentation
-- Field-level descriptions
-- API integration guides
-
-**Use When:**
-- Documenting new API endpoints
-- Writing request/response examples
-- Documenting error codes
-- Creating API field descriptions
-- Writing integration guides
-
-**Example dispatch:**
-```
-Task tool:
-  subagent_type: "ring-tw-team:api-writer"
-  model: "opus"
-  prompt: "Document the POST /accounts endpoint with request/response examples"
-```
-
----
-
-### 3. Documentation Reviewer
-**`ring-tw-team:docs-reviewer`**
-
-**Specializations:**
-- Voice and tone compliance
-- Structure and hierarchy review
-- Completeness assessment
-- Clarity and readability analysis
-- Consistency checking
-- Technical accuracy verification
-
-**Use When:**
-- Reviewing draft documentation
-- Checking documentation quality
-- Ensuring style guide compliance
-- Validating documentation completeness
-- Pre-publication review
-
-**Example dispatch:**
-```
-Task tool:
-  subagent_type: "ring-tw-team:docs-reviewer"
-  model: "opus"
-  prompt: "Review this guide for voice, tone, structure, and completeness"
-```
-
----
-
-## Decision Matrix: Which Specialist?
-
-| Need | Specialist | Use Case |
-|------|-----------|----------|
-| Guides, tutorials, concepts | Functional Writer | Product documentation |
-| API endpoints, schemas, errors | API Writer | Technical API reference |
-| Quality check, style compliance | Docs Reviewer | Pre-publication review |
+| Agent | Specialization | Use When |
+|-------|---------------|----------|
+| `ring-tw-team:functional-writer` | Conceptual docs, guides, tutorials, best practices, workflows | Writing product guides, tutorials, "how to" content |
+| `ring-tw-team:api-writer` | REST API reference, endpoints, schemas, errors, field descriptions | Documenting API endpoints, request/response examples |
+| `ring-tw-team:docs-reviewer` | Voice/tone, structure, completeness, clarity, accuracy | Reviewing drafts, pre-publication quality check |
 
 ---
 
 ## Documentation Standards Summary
-
-These agents enforce the following standards:
 
 ### Voice and Tone
 - **Assertive, but never arrogant** – Say what needs to be said, clearly
@@ -136,12 +46,12 @@ These agents enforce the following standards:
 
 ### Capitalization
 - **Sentence case** for all headings and titles
-- Only first letter and proper nouns are capitalized
+- Only first letter and proper nouns capitalized
 - ✅ "Getting started with the API"
 - ❌ "Getting Started With The API"
 
 ### Structure Patterns
-1. Lead with a clear definition paragraph
+1. Lead with clear definition paragraph
 2. Use bullet points for key characteristics
 3. Separate sections with `---` dividers
 4. Include info boxes and warnings where needed
@@ -150,12 +60,11 @@ These agents enforce the following standards:
 
 ---
 
-## Dispatching Multiple Specialists
+## Dispatching Specialists
 
-For comprehensive documentation, dispatch in **parallel** (single message, multiple Task calls):
+**Parallel dispatch** for comprehensive documentation (single message, multiple Tasks):
 
 ```
-✅ CORRECT:
 Task #1: ring-tw-team:functional-writer (write the guide)
 Task #2: ring-tw-team:api-writer (write API reference)
 (Both run in parallel)
@@ -166,51 +75,42 @@ Task #3: ring-tw-team:docs-reviewer (review both)
 
 ---
 
-## ORCHESTRATOR Principle
-
-Remember:
-- **You're the orchestrator** – Dispatch specialists, don't write directly
-- **Let specialists apply standards** – They know voice, tone, and structure
-- **Combine with other plugins** – API writers + backend engineers for accuracy
-
-### Good Example (ORCHESTRATOR):
-> "I need documentation for the new feature. Let me dispatch ring-tw-team:functional-writer to create the guide."
-
-### Bad Example (OPERATOR):
-> "I'll manually write all the documentation myself."
-
----
-
 ## Available in This Plugin
 
-**Agents:**
-- ring-tw-team:functional-writer
-- ring-tw-team:api-writer
-- ring-tw-team:docs-reviewer
+**Agents:** functional-writer, api-writer, docs-reviewer
 
 **Skills:**
-- using-tw-team: Plugin introduction and agent selection
-- writing-functional-docs: Functional documentation patterns
-- writing-api-docs: API reference documentation patterns
-- documentation-structure: Document hierarchy and organization
-- voice-and-tone: Voice and tone guidelines
-- documentation-review: Documentation quality checklist
+- using-tw-team: Plugin introduction
+- writing-functional-docs: Functional doc patterns
+- writing-api-docs: API reference patterns
+- documentation-structure: Hierarchy and organization
+- voice-and-tone: Voice guidelines
+- documentation-review: Quality checklist
 - api-field-descriptions: Field description patterns
 
 **Commands:**
-- /ring-tw-team:write-guide: Start writing a functional guide
-- /ring-tw-team:write-api: Start writing API documentation
-- /ring-tw-team:review-docs: Review existing documentation
+- /ring-tw-team:write-guide: Start functional guide
+- /ring-tw-team:write-api: Start API documentation
+- /ring-tw-team:review-docs: Review existing docs
 
 ---
 
 ## Integration with Other Plugins
 
-- **using-ring** (default) – ORCHESTRATOR principle for ALL agents
-- **using-dev-team** – Developer agents for technical accuracy
-- **using-pm-team** – Pre-dev planning before documentation
+| Plugin | Use For |
+|--------|---------|
+| using-ring (default) | ORCHESTRATOR principle |
+| using-dev-team | Developer agents for technical accuracy |
+| using-pm-team | Pre-dev planning before documentation |
 
-Dispatch based on your need:
-- Documentation writing → ring-tw-team agents
-- Technical implementation → ring-dev-team agents
-- Feature planning → ring-pm-team agents
+---
+
+## ORCHESTRATOR Principle
+
+- **You're the orchestrator** – Dispatch specialists, don't write directly
+- **Let specialists apply standards** – They know voice, tone, structure
+- **Combine with other plugins** – API writers + backend engineers for accuracy
+
+> ✅ "I need documentation for the new feature. Let me dispatch ring-tw-team:functional-writer."
+>
+> ❌ "I'll manually write all the documentation myself."

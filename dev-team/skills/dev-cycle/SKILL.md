@@ -153,131 +153,18 @@ Day 4: Production incident from Day 1 code
 
 ## Integrated PM → Dev Workflow
 
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│                      PM TEAM OUTPUT                              │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  Option A: Tasks only                                           │
-│  └─ docs/pre-dev/{feature}/tasks.md                             │
-│     ├─ T-001: Task with requirements + acceptance criteria      │
-│     ├─ T-002: Task with requirements + acceptance criteria      │
-│     └─ T-003: Task with requirements + acceptance criteria      │
-│                                                                  │
-│  Option B: Tasks + Subtasks                                     │
-│  └─ docs/pre-dev/{feature}/                                     │
-│     ├─ tasks.md (T-001, T-002, T-003)                          │
-│     └─ subtasks/                                                │
-│        ├─ T-001/                                                │
-│        │  ├─ ST-001-01.md (step-by-step instructions)          │
-│        │  ├─ ST-001-02.md                                      │
-│        │  └─ ST-001-03.md                                      │
-│        ├─ T-002/                                                │
-│        │  └─ ST-002-01.md                                      │
-│        └─ T-003/                                                │
-│           ├─ ST-003-01.md                                      │
-│           └─ ST-003-02.md                                      │
-│                                                                  │
-└──────────────────────────┬──────────────────────────────────────┘
-                           │
-                           ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                   DEV TEAM EXECUTION                             │
-│              /ring-dev-team:dev-cycle                            │
-└─────────────────────────────────────────────────────────────────┘
-```
+**PM Team Output** → **Dev Team Execution** (`/ring-dev-team:dev-cycle`)
+
+| Input Type | Path | Structure |
+|------------|------|-----------|
+| **Tasks only** | `docs/pre-dev/{feature}/tasks.md` | T-001, T-002, T-003 with requirements + acceptance criteria |
+| **Tasks + Subtasks** | `docs/pre-dev/{feature}/` | tasks.md + `subtasks/{task-id}/ST-XXX-01.md, ST-XXX-02.md...` |
 
 ## Execution Order
 
-### Core Principle: One Unit = All 6 Gates
+**Core Principle:** Each execution unit (task OR subtask) passes through **all 6 gates** before the next unit.
 
-Each execution unit (task OR subtask) passes through **all 6 gates** before moving to the next unit.
-
-### Tasks Only (no subtasks)
-
-```text
-For each task in order (T-001 → T-002 → T-003):
-  Gate 0: Implementation (TDD)
-  Gate 1: DevOps (if needed)
-  Gate 2: SRE (observability)
-  Gate 3: Testing
-  Gate 4: Review (3 parallel)
-  Gate 5: Validation
-  ──────────────────────────────────
-  🔒 CHECKPOINT: Unit Approval (Step 7.1)      [if manual_per_subtask]
-     - Present completion summary
-     - Wait for: Continue / Test First / Stop
-  ──────────────────────────────────
-  🔒 CHECKPOINT: Task Approval (Step 7.2)      [if manual_per_subtask OR manual_per_task]
-     - Present task summary
-     - Wait for: Continue / Integration Test / Stop
-  ──────────────────────────────────
-  → Next task
-
-  [automatic mode: no checkpoints, continuous execution]
-```
-
-### Tasks with Subtasks
-
-When a task has subtasks, **each subtask is an execution unit**:
-
-```text
-T-001 (has 3 subtasks):
-  │
-  ├─ ST-001-01:
-  │    Gate 0: Implementation
-  │    Gate 1: DevOps (if needed)
-  │    Gate 2: SRE (if needed)
-  │    Gate 3: Testing
-  │    Gate 4: Review (3 parallel)
-  │    Gate 5: Validation
-  │    ──────────────────────────────────
-  │    🔒 CHECKPOINT: Unit Approval       [if manual_per_subtask]
-  │    ──────────────────────────────────
-  │    ✓ Subtask complete
-  │
-  ├─ ST-001-02:
-  │    Gate 0 → Gate 5 (same as above)
-  │    ──────────────────────────────────
-  │    🔒 CHECKPOINT: Unit Approval       [if manual_per_subtask]
-  │    ──────────────────────────────────
-  │    ✓ Subtask complete
-  │
-  └─ ST-001-03:
-       Gate 0 → Gate 5 (same as above)
-       ──────────────────────────────────
-       🔒 CHECKPOINT: Unit Approval       [if manual_per_subtask]
-       ──────────────────────────────────
-       ✓ Subtask complete
-
-  ══════════════════════════════════════
-  🔒 CHECKPOINT: Task Approval (Step 7.2) [if manual_per_subtask OR manual_per_task]
-     - Present full task summary
-     - Wait for: Continue / Integration Test / Stop
-  ══════════════════════════════════════
-  ✓ T-001 complete
-
-T-002 (no subtasks → task is execution unit):
-  Gate 0 → Gate 5
-  ──────────────────────────────────
-  🔒 CHECKPOINT: Unit Approval            [if manual_per_subtask]
-  🔒 CHECKPOINT: Task Approval            [if manual_per_subtask OR manual_per_task]
-  ──────────────────────────────────
-  ✓ T-002 complete
-
-→ Next task...
-
-EXECUTION MODES SUMMARY:
-┌────────────────────┬─────────────────────┬───────────────────┐
-│ Mode               │ Step 7.1 (unit)     │ Step 7.2 (task)   │
-├────────────────────┼─────────────────────┼───────────────────┤
-│ manual_per_subtask │ ✓ Every unit        │ ✓ Every task      │
-│ manual_per_task    │ ✗ Skip              │ ✓ Every task      │
-│ automatic          │ ✗ Skip              │ ✗ Skip            │
-└────────────────────┴─────────────────────┴───────────────────┘
-```
-
-### Execution Unit Definition
+**Flow:** Unit → Gate 0-5 → 🔒 Unit Checkpoint (Step 7.1) → 🔒 Task Checkpoint (Step 7.2) → Next Unit
 
 | Scenario | Execution Unit | Gates Per Unit |
 |----------|----------------|----------------|
@@ -368,45 +255,35 @@ State is persisted to `.ring/dev-team/current-cycle.json`:
 
 ## Step 0: Verify PROJECT_RULES.md Exists (HARD GATE)
 
-**This step is NON-NEGOTIABLE. Cycle CANNOT proceed without project standards.**
+| Mode | Step 7.1 (unit) | Step 7.2 (task) |
+|------|-----------------|-----------------|
+| `manual_per_subtask` | ✓ Every unit | ✓ Every task |
+| `manual_per_task` | ✗ Skip | ✓ Every task |
+| `automatic` | ✗ Skip | ✗ Skip |
 
-Before initializing or resuming any cycle, verify that project standards exist:
+**Checkpoint Options:** Continue / Test First / Stop (7.1) | Continue / Integration Test / Stop (7.2)
 
-```text
-Check sequence:
-1. Check: docs/PROJECT_RULES.md
-2. Check: docs/STANDARDS.md (legacy name)
-3. If --resume: Check state file references a valid standards path
+## State Management
 
-Decision:
-├── Found → Proceed to Step 1
-└── NOT Found → STOP with blocker
-```
+State persisted to `.ring/dev-team/current-cycle.json`:
 
-**If PROJECT_RULES.md is missing:**
+| Field | Type | Values |
+|-------|------|--------|
+| `execution_mode` | string | `manual_per_subtask` \| `manual_per_task` \| `automatic` |
+| `status` | string | `in_progress` \| `completed` \| `failed` \| `paused` \| `paused_for_approval` \| `paused_for_testing` \| `paused_for_task_approval` \| `paused_for_integration_testing` |
+| `current_task_index` | int | Current task position |
+| `current_gate` | int | 0-5 |
+| `tasks[].status` | string | `pending` \| `in_progress` \| `completed` \| `failed` \| `blocked` |
+| `tasks[].gate_progress` | object | Status per gate (implementation, devops, sre, testing, review, validation) |
+| `metrics` | object | `total_duration_ms`, `gate_durations`, `review_iterations` |
 
-```yaml
-# STOP - Do not proceed. Report blocker:
-Blocker:
-  type: "missing_prerequisite"
-  message: |
-    Cannot start development cycle without project standards.
+## Step 0: Verify PROJECT_RULES.md Exists (HARD GATE)
 
-    REQUIRED: docs/PROJECT_RULES.md must exist.
+**NON-NEGOTIABLE. Cycle CANNOT proceed without project standards.**
 
-    Why is this mandatory?
-    - Agents need standards to follow during implementation
-    - Code review validates against YOUR standards, not generic ones
-    - TDD tests must verify YOUR requirements, not assumptions
-```
+**Check:** (1) docs/PROJECT_RULES.md (2) docs/STANDARDS.md (legacy) (3) --resume state file → Found: Proceed | NOT Found: STOP with blocker `missing_prerequisite`
 
-**Pressure Resistance for Step 0:**
-
-| Pressure | Response |
-|----------|----------|
-| "Standards slow us down" | "No standards = no target. Agents will guess. Guessing = rework." |
-| "Use defaults" | "Defaults are generic. YOUR project has specific conventions." |
-| "Create standards later" | "Later = after implementation = refactoring. Define now." |
+**Pressure Resistance:** "Standards slow us down" → No target = guessing = rework | "Use defaults" → Defaults are generic, YOUR project has specific conventions | "Create later" → Later = refactoring
 
 ---
 
@@ -414,107 +291,31 @@ Blocker:
 
 ### New Cycle (with task file path)
 
-```text
-Input: path/to/tasks.md OR path/to/pre-dev/{feature}/
+**Input:** `path/to/tasks.md` OR `path/to/pre-dev/{feature}/`
 
-1. Detect input type:
-   - If file: Load tasks.md directly
-   - If directory: Load tasks.md + discover subtasks/
+1. **Detect input:** File → Load directly | Directory → Load tasks.md + discover subtasks/
+2. **Build order:** Read tasks, check for subtasks (ST-XXX-01, 02...) or TDD autonomous mode
+3. **Initialize state:** Generate cycle_id, create `.ring/dev-team/current-cycle.json`, set indices to 0
+4. **Display plan:** "Loaded X tasks with Y subtasks"
+5. **ASK EXECUTION MODE (MANDATORY - AskUserQuestion):**
+   - Options: (a) Manual per subtask (b) Manual per task (c) Automatic
+   - **Do NOT skip:** User hints ≠ mode selection. Only explicit a/b/c is valid.
+6. **Start:** Display mode, proceed to Gate 0
 
-2. Build execution order:
-   a. Read tasks from tasks.md (ordered by appearance)
-   b. For each task, check for subtasks directory:
-      - If exists: Load subtask files in order (ST-XXX-01, 02, 03...)
-      - If not: Task will use TDD autonomous mode
+### Resume Cycle (--resume flag)
 
-3. Initialize state:
-   - Generate cycle_id (UUID)
-   - Create .ring/dev-team/current-cycle.json
-   - Populate tasks array with subtask references
-   - Set current_task_index = 0
-   - Set current_gate = 0
-   - Set current_subtask_index = 0
+1. Load `.ring/dev-team/current-cycle.json`, validate
+2. Display: cycle started, tasks completed/total, current task/subtask/gate, paused reason
+3. **Handle paused states:**
 
-4. Display execution plan:
-   "Loaded X tasks with Y total subtasks:
-   - T-001: 3 subtasks
-   - T-002: 1 subtask
-   - T-003: 2 subtasks (TDD autonomous)"
-
-5. **ASK EXECUTION MODE using AskUserQuestion tool:**
-
-   Question: "How would you like to control the development cycle?"
-   Options:
-     a) "Manual (per subtask)" - Approve after each subtask before continuing
-     b) "Manual (per task)" - Approve only after complete tasks (not individual subtasks)
-     c) "Automatic" - Run all tasks without interruptions
-
-   Store selection in state as `execution_mode`:
-     - "manual_per_subtask" → Checkpoint after every subtask (Step 7.1) + after every task (Step 7.2)
-     - "manual_per_task" → Checkpoint only after tasks complete (Step 7.2 only)
-     - "automatic" → No checkpoints, continuous execution
-
-   **MANDATORY - Do NOT skip this step:**
-   - Do NOT infer mode from user hints ("run quickly", "trivial tasks", "simple fixes")
-   - Do NOT skip the question to save time - it takes 5 seconds
-   - User comments about speed are CONTEXT, not mode selection
-   - Only EXPLICIT selection (a/b/c) from AskUserQuestion is valid
-   - "Simple task" is NOT an excuse to skip mode selection
-
-6. Confirm and start:
-   - Display selected mode
-   - Output: "Starting development cycle in [mode] mode..."
-   - Proceed to Gate 0 for first task
-```
-
-### Resume Cycle (with --resume flag)
-
-```text
-Input: --resume
-
-1. Load .ring/dev-team/current-cycle.json
-2. Validate state file exists and is valid
-3. Display resume summary:
-   - Cycle started: [timestamp]
-   - Tasks: [completed]/[total]
-   - Current task: [id] - [title]
-   - Current subtask: [id] (if applicable)
-   - Current gate: [gate_name]
-   - Paused reason: [status explanation]
-
-4. Handle paused states:
-
-   If status = "paused_for_approval":
-     - Display: "Paused waiting for unit approval after [unit_id]"
-     - Re-present Step 7.1 checkpoint (unit summary + approval question)
-
-   If status = "paused_for_testing":
-     - Display: "Paused for manual testing of unit [unit_id]"
-     - Ask: "Have you finished testing? Ready to continue?"
-     - If yes: Proceed to next unit (or Step 7.2 if last unit)
-     - If no: Keep paused
-
-   If status = "paused_for_task_approval":
-     - Display: "Paused waiting for task approval after [task_id]"
-     - Re-present Step 7.2 checkpoint (task summary + approval question)
-
-   If status = "paused_for_integration_testing":
-     - Display: "Paused for integration testing of task [task_id]"
-     - Ask: "Have you finished integration testing? Ready to continue?"
-     - If yes: Proceed to next task
-     - If no: Keep paused
-
-   If status = "paused" (generic):
-     - Display: "Cycle manually paused"
-     - Ask user to confirm resume
-     - Continue from current position
-
-   If status = "in_progress":
-     - Display: "Cycle was interrupted mid-execution"
-     - Resume from current gate of current execution unit
-
-5. Continue from appropriate position based on status
-```
+| Status | Action |
+|--------|--------|
+| `paused_for_approval` | Re-present Step 7.1 checkpoint |
+| `paused_for_testing` | Ask if testing complete → continue or keep paused |
+| `paused_for_task_approval` | Re-present Step 7.2 checkpoint |
+| `paused_for_integration_testing` | Ask if integration testing complete |
+| `paused` (generic) | Ask user to confirm resume |
+| `in_progress` | Resume from current gate |
 
 ## Input Validation
 
@@ -534,9 +335,6 @@ Task files are generated by `/ring-pm-team:pre-dev-*` or `/ring-dev-team:dev-ref
 **REQUIRED SUB-SKILL:** Use ring-dev-team:dev-implementation
 
 **Execution Unit:** Task (if no subtasks) OR Subtask (if task has subtasks)
-
-```text
-For current execution unit:
 
 1. Record gate start timestamp
 
@@ -579,7 +377,6 @@ For current execution unit:
        duration_ms: [execution time]
      }
 6. Proceed to Gate 1
-```
 
 ## Step 3: Gate 1 - DevOps (Per Execution Unit)
 
@@ -826,90 +623,27 @@ For current execution unit:
 
 ## Step 7.1: Execution Unit Approval (Conditional)
 
-**This checkpoint depends on `execution_mode`:**
-- `manual_per_subtask` → Execute this checkpoint (approve each execution unit)
-- `manual_per_task` → Skip (proceed directly to next unit, or Step 7.2 if last unit)
-- `automatic` → Skip entirely
+**Checkpoint depends on `execution_mode`:** `manual_per_subtask` → Execute | `manual_per_task` / `automatic` → Skip
 
-```text
-After Gate 5 validation passes:
+1. Set `status = "paused_for_approval"`, save state
+2. Present summary: Unit ID, Parent Task, Gates 0-5 status, Criteria X/X, Duration, Files Changed
+3. **AskUserQuestion:** "Ready to proceed?" Options: (a) Continue (b) Test First (c) Stop Here
+4. **Handle response:**
 
-0. Check execution_mode from state:
-   - If "automatic": Skip to next execution unit (no checkpoint)
-   - If "manual_per_task": Skip to next unit (or Step 7.2 if last unit)
-   - If "manual_per_subtask": Continue with checkpoint below
-
-1. Set status = "paused_for_approval"
-2. Save state immediately (allow resume if session interrupted)
-
-3. Present completion summary to user:
-   ┌─────────────────────────────────────────────────┐
-   │ ✓ EXECUTION UNIT COMPLETED                      │
-   ├─────────────────────────────────────────────────┤
-   │ Unit: [unit_id] - [title]                       │
-   │ Parent Task: [task_id] - [task_title]           │
-   │                                                  │
-   │ Gates Passed:                                    │
-   │   ✓ Gate 0: Implementation                      │
-   │   ✓ Gate 1: DevOps                              │
-   │   ✓ Gate 2: SRE                                 │
-   │   ✓ Gate 3: Testing                             │
-   │   ✓ Gate 4: Review                              │
-   │   ✓ Gate 5: Validation                          │
-   │                                                  │
-   │ Acceptance Criteria: X/X passed                 │
-   │ Review Iterations: N                            │
-   │ Duration: Xm Ys                                 │
-   │                                                  │
-   │ Files Changed:                                  │
-   │   - file1.go                                    │
-   │   - file2_test.go                               │
-   │   - ...                                         │
-   │                                                  │
-   │ Next: [next_unit_id] - [next_title]             │
-   │       OR "Last unit - proceed to task approval" │
-   └─────────────────────────────────────────────────┘
-
-4. **ASK FOR EXPLICIT APPROVAL using AskUserQuestion tool:**
-
-   Question: "Ready to proceed to the next execution unit?"
-   Options:
-     a) "Continue" - Proceed to next unit
-     b) "Test First" - Manually test this unit before continuing
-     c) "Stop Here" - Pause cycle (can resume later with --resume)
-
-5. Handle user response:
-
-   If "Continue":
-     - Set status = "in_progress"
-     - Check if more units in current task
-     - If yes: Move to next unit, reset to Gate 0
-     - If no: Proceed to Step 7.2 (Task Approval Checkpoint)
-
-   If "Test First":
-     - Set status = "paused_for_testing"
-     - Save state
-     - Output: "Cycle paused. Test unit [unit_id] and run:
-                /ring-dev-team:dev-cycle --resume
-                when ready to continue."
-     - STOP execution (do not proceed)
-
-   If "Stop Here":
-     - Set status = "paused"
-     - Save state
-     - Output: "Cycle paused at unit [unit_id]. Resume with:
-                /ring-dev-team:dev-cycle --resume"
-     - STOP execution (do not proceed)
-```
+| Response | Action |
+|----------|--------|
+| Continue | Set in_progress, move to next unit (or Step 7.2 if last) |
+| Test First | Set `paused_for_testing`, STOP, output resume command |
+| Stop Here | Set `paused`, STOP, output resume command |
 
 ## Step 7.2: Task Approval Checkpoint (Conditional)
 
-**This checkpoint depends on `execution_mode`:**
-- `manual_per_subtask` → Execute this checkpoint
-- `manual_per_task` → Execute this checkpoint
-- `automatic` → Skip entirely (proceed to next task)
+**Checkpoint depends on `execution_mode`:** `manual_per_subtask` / `manual_per_task` → Execute | `automatic` → Skip
 
-**When all subtasks of a task are completed**, require human approval before moving to the next task (unless automatic mode).
+1. Set task `status = "completed"`, cycle `status = "paused_for_task_approval"`, save state
+2. Present summary: Task ID, Subtasks X/X, Total Duration, Review Iterations, Files Changed
+3. **AskUserQuestion:** "Task complete. Ready for next?" Options: (a) Continue (b) Integration Test (c) Stop Here
+4. **Handle response:**
 
 ```text
 After completing all subtasks of a task:
@@ -1010,41 +744,15 @@ After completing all subtasks of a task:
      - STOP execution
 ```
 
-**Note:** For tasks without subtasks, the task itself is the execution unit, so both Step 7.1 (unit approval) and Step 7.2 (task approval) are executed in sequence.
+**Note:** Tasks without subtasks execute both 7.1 and 7.2 in sequence.
 
 ## Step 8: Cycle Completion
 
-```text
-When all tasks completed:
-
-1. Calculate final metrics:
-   - total_duration_ms
-   - Average gate durations
-   - Total review iterations
-   - Pass/fail ratio per gate
-
-2. Update state:
-   - status = "completed"
-   - completed_at = timestamp
-
-3. Generate cycle report:
-   | Task | Subtasks | Duration | Review Iterations | Status |
-   |------|----------|----------|-------------------|--------|
-   | T-001 | 3 | 45m | 2 | PASS |
-   | T-002 | 1 | 32m | 1 | PASS |
-   | T-003 | 0 (TDD) | 28m | 0 | PASS |
-
-4. **REQUIRED:** Invoke dev-feedback-loop skill for metrics tracking
-
-5. Report to user:
-   "Development cycle completed.
-   Tasks: X/X completed
-   Subtasks executed: Y
-   Total time: Xh Xm
-   Review iterations: X
-
-   See detailed report in state file."
-```
+1. **Calculate metrics:** total_duration_ms, average gate durations, review iterations, pass/fail ratio
+2. **Update state:** `status = "completed"`, `completed_at = timestamp`
+3. **Generate report:** Task | Subtasks | Duration | Review Iterations | Status
+4. **REQUIRED:** Invoke `ring-dev-team:dev-feedback-loop` for metrics tracking
+5. **Report:** "Cycle completed. Tasks X/X, Subtasks Y, Time Xh Xm, Review iterations X"
 
 ## Quick Commands
 
@@ -1066,28 +774,16 @@ When all tasks completed:
 
 ## Error Recovery
 
-### Recoverable Errors
-- Network timeouts: Retry with exponential backoff
-- Agent failure: Retry once, then pause for user
-- Test flakiness: Re-run tests up to 2 times
+| Type | Condition | Action |
+|------|-----------|--------|
+| **Recoverable** | Network timeout | Retry with exponential backoff |
+| **Recoverable** | Agent failure | Retry once, then pause for user |
+| **Recoverable** | Test flakiness | Re-run tests up to 2 times |
+| **Non-Recoverable** | Missing required files | Stop and report |
+| **Non-Recoverable** | Invalid state file | Must restart (cannot resume) |
+| **Non-Recoverable** | Max review iterations | Pause for user |
 
-### Non-Recoverable Errors
-- Missing required files: Stop and report
-- Invalid state file: Cannot resume, must restart
-- Max review iterations exceeded: Pause for user
-
-### Recovery Actions
-```text
-On any error:
-1. Update state with error details
-2. Set appropriate status (failed/paused)
-3. Save state immediately
-4. Report to user with:
-   - What failed
-   - Why it failed
-   - How to recover
-   - Command to resume when ready
-```
+**On any error:** Update state → Set status (failed/paused) → Save immediately → Report (what failed, why, how to recover, resume command)
 
 ## Execution Report
 

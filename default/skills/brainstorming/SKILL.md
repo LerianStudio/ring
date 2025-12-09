@@ -61,34 +61,9 @@ Brainstorming Progress:
 
 ### Prep: Autonomous Recon
 
-**MANDATORY evidence (paste ALL):**
+**MANDATORY evidence (paste ALL):** `ls -la`, `git log --oneline -10`, `head -50 README.md`, `find . -name "*test*" | wc -l`, check package.json/requirements.txt/go.mod.
 
-```
-Recon Checklist:
-□ Project structure:
-  $ ls -la
-  [PASTE OUTPUT]
-
-□ Recent activity:
-  $ git log --oneline -10
-  [PASTE OUTPUT]
-
-□ Documentation:
-  $ head -50 README.md
-  [PASTE OUTPUT]
-
-□ Test coverage:
-  $ find . -name "*test*" -type f | wc -l
-  [PASTE OUTPUT]
-
-□ Key frameworks/tools:
-  $ [Check package.json, requirements.txt, go.mod, etc.]
-  [PASTE RELEVANT SECTIONS]
-```
-
-**Only after ALL evidence pasted:** Form your model and share findings.
-
-**Skip any evidence = not following the skill**
+**Only after ALL evidence pasted:** Form your model and share findings. **Skip any = not following skill.**
 
 ### Question Budget
 
@@ -219,30 +194,12 @@ Frame them to confirm or expand your current understanding rather than reopening
 
 ## When to Revisit Earlier Phases
 
-```dot
-digraph revisit_phases {
-    rankdir=LR;
-    "New constraint revealed?" [shape=diamond];
-    "Partner questions approach?" [shape=diamond];
-    "Requirements unclear?" [shape=diamond];
-    "Return to Phase 1" [shape=box, style=filled, fillcolor="#ffcccc"];
-    "Return to Phase 2" [shape=box, style=filled, fillcolor="#ffffcc"];
-    "Continue forward" [shape=box, style=filled, fillcolor="#ccffcc"];
-
-    "New constraint revealed?" -> "Return to Phase 1" [label="yes"];
-    "New constraint revealed?" -> "Partner questions approach?" [label="no"];
-    "Partner questions approach?" -> "Return to Phase 2" [label="yes"];
-    "Partner questions approach?" -> "Requirements unclear?" [label="no"];
-    "Requirements unclear?" -> "Return to Phase 1" [label="yes"];
-    "Requirements unclear?" -> "Continue forward" [label="no"];
-}
-```
-
-**You can and should go backward when:**
-- Partner reveals new constraint during Phase 2 or 3 → Return to Phase 1
-- Validation shows fundamental gap in requirements → Return to Phase 1
-- Partner questions approach during Phase 3 → Return to Phase 2
-- Something doesn't make sense → Go back and clarify
+| Trigger | Action |
+|---------|--------|
+| New constraint revealed | → Return to Phase 1 |
+| Partner questions approach | → Return to Phase 2 |
+| Requirements unclear | → Return to Phase 1 |
+| Something doesn't make sense | → Go back and clarify |
 
 **Avoid forcing forward linearly** when going backward would give better results.
 

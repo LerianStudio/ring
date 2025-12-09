@@ -53,113 +53,29 @@ Read plan file, create TodoWrite with all tasks.
 
 ### 2. Execute Task with Subagent
 
-For each task:
-
-**Dispatch fresh subagent:**
-```
-Task tool (general-purpose):
-  description: "Implement Task N: [task name]"
-  prompt: |
-    You are implementing Task N from [plan-file].
-
-    Read that task carefully. Your job is to:
-    1. Implement exactly what the task specifies
-    2. Write tests (following TDD if task says to)
-    3. Verify implementation works
-    4. Commit your work
-    5. Report back
-
-    Work from: [directory]
-
-    Report: What you implemented, what you tested, test results, files changed, any issues
-```
-
-**Subagent reports back** with summary of work.
+**Dispatch:** `Task tool (general-purpose)` with: Task N from [plan-file], instructions (implement, test with TDD, verify, commit, report back), working directory. Subagent reports summary.
 
 ### 3. Review Subagent's Work (Parallel Execution)
 
-**Dispatch all three reviewer subagents in parallel using a single message:**
+**CRITICAL: Single message with 3 Task tool calls** - all reviewers execute simultaneously.
 
-**CRITICAL: Use one message with 3 Task tool calls to launch all reviewers simultaneously.**
+| Reviewer | Model | Context |
+|----------|-------|---------|
+| `ring-default:code-reviewer` | opus | WHAT_WAS_IMPLEMENTED, PLAN, BASE_SHA, HEAD_SHA |
+| `ring-default:business-logic-reviewer` | opus | Same context |
+| `ring-default:security-reviewer` | opus | Same context |
 
-```
-# Single message with 3 parallel Task calls:
-
-Task tool #1 (ring-default:code-reviewer):
-  model: "opus"
-  description: "Review code quality for Task N"
-  prompt: |
-    WHAT_WAS_IMPLEMENTED: [from subagent's report]
-    PLAN_OR_REQUIREMENTS: Task N from [plan-file]
-    BASE_SHA: [commit before task]
-    HEAD_SHA: [current commit]
-    DESCRIPTION: [task summary]
-
-Task tool #2 (ring-default:business-logic-reviewer):
-  model: "opus"
-  description: "Review business logic for Task N"
-  prompt: |
-    [Same parameters as above]
-
-Task tool #3 (ring-default:security-reviewer):
-  model: "opus"
-  description: "Review security for Task N"
-  prompt: |
-    [Same parameters as above]
-```
-
-**All three reviewers execute simultaneously. Wait for all to complete.**
-
-**Each reviewer returns:** Strengths, Issues (Critical/High/Medium/Low/Cosmetic), Assessment (PASS/FAIL)
+**Each returns:** Strengths, Issues (Critical/High/Medium/Low/Cosmetic), Assessment (PASS/FAIL)
 
 ### 4. Aggregate and Handle Review Feedback
 
-**After all three reviewers complete:**
+**Aggregate** all issues by severity across all 3 reviewers.
 
-**Step 1: Aggregate all issues by severity across all reviewers:**
-- **Critical issues:** [List from code/business/security reviewers]
-- **High issues:** [List from code/business/security reviewers]
-- **Medium issues:** [List from code/business/security reviewers]
-- **Low issues:** [List from code/business/security reviewers]
-- **Cosmetic/Nitpick issues:** [List from code/business/security reviewers]
-
-**Step 2: Handle by severity:**
-
-**Critical/High/Medium → Fix immediately:**
-```
-Dispatch fix subagent:
-"Fix the following issues from parallel code review:
-
-Critical Issues:
-- [Issue 1 from reviewer X] - file:line
-- [Issue 2 from reviewer Y] - file:line
-
-High Issues:
-- [Issue 3 from reviewer Z] - file:line
-
-Medium Issues:
-- [Issue 4 from reviewer X] - file:line"
-```
-
-After fixes complete, **re-run all 3 reviewers in parallel** to verify fixes.
-Repeat until no Critical/High/Medium issues remain.
-
-**Low issues → Add TODO comments in code:**
-```python
-# TODO(review): Extract this validation logic into separate function
-# Reported by: code-reviewer on 2025-11-06
-# Severity: Low
-def process_data(data):
-    ...
-```
-
-**Cosmetic/Nitpick → Add FIXME comments in code:**
-```python
-# FIXME(nitpick): Consider more descriptive variable name than 'x'
-# Reported by: code-reviewer on 2025-11-06
-# Severity: Cosmetic
-x = calculate_total()
-```
+| Severity | Action |
+|----------|--------|
+| **Critical/High/Medium** | Dispatch fix subagent → Re-run all 3 reviewers → Repeat until clear |
+| **Low** | Add `# TODO(review): [issue] - reviewer, date, Severity: Low` |
+| **Cosmetic** | Add `# FIXME(nitpick): [issue] - reviewer, date, Severity: Cosmetic` |
 
 Commit TODO/FIXME comments with fixes.
 
@@ -173,41 +89,7 @@ After all Critical/High/Medium issues resolved for current task:
 
 ### 6. Final Review (After All Tasks)
 
-After all tasks complete, run parallel final validation across entire implementation:
-
-**Dispatch all three reviewers in parallel for full implementation review:**
-
-```
-# Single message with 3 parallel Task calls:
-
-Task tool #1 (ring-default:code-reviewer):
-  model: "opus"
-  description: "Final code review for complete implementation"
-  prompt: |
-    WHAT_WAS_IMPLEMENTED: All tasks from [plan]
-    PLAN_OR_REQUIREMENTS: Complete plan from [plan-file]
-    BASE_SHA: [start of development]
-    HEAD_SHA: [current commit]
-    DESCRIPTION: Full implementation review
-
-Task tool #2 (ring-default:business-logic-reviewer):
-  model: "opus"
-  description: "Final business logic review"
-  prompt: |
-    [Same parameters as above]
-
-Task tool #3 (ring-default:security-reviewer):
-  model: "opus"
-  description: "Final security review"
-  prompt: |
-    [Same parameters as above]
-```
-
-**Wait for all three final reviews to complete, then:**
-- Aggregate findings by severity
-- Fix any remaining Critical/High/Medium issues
-- Add TODO/FIXME for Low/Cosmetic issues
-- Re-run parallel review if fixes were needed
+**Same pattern as Step 3** but reviewing entire implementation (all tasks, full BASE_SHA→HEAD_SHA range). Aggregate, fix, re-run until all 3 PASS.
 
 ### 7. Complete Development
 
@@ -218,105 +100,22 @@ After final review passes:
 
 ## Example Workflow
 
-```
-You: I'm using Subagent-Driven Development to execute this plan.
+**Task 1:** Implement → All 3 reviewers PASS → Mark complete.
 
-[Load plan, create TodoWrite]
+**Task 2:** Implement → Review finds: Critical (hardcoded secret), High (missing password reset, no rate limiting), Low (extract token logic) → Dispatch fix subagent → Re-run reviewers → All PASS → Add TODO for Low → Mark complete.
 
-Task 1: Hook installation script
+**Final:** All 3 reviewers PASS entire implementation → Done.
 
-[Dispatch implementation subagent]
-Subagent: Implemented install-hook with tests, 5/5 passing
-
-[Parallel review - dispatch all 3 reviewers in single message]
-Code reviewer: PASS. Strengths: Good test coverage. Issues: None.
-Business reviewer: PASS. Strengths: Meets requirements. Issues: None.
-Security reviewer: PASS. Strengths: No security concerns. Issues: None.
-
-[All pass - mark Task 1 complete]
-
-Task 2: User authentication endpoint
-
-[Dispatch implementation subagent]
-Subagent: Added auth endpoint with JWT, 8/8 tests passing
-
-[Parallel review - all 3 reviewers run simultaneously]
-Code reviewer:
-  Strengths: Clean architecture
-  Issues (Low): Consider extracting token logic
-  Assessment: PASS
-
-Business reviewer:
-  Strengths: Workflow correct
-  Issues (High): Missing password reset flow (required per PRD)
-  Assessment: FAIL
-
-Security reviewer:
-  Strengths: Good validation
-  Issues (Critical): JWT secret hardcoded, (High): No rate limiting
-  Assessment: FAIL
-
-[Aggregate issues by severity]
-Critical: JWT secret hardcoded
-High: Missing password reset, No rate limiting
-Low: Extract token logic
-
-[Dispatch fix subagent for Critical/High issues]
-Fix subagent: Added password reset, moved secret to env var, added rate limiting
-
-[Re-run all 3 reviewers in parallel after fixes]
-Code reviewer: PASS
-Business reviewer: PASS. All requirements met.
-Security reviewer: PASS. Issues resolved.
-
-[Add TODO comment for Low issue]
-# TODO(review): Extract token generation logic into TokenService
-# Reported by: code-reviewer on 2025-11-06
-# Severity: Low
-
-[Commit and mark Task 2 complete]
-
-...
-
-[After all tasks]
-[Parallel final review - all 3 reviewers simultaneously]
-
-Code reviewer:
-  All implementation solid, architecture consistent
-  Assessment: PASS
-
-Business reviewer:
-  All requirements met, workflows complete
-  Assessment: PASS
-
-Security reviewer:
-  No remaining security concerns, ready for production
-  Assessment: PASS
-
-Done!
-```
-
-**Why parallel works well:**
-- 3x faster than sequential (reviewers run simultaneously)
-- Get all feedback at once (easier to prioritize fixes)
-- Re-review after fixes is fast (parallel execution)
-- TODO/FIXME comments track tech debt in code
+**Why parallel:** 3x faster, all feedback at once, TODO/FIXME tracks tech debt.
 
 ## Advantages
 
-**vs. Manual execution:**
-- Subagents follow TDD naturally
-- Fresh context per task (no confusion)
-- Parallel-safe (subagents don't interfere)
+| vs. | Benefits |
+|-----|----------|
+| **Manual execution** | Fresh context per task, TDD enforced, parallel-safe |
+| **Executing Plans** | Same session (no handoff), continuous progress, automatic review |
 
-**vs. Executing Plans:**
-- Same session (no handoff)
-- Continuous progress (no waiting)
-- Review checkpoints automatic
-
-**Cost:**
-- More subagent invocations
-- But catches issues early (cheaper than debugging later)
+**Cost:** More invocations, but catches issues early (cheaper than debugging later).
 
 ## Red Flags
 

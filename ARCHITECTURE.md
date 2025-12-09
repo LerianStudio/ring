@@ -13,7 +13,7 @@
 
 ## Overview
 
-Ring is a **Claude Code plugin marketplace** that provides a comprehensive skills library and workflow system with **6 active plugins**. It extends Claude Code's capabilities through structured, reusable patterns that enforce proven software engineering practices.
+Ring is a **Claude Code plugin marketplace** that provides a comprehensive skills library and workflow system with **5 active plugins**. It extends Claude Code's capabilities through structured, reusable patterns that enforce proven software engineering practices.
 
 ### Architecture Philosophy
 
@@ -40,11 +40,11 @@ Ring operates on three core principles:
 │  │  │ ring-finops-team     │  │ ring-pm-team         │                       │  │
 │  │  │ Skills(6) Agents(2)  │  │ Skills(10) Cmds(2)   │                       │  │
 │  │  └──────────────────────┘  └──────────────────────┘                       │  │
-│  │  ┌──────────────────────┐  ┌──────────────────────┐                       │  │
-│  │  │ ralph-wiggum         │  │ ring-tw-team         │                       │  │
-│  │  │ Skills(1) Cmds(3)    │  │ Skills(7) Agents(3)  │                       │  │
-│  │  └──────────────────────┘  │ Cmds(3)              │                       │  │
-│  │                            └──────────────────────┘                       │  │
+│  │  ┌──────────────────────┐                                                 │  │
+│  │  │ ring-tw-team         │                                                 │  │
+│  │  │ Skills(7) Agents(3)  │                                                 │  │
+│  │  │ Cmds(3)              │                                                 │  │
+│  │  └──────────────────────┘                                                 │  │
 │  └───────────────────────────────────────────────────────────────────────────┘  │
 │                                                                                  │
 │  Native Tools: Skill, Task, TodoWrite, SlashCommand                             │
@@ -58,12 +58,11 @@ Ring is organized as a monorepo marketplace with multiple plugin collections:
 ```
 ring/                                  # Monorepo root
 ├── .claude-plugin/
-│   └── marketplace.json              # Multi-plugin registry (7 active plugins)
+│   └── marketplace.json              # Multi-plugin registry (5 active plugins)
 ├── default/                          # Core plugin: ring-default
 ├── dev-team/                         # Developer agents: ring-dev-team
 ├── finops-team/                      # FinOps & regulatory: ring-finops-team
 ├── pm-team/                          # Product planning: ring-pm-team
-├── ralph-wiggum/                     # Iterative AI loops: ralph-wiggum
 └── tw-team/                          # Technical writing: ring-tw-team
 ```
 
@@ -77,7 +76,6 @@ ring/                                  # Monorepo root
 | **ring-dev-team** | Developer agents | 10 skills, 7 agents, 5 commands |
 | **ring-finops-team** | FinOps & regulatory compliance | 6 skills, 2 agents |
 | **ring-pm-team** | Product planning workflows | 10 skills, 3 agents, 2 commands |
-| **ralph-wiggum** | Iterative AI development loops | 1 skill, 3 commands, Stop hook |
 | **ring-tw-team** | Technical writing specialists | 7 skills, 3 agents, 3 commands |
 
 ## Component Hierarchy
@@ -190,7 +188,7 @@ default/hooks/
     ├── ring-dev-team    # Developer agents
     ├── ring-pm-team     # Product planning
     ├── ring-finops-team # FinOps & regulatory
-    └── ralph-wiggum     # Iterative loops
+    └── ring-tw-team     # Technical writing
 ```
 
 **marketplace.json Schema:**
@@ -225,10 +223,10 @@ default/hooks/
       "keywords": ["finops", "regulatory"]
     },
     {
-      "name": "ralph-wiggum",
+      "name": "ring-tw-team",
       "version": "...",
-      "source": "./ralph-wiggum",
-      "keywords": ["loops", "iteration"]
+      "source": "./tw-team",
+      "keywords": ["technical-writing", "documentation"]
     }
   ]
 }
@@ -597,14 +595,13 @@ Ring's architecture is designed for:
 
 | Component | Count | Location |
 |-----------|-------|----------|
-| Active Plugins | 6 | `default/`, `dev-team/`, `finops-team/`, `pm-team/`, `ralph-wiggum/`, `tw-team/` |
+| Active Plugins | 5 | `default/`, `dev-team/`, `finops-team/`, `pm-team/`, `tw-team/` |
 | Skills (ring-default) | 21 | `default/skills/` |
 | Skills (ring-dev-team) | 10 | `dev-team/skills/` |
 | Skills (ring-finops-team) | 6 | `finops-team/skills/` |
 | Skills (ring-pm-team) | 10 | `pm-team/skills/` |
-| Skills (ralph-wiggum) | 1 | `ralph-wiggum/skills/` |
 | Skills (ring-tw-team) | 7 | `tw-team/skills/` |
-| **Total Skills** | **55** | **All plugins** |
+| **Total Skills** | **54** | **All plugins** |
 | Agents (ring-default) | 5 | `default/agents/` |
 | Agents (ring-dev-team) | 7 | `dev-team/agents/` |
 | Agents (ring-pm-team) | 3 | `pm-team/agents/` |
@@ -614,9 +611,8 @@ Ring's architecture is designed for:
 | Commands (ring-default) | 7 | `default/commands/` |
 | Commands (ring-dev-team) | 5 | `dev-team/commands/` |
 | Commands (ring-pm-team) | 2 | `pm-team/commands/` |
-| Commands (ralph-wiggum) | 3 | `ralph-wiggum/commands/` |
 | Commands (ring-tw-team) | 3 | `tw-team/commands/` |
-| **Total Commands** | **20** | **All plugins** |
+| **Total Commands** | **17** | **All plugins** |
 | Hooks | Per plugin | `{plugin}/hooks/` |
 | Lib utilities | 9 | `default/lib/` |
 

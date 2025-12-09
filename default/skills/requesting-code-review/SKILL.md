@@ -78,95 +78,27 @@ Three specialized reviewers run in **parallel** for maximum speed:
 
 ## How to Request
 
-**1. Get git SHAs:**
-```bash
-BASE_SHA=$(git rev-parse HEAD~1)  # or origin/main
-HEAD_SHA=$(git rev-parse HEAD)
-```
+**1. Get SHAs:** `BASE_SHA=$(git rev-parse HEAD~1)` and `HEAD_SHA=$(git rev-parse HEAD)`
 
-**2. Dispatch all three reviewers in parallel:**
+**2. Dispatch all three in parallel (CRITICAL: single message, 3 Task calls):**
 
-**CRITICAL: Use a single message with 3 Task tool calls to launch all reviewers simultaneously.**
+Each reviewer needs: `WHAT_WAS_IMPLEMENTED`, `PLAN_OR_REQUIREMENTS`, `BASE_SHA`, `HEAD_SHA`, `DESCRIPTION` - all with `model: "opus"`
 
-```
-# Single message with 3 parallel Task calls:
-
-Task tool #1 (ring-default:code-reviewer):
-  model: "opus"
-  description: "Review code quality and architecture"
-  prompt: |
-    WHAT_WAS_IMPLEMENTED: [What you built]
-    PLAN_OR_REQUIREMENTS: [Requirements/plan reference]
-    BASE_SHA: [starting commit]
-    HEAD_SHA: [current commit]
-    DESCRIPTION: [brief summary]
-
-Task tool #2 (ring-default:business-logic-reviewer):
-  model: "opus"
-  description: "Review business logic correctness"
-  prompt: |
-    [Same parameters as above]
-
-Task tool #3 (ring-default:security-reviewer):
-  model: "opus"
-  description: "Review security vulnerabilities"
-  prompt: |
-    [Same parameters as above]
-```
-
-**All three reviewers execute simultaneously. Wait for all to complete.**
-
-**3. Aggregate findings from all three reviews:**
-
-Collect all issues by severity across all three reviewers:
-- **Critical issues:** [List from all 3 reviewers]
-- **High issues:** [List from all 3 reviewers]
-- **Medium issues:** [List from all 3 reviewers]
-- **Low issues:** [List from all 3 reviewers]
-- **Cosmetic/Nitpick issues:** [List from all 3 reviewers]
+**3. Aggregate by severity:** Critical | High | Medium | Low | Cosmetic/Nitpick (from all 3 reviewers)
 
 **4. Handle by severity:**
-
-**Critical/High/Medium → Fix immediately:**
-- Dispatch fix subagent to address all Critical/High/Medium issues
-- After fixes complete, re-run all 3 reviewers in parallel
-- Repeat until no Critical/High/Medium issues remain
-
-**Low issues → Add TODO comments in code:**
-```javascript
-// TODO(review): [Issue description from reviewer]
-// Reported by: [reviewer-name] on [date]
-// Location: file:line
-```
-
-**Cosmetic/Nitpick → Add FIXME comments in code:**
-```javascript
-// FIXME(nitpick): [Issue description from reviewer]
-// Reported by: [reviewer-name] on [date]
-// Location: file:line
-```
-
-**Push back on incorrect feedback:**
-- If reviewer is wrong, provide reasoning and evidence
-- Request clarification for ambiguous feedback
-- Security concerns require extra scrutiny before dismissing
+- **Critical/High/Medium:** Fix immediately → re-run all 3 reviewers → repeat until resolved
+- **Low:** Add `// TODO(review): [Issue] - [reviewer] on [date]`
+- **Cosmetic:** Add `// FIXME(nitpick): [Issue] - [reviewer] on [date]`
+- **Push back:** If wrong, provide reasoning/evidence. Security requires extra scrutiny.
 
 ## Integration with Workflows
 
-**Subagent-Driven Development:**
-- Review after EACH task using parallel dispatch (all 3 reviewers at once)
-- Aggregate findings across all reviewers
-- Fix Critical/High/Medium, add TODO/FIXME for Low/Cosmetic
-- Move to next task only after all Critical/High/Medium resolved
-
-**Executing Plans:**
-- Review after each batch (3 tasks) using parallel dispatch
-- Handle severity-based fixes before next batch
-- Track Low/Cosmetic issues in code comments
-
-**Ad-Hoc Development:**
-- Review before merge using parallel dispatch (all three reviewers)
-- Can use single reviewer if domain-specific (e.g., docs → code-reviewer only)
+| Workflow | When to Review | Notes |
+|----------|----------------|-------|
+| **Subagent-Driven Development** | After EACH task (all 3 parallel) | Fix Critical/High/Medium before next task |
+| **Executing Plans** | After each batch (3 tasks) | Handle severity fixes before next batch |
+| **Ad-Hoc Development** | Before merge (all 3 parallel) | Single reviewer OK if domain-specific |
 
 ## Red Flags
 
@@ -195,11 +127,5 @@ Collect all issues by severity across all three reviewers:
 
 ## Re-running Reviews After Fixes
 
-**After fixing Critical/High/Medium issues:**
-- Re-run all 3 reviewers in parallel (same as initial review)
-- Don't cherry-pick which reviewers to re-run
-- Parallel execution makes full re-review fast (~3-5 minutes total)
-
-**After adding TODO/FIXME comments:**
-- Commit with message noting review completion and tech debt tracking
-- No need to re-run reviews for comment additions
+**After fixing Critical/High/Medium:** Re-run all 3 in parallel (~3-5 min total). Don't cherry-pick reviewers.
+**After adding TODO/FIXME:** Commit noting review completion. No re-run needed.

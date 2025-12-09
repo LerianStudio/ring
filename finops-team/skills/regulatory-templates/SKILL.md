@@ -156,379 +156,81 @@ The workflow exists specifically to prevent these exact thoughts from leading to
 
 ## Workflow Overview
 
-```
-┌─────────────────────┐
-│  ORCHESTRATOR       │
-│  (this skill)       │
-└──────┬──────────────┘
-       │
-       ▼
-┌─────────────────────┐     ┌──────────────────────────┐
-│ SETUP SUB-SKILL     │────▶│ • Template Selection     │
-│                     │     │ • Context Initialization  │
-└──────┬──────────────┘     └──────────────────────────┘
-       │
-       ▼ context
-┌─────────────────────┐     ┌──────────────────────────┐
-│ GATE 1 SUB-SKILL    │────▶│ • Regulatory Analysis    │
-│                     │     │ • Field Mapping          │
-│                     │     │ • Identify Data Sources  │
-└──────┬──────────────┘     └──────────────────────────┘
-       │
-       ▼ context + gate1
-┌─────────────────────┐     ┌──────────────────────────┐
-│ GATE 2 SUB-SKILL    │────▶│ • Validate Mappings      │
-│                     │     │ • Test Transformations   │
-│                     │     │ • Define Validation Rules │
-└──────┬──────────────┘     │ • Resolve Uncertainties   │
-       │                    └──────────────────────────┘
-       ▼ context + gate1 + gate2
-┌─────────────────────┐     ┌──────────────────────────┐
-│ GATE 3 SUB-SKILL    │────▶│ • Generate Template File │
-│                     │     │ • Apply Transformations  │
-│                     │     │ • Create .tpl File       │
-└──────┬──────────────┘     │ • Django/Jinja2 Format   │
-       │                    └──────────────────────────┘
-       ▼
-┌─────────────────────┐
-│ TEMPLATE CREATED ✅  │
-│ Ready for BACEN     │
-└─────────────────────┘
-```
+**Flow:** Setup → Gate 1 → Gate 2 → Gate 3 → Template Created ✅
+
+| Phase | Sub-skill | Purpose | Agent |
+|-------|-----------|---------|-------|
+| Setup | `regulatory-templates-setup` | Template selection, context init | — |
+| Gate 1 | `regulatory-templates-gate1` | Regulatory analysis, field mapping | `ring-finops-team:finops-analyzer` (opus) |
+| Gate 2 | `regulatory-templates-gate2` | Validate mappings, test transformations | `ring-finops-team:finops-analyzer` (opus) |
+| Gate 3 | `regulatory-templates-gate3` | Generate .tpl template file | `ring-finops-team:finops-automation` (sonnet) |
 
 ---
 
 ## Orchestration Process
 
-### Step 1: Initialize TodoWrite Tasks
+**Step 1:** Initialize TodoWrite with 5 tasks (setup, gate1, gate2, gate3, verify)
 
-```javascript
-TodoWrite({
-  todos: [
-    {
-      content: "Select regulatory template",
-      status: "in_progress",
-      activeForm: "Running setup configuration"
-    },
-    {
-      content: "Gate 1: Regulatory compliance analysis and field mapping",
-      status: "pending",
-      activeForm: "Running Gate 1: Regulatory analysis"
-    },
-    {
-      content: "Gate 2: Technical validation of field mappings",
-      status: "pending",
-      activeForm: "Running Gate 2: Technical validation"
-    },
-    {
-      content: "Gate 3: Template file generation",
-      status: "pending",
-      activeForm: "Running Gate 3: Template generation"
-    },
-    {
-      content: "Verify template creation and functionality",
-      status: "pending",
-      activeForm: "Verifying template"
-    }
-  ]
-})
-```
+**Step 2-5:** Execute each sub-skill using Skill tool:
 
-### Step 2: Execute Setup Sub-skill
+| Step | Skill | On PASS | On FAIL |
+|------|-------|---------|---------|
+| 2 | `regulatory-templates-setup` | Store context → Gate 1 | Fix selection issues |
+| 3 | `regulatory-templates-gate1` | Store spec report → Gate 2 | Address critical gaps, retry |
+| 4 | `regulatory-templates-gate2` | Store finalized report → Gate 3 | Resolve uncertainties, retry |
+| 5 | `regulatory-templates-gate3` | Template complete | 401=refresh token, 500/503=wait+retry |
 
-**Use the Skill tool to execute the setup sub-skill:**
-
-1. Call the Skill tool with:
-   - `skill`: "regulatory-templates-setup"
-
-2. Capture the returned context from the setup skill
-
-3. Update TodoWrite to mark setup as completed and Gate 1 as in_progress
-
-4. **Note:** Context is maintained in memory only - no files are created
-
-### Step 3: Execute Gate 1 Sub-skill
-
-**Use the Skill tool to execute Gate 1:**
-
-1. Call the Skill tool with:
-   - `skill`: "regulatory-templates-gate1"
-
-2. The Gate 1 skill will dispatch the ring-finops-team:finops-analyzer agent to:
-   - **READ the regulatory specification** from `/docs/regulatory/templates/`
-   - **ANALYZE the specification requirements**
-   - **GENERATE a SPECIFICATION REPORT**
-
-3. Capture the report output containing:
-   - Template structure and format
-   - Mandatory and optional fields
-   - Transformation rules
-   - Validation requirements
-   - Business rules
-   - Compliance checklist
-
-4. Check if gate1_passed is true:
-   - If PASSED: Store the specification report in context, update TodoWrite, proceed to Gate 2
-   - If FAILED: Handle Gate 1 failure, address critical gaps before retry
-
-### Step 4: Execute Gate 2 Sub-skill
-
-**Use the Skill tool to execute Gate 2:**
-
-1. Call the Skill tool with:
-   - `skill`: "regulatory-templates-gate2"
-   - Context includes the **specification report** from Gate 1
-
-2. The Gate 2 skill will dispatch the ring-finops-team:finops-analyzer agent to:
-   - **VALIDATE the specification report completeness**
-   - **RESOLVE any uncertainties or gaps**
-   - **CONFIRM all transformation rules**
-   - **FINALIZE the specification report**
-
-3. Check if gate2_passed is true:
-   - **CRITICAL:** Verify mandatory fields validation = 100%
-   - If validation < 100%: FAIL with mandatory fields incomplete error
-   - If PASSED: Store the **FINALIZED REPORT** in context, update TodoWrite, proceed to Gate 3
-   - If FAILED: Handle unresolved uncertainties
-
-### Step 5: Execute Gate 3 Sub-skill
-
-**Use the Skill tool to execute Gate 3:**
-
-1. Call the Skill tool with:
-   - `skill`: "regulatory-templates-gate3"
-   - Context includes the **FINALIZED SPECIFICATION REPORT** from Gate 2
-
-2. The Gate 3 skill will dispatch the ring-finops-team:finops-automation agent (using sonnet model) to:
-   - **USE THE SPECIFICATION REPORT as input**
-   - **GENERATE the .tpl template based on report**
-   - **VALIDATE template against report requirements**
-   - **CREATE production-ready template file**
-
-3. Check if gate3_passed is true:
-   - If PASSED: Template created successfully, update TodoWrite, verify output
-   - If FAILED: Handle Gate 3 failure with retry logic (401 = token refresh, 500/503 = wait and retry)
-
----
-
-## Sub-skill Execution Pattern
-
-**Each sub-skill is executed using the Skill tool:**
-
-1. **To execute a sub-skill:**
-   - Use the Skill tool with parameter `skill: "skill-name"`
-   - The sub-skill will handle agent dispatch internally
-
-2. **Example invocations:**
-   ```
-   Skill tool with skill: "regulatory-templates-setup"
-   Skill tool with skill: "regulatory-templates-gate1"
-   Skill tool with skill: "regulatory-templates-gate2"
-   Skill tool with skill: "regulatory-templates-gate3"
-   ```
-
-3. **Context flows automatically** through the orchestrator's memory
+**Context flows in memory** - no intermediate files created
 
 ---
 
 ## Context Management - Report-Driven Flow
 
-### Context Structure Evolution
+**Context accumulates through gates (each adds, never overwrites):**
 
-**After Setup:**
-```javascript
-{
-  template_selected: "CADOC 4010",
-  template_code: "4010",
-  authority: "BACEN",
-  deadline: "2025-12-31"
-}
-```
-
-**After Gate 1 - SPECIFICATION REPORT GENERATED:**
-```javascript
-{
-  // ... setup context +
-  specification_report: {
-    template_info: {
-      name: "CADOC 4010",
-      format: "XML",
-      version: "1.0"
-    },
-    fields: {
-      mandatory: [/* field definitions */],
-      optional: [/* field definitions */]
-    },
-    transformations: [/* transformation rules */],
-    validations: [/* validation rules */],
-    structure: {/* document structure */}
-  }
-}
-```
-
-**After Gate 2 - FINALIZED REPORT:**
-```javascript
-{
-  // ... setup + gate1 context +
-  finalized_report: {
-    // Enhanced specification report with:
-    validated: true,
-    uncertainties_resolved: true,
-    all_fields_mapped: true,
-    transformations_confirmed: true,
-    ready_for_implementation: true
-  }
-}
-```
-
-**After Gate 3 - TEMPLATE GENERATED:**
-```javascript
-{
-  // ... setup + gate1 + gate2 context +
-  gate3: {
-    template_file: {
-      filename: "cadoc4010_20251119_preview.tpl",
-      path: "/path/to/file",
-      generated_from_report: true,
-      validation_passed: true
-    },
-    ready_for_use: true,
-    report_compliance: "100%"
-  }
-}
-```
+| After | Context Additions |
+|-------|-------------------|
+| Setup | `template_selected`, `template_code`, `authority`, `deadline` |
+| Gate 1 | `specification_report` (template_info, fields, transformations, validations, structure) |
+| Gate 2 | `finalized_report` (validated, uncertainties_resolved, all_fields_mapped, ready_for_implementation) |
+| Gate 3 | `gate3` (template_file, filename, path, ready_for_use, report_compliance: 100%) |
 
 ---
 
 ## Template Specifications Management
 
-### How Gates Load Template Specifications
-
-**Each gate dynamically loads template specifications from centralized configurations:**
-
-```javascript
-// Pattern used by all gates
-const templateCode = context.template_selected.split(' ')[1]; // e.g., "4010"
-const templateName = context.template_selected.toLowerCase().replace(' ', ''); // e.g., "cadoc4010"
-
-// Load specifications from centralized config
-const templateSpecs = loadTemplateSpecifications(templateName);
-// Gate 1: Use field mappings from specifications
-// Gate 2: Apply validation rules from specifications
-// Gate 3: Use template structure from specifications
-```
-
-### Benefits of Centralized Specifications
-
-1. **Simplicity:** Single source of truth for all templates
-2. **Maintainability:** Update specs without changing gate logic
-3. **Scalability:** Add new templates by adding specifications only
-4. **Consistency:** All templates follow same processing logic
-5. **Evolution:** Template updates require only spec changes
-
-### Adding New Template Support
-
-When adding support for a new regulatory template:
-
-1. **Add template specifications** to centralized configuration
-2. **No new skills required** - Gates handle all templates
-3. **Content:** Field mappings, validation rules, format specifications
-4. **Testing:** Run through 3-gate process with new specs
+- Gates load specs dynamically from centralized config
+- Add new templates by adding specifications only (no new skills)
+- Pattern: `loadTemplateSpecifications(templateName)` for field mappings, validation rules, format specs
 
 ---
 
 ## State Tracking
 
-**Output state tracking comment after EACH sub-skill execution:**
-
-```
-SKILL: regulatory-templates (orchestrator)
-PHASE: {current_phase}
-TEMPLATE: {context.template_selected}
-GATES_COMPLETED: {completed_gates}/3
-CURRENT: {current_action}
-NEXT: {next_action}
-EVIDENCE: {last_result}
-BLOCKERS: {blockers or "None"}
-```
+Output after EACH sub-skill: `SKILL: regulatory-templates | PHASE: {phase} | TEMPLATE: {template} | GATES: {n}/3 | CURRENT: {action} | NEXT: {next} | BLOCKERS: {blockers}`
 
 ---
 
 ## Error Handling
 
-### Gate Failure Handling
-
-```javascript
-function handleGateFailure(gateNumber, issues) {
-  // Log failure
-  console.log(`Gate ${gateNumber} FAILED`);
-
-  // Determine if retriable
-  if (isRetriable(issues)) {
-    // Fix issues
-    fixIssues(issues);
-
-    // Retry gate
-    retryGate(gateNumber);
-  } else {
-    // Escalate to user
-    askUserForHelp(gateNumber, issues);
-  }
-}
-```
-
-### Gate 3 Special Retry Logic
-
-```javascript
-function handleGate3Failure(result) {
-  if (result.error_code === 401) {
-    // Token expired - refresh and retry
-    refreshToken();
-    retryGate3();
-  } else if ([500, 503].includes(result.error_code)) {
-    // Server error - wait and retry
-    wait(120000); // 2 minutes
-    retryGate3();
-  } else {
-    // Non-retriable error
-    escalateToUser(result.error);
-  }
-}
-```
-
----
-
-## Success Output
-
-```markdown
-✅ TEMPLATE CREATED SUCCESSFULLY
-
-Template: {context.template_name}
-Template ID: {gate3_result.template_id}
-Fields Configured: {gate3_result.fields_configured}/{context.total_fields}
-Validation Rules: {gate3_result.validation_rules_applied}
-Test Status: PASSED ✅
-
-Gates Summary:
-- Setup: ✅ Template selected
-- Gate 1: ✅ Regulatory analysis complete
-- Gate 2: ✅ Technical validation complete
-- Gate 3: ✅ Template created and verified
-
-Ready for production use!
-```
+| Error | Action |
+|-------|--------|
+| Gate failure (retriable) | Fix issues → retry gate |
+| Gate failure (non-retriable) | Escalate to user |
+| Gate 3: 401 | Refresh token → retry |
+| Gate 3: 500/503 | Wait 2 min → retry |
 
 ---
 
 ## Coordination Rules
 
-1. **Sequential Execution:** Gates must execute in order (1→2→3)
-2. **Context Accumulation:** Each gate adds to context, never overwrites
-3. **Failure Stops Progress:** Cannot proceed to next gate if current fails
-4. **State Tracking Required:** Output state after each sub-skill
-5. **TodoWrite Updates:** Mark complete immediately after each phase
-6. **NO INTERMEDIATE FILES:** Context flows in memory only - no .md files between gates
-7. **SINGLE OUTPUT FILE:** Only create final .tpl template file in Gate 3
+1. Sequential execution (1→2→3)
+2. Context accumulates (never overwrites)
+3. Failure stops progress
+4. State tracking after each sub-skill
+5. TodoWrite updates immediately
+6. NO intermediate files (memory only)
+7. SINGLE output file (.tpl in Gate 3)
 
 ---
 
@@ -575,81 +277,17 @@ If you catch yourself thinking ANY of these, STOP and re-read the NO EXCEPTIONS 
 
 ---
 
-## Benefits of Modular Architecture
-
-1. **Maintainability:** Each sub-skill can be updated independently
-2. **Reusability:** Sub-skills can be used in other workflows
-3. **Testing:** Each gate can be tested in isolation
-4. **Debugging:** Easier to identify which gate failed
-5. **Scalability:** New gates can be added as sub-skills
-
----
-
-## Common Patterns
-
-### Calling Sub-skills
-
-**Use the Skill tool to invoke sub-skills:**
-```
-1. Call Skill tool with skill: "regulatory-templates-gate1"
-2. Sub-skill will handle agent dispatch internally
-3. Context is maintained in orchestrator memory
-```
-
-### Checking Gate Results
-
-**After each gate execution:**
-- If gate_passed = true: Merge results into context, proceed to next gate
-- If gate_passed = false: Handle failure, address issues before retry
-
-### Updating Progress
-
-**Use TodoWrite tool after each gate:**
-- Mark current gate as "completed"
-- Mark next gate as "in_progress"
-- Keep user informed of progress
-
----
-
-## Remember
-
-1. **This is an orchestrator** - Delegates work to sub-skills
-2. **Context flows forward** - Each gate builds on previous
-3. **Sub-skills are independent** - Can be tested/updated separately
-4. **State tracking is mandatory** - After each sub-skill execution
-5. **All behavior preserved** - Same functionality, modular structure
-
----
-
 ## Quick Reference
 
 | Sub-skill | Purpose | Input | Output |
 |-----------|---------|-------|--------|
 | regulatory-templates-setup | Initial configuration | User selections | Base context |
-| regulatory-templates-gate1 | Regulatory analysis | Base context | Field mappings, uncertainties |
+| regulatory-templates-gate1 | Regulatory analysis | Base context | Field mappings, spec report |
 | regulatory-templates-gate2 | Technical validation | Context + Gate 1 | Validated mappings, rules |
-| regulatory-templates-gate3 | API readiness | Context + Gates 1-2 | Authentication, endpoints |
-| regulatory-templates-gate4 | Template creation | Complete context | Template ID, verification |
+| regulatory-templates-gate3 | Template creation | Context + Gates 1-2 | .tpl file |
 
----
+## Checklist
 
-## Master Assertion Checklist
-
-Before executing workflow:
-- [ ] All sub-skills exist in skills directory
-- [ ] Agents ring-finops-team:finops-analyzer and ring-finops-team:finops-automation available
-- [ ] User has selected template type
-- [ ] Environment URLs configured
-
-After each gate:
-- [ ] Gate result captured
-- [ ] Context updated with gate output
-- [ ] TodoWrite updated
-- [ ] State tracking comment output
-- [ ] Next action determined
-
-After workflow completion:
-- [ ] Template created successfully
-- [ ] Template ID captured
-- [ ] Verification passed
-- [ ] User notified with details
+**Before:** Sub-skills exist, agents available, template selected, URLs configured
+**After each gate:** Result captured, context updated, TodoWrite updated, state tracked
+**After completion:** Template created, verified, user notified

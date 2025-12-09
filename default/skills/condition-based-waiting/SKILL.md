@@ -25,28 +25,11 @@ Flaky tests often guess at timing with arbitrary delays. This creates race condi
 
 ## When to Use
 
-```dot
-digraph when_to_use {
-    "Test uses setTimeout/sleep?" [shape=diamond];
-    "Testing timing behavior?" [shape=diamond];
-    "Document WHY timeout needed" [shape=box];
-    "Use condition-based waiting" [shape=box];
+**Decision flow:** Test uses setTimeout/sleep? → Testing actual timing behavior? → (yes: document WHY timeout needed) | (no: **use condition-based waiting**)
 
-    "Test uses setTimeout/sleep?" -> "Testing timing behavior?" [label="yes"];
-    "Testing timing behavior?" -> "Document WHY timeout needed" [label="yes"];
-    "Testing timing behavior?" -> "Use condition-based waiting" [label="no"];
-}
-```
+**Use when:** Arbitrary delays (`setTimeout`, `sleep`) | Flaky tests (pass sometimes, fail under load) | Timeouts in parallel runs | Async operation waits
 
-**Use when:**
-- Tests have arbitrary delays (`setTimeout`, `sleep`, `time.sleep()`)
-- Tests are flaky (pass sometimes, fail under load)
-- Tests timeout when run in parallel
-- Waiting for async operations to complete
-
-**Don't use when:**
-- Testing actual timing behavior (debounce, throttle intervals)
-- Always document WHY if using arbitrary timeout
+**Don't use when:** Testing actual timing behavior (debounce, throttle) - document WHY if using arbitrary timeout
 
 ## Core Pattern
 
@@ -74,59 +57,20 @@ expect(result).toBeDefined();
 
 ## Implementation
 
-Generic polling function:
-```typescript
-async function waitFor<T>(
-  condition: () => T | undefined | null | false,
-  description: string,
-  timeoutMs = 5000
-): Promise<T> {
-  const startTime = Date.now();
-
-  while (true) {
-    const result = condition();
-    if (result) return result;
-
-    if (Date.now() - startTime > timeoutMs) {
-      throw new Error(`Timeout waiting for ${description} after ${timeoutMs}ms`);
-    }
-
-    await new Promise(r => setTimeout(r, 10)); // Poll every 10ms
-  }
-}
-```
-
-See @example.ts for complete implementation with domain-specific helpers (`waitForEvent`, `waitForEventCount`, `waitForEventMatch`) from actual debugging session.
+**Generic polling:** `waitFor(condition, description, timeoutMs=5000)` - poll every 10ms, throw on timeout with clear message. See @example.ts for domain-specific helpers (`waitForEvent`, `waitForEventCount`, `waitForEventMatch`).
 
 ## Common Mistakes
 
-**❌ Polling too fast:** `setTimeout(check, 1)` - wastes CPU
-**✅ Fix:** Poll every 10ms
-
-**❌ No timeout:** Loop forever if condition never met
-**✅ Fix:** Always include timeout with clear error
-
-**❌ Stale data:** Cache state before loop
-**✅ Fix:** Call getter inside loop for fresh data
+| ❌ Bad | ✅ Fix |
+|--------|--------|
+| Polling too fast (`setTimeout(check, 1)`) | Poll every 10ms |
+| No timeout (loop forever) | Always include timeout with clear error |
+| Stale data (cache before loop) | Call getter inside loop for fresh data |
 
 ## When Arbitrary Timeout IS Correct
 
-```typescript
-// Tool ticks every 100ms - need 2 ticks to verify partial output
-await waitForEvent(manager, 'TOOL_STARTED'); // First: wait for condition
-await new Promise(r => setTimeout(r, 200));   // Then: wait for timed behavior
-// 200ms = 2 ticks at 100ms intervals - documented and justified
-```
-
-**Requirements:**
-1. First wait for triggering condition
-2. Based on known timing (not guessing)
-3. Comment explaining WHY
+`await waitForEvent(...); await setTimeout(200)` - OK when: (1) First wait for triggering condition (2) Based on known timing, not guessing (3) Comment explaining WHY (e.g., "200ms = 2 ticks at 100ms intervals")
 
 ## Real-World Impact
 
-From debugging session (2025-10-03):
-- Fixed 15 flaky tests across 3 files
-- Pass rate: 60% → 100%
-- Execution time: 40% faster
-- No more race conditions
+Fixed 15 flaky tests across 3 files: 60% → 100% pass rate, 40% faster execution, zero race conditions.

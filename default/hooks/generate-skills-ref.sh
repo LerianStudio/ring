@@ -14,7 +14,7 @@ PLUGIN_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 SKILLS_DIR="${PLUGIN_ROOT}/skills"
 
 # Parse a single field from YAML frontmatter
-# Uses the proven sed pattern from ralph-wiggum/hooks/stop-hook.sh
+# Uses portable sed pattern for YAML parsing
 extract_field() {
     local frontmatter="$1"
     local field="$2"
@@ -69,7 +69,7 @@ parse_skill() {
     fi
 
     # Extract frontmatter between --- delimiters
-    # Pattern proven portable in ralph-wiggum/hooks/stop-hook.sh
+    # Portable sed pattern for YAML frontmatter extraction
     local frontmatter
     frontmatter=$(sed -n '/^---$/,/^---$/{ /^---$/d; p; }' "$skill_file" 2>/dev/null) || return
 

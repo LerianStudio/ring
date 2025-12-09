@@ -159,24 +159,11 @@ Before starting this gate:
 
 ## Step 1: Map Acceptance Criteria to Unit Tests
 
-Create a traceability matrix linking each criterion to tests:
+Create traceability matrix: | ID | Criterion | Test File | Test Function | Status (Pending/PASS) |
 
-```markdown
-## Test Coverage Matrix
-
-| ID | Acceptance Criterion | Test File | Test Function | Status |
-|----|---------------------|-----------|---------------|--------|
-| AC-1 | User can login with valid credentials | auth_test.go | TestAuthService_Login_WithValidCredentials | Pending |
-| AC-2 | Invalid password returns error | auth_test.go | TestAuthService_Login_WithInvalidPassword | Pending |
-| AC-3 | Empty email returns validation error | auth_test.go | TestAuthService_Login_WithEmptyEmail | Pending |
-| AC-4 | Password must be at least 8 chars | user_test.go | TestUserService_CreateUser_ShortPassword | Pending |
-```
-
-**Rule:** Every row MUST have at least one unit test. No criterion left untested.
+**Rule:** Every criterion MUST have at least one unit test. No criterion left untested.
 
 ## Step 2: Identify Testable Units
-
-For each criterion, identify the unit to test:
 
 | Criterion Type | Testable Unit | Mock Dependencies |
 |----------------|---------------|-------------------|
@@ -184,127 +171,26 @@ For each criterion, identify the unit to test:
 | Validation | Validators, DTOs | None (pure functions) |
 | Domain rules | Entity methods | None |
 | Error handling | Service methods | Force error conditions |
-| Calculations | Domain services | None |
 
 ## Step 3: Execute TDD Cycle
 
-For each acceptance criterion, follow strict TDD:
-
-### 3.1 RED Phase - Write Failing Test
-
-```bash
-# Write test that describes expected behavior
-# Run test - MUST fail with expected error
-go test -run TestAuthService_Login_WithValidCredentials ./...
-```
-
-**Verify failure output shows:**
-- Test runs (no syntax errors)
-- Failure is for right reason (feature missing, not typo)
-- Error message indicates expected behavior
-
-**Paste actual failure output:**
-```
---- FAIL: TestAuthService_Login_WithValidCredentials (0.00s)
-    auth_test.go:25: expected token, got nil
-FAIL
-```
-
-### 3.2 GREEN Phase - Minimal Implementation
-
-Write only enough code to make the test pass:
-
-```bash
-# Implement minimal code
-# Run test - MUST pass
-go test -run TestAuthService_Login_WithValidCredentials ./...
-```
-
-**Verify pass output:**
-```
---- PASS: TestAuthService_Login_WithValidCredentials (0.00s)
-PASS
-```
-
-### 3.3 REFACTOR Phase - Clean Up
-
-Improve code quality while keeping tests green:
-
-- Remove duplication
-- Improve naming
-- Extract helpers
-- Simplify logic
-
-```bash
-# After refactoring - MUST still pass
-go test -run TestAuthService_Login_WithValidCredentials ./...
-```
+| Phase | Action | Verify |
+|-------|--------|--------|
+| **RED** | Write test describing expected behavior | Test runs + fails for right reason (feature missing, not typo) + paste failure output |
+| **GREEN** | Write minimal code to pass | Test passes |
+| **REFACTOR** | Remove duplication, improve naming, extract helpers | Tests still pass |
 
 ## Step 4: Dispatch QA Analyst for Unit Tests
 
-Dispatch `ring-dev-team:qa-analyst` for unit test design:
-
-```
-Task tool:
-  subagent_type: "ring-dev-team:qa-analyst"
-  prompt: |
-    Create unit tests for the following acceptance criteria:
-
-    TASK_ID: [task identifier]
-    ACCEPTANCE_CRITERIA:
-    - AC-1: [criterion description]
-    - AC-2: [criterion description]
-
-    IMPLEMENTATION_FILES:
-    - [file paths with key functions/methods]
-
-    Requirements:
-    1. One test per acceptance criterion minimum
-    2. Test edge cases and error conditions
-    3. Use mocks for external dependencies (repos, APIs)
-    4. Follow naming: Test{Unit}_{Method}_{Scenario}_{Expected}
-    5. Use table-driven tests where appropriate
-
-    Focus: Unit tests ONLY. Do not write integration or E2E tests.
-```
+**Dispatch:** `Task(subagent_type: "ring-dev-team:qa-analyst")` with TASK_ID, ACCEPTANCE_CRITERIA, IMPLEMENTATION_FILES. Requirements: 1+ test/criterion, edge cases, mock deps, naming: `Test{Unit}_{Method}_{Scenario}`. Unit tests ONLY.
 
 ## Step 5: Execute Full Test Suite
 
-Run all unit tests and verify coverage:
-
-```bash
-# Run full test suite with coverage
-go test ./... -cover
-
-# Or language-specific:
-# TypeScript: npm test -- --coverage
-# Python: pytest --cov=src
-```
-
-**Required output verification:**
-
-```
-ok      internal/service    0.015s  coverage: 87.3%
-ok      internal/handler    0.012s  coverage: 82.1%
-ok      internal/domain     0.008s  coverage: 95.0%
-
-Total coverage: 85.3%
-```
+Run: `go test ./... -cover` (or `npm test -- --coverage`, `pytest --cov=src`). Verify coverage ≥85%.
 
 ## Step 6: Update Traceability Matrix
 
-Mark each criterion with test status:
-
-```markdown
-## Test Coverage Matrix (Updated)
-
-| ID | Acceptance Criterion | Test File | Test Function | Status |
-|----|---------------------|-----------|---------------|--------|
-| AC-1 | User can login with valid credentials | auth_test.go:15 | TestAuthService_Login_WithValidCredentials | PASS |
-| AC-2 | Invalid password returns error | auth_test.go:35 | TestAuthService_Login_WithInvalidPassword | PASS |
-| AC-3 | Empty email returns validation error | auth_test.go:55 | TestAuthService_Login_WithEmptyEmail | PASS |
-| AC-4 | Password must be at least 8 chars | user_test.go:22 | TestUserService_CreateUser_ShortPassword | PASS |
-```
+Update matrix with line numbers and PASS status for each criterion.
 
 ## Gate Exit Criteria
 
@@ -402,23 +288,8 @@ If tests fail during execution:
 
 ## Recovery Procedures
 
-### Tests written without RED phase
-
-1. Delete/comment implementation code
-2. Run test - verify it fails
-3. Restore implementation - verify it passes
-4. If test passes without implementation -> test is wrong, rewrite
-
-### Coverage below threshold
-
-1. Identify uncovered lines/branches
-2. Write additional unit tests targeting gaps
-3. Re-run coverage report
-4. Repeat until threshold met
-
-### Acceptance criterion has no test
-
-1. Stop proceeding
-2. Write unit test for missing criterion
-3. Follow full TDD cycle
-4. Update traceability matrix
+| Issue | Recovery Steps |
+|-------|---------------|
+| **Tests without RED phase** | Delete impl → Run test (must fail) → Restore impl (must pass) → If passes without impl: test is wrong, rewrite |
+| **Coverage below threshold** | Identify uncovered lines → Write unit tests for gaps → Re-run coverage → Repeat until ≥85% |
+| **Criterion has no test** | STOP → Write unit test → Full TDD cycle → Update matrix |

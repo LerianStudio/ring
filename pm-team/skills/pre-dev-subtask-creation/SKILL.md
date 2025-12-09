@@ -26,25 +26,7 @@ sequence:
 
 Write comprehensive implementation subtasks assuming the engineer has zero context for our codebase. Each subtask breaks down into 2-5 minute steps following RED-GREEN-REFACTOR. Complete code, exact commands, explicit verification. **DRY. YAGNI. TDD. Frequent commits.**
 
-**Announce at start:** "I'm using the pre-dev-subtask-creation skill to create implementation subtasks."
-
-**Context:** This should be run after Gate 7 validation (approved tasks exist).
-
 **Save subtasks to:** `docs/pre-dev/{feature-name}/subtasks/T-[task-id]/ST-[task-id]-[number]-[description].md`
-
-## When to Use
-
-Use this skill when:
-- Tasks have passed Gate 7 validation
-- About to write implementation instructions
-- Tempted to write "add validation here..." (placeholder)
-- Tempted to say "update the user service" (which part?)
-- Creating work units for developers or AI agents
-
-**When NOT to use:**
-- Before Gate 7 validation
-- For trivial changes (<10 minutes total)
-- When engineer has full context (rare)
 
 ## Foundational Principle
 
@@ -64,103 +46,38 @@ Requiring context creates bottlenecks, onboarding friction, and integration fail
 - "Run the tests and make sure they pass" - step
 - "Commit" - step
 
-## Subtask Document Header
+## Subtask Document Structure
 
-**Every subtask MUST start with this header:**
+**Header (required):**
 
-```markdown
-# ST-[task-id]-[number]: [Subtask Name]
+| Field | Content |
+|-------|---------|
+| Title | `# ST-[task-id]-[number]: [Subtask Name]` |
+| Agent Note | `> **For Agents:** REQUIRED SUB-SKILL: Use ring-default:executing-plans` |
+| Goal | One sentence describing what this builds |
+| Prerequisites | Verification commands with expected output |
+| Files | Create: `exact/path`, Modify: `exact/path:lines`, Test: `tests/path` |
 
-> **For Agents:** REQUIRED SUB-SKILL: Use ring-default:executing-plans to implement this subtask step-by-step.
+**Step Structure (TDD Cycle):**
 
-**Goal:** [One sentence describing what this builds]
-
-**Prerequisites:**
-```bash
-# Verification commands
-cd /path/to/project
-npm list dependency-name
-# Expected output: dependency@version
-```
-
-**Files:**
-- Create: `exact/path/to/file.py`
-- Modify: `exact/path/to/existing.py:123-145`
-- Test: `tests/exact/path/to/test.py`
-
----
-```
-
-## Step Structure (TDD Cycle)
-
-```markdown
-### Step 1: Write the failing test
-
-```typescript
-// tests/exact/path/test.ts
-import { functionName } from '../src/module';
-
-describe('FeatureName', () => {
-  it('should do specific behavior', () => {
-    const result = functionName(input);
-    expect(result).toBe(expected);
-  });
-});
-```
-
-### Step 2: Run test to verify it fails
-
-```bash
-npm test tests/exact/path/test.ts
-# Expected output: FAIL - "functionName is not defined"
-```
-
-### Step 3: Write minimal implementation
-
-```typescript
-// src/exact/path/module.ts
-export function functionName(input: string): string {
-  return expected;
-}
-```
-
-### Step 4: Run test to verify it passes
-
-```bash
-npm test tests/exact/path/test.ts
-# Expected output: PASS - 1 test passed
-```
-
-### Step 5: Commit
-
-```bash
-git add tests/exact/path/test.ts src/exact/path/module.ts
-git commit -m "feat: add specific feature"
-```
-```
+| Step | Content |
+|------|---------|
+| Step 1: Write failing test | Complete test file with imports |
+| Step 2: Run test to verify fail | Command + expected failure output |
+| Step 3: Write minimal implementation | Complete implementation file |
+| Step 4: Run test to verify pass | Command + expected success output |
+| Step 5: Update exports (if needed) | Exact modification to index files |
+| Step 6: Verify type checking | Command + expected output |
+| Step 7: Commit | Exact git commands with message |
+| Rollback | Exact commands to undo if issues |
 
 ## Explicit Rules
 
 ### ✅ DO Include in Subtasks
-- Exact file paths (absolute or from root)
-- Complete file contents (if creating)
-- Complete code snippets (if modifying)
-- All imports and dependencies
-- Step-by-step TDD cycle (numbered)
-- Verification commands (copy-pasteable)
-- Expected output (exact)
-- Rollback procedures (exact commands)
-- Prerequisites (what must exist first)
+Exact file paths (absolute or from root), complete file contents (if creating), complete code snippets (if modifying), all imports and dependencies, step-by-step TDD cycle (numbered), verification commands (copy-pasteable), expected output (exact), rollback procedures (exact commands), prerequisites (what must exist first)
 
 ### ❌ NEVER Include in Subtasks
-- Placeholders: "...", "TODO", "implement here"
-- Vague instructions: "update the service", "add validation"
-- Assumptions: "assuming setup is done"
-- Context requirements: "you need to understand X first"
-- Incomplete code: "add the rest yourself"
-- Missing imports: "import necessary packages"
-- Undefined success: "make sure it works"
-- No verification: "test it manually"
+Placeholders: "...", "TODO", "implement here"; vague instructions: "update the service", "add validation"; assumptions: "assuming setup is done"; context requirements: "you need to understand X first"; incomplete code: "add the rest yourself"; missing imports: "import necessary packages"; undefined success: "make sure it works"; no verification: "test it manually"
 
 ## Rationalization Table
 
@@ -196,252 +113,35 @@ If you catch yourself writing any of these in a subtask, **STOP and rewrite**:
 
 ## Gate 8 Validation Checklist
 
-Before declaring subtasks ready:
+| Category | Requirements |
+|----------|--------------|
+| **Atomicity** | Each step 2-5 minutes; no system architecture understanding required; assignable to anyone |
+| **Completeness** | All code provided in full; all file paths explicit; all imports listed; all prerequisites documented; TDD cycle followed |
+| **Verifiability** | Test commands copy-pasteable; expected output exact; commands run from project root |
+| **Reversibility** | Rollback commands provided; rollback doesn't require system knowledge |
 
-**Atomicity:**
-- [ ] Each step has single responsibility (2-5 minutes)
-- [ ] No step depends on understanding system architecture
-- [ ] Subtasks can be assigned to anyone (developer or AI)
-
-**Completeness:**
-- [ ] All code provided in full (no placeholders)
-- [ ] All file paths are explicit and exact
-- [ ] All imports listed explicitly
-- [ ] All prerequisites documented
-- [ ] TDD cycle followed in every implementation
-
-**Verifiability:**
-- [ ] Test commands are copy-pasteable
-- [ ] Expected output is exact (not subjective)
-- [ ] Commands run from project root (or specify directory)
-
-**Reversibility:**
-- [ ] Rollback commands provided
-- [ ] Rollback doesn't require system knowledge
-
-**Gate Result:**
-- ✅ **PASS**: All checkboxes checked → Ready for implementation
-- ⚠️ **CONDITIONAL**: Add missing details → Re-validate
-- ❌ **FAIL**: Too much context required → Decompose further
-
-## Example Subtask
-
-```markdown
-# ST-001-01: Create User Model with Validation
-
-> **For Agents:** REQUIRED SUB-SKILL: Use ring-default:executing-plans to implement this subtask step-by-step.
-
-**Goal:** Create a User model class with email and password validation in the auth service.
-
-**Prerequisites:**
-```bash
-cd /path/to/project
-npm list zod bcrypt
-# Expected: zod@3.22.4, bcrypt@5.1.1
-```
-
-**Files:**
-- Create: `src/domain/entities/User.ts`
-- Create: `src/domain/entities/__tests__/User.test.ts`
-- Modify: `src/domain/entities/index.ts`
-
----
-
-### Step 1: Write the failing test
-
-Create file: `src/domain/entities/__tests__/User.test.ts`
-
-```typescript
-import { UserModel } from '../User';
-
-describe('UserModel', () => {
-  const validUserData = {
-    email: 'test@example.com',
-    password: 'securePassword123',
-    firstName: 'John',
-    lastName: 'Doe'
-  };
-
-  it('should create user with valid data', () => {
-    const user = new UserModel(validUserData);
-    expect(user.getData().email).toBe(validUserData.email);
-  });
-
-  it('should throw on invalid email', () => {
-    const invalidData = { ...validUserData, email: 'invalid' };
-    expect(() => new UserModel(invalidData)).toThrow('Invalid email format');
-  });
-});
-```
-
-### Step 2: Run test to verify it fails
-
-```bash
-npm test src/domain/entities/__tests__/User.test.ts
-# Expected: FAIL - "Cannot find module '../User'"
-```
-
-### Step 3: Write minimal implementation
-
-Create file: `src/domain/entities/User.ts`
-
-```typescript
-import { z } from 'zod';
-import bcrypt from 'bcrypt';
-
-export const UserSchema = z.object({
-  id: z.string().uuid(),
-  email: z.string().email('Invalid email format'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  firstName: z.string().min(1, 'First name is required'),
-  lastName: z.string().min(1, 'Last name is required'),
-  createdAt: z.date().default(() => new Date()),
-  updatedAt: z.date().default(() => new Date())
-});
-
-export type User = z.infer<typeof UserSchema>;
-
-export class UserModel {
-  private data: User;
-
-  constructor(data: Partial<User>) {
-    this.data = UserSchema.parse({
-      ...data,
-      id: data.id || crypto.randomUUID(),
-      createdAt: data.createdAt || new Date(),
-      updatedAt: data.updatedAt || new Date()
-    });
-  }
-
-  async hashPassword(): Promise<void> {
-    const saltRounds = 10;
-    this.data.password = await bcrypt.hash(this.data.password, saltRounds);
-  }
-
-  async comparePassword(candidatePassword: string): Promise<boolean> {
-    return bcrypt.compare(candidatePassword, this.data.password);
-  }
-
-  getData(): User {
-    return this.data;
-  }
-}
-```
-
-### Step 4: Run test to verify it passes
-
-```bash
-npm test src/domain/entities/__tests__/User.test.ts
-# Expected: PASS - 2 tests passed
-```
-
-### Step 5: Update exports
-
-Modify file: `src/domain/entities/index.ts`
-
-Add or append:
-```typescript
-export { UserModel, UserSchema, type User } from './User';
-```
-
-### Step 6: Verify type checking
-
-```bash
-npm run typecheck
-# Expected: No errors
-```
-
-### Step 7: Commit
-
-```bash
-git add src/domain/entities/User.ts src/domain/entities/__tests__/User.test.ts src/domain/entities/index.ts
-git commit -m "feat: add User model with validation
-
-- Add Zod schema for user validation
-- Implement password hashing with bcrypt
-- Add comprehensive tests"
-```
-
-### Rollback
-
-If issues occur:
-```bash
-rm src/domain/entities/User.ts
-rm src/domain/entities/__tests__/User.test.ts
-git checkout -- src/domain/entities/index.ts
-git status
-```
-```
+**Gate Result:** ✅ PASS → Ready for implementation | ⚠️ CONDITIONAL (add details) | ❌ FAIL (decompose further)
 
 ## Confidence Scoring
 
-Use this to adjust your interaction with the user:
+| Factor | Points | Criteria |
+|--------|--------|----------|
+| Step Atomicity | 0-30 | All 2-5 minutes: 30, Most sized right: 20, Too large/vague: 10 |
+| Code Completeness | 0-30 | Zero placeholders: 30, Mostly complete: 15, Significant TODOs: 5 |
+| Context Independence | 0-25 | Anyone can execute: 25, Minor context: 15, Significant knowledge: 5 |
+| TDD Coverage | 0-15 | All RED-GREEN-REFACTOR: 15, Most have tests: 10, Limited: 5 |
 
-```yaml
-Confidence Factors:
-  Step Atomicity: [0-30]
-    - All steps 2-5 minutes: 30
-    - Most steps appropriately sized: 20
-    - Steps too large or vague: 10
-
-  Code Completeness: [0-30]
-    - Zero placeholders, all code complete: 30
-    - Mostly complete with minor gaps: 15
-    - Significant placeholders or TODOs: 5
-
-  Context Independence: [0-25]
-    - Anyone can execute without questions: 25
-    - Minor context needed: 15
-    - Significant domain knowledge required: 5
-
-  TDD Coverage: [0-15]
-    - All implementation follows RED-GREEN-REFACTOR: 15
-    - Most steps include tests: 10
-    - Limited test coverage: 5
-
-Total: [0-100]
-
-Action:
-  80+: Generate complete subtasks autonomously
-  50-79: Present approach options for complex steps
-  <50: Ask about codebase structure and patterns
-```
+**Action:** 80+ autonomous | 50-79 present options | <50 ask about structure
 
 ## Execution Handoff
 
 After creating subtasks, offer execution choice:
 
-**"Subtasks complete and saved to `docs/pre-dev/{feature-name}/subtasks/T-[id]/`. Two execution options:**
-
-**1. Subagent-Driven (this session)** - I dispatch fresh subagent per subtask, review between subtasks, fast iteration
-
-**2. Parallel Session (separate)** - Open new session with executing-plans, batch execution with checkpoints
+**"Subtasks complete. Two execution options:**
+1. **Subagent-Driven** - Fresh subagent per subtask, review between, fast iteration → Use `ring-default:subagent-driven-development`
+2. **Parallel Session** - New session with executing-plans, batch with checkpoints → Use `ring-default:executing-plans`
 
 **Which approach?"**
-
-**If Subagent-Driven chosen:**
-- **REQUIRED SUB-SKILL:** Use ring-default:subagent-driven-development
-- Stay in this session
-- Fresh subagent per subtask + code review
-
-**If Parallel Session chosen:**
-- Guide them to open new session in worktree
-- **REQUIRED SUB-SKILL:** New session uses ring-default:executing-plans
-
-## Quality Self-Check
-
-Before declaring subtasks complete, verify:
-- [ ] Every step is truly atomic (2-5 minutes)
-- [ ] Zero context required to complete any step
-- [ ] All code is complete (no "...", "TODO", placeholders)
-- [ ] All file paths are explicit (absolute or from root)
-- [ ] All imports are listed explicitly
-- [ ] TDD cycle followed (test → fail → implement → pass → commit)
-- [ ] Verification steps included with exact commands
-- [ ] Expected output specified for every command
-- [ ] Rollback plans provided with exact commands
-- [ ] Prerequisites documented (what must exist first)
-- [ ] Gate 8 validation checklist 100% complete
 
 ## The Bottom Line
 

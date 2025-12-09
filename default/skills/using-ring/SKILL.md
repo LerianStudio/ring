@@ -23,27 +23,18 @@ This is not negotiable. This is not optional. You cannot rationalize your way ou
 
 ## ⛔ 3-FILE RULE: HARD GATE (NON-NEGOTIABLE)
 
-**DO NOT read more than 3 files directly. This is a PROHIBITION, not guidance.**
+**DO NOT read/edit >3 files directly. PROHIBITION, not guidance.**
 
 ```
-FILES YOU'RE ABOUT TO TOUCH: [count]
-
-≤3 files → Direct operation permitted (if user explicitly requested)
->3 files → STOP. DO NOT PROCEED. Launch specialist agent.
-
-VIOLATION = WASTING 15x CONTEXT. This is unacceptable.
+≤3 files → Direct OK (if user requested)
+>3 files → STOP. Launch agent. VIOLATION = 15x context waste.
 ```
 
-**This gate applies to:**
-- Reading files (Read tool)
-- Searching files (Grep/Glob returning >3 matches to inspect)
-- Editing files (Edit tool on >3 files)
-- Any combination totaling >3 file operations
+**Applies to:** Read, Grep/Glob (>3 matches to inspect), Edit, or any combination >3.
 
-**If you've already read 3 files and need more:**
-STOP. You are at the gate. Dispatch an agent NOW with what you've learned.
+**Already at 3 files?** STOP. Dispatch agent NOW with what you've learned.
 
-**Why this number?** 3 files ≈ 6-15k tokens. Beyond that, agent dispatch costs ~2k tokens and returns focused results. The math is clear: >3 files = agent is 5-15x more efficient.
+**Why 3?** 3 files ≈ 6-15k tokens. Agent dispatch = ~2k tokens with focused results. Math: >3 = agent is 5-15x more efficient.
 
 ## 🚨 AUTO-TRIGGER PHRASES: MANDATORY AGENT DISPATCH
 
@@ -62,33 +53,27 @@ STOP. You are at the gate. Dispatch an agent NOW with what you've learned.
 
 ## MANDATORY PRE-ACTION CHECKPOINT
 
-**Before EVERY tool use, you MUST complete this checkpoint. No exceptions.**
+**Before EVERY tool use (Read/Grep/Glob/Bash), complete this. No exceptions.**
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  ⛔ STOP. COMPLETE BEFORE PROCEEDING.                       │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  1. FILES THIS TASK WILL TOUCH: ___                         │
-│     □ >3 files? → STOP. Launch agent. DO NOT proceed.       │
-│                                                             │
-│  2. USER PHRASE CHECK:                                      │
-│     □ Did user say "fix issues/remaining/findings"?         │
-│     □ Did user say "apply fixes" or "fix the X issues"?     │
-│     □ Did user say "find/search/locate/understand"?         │
-│     → If ANY checked: Launch agent. DO NOT proceed manually.│
-│                                                             │
-│  3. OPERATION TYPE:                                         │
-│     □ Investigation/exploration → Explore agent             │
-│     □ Multi-file edit → Specialist agent                    │
-│     □ Single explicit file (user named it) → Direct OK      │
-│                                                             │
-│  CHECKPOINT RESULT: [Agent dispatch / Direct operation]     │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+⛔ STOP. COMPLETE BEFORE PROCEEDING.
+─────────────────────────────────────
+1. FILES: ___ □ >3? → Agent. □ Already 3? → Agent now.
+
+2. USER PHRASE:
+   □ "fix issues/remaining/findings" → Agent
+   □ "find/search/locate/understand" → Explore agent
+
+3. DECISION:
+   □ Investigation → Explore agent
+   □ Multi-file → Specialist agent
+   □ User named ONE specific file → Direct OK (rare)
+
+RESULT: [Agent: ___] or [Direct: why]
+─────────────────────────────────────
 ```
 
-**If you skip this checkpoint, you are in automatic violation.**
+**Skipping = violation. Document decision in TodoWrite.**
 
 # Getting Started with Skills
 
@@ -169,68 +154,6 @@ Every time you skip checking for skills:
 
 **This is not optional. Check for skills or fail.**
 
-## Mandatory Skill Check Points
-
-**Before EVERY tool use**, ask yourself:
-- About to use Read? → Is there a skill for reading this type of file?
-- About to use Bash? → Is there a skill for this command type?
-- About to use Grep? → Is there a skill for searching?
-- About to use Task? → Which subagent_type matches?
-
-**No tool use without skill check first.**
-
-## MANDATORY PRE-TOOL-USE PROTOCOL
-
-**Before EVERY tool call** (Read, Grep, Glob, Bash), complete this check:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  Tool I'm about to use: [tool-name]                         │
-│  Purpose: [what I'm trying to learn/do]                     │
-│  Files this will touch: [count] ← CHECK 3-FILE RULE         │
-├─────────────────────────────────────────────────────────────┤
-│  ⛔ 3-FILE GATE:                                             │
-│  □ Will touch >3 files? → STOP. Launch agent. DO NOT proceed│
-│  □ Already touched 3 files? → STOP. At gate. Dispatch now.  │
-├─────────────────────────────────────────────────────────────┤
-│  Orchestration Decision:                                    │
-│  □ User explicitly requested specific file → Direct tool OK │
-│  □ Investigation/exploration/search → MUST use agent        │
-│  □ User said "fix issues/remaining/findings" → MUST use agent│
-├─────────────────────────────────────────────────────────────┤
-│  Agent I'm dispatching: [agent-name]                        │
-│  Model: Opus (default, unless user specified otherwise)     │
-│  OR                                                         │
-│  Exception: [why user explicitly requested this file]       │
-└─────────────────────────────────────────────────────────────┘
-```
-
-**CONSEQUENCES OF SKIPPING THIS CHECK:**
-- You waste 15x context (agent returns ~2k, manual exploration ~30k)
-- You deprive user of conversation headroom
-- You violate ORCHESTRATOR principle
-- **This is automatic failure**
-
-**Examples:**
-
-❌ **WRONG:**
-```
-User: "Where are errors handled?"
-Me: [uses Grep to search for "error"]
-```
-**Why wrong:** No orchestration decision documented, direct tool usage for exploration.
-
-✅ **CORRECT:**
-```
-User: "Where are errors handled?"
-Me:
-Tool I'm about to use: None (using agent)
-Purpose: Find error handling code
-Orchestration Decision: Investigation task → Explore agent
-Agent I'm dispatching: Explore
-Model: Opus
-```
-
 ## ORCHESTRATOR Principle: Agent-First Always
 
 **Your role is ORCHESTRATOR, not operator.**
@@ -280,73 +203,23 @@ You are breaking ORCHESTRATOR. Use an agent instead.
 
 ### Available Agents
 
-#### Built-in Agents (Claude Code)
-| Agent | Purpose | When to Use | Model Default |
-|-------|---------|-------------|---------------|
-| **`Explore`** | Codebase navigation & discovery | Finding files/code, understanding architecture, searching patterns | **Opus** |
-| **`Plan`** | Implementation planning | Breaking down features, creating task lists, architecting solutions | **Opus** |
-| **`general-purpose`** | Multi-step research & investigation | Complex analysis, research requiring multiple steps, anything not fitting Explore/Plan | **Opus** |
-| `claude-code-guide` | Claude Code documentation | Questions about Claude Code features, hooks, MCP, SDK | Opus |
+**Built-in (Opus):** `Explore` (navigation), `Plan` (implementation), `general-purpose` (research), `claude-code-guide` (docs).
 
-#### Ring Agents (Specialized)
-| Agent | Purpose |
-|-------|---------|
-| `ring-default:code-reviewer` | Architecture & patterns |
-| `ring-default:business-logic-reviewer` | Correctness & requirements |
-| `ring-default:security-reviewer` | Security & OWASP |
-| `ring-default:write-plan` | Implementation planning |
+**Ring:** `ring-default:code-reviewer`, `ring-default:business-logic-reviewer`, `ring-default:security-reviewer`, `ring-default:write-plan`.
 
 ### Decision: Which Agent?
 
-**Don't ask "should I use an agent?" Ask "which agent?"**
+| Task Type | Agent (Opus default) |
+|-----------|---------------------|
+| Explore/find/understand/search | **Explore** |
+| Plan implementation, break down features | **Plan** |
+| Multi-step research, complex investigation | **general-purpose** |
+| Code review | ALL THREE in parallel (code, business-logic, security reviewers) |
+| Implementation plan document | ring-default:write-plan |
+| Claude Code questions | claude-code-guide |
+| User explicitly said "read [file]" | Direct (ONLY exception) |
 
-```
-START: I need to do something with the codebase
-
-├─▶ Explore/find/understand code
-│   └─▶ Use Explore agent with Opus
-│       Examples: "Find where X is used", "Understand auth flow", "Locate config files"
-│
-├─▶ Search for something (grep, find function, locate file)
-│   └─▶ Use Explore agent with Opus (YES, even "simple" searches)
-│       Examples: "Search for handleError", "Find all API endpoints", "Locate middleware"
-│
-├─▶ Plan implementation or break down features
-│   └─▶ Use Plan agent with Opus
-│       Examples: "Plan how to add feature X", "Break down this task", "Design solution for Y"
-│
-├─▶ Multi-step research or complex investigation
-│   └─▶ Use general-purpose agent with Opus
-│       Examples: "Research and analyze X", "Investigate Y across multiple files", "Deep dive into Z"
-│
-├─▶ Review code quality
-│   └─▶ Use ALL THREE in parallel:
-│       • ring-default:code-reviewer (with Opus)
-│       • ring-default:business-logic-reviewer (with Opus)
-│       • ring-default:security-reviewer (with Opus)
-│
-├─▶ Create implementation plan document
-│   └─▶ Use ring-default:write-plan agent with Opus
-│
-├─▶ Question about Claude Code
-│   └─▶ Use claude-code-guide agent with Opus
-│
-└─▶ User explicitly said "read [specific-file]"
-    └─▶ Read directly (ONLY if user explicitly requested specific file read)
-```
-
-### Quick Reference: WRONG → RIGHT
-
-| Your Thought | Action |
-|--------------|--------|
-| "Let me read files to understand X" | Explore agent: "Understand X" |
-| "I'll grep for Y" | Explore agent: "Find Y" |
-| "User mentioned file Z" | Explore agent (unless user said "read Z") |
-| "Need context for good agent instructions" | Dispatch agent with broad topic |
-| "Already read 3 files, just 2 more" | STOP at gate. Dispatch now. |
-| "This search won't find anything" | Dispatch anyway. You're not the validator. |
-
-**Any of these thoughts = you're about to violate ORCHESTRATOR.**
+**WRONG → RIGHT:** "Let me read files" → Explore. "I'll grep" → Explore. "Already read 3 files" → STOP, dispatch now.
 
 ### Ring Reviewers: ALWAYS Parallel
 
@@ -376,8 +249,7 @@ When dispatching code reviewers, **single message with 3 Task calls:**
 
 ## Announcing Skill Usage
 
-- **Always announce meta-skills:** brainstorming, writing-plans, systematic-debugging, codify-solution (methodology change)
-- **Post-completion:** After non-trivial fixes, suggest `/ring-default:codify` to document the solution
+- **Always announce meta-skills:** brainstorming, writing-plans, systematic-debugging (methodology change)
 - **Skip when obvious:** User says "write tests first" → no need to announce TDD
 
 ## Required Patterns
@@ -416,7 +288,7 @@ Your human partner's specific instructions describe WHAT to do, not HOW.
 3. **Announce** → State which skill/agent you're using
 4. **Execute** → Dispatch agent with Opus OR follow skill exactly
 
-**Before ANY tool use (Read/Grep/Glob/Bash):** Complete PRE-TOOL-USE PROTOCOL checklist.
+**Before ANY tool use (Read/Grep/Glob/Bash):** Complete PRE-ACTION CHECKPOINT.
 
 **Skill has checklist?** TodoWrite for every item.
 

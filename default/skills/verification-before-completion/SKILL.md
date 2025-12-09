@@ -145,35 +145,13 @@ Check:
 
 ## Key Patterns
 
-**Tests:**
-```
-✅ [Run test command] [See: 34/34 pass] "All tests pass"
-❌ "Should pass now" / "Looks correct"
-```
-
-**Regression tests (TDD Red-Green):**
-```
-✅ Write → Run (pass) → Revert fix → Run (MUST FAIL) → Restore → Run (pass)
-❌ "I've written a regression test" (without red-green verification)
-```
-
-**Build:**
-```
-✅ [Run build] [See: exit 0] "Build passes"
-❌ "Linter passed" (linter doesn't check compilation)
-```
-
-**Requirements:**
-```
-✅ Re-read plan → Create checklist → Verify each → Report gaps or completion
-❌ "Tests pass, phase complete"
-```
-
-**Agent delegation:**
-```
-✅ Agent reports success → Check VCS diff → Verify changes → Report actual state
-❌ Trust agent report
-```
+| Type | ✅ CORRECT | ❌ WRONG |
+|------|-----------|---------|
+| Tests | Run command, see "34/34 pass", then claim | "Should pass now" |
+| Regression (TDD) | Write → pass → revert → MUST FAIL → restore → pass | "Written regression test" (no red-green) |
+| Build | Run build, see exit 0, then claim | "Linter passed" (linter ≠ compiler) |
+| Requirements | Re-read plan → checklist → verify each | "Tests pass, phase complete" |
+| Agent delegation | Check VCS diff → verify changes | Trust agent report |
 
 ## Required Patterns
 
@@ -187,59 +165,15 @@ Apply ALL patterns when using this skill.
 
 ---
 
-## When You Violate This Skill
+## Violation Recovery
 
-### Violation: Claimed complete without running verification
+| Violation | Detection | Recovery |
+|-----------|-----------|----------|
+| Claimed complete without verification | "complete" with no command output, "should work" | Run verification → paste output → then claim |
+| Ran command but didn't paste | Mentioned running tests, no output shown | Re-run → copy FULL output → paste → then claim |
+| Used banned phrases | "appears to work", "Great!", "Done!" before evidence | Stop → run verification → paste output → evidence-based claim |
 
-**How to detect:**
-- Said "implementation is complete"
-- No command output shown
-- Used words like "should work" or "appears correct"
-
-**Recovery procedure:**
-1. Don't mark task complete yet
-2. Run actual verification commands
-3. Paste complete output
-4. Only then claim completion
-
-**Why recovery matters:**
-Claims without evidence create false confidence. Silent failures go undetected until production.
-
----
-
-### Violation: Ran command but didn't paste output
-
-**How to detect:**
-- Mentioned running tests/build
-- No output shown in response
-- Said "tests passed" without proof
-
-**Recovery procedure:**
-1. Re-run the command
-2. Copy FULL output
-3. Paste output in response
-4. Then make completion claim
-
-**Why recovery matters:**
-"I ran tests and they passed" is a claim, not evidence. Paste the output to prove it.
-
----
-
-### Violation: Used banned phrases before verification
-
-**How to detect:**
-- Said "appears to work" / "should be fixed" / "looks correct"
-- Expressed satisfaction: "Great!", "Perfect!", "Done!"
-- Implied success without evidence
-
-**Recovery procedure:**
-1. Recognize the violation immediately
-2. Stop and run verification
-3. Paste complete output
-4. Replace banned phrase with evidence-based claim
-
-**Why recovery matters:**
-Banned phrases are cognitive shortcuts that bypass verification. They signal you're claiming success without proof, which is lying to your partner.
+**Why recovery matters:** Claims without evidence = false confidence. Silent failures go undetected until production.
 
 ---
 
