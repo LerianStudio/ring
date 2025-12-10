@@ -1,5 +1,40 @@
 Analyze existing codebase against standards and execute refactoring through dev-cycle.
 
+## ⛔ PRE-EXECUTION CHECK (EXECUTE FIRST)
+
+**Before loading the skill, you MUST check:**
+
+```
+Does docs/PROJECT_RULES.md exist in the target project?
+├── YES → Load skill: ring-dev-team:dev-refactor
+└── NO  → Output blocker below and STOP
+```
+
+**If file does NOT exist, output this EXACT response:**
+
+```markdown
+## ⛔ HARD BLOCK: PROJECT_RULES.md Not Found
+
+**Status:** BLOCKED - Cannot proceed
+
+### Required Action
+Create `docs/PROJECT_RULES.md` with your project's:
+- Architecture patterns
+- Code conventions
+- Testing requirements
+- DevOps standards
+
+Then re-run `/ring-dev-team:dev-refactor`.
+```
+
+**DO NOT:**
+- Use "default" or "industry" standards
+- Infer standards from existing code
+- Proceed with partial analysis
+- Offer to create the file
+
+---
+
 ## Usage
 
 ```
@@ -47,16 +82,26 @@ Analyze existing codebase against standards and execute refactoring through dev-
 │                 /ring-dev-team:dev-refactor                     │
 └─────────────────────────────────────────────────────────────┘
                            │
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│  ⛔ HARD GATE: Check PROJECT_RULES.md                       │
+│                                                             │
+│  Does docs/PROJECT_RULES.md exist?                          │
+│  └── YES → Continue                                         │
+│  └── NO  → OUTPUT BLOCKER AND TERMINATE                     │
+└─────────────────────────────────────────────────────────────┘
+                           │
         ┌──────────────────┴──────────────────┐
         ▼                                     ▼
 ┌───────────────────┐                ┌───────────────────┐
 │ Load Standards    │                │ Scan Codebase     │
 │                   │                │ (4 dimensions)    │
-│ 1. Project's      │                │                   │
-│    PROJECT_RULES.md   │                │ • Architecture    │
-│ 2. Or dev-team    │                │ • Code Quality    │
-│    defaults       │                │ • Testing         │
-└───────────────────┘                │ • DevOps          │
+│ PROJECT_RULES.md  │                │                   │
+│ (MANDATORY)       │                │ • Architecture    │
+│                   │                │ • Code Quality    │
+└───────────────────┘                │ • Testing         │
+                                     │ • DevOps          │
                                      └───────────────────┘
                            │
                            ▼
@@ -126,9 +171,11 @@ Analyze existing codebase against standards and execute refactoring through dev-
 
 ## Prerequisites
 
-1. **Standards file**: Either `docs/PROJECT_RULES.md` in project or use dev-team defaults
+1. **⛔ PROJECT_RULES.md (MANDATORY)**: `docs/PROJECT_RULES.md` MUST exist - no defaults, no fallback
 2. **Git repository**: Project should be under version control
 3. **Readable codebase**: Access to source files
+
+**If PROJECT_RULES.md does not exist:** This command will output a blocker message and terminate. The project owner must create the file first.
 
 ## Related Commands
 
