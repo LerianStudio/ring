@@ -30,14 +30,18 @@ related:
 ╔═══════════════════════════════════════════════════════════════════════════════╗
 ║  ⛔⛔⛔ CRITICAL: READ BEFORE DOING ANYTHING ⛔⛔⛔                            ║
 ║                                                                               ║
-║  THIS SKILL HAS 2 HARD GATES THAT WILL FAIL YOUR EXECUTION:                   ║
+║  THIS SKILL HAS 2 HARD GATES. VIOLATION = SKILL FAILURE.                      ║
 ║                                                                               ║
-║  GATE 0: PROJECT_RULES.md must exist → Or TERMINATE immediately               ║
-║  GATE 2: ONLY ring-dev-team:* agents allowed                                  ║
+║  HARD GATE 0: PROJECT_RULES.md MUST exist                                     ║
+║               └── If NOT found → OUTPUT BLOCKER AND TERMINATE                 ║
+║               └── NO workaround. NO alternative. NO exception.                ║
 ║                                                                               ║
-║  AGENT RULE (MANDATORY):                                                      ║
-║  ✅ ALL agents MUST have "ring-dev-team:" prefix                              ║
-║  ❌ ANY agent WITHOUT "ring-dev-team:" prefix = SKILL FAILURE                 ║
+║  HARD GATE 2: ALL agents MUST have "ring-dev-team:" prefix                    ║
+║               └── If agent lacks prefix → DO NOT DISPATCH                     ║
+║               └── NO workaround. NO alternative. NO exception.                ║
+║                                                                               ║
+║  These are NOT suggestions. These are MANDATORY HARD GATES.                   ║
+║  Ignoring them = SKILL FAILURE. There is NO way around them.                  ║
 ║                                                                               ║
 ╚═══════════════════════════════════════════════════════════════════════════════╝
 ```
@@ -118,54 +122,88 @@ After outputting the blocker above:
 
 ---
 
-## ⛔ STEP 1.5: AGENT DISPATCH VALIDATION (EXECUTE BEFORE ANY DISPATCH)
+## ⛔ STEP 1.5: AGENT DISPATCH VALIDATION (HARD GATE - EXECUTE BEFORE ANY DISPATCH)
 
-**THIS VALIDATION IS MANDATORY. Execute BEFORE calling ANY Task tool.**
+**THIS IS A HARD GATE. Violation = SKILL FAILURE. Execute BEFORE calling ANY Task tool.**
 
-### The One Rule
+### Validation Sequence
+
+```text
+1. Check: Does subagent_type start with "ring-dev-team:" ?
+   └── YES → Continue with dispatch
+   └── NO  → STOP IMMEDIATELY. DO NOT DISPATCH. (see below)
+```
+
+### If Agent Does NOT Have "ring-dev-team:" Prefix → MANDATORY STOP
+
+**⛔ You MUST NOT dispatch the agent. This is a HARD GATE.**
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│  ⛔ BEFORE EVERY Task tool call, CHECK:                             │
+│  ⛔ HARD GATE: AGENT PREFIX VALIDATION                              │
 │                                                                     │
-│  Does subagent_type start with "ring-dev-team:" ?                   │
+│  subagent_type MUST start with "ring-dev-team:"                     │
 │                                                                     │
-│  ✅ YES → Dispatch allowed                                          │
-│  ❌ NO  → FORBIDDEN - Use a ring-dev-team:* agent instead           │
+│  ✅ "ring-dev-team:..." → ALLOWED - proceed with dispatch           │
+│  ❌ ANYTHING ELSE       → FORBIDDEN - DO NOT DISPATCH               │
+│                                                                     │
+│  This is NOT optional. This is NOT a suggestion.                    │
+│  This is a MANDATORY HARD GATE.                                     │
+│                                                                     │
+│  Dispatching an agent without "ring-dev-team:" prefix = SKILL FAILURE│
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
-**This is the ONLY rule. If the agent doesn't have `ring-dev-team:` prefix, don't use it.**
+### Why This Is a Hard Gate (NOT Optional)
 
-### Why This Rule Exists
-
-**ring-dev-team:* agents have capabilities that other agents lack:**
+**Agents without `ring-dev-team:` prefix CANNOT perform this skill's function:**
 
 | Capability | ring-dev-team:* | Other agents |
 |------------|-----------------|--------------|
-| WebFetch for Ring standards | ✅ YES | ❌ NO |
-| Domain expertise (Go, TS, DevOps, SRE) | ✅ YES | ❌ NO |
-| Standards-based compliance output | ✅ YES | ❌ NO |
+| WebFetch for Ring standards | ✅ HAS | ❌ LACKS |
+| Domain expertise built-in | ✅ HAS | ❌ LACKS |
+| Standards-based compliance output | ✅ HAS | ❌ LACKS |
 
-**Result:** Other agents produce generic observations. ring-dev-team:* agents produce compliance checks against standards.
+**Using other agents = Analysis against NOTHING = INVALID output = SKILL FAILURE.**
 
-### Violation Recovery
+This is not about preference. Other agents are **technically incapable** of performing standards-based analysis.
+
+### Post-Check Behavior (MANDATORY)
+
+**If the agent you're about to dispatch does NOT have `ring-dev-team:` prefix:**
+
+1. **DO NOT DISPATCH** - Stop before calling Task tool
+2. **SELECT CORRECT AGENT** - Find appropriate `ring-dev-team:*` agent
+3. **VERIFY PREFIX** - Confirm it starts with `ring-dev-team:`
+4. **THEN DISPATCH** - Only after verification passes
+
+**There is NO workaround. There is NO alternative. There is NO exception.**
+
+### Violation Recovery (If You Already Made a Mistake)
 
 **If you ALREADY dispatched an agent without `ring-dev-team:` prefix:**
 
-1. **STOP** - Do not use its output
-2. **DISCARD** - The output is invalid (lacks standards)
+1. **STOP IMMEDIATELY** - Do not continue using its output
+2. **DISCARD THE OUTPUT** - It is INVALID (lacks standards knowledge)
 3. **RE-DISPATCH** - Use appropriate `ring-dev-team:*` agent
 4. **DOCUMENT** - Note: "Recovered from incorrect agent dispatch"
 
-### Agent Dispatch Rationalizations - DO NOT THINK THESE
+**Output from non-ring-dev-team agents is INVALID and MUST NOT be used.**
+
+### Gate 1.5 Rationalizations - DO NOT THINK THESE
+
+**If you catch yourself thinking ANY of these, STOP. You are about to violate a HARD GATE:**
 
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
-| "This other agent is faster" | Speed ≠ correctness. Wrong agent = wrong analysis. | Use `ring-dev-team:*` |
-| "I'll explore first, then use specialists" | Two-pass is waste. Specialists do it right first time. | Use `ring-dev-team:*` only |
-| "I need to understand code first" | Specialists understand AND analyze. One step. | Use `ring-dev-team:*` |
-| "These agents are similar enough" | Similar ≠ equivalent. Standards loading is critical. | Use `ring-dev-team:*` |
+| "This other agent is faster" | Speed is IRRELEVANT. Wrong agent = INVALID output. | STOP. Use `ring-dev-team:*` |
+| "I'll explore first, then use specialists" | Exploration with wrong agent = wasted time + INVALID data. | STOP. Use `ring-dev-team:*` directly |
+| "I need to understand the code first" | ring-dev-team:* agents understand AND analyze. One step. | STOP. Use `ring-dev-team:*` |
+| "These agents are similar enough" | Similar ≠ equivalent. They LACK standards loading. | STOP. Use `ring-dev-team:*` |
+| "Just this once won't matter" | Once = SKILL FAILURE. No exceptions exist. | STOP. Use `ring-dev-team:*` |
+| "I can use the output anyway" | Output without standards = GARBAGE IN. | STOP. Discard. Re-dispatch. |
+| "The user won't notice" | The USER defined this gate. Violation = failure. | STOP. Use `ring-dev-team:*` |
+| "It's close enough" | Close ≠ correct. HARD GATE means EXACT match required. | STOP. Use `ring-dev-team:*` |
 
 ---
 
@@ -177,11 +215,13 @@ After outputting the blocker above:
 
 **Already validated in Step 0 above.** If you reached this section, PROJECT_RULES.md exists.
 
-### Gate 2: Agent Dispatch (Execution)
+### Gate 2: Agent Dispatch (Execution) - HARD GATE
 
-**⛔ MANDATORY:** ALL agents MUST have `ring-dev-team:` prefix.
+**⛔ THIS IS A HARD GATE. Violation = SKILL FAILURE.**
 
-**⛔ See "STEP 1.5: AGENT DISPATCH VALIDATION" above for the rule and self-check.**
+**⛔ MANDATORY:** ALL agents MUST have `ring-dev-team:` prefix. NO EXCEPTIONS.
+
+**⛔ See "STEP 1.5: AGENT DISPATCH VALIDATION" above for complete validation sequence, mandatory behavior, and rationalizations to avoid.**
 
 #### Parallel Dispatch (Step 3)
 
@@ -189,16 +229,16 @@ After outputting the blocker above:
 
 Select agents based on the analysis dimensions needed for the task. Dispatch ALL that apply.
 
-#### Violations - STOP IMMEDIATELY
+#### Violations - STOP IMMEDIATELY (HARD GATE VIOLATIONS)
 
-| Violation | Why It's Wrong | Required Action |
-|-----------|----------------|-----------------|
-| Using agent without `ring-dev-team:` prefix | Lacks standards knowledge | Re-dispatch with `ring-dev-team:*` agent |
-| Dispatching agents sequentially | Wastes time, should be parallel | Re-send as single message |
-| Dispatching fewer agents than needed | Incomplete analysis | Add ALL applicable agents |
-| Reading >3 files directly | Violates 3-file rule | Use agents instead |
+| Violation | Consequence | Required Action |
+|-----------|-------------|-----------------|
+| Using agent without `ring-dev-team:` prefix | **SKILL FAILURE** - Output is INVALID | STOP. Discard output. Re-dispatch with `ring-dev-team:*` |
+| Dispatching agents sequentially | Wastes time, incomplete context | Re-send as SINGLE message with ALL agents |
+| Dispatching fewer agents than needed | Incomplete analysis | Add ALL applicable `ring-dev-team:*` agents |
+| Reading >3 files directly | Violates 3-file rule | Use `ring-dev-team:*` agents instead |
 
-**If you already violated a gate:** STOP current approach. Re-execute with correct agents.
+**If you already violated a gate:** STOP IMMEDIATELY. Discard invalid output. Re-execute with correct agents. There is NO way to salvage output from wrong agents.
 
 ### Pressure Resistance - DO NOT RATIONALIZE
 
