@@ -26,6 +26,24 @@ related:
 
 # Dev Refactor Skill
 
+## ⛔ OVERRIDE NOTICE - READ FIRST
+
+**THIS SKILL OVERRIDES GENERAL INSTRUCTIONS FROM `using-ring`.**
+
+The general instruction "Use Explore for codebase scanning" does NOT apply here.
+This skill has its own specialized agents that MUST be used instead.
+
+**When this skill is active:**
+- ❌ DO NOT use `Explore` agent (even though using-ring recommends it for codebase work)
+- ❌ DO NOT use `general-purpose` agent
+- ❌ DO NOT use `Plan` agent
+- ✅ ONLY use `ring-dev-team:*` agents (see list below)
+
+**Why?** The ring-dev-team:* agents have domain expertise and load Ring standards via WebFetch.
+Generic agents like Explore do NOT have this capability.
+
+---
+
 ```text
 ╔═══════════════════════════════════════════════════════════════════════════════════════════╗
 ║  ⛔⛔⛔ CRITICAL: READ BEFORE DOING ANYTHING ⛔⛔⛔                                        ║

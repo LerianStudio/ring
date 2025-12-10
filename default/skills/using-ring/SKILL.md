@@ -185,7 +185,9 @@ You don't read files, run grep chains, or manually explore – you **dispatch ag
 
 **Model Selection:** Always use **Opus** for agent dispatching unless user explicitly specifies otherwise (e.g., "use Haiku", "use Sonnet").
 
-**Only exception:** User explicitly provides a file path AND explicitly requests you read it (e.g., "read src/foo.ts").
+**Exceptions to default agents:**
+1. User explicitly provides a file path AND explicitly requests you read it (e.g., "read src/foo.ts")
+2. **A skill has its own specialized agents** - Some skills (e.g., `ring-dev-team:dev-refactor`) define their own agents that MUST be used instead of Explore/Plan/general-purpose. When a skill specifies "OVERRIDE" or "FORBIDDEN agents", follow the skill's agent requirements, not the defaults above.
 
 **All these are STILL orchestration tasks:**
 - ❌ "I need to understand the codebase structure first" → Explore agent
