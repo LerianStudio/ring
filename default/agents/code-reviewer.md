@@ -176,6 +176,81 @@ Work through these areas systematically:
 - [ ] Logging is appropriate (not too verbose, not too sparse)
 - [ ] Configuration is externalized (not hardcoded)
 
+### 8. 12-Factor App Violations (CRITICAL) - HIGH PRIORITY
+
+**MANDATORY CHECK:** These violations MUST be flagged and will FAIL the review.
+
+#### Config (Factor III) - CRITICAL
+- [ ] No hardcoded connection strings (grep for `localhost`, `127.0.0.1`, hardcoded ports)
+- [ ] No hardcoded credentials or API keys
+- [ ] No hardcoded hostnames (e.g., `db.internal.company.com`)
+- [ ] All config loaded from environment variables
+
+**Verification Commands:**
+```bash
+# Go - hardcoded hosts
+grep -rE "(localhost|127\.0\.0\.1|:5432|:6379|:3306)" --include="*.go" | grep -v test | grep -v _test
+
+# TypeScript - hardcoded hosts
+grep -rE "(localhost|127\.0\.0\.1|:5432|:6379|:3306)" --include="*.ts" | grep -v test | grep -v node_modules
+```
+
+#### Stateless (Factor VI) - CRITICAL
+- [ ] No local file storage for user data (`os.Create`, `ioutil.WriteFile`, `fs.writeFile`)
+- [ ] No in-memory sessions (global `map[string]Session`, `new Map<string, Session>()`)
+- [ ] No global mutable state for user data
+- [ ] Sessions/cache stored in Redis or database
+
+**Verification Commands:**
+```bash
+# Go - local file storage
+grep -rE "os\.Create|ioutil\.WriteFile" --include="*.go" | grep -v test | grep -v _test
+
+# TypeScript - local file storage
+grep -rE "fs\.writeFile|fs\.createWriteStream" --include="*.ts" | grep -v test | grep -v node_modules
+```
+
+#### Disposability (Factor IX) - CRITICAL
+- [ ] SIGTERM handler present in main entry point
+- [ ] Graceful server shutdown implemented
+- [ ] Database connections closed on shutdown
+- [ ] Workers return jobs to queue on shutdown
+
+**Verification Commands:**
+```bash
+# Go - SIGTERM handler
+grep -rE "signal\.Notify.*SIGTERM|syscall\.SIGTERM" --include="*.go"
+
+# TypeScript - SIGTERM handler
+grep -rE "process\.on\(['\"]SIGTERM" --include="*.ts" | grep -v node_modules
+```
+
+#### Logs (Factor XI)
+- [ ] No file-based logging (`os.OpenFile` for logs, `fs.createWriteStream` for logs)
+- [ ] Structured JSON logging format
+- [ ] Logs go to stdout/stderr only
+
+**Verification Commands:**
+```bash
+# Go - file logging
+grep -rE "os\.OpenFile.*\.log|log\.SetOutput.*File" --include="*.go" | grep -v test
+
+# TypeScript - file logging
+grep -rE "createWriteStream.*\.log|transports\.File" --include="*.ts" | grep -v node_modules
+```
+
+#### Severity Classification for 12-Factor Issues
+
+| Violation | Severity | Action |
+|-----------|----------|--------|
+| Hardcoded credentials/secrets | **CRITICAL** | FAIL review immediately |
+| Hardcoded hosts/ports | **HIGH** | FAIL review |
+| Missing SIGTERM handler | **HIGH** | FAIL review |
+| Local file storage for user data | **HIGH** | FAIL review |
+| In-memory session storage | **HIGH** | FAIL review |
+| File-based logging | **MEDIUM** | Should fix |
+| Unstructured console logs | **LOW** | Nice to fix |
+
 ---
 
 ## Issue Categorization
@@ -227,11 +302,16 @@ Classify every issue you find:
 - 3 or more High issues found
 - Code does not meet basic quality standards
 
+**12-Factor Specific:**
+- 1 CRITICAL 12-Factor violation (e.g., hardcoded credentials) = AUTOMATIC FAIL
+- 1 or more HIGH 12-Factor violations (e.g., missing SIGTERM) = FAIL
+
 **REVIEW PASSES if:**
 - 0 Critical issues
 - Fewer than 3 High issues
 - All High issues have clear remediation plan
 - Code is maintainable and well-architected
+- All 12-Factor compliance checks pass
 
 **NEEDS DISCUSSION if:**
 - Major deviations from plan that might be improvements

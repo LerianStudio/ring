@@ -775,3 +775,105 @@ Before deploying to production:
 - [ ] **Tracing**: OpenTelemetry instrumentation
 - [ ] **Health Checks**: `/health` and `/ready` endpoints
 - [ ] **Runbooks**: Documented for all critical alerts
+
+---
+
+## 12-Factor App Runtime (SRE)
+
+SRE is responsible for runtime aspects of 12-Factor compliance.
+
+### SRE-Owned Factors
+
+| Factor | SRE Responsibility |
+|--------|-------------------|
+| IV. Backing Services | Provision databases, caches, queues |
+| VI. Processes | Configure replica count, verify stateless |
+| VIII. Concurrency | HPA configuration, scaling policies |
+| IX. Disposability | Configure probes, verify startup time |
+| XI. Logs | Log aggregation, structured log parsing |
+
+---
+
+### VI. Processes - Stateless Verification
+
+**Verify applications are stateless by checking for local storage.**
+
+```bash
+# Check for local file storage in Go code
+grep -rE "os\.Create|ioutil\.WriteFile" --include="*.go" | grep -v test
+
+# If found, escalate to developer - stateful code cannot scale horizontally
+```
+
+---
+
+### VIII. Concurrency - HPA Configuration
+
+```yaml
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: api-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: api
+  minReplicas: 3
+  maxReplicas: 20
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+```
+
+---
+
+### IX. Disposability - Startup Time SLO
+
+| Metric | Target | Action if Exceeded |
+|--------|--------|-------------------|
+| Cold start | < 10 seconds | HIGH severity alert |
+| Warm start | < 5 seconds | MEDIUM severity alert |
+
+#### Kubernetes Probes
+
+```yaml
+livenessProbe:
+  httpGet:
+    path: /live
+    port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: 8080
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  failureThreshold: 3
+```
+
+---
+
+### XI. Logs - Aggregation
+
+**SRE aggregates logs; developers write to stdout.**
+
+- Application -> stdout (JSON) -> Fluent Bit -> Loki/CloudWatch
+- SRE does NOT configure application log format (developer responsibility)
+- SRE configures log retention, alerts on error rates
+
+---
+
+### 12-Factor Runtime Checklist (SRE)
+
+- [ ] HPA configured for horizontal scaling
+- [ ] Liveness/readiness probes configured
+- [ ] Startup time < 10 seconds
+- [ ] Log aggregation pipeline working
+- [ ] Backing services provisioned and healthy

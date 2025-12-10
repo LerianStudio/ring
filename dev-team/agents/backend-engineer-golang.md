@@ -890,6 +890,72 @@ Before submitting Go code, verify:
 - [ ] Sensitive data not logged
 - [ ] golangci-lint passes
 
+## 12-Factor App Code Patterns (MANDATORY)
+
+**MANDATORY:** Before implementing ANY service code, verify 12-Factor compliance. These patterns are NON-NEGOTIABLE.
+
+### Quick Reference
+
+| Factor | Requirement | Verification |
+|--------|-------------|--------------|
+| III. Config | `os.Getenv` / `libCommons.SetConfigFromEnvVars` | No hardcoded values |
+| VI. Stateless | No local file storage | No `os.Create` for user data |
+| IX. Disposability | SIGTERM handler | `signal.Notify` present |
+| XI. Logs | Stdout only | No `os.OpenFile` for logs |
+
+### Config Pattern (Factor III) - CRITICAL
+
+```go
+// MANDATORY - Use lib-commons
+cfg := &Config{}
+if err := libCommons.SetConfigFromEnvVars(cfg); err != nil {
+    log.Fatal("Failed to load config", zap.Error(err))
+}
+
+// FORBIDDEN
+dbHost := "localhost:5432"        // FAIL - hardcoded
+apiKey := "sk_live_xxx"           // FAIL - hardcoded secret
+```
+
+### Graceful Shutdown Pattern (Factor IX) - CRITICAL
+
+```go
+// MANDATORY in all services
+quit := make(chan os.Signal, 1)
+signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+
+go func() {
+    <-quit
+    log.Info("Shutting down gracefully...")
+
+    ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+    defer cancel()
+
+    server.Shutdown(ctx)
+    db.Close()
+}()
+```
+
+### Logging Pattern (Factor XI)
+
+```go
+// MANDATORY - Use lib-commons Zap logger (stdout)
+logger := libZap.NewZapLogger()
+
+// FORBIDDEN
+f, _ := os.OpenFile("app.log", os.O_APPEND, 0644)
+log.SetOutput(f)                  // FAIL - file logging
+```
+
+### Before Implementation Checklist
+
+- [ ] Config loaded via `libCommons.SetConfigFromEnvVars`
+- [ ] SIGTERM handler in main()
+- [ ] No hardcoded hosts/credentials
+- [ ] Logging via lib-commons Zap (stdout)
+
+**If any check fails:** Do NOT proceed. Fix compliance issues first.
+
 ## Example Output
 
 ```markdown

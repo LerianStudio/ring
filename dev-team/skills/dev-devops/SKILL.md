@@ -35,6 +35,34 @@ verification:
     - command: "curl -sf http://localhost:8080/health || curl -sf http://localhost:3000/health"
       description: "Health endpoint responds"
       success_pattern: "200|ok|healthy"
+    - command: "grep -r 'runs-on:' .github/workflows/ 2>/dev/null | grep -v 'shared-workflows' | head -1"
+      description: "No inline/hardcoded pipeline jobs"
+      success_pattern: "^$"
+      failure_pattern: "runs-on:"
+    - command: "terraform fmt -check -recursive 2>/dev/null || echo 'terraform not installed or not a terraform project'"
+      description: "Terraform files are properly formatted"
+      success_pattern: "^$|not a terraform"
+      failure_pattern: ".tf"
+    - command: "grep -rE 'source\\s*=\\s*\"\\./' *.tf 2>/dev/null | head -1"
+      description: "No internal Terraform modules"
+      success_pattern: "^$"
+      failure_pattern: "source"
+    - command: "grep -E '^FROM\\s+(alpine|ubuntu)' Dockerfile 2>/dev/null | grep -v 'AS builder'"
+      description: "No Alpine/Ubuntu final image"
+      success_pattern: "^$"
+      failure_pattern: "FROM"
+    - command: "grep 'gcr.io/distroless/static-debian12' Dockerfile 2>/dev/null"
+      description: "Uses distroless final image"
+      success_pattern: "distroless"
+      failure_pattern: "^$"
+    - command: "grep -E '^ARG.*(TOKEN|SECRET|PASSWORD|KEY)' Dockerfile 2>/dev/null"
+      description: "No secrets in build arguments"
+      success_pattern: "^$"
+      failure_pattern: "ARG"
+    - command: "grep 'CGO_ENABLED=0' Dockerfile 2>/dev/null"
+      description: "Static binary (CGO disabled)"
+      success_pattern: "CGO_ENABLED=0"
+      failure_pattern: "^$"
   manual:
     - "Verify docker-compose ps shows all services as 'Up (healthy)'"
     - "Verify .env.example documents all required environment variables"
@@ -146,6 +174,303 @@ If you catch yourself thinking ANY of these, STOP immediately:
 - ✅ Library/SDK with no runtime component
 - ✅ Project explicitly documented as non-containerized (rare)
 
+## Shared Workflows Compliance (MANDATORY)
+
+> **STRICT RULE:** All CI/CD pipelines MUST use shared workflows from `LerianStudio/github-actions-shared-workflows`.
+
+### Pre-Implementation Check
+
+Before creating ANY pipeline file:
+
+```bash
+# Check if shared workflow exists for your need
+# Repository: https://github.com/LerianStudio/github-actions-shared-workflows
+
+# Available workflows:
+# - pr-security-scan.yml     → Security scanning on PRs
+# - pr-validation.yml        → Semantic PR titles, size checks
+# - go-pr-analysis.yml       → Go CI: lint, test, coverage
+# - go-release.yml           → GoReleaser automation
+# - release.yml              → Semantic versioning
+# - gitops-update.yml        → Deploy to environments
+# - api-dog-e2e-tests.yml    → E2E testing
+# - changed-paths.yml        → Monorepo path detection
+# - build.yml                → Docker build
+```
+
+### Compliance Verification Commands
+
+```bash
+# MUST PASS: No inline jobs in workflows
+grep -r "runs-on:" .github/workflows/ 2>/dev/null | grep -v "shared-workflows"
+# Expected: No output (empty = PASS)
+
+# MUST PASS: Using shared workflows
+grep -r "uses:.*LerianStudio/github-actions-shared-workflows" .github/workflows/
+# Expected: At least one match
+
+# MUST PASS: No forbidden patterns
+grep -rE "(golangci-lint-action|setup-go|docker/build-push-action)" .github/workflows/ 2>/dev/null | grep -v "shared-workflows"
+# Expected: No output (these should come from shared workflows)
+```
+
+### If Shared Workflow is Missing
+
+**DO NOT create inline jobs. Report blocker:**
+
+```markdown
+## Blockers
+- **Missing Shared Workflow:** [describe needed functionality]
+- **Required Action:** Create workflow in LerianStudio/github-actions-shared-workflows
+- **Status:** BLOCKED until shared workflow exists
+```
+
+### Valid vs Invalid Pipeline Patterns
+
+**VALID:**
+```yaml
+jobs:
+  ci:
+    uses: LerianStudio/github-actions-shared-workflows/.github/workflows/go-pr-analysis.yml@v1.0.0
+    secrets: inherit
+```
+
+**INVALID (FORBIDDEN):**
+```yaml
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: golangci/golangci-lint-action@v4
+```
+
+## Terraform Compliance (MANDATORY)
+
+> **STRICT RULE:** All Terraform infrastructure MUST follow patterns from `LerianStudio/midaz-terraform-foundation`. Internal modules are FORBIDDEN.
+
+### Reference Repository
+
+**Source of Truth:** `LerianStudio/midaz-terraform-foundation`
+
+This repository demonstrates proper use of official Terraform Registry modules for AWS, GCP, and Azure.
+
+### Pre-Implementation Checks
+
+Before writing ANY Terraform:
+
+```bash
+# 1. Check midaz-terraform-foundation for existing patterns
+# Repository: https://github.com/LerianStudio/midaz-terraform-foundation/tree/main/examples
+
+# 2. Verify component structure exists
+ls -la {component}/
+# Expected: main.tf, variables.tf, outputs.tf, backend.tf, versions.tf
+
+# 3. Check official module availability
+# AWS: https://registry.terraform.io/namespaces/terraform-aws-modules
+# GCP: https://registry.terraform.io/namespaces/terraform-google-modules
+```
+
+### Compliance Verification Commands
+
+```bash
+# MUST PASS: terraform fmt check
+terraform fmt -check -recursive
+# Expected: Exit code 0 (no output = formatted correctly)
+
+# MUST PASS: No internal modules (local paths)
+grep -rE "source\s*=\s*\"\./" *.tf 2>/dev/null
+# Expected: No output
+
+# MUST PASS: No internal modules (git repos)
+grep -rE "source\s*=\s*\"git::" *.tf 2>/dev/null | grep -v "terraform-aws-modules\|terraform-google-modules"
+# Expected: No output
+
+# MUST HAVE: Remote backend
+grep -l "backend" backend.tf 2>/dev/null
+# Expected: backend.tf
+
+# MUST HAVE: ManagedBy tag
+grep -E "ManagedBy.*=.*Terraform" *.tf 2>/dev/null
+# Expected: At least one match
+```
+
+### Official Modules Quick Reference
+
+**AWS:**
+- VPC: `terraform-aws-modules/vpc/aws` ~> 5.0
+- EKS: `terraform-aws-modules/eks/aws` ~> 21.0
+- RDS: `terraform-aws-modules/rds/aws` ~> 6.0
+
+**GCP:**
+- GKE: `terraform-google-modules/kubernetes-engine/google//modules/beta-private-cluster` ~> 36.0
+
+**Azure:**
+- Use native `azurerm_*` resources
+
+### If Internal Module Seems Needed
+
+**DO NOT create internal modules. Report blocker:**
+
+```markdown
+## Blockers
+- **Internal Module Request:** [describe needed functionality]
+- **Official Module:** [module name] does not support this
+- **Required Action:**
+  1. Review official module docs again
+  2. Use native provider resources
+  3. OR request feature upstream
+- **Status:** BLOCKED until official solution found
+```
+
+### Valid vs Invalid Terraform Patterns
+
+**VALID - Official Module:**
+```hcl
+module "vpc" {
+  source  = "terraform-aws-modules/vpc/aws"
+  version = "~> 5.0"
+  # ...
+}
+```
+
+**VALID - Native Resource:**
+```hcl
+resource "azurerm_kubernetes_cluster" "aks" {
+  name                = var.cluster_name
+  # ...
+}
+```
+
+**INVALID - Internal Module (FORBIDDEN):**
+```hcl
+module "vpc" {
+  source = "./modules/vpc"  # FORBIDDEN
+}
+
+module "eks" {
+  source = "git::https://github.com/company/terraform-modules//eks"  # FORBIDDEN
+}
+```
+
+## Dockerfile Standards Compliance (MANDATORY)
+
+> **STRICT RULE:** All Dockerfiles MUST use `gcr.io/distroless/static-debian12` as the final image. Alpine/Ubuntu final images are FORBIDDEN.
+
+### Dockerfile Pattern Selection
+
+Before creating ANY Dockerfile:
+
+1. **Determine application type:**
+   - OpenSource → Use flowker pattern
+   - Closed Source/Licensed → Use plugin-fees pattern
+
+2. **Verify requirements:**
+
+| Criteria | OpenSource | Closed Source |
+|----------|-----------|---------------|
+| Public repository | YES | NO |
+| Private Go modules | NO | YES |
+| Code obfuscation needed | NO | YES |
+
+### OpenSource Pattern (flowker)
+
+```dockerfile
+FROM --platform=$BUILDPLATFORM golang:1.25.3-alpine AS builder
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+ARG TARGETPLATFORM
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=$(echo $TARGETPLATFORM | cut -d'/' -f2) \
+  go build -tags netgo -ldflags '-s -w -extldflags "-static"' -o /app/server cmd/app/main.go
+
+FROM gcr.io/distroless/static-debian12
+COPY --from=builder /app/server /server
+EXPOSE 8080
+ENTRYPOINT ["/server"]
+```
+
+### Closed Source Pattern (plugin-fees)
+
+```dockerfile
+# syntax=docker/dockerfile:1.4
+FROM --platform=$BUILDPLATFORM golang:1.25-alpine AS builder
+WORKDIR /app
+ARG TARGETPLATFORM
+RUN apk add --no-cache git && go install mvdan.cc/garble@latest
+ENV PATH="/root/go/bin:${PATH}"
+COPY go.mod go.sum ./
+RUN --mount=type=secret,id=github_token \
+  GITHUB_TOKEN=$(cat /run/secrets/github_token) && \
+  printf "machine github.com\nlogin x-oauth-basic\npassword %s\n" "$GITHUB_TOKEN" > ~/.netrc && \
+  go mod download && rm ~/.netrc
+COPY . .
+ENV GOGARBLE=app/v3,github.com/LerianStudio/lib-license-go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=$(echo $TARGETPLATFORM | cut -d'/' -f2) \
+  garble -tiny -literals build -tags netgo -ldflags '-w -extldflags "-static"' -o /app/server cmd/app/main.go
+
+FROM gcr.io/distroless/static-debian12
+COPY --from=builder /app/server /server
+EXPOSE 8080
+ENTRYPOINT ["/server"]
+```
+
+### Compliance Verification Commands
+
+```bash
+# MUST PASS: No Alpine/Ubuntu final image
+grep -E "^FROM\s+(alpine|ubuntu)" Dockerfile | grep -v "AS builder"
+# Expected: No output (empty = PASS)
+
+# MUST PASS: Uses distroless
+grep "gcr.io/distroless/static-debian12" Dockerfile
+# Expected: At least one match
+
+# MUST PASS: Multi-stage build
+grep -c "^FROM" Dockerfile
+# Expected: 2 or more
+
+# MUST PASS: No secrets in ARG
+grep -E "^ARG.*(TOKEN|SECRET|PASSWORD|KEY)" Dockerfile
+# Expected: No output (empty = PASS)
+
+# MUST PASS: Static binary
+grep "CGO_ENABLED=0" Dockerfile
+# Expected: At least one match
+
+# MUST PASS: Pinned version (no :latest)
+grep -E "^FROM.*:latest" Dockerfile
+# Expected: No output (empty = PASS)
+
+# MUST PASS: Layer caching optimization
+head -20 Dockerfile | grep -E "COPY go\.(mod|sum)"
+# Expected: go.mod/go.sum copied before full COPY
+```
+
+### FORBIDDEN Patterns - Blocker
+
+If ANY of these are detected, STOP and report blocker:
+
+| Pattern | Detection Command | Action |
+|---------|------------------|--------|
+| Alpine final image | `grep "^FROM alpine" Dockerfile \| grep -v "AS builder"` | BLOCKER |
+| Ubuntu final image | `grep "^FROM ubuntu" Dockerfile \| grep -v "AS builder"` | BLOCKER |
+| Secrets in ARG | `grep "^ARG.*TOKEN" Dockerfile` | BLOCKER |
+| :latest tag | `grep "^FROM.*:latest" Dockerfile` | BLOCKER |
+| Missing CGO_ENABLED=0 | `! grep "CGO_ENABLED=0" Dockerfile` | BLOCKER |
+
+**Report blocker format:**
+
+```markdown
+## Blockers
+- **Dockerfile Violation:** [describe: Alpine final, secrets in ARG, etc.]
+- **Detection:** [command that found violation]
+- **Required:** Use Ring Dockerfile Standards ([OpenSource/Closed Source] pattern)
+- **Status:** BLOCKED until Dockerfile is compliant
+```
+
 ## Prerequisites
 
 Before starting Gate 1:
@@ -182,15 +507,33 @@ Before starting Gate 1:
 
 ## Step 3: Create/Update Dockerfile
 
-**Pattern:** Multi-stage build → builder stage (deps first, then source) → production stage (non-root user, only artifacts)
+**Pattern Selection:** OpenSource (public repo, no private deps) OR Closed Source (private repo, obfuscation needed)
 
-**Required elements:** `WORKDIR /app`, `USER appuser` (non-root), `EXPOSE {port}`, `HEALTHCHECK` (30s interval, 3s timeout)
+**MANDATORY for ALL Dockerfiles:**
 
-| Language | Builder | Runtime | Build Command | Notes |
-|----------|---------|---------|---------------|-------|
-| **Go** | `golang:1.21-alpine` | `alpine:3.19` | `CGO_ENABLED=0 go build` | Add ca-certificates, tzdata |
-| **TypeScript** | `node:20-alpine` | `node:20-alpine` | `npm ci && npm run build` | `npm ci --only=production` in prod |
-| **Python** | `python:3.11-slim` | `python:3.11-slim` | venv + `pip install` | Copy `/opt/venv` to prod |
+| Requirement | Value | Reason |
+|-------------|-------|--------|
+| Final image | `gcr.io/distroless/static-debian12` | Security, minimal attack surface |
+| Build platform | `--platform=$BUILDPLATFORM` | Multi-arch support |
+| Base version | Pinned (e.g., `golang:1.25.3-alpine`) | Reproducibility |
+| CGO | `CGO_ENABLED=0` | Static binary |
+| LDFLAGS | `-s -w -extldflags "-static"` | Stripped, static binary |
+| Layer caching | `COPY go.mod go.sum` before `COPY .` | Build performance |
+
+**Language-Specific Patterns:**
+
+| Language | Builder | Final | Key Flags |
+|----------|---------|-------|-----------|
+| **Go (OpenSource)** | `golang:X.X.X-alpine` | `gcr.io/distroless/static-debian12` | `-ldflags '-s -w'` |
+| **Go (Closed Source)** | `golang:X.X.X-alpine` + garble | `gcr.io/distroless/static-debian12` | `garble -tiny -literals` |
+| **TypeScript** | `node:20-alpine` | `gcr.io/distroless/nodejs20-debian12` | `npm ci --only=production` |
+
+**FORBIDDEN - Will fail Gate 1:**
+- Alpine/Ubuntu as final image
+- Secrets in ARG/ENV
+- `:latest` tag
+- Missing CGO_ENABLED=0
+- Single-stage builds
 
 ## Step 4: Create/Update docker-compose.yml
 
@@ -234,9 +577,54 @@ Create `docs/LOCAL_SETUP.md` with these sections:
 
 **Checklist:** Build succeeds ✓ | Services start ✓ | All healthy ✓ | Health responds ✓ | No errors ✓ | DB connects ✓ | Redis connects ✓
 
+**Shared Workflows Checklist (if pipelines exist):**
+- [ ] No inline pipeline jobs (grep verification passed)
+- [ ] All pipelines use shared workflows from LerianStudio/github-actions-shared-workflows
+- [ ] Pipeline versions pinned appropriately (semantic versions for production)
+
+**Terraform Checklist (if Terraform project):**
+- [ ] `terraform fmt -check -recursive` passes (if Terraform project)
+- [ ] No internal modules (grep verification passed)
+- [ ] Remote backend configured in backend.tf
+- [ ] Standard tags present (Environment, ManagedBy)
+- [ ] Using official modules per midaz-terraform-foundation patterns
+
+**Dockerfile Checklist (MANDATORY):**
+- [ ] Dockerfile uses `gcr.io/distroless/static-debian12` final image
+- [ ] No Alpine/Ubuntu final images (grep verification passed)
+- [ ] No secrets in build arguments
+- [ ] CGO_ENABLED=0 for static binary
+- [ ] Base image version pinned (no :latest)
+- [ ] Multi-stage build (2+ FROM statements)
+- [ ] Layer caching optimized (go.mod/go.sum before COPY .)
+
 ## Step 8: Prepare Handoff to Gate 2
 
 **Handoff format:** DevOps status (COMPLETE/PARTIAL) | Files changed (Dockerfile, compose, .env, docs) | Services configured (App:port, DB:type/port, Cache:type/port) | Env vars added | Verification results (build/startup/health/connectivity: PASS/FAIL) | Ready for testing: YES/NO
+
+**Shared Workflows Compliance:**
+- CI Pipeline: USING SHARED/NOT APPLICABLE/BLOCKER
+- Release Pipeline: USING SHARED/NOT APPLICABLE/BLOCKER
+- Inline Jobs: NONE FOUND/VIOLATION DETECTED
+
+**Pipeline Verification:**
+- Inline job check: PASS/FAIL
+- Shared workflow usage: YES/NO/N/A
+
+**Terraform Compliance:**
+- terraform fmt check: PASS/FAIL/N/A
+- Internal modules: NONE FOUND/VIOLATION DETECTED/N/A
+- Remote backend: CONFIGURED/MISSING/N/A
+- Standard tags: PRESENT/MISSING/N/A
+- Official modules: YES/VIOLATION/N/A
+
+**Dockerfile Compliance:**
+- Final image: DISTROLESS/VIOLATION
+- Multi-stage build: YES/NO
+- Static binary (CGO_ENABLED=0): YES/NO
+- Secrets handling: BUILDKIT_SECRETS/ARG_VIOLATION/N/A
+- Base version pinned: YES/NO
+- Pattern used: OPENSOURCE/CLOSED_SOURCE
 
 ## Common DevOps Patterns
 

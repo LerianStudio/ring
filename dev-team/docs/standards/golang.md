@@ -1480,3 +1480,378 @@ Before submitting Go code, verify:
 - [ ] Sensitive data not logged
 - [ ] golangci-lint passes
 - [ ] Pagination strategy defined in TRD (or confirmed with user if no TRD)
+
+---
+
+## 12-Factor App Compliance (MANDATORY for All Services)
+
+The [12-Factor App methodology](https://12factor.net) defines cloud-native best practices. Go developers are responsible for implementing code patterns that enable 12-Factor compliance.
+
+### Developer-Owned Factors
+
+| Factor | What Developers Must Do | Verification |
+|--------|------------------------|--------------|
+| III. Config | Read ALL config from environment variables | No hardcoded values |
+| IV. Backing Services | Connect via URL from config | No hardcoded hosts |
+| VI. Processes | Write stateless code, no local file storage | No `os.Create` for user data |
+| IX. Disposability | Implement graceful shutdown (SIGTERM) | `signal.Notify` present |
+| XI. Logs | Write to stdout only, JSON format | No `os.OpenFile` for logs |
+
+---
+
+### III. Config - Environment Variables (CRITICAL)
+
+**All configuration MUST come from environment variables.** This is already enforced via `libCommons.SetConfigFromEnvVars`.
+
+#### CORRECT Pattern
+
+```go
+// CORRECT - Using lib-commons (MANDATORY)
+cfg := &Config{}
+if err := libCommons.SetConfigFromEnvVars(cfg); err != nil {
+    log.Fatal("Failed to load config", zap.Error(err))
+}
+
+// CORRECT - Direct os.Getenv for simple cases
+dbHost := os.Getenv("DATABASE_HOST")
+if dbHost == "" {
+    log.Fatal("DATABASE_HOST environment variable required")
+}
+
+// CORRECT - With sensible defaults for non-sensitive config
+logLevel := os.Getenv("LOG_LEVEL")
+if logLevel == "" {
+    logLevel = "info"
+}
+```
+
+#### FORBIDDEN Patterns (Will Fail Code Review)
+
+```go
+// FORBIDDEN - Hardcoded connection strings
+dbHost := "localhost:5432"                    // FAIL
+dbHost := "db.internal.company.com"           // FAIL
+redisURL := "redis://localhost:6379"          // FAIL
+
+// FORBIDDEN - Hardcoded credentials
+apiKey := "sk_live_xxx"                       // FAIL - SECURITY CRITICAL
+password := "mysecretpassword"                // FAIL - SECURITY CRITICAL
+
+// FORBIDDEN - Environment-specific code paths
+if os.Getenv("ENV") == "production" {
+    dbHost = "prod-db.internal"               // FAIL - Still hardcoded!
+}
+
+// FORBIDDEN - Config files with secrets
+config := LoadYAML("config.yaml")             // FAIL if contains credentials
+```
+
+#### Verification Command
+
+```bash
+# Check for hardcoded hosts (should return empty)
+grep -rE "(localhost|127\.0\.0\.1|:5432|:6379|:3306|:27017)" \
+  --include="*.go" | grep -v test | grep -v _test | grep -v vendor
+```
+
+---
+
+### VI. Processes - Stateless Code (CRITICAL)
+
+**Applications must be stateless.** Any data that needs to persist must use a backing service (database, Redis, S3).
+
+#### CORRECT Patterns
+
+```go
+// CORRECT - Session in Redis
+type SessionStore struct {
+    redis *redis.Client
+}
+
+func (s *SessionStore) Get(ctx context.Context, sessionID string) (*Session, error) {
+    data, err := s.redis.Get(ctx, "session:"+sessionID).Result()
+    if err != nil {
+        return nil, fmt.Errorf("get session: %w", err)
+    }
+    var session Session
+    if err := json.Unmarshal([]byte(data), &session); err != nil {
+        return nil, fmt.Errorf("unmarshal session: %w", err)
+    }
+    return &session, nil
+}
+
+// CORRECT - File uploads to S3
+func (s *StorageService) Upload(ctx context.Context, file io.Reader, key string) (string, error) {
+    _, err := s.s3Client.PutObject(ctx, &s3.PutObjectInput{
+        Bucket: aws.String(os.Getenv("S3_BUCKET")),
+        Key:    aws.String(key),
+        Body:   file,
+    })
+    if err != nil {
+        return "", fmt.Errorf("upload to S3: %w", err)
+    }
+    return fmt.Sprintf("s3://%s/%s", os.Getenv("S3_BUCKET"), key), nil
+}
+```
+
+#### FORBIDDEN Patterns (Will Fail Code Review)
+
+```go
+// FORBIDDEN - Local file storage for user data
+func uploadFile(file io.Reader, filename string) error {
+    f, err := os.Create("/uploads/" + filename)  // FAIL - Lost on restart!
+    if err != nil {
+        return err
+    }
+    defer f.Close()
+    _, err = io.Copy(f, file)
+    return err
+}
+
+// FORBIDDEN - In-memory session (lost on restart)
+var sessions = make(map[string]*Session)        // FAIL - Global state!
+
+func getSession(id string) *Session {
+    return sessions[id]                          // FAIL - Gone when process restarts!
+}
+
+// FORBIDDEN - Local cache that can't be shared
+var cache = make(map[string]interface{})        // FAIL - Not shared across replicas!
+```
+
+#### Verification Command
+
+```bash
+# Check for local file storage (should return empty for user data)
+grep -rE "os\.Create|ioutil\.WriteFile|os\.OpenFile.*O_CREATE" \
+  --include="*.go" | grep -v test | grep -v _test | grep -v vendor
+```
+
+---
+
+### IX. Disposability - Graceful Shutdown (CRITICAL)
+
+**All services MUST handle SIGTERM gracefully.** This is required for Kubernetes rolling deployments.
+
+#### REQUIRED Pattern
+
+```go
+func main() {
+    // Initialize server
+    server := &http.Server{
+        Addr:    ":" + os.Getenv("PORT"),
+        Handler: router,
+    }
+
+    // Start server in goroutine
+    go func() {
+        if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+            log.Fatal("Server error", zap.Error(err))
+        }
+    }()
+
+    // REQUIRED - Wait for shutdown signal
+    quit := make(chan os.Signal, 1)
+    signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+    <-quit
+
+    log.Info("Shutting down gracefully...")
+
+    // REQUIRED - Grace period for in-flight requests
+    ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+    defer cancel()
+
+    if err := server.Shutdown(ctx); err != nil {
+        log.Error("Server forced to shutdown", zap.Error(err))
+    }
+
+    // REQUIRED - Close database connections
+    if err := db.Close(); err != nil {
+        log.Error("Failed to close database", zap.Error(err))
+    }
+
+    // REQUIRED - Close Redis connections
+    if err := redis.Close(); err != nil {
+        log.Error("Failed to close Redis", zap.Error(err))
+    }
+
+    log.Info("Server exited gracefully")
+}
+```
+
+#### Using lib-commons Server (RECOMMENDED)
+
+```go
+// lib-commons provides server lifecycle management
+server := libServer.NewServer(
+    libServer.WithAddress(cfg.ServerAddress),
+    libServer.WithHandler(router),
+    libServer.WithGracefulShutdown(30*time.Second),
+)
+
+// Start handles SIGTERM automatically
+if err := server.Start(); err != nil {
+    log.Fatal("Server failed", zap.Error(err))
+}
+```
+
+#### Worker Graceful Shutdown
+
+```go
+func runWorker(ctx context.Context, queue *amqp.Channel) {
+    msgs, _ := queue.Consume(queueName, "", false, false, false, false, nil)
+
+    for {
+        select {
+        case <-ctx.Done():
+            // REQUIRED - Return current job to queue before exit
+            if currentMsg != nil {
+                currentMsg.Nack(false, true)  // Requeue
+                log.Info("Job returned to queue", zap.String("job_id", currentMsg.MessageId))
+            }
+            return
+        case msg := <-msgs:
+            currentMsg = &msg
+            processMessage(ctx, msg)
+            msg.Ack(false)
+            currentMsg = nil
+        }
+    }
+}
+```
+
+#### Verification Command
+
+```bash
+# Check for SIGTERM handling (should find signal.Notify)
+grep -rE "signal\.Notify.*SIGTERM|syscall\.SIGTERM" --include="*.go" | head -5
+```
+
+---
+
+### XI. Logs - Stdout Only (MANDATORY)
+
+**All logs MUST go to stdout.** Log aggregation is handled by the infrastructure (Kubernetes, CloudWatch, etc.).
+
+#### CORRECT Pattern (Using lib-commons)
+
+```go
+// CORRECT - lib-commons Zap logger (writes to stdout)
+logger := libZap.NewZapLogger()
+
+// CORRECT - Structured logging
+logger.Info("Request received",
+    zap.String("method", r.Method),
+    zap.String("path", r.URL.Path),
+    zap.String("trace_id", traceID),
+)
+
+// CORRECT - Error logging with context
+logger.Error("Failed to process request",
+    zap.Error(err),
+    zap.String("trace_id", traceID),
+    zap.String("user_id", userID),
+)
+```
+
+#### FORBIDDEN Patterns (Will Fail Code Review)
+
+```go
+// FORBIDDEN - File logging
+f, _ := os.OpenFile("/var/log/app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+log.SetOutput(f)                              // FAIL - File logging!
+
+// FORBIDDEN - Log rotation in application
+log.SetOutput(&lumberjack.Logger{
+    Filename: "/var/log/app.log",
+    MaxSize:  100,
+})                                            // FAIL - App shouldn't manage rotation!
+
+// FORBIDDEN - Using fmt for logs
+fmt.Printf("User %s logged in\n", userID)     // FAIL - Unstructured, not JSON
+
+// FORBIDDEN - Logging to file in any form
+logFile, _ := os.Create("debug.log")          // FAIL
+```
+
+#### Verification Command
+
+```bash
+# Check for file logging (should return empty)
+grep -rE "os\.OpenFile.*\.log|log\.SetOutput.*File|WriteFile.*\.log|lumberjack" \
+  --include="*.go" | grep -v test | grep -v _test | grep -v vendor
+```
+
+---
+
+### 12-Factor Compliance Checklist (Go Developers)
+
+Before submitting code for review, verify:
+
+**Config (III) - CRITICAL:**
+- [ ] All config loaded via `libCommons.SetConfigFromEnvVars` or `os.Getenv`
+- [ ] No hardcoded hostnames (localhost, IP addresses)
+- [ ] No hardcoded credentials or API keys
+- [ ] No environment-specific code paths with hardcoded values
+
+**Stateless (VI) - CRITICAL:**
+- [ ] No local file storage for user data
+- [ ] Sessions stored in Redis/database
+- [ ] File uploads go to S3/GCS
+- [ ] No global mutable state for user data
+
+**Disposability (IX) - CRITICAL:**
+- [ ] SIGTERM signal handler implemented
+- [ ] Graceful server shutdown with context timeout
+- [ ] Database connections closed on shutdown
+- [ ] Workers return jobs to queue on shutdown
+
+**Logs (XI):**
+- [ ] All logs written to stdout
+- [ ] Using lib-commons Zap logger
+- [ ] Structured JSON format
+- [ ] No file-based logging
+
+---
+
+### Quick Verification Script
+
+```bash
+#!/bin/bash
+# 12-factor-check.sh - Run before code review
+
+echo "=== 12-Factor Compliance Check ==="
+
+echo -e "\n--- Factor III: Config (hardcoded values) ---"
+HARDCODED=$(grep -rE "(localhost|127\.0\.0\.1|:5432|:6379)" --include="*.go" | grep -v test | grep -v vendor | wc -l)
+if [ "$HARDCODED" -gt 0 ]; then
+    echo "FAIL: Found $HARDCODED potential hardcoded values"
+    grep -rE "(localhost|127\.0\.0\.1|:5432|:6379)" --include="*.go" | grep -v test | grep -v vendor | head -5
+else
+    echo "PASS: No hardcoded hosts found"
+fi
+
+echo -e "\n--- Factor VI: Stateless (local file storage) ---"
+LOCAL_STORAGE=$(grep -rE "os\.Create|ioutil\.WriteFile" --include="*.go" | grep -v test | grep -v vendor | grep -v "\.log" | wc -l)
+if [ "$LOCAL_STORAGE" -gt 0 ]; then
+    echo "WARN: Found $LOCAL_STORAGE potential local file operations (review manually)"
+else
+    echo "PASS: No local file storage detected"
+fi
+
+echo -e "\n--- Factor IX: Disposability (SIGTERM handler) ---"
+SIGTERM=$(grep -rE "signal\.Notify.*SIGTERM|syscall\.SIGTERM" --include="*.go" | wc -l)
+if [ "$SIGTERM" -eq 0 ]; then
+    echo "FAIL: No SIGTERM handler found"
+else
+    echo "PASS: SIGTERM handler found in $SIGTERM file(s)"
+fi
+
+echo -e "\n--- Factor XI: Logs (file logging) ---"
+FILE_LOGS=$(grep -rE "os\.OpenFile.*\.log|WriteFile.*\.log" --include="*.go" | grep -v test | grep -v vendor | wc -l)
+if [ "$FILE_LOGS" -gt 0 ]; then
+    echo "FAIL: Found $FILE_LOGS potential file logging operations"
+else
+    echo "PASS: No file logging detected"
+fi
+```

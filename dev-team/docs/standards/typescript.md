@@ -1085,3 +1085,342 @@ Before submitting TypeScript code, verify:
 - [ ] Domain Events emitted for significant state changes
 - [ ] Repository interfaces defined in domain layer
 - [ ] No infrastructure dependencies in domain layer
+
+---
+
+## 12-Factor App Compliance (MANDATORY for All Services)
+
+The [12-Factor App methodology](https://12factor.net) defines cloud-native best practices. TypeScript developers are responsible for implementing code patterns that enable 12-Factor compliance.
+
+### Developer-Owned Factors
+
+| Factor | What Developers Must Do | Verification |
+|--------|------------------------|--------------|
+| III. Config | Read ALL config from process.env | No hardcoded values |
+| IV. Backing Services | Connect via URL from config | No hardcoded hosts |
+| VI. Processes | Write stateless code, no local file storage | No fs.writeFile for user data |
+| IX. Disposability | Implement graceful shutdown (SIGTERM) | process.on('SIGTERM') present |
+| XI. Logs | Write to stdout only, JSON format | No fs.createWriteStream for logs |
+
+---
+
+### III. Config - Environment Variables (CRITICAL)
+
+**All configuration MUST come from environment variables.** Validate with Zod at startup.
+
+#### CORRECT Pattern
+
+```typescript
+import { z } from 'zod';
+
+// Define and validate config at startup
+const configSchema = z.object({
+  // Application
+  NODE_ENV: z.enum(['development', 'staging', 'production']).default('development'),
+  PORT: z.string().transform(Number).default('3000'),
+  LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
+
+  // Database
+  DATABASE_URL: z.string().url(),
+  DATABASE_POOL_SIZE: z.string().transform(Number).default('10'),
+
+  // Redis
+  REDIS_URL: z.string().url(),
+
+  // External Services
+  AUTH_SERVICE_URL: z.string().url(),
+
+  // Secrets (required, no defaults)
+  JWT_SECRET: z.string().min(32),
+  API_KEY: z.string().min(20),
+});
+
+// Validate on startup - fails fast if config missing
+export const config = configSchema.parse(process.env);
+
+// Type-safe access throughout application
+console.log(config.DATABASE_URL);  // TypeScript knows it's a string
+```
+
+#### FORBIDDEN Patterns (Will Fail Code Review)
+
+```typescript
+// FORBIDDEN - Hardcoded connection strings
+const dbHost = 'localhost:5432';                    // FAIL
+const dbHost = 'db.internal.company.com';           // FAIL
+const redisUrl = 'redis://localhost:6379';          // FAIL
+
+// FORBIDDEN - Hardcoded credentials
+const apiKey = 'sk_live_xxx';                       // FAIL - SECURITY CRITICAL
+const jwtSecret = 'mysecretkey';                    // FAIL - SECURITY CRITICAL
+
+// FORBIDDEN - Environment-specific code paths with hardcoded values
+if (process.env.NODE_ENV === 'production') {
+  const dbHost = 'prod-db.internal';                // FAIL - Still hardcoded!
+}
+
+// FORBIDDEN - Config files with secrets
+import config from './config.json';                  // FAIL if contains credentials
+```
+
+#### Verification Command
+
+```bash
+# Check for hardcoded hosts (should return empty)
+grep -rE "(localhost|127\.0\.0\.1|:5432|:6379|:3306)" \
+  --include="*.ts" --include="*.js" | grep -v test | grep -v node_modules | grep -v ".d.ts"
+```
+
+---
+
+### VI. Processes - Stateless Code (CRITICAL)
+
+**Applications must be stateless.** Any data that needs to persist must use a backing service.
+
+#### CORRECT Patterns
+
+```typescript
+// CORRECT - Session in Redis
+import Redis from 'ioredis';
+
+class SessionStore {
+  constructor(private redis: Redis) {}
+
+  async get(sessionId: string): Promise<Session | null> {
+    const data = await this.redis.get(`session:${sessionId}`);
+    if (!data) return null;
+    return JSON.parse(data) as Session;
+  }
+
+  async set(sessionId: string, session: Session, ttlSeconds = 86400): Promise<void> {
+    await this.redis.setex(`session:${sessionId}`, ttlSeconds, JSON.stringify(session));
+  }
+}
+
+// CORRECT - File uploads to S3
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+
+class StorageService {
+  constructor(private s3: S3Client, private bucket: string) {}
+
+  async upload(key: string, body: Buffer): Promise<string> {
+    await this.s3.send(new PutObjectCommand({
+      Bucket: this.bucket,
+      Key: key,
+      Body: body,
+    }));
+    return `s3://${this.bucket}/${key}`;
+  }
+}
+```
+
+#### FORBIDDEN Patterns (Will Fail Code Review)
+
+```typescript
+// FORBIDDEN - Local file storage for user data
+import fs from 'fs';
+
+async function uploadFile(filename: string, data: Buffer): Promise<void> {
+  await fs.promises.writeFile(`/uploads/${filename}`, data);  // FAIL - Lost on restart!
+}
+
+// FORBIDDEN - In-memory session (lost on restart)
+const sessions = new Map<string, Session>();        // FAIL - Global state!
+
+function getSession(id: string): Session | undefined {
+  return sessions.get(id);                          // FAIL - Gone when process restarts!
+}
+
+// FORBIDDEN - Local cache that can't be shared
+const cache = new Map<string, unknown>();           // FAIL - Not shared across replicas!
+```
+
+#### Verification Command
+
+```bash
+# Check for local file storage (should return empty for user data)
+grep -rE "fs\.writeFile|fs\.createWriteStream|writeFileSync" \
+  --include="*.ts" --include="*.js" | grep -v test | grep -v node_modules | grep -v ".log"
+```
+
+---
+
+### IX. Disposability - Graceful Shutdown (CRITICAL)
+
+**All services MUST handle SIGTERM gracefully.** This is required for Kubernetes rolling deployments.
+
+#### REQUIRED Pattern
+
+```typescript
+import http from 'http';
+
+const server = http.createServer(app);
+
+server.listen(config.PORT, () => {
+  console.log(`Server listening on port ${config.PORT}`);
+});
+
+// REQUIRED - Graceful shutdown handler
+const shutdown = async (signal: string) => {
+  console.log(`${signal} received, shutting down gracefully...`);
+
+  // Stop accepting new connections
+  server.close(async () => {
+    console.log('HTTP server closed');
+
+    try {
+      // REQUIRED - Close database connections
+      await prisma.$disconnect();
+      console.log('Database disconnected');
+
+      // REQUIRED - Close Redis connections
+      await redis.quit();
+      console.log('Redis disconnected');
+
+      console.log('Cleanup complete, exiting');
+      process.exit(0);
+    } catch (error) {
+      console.error('Error during cleanup:', error);
+      process.exit(1);
+    }
+  });
+
+  // REQUIRED - Force exit after timeout
+  setTimeout(() => {
+    console.error('Forced shutdown after 30s timeout');
+    process.exit(1);
+  }, 30000);
+};
+
+// REQUIRED - Register signal handlers
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+```
+
+#### NestJS Pattern
+
+```typescript
+// main.ts
+import { NestFactory } from '@nestjs/core';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  // REQUIRED - Enable graceful shutdown hooks
+  app.enableShutdownHooks();
+
+  await app.listen(config.PORT);
+}
+
+// In a service - implement OnModuleDestroy
+@Injectable()
+class DatabaseService implements OnModuleDestroy {
+  async onModuleDestroy() {
+    await this.connection.close();
+    console.log('Database connection closed');
+  }
+}
+```
+
+#### Verification Command
+
+```bash
+# Check for SIGTERM handling (should find process.on)
+grep -rE "process\.on\(['\"]SIGTERM" --include="*.ts" --include="*.js" | grep -v node_modules
+```
+
+---
+
+### XI. Logs - Stdout Only (MANDATORY)
+
+**All logs MUST go to stdout.** Log aggregation is handled by the infrastructure.
+
+#### CORRECT Pattern (Using @lerianstudio/lib-commons-js)
+
+```typescript
+import { ConsoleLogger } from '@lerianstudio/lib-commons-js';
+
+// CORRECT - Structured logging to stdout
+const logger = new ConsoleLogger();
+
+// CORRECT - Structured logging with context using withFields
+const requestLogger = logger.withFields({
+  method: req.method,
+  path: req.path,
+  traceId: req.headers['x-trace-id'],
+});
+requestLogger.info('Request received');
+
+// CORRECT - Error logging with context
+const errorLogger = logger.withFields({
+  traceId,
+  userId,
+  error: err.message,
+  stack: err.stack,
+});
+errorLogger.error('Failed to process request');
+
+// CORRECT - Using withDefaultMessageTemplate for consistent prefixes
+const serviceLogger = logger.withDefaultMessageTemplate('[UserService]');
+serviceLogger.info('Starting user lookup');
+
+// CORRECT - Printf-style logging
+logger.infof('User %s logged in from IP %s', userId, clientIp);
+```
+
+#### FORBIDDEN Patterns (Will Fail Code Review)
+
+```typescript
+// FORBIDDEN - File logging
+import fs from 'fs';
+const logStream = fs.createWriteStream('/var/log/app.log', { flags: 'a' });
+
+// FORBIDDEN - Winston file transport
+import winston from 'winston';
+const logger = winston.createLogger({
+  transports: [
+    new winston.transports.File({ filename: 'error.log' })  // FAIL!
+  ]
+});
+
+// FORBIDDEN - Console.log for production logs
+console.log(`User ${userId} logged in`);  // FAIL - Unstructured, not JSON
+```
+
+#### Verification Command
+
+```bash
+# Check for file logging (should return empty)
+grep -rE "createWriteStream.*\.log|transports\.File|writeFile.*\.log" \
+  --include="*.ts" --include="*.js" | grep -v test | grep -v node_modules
+```
+
+---
+
+### 12-Factor Compliance Checklist (TypeScript Developers)
+
+Before submitting code for review, verify:
+
+**Config (III) - CRITICAL:**
+- [ ] All config loaded via process.env with Zod validation
+- [ ] No hardcoded hostnames (localhost, IP addresses)
+- [ ] No hardcoded credentials or API keys
+- [ ] Config validation fails fast at startup
+
+**Stateless (VI) - CRITICAL:**
+- [ ] No local file storage for user data
+- [ ] Sessions stored in Redis/database
+- [ ] File uploads go to S3/GCS
+- [ ] No in-memory Maps for user data
+
+**Disposability (IX) - CRITICAL:**
+- [ ] SIGTERM signal handler implemented
+- [ ] Graceful server shutdown
+- [ ] Database connections closed on shutdown
+- [ ] Force exit timeout as safety net
+
+**Logs (XI):**
+- [ ] All logs written to stdout
+- [ ] Using @lerianstudio/lib-commons-js ConsoleLogger
+- [ ] Structured format with withFields for context
+- [ ] No file-based logging
