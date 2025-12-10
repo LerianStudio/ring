@@ -25,6 +25,11 @@ output_schema:
     - name: "Next Steps"
       pattern: "^## Next Steps"
       required: true
+    - name: "Standards Compliance"
+      pattern: "^## Standards Compliance"
+      required: false
+      required_when: "invoked_from_dev_refactor"
+      description: "Comparison of codebase against Lerian/Ring standards. MANDATORY when invoked from dev-refactor skill. Optional otherwise."
     - name: "Blockers"
       pattern: "^## Blockers"
       required: false
@@ -343,6 +348,55 @@ If infrastructure is ALREADY compliant with all standards:
 - Image versions pinned (no :latest)
 
 **If compliant → say "no changes needed" and move on.**
+
+## Standards Compliance Report (MANDATORY when invoked from dev-refactor)
+
+When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the infrastructure against Lerian/Ring DevOps Standards.
+
+### Comparison Categories for DevOps
+
+| Category | Ring Standard | Expected Pattern |
+|----------|--------------|------------------|
+| **Dockerfile** | Multi-stage, non-root | Alpine/distroless, USER directive |
+| **Image Tags** | Pinned versions | No `:latest`, use SHA or semver |
+| **Health Checks** | Container health probes | HEALTHCHECK in Dockerfile |
+| **Secrets** | External secrets manager | No hardcoded secrets |
+| **CI/CD** | GitHub Actions with caching | Pinned action versions |
+| **Resource Limits** | K8s resource constraints | requests/limits defined |
+| **Logging** | Structured JSON output | stdout/stderr JSON format |
+
+### Output Format
+
+**If ALL categories are compliant:**
+```markdown
+## Standards Compliance
+
+✅ **Fully Compliant** - Infrastructure follows all Lerian/Ring DevOps Standards.
+
+No migration actions required.
+```
+
+**If ANY category is non-compliant:**
+```markdown
+## Standards Compliance
+
+### Lerian/Ring Standards Comparison
+
+| Category | Current Pattern | Expected Pattern | Status | File/Location |
+|----------|----------------|------------------|--------|---------------|
+| Dockerfile | Runs as root | Non-root USER | ⚠️ Non-Compliant | `Dockerfile` |
+| Image Tags | Uses `:latest` | Pinned version | ⚠️ Non-Compliant | `docker-compose.yml` |
+| ... | ... | ... | ✅ Compliant | - |
+
+### Required Changes for Compliance
+
+1. **[Category] Fix**
+   - Replace: `[current pattern]`
+   - With: `[Ring standard pattern]`
+   - Files affected: [list]
+```
+
+**IMPORTANT:** Do NOT skip this section. If invoked from dev-refactor, Standards Compliance is MANDATORY in your output.
 
 ## Blocker Criteria - STOP and Report
 

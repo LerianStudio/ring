@@ -28,6 +28,11 @@ output_schema:
     - name: "Next Steps"
       pattern: "^## Next Steps"
       required: true
+    - name: "Standards Compliance"
+      pattern: "^## Standards Compliance"
+      required: false
+      required_when: "invoked_from_dev_refactor"
+      description: "Comparison of codebase against Lerian/Ring standards. MANDATORY when invoked from dev-refactor skill. Optional otherwise."
 ---
 
 # Frontend Engineer
@@ -637,6 +642,54 @@ When ambiguity exists, present options with trade-offs:
 | 3 | Implement UI Components - loading, error, empty states |
 | 4 | Test Integration - mock BFF responses, test all scenarios |
 | 5 | Report Issues - notify BFF engineer of gaps or mismatches |
+
+## Standards Compliance Report (MANDATORY when invoked from dev-refactor)
+
+When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the frontend implementation against Lerian/Ring Frontend Standards.
+
+### Comparison Categories for Frontend
+
+| Category | Ring Standard | Expected Pattern |
+|----------|--------------|------------------|
+| **Accessibility** | WCAG 2.1 AA | Semantic HTML, ARIA, keyboard nav |
+| **TypeScript** | Strict mode | No `any`, branded types |
+| **Performance** | Core Web Vitals | LCP ≤2.5s, FID ≤100ms, CLS ≤0.1 |
+| **State Management** | Server state vs client | TanStack Query for server, Zustand for client |
+| **Testing** | Component + integration | RTL, MSW for API mocks |
+| **Error Handling** | Error boundaries | Feature-level + app-level |
+
+### Output Format
+
+**If ALL categories are compliant:**
+```markdown
+## Standards Compliance
+
+✅ **Fully Compliant** - Frontend follows all Lerian/Ring Frontend Standards.
+
+No migration actions required.
+```
+
+**If ANY category is non-compliant:**
+```markdown
+## Standards Compliance
+
+### Lerian/Ring Standards Comparison
+
+| Category | Current Pattern | Expected Pattern | Status | File/Location |
+|----------|----------------|------------------|--------|---------------|
+| Accessibility | Missing keyboard nav | Full keyboard support | ⚠️ Non-Compliant | `components/Modal.tsx` |
+| TypeScript | Uses `any` in props | Proper typed props | ⚠️ Non-Compliant | `components/**/*.tsx` |
+| ... | ... | ... | ✅ Compliant | - |
+
+### Required Changes for Compliance
+
+1. **[Category] Migration**
+   - Replace: `[current code pattern]`
+   - With: `[Ring standard pattern]`
+   - Files affected: [list]
+```
+
+**IMPORTANT:** Do NOT skip this section. If invoked from dev-refactor, Standards Compliance is MANDATORY in your output.
 
 ## What This Agent Does NOT Handle
 

@@ -1094,6 +1094,41 @@ Task 1:
     **Why This Matters:** [Business impact]
     ```
 
+    ## Standards Compliance (MANDATORY)
+
+    You MUST include a "## Standards Compliance" section at the end of your output.
+    This section compares the codebase against Lerian/Ring standards.
+
+    **If ALL categories are compliant:**
+    ```
+    ## Standards Compliance
+
+    ✅ **Fully Compliant** - Codebase follows all Lerian/Ring Go Standards.
+    No migration actions required.
+    ```
+
+    **If ANY category is non-compliant:**
+    ```
+    ## Standards Compliance
+
+    ### Lerian/Ring Standards Comparison
+
+    | Category | Current Pattern | Expected Pattern | Status | File/Location |
+    |----------|----------------|------------------|--------|---------------|
+    | Logging | Uses `log/slog` | `libCommons/zap` | ⚠️ Non-Compliant | internal/service/*.go |
+    | Telemetry | Manual setup | `libCommons/opentelemetry` | ⚠️ Non-Compliant | cmd/api/main.go |
+    | Config | os.Getenv direct | `libCommons.SetConfigFromEnvVars()` | ⚠️ Non-Compliant | config/config.go |
+    | ... | ... | ... | ✅ Compliant | - |
+
+    ### Required Changes for Compliance
+
+    1. **[Category] Migration**
+       - Replace: `[current code pattern]`
+       - With: `[lib-commons pattern]`
+       - Import: `[required import]`
+       - Files affected: [list]
+    ```
+
 Task 2:
   subagent_type: "ring-dev-team:qa-analyst"
   description: "Compare test coverage with Ring standards"
@@ -1129,6 +1164,11 @@ Task 2:
     - Current code snippet
     - Expected code snippet from standards
     - Specific file:line to change
+
+    ## Standards Compliance (MANDATORY)
+
+    Include a "## Standards Compliance" section comparing QA patterns against Ring standards.
+    Use the format from your agent definition (qa-analyst.md → Standards Compliance Report section).
 
 Task 3:
   subagent_type: "ring-dev-team:devops-engineer"
@@ -1170,6 +1210,11 @@ Task 3:
 
     Same as Task 1 - show current vs expected with exact fixes.
 
+    ## Standards Compliance (MANDATORY)
+
+    Include a "## Standards Compliance" section comparing DevOps setup against Ring standards.
+    Use the format from your agent definition (devops-engineer.md → Standards Compliance Report section).
+
 Task 4:
   subagent_type: "ring-dev-team:sre"
   description: "Compare observability with Ring standards"
@@ -1209,6 +1254,12 @@ Task 4:
     ## OUTPUT FORMAT
 
     Same as Task 1 - show current vs expected with exact fixes.
+
+    ## Standards Compliance (MANDATORY)
+
+    Include a "## Standards Compliance" section comparing observability against Ring standards.
+    Use the format from your agent definition (sre.md → Standards Compliance Report section).
+    Focus on: Health Endpoints, Logging, Tracing.
 ```
 
 ---
@@ -1253,6 +1304,12 @@ Task 1:
     ## OUTPUT FORMAT
 
     Same as Go - show current vs expected with exact fixes.
+
+    ## Standards Compliance (MANDATORY)
+
+    Include a "## Standards Compliance" section comparing TypeScript patterns against Ring standards.
+    Use the format from your agent definition (backend-engineer-typescript.md → Standards Compliance Report section).
+    Reference @lerian/lib-commons-js packages for applicable categories.
 ```
 
 ---
@@ -1290,6 +1347,11 @@ Task 5:
     ## OUTPUT FORMAT
 
     Same format - current vs expected with exact fixes.
+
+    ## Standards Compliance (MANDATORY)
+
+    Include a "## Standards Compliance" section comparing frontend patterns against Ring standards.
+    Use the format from your agent definition (frontend-bff-engineer-typescript.md → Standards Compliance Report section).
 ```
 
 ### Key Rules - MANDATORY

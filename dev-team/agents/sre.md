@@ -26,6 +26,11 @@ output_schema:
     - name: "Next Steps"
       pattern: "^## Next Steps"
       required: true
+    - name: "Standards Compliance"
+      pattern: "^## Standards Compliance"
+      required: false
+      required_when: "invoked_from_dev_refactor"
+      description: "Comparison of codebase against Lerian/Ring standards. MANDATORY when invoked from dev-refactor skill. Optional otherwise."
     - name: "Blockers"
       pattern: "^## Blockers"
       required: false
@@ -217,6 +222,51 @@ None. This agent cannot proceed until `docs/PROJECT_RULES.md` is created by the 
 ```
 
 **You CANNOT extend observability that matches non-compliant patterns. This is non-negotiable.**
+
+## Standards Compliance Report (MANDATORY when invoked from dev-refactor)
+
+When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the observability implementation against Lerian/Ring SRE Standards.
+
+### Comparison Categories for SRE/Observability
+
+| Category | Ring Standard | Expected Pattern |
+|----------|--------------|------------------|
+| **Health Endpoints** | `/health`, `/ready` endpoints | Return JSON with service status |
+| **Logging** | Structured JSON | trace_id, request_id correlation |
+| **Tracing** | OpenTelemetry | Distributed tracing with span context |
+
+### Output Format
+
+**If ALL categories are compliant:**
+```markdown
+## Standards Compliance
+
+✅ **Fully Compliant** - Observability follows all Lerian/Ring SRE Standards.
+
+No migration actions required.
+```
+
+**If ANY category is non-compliant:**
+```markdown
+## Standards Compliance
+
+### Lerian/Ring Standards Comparison
+
+| Category | Current Pattern | Expected Pattern | Status | File/Location |
+|----------|----------------|------------------|--------|---------------|
+| Health Endpoints | Missing `/ready` | Both `/health` and `/ready` | ⚠️ Non-Compliant | `cmd/api/main.go` |
+| Logging | Plain text logs | Structured JSON with trace_id | ⚠️ Non-Compliant | `internal/**/*.go` |
+| Tracing | No tracing | OpenTelemetry spans | ⚠️ Non-Compliant | `internal/service/*.go` |
+
+### Required Changes for Compliance
+
+1. **[Category] Fix**
+   - Replace: `[current pattern]`
+   - With: `[Ring standard pattern]`
+   - Files affected: [list]
+```
+
+**IMPORTANT:** Do NOT skip this section. If invoked from dev-refactor, Standards Compliance is MANDATORY in your output.
 
 ### Step 2: Ask Only When Standards Don't Answer
 

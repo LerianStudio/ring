@@ -33,6 +33,11 @@ output_schema:
     - name: "Next Steps"
       pattern: "^## Next Steps"
       required: true
+    - name: "Standards Compliance"
+      pattern: "^## Standards Compliance"
+      required: false
+      required_when: "invoked_from_dev_refactor"
+      description: "Comparison of codebase against Lerian/Ring standards. MANDATORY when invoked from dev-refactor skill. Optional otherwise."
     - name: "Blockers"
       pattern: "^## Blockers"
       required: false
@@ -1297,6 +1302,23 @@ Before submitting design implementations:
 
 - Handoff to `ring-dev-team:frontend-bff-engineer-typescript` for implementation
 - Create Figma prototype for stakeholder review
+
+## Standards Compliance
+
+### Lerian/Ring Standards Comparison
+
+| Category | Current Pattern | Expected Pattern | Status | File/Location |
+|----------|----------------|------------------|--------|---------------|
+| Design Tokens | Custom CSS variables | Ring Design System tokens | ✅ Compliant | - |
+| Accessibility | Missing focus states | WCAG 2.1 AA compliant | ⚠️ Non-Compliant | Component specs |
+| Responsive | Desktop only | Mobile-first responsive | ⚠️ Non-Compliant | Layout specs |
+
+### Required Changes for Compliance
+
+1. **Accessibility Migration**
+   - Add: Focus states for all interactive elements
+   - Add: ARIA labels for non-semantic elements
+   - Reference: Ring Frontend Standards → Accessibility section
 ```
 
 ## What This Agent Does NOT Handle

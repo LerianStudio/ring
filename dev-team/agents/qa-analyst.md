@@ -40,6 +40,11 @@ output_schema:
     - name: "Next Steps"
       pattern: "^## Next Steps"
       required: true
+    - name: "Standards Compliance"
+      pattern: "^## Standards Compliance"
+      required: false
+      required_when: "invoked_from_dev_refactor"
+      description: "Comparison of codebase against Lerian/Ring standards. MANDATORY when invoked from dev-refactor skill. Optional otherwise."
     - name: "Blockers"
       pattern: "^## Blockers"
       required: false
@@ -262,6 +267,53 @@ None. This agent cannot proceed until `docs/PROJECT_RULES.md` is created by the 
 ```
 
 **You CANNOT extend tests that match non-compliant patterns. This is non-negotiable.**
+
+## Standards Compliance Report (MANDATORY when invoked from dev-refactor)
+
+When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the test implementation against Lerian/Ring QA Standards.
+
+### Comparison Categories for QA/Testing
+
+| Category | Ring Standard | Expected Pattern |
+|----------|--------------|------------------|
+| **Test Isolation** | Independent tests | No shared state, no execution order dependency |
+| **Coverage** | ≥80% threshold | Critical paths covered |
+| **Naming** | Descriptive names | `describe/it` or `Test{Unit}_{Scenario}` |
+| **TDD** | RED-GREEN-REFACTOR | Test fails first, then passes |
+| **Mocking** | Minimal mocking | Test behavior, not mocks |
+
+### Output Format
+
+**If ALL categories are compliant:**
+```markdown
+## Standards Compliance
+
+✅ **Fully Compliant** - Testing follows all Lerian/Ring QA Standards.
+
+No migration actions required.
+```
+
+**If ANY category is non-compliant:**
+```markdown
+## Standards Compliance
+
+### Lerian/Ring Standards Comparison
+
+| Category | Current Pattern | Expected Pattern | Status | File/Location |
+|----------|----------------|------------------|--------|---------------|
+| Test Isolation | Shared database state | Independent test fixtures | ⚠️ Non-Compliant | `tests/**/*.test.ts` |
+| Coverage | 65% | ≥80% | ⚠️ Non-Compliant | Project-wide |
+| ... | ... | ... | ✅ Compliant | - |
+
+### Required Changes for Compliance
+
+1. **[Category] Fix**
+   - Replace: `[current pattern]`
+   - With: `[Ring standard pattern]`
+   - Files affected: [list]
+```
+
+**IMPORTANT:** Do NOT skip this section. If invoked from dev-refactor, Standards Compliance is MANDATORY in your output.
 
 ### Step 2: Ask Only When Standards Don't Answer
 

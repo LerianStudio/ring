@@ -27,6 +27,11 @@ output_schema:
     - name: "Next Steps"
       pattern: "^## Next Steps"
       required: true
+    - name: "Standards Compliance"
+      pattern: "^## Standards Compliance"
+      required: false
+      required_when: "invoked_from_dev_refactor"
+      description: "Comparison of codebase against Lerian/Ring standards. MANDATORY when invoked from dev-refactor skill. Optional otherwise."
     - name: "Blockers"
       pattern: "^## Blockers"
       required: false
@@ -474,6 +479,57 @@ If code is ALREADY compliant with all standards:
 - Proper async/await patterns
 
 **If compliant → say "no changes needed" and move on.**
+
+## Standards Compliance Report (MANDATORY when invoked from dev-refactor)
+
+When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the codebase against Lerian/Ring TypeScript Standards.
+
+### Comparison Categories for TypeScript
+
+| Category | Ring Standard | lib-commons-js Package |
+|----------|--------------|------------------------|
+| **Logging** | Structured JSON logging | `@lerian/lib-commons-js/log` |
+| **Error Handling** | Standardized error types | `@lerian/lib-commons-js/errors` |
+| **HTTP Client** | Instrumented HTTP client | `@lerian/lib-commons-js/http` |
+| **Graceful Shutdown** | Clean shutdown handling | `@lerian/lib-commons-js/shutdown` |
+| **Caching** | Standardized cache patterns | `@lerian/lib-commons-js/cache` |
+| **Transactions** | Transaction validation | `@lerian/lib-commons-js/transactions` |
+| **Type Safety** | No `any` types | Use `unknown` with type guards |
+| **Validation** | Runtime type checking | Zod schemas at boundaries |
+
+### Output Format
+
+**If ALL categories are compliant:**
+```markdown
+## Standards Compliance
+
+✅ **Fully Compliant** - Codebase follows all Lerian/Ring TypeScript Standards.
+
+No migration actions required.
+```
+
+**If ANY category is non-compliant:**
+```markdown
+## Standards Compliance
+
+### Lerian/Ring Standards Comparison
+
+| Category | Current Pattern | Expected Pattern | Status | File/Location |
+|----------|----------------|------------------|--------|---------------|
+| Logging | Uses `console.log` | `@lerian/lib-commons-js/log` | ⚠️ Non-Compliant | `src/services/*.ts` |
+| Error Handling | Custom error classes | `@lerian/lib-commons-js/errors` | ⚠️ Non-Compliant | `src/errors/*.ts` |
+| ... | ... | ... | ✅ Compliant | - |
+
+### Required Changes for Compliance
+
+1. **[Category] Migration**
+   - Replace: `[current code pattern]`
+   - With: `[lib-commons-js pattern]`
+   - Import: `import { ... } from '@lerian/lib-commons-js/[module]'`
+   - Files affected: [list]
+```
+
+**IMPORTANT:** Do NOT skip this section. If invoked from dev-refactor, Standards Compliance is MANDATORY in your output.
 
 ## Blocker Criteria - STOP and Report
 
@@ -1010,6 +1066,29 @@ Coverage: 89.2%
 - Add password hashing integration
 - Implement email verification flow
 - Add rate limiting to registration endpoint
+
+## Standards Compliance
+
+### Lerian/Ring Standards Comparison
+
+| Category | Current Pattern | Expected Pattern | Status | File/Location |
+|----------|----------------|------------------|--------|---------------|
+| Logging | Uses `console.log` | `@lerian/lib-commons-js/log` | ⚠️ Non-Compliant | `src/services/*.ts` |
+| Error Handling | Custom Result type | `@lerian/lib-commons-js/errors` | ⚠️ Non-Compliant | `src/domain/errors.ts` |
+| Type Safety | Uses `unknown` with guards | Ring TypeScript Standards | ✅ Compliant | - |
+| Validation | Zod schemas at boundaries | Ring TypeScript Standards | ✅ Compliant | - |
+
+### Required Changes for Compliance
+
+1. **Logging Migration**
+   - Replace: `console.log()` and custom logging
+   - With: `import { Logger } from '@lerian/lib-commons-js/log'`
+   - Files affected: `src/services/user-service.ts`, `src/infrastructure/repositories/*.ts`
+
+2. **Error Handling Migration**
+   - Replace: Custom Result type implementation
+   - With: `import { AppError } from '@lerian/lib-commons-js/errors'`
+   - Files affected: `src/domain/errors.ts`
 ```
 
 ## What This Agent Does NOT Handle

@@ -26,6 +26,11 @@ output_schema:
     - name: "Next Steps"
       pattern: "^## Next Steps"
       required: true
+    - name: "Standards Compliance"
+      pattern: "^## Standards Compliance"
+      required: false
+      required_when: "invoked_from_dev_refactor"
+      description: "Comparison of codebase against Lerian/Ring standards. MANDATORY when invoked from dev-refactor skill. Optional otherwise."
     - name: "Blockers"
       pattern: "^## Blockers"
       required: false
@@ -419,6 +424,58 @@ If code is ALREADY compliant with all standards:
 - Proper logging with structured fields
 
 **If compliant → say "no changes needed" and move on.**
+
+## Standards Compliance Report (MANDATORY when invoked from dev-refactor)
+
+When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the codebase against Lerian/Ring Go Standards.
+
+### Comparison Categories for Go
+
+| Category | Ring Standard | lib-commons Package |
+|----------|--------------|---------------------|
+| **Logging** | Structured JSON logging | `libCommons/zap` |
+| **Telemetry** | OpenTelemetry integration | `libCommons/opentelemetry` |
+| **Config** | Environment-based config | `libCommons.SetConfigFromEnvVars()` |
+| **HTTP Client** | Instrumented HTTP client | `libCommons/net/http` |
+| **Server Lifecycle** | Graceful shutdown | `libServer.NewServerManager()` |
+| **PostgreSQL** | Connection pooling, tracing | `libCommons/postgres` |
+| **MongoDB** | Connection pooling, tracing | `libCommons/mongo` |
+| **Redis** | Connection pooling, tracing | `libCommons/redis` |
+| **Entity Mapping** | ToEntity/FromEntity pattern | Domain layer |
+| **Error Handling** | Wrapped errors with context | `fmt.Errorf("%w", err)` |
+
+### Output Format
+
+**If ALL categories are compliant:**
+```markdown
+## Standards Compliance
+
+✅ **Fully Compliant** - Codebase follows all Lerian/Ring Go Standards.
+
+No migration actions required.
+```
+
+**If ANY category is non-compliant:**
+```markdown
+## Standards Compliance
+
+### Lerian/Ring Standards Comparison
+
+| Category | Current Pattern | Expected Pattern | Status | File/Location |
+|----------|----------------|------------------|--------|---------------|
+| Logging | [what codebase uses] | [lib-commons pattern] | ⚠️ Non-Compliant | [file path] |
+| ... | ... | ... | ✅ Compliant | - |
+
+### Required Changes for Compliance
+
+1. **[Category] Migration**
+   - Replace: `[current code pattern]`
+   - With: `[lib-commons pattern]`
+   - Import: `[required import]`
+   - Files affected: [list]
+```
+
+**IMPORTANT:** Do NOT skip this section. If invoked from dev-refactor, Standards Compliance is MANDATORY in your output.
 
 ## Blocker Criteria - STOP and Report
 
@@ -930,6 +987,34 @@ coverage: 87.3% of statements
 - Integrate with API handler layer
 - Add refresh token mechanism
 - Configure token expiration in environment
+
+## Standards Compliance
+
+### Lerian/Ring Standards Comparison
+
+| Category | Current Pattern | Expected Pattern | Status | File/Location |
+|----------|----------------|------------------|--------|---------------|
+| Logging | Uses `log/slog` with structured fields | `libCommons/zap` structured logging | ⚠️ Non-Compliant | `internal/service/*.go` |
+| Telemetry | Manual OpenTelemetry setup | `libCommons/opentelemetry.InitializeTelemetry()` | ⚠️ Non-Compliant | `cmd/api/main.go` |
+| Error Handling | `fmt.Errorf` with wrapping | `fmt.Errorf` with wrapping | ✅ Compliant | - |
+| Config | Environment variables direct | `libCommons.SetConfigFromEnvVars(cfg)` | ⚠️ Non-Compliant | `config/config.go` |
+| Server Lifecycle | Manual HTTP server setup | `libServer.NewServerManager().StartWithGracefulShutdown()` | ⚠️ Non-Compliant | `cmd/api/main.go` |
+
+### Required Changes for Compliance
+
+1. **Logging Migration**
+   - Replace: `slog.Info("message", "key", value)`
+   - With: `libZap.Logger.Info("message", zap.String("key", value))`
+   - Import: `libZap "github.com/LerianStudio/lib-commons/commons/zap"`
+
+2. **Telemetry Migration**
+   - Replace: Manual OTEL initialization
+   - With: `libOpentelemetry.InitializeTelemetry(ctx, cfg)`
+   - Import: `libOpentelemetry "github.com/LerianStudio/lib-commons/commons/opentelemetry"`
+
+3. **Config Migration**
+   - Replace: Direct `os.Getenv` calls
+   - With: `libCommons.SetConfigFromEnvVars(&cfg)`
 ```
 
 ## What This Agent Does NOT Handle
