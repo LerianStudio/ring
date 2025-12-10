@@ -48,7 +48,8 @@ Generic agents like Explore do NOT have this capability.
 ╔═══════════════════════════════════════════════════════════════════════════════════════════╗
 ║  ⛔⛔⛔ CRITICAL: READ BEFORE DOING ANYTHING ⛔⛔⛔                                        ║
 ║                                                                                           ║
-║  THIS SKILL HAS 2 HARD GATES. VIOLATION = SKILL FAILURE.                                  ║
+║  THIS SKILL HAS 3 HARD GATES. VIOLATION = SKILL FAILURE.                                  ║
+║  ALL STEPS ARE MANDATORY. NO STEP CAN BE SKIPPED.                                         ║
 ║                                                                                           ║
 ║  ┌─────────────────────────────────────────────────────────────────────────────────────┐  ║
 ║  │  HARD GATE 0: PROJECT_RULES.md MUST exist                                           │  ║
@@ -56,33 +57,62 @@ Generic agents like Explore do NOT have this capability.
 ║  └─────────────────────────────────────────────────────────────────────────────────────┘  ║
 ║                                                                                           ║
 ║  ┌─────────────────────────────────────────────────────────────────────────────────────┐  ║
-║  │  HARD GATE 1: ONLY ring-dev-team:* agents allowed                                   │  ║
+║  │  HARD GATE 2: codebase-report.md MUST be generated (Step 2.5)                       │  ║
+║  │               └── Dispatch ring-default:codebase-explorer BEFORE specialists        │  ║
+║  │               └── Save output to docs/refactor/{timestamp}/codebase-report.md       │  ║
+║  │               └── WITHOUT THIS → ALL SPECIALIST OUTPUT IS INVALID                   │  ║
+║  └─────────────────────────────────────────────────────────────────────────────────────┘  ║
+║                                                                                           ║
+║  ┌─────────────────────────────────────────────────────────────────────────────────────┐  ║
+║  │  HARD GATE 1: ONLY ring-dev-team:* agents allowed (Step 3)                          │  ║
 ║  │               └── BEFORE typing Task tool → CHECK subagent_type                     │  ║
 ║  │               └── Does it start with "ring-dev-team:" ? → REQUIRED                  │  ║
+║  │               └── ✅ EXCEPTION: ring-default:codebase-explorer (GATE 2 only)        │  ║
 ║  │                                                                                     │  ║
 ║  │  ❌ FORBIDDEN (DO NOT USE):                                                         │  ║
 ║  │     • Explore                    → SKILL FAILURE                                    │  ║
 ║  │     • general-purpose            → SKILL FAILURE                                    │  ║
 ║  │     • Plan                       → SKILL FAILURE                                    │  ║
-║  │     • ring-default:*             → SKILL FAILURE                                    │  ║
-║  │     • ANY agent without ring-dev-team: prefix → SKILL FAILURE                       │  ║
+║  │     • ANY agent without ring-dev-team: prefix (except codebase-explorer)            │  ║
 ║  │                                                                                     │  ║
 ║  │  ✅ REQUIRED (USE THESE):                                                           │  ║
+║  │     • ring-default:codebase-explorer (GATE 2 - generates report)                    │  ║
 ║  │     • ring-dev-team:backend-engineer-golang                                         │  ║
 ║  │     • ring-dev-team:backend-engineer-typescript                                     │  ║
 ║  │     • ring-dev-team:qa-analyst                                                      │  ║
 ║  │     • ring-dev-team:devops-engineer                                                 │  ║
 ║  │     • ring-dev-team:sre                                                             │  ║
-║  │     • (any agent with ring-dev-team: prefix)                                        │  ║
 ║  └─────────────────────────────────────────────────────────────────────────────────────┘  ║
 ║                                                                                           ║
-║  NO workaround. NO alternative. NO exception.                                             ║
+║  NO workaround. NO alternative. NO exception. NO "quick mode". NO shortcuts.              ║
+║  EVERY execution follows the SAME steps. "Simple project" is NOT an excuse.               ║
 ║  Ignoring them = SKILL FAILURE. There is NO way around them.                              ║
 ║                                                                                           ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════╝
 ```
 
 This skill analyzes an existing codebase to identify gaps between current implementation and project standards, then generates a structured refactoring plan compatible with the dev-cycle workflow.
+
+---
+
+## ⛔ UNIVERSAL ANTI-RATIONALIZATION TABLE
+
+**If you catch yourself thinking ANY of these at ANY step, STOP. You are about to cause SKILL FAILURE:**
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "This project is small/simple" | Size is IRRELEVANT. ALL projects follow ALL steps. | Execute ALL steps |
+| "I already explored this codebase" | Previous exploration ≠ current report. Each run is fresh. | Execute Step 2.5 |
+| "The user wants quick results" | Quick invalid results = useless. Valid results require ALL steps. | Execute ALL steps |
+| "This step seems redundant" | Steps are designed together. Skipping one breaks others. | Execute ALL steps |
+| "I can combine steps to save time" | Steps have dependencies. Combining = invalid order. | Execute in ORDER |
+| "The codebase hasn't changed" | You don't know that. Fresh report ensures accuracy. | Execute Step 2.5 |
+| "I'll do a partial analysis" | Partial = incomplete = SKILL FAILURE. | Complete analysis |
+| "Just this once I'll skip" | Once = always. No exceptions exist. | Execute ALL steps |
+| "The user didn't ask for all this" | User invoked the skill. Skill defines the process. | Execute ALL steps |
+| "Other skills don't require this" | THIS skill requires it. Follow THIS skill's rules. | Execute ALL steps |
+
+**NON-NEGOTIABLE:** Every invocation of dev-refactor MUST execute Steps 0 → 1 → 2 → 2.5 → 3 → 4 → 5 → 6 → 7 → 8 → 9 in that exact order.
 
 ---
 
@@ -166,13 +196,21 @@ After outputting the blocker above:
 - `Explore` - Generic agent, no Ring standards
 - `general-purpose` - Generic agent, no domain expertise
 - `Plan` - Planning agent, not for analysis
-- `ring-default:*` - Wrong plugin, for review not analysis
-- ANY agent without `ring-dev-team:` prefix
+- ANY agent without `ring-dev-team:` or `ring-default:codebase-explorer` prefix
+
+**✅ EXCEPTION: `ring-default:codebase-explorer` is ALLOWED**
+- This agent runs FIRST in Step 2.5 to generate `codebase-report.md`
+- It provides deep architectural understanding that specialists need
+- Without it, specialists analyze blindly (the problem you experienced)
 
 ### Validation Sequence
 
 ```text
-1. Check: Does subagent_type start with "ring-dev-team:" ?
+1. Check: Is subagent_type "ring-default:codebase-explorer"?
+   └── YES → ALLOWED (Step 2.5 only)
+   └── NO  → Continue to check 2
+
+2. Check: Does subagent_type start with "ring-dev-team:" ?
    └── YES → Continue with dispatch
    └── NO  → STOP IMMEDIATELY. DO NOT DISPATCH. (see below)
 ```
@@ -350,42 +388,79 @@ Select agents based on the analysis dimensions needed for the task. Dispatch ALL
 ### Execution Checklist - MUST COMPLETE IN ORDER
 
 ```text
+╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+║  ⛔ ALL STEPS ARE MANDATORY. NO STEP CAN BE SKIPPED. NO EXCEPTIONS.                        ║
+║                                                                                           ║
+║  Every execution of this skill MUST follow the EXACT same sequence.                       ║
+║  "Simple project" is NOT an excuse. "Small codebase" is NOT an excuse.                    ║
+║  "I already know the code" is NOT an excuse. FOLLOW THE STEPS.                            ║
+╚═══════════════════════════════════════════════════════════════════════════════════════════╝
+
 GATE 0:   [ ] PROJECT_RULES.md exists? → If NO, output blocker and TERMINATE
-           ⚠️ See "HARD GATE 0: PROJECT_RULES.md VALIDATION" at top of skill
+           ⛔ HARD GATE - See "HARD GATE 0" section
+           ❌ Cannot proceed without this file
 
 Step 1:   [ ] Language detected? → go.mod / package.json found
-
-GATE 1:   [ ] Agent dispatch validated? → BEFORE typing Task tool:
-           ⚠️ Does subagent_type start with "ring-dev-team:"? → REQUIRED
-           ❌ FORBIDDEN: Explore, general-purpose, Plan, ring-default:*
+           ⛔ MANDATORY - Determines which agents to dispatch
 
 Step 2:   [ ] PROJECT_RULES.md read?
+           ⛔ MANDATORY - Project-specific standards context
+
+GATE 2:   [ ] Codebase Explorer dispatched? → ring-default:codebase-explorer
+           ⛔ HARD GATE - See "HARD GATE 2" section
+           ⛔ This generates codebase-report.md (REQUIRED for Step 3)
+           ⛔ WITHOUT THIS, ALL SUBSEQUENT STEPS PRODUCE INVALID OUTPUT
+           ✅ EXCEPTION: This is the ONLY ring-default:* agent allowed
+
+Step 2.5b:[ ] codebase-report.md saved to docs/refactor/{timestamp}/?
+           ⛔ MANDATORY - File MUST exist before Step 3
+
+GATE 1:   [ ] Agent dispatch validated? → BEFORE typing Task tool:
+           ⛔ HARD GATE - See "HARD GATE 1" section
+           ⚠️ Does subagent_type start with "ring-dev-team:"? → REQUIRED
+           ✅ EXCEPTION: ring-default:codebase-explorer (GATE 2 only)
+           ❌ FORBIDDEN: Explore, general-purpose, Plan
 
 Step 3:   [ ] ALL applicable ring-dev-team:* agents dispatched in SINGLE message?
-           ⚠️ If wrong agent used → DISCARD output, re-dispatch correct agent
+           ⛔ MANDATORY - Agents receive codebase-report.md path
+           ⛔ MANDATORY - Agents compare codebase with Ring standards
            ❌ FORBIDDEN: Any agent without ring-dev-team: prefix
 
 Step 4:   [ ] Agent outputs compiled into analysis-report.md?
+           ⛔ MANDATORY - Merge all comparison tables
+
 Step 5:   [ ] Findings grouped into REFACTOR-XXX tasks?
-Step 6:   [ ] tasks.md generated? → If NO, skill is INCOMPLETE
+           ⛔ MANDATORY - Group by dependency order
+
+Step 6:   [ ] tasks.md generated?
+           ⛔ MANDATORY - Skill is INCOMPLETE without this
+           ❌ If NO → SKILL FAILURE
+
 Step 7:   [ ] User approval requested via AskUserQuestion?
+           ⛔ MANDATORY - User must approve before execution
+
 Step 8:   [ ] Artifacts saved to docs/refactor/{timestamp}/?
+           ⛔ MANDATORY - All artifacts must be persisted
+
 Step 9:   [ ] Handoff to dev-cycle (if approved)?
+           ⛔ MANDATORY (if user approved) - Execute via dev-cycle
 ```
 
-**SKIP PREVENTION:** You CANNOT proceed to Step N+1 without completing Step N. No exceptions.
+**⛔ SKIP PREVENTION:** You CANNOT proceed to Step N+1 without completing Step N. There are NO exceptions. There are NO shortcuts. There are NO "quick modes".
 
-**GATE 0 is NON-NEGOTIABLE:** If PROJECT_RULES.md doesn't exist, you MUST output the blocker template from the top of this skill and terminate. No rationalizations allowed.
+**⛔ GATE 0 (PROJECT_RULES.md):** If PROJECT_RULES.md doesn't exist, you MUST output the blocker template and TERMINATE. No rationalizations allowed.
 
-**GATE 1 is NON-NEGOTIABLE:** If subagent_type doesn't start with `ring-dev-team:`, STOP and use the correct agent. FORBIDDEN agents (Explore, general-purpose, Plan, ring-default:*) = SKILL FAILURE. No rationalizations allowed.
+**⛔ GATE 2 (CODEBASE REPORT):** If codebase-report.md doesn't exist, you CANNOT dispatch specialist agents. This is not optional. This is not "nice to have". Without the report, ALL specialist output is INVALID.
 
-#### Prompt Prefix (REQUIRED)
+**⛔ GATE 1 (AGENT PREFIX):** If subagent_type doesn't start with `ring-dev-team:`, STOP and use the correct agent. EXCEPTION: `ring-default:codebase-explorer` is allowed ONLY in GATE 2.
 
-All agent prompts MUST start with:
-```text
-**MODE: ANALYSIS ONLY** - Analyze codebase for refactoring.
-Return findings with: severity (Critical/High/Medium/Low), location (file:line), issue, recommendation.
-```
+#### Prompt Requirements for Step 3
+
+All specialist agent prompts MUST:
+1. Reference codebase-report.md path: `docs/refactor/{timestamp}/codebase-report.md`
+2. Instruct agent to load Ring standards via WebFetch
+3. Request comparison tables: Standard Pattern | Codebase Has | Status | Location | Fix
+4. Request code snippets: Current Code vs Expected Code
 
 #### WRONG vs RIGHT: Agent Dispatch
 
@@ -691,7 +766,226 @@ This file contains:
 
 **Output of this step:**
 - PROJECT_RULES.md content loaded and understood
-- Ready to dispatch agents with project context
+- Ready to dispatch codebase-explorer
+
+---
+
+## ⛔ HARD GATE 2: CODEBASE REPORT GENERATION (Step 2.5)
+
+```text
+╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+║  ⛔⛔⛔ HARD GATE 2: CODEBASE REPORT IS MANDATORY ⛔⛔⛔                                    ║
+║                                                                                           ║
+║  Step 2.5 MUST be executed for EVERY run of this skill.                                   ║
+║  There are NO exceptions. There are NO shortcuts.                                         ║
+║                                                                                           ║
+║  ┌─────────────────────────────────────────────────────────────────────────────────────┐  ║
+║  │  BEFORE Step 3 (specialist agents):                                                 │  ║
+║  │                                                                                     │  ║
+║  │  [ ] Did you dispatch ring-default:codebase-explorer?                               │  ║
+║  │  [ ] Did you receive the codebase-report.md output?                                 │  ║
+║  │  [ ] Did you save it to docs/refactor/{timestamp}/codebase-report.md?               │  ║
+║  │                                                                                     │  ║
+║  │  If ANY checkbox is NO → STOP. Execute Step 2.5 before proceeding.                  │  ║
+║  └─────────────────────────────────────────────────────────────────────────────────────┘  ║
+║                                                                                           ║
+║  Skipping Step 2.5 = SKILL FAILURE. Output will be INVALID.                               ║
+║                                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════════════════════╝
+```
+
+### Why This Is a HARD GATE (NOT Optional)
+
+**Without codebase-report.md, specialist agents CANNOT function correctly:**
+
+| With codebase-report.md | Without codebase-report.md |
+|-------------------------|---------------------------|
+| Agents compare ACTUAL code with standards | Agents guess what code might look like |
+| Output: "Replace os.Getenv at config.go:15" | Output: "Consider using better config" |
+| Specific file:line references | Generic recommendations |
+| Code snippets: current vs expected | No code context |
+| **VALID analysis** | **INVALID analysis** |
+
+**This is not about preference. Without the report, agents are TECHNICALLY INCAPABLE of producing valid output.**
+
+### Gate 2 Rationalizations - DO NOT THINK THESE
+
+**If you catch yourself thinking ANY of these, STOP IMMEDIATELY. You are about to violate HARD GATE 2:**
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "The codebase is small, I can analyze directly" | Small ≠ skip steps. ALL codebases need the report. | Execute Step 2.5 |
+| "I already know this codebase from context" | Knowledge ≠ documented report. Agents need the file. | Execute Step 2.5 |
+| "This will take too long" | Time is IRRELEVANT. Invalid output is worse than slow output. | Execute Step 2.5 |
+| "The user just wants quick feedback" | Quick invalid feedback = useless. Valid output requires report. | Execute Step 2.5 |
+| "I can read the files myself instead" | You are the ORCHESTRATOR. Explorer generates the REPORT. | Execute Step 2.5 |
+| "Step 2.5 is optional for simple projects" | There is NO such thing as optional. It's a HARD GATE. | Execute Step 2.5 |
+| "I'll skip it this once" | Once = SKILL FAILURE. No exceptions exist. | Execute Step 2.5 |
+| "The specialists can explore themselves" | Specialists COMPARE, they don't EXPLORE. Wrong responsibility. | Execute Step 2.5 |
+| "Codebase-explorer is slow, I'll use Explore" | Explore is FORBIDDEN. Only codebase-explorer is allowed. | Execute Step 2.5 |
+| "I can infer the architecture from file names" | Inference = guessing = INVALID. Report provides FACTS. | Execute Step 2.5 |
+| "PROJECT_RULES.md already describes the project" | PROJECT_RULES.md = standards. Report = actual implementation. Different things. | Execute Step 2.5 |
+| "Previous analysis is still valid" | Each run = fresh report. Codebase may have changed. | Execute Step 2.5 |
+
+### Violation Recovery (If You Already Skipped)
+
+**If you ALREADY proceeded to Step 3 without codebase-report.md:**
+
+1. **STOP IMMEDIATELY** - Do not continue with specialist agents
+2. **DISCARD any specialist outputs** - They are INVALID without the report
+3. **GO BACK to Step 2.5** - Execute codebase-explorer NOW
+4. **SAVE the report** - To docs/refactor/{timestamp}/codebase-report.md
+5. **THEN proceed to Step 3** - With the report path in prompts
+6. **DOCUMENT** - Note: "Recovered from skipped Step 2.5"
+
+**Output from specialists without codebase-report.md is INVALID and MUST NOT be used.**
+
+---
+
+## Step 2.5: Generate Codebase Report (MANDATORY - HARD GATE 2)
+
+**⛔ THIS IS A HARD GATE. Skipping = SKILL FAILURE.**
+
+**Why this step exists:**
+Without understanding the ACTUAL codebase structure, specialists analyze blindly and produce generic recommendations like "improve architecture" instead of actionable insights.
+
+**Responsibility Split:**
+| Component | Does | Does NOT |
+|-----------|------|----------|
+| **codebase-explorer** | Maps what EXISTS in the project | Compare with standards |
+| **Specialist agents** | Load Ring standards + Compare with report | Explore codebase |
+
+### Execution Template - COPY EXACTLY
+
+```
+Task:
+  subagent_type: "ring-default:codebase-explorer"
+  model: "opus"
+  description: "Generate codebase architecture report"
+  prompt: |
+    **EXPLORATION TYPE: THOROUGH (30-45 minutes)**
+
+    Generate a comprehensive codebase report describing WHAT EXISTS in this project.
+
+    **IMPORTANT:** You are NOT comparing with standards. You are DOCUMENTING what you find.
+    The specialist agents will receive your report and compare it with their standards.
+
+    ## SECTIONS TO INCLUDE
+
+    ### 1. Project Structure
+    - Directory layout (internal/, pkg/, cmd/, adapters/, domain/, etc.)
+    - Module organization pattern (feature-based vs layer-based)
+    - Entry points (main.go, index.ts, etc.)
+    - Test organization (co-located vs separate)
+
+    ### 2. Architecture Pattern
+    - What architecture is used? (hexagonal, clean, MVC, etc.)
+    - Layer boundaries identified
+    - Dependency direction observed
+
+    ### 3. Technology Stack
+    From go.mod / package.json / pyproject.toml:
+    - Language and version
+    - Main frameworks (Fiber, Express, FastAPI, etc.)
+    - Database libraries
+    - Observability libraries
+    - Testing libraries
+
+    ### 4. Code Patterns Found
+
+    Document HOW things are currently implemented:
+
+    #### Configuration
+    - Where is config loaded? (file:line)
+    - How? (env vars, config files, etc.)
+    - Show code snippet
+
+    #### Database Access
+    - Where are repositories? (directory)
+    - What pattern? (raw SQL, ORM, etc.)
+    - Do models transform to domain? (yes/no, example file)
+
+    #### HTTP Handlers
+    - Where are handlers? (directory)
+    - How is routing set up? (file:line)
+    - Middleware chain found
+
+    #### Error Handling
+    - Pattern observed (wrapped errors, custom types, etc.)
+    - Example locations
+
+    #### Telemetry/Observability
+    - Is there logging setup? (where)
+    - Is there tracing setup? (where)
+    - Is there metrics setup? (where)
+    - Health endpoints found? (paths)
+
+    #### Testing
+    - Test file pattern (xxx_test.go, xxx.spec.ts)
+    - Test patterns observed (table-driven, AAA, etc.)
+    - Mocking approach
+
+    ### 5. Key Files Inventory
+
+    | Category | File | Purpose | Lines |
+    |----------|------|---------|-------|
+    | Entry Point | cmd/app/main.go | Application start | 50 |
+    | Config | internal/bootstrap/config.go | Config loading | 150 |
+    | Router | internal/adapters/http/routes.go | Route definitions | 120 |
+    | Handler | internal/adapters/http/user_handler.go | User endpoints | 200 |
+    | Service | internal/services/user_service.go | Business logic | 180 |
+    | Repository | internal/adapters/postgres/user_repo.go | DB access | 150 |
+    | Domain | internal/domain/user.go | Entity definition | 60 |
+    | Test | internal/services/user_service_test.go | Unit tests | 250 |
+    | Dockerfile | Dockerfile | Container build | 35 |
+    | Docker Compose | docker-compose.yml | Local dev setup | 80 |
+
+    ### 6. Code Snippets (IMPORTANT)
+
+    For EACH major pattern, include a code snippet showing CURRENT implementation:
+
+    ```go
+    // Configuration loading (internal/bootstrap/config.go:15-25)
+    [actual code snippet here]
+    ```
+
+    ```go
+    // Handler pattern (internal/adapters/http/user_handler.go:30-50)
+    [actual code snippet here]
+    ```
+
+    ```go
+    // Repository pattern (internal/adapters/postgres/user_repo.go:20-45)
+    [actual code snippet here]
+    ```
+
+    ## OUTPUT FORMAT
+
+    Use standard codebase-explorer schema:
+    - EXPLORATION SUMMARY
+    - KEY FINDINGS (with file:line references)
+    - ARCHITECTURE INSIGHTS
+    - RELEVANT FILES (the inventory table)
+    - RECOMMENDATIONS (areas that look incomplete, NOT standards comparison)
+```
+
+### Save the Report
+
+After receiving the codebase-explorer output:
+
+```text
+Action: Use Write tool to save to docs/refactor/{timestamp}/codebase-report.md
+
+Content: Full output from codebase-explorer
+```
+
+**Output of this step:**
+- `codebase-report.md` saved with complete architecture map
+- Code snippets showing current implementations
+- Key files inventory for specialists to reference
+- Ready to dispatch specialists who will COMPARE with their standards
+
+---
 
 ## Step 3: Dispatch ring-dev-team Agents
 
@@ -724,112 +1018,278 @@ This file contains:
 
 ### Execution Template - COPY EXACTLY
 
+**⚠️ IMPORTANT: Each agent receives the codebase-report.md and compares with their Ring standards.**
+
+**The prompts below instruct agents to:**
+1. Read their Ring standards via WebFetch (they have the URL in their agent definition)
+2. Read the codebase-report.md generated in Step 2.5
+3. Compare what EXISTS (report) with what SHOULD exist (standards)
+4. Generate specific findings with CURRENT code vs EXPECTED code
+
+---
+
 **For Go projects, dispatch in ONE message:**
 
 ```
 Task 1:
   subagent_type: "ring-dev-team:backend-engineer-golang"
-  description: "Analyze Go architecture and code quality"
+  description: "Compare Go codebase with Ring standards"
   prompt: |
-    **MODE: ANALYSIS ONLY** - Analyze codebase for refactoring.
+    **MODE: ANALYSIS ONLY** - Compare codebase with Ring Go standards.
 
-    Standards source: docs/PROJECT_RULES.md (already read by orchestrator)
+    ## INPUT
+    1. **Ring Standards:** Load via WebFetch from your agent instructions (golang.md)
+    2. **Codebase Report:** Read docs/refactor/{timestamp}/codebase-report.md
+    3. **Project Rules:** docs/PROJECT_RULES.md
 
-    Analyze these dimensions:
-    - Architecture patterns compliance
-    - Code quality and naming conventions
-    - Error handling patterns
-    - Security practices
+    ## YOUR TASK
 
-    Return findings with: severity (Critical/High/Medium/Low), location (file:line), issue, recommendation.
+    Compare the CURRENT implementation (from codebase-report.md) with EXPECTED patterns (from Ring standards).
+
+    For EACH pattern in Ring standards, check if the codebase follows it:
+
+    ### lib-commons v2 Patterns
+    | Standard Pattern | Codebase Has | Status | Location | Fix |
+    |-----------------|--------------|--------|----------|-----|
+    | `SetConfigFromEnvVars(&cfg)` | os.Getenv() calls | ❌ | config.go:15 | Replace with... |
+    | `NewTrackingFromContext(ctx)` | No telemetry recovery | ❌ | handler.go:22 | Add call... |
+    | `ToEntity() / FromEntity()` | Raw struct returns | ❌ | user_repo.go:45 | Add methods... |
+    | `InitializeTelemetry()` | Missing | ❌ | bootstrap/ | Add in config.go |
+    | `StartWithGracefulShutdown()` | app.Listen() only | ⚠️ | main.go:30 | Use ServerManager |
+
+    ### Architecture Patterns
+    | Standard Pattern | Codebase Has | Status | Location | Fix |
+    |-----------------|--------------|--------|----------|-----|
+    | Domain has no external imports | imports "database/sql" | ❌ | domain/user.go:5 | Remove import |
+    | Interfaces in consumers | In implementers | ❌ | adapters/repo.go | Move to services/ |
+
+    ### Error Handling
+    | Standard Pattern | Codebase Has | Status | Location | Fix |
+    |-----------------|--------------|--------|----------|-----|
+    | `fmt.Errorf("context: %w", err)` | Raw error return | ❌ | service.go:42 | Wrap with context |
+    | No panic() in business logic | panic() found | ❌ | handler.go:88 | Return error |
+    | Error codes with prefix | No error codes | ❌ | - | Add pkg/constant/errors.go |
+
+    ## OUTPUT FORMAT
+
+    For EACH non-compliant pattern, provide:
+
+    ```markdown
+    ### ISSUE-001: [Pattern Name]
+
+    **Severity:** Critical | High | Medium | Low
+    **Location:** file.go:line
+    **Standard:** [Quote from Ring standards]
+
+    **Current Code:**
+    ```go
+    // What exists in codebase
+    ```
+
+    **Expected Code:**
+    ```go
+    // What Ring standards require
+    ```
+
+    **Why This Matters:** [Business impact]
+    ```
 
 Task 2:
   subagent_type: "ring-dev-team:qa-analyst"
-  description: "Analyze test coverage and quality"
+  description: "Compare test coverage with Ring standards"
   prompt: |
-    **MODE: ANALYSIS ONLY** - Analyze test coverage for refactoring.
+    **MODE: ANALYSIS ONLY** - Compare test patterns with Ring standards.
 
-    Standards source: docs/PROJECT_RULES.md
+    ## INPUT
+    1. **Ring Standards:** Load via WebFetch from your agent instructions
+    2. **Codebase Report:** Read docs/refactor/{timestamp}/codebase-report.md
+    3. **Project Rules:** docs/PROJECT_RULES.md
 
-    Analyze:
-    - Test coverage percentage
-    - Test patterns (table-driven, AAA structure)
-    - Missing critical path tests
-    - Test naming conventions
+    ## YOUR TASK
 
-    Return findings with: severity (Critical/High/Medium/Low), location (file:line), issue, recommendation.
+    Compare CURRENT test implementation with EXPECTED patterns:
+
+    ### Test Coverage
+    | Metric | Current | Required | Status |
+    |--------|---------|----------|--------|
+    | Total coverage | X% | 85% | ❌/✅ |
+    | Handler coverage | X% | 100% | ❌/✅ |
+    | Service coverage | X% | 100% | ❌/✅ |
+
+    ### Test Patterns
+    | Standard Pattern | Codebase Has | Status | Location | Fix |
+    |-----------------|--------------|--------|----------|-----|
+    | Table-driven tests | Single assertions | ❌ | user_test.go:20 | Convert to table |
+    | Test naming convention | Random names | ❌ | - | Use Test{Unit}_{Scenario}_{Expected} |
+    | Mocks for externals | Real DB calls | ❌ | repo_test.go | Add mock interface |
+
+    ## OUTPUT FORMAT
+
+    Same as Task 1 - for each non-compliant pattern:
+    - Current code snippet
+    - Expected code snippet from standards
+    - Specific file:line to change
 
 Task 3:
   subagent_type: "ring-dev-team:devops-engineer"
-  description: "Analyze DevOps configuration"
+  description: "Compare DevOps setup with Ring standards"
   prompt: |
-    **MODE: ANALYSIS ONLY** - Analyze DevOps setup for refactoring.
+    **MODE: ANALYSIS ONLY** - Compare DevOps config with Ring standards.
 
-    Standards source: docs/PROJECT_RULES.md
+    ## INPUT
+    1. **Ring Standards:** Load via WebFetch from your agent instructions (devops.md)
+    2. **Codebase Report:** Read docs/refactor/{timestamp}/codebase-report.md
+    3. **Project Rules:** docs/PROJECT_RULES.md
 
-    Analyze:
-    - Dockerfile (multi-stage, non-root, health check)
-    - docker-compose.yml completeness
-    - Environment configuration (.env.example)
-    - CI/CD pipeline
+    ## YOUR TASK
 
-    Return findings with: severity (Critical/High/Medium/Low), location (file:line), issue, recommendation.
+    Compare CURRENT DevOps setup with EXPECTED patterns:
+
+    ### Dockerfile
+    | Standard Pattern | Codebase Has | Status | Location | Fix |
+    |-----------------|--------------|--------|----------|-----|
+    | Multi-stage build | Single stage | ❌ | Dockerfile:1 | Add builder stage |
+    | Non-root user | Runs as root | ❌ | Dockerfile | Add USER 1000 |
+    | HEALTHCHECK | Missing | ❌ | Dockerfile | Add HEALTHCHECK CMD |
+    | Distroless/alpine base | Full debian | ⚠️ | Dockerfile:10 | Use distroless |
+
+    ### docker-compose.yml
+    | Standard Pattern | Codebase Has | Status | Location | Fix |
+    |-----------------|--------------|--------|----------|-----|
+    | All dependencies | Missing redis | ❌ | docker-compose.yml | Add redis service |
+    | Health checks | No healthcheck | ❌ | - | Add healthcheck per service |
+    | Custom network | Default bridge | ⚠️ | - | Add network definition |
+
+    ### Environment
+    | Standard Pattern | Codebase Has | Status | Location | Fix |
+    |-----------------|--------------|--------|----------|-----|
+    | .env.example | Missing | ❌ | - | Create file |
+    | .env in .gitignore | Not ignored | ❌ | .gitignore | Add .env |
+
+    ## OUTPUT FORMAT
+
+    Same as Task 1 - show current vs expected with exact fixes.
 
 Task 4:
   subagent_type: "ring-dev-team:sre"
-  description: "Analyze observability setup"
+  description: "Compare observability with Ring standards"
   prompt: |
-    **MODE: ANALYSIS ONLY** - Analyze observability for refactoring.
+    **MODE: ANALYSIS ONLY** - Compare observability setup with Ring standards.
 
-    Standards source: docs/PROJECT_RULES.md
+    ## INPUT
+    1. **Ring Standards:** Load via WebFetch from your agent instructions (sre.md)
+    2. **Codebase Report:** Read docs/refactor/{timestamp}/codebase-report.md
+    3. **Project Rules:** docs/PROJECT_RULES.md
 
-    Analyze:
-    - Logging (structured JSON, appropriate levels)
-    - Metrics (Prometheus/OpenTelemetry)
-    - Tracing configuration
-    - Health/readiness endpoints
+    ## YOUR TASK
 
-    Return findings with: severity (Critical/High/Medium/Low), location (file:line), issue, recommendation.
+    Compare CURRENT observability with EXPECTED patterns:
+
+    ### Health Endpoints
+    | Standard Pattern | Codebase Has | Status | Location | Fix |
+    |-----------------|--------------|--------|----------|-----|
+    | GET /health | Missing | ❌ | routes.go | Add libHTTP.Ping |
+    | GET /ready | Missing | ❌ | routes.go | Add readiness check |
+    | GET /version | Missing | ❌ | routes.go | Add libHTTP.Version |
+
+    ### Logging
+    | Standard Pattern | Codebase Has | Status | Location | Fix |
+    |-----------------|--------------|--------|----------|-----|
+    | JSON structured logs | Plain text | ❌ | logger.go | Use libZap.InitializeLogger() |
+    | Log from context | Direct logger | ❌ | handler.go:15 | Use NewTrackingFromContext |
+    | No sensitive data logged | Password logged | 🚨 | auth.go:42 | Remove from log |
+
+    ### Tracing
+    | Standard Pattern | Codebase Has | Status | Location | Fix |
+    |-----------------|--------------|--------|----------|-----|
+    | Span per operation | No spans | ❌ | - | Add tracer.Start() |
+    | Error recording | Not recorded | ❌ | - | Add HandleSpanError() |
+    | Context propagation | Breaks chain | ❌ | service.go:30 | Pass ctx |
+
+    ## OUTPUT FORMAT
+
+    Same as Task 1 - show current vs expected with exact fixes.
 ```
+
+---
 
 **For TypeScript projects, replace Task 1 with:**
 
 ```
 Task 1:
   subagent_type: "ring-dev-team:backend-engineer-typescript"
-  description: "Analyze TypeScript architecture and code quality"
+  description: "Compare TypeScript codebase with Ring standards"
   prompt: |
-    **MODE: ANALYSIS ONLY** - Analyze codebase for refactoring.
+    **MODE: ANALYSIS ONLY** - Compare codebase with Ring TypeScript standards.
 
-    Standards source: docs/PROJECT_RULES.md
+    ## INPUT
+    1. **Ring Standards:** Load via WebFetch from your agent instructions (typescript.md)
+    2. **Codebase Report:** Read docs/refactor/{timestamp}/codebase-report.md
+    3. **Project Rules:** docs/PROJECT_RULES.md
 
-    Analyze these dimensions:
-    - Architecture patterns compliance
-    - TypeScript strict mode compliance
-    - Type safety (no `any` usage)
-    - Error handling patterns
+    ## YOUR TASK
 
-    Return findings with: severity (Critical/High/Medium/Low), location (file:line), issue, recommendation.
+    Compare CURRENT implementation with EXPECTED patterns:
+
+    ### TypeScript Configuration
+    | Standard Pattern | Codebase Has | Status | Location | Fix |
+    |-----------------|--------------|--------|----------|-----|
+    | strict: true | strict: false | ❌ | tsconfig.json:5 | Set to true |
+    | noImplicitAny | Missing | ❌ | tsconfig.json | Add option |
+
+    ### Type Safety
+    | Standard Pattern | Codebase Has | Status | Location | Fix |
+    |-----------------|--------------|--------|----------|-----|
+    | No `any` type | 15 `any` usages | ❌ | [list files] | Replace with proper types |
+    | Branded types for IDs | Plain strings | ❌ | types.ts | Add branded types |
+    | Zod validation | No validation | ❌ | - | Add Zod schemas |
+
+    ### Error Handling
+    | Standard Pattern | Codebase Has | Status | Location | Fix |
+    |-----------------|--------------|--------|----------|-----|
+    | Result type | throw exceptions | ❌ | service.ts:42 | Return Result<T,E> |
+    | Discriminated unions | Plain objects | ⚠️ | types.ts | Add discriminator |
+
+    ## OUTPUT FORMAT
+
+    Same as Go - show current vs expected with exact fixes.
 ```
+
+---
 
 **For Frontend projects, add:**
 
 ```
 Task 5:
   subagent_type: "ring-dev-team:frontend-bff-engineer-typescript"
-  description: "Analyze frontend architecture"
+  description: "Compare frontend with Ring standards"
   prompt: |
-    **MODE: ANALYSIS ONLY** - Analyze frontend for refactoring.
+    **MODE: ANALYSIS ONLY** - Compare frontend with Ring standards.
 
-    Standards source: docs/PROJECT_RULES.md
+    ## INPUT
+    1. **Ring Standards:** Load via WebFetch from your agent instructions (frontend.md)
+    2. **Codebase Report:** Read docs/refactor/{timestamp}/codebase-report.md
+    3. **Project Rules:** docs/PROJECT_RULES.md
 
-    Analyze:
-    - Component structure
-    - State management patterns
-    - API integration patterns
-    - Performance considerations
+    ## YOUR TASK
 
-    Return findings with: severity (Critical/High/Medium/Low), location (file:line), issue, recommendation.
+    Compare CURRENT frontend patterns with EXPECTED:
+
+    ### Component Architecture
+    | Standard Pattern | Codebase Has | Status | Location | Fix |
+    |-----------------|--------------|--------|----------|-----|
+    | Functional components | Class components | ❌ | UserList.tsx | Convert to function |
+    | Typed props | any props | ❌ | Button.tsx:5 | Add interface |
+
+    ### State Management
+    | Standard Pattern | Codebase Has | Status | Location | Fix |
+    |-----------------|--------------|--------|----------|-----|
+    | Server state in React Query | In Redux | ⚠️ | store/ | Migrate to RQ |
+    | Minimal global state | Everything global | ❌ | - | Use local state |
+
+    ## OUTPUT FORMAT
+
+    Same format - current vs expected with exact fixes.
 ```
 
 ### Key Rules - MANDATORY
@@ -843,59 +1303,59 @@ Task 5:
 
 ## Step 4: Compile Findings
 
-**Collect outputs from all dispatched agents and merge into structured report.**
+**Orchestrator action: Collect agent outputs and merge into analysis-report.md**
 
-Each agent returns findings in their output. The dev-refactor skill must:
+Each specialist agent returns:
+- Comparison tables (Standard Pattern | Codebase Has | Status | Location | Fix)
+- Code snippets (Current vs Expected from their Ring standards)
+- Severity classifications
+
+The dev-refactor orchestrator must:
 1. **Collect** all agent outputs
-2. **Parse** findings from each output (severity, location, issue, recommendation)
+2. **Merge** comparison tables by category
 3. **Deduplicate** overlapping findings
-4. **Categorize** by dimension (Architecture, Code Quality, Testing, DevOps)
+4. **Count** compliance status (✅ Compliant, ❌ Non-Compliant, ⚠️ Partial)
 5. **Sort** by severity (Critical → High → Medium → Low)
 
-**Merge results into structured report:**
+**Output structure (template only - agents fill the content):**
 
 ```markdown
 # Analysis Report: {project-name}
 
 **Generated:** {date}
-**Standards:** {path to PROJECT_RULES.md used}
-**Scope:** {directories analyzed}
+**Codebase Report:** docs/refactor/{timestamp}/codebase-report.md
+**Standards Used:** [list Ring standards loaded by agents]
 
-## Summary
+## Executive Summary
 
-| Dimension    | Issues | Critical | High | Medium | Low |
-|--------------|--------|----------|------|--------|-----|
-| Architecture | 12     | 2        | 4    | 4      | 2   |
-| Code Quality | 23     | 1        | 8    | 10     | 4   |
-| Testing      | 8      | 3        | 3    | 2      | 0   |
-| DevOps       | 5      | 0        | 2    | 2      | 1   |
-| **Total**    | **48** | **6**    | **17**| **18**| **7**|
+| Category | Total | ✅ | ❌ | ⚠️ |
+|----------|-------|-----|-----|-----|
+| [From backend-engineer agent] | | | | |
+| [From qa-analyst agent] | | | | |
+| [From devops-engineer agent] | | | | |
+| [From sre agent] | | | | |
+| **Total** | | | | |
 
-## Critical Issues (Fix Immediately)
+## Pattern Compliance Details
 
-### ARCH-001: Domain depends on infrastructure
-**Location:** `src/domain/user.go:15`
-**Issue:** Domain entity imports database package
-**Standard:** Domain layer must have zero external dependencies
-**Fix:** Extract repository interface, inject via constructor
+[Merged tables from all agents - each agent provides their category]
 
-### CODE-001: SQL injection vulnerability
-**Location:** `src/handler/search.go:42`
-**Issue:** User input concatenated into SQL query
-**Standard:** Always use parameterized queries
-**Fix:** Use query builder or prepared statements
+## Issues by Severity
 
-...
+### Critical
+[Issues from agents with severity=Critical, includes code snippets]
 
-## High Priority Issues
-...
+### High
+[Issues from agents with severity=High]
 
-## Medium Priority Issues
-...
+### Medium
+[Issues from agents with severity=Medium]
 
-## Low Priority Issues
-...
+### Low
+[Issues from agents with severity=Low]
 ```
+
+**Key point:** The orchestrator does NOT add code examples. The agents provide all code comparisons based on their Ring standards knowledge.
 
 ## Step 5: Prioritize and Group
 
