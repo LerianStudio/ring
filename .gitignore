@@ -3,6 +3,7 @@
 .test/
 examples/
 .references/
+docs/plans/
 
 # Python cache
 __pycache__/

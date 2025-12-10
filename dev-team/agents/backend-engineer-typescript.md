@@ -966,6 +966,79 @@ Before submitting TypeScript code, verify:
 - [ ] Sensitive data not logged
 - [ ] ESLint passes with no warnings
 
+## 12-Factor App Code Patterns (MANDATORY)
+
+**MANDATORY:** Before implementing ANY service code, verify 12-Factor compliance. These patterns are NON-NEGOTIABLE.
+
+### Quick Reference
+
+| Factor | Requirement | Verification |
+|--------|-------------|--------------|
+| III. Config | `process.env` with Zod validation | No hardcoded values |
+| VI. Stateless | No local file storage | No `fs.writeFile` for user data |
+| IX. Disposability | SIGTERM handler | `process.on('SIGTERM')` present |
+| XI. Logs | Stdout only | No `fs.createWriteStream` for logs |
+
+### Config Pattern (Factor III) - CRITICAL
+
+```typescript
+// MANDATORY - Validate with Zod at startup
+const configSchema = z.object({
+  DATABASE_URL: z.string().url(),
+  REDIS_URL: z.string().url(),
+  JWT_SECRET: z.string().min(32),
+});
+export const config = configSchema.parse(process.env);
+
+// FORBIDDEN
+const dbHost = 'localhost:5432';        // FAIL - hardcoded
+const apiKey = 'sk_live_xxx';           // FAIL - hardcoded secret
+```
+
+### Graceful Shutdown Pattern (Factor IX) - CRITICAL
+
+```typescript
+// MANDATORY in all services
+const shutdown = async (signal: string) => {
+  console.log(`${signal} received, shutting down...`);
+
+  server.close(async () => {
+    await prisma.$disconnect();
+    await redis.quit();
+    process.exit(0);
+  });
+
+  setTimeout(() => process.exit(1), 30000);  // Force exit
+};
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+```
+
+### Logging Pattern (Factor XI)
+
+```typescript
+// MANDATORY - lib-commons-js ConsoleLogger to stdout
+import { ConsoleLogger } from '@lerianstudio/lib-commons-js';
+const logger = new ConsoleLogger();
+
+// Structured logging with context
+const requestLogger = logger.withFields({ traceId, userId });
+requestLogger.info('Processing request');
+
+// FORBIDDEN
+const logStream = fs.createWriteStream('app.log');  // FAIL - file logging
+```
+
+### Before Implementation Checklist
+
+- [ ] Config validated with Zod at startup
+- [ ] SIGTERM handler in main entry point
+- [ ] No hardcoded hosts/credentials
+- [ ] Logging via @lerianstudio/lib-commons-js (stdout)
+
+**If any check fails:** Do NOT proceed. Fix compliance issues first.
+
 ## Example Output
 
 ```markdown

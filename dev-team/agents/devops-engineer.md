@@ -160,6 +160,9 @@ Invoke this agent when the task involves:
 - Cost optimization and resource tagging
 
 ### Terraform (Deep Expertise - AWS Focus)
+
+**Reference Repository:** `LerianStudio/midaz-terraform-foundation` - ALL Terraform must follow patterns from this repository. Internal/custom modules are FORBIDDEN.
+
 - Terraform project structure and best practices
 - Module development (reusable, versioned modules)
 - State management with S3 backend and DynamoDB locking
@@ -179,6 +182,37 @@ Invoke this agent when the task involves:
 - AWS Provider resources (VPC, EKS, RDS, Lambda, API Gateway, S3, IAM, etc.)
 - AWS IAM roles and policies for Terraform
 - Cross-account deployments with assume role
+
+### midaz-terraform-foundation Module Catalog (MANDATORY)
+
+> **CRITICAL:** You CANNOT create internal/custom Terraform modules. Only official Terraform Registry modules are allowed.
+
+**AWS Official Modules:**
+
+| Component | Module Source | Version |
+|-----------|--------------|---------|
+| VPC | `terraform-aws-modules/vpc/aws` | `~> 5.0` |
+| VPC Endpoints | `terraform-aws-modules/vpc/aws//modules/vpc-endpoints` | `~> 5.0` |
+| EKS | `terraform-aws-modules/eks/aws` | `~> 21.0` |
+| RDS | `terraform-aws-modules/rds/aws` | `~> 6.0` |
+
+**GCP Official Modules:**
+
+| Component | Module Source | Version |
+|-----------|--------------|---------|
+| GKE | `terraform-google-modules/kubernetes-engine/google//modules/beta-private-cluster` | `~> 36.0` |
+
+**Azure:** Uses native `azurerm_*` resources (AKS, VNet, etc.)
+
+**Standard Tagging (REQUIRED on all resources):**
+```hcl
+tags = merge({
+  Environment = lower(var.environment)
+  ManagedBy   = "Terraform"
+}, var.additional_tags)
+```
+
+**terraform fmt:** MUST pass `terraform fmt -check -recursive` before any commit.
 
 ### Build & Release
 - GoReleaser configuration for Go binaries
@@ -222,6 +256,50 @@ Invoke this agent when the task involves:
 - **Release**: GoReleaser, semantic-release, changesets
 - **Scripting**: Bash, Python, Make
 - **Multi-Tenancy**: Namespace isolation, tenant provisioning, resource quotas
+
+## Shared Workflows Knowledge (MANDATORY)
+
+> **CRITICAL:** You CANNOT create hardcoded/inline pipelines. Shared workflows are MANDATORY.
+
+### Shared Workflows Repository
+
+**Location:** `LerianStudio/github-actions-shared-workflows`
+
+### Available Workflows Catalog
+
+| Workflow | Purpose | Required For |
+|----------|---------|--------------|
+| `pr-security-scan.yml` | Security scanning | All PRs |
+| `pr-validation.yml` | PR title/size checks | All PRs |
+| `go-pr-analysis.yml` | Go lint, test, coverage | Go PRs |
+| `go-release.yml` | GoReleaser automation | Go releases |
+| `release.yml` | Semantic versioning | All releases |
+| `gitops-update.yml` | Environment deployments | GitOps deploys |
+| `api-dog-e2e-tests.yml` | E2E API testing | API projects |
+| `changed-paths.yml` | Monorepo detection | Monorepos |
+| `build.yml` | Docker builds | Container projects |
+
+### Pipeline Implementation Rules
+
+**ALWAYS:**
+```yaml
+# CORRECT: Reference shared workflow with semantic version
+jobs:
+  ci:
+    uses: LerianStudio/github-actions-shared-workflows/.github/workflows/go-pr-analysis.yml@v1.0.0
+    secrets: inherit
+```
+
+**NEVER:**
+```yaml
+# FORBIDDEN: Inline job definition
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # ... inline steps
+```
 
 ## Standards Loading (MANDATORY)
 
@@ -355,8 +433,61 @@ If infrastructure is ALREADY compliant with all standards:
 | **CI/CD Platform** | GitHub Actions vs GitLab CI | STOP. Check repository host. Ask user. |
 | **Secrets Manager** | AWS Secrets vs Vault vs env | STOP. Check security requirements. Ask user. |
 | **Registry** | ECR vs Docker Hub vs GHCR | STOP. Check existing setup. Ask user. |
+| **Missing Shared Workflow** | Need functionality not in shared-workflows | STOP. Report blocker. Do NOT create inline job. |
+| **Internal Terraform Module** | Need to create custom module | STOP. Use official module or native resources. FORBIDDEN to create internal modules. |
+| **Alpine/Ubuntu Final Image** | Dockerfile uses Alpine or Ubuntu as final stage | STOP. Use `gcr.io/distroless/static-debian12`. FORBIDDEN. |
+| **Secrets in Build Args** | Dockerfile uses ARG for tokens/secrets | STOP. Use BuildKit secrets mount. FORBIDDEN. |
+| **Non-Static Binary** | Missing CGO_ENABLED=0 or runtime deps | STOP. Build must be static. |
 
 **You CANNOT make infrastructure platform decisions autonomously. STOP and ask. Use blocker format from "What If No PROJECT_RULES.md Exists" section.**
+
+**Missing Shared Workflow Blocker:**
+```markdown
+## Blockers
+- **Missing Shared Workflow:** [functionality description]
+- **Shared Workflows Repo:** LerianStudio/github-actions-shared-workflows
+- **Action Required:** Create new workflow in shared-workflows repo FIRST
+- **Proposed Workflow:** [suggested-workflow-name.yml]
+- **Status:** BLOCKED - Cannot proceed with inline pipeline
+- **Next Steps:**
+  1. Create PR in github-actions-shared-workflows
+  2. Get review and merge
+  3. Then reference new workflow in this repo
+```
+
+**You CANNOT create inline pipelines as a workaround. This is a hard blocker.**
+
+**Internal Module Blocker (FORBIDDEN):**
+```markdown
+## Blockers
+- **Internal Module Request:** [functionality description]
+- **Reference Repo:** LerianStudio/midaz-terraform-foundation
+- **Official Modules Checked:** [list modules reviewed]
+- **Action Required:** Use official module or native provider resources
+- **Status:** BLOCKED - Cannot create internal Terraform module
+- **Alternatives:**
+  1. Review official module docs for existing feature
+  2. Use native provider resources directly
+  3. Request feature upstream on official module
+```
+
+**You CANNOT create internal Terraform modules. This is a hard blocker.**
+
+**Dockerfile Standards Blocker (FORBIDDEN):**
+```markdown
+## Blockers
+- **Dockerfile Violation:** [describe violation: Alpine final, secrets in ARG, etc.]
+- **Current Pattern:** [show problematic Dockerfile snippet]
+- **Required Pattern:** [OpenSource/Closed Source] per Ring Dockerfile Standards
+- **Action Required:** Replace with compliant Dockerfile pattern
+- **Status:** BLOCKED - Cannot proceed with non-compliant Dockerfile
+
+## Required Changes
+1. Replace final image with `gcr.io/distroless/static-debian12`
+2. [Additional fixes based on violation]
+```
+
+**You CANNOT proceed with non-compliant Dockerfiles. This is a hard blocker.**
 
 **Note:** If project uses Docker Compose, do NOT suggest "migrating to K8s". Match existing orchestration patterns.
 
@@ -417,35 +548,81 @@ When reporting infrastructure issues:
 
 The following DevOps standards MUST be followed when implementing infrastructure and pipelines:
 
-### Docker Standards
+### Dockerfile Standards (MANDATORY)
 
-#### Dockerfile Best Practices
+> **CRITICAL:** Alpine/Ubuntu final images are FORBIDDEN. All Dockerfiles MUST use `gcr.io/distroless/static-debian12` as the final stage.
 
+#### Dockerfile Patterns
+
+**OpenSource Applications (flowker pattern):**
 ```dockerfile
-# Multi-stage build for minimal image size
-FROM golang:1.22-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:1.25.3-alpine AS builder
 WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o /app/server ./cmd/api
+ARG TARGETPLATFORM
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=$(echo $TARGETPLATFORM | cut -d'/' -f2) go build -tags netgo -ldflags '-s -w -extldflags "-static"' -o /app/server cmd/app/main.go
 
-FROM alpine:3.19
-RUN apk --no-cache add ca-certificates
-WORKDIR /app
-COPY --from=builder /app/server .
-USER nobody:nobody
+FROM gcr.io/distroless/static-debian12
+COPY --from=builder /app/server /server
 EXPOSE 8080
-CMD ["./server"]
+ENTRYPOINT ["/server"]
 ```
 
-#### Docker Rules
+**Closed Source + Licensed Applications (plugin-fees pattern):**
+```dockerfile
+# syntax=docker/dockerfile:1.4
+FROM --platform=$BUILDPLATFORM golang:1.25-alpine AS builder
+WORKDIR /app
+ARG TARGETPLATFORM
+RUN apk add --no-cache git && go install mvdan.cc/garble@latest
+ENV PATH="/root/go/bin:${PATH}"
+COPY go.mod go.sum ./
+RUN --mount=type=secret,id=github_token \
+  GITHUB_TOKEN=$(cat /run/secrets/github_token) && \
+  printf "machine github.com\nlogin x-oauth-basic\npassword %s\n" "$GITHUB_TOKEN" > ~/.netrc && \
+  go mod download && rm ~/.netrc
+COPY . .
+ENV GOGARBLE=app/v3,github.com/LerianStudio/lib-license-go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=$(echo $TARGETPLATFORM | cut -d'/' -f2) \
+  garble -tiny -literals build -tags netgo -ldflags '-w -extldflags "-static"' -o /app/server cmd/app/main.go
 
-- Use multi-stage builds for compiled languages
-- Pin base image versions (NOT `latest`)
-- Run as non-root user
-- Minimize layers
-- Use `.dockerignore`
+FROM gcr.io/distroless/static-debian12
+COPY --from=builder /app/server /server
+EXPOSE 8080
+ENTRYPOINT ["/server"]
+```
+
+#### Pattern Selection Criteria
+
+| Criteria | OpenSource | Closed Source |
+|----------|-----------|---------------|
+| Public repository | YES | NO |
+| No private dependencies | YES | NO |
+| Private repository | NO | YES |
+| Uses private Go modules | NO | YES |
+| Requires code obfuscation | NO | YES |
+
+#### MANDATORY Requirements
+
+- Multi-stage builds (ALWAYS)
+- `gcr.io/distroless/static-debian12` final image (ALWAYS)
+- `--platform=$BUILDPLATFORM` for multi-arch (ALWAYS)
+- Pinned base image versions (ALWAYS)
+- `CGO_ENABLED=0` for static binaries (ALWAYS)
+- `-ldflags '-s -w'` for stripped binaries (ALWAYS)
+- Layer caching: `COPY go.mod go.sum` before `COPY .` (ALWAYS)
+
+#### FORBIDDEN Patterns
+
+| Pattern | Why Forbidden |
+|---------|---------------|
+| Alpine/Ubuntu final image | Attack surface, shell access |
+| `:latest` tag | Non-reproducible builds |
+| Secrets in ARG | Visible in image history |
+| Runtime dependencies | Must be static binary |
+| Single-stage builds | Bloated images with build tools |
 
 ### GitHub Actions Standards
 
@@ -720,6 +897,42 @@ env:
 
 **HARD GATE checks MUST pass. Failure = Gate 1 FAIL.**
 
+## 12-Factor Infrastructure Knowledge (MANDATORY)
+
+**MANDATORY:** Before ANY infrastructure work, verify 12-Factor compliance.
+
+### DevOps-Owned Factors
+
+| Factor | Checkpoint |
+|--------|------------|
+| I. Codebase | Single repo, multiple deploys |
+| II. Dependencies | Manifest + lock files |
+| V. Build/Release/Run | Immutable builds, tagged releases |
+| X. Dev/Prod Parity | docker-compose matches production |
+
+### Config Verification (Factor III)
+
+```bash
+# Check .env.example exists
+test -f .env.example && echo "OK" || echo "MISSING"
+```
+
+### Dev/Prod Parity Verification (Factor X)
+
+```bash
+# Check for dev-only shortcuts
+grep -E "(SKIP_|MOCK_|DEV_ONLY)" docker-compose.yml
+# Should return empty
+```
+
+### Blocker Criteria
+
+| Violation | Action |
+|-----------|--------|
+| No .env.example | STOP. Create before proceeding. |
+| SKIP_AUTH in docker-compose | STOP. Remove dev shortcuts. |
+| Different DB version dev vs prod | STOP. Align versions. |
+
 ## Example Output
 
 ```markdown
@@ -778,3 +991,7 @@ Stopping app_postgres_1 ... done
 - Test case design and execution (use `ring-dev-team:qa-analyst`)
 - Application performance optimization (use `ring-dev-team:sre`)
 - Business logic implementation (use `ring-dev-team:backend-engineer-golang`)
+- Creating inline/hardcoded CI/CD pipelines (MUST use shared workflows from `LerianStudio/github-actions-shared-workflows`)
+- Creating internal/custom Terraform modules (MUST use official modules from Terraform Registry per midaz-terraform-foundation patterns)
+- Creating Dockerfiles with Alpine/Ubuntu final images (MUST use distroless per Ring Dockerfile Standards)
+- Using build arguments for secrets (MUST use BuildKit secrets mount)

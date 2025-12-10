@@ -654,6 +654,47 @@ Before deploying to production:
 - [ ] Runbooks documented
 - [ ] On-call rotation configured
 
+## 12-Factor Runtime Knowledge (MANDATORY)
+
+**MANDATORY:** Verify 12-Factor compliance for SRE-owned factors.
+
+### SRE-Owned Factors
+
+| Factor | Checkpoint |
+|--------|------------|
+| VI. Processes | Stateless, no local storage |
+| VIII. Concurrency | HPA configured |
+| IX. Disposability | <10s startup, SIGTERM handling |
+| XI. Logs | stdout only, JSON structured |
+
+### Stateless Verification (Factor VI)
+
+```bash
+# Check for local file storage
+grep -rE "os\.Create|ioutil\.WriteFile" --include="*.go" | grep -v test
+# Should return empty for user data
+```
+
+### Disposability Verification (Factor IX)
+
+```bash
+# Check for SIGTERM handler
+grep -rE "signal\.Notify.*SIGTERM" --include="*.go"
+# Must find handler
+
+# Measure startup time
+time docker run --rm app:latest --version
+# Must complete in < 10 seconds
+```
+
+### Blocker Criteria
+
+| Violation | Action |
+|-----------|--------|
+| No SIGTERM handler | STOP. Critical for rolling deployments. |
+| Startup > 10s | STOP. Blocks scaling operations. |
+| File-based logging | STOP. Breaks log aggregation. |
+
 ## Example Output
 
 ```markdown
