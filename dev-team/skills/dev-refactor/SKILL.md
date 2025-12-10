@@ -45,6 +45,7 @@ related:
 ║  │  ❌ FORBIDDEN (DO NOT USE):                                                         │  ║
 ║  │     • Explore                    → SKILL FAILURE                                    │  ║
 ║  │     • general-purpose            → SKILL FAILURE                                    │  ║
+║  │     • Plan                       → SKILL FAILURE                                    │  ║
 ║  │     • ring-default:*             → SKILL FAILURE                                    │  ║
 ║  │     • ANY agent without ring-dev-team: prefix → SKILL FAILURE                       │  ║
 ║  │                                                                                     │  ║
@@ -146,6 +147,7 @@ After outputting the blocker above:
 **⛔ FORBIDDEN AGENTS (causes SKILL FAILURE):**
 - `Explore` - Generic agent, no Ring standards
 - `general-purpose` - Generic agent, no domain expertise
+- `Plan` - Planning agent, not for analysis
 - `ring-default:*` - Wrong plugin, for review not analysis
 - ANY agent without `ring-dev-team:` prefix
 
@@ -337,7 +339,7 @@ Step 1:   [ ] Language detected? → go.mod / package.json found
 
 GATE 1:   [ ] Agent dispatch validated? → BEFORE typing Task tool:
            ⚠️ Does subagent_type start with "ring-dev-team:"? → REQUIRED
-           ❌ FORBIDDEN: Explore, general-purpose, ring-default:*
+           ❌ FORBIDDEN: Explore, general-purpose, Plan, ring-default:*
 
 Step 2:   [ ] PROJECT_RULES.md read?
 
@@ -357,7 +359,7 @@ Step 9:   [ ] Handoff to dev-cycle (if approved)?
 
 **GATE 0 is NON-NEGOTIABLE:** If PROJECT_RULES.md doesn't exist, you MUST output the blocker template from the top of this skill and terminate. No rationalizations allowed.
 
-**GATE 1 is NON-NEGOTIABLE:** If subagent_type doesn't start with `ring-dev-team:`, STOP and use the correct agent. FORBIDDEN agents (Explore, general-purpose, ring-default:*) = SKILL FAILURE. No rationalizations allowed.
+**GATE 1 is NON-NEGOTIABLE:** If subagent_type doesn't start with `ring-dev-team:`, STOP and use the correct agent. FORBIDDEN agents (Explore, general-purpose, Plan, ring-default:*) = SKILL FAILURE. No rationalizations allowed.
 
 #### Prompt Prefix (REQUIRED)
 
@@ -375,6 +377,7 @@ Return findings with: severity (Critical/High/Medium/Low), location (file:line),
 |-------|-----------|-------------|
 | `Explore` | Generic agent, no Ring standards | SKILL FAILURE |
 | `general-purpose` | Generic agent, no domain expertise | SKILL FAILURE |
+| `Plan` | Planning agent, not for analysis | SKILL FAILURE |
 | `ring-default:code-reviewer` | Wrong plugin, for review not analysis | SKILL FAILURE |
 | `ring-default:codebase-explorer` | Wrong plugin, generic exploration | SKILL FAILURE |
 
@@ -674,11 +677,149 @@ This file contains:
 
 ## Step 3: Scan Codebase
 
-**⛔ See "HARD GATES" section above - Gate 2 → Parallel Dispatch**
+**⛔ HARD GATE 1 APPLIES HERE - READ BEFORE DISPATCHING ANY AGENT**
 
-Dispatch ALL applicable `ring-dev-team:*` agents in a SINGLE message.
+```text
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  ⛔ BEFORE TYPING "Task" - VERIFY AGENT PREFIX                                  │
+│                                                                                 │
+│  subagent_type MUST start with "ring-dev-team:"                                 │
+│                                                                                 │
+│  ✅ ALLOWED: ring-dev-team:backend-engineer-golang                              │
+│  ✅ ALLOWED: ring-dev-team:backend-engineer-typescript                          │
+│  ✅ ALLOWED: ring-dev-team:qa-analyst                                           │
+│  ✅ ALLOWED: ring-dev-team:devops-engineer                                      │
+│  ✅ ALLOWED: ring-dev-team:sre                                                  │
+│  ✅ ALLOWED: ring-dev-team:frontend-bff-engineer-typescript                     │
+│  ✅ ALLOWED: ring-dev-team:frontend-designer                                    │
+│                                                                                 │
+│  ❌ FORBIDDEN: Explore                    → SKILL FAILURE                       │
+│  ❌ FORBIDDEN: general-purpose            → SKILL FAILURE                       │
+│  ❌ FORBIDDEN: ring-default:*             → SKILL FAILURE                       │
+│  ❌ FORBIDDEN: Plan                       → SKILL FAILURE                       │
+│  ❌ FORBIDDEN: ANY agent without ring-dev-team: prefix → SKILL FAILURE          │
+│                                                                                 │
+│  This is NOT optional. This is NOT a suggestion.                                │
+│  Dispatching a FORBIDDEN agent = SKILL FAILURE. No exceptions.                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
+```
 
-All prompts MUST start with `**MODE: ANALYSIS ONLY**`.
+### Execution Template - COPY EXACTLY
+
+**For Go projects, dispatch in ONE message:**
+
+```
+Task 1:
+  subagent_type: "ring-dev-team:backend-engineer-golang"
+  description: "Analyze Go architecture and code quality"
+  prompt: |
+    **MODE: ANALYSIS ONLY** - Analyze codebase for refactoring.
+
+    Standards source: docs/PROJECT_RULES.md (already read by orchestrator)
+
+    Analyze these dimensions:
+    - Architecture patterns compliance
+    - Code quality and naming conventions
+    - Error handling patterns
+    - Security practices
+
+    Return findings with: severity (Critical/High/Medium/Low), location (file:line), issue, recommendation.
+
+Task 2:
+  subagent_type: "ring-dev-team:qa-analyst"
+  description: "Analyze test coverage and quality"
+  prompt: |
+    **MODE: ANALYSIS ONLY** - Analyze test coverage for refactoring.
+
+    Standards source: docs/PROJECT_RULES.md
+
+    Analyze:
+    - Test coverage percentage
+    - Test patterns (table-driven, AAA structure)
+    - Missing critical path tests
+    - Test naming conventions
+
+    Return findings with: severity (Critical/High/Medium/Low), location (file:line), issue, recommendation.
+
+Task 3:
+  subagent_type: "ring-dev-team:devops-engineer"
+  description: "Analyze DevOps configuration"
+  prompt: |
+    **MODE: ANALYSIS ONLY** - Analyze DevOps setup for refactoring.
+
+    Standards source: docs/PROJECT_RULES.md
+
+    Analyze:
+    - Dockerfile (multi-stage, non-root, health check)
+    - docker-compose.yml completeness
+    - Environment configuration (.env.example)
+    - CI/CD pipeline
+
+    Return findings with: severity (Critical/High/Medium/Low), location (file:line), issue, recommendation.
+
+Task 4:
+  subagent_type: "ring-dev-team:sre"
+  description: "Analyze observability setup"
+  prompt: |
+    **MODE: ANALYSIS ONLY** - Analyze observability for refactoring.
+
+    Standards source: docs/PROJECT_RULES.md
+
+    Analyze:
+    - Logging (structured JSON, appropriate levels)
+    - Metrics (Prometheus/OpenTelemetry)
+    - Tracing configuration
+    - Health/readiness endpoints
+
+    Return findings with: severity (Critical/High/Medium/Low), location (file:line), issue, recommendation.
+```
+
+**For TypeScript projects, replace Task 1 with:**
+
+```
+Task 1:
+  subagent_type: "ring-dev-team:backend-engineer-typescript"
+  description: "Analyze TypeScript architecture and code quality"
+  prompt: |
+    **MODE: ANALYSIS ONLY** - Analyze codebase for refactoring.
+
+    Standards source: docs/PROJECT_RULES.md
+
+    Analyze these dimensions:
+    - Architecture patterns compliance
+    - TypeScript strict mode compliance
+    - Type safety (no `any` usage)
+    - Error handling patterns
+
+    Return findings with: severity (Critical/High/Medium/Low), location (file:line), issue, recommendation.
+```
+
+**For Frontend projects, add:**
+
+```
+Task 5:
+  subagent_type: "ring-dev-team:frontend-bff-engineer-typescript"
+  description: "Analyze frontend architecture"
+  prompt: |
+    **MODE: ANALYSIS ONLY** - Analyze frontend for refactoring.
+
+    Standards source: docs/PROJECT_RULES.md
+
+    Analyze:
+    - Component structure
+    - State management patterns
+    - API integration patterns
+    - Performance considerations
+
+    Return findings with: severity (Critical/High/Medium/Low), location (file:line), issue, recommendation.
+```
+
+### Key Rules - MANDATORY
+
+1. **ALL Task tool calls in ONE message** = Parallel execution
+2. **ALL subagent_type values MUST start with `ring-dev-team:`**
+3. **ALL prompts MUST start with `**MODE: ANALYSIS ONLY**`**
+4. **Select agents based on detected language** (go.mod → Go agents, package.json → TypeScript agents)
 
 **Output:** Dimension-specific findings with severities to compile in Step 4.
 
