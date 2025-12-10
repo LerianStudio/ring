@@ -431,18 +431,46 @@ When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST p
 
 ### Comparison Categories for Go
 
+#### Bootstrap & Initialization (CRITICAL)
+
+| Category | Ring Standard | lib-commons Pattern |
+|----------|--------------|---------------------|
+| **Config Struct** | Single struct with `env` tags | `type Config struct { Field string \`env:"ENV_VAR"\` }` |
+| **Config Loading** | Centralized in bootstrap | `libCommons.SetConfigFromEnvVars(cfg)` |
+| **Logger Init** | First initialization | `libZap.InitializeLogger()` |
+| **Telemetry Init** | After logger, before server | `libOpentelemetry.InitializeTelemetry(&config)` |
+| **Telemetry Middleware** | First middleware in router | `tlMid.WithTelemetry(tl)` |
+| **Telemetry EndSpans** | Last middleware in router | `tlMid.EndTracingSpans` |
+| **Server Lifecycle** | Graceful shutdown | `libServer.NewServerManager().StartWithGracefulShutdown()` |
+| **Bootstrap Directory** | `/internal/bootstrap/` | `config.go`, `fiber.server.go`, `service.go` |
+
+#### Context & Tracking
+
+| Category | Ring Standard | lib-commons Pattern |
+|----------|--------------|---------------------|
+| **Logger/Tracer Recovery** | From context in any layer | `libCommons.NewTrackingFromContext(ctx)` |
+| **Span Creation** | Child spans per operation | `ctx, span := tracer.Start(ctx, "operation")` |
+| **Error in Span** | Technical errors | `libOpentelemetry.HandleSpanError(&span, msg, err)` |
+| **Business Error in Span** | Validation errors | `libOpentelemetry.HandleSpanBusinessErrorEvent(&span, msg, err)` |
+
+#### Infrastructure
+
 | Category | Ring Standard | lib-commons Package |
 |----------|--------------|---------------------|
-| **Logging** | Structured JSON logging | `libCommons/zap` |
-| **Telemetry** | OpenTelemetry integration | `libCommons/opentelemetry` |
-| **Config** | Environment-based config | `libCommons.SetConfigFromEnvVars()` |
-| **HTTP Client** | Instrumented HTTP client | `libCommons/net/http` |
-| **Server Lifecycle** | Graceful shutdown | `libServer.NewServerManager()` |
-| **PostgreSQL** | Connection pooling, tracing | `libCommons/postgres` |
-| **MongoDB** | Connection pooling, tracing | `libCommons/mongo` |
-| **Redis** | Connection pooling, tracing | `libCommons/redis` |
-| **Entity Mapping** | ToEntity/FromEntity pattern | Domain layer |
-| **Error Handling** | Wrapped errors with context | `fmt.Errorf("%w", err)` |
+| **Logging** | Structured JSON logging | `libZap` / `libLog` |
+| **HTTP Utilities** | Health, version, pagination | `libHTTP.Ping`, `libHTTP.Version` |
+| **PostgreSQL** | Connection pooling, tracing | `libPostgres.PostgresConnection` |
+| **MongoDB** | Connection pooling, tracing | `libMongo.MongoConnection` |
+| **Redis** | Connection pooling, tracing | `libRedis.RedisConnection` |
+
+#### Domain Patterns
+
+| Category | Ring Standard | Expected Pattern |
+|----------|--------------|------------------|
+| **Entity Mapping** | DB ↔ Domain conversion | `ToEntity()` / `FromEntity()` methods |
+| **Error Codes** | Service prefix | `PLT-0001`, `MDZ-0001` format |
+| **Error Handling** | Wrapped with context | `fmt.Errorf("context: %w", err)` |
+| **No panic()** | Return errors instead | Only allowed in `main.go` or `InitServers()` |
 
 ### Output Format
 
@@ -992,29 +1020,54 @@ coverage: 87.3% of statements
 
 ### Lerian/Ring Standards Comparison
 
+#### Bootstrap & Initialization
 | Category | Current Pattern | Expected Pattern | Status | File/Location |
 |----------|----------------|------------------|--------|---------------|
-| Logging | Uses `log/slog` with structured fields | `libCommons/zap` structured logging | ⚠️ Non-Compliant | `internal/service/*.go` |
-| Telemetry | Manual OpenTelemetry setup | `libCommons/opentelemetry.InitializeTelemetry()` | ⚠️ Non-Compliant | `cmd/api/main.go` |
+| Config Struct | Scattered `os.Getenv()` calls | Single struct with `env` tags | ⚠️ Non-Compliant | `internal/` |
+| Config Loading | Manual env parsing | `libCommons.SetConfigFromEnvVars(cfg)` | ⚠️ Non-Compliant | `cmd/api/main.go` |
+| Logger Init | `log.New()` | `libZap.InitializeLogger()` | ⚠️ Non-Compliant | `cmd/api/main.go` |
+| Telemetry Init | Manual OTEL setup | `libOpentelemetry.InitializeTelemetry(&config)` | ⚠️ Non-Compliant | `cmd/api/main.go` |
+| Telemetry Middleware | Missing | `tlMid.WithTelemetry(tl)` as first middleware | ⚠️ Non-Compliant | `routes.go` |
+| Server Lifecycle | `http.ListenAndServe()` | `libServer.NewServerManager().StartWithGracefulShutdown()` | ⚠️ Non-Compliant | `cmd/api/main.go` |
+| Bootstrap Directory | Code in `cmd/` | `/internal/bootstrap/` structure | ⚠️ Non-Compliant | - |
+
+#### Context & Tracking
+| Category | Current Pattern | Expected Pattern | Status | File/Location |
+|----------|----------------|------------------|--------|---------------|
+| Logger Recovery | Global logger | `libCommons.NewTrackingFromContext(ctx)` | ⚠️ Non-Compliant | `internal/service/*.go` |
+| Span Creation | No tracing | `tracer.Start(ctx, "operation")` | ⚠️ Non-Compliant | `internal/service/*.go` |
+
+#### Domain Patterns
+| Category | Current Pattern | Expected Pattern | Status | File/Location |
+|----------|----------------|------------------|--------|---------------|
 | Error Handling | `fmt.Errorf` with wrapping | `fmt.Errorf` with wrapping | ✅ Compliant | - |
-| Config | Environment variables direct | `libCommons.SetConfigFromEnvVars(cfg)` | ⚠️ Non-Compliant | `config/config.go` |
-| Server Lifecycle | Manual HTTP server setup | `libServer.NewServerManager().StartWithGracefulShutdown()` | ⚠️ Non-Compliant | `cmd/api/main.go` |
+| Entity Mapping | Direct struct usage | `ToEntity()` / `FromEntity()` | ⚠️ Non-Compliant | `internal/adapters/postgres/` |
+| Error Codes | Generic errors | Service prefix (e.g., `PLT-0001`) | ⚠️ Non-Compliant | `pkg/constant/errors.go` |
 
 ### Required Changes for Compliance
 
-1. **Logging Migration**
-   - Replace: `slog.Info("message", "key", value)`
-   - With: `libZap.Logger.Info("message", zap.String("key", value))`
-   - Import: `libZap "github.com/LerianStudio/lib-commons/commons/zap"`
+1. **Bootstrap Restructure**
+   - Create: `/internal/bootstrap/config.go` with Config struct
+   - Create: `/internal/bootstrap/fiber.server.go` with Server
+   - Move: Initialization logic from `cmd/api/main.go`
 
-2. **Telemetry Migration**
-   - Replace: Manual OTEL initialization
-   - With: `libOpentelemetry.InitializeTelemetry(ctx, cfg)`
-   - Import: `libOpentelemetry "github.com/LerianStudio/lib-commons/commons/opentelemetry"`
+2. **Config Migration**
+   - Replace: Direct `os.Getenv()` calls
+   - With: Config struct + `libCommons.SetConfigFromEnvVars(&cfg)`
+   - Import: `libCommons "github.com/LerianStudio/lib-commons/v2/commons"`
 
-3. **Config Migration**
-   - Replace: Direct `os.Getenv` calls
-   - With: `libCommons.SetConfigFromEnvVars(&cfg)`
+3. **Telemetry Setup**
+   - Add: `logger := libZap.InitializeLogger()`
+   - Add: `telemetry := libOpentelemetry.InitializeTelemetry(&config)`
+   - Add: Middleware `tlMid.WithTelemetry(tl)` (first) and `tlMid.EndTracingSpans` (last)
+
+4. **Context Tracking**
+   - Replace: Global logger usage
+   - With: `logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)`
+
+5. **Server Lifecycle**
+   - Replace: `http.ListenAndServe()`
+   - With: `libServer.NewServerManager(nil, &telemetry, logger).WithHTTPServer(app, addr).StartWithGracefulShutdown()`
 ```
 
 ## What This Agent Does NOT Handle
