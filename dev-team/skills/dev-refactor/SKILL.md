@@ -27,23 +27,40 @@ related:
 # Dev Refactor Skill
 
 ```text
-╔═══════════════════════════════════════════════════════════════════════════════╗
-║  ⛔⛔⛔ CRITICAL: READ BEFORE DOING ANYTHING ⛔⛔⛔                            ║
-║                                                                               ║
-║  THIS SKILL HAS 2 HARD GATES. VIOLATION = SKILL FAILURE.                      ║
-║                                                                               ║
-║  HARD GATE 0: PROJECT_RULES.md MUST exist                                     ║
-║               └── If NOT found → OUTPUT BLOCKER AND TERMINATE                 ║
-║               └── NO workaround. NO alternative. NO exception.                ║
-║                                                                               ║
-║  HARD GATE 2: ALL agents MUST have "ring-dev-team:" prefix                    ║
-║               └── If agent lacks prefix → DO NOT DISPATCH                     ║
-║               └── NO workaround. NO alternative. NO exception.                ║
-║                                                                               ║
-║  These are NOT suggestions. These are MANDATORY HARD GATES.                   ║
-║  Ignoring them = SKILL FAILURE. There is NO way around them.                  ║
-║                                                                               ║
-╚═══════════════════════════════════════════════════════════════════════════════╝
+╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+║  ⛔⛔⛔ CRITICAL: READ BEFORE DOING ANYTHING ⛔⛔⛔                                        ║
+║                                                                                           ║
+║  THIS SKILL HAS 2 HARD GATES. VIOLATION = SKILL FAILURE.                                  ║
+║                                                                                           ║
+║  ┌─────────────────────────────────────────────────────────────────────────────────────┐  ║
+║  │  HARD GATE 0: PROJECT_RULES.md MUST exist                                           │  ║
+║  │               └── If NOT found → OUTPUT BLOCKER AND TERMINATE                       │  ║
+║  └─────────────────────────────────────────────────────────────────────────────────────┘  ║
+║                                                                                           ║
+║  ┌─────────────────────────────────────────────────────────────────────────────────────┐  ║
+║  │  HARD GATE 1: ONLY ring-dev-team:* agents allowed                                   │  ║
+║  │               └── BEFORE typing Task tool → CHECK subagent_type                     │  ║
+║  │               └── Does it start with "ring-dev-team:" ? → REQUIRED                  │  ║
+║  │                                                                                     │  ║
+║  │  ❌ FORBIDDEN (DO NOT USE):                                                         │  ║
+║  │     • Explore                    → SKILL FAILURE                                    │  ║
+║  │     • general-purpose            → SKILL FAILURE                                    │  ║
+║  │     • ring-default:*             → SKILL FAILURE                                    │  ║
+║  │     • ANY agent without ring-dev-team: prefix → SKILL FAILURE                       │  ║
+║  │                                                                                     │  ║
+║  │  ✅ REQUIRED (USE THESE):                                                           │  ║
+║  │     • ring-dev-team:backend-engineer-golang                                         │  ║
+║  │     • ring-dev-team:backend-engineer-typescript                                     │  ║
+║  │     • ring-dev-team:qa-analyst                                                      │  ║
+║  │     • ring-dev-team:devops-engineer                                                 │  ║
+║  │     • ring-dev-team:sre                                                             │  ║
+║  │     • (any agent with ring-dev-team: prefix)                                        │  ║
+║  └─────────────────────────────────────────────────────────────────────────────────────┘  ║
+║                                                                                           ║
+║  NO workaround. NO alternative. NO exception.                                             ║
+║  Ignoring them = SKILL FAILURE. There is NO way around them.                              ║
+║                                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════════════════════╝
 ```
 
 This skill analyzes an existing codebase to identify gaps between current implementation and project standards, then generates a structured refactoring plan compatible with the dev-cycle workflow.
@@ -122,9 +139,15 @@ After outputting the blocker above:
 
 ---
 
-## ⛔ STEP 1.5: AGENT DISPATCH VALIDATION (HARD GATE - EXECUTE BEFORE ANY DISPATCH)
+## ⛔ HARD GATE 1: AGENT DISPATCH VALIDATION (EXECUTE BEFORE ANY DISPATCH)
 
 **THIS IS A HARD GATE. Violation = SKILL FAILURE. Execute BEFORE calling ANY Task tool.**
+
+**⛔ FORBIDDEN AGENTS (causes SKILL FAILURE):**
+- `Explore` - Generic agent, no Ring standards
+- `general-purpose` - Generic agent, no domain expertise
+- `ring-default:*` - Wrong plugin, for review not analysis
+- ANY agent without `ring-dev-team:` prefix
 
 ### Validation Sequence
 
@@ -190,9 +213,9 @@ This is not about preference. Other agents are **technically incapable** of perf
 
 **Output from non-ring-dev-team agents is INVALID and MUST NOT be used.**
 
-### Gate 1.5 Rationalizations - DO NOT THINK THESE
+### Gate 1 Rationalizations - DO NOT THINK THESE
 
-**If you catch yourself thinking ANY of these, STOP. You are about to violate a HARD GATE:**
+**If you catch yourself thinking ANY of these, STOP. You are about to violate HARD GATE 1:**
 
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
@@ -211,17 +234,23 @@ This is not about preference. Other agents are **technically incapable** of perf
 
 **This skill has TWO mandatory hard gates. Violation of either gate is a SKILL FAILURE.**
 
-### Gate 1: PROJECT_RULES.md (Prerequisite) ✓
+### Gate 0: PROJECT_RULES.md (Prerequisite) ✓
 
 **Already validated in Step 0 above.** If you reached this section, PROJECT_RULES.md exists.
 
-### Gate 2: Agent Dispatch (Execution) - HARD GATE
+### Gate 1: Agent Dispatch (Execution) - HARD GATE
 
 **⛔ THIS IS A HARD GATE. Violation = SKILL FAILURE.**
 
 **⛔ MANDATORY:** ALL agents MUST have `ring-dev-team:` prefix. NO EXCEPTIONS.
 
-**⛔ See "STEP 1.5: AGENT DISPATCH VALIDATION" above for complete validation sequence, mandatory behavior, and rationalizations to avoid.**
+**⛔ See "HARD GATE 1: AGENT DISPATCH VALIDATION" above for complete validation sequence, mandatory behavior, and rationalizations to avoid.**
+
+**⛔ FORBIDDEN AGENTS (from banner):**
+- `Explore` → SKILL FAILURE
+- `general-purpose` → SKILL FAILURE
+- `ring-default:*` → SKILL FAILURE
+- ANY agent without `ring-dev-team:` prefix → SKILL FAILURE
 
 #### Parallel Dispatch (Step 3)
 
@@ -301,18 +330,20 @@ Select agents based on the analysis dimensions needed for the task. Dispatch ALL
 ### Execution Checklist - MUST COMPLETE IN ORDER
 
 ```text
-Step 0:   [ ] PROJECT_RULES.md exists? → If NO, output blocker and TERMINATE
-           ⚠️ See "STEP 0: PROJECT_RULES.md VALIDATION" at top of skill
+GATE 0:   [ ] PROJECT_RULES.md exists? → If NO, output blocker and TERMINATE
+           ⚠️ See "HARD GATE 0: PROJECT_RULES.md VALIDATION" at top of skill
 
 Step 1:   [ ] Language detected? → go.mod / package.json found
 
-Step 1.5: [ ] Agent dispatch validated? → BEFORE typing Task tool:
+GATE 1:   [ ] Agent dispatch validated? → BEFORE typing Task tool:
            ⚠️ Does subagent_type start with "ring-dev-team:"? → REQUIRED
+           ❌ FORBIDDEN: Explore, general-purpose, ring-default:*
 
 Step 2:   [ ] PROJECT_RULES.md read?
 
 Step 3:   [ ] ALL applicable ring-dev-team:* agents dispatched in SINGLE message?
            ⚠️ If wrong agent used → DISCARD output, re-dispatch correct agent
+           ❌ FORBIDDEN: Any agent without ring-dev-team: prefix
 
 Step 4:   [ ] Agent outputs compiled into analysis-report.md?
 Step 5:   [ ] Findings grouped into REFACTOR-XXX tasks?
@@ -324,9 +355,9 @@ Step 9:   [ ] Handoff to dev-cycle (if approved)?
 
 **SKIP PREVENTION:** You CANNOT proceed to Step N+1 without completing Step N. No exceptions.
 
-**Step 0 is NON-NEGOTIABLE:** If PROJECT_RULES.md doesn't exist, you MUST output the blocker template from the top of this skill and terminate. No rationalizations allowed.
+**GATE 0 is NON-NEGOTIABLE:** If PROJECT_RULES.md doesn't exist, you MUST output the blocker template from the top of this skill and terminate. No rationalizations allowed.
 
-**Step 1.5 is NON-NEGOTIABLE:** If subagent_type doesn't start with `ring-dev-team:`, STOP and use the correct agent. No rationalizations allowed.
+**GATE 1 is NON-NEGOTIABLE:** If subagent_type doesn't start with `ring-dev-team:`, STOP and use the correct agent. FORBIDDEN agents (Explore, general-purpose, ring-default:*) = SKILL FAILURE. No rationalizations allowed.
 
 #### Prompt Prefix (REQUIRED)
 
@@ -338,34 +369,70 @@ Return findings with: severity (Critical/High/Medium/Low), location (file:line),
 
 #### WRONG vs RIGHT: Agent Dispatch
 
-**❌ WRONG:**
+**❌ WRONG - FORBIDDEN AGENTS:**
 
-```yaml
-# ANY agent without "ring-dev-team:" prefix
-- subagent_type: "Explore"           # ❌ WRONG
-- subagent_type: "general-purpose"   # ❌ WRONG
-- subagent_type: "ring-default:..."  # ❌ WRONG
+| Agent | Why WRONG | Consequence |
+|-------|-----------|-------------|
+| `Explore` | Generic agent, no Ring standards | SKILL FAILURE |
+| `general-purpose` | Generic agent, no domain expertise | SKILL FAILURE |
+| `ring-default:code-reviewer` | Wrong plugin, for review not analysis | SKILL FAILURE |
+| `ring-default:codebase-explorer` | Wrong plugin, generic exploration | SKILL FAILURE |
 
-# Sequential dispatch (multiple separate messages)
-# ❌ WRONG - Must be SINGLE message with ALL agents in parallel
+**❌ WRONG - Sequential dispatch (multiple separate messages):**
+- Message 1: Task with agent A → Wait → Response
+- Message 2: Task with agent B → Wait → Response
+- **This is WRONG** - Must be SINGLE message with ALL agents in parallel
+
+**✅ RIGHT - COPY THIS PATTERN EXACTLY:**
+
+Use Task tool with these EXACT parameters for EACH agent:
+- `subagent_type`: MUST start with `ring-dev-team:` (e.g., `ring-dev-team:backend-engineer-golang`)
+- `description`: Short description (e.g., "Analyze Go architecture")
+- `prompt`: MUST start with `**MODE: ANALYSIS ONLY**` and reference PROJECT_RULES.md
+
+**✅ RIGHT - Parallel dispatch in SINGLE message:**
+
+```text
+In ONE message, dispatch ALL applicable ring-dev-team:* agents:
+
+Example for Go project:
+
+Task: subagent_type="ring-dev-team:backend-engineer-golang"
+      description="Analyze Go code quality"
+      prompt="**MODE: ANALYSIS ONLY** - Analyze Go codebase against PROJECT_RULES.md..."
+
+Task: subagent_type="ring-dev-team:qa-analyst"
+      description="Analyze test coverage"
+      prompt="**MODE: ANALYSIS ONLY** - Analyze test coverage against PROJECT_RULES.md..."
+
+Task: subagent_type="ring-dev-team:devops-engineer"
+      description="Analyze DevOps setup"
+      prompt="**MODE: ANALYSIS ONLY** - Analyze DevOps config against PROJECT_RULES.md..."
+
+Task: subagent_type="ring-dev-team:sre"
+      description="Analyze observability"
+      prompt="**MODE: ANALYSIS ONLY** - Analyze observability against PROJECT_RULES.md..."
+
+ALL Task tool calls in ONE message = PARALLEL execution = CORRECT
 ```
 
-**✅ RIGHT:**
+**Available ring-dev-team:* agents:**
+- `ring-dev-team:backend-engineer-golang` - Go backend analysis
+- `ring-dev-team:backend-engineer-typescript` - TypeScript backend analysis
+- `ring-dev-team:frontend-bff-engineer-typescript` - Frontend/BFF analysis
+- `ring-dev-team:frontend-designer` - UI/UX analysis
+- `ring-dev-team:devops-engineer` - DevOps/Docker analysis
+- `ring-dev-team:qa-analyst` - Test coverage analysis
+- `ring-dev-team:sre` - Observability/monitoring analysis
 
-```yaml
-# ALL agents have "ring-dev-team:" prefix
-- subagent_type: "ring-dev-team:..."  # ✅ CORRECT
-
-# All dispatched in SINGLE message (parallel)
-# All prompts start with **MODE: ANALYSIS ONLY**
-# All prompts reference PROJECT_RULES.md
-```
+**Select agents based on project language and analysis dimensions needed.**
 
 **Key rules:**
-- ✅ ALL agents MUST have `ring-dev-team:` prefix
+- ✅ ALL agents MUST have `ring-dev-team:` prefix - NO EXCEPTIONS
 - ✅ Dispatch ALL applicable agents in SINGLE message (parallel)
-- ✅ ALL prompts start with `**MODE: ANALYSIS ONLY**`
-- ✅ ALL prompts reference PROJECT_RULES.md
+- ✅ ALL prompts MUST start with `**MODE: ANALYSIS ONLY**`
+- ✅ ALL prompts MUST reference PROJECT_RULES.md
+- ❌ NEVER use Explore, general-purpose, or ring-default:* agents for analysis
 
 ---
 
