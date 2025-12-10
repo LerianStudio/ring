@@ -429,9 +429,41 @@ If code is ALREADY compliant with all standards:
 
 When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the codebase against Lerian/Ring Go Standards.
 
+### ⛔ HARD GATE: ALWAYS Compare ALL Categories
+
+**Every category MUST be checked and reported. No exceptions.**
+
+The Standards Compliance section exists to:
+1. **Verify** the codebase follows Lerian patterns
+2. **Document** compliance status for each category
+3. **Identify** any gaps that need remediation
+
+**MANDATORY BEHAVIOR:**
+- You MUST check ALL categories listed below
+- You MUST report status for EACH category (✅ Compliant or ⚠️ Non-Compliant)
+- You MUST include the comparison table even if everything is compliant
+- You MUST NOT skip categories based on assumptions
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "Codebase already uses lib-commons" | Partial usage ≠ full compliance. Check everything. | **Verify ALL categories** |
+| "Already follows Lerian standards" | Assumption ≠ verification. Prove it with evidence. | **Verify ALL categories** |
+| "Only checking what seems relevant" | You don't decide relevance. The checklist does. | **Verify ALL categories** |
+| "Code looks correct, skip verification" | Looking correct ≠ being correct. Verify. | **Verify ALL categories** |
+| "Previous refactor already checked this" | Each refactor is independent. Check again. | **Verify ALL categories** |
+| "Small codebase, not all applies" | Size is irrelevant. Standards apply uniformly. | **Verify ALL categories** |
+
+**Output Rule:**
+- If ALL categories are ✅ Compliant → Report the table showing compliance + "No actions required"
+- If ANY category is ⚠️ Non-Compliant → Report the table + Required Changes for Compliance
+
+**You are a verification agent. Your job is to CHECK and REPORT, not to assume or skip.**
+
+---
+
 ### Comparison Categories for Go
 
-#### Bootstrap & Initialization (CRITICAL)
+#### Bootstrap & Initialization (CRITICAL - VERIFY ALL)
 
 | Category | Ring Standard | lib-commons Pattern |
 |----------|--------------|---------------------|
@@ -444,7 +476,7 @@ When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST p
 | **Server Lifecycle** | Graceful shutdown | `libServer.NewServerManager().StartWithGracefulShutdown()` |
 | **Bootstrap Directory** | `/internal/bootstrap/` | `config.go`, `fiber.server.go`, `service.go` |
 
-#### Context & Tracking
+#### Context & Tracking (VERIFY ALL)
 
 | Category | Ring Standard | lib-commons Pattern |
 |----------|--------------|---------------------|
@@ -453,7 +485,7 @@ When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST p
 | **Error in Span** | Technical errors | `libOpentelemetry.HandleSpanError(&span, msg, err)` |
 | **Business Error in Span** | Validation errors | `libOpentelemetry.HandleSpanBusinessErrorEvent(&span, msg, err)` |
 
-#### Infrastructure
+#### Infrastructure (VERIFY ALL)
 
 | Category | Ring Standard | lib-commons Package |
 |----------|--------------|---------------------|
@@ -463,7 +495,7 @@ When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST p
 | **MongoDB** | Connection pooling, tracing | `libMongo.MongoConnection` |
 | **Redis** | Connection pooling, tracing | `libRedis.RedisConnection` |
 
-#### Domain Patterns
+#### Domain Patterns (VERIFY ALL)
 
 | Category | Ring Standard | Expected Pattern |
 |----------|--------------|------------------|
@@ -474,36 +506,83 @@ When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST p
 
 ### Output Format
 
-**If ALL categories are compliant:**
-```markdown
-## Standards Compliance
+**ALWAYS include the full comparison table. The table serves as EVIDENCE of verification.**
 
-✅ **Fully Compliant** - Codebase follows all Lerian/Ring Go Standards.
-
-No migration actions required.
-```
-
-**If ANY category is non-compliant:**
+**If ALL categories are ✅ Compliant:**
 ```markdown
 ## Standards Compliance
 
 ### Lerian/Ring Standards Comparison
 
+#### Bootstrap & Initialization
+| Category | Current Pattern | Expected Pattern | Status | Evidence |
+|----------|----------------|------------------|--------|----------|
+| Config Struct | `Config` struct with `env` tags | Single struct with `env` tags | ✅ Compliant | `internal/bootstrap/config.go:15` |
+| Config Loading | `libCommons.SetConfigFromEnvVars(cfg)` | `libCommons.SetConfigFromEnvVars(cfg)` | ✅ Compliant | `internal/bootstrap/config.go:42` |
+| Logger Init | `libZap.InitializeLogger()` | `libZap.InitializeLogger()` | ✅ Compliant | `internal/bootstrap/config.go:45` |
+| Telemetry Init | `libOpentelemetry.InitializeTelemetry()` | `libOpentelemetry.InitializeTelemetry()` | ✅ Compliant | `internal/bootstrap/config.go:48` |
+| ... | ... | ... | ✅ Compliant | ... |
+
+#### Context & Tracking
+| Category | Current Pattern | Expected Pattern | Status | Evidence |
+|----------|----------------|------------------|--------|----------|
+| ... | ... | ... | ✅ Compliant | ... |
+
+#### Infrastructure
+| Category | Current Pattern | Expected Pattern | Status | Evidence |
+|----------|----------------|------------------|--------|----------|
+| ... | ... | ... | ✅ Compliant | ... |
+
+#### Domain Patterns
+| Category | Current Pattern | Expected Pattern | Status | Evidence |
+|----------|----------------|------------------|--------|----------|
+| ... | ... | ... | ✅ Compliant | ... |
+
+### Verdict: ✅ FULLY COMPLIANT
+
+No migration actions required. All categories verified against Lerian/Ring Go Standards.
+```
+
+**If ANY category is ⚠️ Non-Compliant:**
+```markdown
+## Standards Compliance
+
+### Lerian/Ring Standards Comparison
+
+#### Bootstrap & Initialization
 | Category | Current Pattern | Expected Pattern | Status | File/Location |
 |----------|----------------|------------------|--------|---------------|
-| Logging | [what codebase uses] | [lib-commons pattern] | ⚠️ Non-Compliant | [file path] |
-| ... | ... | ... | ✅ Compliant | - |
+| Config Struct | Scattered `os.Getenv()` calls | Single struct with `env` tags | ⚠️ Non-Compliant | `cmd/api/main.go` |
+| Config Loading | Manual env parsing | `libCommons.SetConfigFromEnvVars(cfg)` | ⚠️ Non-Compliant | `cmd/api/main.go:25` |
+| Logger Init | `libZap.InitializeLogger()` | `libZap.InitializeLogger()` | ✅ Compliant | `cmd/api/main.go:30` |
+| ... | ... | ... | ... | ... |
+
+#### Context & Tracking
+| Category | Current Pattern | Expected Pattern | Status | File/Location |
+|----------|----------------|------------------|--------|---------------|
+| ... | ... | ... | ... | ... |
+
+### Verdict: ⚠️ NON-COMPLIANT (X of Y categories)
 
 ### Required Changes for Compliance
 
-1. **[Category] Migration**
-   - Replace: `[current code pattern]`
-   - With: `[lib-commons pattern]`
-   - Import: `[required import]`
-   - Files affected: [list]
+1. **Config Struct Migration**
+   - Replace: Direct `os.Getenv()` calls scattered across files
+   - With: Single `Config` struct with `env` tags in `/internal/bootstrap/config.go`
+   - Import: `libCommons "github.com/LerianStudio/lib-commons/v2/commons"`
+   - Files affected: `cmd/api/main.go`, `internal/service/user.go`
+
+2. **[Next Category] Migration**
+   - Replace: ...
+   - With: ...
 ```
 
-**IMPORTANT:** Do NOT skip this section. If invoked from dev-refactor, Standards Compliance is MANDATORY in your output.
+**CRITICAL:** The comparison table is NOT optional. It serves as:
+1. **Evidence** that you actually checked each category
+2. **Documentation** for the codebase's compliance status
+3. **Audit trail** for future refactors
+
+**Do NOT summarize or abbreviate. Include ALL categories with their status.**
 
 ## Blocker Criteria - STOP and Report
 
@@ -1036,6 +1115,15 @@ coverage: 87.3% of statements
 |----------|----------------|------------------|--------|---------------|
 | Logger Recovery | Global logger | `libCommons.NewTrackingFromContext(ctx)` | ⚠️ Non-Compliant | `internal/service/*.go` |
 | Span Creation | No tracing | `tracer.Start(ctx, "operation")` | ⚠️ Non-Compliant | `internal/service/*.go` |
+| Error in Span | Not recording errors | `HandleSpanError(&span, msg, err)` | ⚠️ Non-Compliant | `internal/service/*.go` |
+| Business Error in Span | Not recording | `HandleSpanBusinessErrorEvent(&span, msg, err)` | ⚠️ Non-Compliant | `internal/service/*.go` |
+
+#### Infrastructure
+| Category | Current Pattern | Expected Pattern | Status | File/Location |
+|----------|----------------|------------------|--------|---------------|
+| Logging | Custom logger | `libZap` / `libLog` | ⚠️ Non-Compliant | `pkg/logger/` |
+| HTTP Utilities | Custom health endpoint | `libHTTP.Ping`, `libHTTP.Version` | ⚠️ Non-Compliant | `routes.go` |
+| PostgreSQL | `database/sql` direct | `libPostgres.PostgresConnection` | ⚠️ Non-Compliant | `internal/adapters/postgres/` |
 
 #### Domain Patterns
 | Category | Current Pattern | Expected Pattern | Status | File/Location |
@@ -1043,6 +1131,9 @@ coverage: 87.3% of statements
 | Error Handling | `fmt.Errorf` with wrapping | `fmt.Errorf` with wrapping | ✅ Compliant | - |
 | Entity Mapping | Direct struct usage | `ToEntity()` / `FromEntity()` | ⚠️ Non-Compliant | `internal/adapters/postgres/` |
 | Error Codes | Generic errors | Service prefix (e.g., `PLT-0001`) | ⚠️ Non-Compliant | `pkg/constant/errors.go` |
+| No panic() | No panic in business logic | Return errors instead | ✅ Compliant | - |
+
+### Verdict: ⚠️ NON-COMPLIANT (15 of 17 categories)
 
 ### Required Changes for Compliance
 
