@@ -777,6 +777,44 @@ Tests: 3 passed | Coverage: 72%
 **BLOCKED** - Return to Gate 0 to add tests for uncovered code listed above.
 ```
 
+## Example Output (Standards Compliance - Non-Compliant)
+
+```markdown
+## Standards Compliance
+
+### Lerian/Ring Standards Comparison
+
+| Category | Current Pattern | Expected Pattern | Status | File/Location |
+|----------|----------------|------------------|--------|---------------|
+| Test Isolation | Shared database state | Independent test fixtures | ⚠️ Non-Compliant | `tests/integration/**/*.test.ts` |
+| Coverage | 65% | ≥80% | ⚠️ Non-Compliant | Project-wide |
+| Naming | Various patterns | `describe/it('should X when Y')` | ✅ Compliant | - |
+| TDD | Some tests lack RED phase | RED-GREEN-REFACTOR cycle | ⚠️ Non-Compliant | `tests/services/**/*.test.ts` |
+| Mocking | Mocks database | Use test fixtures | ⚠️ Non-Compliant | `tests/repositories/**/*.test.ts` |
+
+### Required Changes for Compliance
+
+1. **Test Isolation Fix**
+   - Replace: Shared database state in `beforeAll`/`afterAll`
+   - With: Independent test fixtures per test using factory functions
+   - Files affected: `tests/integration/user.test.ts`, `tests/integration/order.test.ts`
+
+2. **Coverage Improvement**
+   - Current: 65% statement coverage
+   - Target: ≥80% statement coverage
+   - Priority files: `src/services/payment.ts` (0%), `src/utils/validation.ts` (45%)
+
+3. **TDD Compliance**
+   - Issue: Tests written after implementation (no RED phase evidence)
+   - Fix: For new features, commit failing test before implementation
+   - Files affected: `tests/services/notification.test.ts`
+
+4. **Mock Strategy Fix**
+   - Replace: `jest.mock('../repositories/userRepository')`
+   - With: Test fixtures with real repository against test database
+   - Files affected: `tests/repositories/user.repository.test.ts`
+```
+
 ## What This Agent Does NOT Handle
 
 - Application code development (use `ring-dev-team:backend-engineer-golang`, `ring-dev-team:backend-engineer-typescript`, or `ring-dev-team:frontend-bff-engineer-typescript`)
