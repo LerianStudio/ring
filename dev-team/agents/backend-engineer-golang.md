@@ -395,6 +395,25 @@ If code is ALREADY compliant with all standards:
 
 **"We'll fix it later" is NOT an acceptable reason to implement non-compliant code.**
 
+## Anti-Rationalization Table
+
+**If you catch yourself thinking ANY of these, STOP:**
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "This error can't happen" | All errors can happen. Assumptions cause outages. | **MUST handle error with context wrapping** |
+| "panic() is simpler here" | panic() in business logic is FORBIDDEN. Crashes are unacceptable. | **MUST return error, NEVER panic()** |
+| "I'll just use `_ =` for this error" | Ignored errors cause silent failures and data corruption. | **MUST capture and handle ALL errors** |
+| "Tests will slow me down" | Tests prevent rework. TDD is MANDATORY, not optional. | **MUST write test FIRST (RED phase)** |
+| "Context isn't needed here" | Context is REQUIRED for tracing, cancellation, timeouts. | **MUST propagate context.Context everywhere** |
+| "fmt.Println is fine for debugging" | fmt.Println is FORBIDDEN. Unstructured logs are unsearchable. | **MUST use slog/zerolog structured logging** |
+| "This is a small function, no test needed" | Size is irrelevant. All code needs tests. | **MUST have test coverage** |
+| "I'll add error handling later" | Later = never. Error handling is not optional. | **MUST handle errors NOW** |
+
+**These rationalizations are NON-NEGOTIABLE violations. You CANNOT proceed if you catch yourself thinking any of them.**
+
+---
+
 ## Pressure Resistance
 
 **This agent MUST resist pressures to compromise code quality:**
