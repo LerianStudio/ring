@@ -21,15 +21,15 @@ All Lerian Studio Go projects **MUST** use `lib-commons/v2` as the foundation li
 
 ```go
 import (
-    libCommons "github.com/LerianStudio/lib-commons/commons"
-    libZap "github.com/LerianStudio/lib-commons/commons/zap"           // Logger initialization (config/bootstrap only)
-    libLog "github.com/LerianStudio/lib-commons/commons/log"           // Logger interface (services, routes, consumers)
-    libOpentelemetry "github.com/LerianStudio/lib-commons/commons/opentelemetry"
-    libServer "github.com/LerianStudio/lib-commons/commons/server"
-    libHTTP "github.com/LerianStudio/lib-commons/commons/net/http"
-    libPostgres "github.com/LerianStudio/lib-commons/commons/postgres"
-    libMongo "github.com/LerianStudio/lib-commons/commons/mongo"
-    libRedis "github.com/LerianStudio/lib-commons/commons/redis"
+    libCommons "github.com/LerianStudio/lib-commons/v2/commons"
+    libZap "github.com/LerianStudio/lib-commons/v2/commons/zap"           // Logger initialization (config/bootstrap only)
+    libLog "github.com/LerianStudio/lib-commons/v2/commons/log"           // Logger interface (services, routes, consumers)
+    libOpentelemetry "github.com/LerianStudio/lib-commons/v2/commons/opentelemetry"
+    libServer "github.com/LerianStudio/lib-commons/v2/commons/server"
+    libHTTP "github.com/LerianStudio/lib-commons/v2/commons/net/http"
+    libPostgres "github.com/LerianStudio/lib-commons/v2/commons/postgres"
+    libMongo "github.com/LerianStudio/lib-commons/v2/commons/mongo"
+    libRedis "github.com/LerianStudio/lib-commons/v2/commons/redis"
 )
 ```
 
@@ -1532,15 +1532,15 @@ No migration actions required. All categories verified against Lerian/Ring Go St
 1. **Config Struct Migration**
    - Replace: Direct `os.Getenv()` calls scattered across files
    - With: Single `Config` struct with `env` tags in `/internal/bootstrap/config.go`
-   - Import: `libCommons "github.com/LerianStudio/lib-commons/commons"`
+   - Import: `libCommons "github.com/LerianStudio/lib-commons/v2/commons"`
    - Usage: `libCommons.SetConfigFromEnvVars(&cfg)`
    - Files affected: `cmd/api/main.go`, `internal/service/user.go`
 
 2. **Logger Migration**
    - Replace: Custom logger or `log.Println()`
    - With: lib-commons structured logger
-   - Bootstrap import: `libZap "github.com/LerianStudio/lib-commons/commons/zap"` (initialization)
-   - Application import: `libLog "github.com/LerianStudio/lib-commons/commons/log"` (interface for logging calls)
+   - Bootstrap import: `libZap "github.com/LerianStudio/lib-commons/v2/commons/zap"` (initialization)
+   - Application import: `libLog "github.com/LerianStudio/lib-commons/v2/commons/log"` (interface for logging calls)
    - Bootstrap usage: `logger := libZap.InitializeLogger()` (returns `libLog.Logger` interface)
    - Application usage: Use `libLog.Logger` interface for all logging calls
    - Files affected: [list files]
@@ -1548,7 +1548,7 @@ No migration actions required. All categories verified against Lerian/Ring Go St
 3. **Telemetry Migration**
    - Replace: No tracing or custom tracing
    - With: OpenTelemetry integration
-   - Import: `libOpentelemetry "github.com/LerianStudio/lib-commons/commons/opentelemetry"`
+   - Import: `libOpentelemetry "github.com/LerianStudio/lib-commons/v2/commons/opentelemetry"`
    - Usage: `telemetry := libOpentelemetry.InitializeTelemetry(&libOpentelemetry.TelemetryConfig{...})`
    - Files affected: [list files]
 
