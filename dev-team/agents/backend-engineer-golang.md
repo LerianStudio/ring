@@ -550,6 +550,7 @@ import (
 ### Lerian/Ring Standards Comparison
 
 #### Bootstrap & Initialization
+
 | Category | Current Pattern | Expected Pattern | Status | Evidence |
 |----------|----------------|------------------|--------|----------|
 | Config Struct | `Config` struct with `env` tags | Single struct with `env` tags | ✅ Compliant | `internal/bootstrap/config.go:15` |
@@ -559,16 +560,19 @@ import (
 | ... | ... | ... | ✅ Compliant | ... |
 
 #### Context & Tracking
+
 | Category | Current Pattern | Expected Pattern | Status | Evidence |
 |----------|----------------|------------------|--------|----------|
 | ... | ... | ... | ✅ Compliant | ... |
 
 #### Infrastructure
+
 | Category | Current Pattern | Expected Pattern | Status | Evidence |
 |----------|----------------|------------------|--------|----------|
 | ... | ... | ... | ✅ Compliant | ... |
 
 #### Domain Patterns
+
 | Category | Current Pattern | Expected Pattern | Status | Evidence |
 |----------|----------------|------------------|--------|----------|
 | ... | ... | ... | ✅ Compliant | ... |
@@ -585,6 +589,7 @@ No migration actions required. All categories verified against Lerian/Ring Go St
 ### Lerian/Ring Standards Comparison
 
 #### Bootstrap & Initialization
+
 | Category | Current Pattern | Expected Pattern | Status | File/Location |
 |----------|----------------|------------------|--------|---------------|
 | Config Struct | Scattered `os.Getenv()` calls | Single struct with `env` tags | ⚠️ Non-Compliant | `cmd/api/main.go` |
@@ -593,6 +598,7 @@ No migration actions required. All categories verified against Lerian/Ring Go St
 | ... | ... | ... | ... | ... |
 
 #### Context & Tracking
+
 | Category | Current Pattern | Expected Pattern | Status | File/Location |
 |----------|----------------|------------------|--------|---------------|
 | ... | ... | ... | ... | ... |
@@ -1152,6 +1158,7 @@ coverage: 87.3% of statements
 ### Lerian/Ring Standards Comparison
 
 #### Bootstrap & Initialization
+
 | Category | Current Pattern | Expected Pattern | Status | File/Location |
 |----------|----------------|------------------|--------|---------------|
 | Config Struct | Scattered `os.Getenv()` calls | Single struct with `env` tags | ⚠️ Non-Compliant | `internal/` |
@@ -1163,6 +1170,7 @@ coverage: 87.3% of statements
 | Bootstrap Directory | Code in `cmd/` | `/internal/bootstrap/` structure | ⚠️ Non-Compliant | - |
 
 #### Context & Tracking
+
 | Category | Current Pattern | Expected Pattern | Status | File/Location |
 |----------|----------------|------------------|--------|---------------|
 | Logger Recovery | Global logger | `commons.NewTrackingFromContext(ctx)` | ⚠️ Non-Compliant | `internal/service/*.go` |
@@ -1171,6 +1179,7 @@ coverage: 87.3% of statements
 | Business Error in Span | Not recording | `opentelemetry.HandleSpanBusinessErrorEvent(&span, msg, err)` | ⚠️ Non-Compliant | `internal/service/*.go` |
 
 #### Infrastructure
+
 | Category | Current Pattern | Expected Pattern | Status | File/Location |
 |----------|----------------|------------------|--------|---------------|
 | Logging | Custom logger | `zap.InitializeLogger()` → `log.Logger` | ⚠️ Non-Compliant | `pkg/logger/` |
@@ -1178,6 +1187,7 @@ coverage: 87.3% of statements
 | PostgreSQL | `database/sql` direct | `postgres.PostgresConnection` | ⚠️ Non-Compliant | `internal/adapters/postgres/` |
 
 #### Domain Patterns
+
 | Category | Current Pattern | Expected Pattern | Status | File/Location |
 |----------|----------------|------------------|--------|---------------|
 | Error Handling | `fmt.Errorf` with wrapping | `fmt.Errorf` with wrapping | ✅ Compliant | - |
