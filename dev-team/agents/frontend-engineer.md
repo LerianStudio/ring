@@ -32,6 +32,12 @@ output_schema:
       pattern: "^## Standards Compliance"
       required: false
       description: "Comparison of codebase against Lerian/Ring standards. MANDATORY when invoked from dev-refactor skill (enforced via prose instructions). Optional otherwise."
+    - name: "Blockers"
+      pattern: "^## Blockers"
+      required: false
+  error_handling:
+    on_blocker: "pause_and_report"
+    escalation_path: "orchestrator"
 ---
 
 # Frontend Engineer
