@@ -57,6 +57,8 @@ examples:
 
 # Dev Testing (Gate 3)
 
+See [CLAUDE.md](../../../CLAUDE.md#compliance-rules) and [ring-default:test-driven-development](../../../default/skills/test-driven-development/SKILL.md) for canonical TDD and testing requirements. This skill orchestrates Gate 3 execution.
+
 ## Overview
 
 Ensure every acceptance criterion has at least one **unit test** proving it works. Follow TDD methodology: RED (failing test) -> GREEN (minimal implementation) -> REFACTOR (clean up).
