@@ -473,6 +473,22 @@ When reporting infrastructure issues:
 
 **"We'll fix it later" is NOT an acceptable reason to deploy non-compliant infrastructure.**
 
+## Anti-Rationalization Table
+
+**If you catch yourself thinking ANY of these, STOP:**
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "Small project, skip multi-stage build" | Size doesn't reduce bloat risk. | **Use multi-stage builds** |
+| "Dev environment, root user is fine" | Dev ≠ exception. Security patterns everywhere. | **Configure non-root USER** |
+| "I'll pin versions later" | Later = never. :latest breaks builds. | **Pin versions NOW** |
+| "Secret in env file is temporary" | Temporary secrets get committed. | **Use secrets manager** |
+| "Health checks are optional for now" | Orchestration breaks without them. | **Add health checks** |
+| "Resource limits not needed locally" | Local = prod patterns. Train correctly. | **Define resource limits** |
+| "Security scan slows CI" | Slow CI > vulnerable production. | **Run security scans** |
+
+---
+
 ## Pressure Resistance
 
 **When users pressure you to skip standards, respond firmly:**
