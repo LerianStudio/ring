@@ -58,6 +58,8 @@ examples:
 
 **Before ANY SRE validation, you MUST load Ring SRE standards:**
 
+See [CLAUDE.md](../../../CLAUDE.md#agent-modification-verification-mandatory) and [dev-team/docs/standards/sre.md](../../docs/standards/sre.md) for canonical requirements. This section summarizes the loading process.
+
 **MANDATORY ACTION:** You MUST use the WebFetch tool NOW:
 
 | Parameter | Value |
