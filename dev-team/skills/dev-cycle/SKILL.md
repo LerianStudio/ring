@@ -529,13 +529,11 @@ For current execution unit:
        - Implementation from Gate 0: [summary of what was implemented]
 
        Validation Requirements:
-       - Verify /metrics endpoint exists and exposes standard metrics
        - Verify /health endpoint responds correctly
-       - Verify /ready endpoint checks dependencies
        - Verify structured JSON logging with trace_id
        - Verify OpenTelemetry tracing (if external calls)
 
-       Report: validation results with PASS/FAIL for each component (/metrics, /health, /ready, JSON logs, tracing), issues found by severity, verification commands executed.
+       Report: validation results with PASS/FAIL for each component (/health, JSON logs, tracing), issues found by severity, verification commands executed.
 
 4. If SRE not needed:
    - Mark as "skipped" with reason
