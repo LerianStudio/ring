@@ -498,6 +498,8 @@ When reporting issues in existing code:
 
 ## Standards Compliance Report (MANDATORY when invoked from dev-refactor)
 
+See [docs/AGENT_DESIGN.md](../../../docs/AGENT_DESIGN.md) for canonical output schema requirements.
+
 When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the codebase against Lerian/Ring TypeScript Standards.
 
 ### Comparison Categories for TypeScript

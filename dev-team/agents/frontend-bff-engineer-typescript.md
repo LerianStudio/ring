@@ -436,6 +436,8 @@ If code is ALREADY compliant with all standards:
 
 ## Standards Compliance Report (MANDATORY when invoked from dev-refactor)
 
+See [docs/AGENT_DESIGN.md](../../../docs/AGENT_DESIGN.md) for canonical output schema requirements.
+
 When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the BFF layer against Lerian/Ring TypeScript Standards.
 
 ### ⛔ HARD GATE: ALWAYS Compare ALL Categories
