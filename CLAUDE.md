@@ -2,6 +2,278 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+---
+
+## ⛔ CRITICAL RULES (READ FIRST)
+
+**These rules are NON-NEGOTIABLE. They MUST be followed for EVERY task.**
+
+### 1. Agent Modification = Mandatory Verification
+When creating or modifying ANY agent in `*/agents/*.md`:
+- **MUST** verify agent has ALL required sections (see "Agent Modification Verification")
+- **MUST** use STRONG language (MUST, REQUIRED, CANNOT, FORBIDDEN)
+- **MUST** include anti-rationalization tables
+- If ANY section is missing → Agent is INCOMPLETE
+
+### 2. Agents are EXECUTORS, Not DECISION-MAKERS
+- Agents **VERIFY**, they do NOT **ASSUME**
+- Agents **REPORT** blockers, they do NOT **SOLVE** ambiguity autonomously
+- Agents **FOLLOW** gates, they do NOT **SKIP** gates
+- Agents **ASK** when uncertain, they do NOT **GUESS**
+
+### 3. Anti-Patterns (NEVER Do These)
+1. **NEVER skip using-ring** - It's mandatory, not optional
+2. **NEVER run reviewers sequentially** - Always dispatch in parallel
+3. **NEVER skip TDD's RED phase** - Test must fail before implementation
+4. **NEVER ignore skill when applicable** - "Simple task" is not an excuse
+5. **NEVER use panic() in Go** - Error handling required
+6. **NEVER commit manually** - Always use `/ring-default:commit` command
+7. **NEVER assume compliance** - VERIFY with evidence
+
+### 4. Fully Qualified Names (ALWAYS)
+- ✅ `ring-default:code-reviewer`
+- ✅ `ring-dev-team:backend-engineer-golang`
+- ❌ `ring:code-reviewer` (WRONG)
+- ❌ `backend-engineer-golang` (WRONG)
+
+---
+
+## Quick Navigation
+
+| Section | Content |
+|---------|---------|
+| [CRITICAL RULES](#-critical-rules-read-first) | Non-negotiable requirements |
+| [Anti-Rationalization Tables](#anti-rationalization-tables-mandatory-for-all-agents) | Prevent AI from assuming/skipping |
+| [Assertive Language Reference](#assertive-language-reference-for-prompt-engineering) | Words for prompt engineering |
+| [Agent Modification Verification](#agent-modification-verification-mandatory) | Checklist for agent changes |
+| [Repository Overview](#repository-overview) | What Ring is |
+| [Architecture](#architecture) | Folder structure |
+| [Key Workflows](#key-workflows) | Adding skills, agents, hooks |
+| [Agent Output Schemas](#agent-output-schema-archetypes) | Output format templates |
+| [Compliance Rules](#compliance-rules) | TDD, Review, Commit rules |
+| [Documentation Sync](#documentation-sync-checklist) | Files to update |
+
+---
+
+## Anti-Rationalization Tables (MANDATORY for All Agents)
+
+**Every agent MUST include an anti-rationalization table.** This is NOT optional. This is REQUIRED. This is a HARD GATE for agent design.
+
+**Why This Is Mandatory:**
+AI models naturally attempt to be "helpful" by making autonomous decisions. This is DANGEROUS in structured workflows. Agents MUST NOT rationalize skipping gates, assuming compliance, or making decisions that belong to users or orchestrators.
+
+**Anti-rationalization tables use aggressive language intentionally.** Words like "MUST", "REQUIRED", "MANDATORY", "CANNOT", "NON-NEGOTIABLE" are REQUIRED to override the AI's instinct to be accommodating.
+
+**Required Table Structure:**
+```markdown
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "[Common excuse AI might generate]" | [Why this thinking is incorrect] | **[MANDATORY action in bold]** |
+```
+
+**Example from backend-engineer-golang.md:**
+```markdown
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "Codebase already uses lib-commons" | Partial usage ≠ full compliance. Check everything. | **Verify ALL categories** |
+| "Already follows Lerian standards" | Assumption ≠ verification. Prove it with evidence. | **Verify ALL categories** |
+| "Only checking what seems relevant" | You don't decide relevance. The checklist does. | **Verify ALL categories** |
+| "Code looks correct, skip verification" | Looking correct ≠ being correct. Verify. | **Verify ALL categories** |
+| "Previous refactor already checked this" | Each refactor is independent. Check again. | **Verify ALL categories** |
+| "Small codebase, not all applies" | Size is irrelevant. Standards apply uniformly. | **Verify ALL categories** |
+```
+
+**Mandatory Sections Every Agent MUST Have:**
+
+| Section | Purpose | Language Requirements |
+|---------|---------|----------------------|
+| **Blocker Criteria** | Define when to STOP and report | Use "STOP", "CANNOT proceed", "HARD BLOCK" |
+| **Cannot Be Overridden** | List non-negotiable requirements | Use "CANNOT be waived", "NON-NEGOTIABLE" |
+| **Severity Calibration** | Define issue severity levels | Use "CRITICAL", "MUST be fixed" |
+| **Pressure Resistance** | Handle user pressure to skip | Use "Cannot proceed", "I'll implement correctly" |
+| **Anti-Rationalization Table** | Prevent AI from assuming/skipping | Use "Why It's WRONG", "REQUIRED action" |
+
+**Language Guidelines for Agent Prompts:**
+
+| Weak (AVOID) | Strong (REQUIRED) |
+|--------------|-------------------|
+| "You should check..." | "You MUST check..." |
+| "It's recommended to..." | "It is REQUIRED to..." |
+| "Consider verifying..." | "MANDATORY: Verify..." |
+| "You can skip if..." | "You CANNOT skip. No exceptions." |
+| "Optionally include..." | "This section is NON-NEGOTIABLE." |
+| "Try to follow..." | "HARD GATE: You will follow..." |
+
+**If an agent lacks anti-rationalization tables → The agent is INCOMPLETE and MUST be updated.**
+
+---
+
+## Assertive Language Reference (For Prompt Engineering)
+
+**Use these words and phrases to write effective AI instructions that prevent rationalization and ensure compliance.**
+
+### Obligation & Requirement Words
+
+| Word/Phrase | Usage | Example |
+|-------------|-------|---------|
+| **MUST** | Absolute requirement | "You MUST verify all categories" |
+| **REQUIRED** | Mandatory action | "Standards compliance is REQUIRED" |
+| **MANDATORY** | Non-optional | "MANDATORY: Read PROJECT_RULES.md first" |
+| **SHALL** | Formal obligation | "Agent SHALL report all blockers" |
+| **WILL** | Definite action | "You WILL follow this checklist" |
+| **ALWAYS** | Every time, no exceptions | "ALWAYS check before proceeding" |
+
+### Prohibition Words
+
+| Word/Phrase | Usage | Example |
+|-------------|-------|---------|
+| **MUST NOT** | Absolute prohibition | "You MUST NOT skip verification" |
+| **CANNOT** | Inability/prohibition | "You CANNOT proceed without approval" |
+| **NEVER** | Zero tolerance | "NEVER assume compliance" |
+| **FORBIDDEN** | Explicitly banned | "Using `any` type is FORBIDDEN" |
+| **DO NOT** | Direct prohibition | "DO NOT make autonomous decisions" |
+| **PROHIBITED** | Not allowed | "Skipping gates is PROHIBITED" |
+
+### Enforcement Phrases
+
+| Phrase | When to Use | Example |
+|--------|-------------|---------|
+| **HARD GATE** | Checkpoint that blocks progress | "HARD GATE: Verify standards before implementation" |
+| **NON-NEGOTIABLE** | Cannot be changed or waived | "Security checks are NON-NEGOTIABLE" |
+| **NO EXCEPTIONS** | Rule applies universally | "All agents MUST have this section. No exceptions." |
+| **THIS IS NOT OPTIONAL** | Emphasize requirement | "Anti-rationalization tables - this is NOT optional" |
+| **STOP AND REPORT** | Halt execution | "If blocker found → STOP and report" |
+| **BLOCKING REQUIREMENT** | Prevents continuation | "This is a BLOCKING requirement" |
+
+### Consequence Phrases
+
+| Phrase | When to Use | Example |
+|--------|-------------|---------|
+| **If X → STOP** | Define halt condition | "If PROJECT_RULES.md missing → STOP" |
+| **FAILURE TO X = Y** | Define consequences | "Failure to verify = incomplete work" |
+| **WITHOUT X, CANNOT Y** | Define dependencies | "Without standards, cannot proceed" |
+| **X IS INCOMPLETE IF** | Define completeness | "Agent is INCOMPLETE if missing sections" |
+
+### Verification Phrases
+
+| Phrase | When to Use | Example |
+|--------|-------------|---------|
+| **VERIFY** | Confirm something is true | "VERIFY all categories are checked" |
+| **CONFIRM** | Get explicit confirmation | "CONFIRM compliance before proceeding" |
+| **CHECK** | Inspect/examine | "CHECK for FORBIDDEN patterns" |
+| **VALIDATE** | Ensure correctness | "VALIDATE output format" |
+| **PROVE** | Provide evidence | "PROVE compliance with evidence, not assumptions" |
+
+### Anti-Rationalization Phrases
+
+| Phrase | Purpose | Example |
+|--------|---------|---------|
+| **Assumption ≠ Verification** | Prevent assuming | "Assuming compliance ≠ verifying compliance" |
+| **Looking correct ≠ Being correct** | Prevent superficial checks | "Code looking correct ≠ code being correct" |
+| **Partial ≠ Complete** | Prevent incomplete work | "Partial compliance ≠ full compliance" |
+| **You don't decide X** | Remove AI autonomy | "You don't decide relevance. The checklist does." |
+| **Your job is to X, not Y** | Define role boundaries | "Your job is to VERIFY, not to ASSUME" |
+
+### Escalation Phrases
+
+| Phrase | When to Use | Example |
+|--------|---------|---------|
+| **ESCALATE TO** | Define escalation path | "ESCALATE TO orchestrator if blocked" |
+| **REPORT BLOCKER** | Communicate impediment | "REPORT BLOCKER and await user decision" |
+| **AWAIT USER DECISION** | Pause for human input | "STOP. AWAIT USER DECISION on architecture" |
+| **ASK, DO NOT GUESS** | Prevent assumptions | "When uncertain, ASK. Do not GUESS." |
+
+### Template Patterns
+
+**For Mandatory Sections:**
+```markdown
+## Section Name (MANDATORY)
+
+**This section is REQUIRED. It is NOT optional. You MUST include this.**
+```
+
+**For Blocker Conditions:**
+```markdown
+**If [condition] → STOP. DO NOT proceed.**
+
+Action: STOP immediately. Report blocker. AWAIT user decision.
+```
+
+**For Non-Negotiable Rules:**
+```markdown
+| Requirement | Cannot Override Because |
+|-------------|------------------------|
+| **[Rule]** | [Reason]. This is NON-NEGOTIABLE. |
+```
+
+**For Anti-Rationalization:**
+```markdown
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "[Excuse]" | [Why incorrect]. | **[MANDATORY action]** |
+```
+
+**Key Principle:** The more assertive and explicit the language, the less room for AI to rationalize, assume, or make autonomous decisions. Strong language creates clear boundaries.
+
+---
+
+## Agent Modification Verification (MANDATORY)
+
+**HARD GATE: Before creating or modifying ANY agent file, Claude Code MUST verify compliance with this checklist.**
+
+When you receive instructions to create or modify an agent in `*/agents/*.md`:
+
+**Step 1: Read This Section**
+Before ANY agent work, re-read this CLAUDE.md section to understand current requirements.
+
+**Step 2: Verify Agent Has ALL Required Sections**
+
+| Required Section | Pattern to Check | If Missing |
+|------------------|------------------|------------|
+| **Standards Loading (MANDATORY)** | `## Standards Loading` | MUST add with WebFetch instructions |
+| **Blocker Criteria - STOP and Report** | `## Blocker Criteria` | MUST add with decision type table |
+| **Cannot Be Overridden** | `### Cannot Be Overridden` | MUST add with non-negotiable requirements |
+| **Severity Calibration** | `## Severity Calibration` | MUST add with CRITICAL/HIGH/MEDIUM/LOW table |
+| **Pressure Resistance** | `## Pressure Resistance` | MUST add with "User Says / Your Response" table |
+| **Anti-Rationalization Table** | `Rationalization.*Why It's WRONG` | MUST add in Standards Compliance section |
+| **When Implementation is Not Needed** | `## When.*Not Needed` | MUST add with compliance signs |
+| **Standards Compliance Report** | `## Standards Compliance Report` | MUST add for dev-team agents |
+
+**Step 3: Verify Language Strength**
+
+Check agent uses STRONG language, not weak:
+
+```text
+SCAN for weak phrases → REPLACE with strong:
+- "should" → "MUST"
+- "recommended" → "REQUIRED"
+- "consider" → "MANDATORY"
+- "can skip" → "CANNOT skip"
+- "optional" → "NON-NEGOTIABLE"
+- "try to" → "HARD GATE:"
+```
+
+**Step 4: Before Completing Agent Modification**
+
+```text
+CHECKLIST (ALL must be YES):
+[ ] Does agent have Standards Loading section?
+[ ] Does agent have Blocker Criteria table?
+[ ] Does agent have Cannot Be Overridden table?
+[ ] Does agent have Severity Calibration table?
+[ ] Does agent have Pressure Resistance table?
+[ ] Does agent have Anti-Rationalization table?
+[ ] Does agent use STRONG language (MUST, REQUIRED, CANNOT)?
+[ ] Does agent define when to STOP and report?
+[ ] Does agent define non-negotiable requirements?
+
+If ANY checkbox is NO → Agent is INCOMPLETE. Add missing sections.
+```
+
+**This verification is NOT optional. This is a HARD GATE for all agent modifications.**
+
+---
+
 ## Repository Overview
 
 Ring is a comprehensive skills library and workflow system for AI agents that enforces proven software engineering practices through mandatory workflows, parallel code review, and systematic pre-development planning. Currently implemented as a Claude Code plugin marketplace with **5 active plugins**, the skills are agent-agnostic and reusable across different AI systems.
@@ -18,6 +290,8 @@ Ring is a comprehensive skills library and workflow system for AI agents that en
 **Total: 55 skills (22 + 10 + 6 + 10 + 7) across 5 plugins**
 
 The architecture uses markdown-based skill definitions with YAML frontmatter, auto-discovered at session start via hooks, and executed through Claude Code's native Skill/Task tools.
+
+---
 
 ## Installation
 
@@ -76,6 +350,8 @@ cd ~/ring
 ```
 
 See `docs/platforms/` for platform-specific guides.
+
+---
 
 ## Architecture
 
@@ -182,6 +458,8 @@ ring/                                  # Monorepo root
 └── pmm-team/                      # Team-specific skills (reserved)
 ```
 
+---
+
 ## Common Commands
 
 ```bash
@@ -207,6 +485,8 @@ Skill tool: "ring-default:using-ring"              # Load mandatory workflows
 bash default/hooks/session-start.sh      # Test skill loading
 python default/hooks/generate-skills-ref.py # Generate skill overview
 ```
+
+---
 
 ## Key Workflows
 
@@ -339,6 +619,8 @@ Task.parallel([
 ])  # Single message, 3 tool calls
 ```
 
+---
+
 ## Important Patterns
 
 ### Code Organization
@@ -364,7 +646,9 @@ Task.parallel([
   - ❌ Wrong: `backend-engineer-golang` (missing plugin prefix)
 - **Rationale:** Prevents ambiguity in multi-plugin environments
 
-### Agent Output Schema Archetypes
+---
+
+## Agent Output Schema Archetypes
 
 Agents use standard output schema patterns based on their purpose:
 
@@ -492,17 +776,125 @@ output_schema:
 
 **Used by:** `ring-default:write-plan`
 
-### Anti-Patterns to Avoid
-1. **Never skip using-ring** - It's mandatory, not optional
-2. **Never run reviewers sequentially** - Always dispatch in parallel
-3. **Never modify generated skill reference** - Auto-generated from frontmatter
-4. **Never skip TDD's RED phase** - Test must fail before implementation
-5. **Never ignore skill when applicable** - "Simple task" is not an excuse
-6. **Never use panic() in Go** - Error handling required
-7. **Never commit incomplete code** - No "TODO: implement" comments
-8. **Never commit manually** - Always use `/ring-default:commit` command
+---
 
-### Compliance Rules
+## Standards Compliance (Conditional Output Section)
+
+The `ring-dev-team` agents include a **Standards Compliance** output section that is conditionally required based on invocation context.
+
+### Schema Definition
+
+All ring-dev-team agents include this in their `output_schema`:
+
+```yaml
+- name: "Standards Compliance"
+  pattern: "^## Standards Compliance"
+  required: false  # In schema, but MANDATORY when invoked from dev-refactor
+  description: "Comparison of codebase against Lerian/Ring standards. MANDATORY when invoked from dev-refactor skill."
+```
+
+### Conditional Requirement: `invoked_from_dev_refactor`
+
+| Context | Standards Compliance Required | Enforcement |
+|---------|------------------------------|-------------|
+| Direct agent invocation | Optional | Agent may include if relevant |
+| Via `ring-dev-team:dev-cycle` | Optional | Agent may include if relevant |
+| Via `ring-dev-team:dev-refactor` | **MANDATORY** | Prompt includes `MODE: ANALYSIS ONLY` |
+
+**How It's Triggered:**
+1. User invokes `/ring-dev-team:dev-refactor` command
+2. The skill dispatches agents with prompts starting with `**MODE: ANALYSIS ONLY**`
+3. This prompt pattern signals to agents that Standards Compliance output is MANDATORY
+4. Agents load Ring standards via WebFetch and produce comparison tables
+
+**Detection in Agent Prompts:**
+```text
+If prompt contains "**MODE: ANALYSIS ONLY**":
+  → Standards Compliance section is MANDATORY
+  → Agent MUST load Ring standards via WebFetch
+  → Agent MUST produce comparison tables
+
+If prompt does NOT contain "**MODE: ANALYSIS ONLY**":
+  → Standards Compliance section is optional
+  → Agent focuses on implementation/other tasks
+```
+
+### Affected Agents
+
+All ring-dev-team agents support Standards Compliance:
+
+| Agent | Standards Source | Categories Checked |
+|-------|------------------|-------------------|
+| `ring-dev-team:backend-engineer-golang` | `golang.md` | lib-commons, Error Handling, Logging, Config |
+| `ring-dev-team:backend-engineer-typescript` | `typescript.md` | Type Safety, Error Handling, Validation |
+| `ring-dev-team:devops-engineer` | `devops.md` | Dockerfile, docker-compose, CI/CD |
+| `ring-dev-team:frontend-bff-engineer-typescript` | `frontend.md` | Component patterns, State management |
+| `ring-dev-team:frontend-designer` | `frontend.md` | Accessibility, Design patterns |
+| `ring-dev-team:qa-analyst` | `qa.md` | Test coverage, Test patterns |
+| `ring-dev-team:sre` | `sre.md` | Health endpoints, Logging, Tracing |
+
+### Output Format Examples
+
+**When ALL categories are compliant:**
+```markdown
+## Standards Compliance
+
+✅ **Fully Compliant** - Codebase follows all Lerian/Ring Standards.
+
+No migration actions required.
+```
+
+**When ANY category is non-compliant:**
+```markdown
+## Standards Compliance
+
+### Lerian/Ring Standards Comparison
+
+| Category | Current Pattern | Expected Pattern | Status | File/Location |
+|----------|----------------|------------------|--------|---------------|
+| Error Handling | Using panic() | Return error | ⚠️ Non-Compliant | handler.go:45 |
+| Logging | Uses fmt.Println | lib-commons/zap | ⚠️ Non-Compliant | service/*.go |
+| Config | os.Getenv direct | SetConfigFromEnvVars() | ⚠️ Non-Compliant | config.go:15 |
+
+### Compliance Summary
+- **Total Violations:** 3
+- **Critical:** 0
+- **High:** 1
+- **Medium:** 2
+- **Low:** 0
+
+### Required Changes for Compliance
+
+1. **Error Handling Migration**
+   - Replace: `panic("error message")`
+   - With: `return fmt.Errorf("context: %w", err)`
+   - Files affected: handler.go, service.go
+
+2. **Logging Migration**
+   - Replace: `fmt.Println("debug info")`
+   - With: `logger.Info("debug info", zap.String("key", "value"))`
+   - Import: `import "github.com/LerianStudio/lib-commons/zap"`
+   - Files affected: internal/service/*.go
+```
+
+### Cross-References
+
+| Document | Location | What It Contains |
+|----------|----------|-----------------|
+| **Skill Definition** | `dev-team/skills/dev-refactor/SKILL.md` | HARD GATES requiring Standards Compliance |
+| **Standards Source** | `dev-team/docs/standards/*.md` | Source of truth for compliance checks |
+| **Agent Definitions** | `dev-team/agents/*.md` | output_schema includes Standards Compliance |
+| **Session Hook** | `dev-team/hooks/session-start.sh` | Injects Standards Compliance guidance |
+
+### Changelog
+
+- **2025-12-11**: Added `invoked_from_dev_refactor` conditional requirement documentation
+- **2025-12-10**: Initial Standards Compliance section added
+
+---
+
+## Compliance Rules
+
 ```bash
 # TDD compliance (default/skills/test-driven-development/SKILL.md:638)
 - Test file must exist before implementation
@@ -528,7 +920,10 @@ output_schema:
 - NEVER use HEREDOC to include trailers in message body
 ```
 
-### Session Context
+---
+
+## Session Context
+
 The system loads at SessionStart (from `default/` plugin):
 1. `default/hooks/session-start.sh` - Loads skill quick reference via `generate-skills-ref.py`
 2. `using-ring` skill - Injected as mandatory workflow
@@ -547,7 +942,9 @@ The system loads at SessionStart (from `default/` plugin):
 - Current git branch: `main`
 - Remote: `github.com/LerianStudio/ring`
 
-### Documentation Sync Checklist
+---
+
+## Documentation Sync Checklist
 
 **IMPORTANT:** When modifying agents, skills, commands, or hooks, check ALL these files for consistency:
 

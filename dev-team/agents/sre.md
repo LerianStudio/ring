@@ -2,10 +2,13 @@
 name: sre
 description: Senior Site Reliability Engineer specialized in VALIDATING observability implementations for high-availability financial systems. Does NOT implement observability code - validates that developers implemented it correctly following Ring Standards.
 model: opus
-version: 1.1.0
-last_updated: 2025-01-25
+version: 1.2.2
+last_updated: 2025-12-11
 type: specialist
 changelog:
+  - 1.2.2: Added required_when condition to Standards Compliance for dev-refactor gate enforcement
+  - 1.2.1: Added Standards Compliance documentation cross-references (CLAUDE.md, MANUAL.md, README.md, ARCHITECTURE.md, session-start.sh)
+  - 1.2.0: Refactored to reference Ring SRE standards via WebFetch, removed duplicated domain standards
   - 1.1.0: Clarified role as VALIDATOR, not IMPLEMENTER. Developers implement observability.
   - 1.0.0: Initial release
 output_schema:
@@ -26,6 +29,13 @@ output_schema:
     - name: "Next Steps"
       pattern: "^## Next Steps"
       required: true
+    - name: "Standards Compliance"
+      pattern: "^## Standards Compliance"
+      required: false
+      required_when:
+        invocation_context: "dev-refactor"
+        prompt_contains: "**MODE: ANALYSIS ONLY**"
+      description: "Comparison of codebase against Lerian/Ring standards. MANDATORY when invoked from dev-refactor skill. Optional otherwise."
     - name: "Blockers"
       pattern: "^## Blockers"
       required: false
@@ -218,6 +228,53 @@ None. This agent cannot proceed until `docs/PROJECT_RULES.md` is created by the 
 
 **You CANNOT extend observability that matches non-compliant patterns. This is non-negotiable.**
 
+## Standards Compliance Report (MANDATORY when invoked from dev-refactor)
+
+When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the observability implementation against Lerian/Ring SRE Standards.
+
+### Comparison Categories for SRE/Observability
+
+| Category | Ring Standard | Expected Pattern |
+|----------|--------------|------------------|
+| **Health Endpoints** | `/health`, `/ready` endpoints | Return JSON with service status |
+| **Logging** | Structured JSON | trace_id, request_id correlation |
+| **Tracing** | OpenTelemetry | Distributed tracing with span context |
+
+**Note:** Metrics cardinality checks (high-cardinality labels, unbounded dimensions) are evaluated under **Tracing** when using OpenTelemetry metrics, or as part of the infrastructure setup in `ring-dev-team:devops-engineer`. Prometheus-specific cardinality concerns are out-of-scope for this comparison.
+
+### Output Format
+
+**If ALL categories are compliant:**
+```markdown
+## Standards Compliance
+
+✅ **Fully Compliant** - Observability follows all Lerian/Ring SRE Standards.
+
+No migration actions required.
+```
+
+**If ANY category is non-compliant:**
+```markdown
+## Standards Compliance
+
+### Lerian/Ring Standards Comparison
+
+| Category | Current Pattern | Expected Pattern | Status | File/Location |
+|----------|----------------|------------------|--------|---------------|
+| Health Endpoints | Missing `/ready` | Both `/health` and `/ready` | ⚠️ Non-Compliant | `cmd/api/main.go` |
+| Logging | Plain text logs | Structured JSON with trace_id | ⚠️ Non-Compliant | `internal/**/*.go` |
+| Tracing | No tracing | OpenTelemetry spans | ⚠️ Non-Compliant | `internal/service/*.go` |
+
+### Required Changes for Compliance
+
+1. **[Category] Fix**
+   - Replace: `[current pattern]`
+   - With: `[Ring standard pattern]`
+   - Files affected: [list]
+```
+
+**IMPORTANT:** Do NOT skip this section. If invoked from dev-refactor, Standards Compliance is MANDATORY in your output.
+
 ### Step 2: Ask Only When Standards Don't Answer
 
 **Ask when standards don't cover:**
@@ -357,302 +414,6 @@ If observability is ALREADY adequate:
 - Non-standard dependencies
 
 **Use defaults for standard services. Don't over-ask.**
-
-## Domain Standards
-
-The following SRE and observability standards MUST be followed:
-
-### Observability Stack
-
-| Component | Recommended Tool | Alternative |
-|-----------|-----------------|-------------|
-| Metrics | Prometheus | DataDog, CloudWatch |
-| Logs | Loki | ELK, Splunk |
-| Traces | Jaeger/Tempo | Zipkin, X-Ray |
-| Dashboards | Grafana | DataDog, New Relic |
-| Alerting | Alertmanager | PagerDuty, OpsGenie |
-
-### Metrics Standards
-
-#### Prometheus Metrics
-
-```yaml
-# prometheus.yml
-global:
-  scrape_interval: 15s
-  evaluation_interval: 15s
-
-scrape_configs:
-  - job_name: 'api'
-    kubernetes_sd_configs:
-      - role: pod
-    relabel_configs:
-      - source_labels: [__meta_kubernetes_pod_label_app]
-        regex: api
-        action: keep
-```
-
-#### Application Metrics
-
-```go
-// Go example with prometheus client
-var (
-    httpRequestsTotal = prometheus.NewCounterVec(
-        prometheus.CounterOpts{
-            Name: "http_requests_total",
-            Help: "Total HTTP requests",
-        },
-        []string{"method", "endpoint", "status"},
-    )
-
-    httpRequestDuration = prometheus.NewHistogramVec(
-        prometheus.HistogramOpts{
-            Name:    "http_request_duration_seconds",
-            Help:    "HTTP request duration",
-            Buckets: []float64{.001, .005, .01, .025, .05, .1, .25, .5, 1},
-        },
-        []string{"method", "endpoint"},
-    )
-)
-```
-
-### SLI/SLO Standards
-
-#### Common SLIs
-
-| Service Type | SLI | Target |
-|--------------|-----|--------|
-| Web API | Request latency p99 | < 200ms |
-| Web API | Error rate | < 0.1% |
-| Web API | Availability | 99.9% |
-| Database | Query latency p99 | < 50ms |
-| Queue | Processing time p99 | < 1s |
-
-#### SLO Definition
-
-```yaml
-# slo.yaml
-apiVersion: sloth.slok.dev/v1
-kind: PrometheusServiceLevel
-metadata:
-  name: api-availability
-spec:
-  service: api
-  slos:
-    - name: requests-availability
-      objective: 99.9
-      sli:
-        events:
-          errorQuery: sum(rate(http_requests_total{status=~"5.."}[5m]))
-          totalQuery: sum(rate(http_requests_total[5m]))
-      alerting:
-        pageAlert:
-          disable: false
-        ticketAlert:
-          disable: false
-```
-
-### Alerting Standards
-
-#### Alert Severity Levels
-
-| Severity | Response Time | Example |
-|----------|---------------|---------|
-| Critical | Immediate (page) | Service down, data loss |
-| High | 1 hour | High error rate, degraded performance |
-| Medium | 4 hours | Elevated latency, disk space warning |
-| Low | Next business day | Certificate expiring, minor anomalies |
-
-#### Alert Template
-
-```yaml
-# alertmanager rules
-groups:
-  - name: api
-    rules:
-      - alert: HighErrorRate
-        expr: |
-          sum(rate(http_requests_total{status=~"5.."}[5m]))
-          /
-          sum(rate(http_requests_total[5m]))
-          > 0.01
-        for: 5m
-        labels:
-          severity: high
-        annotations:
-          summary: "High error rate on {{ $labels.service }}"
-          description: "Error rate is {{ $value | humanizePercentage }}"
-          runbook_url: "https://wiki.example.com/runbooks/high-error-rate"
-
-      - alert: HighLatency
-        expr: |
-          histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m]))
-          > 0.2
-        for: 5m
-        labels:
-          severity: medium
-        annotations:
-          summary: "High latency on {{ $labels.service }}"
-          description: "P99 latency is {{ $value | humanizeDuration }}"
-```
-
-### Logging Standards
-
-#### Structured Log Format
-
-```json
-{
-  "timestamp": "2024-01-15T10:30:00Z",
-  "level": "error",
-  "service": "api",
-  "trace_id": "abc123",
-  "span_id": "def456",
-  "message": "Failed to process request",
-  "error": "connection timeout",
-  "user_id": "usr_123",
-  "latency_ms": 5000
-}
-```
-
-#### Log Levels
-
-| Level | Usage |
-|-------|-------|
-| ERROR | Failures requiring attention |
-| WARN | Potential issues, degradation |
-| INFO | Normal operations, key events |
-| DEBUG | Detailed debugging (disabled in prod) |
-
-### Health Checks
-
-#### Endpoints
-
-```go
-// Required health endpoints
-// GET /health  - Liveness (is the process running?)
-// GET /ready   - Readiness (can it serve traffic?)
-// GET /metrics - Prometheus metrics
-
-func healthHandler(w http.ResponseWriter, r *http.Request) {
-    w.WriteHeader(http.StatusOK)
-    w.Write([]byte("OK"))
-}
-
-func readyHandler(w http.ResponseWriter, r *http.Request) {
-    // Check database connection
-    if err := db.Ping(r.Context()); err != nil {
-        w.WriteHeader(http.StatusServiceUnavailable)
-        return
-    }
-    // Check cache connection
-    if err := cache.Ping(r.Context()); err != nil {
-        w.WriteHeader(http.StatusServiceUnavailable)
-        return
-    }
-    w.WriteHeader(http.StatusOK)
-}
-```
-
-### Grafana Dashboard Standards
-
-#### Required Panels
-
-1. **Overview Row**
-   - Request rate (req/sec)
-   - Error rate (%)
-   - P50/P95/P99 latency
-
-2. **Resources Row**
-   - CPU usage
-   - Memory usage
-   - Pod count
-
-3. **Dependencies Row**
-   - Database latency
-   - Cache hit rate
-   - Queue depth
-
-#### Dashboard Template
-
-```json
-{
-  "annotations": {
-    "list": [
-      {
-        "datasource": "-- Grafana --",
-        "enable": true,
-        "name": "Deployments",
-        "iconColor": "green"
-      }
-    ]
-  },
-  "panels": [
-    {
-      "title": "Request Rate",
-      "type": "stat",
-      "targets": [
-        {
-          "expr": "sum(rate(http_requests_total[5m]))"
-        }
-      ]
-    }
-  ]
-}
-```
-
-### Incident Management
-
-#### Incident Severity
-
-| Severity | Impact | Examples |
-|----------|--------|----------|
-| SEV1 | Complete outage | Service unreachable, data loss |
-| SEV2 | Major degradation | 50%+ users affected |
-| SEV3 | Minor degradation | Feature unavailable, slow performance |
-| SEV4 | No user impact | Internal tooling issues |
-
-#### Post-Mortem Template
-
-```markdown
-# Incident Post-Mortem: [Title]
-
-## Summary
-- **Date**: YYYY-MM-DD
-- **Duration**: X hours
-- **Severity**: SEVX
-- **Impact**: X users affected, X requests failed
-
-## Timeline
-- HH:MM - Alert triggered
-- HH:MM - Investigation started
-- HH:MM - Root cause identified
-- HH:MM - Fix deployed
-- HH:MM - Service recovered
-
-## Root Cause
-[Description of what caused the incident]
-
-## Resolution
-[What was done to fix it]
-
-## Action Items
-- [ ] [Action 1] - Owner - Due date
-- [ ] [Action 2] - Owner - Due date
-```
-
-### SRE Checklist
-
-Before deploying to production:
-
-- [ ] SLIs defined and measured
-- [ ] SLO targets documented
-- [ ] Prometheus metrics exposed
-- [ ] Grafana dashboard created
-- [ ] Alert rules configured
-- [ ] Health endpoints implemented
-- [ ] Structured logging enabled
-- [ ] Runbooks documented
-- [ ] On-call rotation configured
 
 ## Example Output
 

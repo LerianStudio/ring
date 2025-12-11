@@ -2,10 +2,12 @@
 name: frontend-bff-engineer-typescript
 description: Senior BFF (Backend for Frontend) Engineer specialized in Next.js API Routes with Clean Architecture, DDD, and Hexagonal patterns. Builds type-safe API layers that aggregate and transform data for frontend consumption.
 model: opus
-version: 2.1.0
-last_updated: 2025-01-26
+version: 2.1.2
+last_updated: 2025-12-11
 type: specialist
 changelog:
+  - 2.1.2: Added required_when condition to Standards Compliance for dev-refactor gate enforcement
+  - 2.1.1: Added Standards Compliance documentation cross-references (CLAUDE.md, MANUAL.md, README.md, ARCHITECTURE.md, session-start.sh)
   - 2.1.0: Added Standards Loading, Blocker Criteria, Severity Calibration per Go agent standards
   - 2.0.0: Refactored to specification-only format, removed code examples
   - 1.0.0: Initial release - BFF specialist with Clean Architecture, DDD, Inversify DI
@@ -27,6 +29,13 @@ output_schema:
     - name: "Next Steps"
       pattern: "^## Next Steps"
       required: true
+    - name: "Standards Compliance"
+      pattern: "^## Standards Compliance"
+      required: false
+      required_when:
+        invocation_context: "dev-refactor"
+        prompt_contains: "**MODE: ANALYSIS ONLY**"
+      description: "Comparison of codebase against Lerian/Ring standards. MANDATORY when invoked from dev-refactor skill. Optional otherwise."
     - name: "Blockers"
       pattern: "^## Blockers"
       required: false
@@ -423,6 +432,67 @@ If code is ALREADY compliant with all standards:
 - Dependency injection configured
 
 **If compliant → say "no changes needed" and move on.**
+
+## Standards Compliance Report (MANDATORY when invoked from dev-refactor)
+
+When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the BFF layer against Lerian/Ring TypeScript Standards.
+
+### Comparison Categories for BFF/TypeScript
+
+| Category | Ring Standard | lib-commons-js Symbol |
+|----------|--------------|----------------------|
+| **Logging** | Structured JSON logging | `createLogger` from `@lerianstudio/lib-commons-js` |
+| **Error Handling** | Standardized error types | `AppError`, `isAppError` from `@lerianstudio/lib-commons-js` |
+| **HTTP Middleware** | Instrumented middleware | `createExpressMiddleware` from `@lerianstudio/lib-commons-js` |
+| **Graceful Shutdown** | Clean shutdown handling | `startServerWithGracefulShutdown` from `@lerianstudio/lib-commons-js` |
+| **Type Safety** | No `any` types | Use `unknown` with type guards |
+| **Validation** | Runtime type checking | Zod schemas at boundaries |
+| **Architecture** | Clean Architecture | Ports/Adapters, DI containers |
+
+### Output Format
+
+**If ALL categories are compliant:**
+```markdown
+## Standards Compliance
+
+✅ **Fully Compliant** - BFF layer follows all Lerian/Ring TypeScript Standards.
+
+No migration actions required.
+```
+
+**If ANY category is non-compliant:**
+```markdown
+## Standards Compliance
+
+### Lerian/Ring Standards Comparison
+
+| Category | Current Pattern | Expected Pattern | Status | File/Location |
+|----------|----------------|------------------|--------|---------------|
+| Logging | Uses `console.log` | `createLogger` from lib-commons-js | ⚠️ Non-Compliant | `src/app/api/**/*.ts` |
+| ... | ... | ... | ✅ Compliant | - |
+
+### Required Changes for Compliance
+
+1. **Logging Migration**
+   - Replace: `console.log()` / `console.error()`
+   - With: `const logger = createLogger({ service: 'my-bff' })`
+   - Import: `import { createLogger } from '@lerianstudio/lib-commons-js'`
+   - Files affected: [list]
+
+2. **Error Handling Migration**
+   - Replace: Custom error classes or plain `Error`
+   - With: `throw new AppError('message', { code: 'ERR_CODE', statusCode: 400 })`
+   - Import: `import { AppError, isAppError } from '@lerianstudio/lib-commons-js'`
+   - Files affected: [list]
+
+3. **Graceful Shutdown Migration**
+   - Replace: `app.listen(port)`
+   - With: `startServerWithGracefulShutdown(app, { port })`
+   - Import: `import { startServerWithGracefulShutdown } from '@lerianstudio/lib-commons-js'`
+   - Files affected: [list]
+```
+
+**IMPORTANT:** Do NOT skip this section. If invoked from dev-refactor, Standards Compliance is MANDATORY in your output.
 
 ## Blocker Criteria - STOP and Report
 
