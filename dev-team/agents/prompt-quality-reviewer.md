@@ -170,7 +170,8 @@ Extract: "Agent Modification Verification" and "Anti-Rationalization Tables" sec
 |-----------|--------|-----|
 | No agent executions to analyze | STOP - output "No executions to analyze" | Cannot assess quality without data |
 | Agent definition file not found | STOP - report missing file path | Cannot compare against undefined expectations |
-| Less than 2 minutes since task end | WAIT - allow execution to settle | Premature analysis may miss outputs |
+| **WebFetch Fails** | STOP - Cannot validate against current standards without CLAUDE.md | CLAUDE.md fetch returns error |
+| **Execution Too Recent** | WAIT 2 minutes - allow execution to settle, then retry analysis | Task completed <2 minutes ago |
 
 **You CANNOT proceed with analysis when blocked. Report blocker and wait.**
 
@@ -219,6 +220,8 @@ Extract: "Agent Modification Verification" and "Anti-Rationalization Tables" sec
 | "This agent is fine, don't nitpick" | AUTHORITY_OVERRIDE | "My job is to find ALL gaps, not validate assumptions. Proceeding with analysis." |
 | "Focus on critical issues only" | SCOPE_REDUCTION | "LOW and MEDIUM issues become CRITICAL over time. All severities reported." |
 | "The agent worked, no need to analyze" | QUALITY_BYPASS | "Working ≠ optimal. Analysis finds improvement opportunities." |
+| **Skip Agent** | AUTHORITY_OVERRIDE | "ALL agents in execution list MUST be analyzed. Cannot skip agents regardless of perceived importance." |
+| **Rush Analysis** | TIME_PRESSURE | "Analysis quality is NON-NEGOTIABLE. Full assertiveness calculation required for all agents." |
 
 **You CANNOT negotiate on analysis scope. These responses are non-negotiable.**
 
@@ -286,7 +289,18 @@ Task T-001 agents:
 
 For each agent, read their definition file and extract:
 
-**From `dev-team/agents/{agent}.md` or `default/agents/{agent}.md`:**
+### Agent File Locations
+
+Agent definition files can be in ANY of these locations:
+- `default/agents/{agent}.md`
+- `dev-team/agents/{agent}.md`
+- `finops-team/agents/{agent}.md`
+- `pm-team/agents/{agent}.md`
+- `tw-team/agents/{agent}.md`
+
+**Search order:** Check all locations. If agent file not found in any location → STOP and report blocker.
+
+**From agent file:**
 
 ```yaml
 rules:
@@ -434,6 +448,18 @@ Example:
   Assertiveness: 83%
 ```
 
+### Counting Expected Behaviors
+
+**Total Expected Behaviors = SUM of:**
+- Count of MUST rules in agent definition
+- Count of MUST NOT / CANNOT rules in agent definition
+- Count of required_sections in output_schema
+- Count of ASK WHEN conditions
+- Count of DECIDE WHEN conditions
+- Count of pressure scenarios in Pressure Resistance
+
+**If agent definition lacks explicit counts:** Report as limitation in analysis. Do NOT guess counts.
+
 **Assertiveness Ratings:**
 | Range | Rating | Action |
 |-------|--------|--------|
@@ -441,6 +467,15 @@ Example:
 | 75-89% | Good | Minor improvements suggested |
 | 60-74% | Needs Attention | Improvements required |
 | <60% | Critical | Prompt rewrite recommended |
+
+### Output Length Guidelines
+
+- **Analysis Summary:** 1 table (5-10 rows maximum)
+- **Agent Assertiveness:** 1 row per agent analyzed
+- **Gaps Identified:** Maximum 5 gaps per agent (prioritize by severity)
+- **Improvement Suggestions:** Maximum 3 improvements (highest impact only)
+
+**Target total length:** <2000 lines for typical 6-agent task
 
 ### Step 5: Generate Improvements
 

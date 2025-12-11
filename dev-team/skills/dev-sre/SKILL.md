@@ -80,6 +80,40 @@ This skill VALIDATES that observability was correctly implemented by developers:
 2. Issues go back to developers to fix
 3. SRE re-validates after fixes
 
+## Blocker Criteria - STOP and Report
+
+| Decision Type | Scenario | Action | Can User Override? |
+|---------------|----------|--------|-------------------|
+| **HARD BLOCK** | Service lacks /health + /ready + /metrics + JSON logs | STOP. Return to Gate 0. Cannot proceed to Gate 3. | ❌ NO |
+| **HARD BLOCK** | Verification commands not run (no evidence) | STOP. Cannot mark Gate 2 complete without automated verification. | ❌ NO |
+| **HARD BLOCK** | User says "feature complete, add observability later" | STOP. Observability is part of completion. Gate 2 required. | ❌ NO |
+| **HIGH** | Only /health exists, missing /ready or /metrics | Report HIGH severity. Return to developers. | ❌ NO |
+| **MEDIUM** | Logs are fmt.Println/echo, not JSON structured | Report MEDIUM severity. Must fix before Gate 3. | ❌ NO |
+
+## Cannot Be Overridden
+
+**These requirements are NON-NEGOTIABLE and cannot be waived by:**
+
+| Requirement | Cannot Be Waived By | Rationale |
+|-------------|---------------------|-----------|
+| Gate 2 execution | CTO, PM, "MVP" arguments | Observability prevents production blindness |
+| Automated verification | "Developer confirms it works" | Evidence required for Gate 2 PASS |
+| /health + /ready + /metrics + JSON logs | "Health is enough" | Minimum viable observability - ALL 4 required |
+| "Complete" includes observability | Deadline pressure | Definition of done is non-negotiable |
+
+**If pressured:** "Observability is PART of completion, not an addition to it. Gate 2 cannot be skipped regardless of authority or deadline."
+
+## Severity Calibration
+
+| Severity | Scenario | Gate 2 Status | Can Proceed? |
+|----------|----------|---------------|--------------|
+| **CRITICAL** | Missing ALL observability (no /health, /ready, /metrics, logs) | FAIL | ❌ Return to Gate 0 |
+| **CRITICAL** | fmt.Println/echo instead of JSON logs | FAIL | ❌ Return to Gate 0 |
+| **CRITICAL** | Verification commands not run | FAIL | ❌ Cannot mark complete |
+| **HIGH** | Missing 1-2 of required endpoints (/ready or /metrics) | NEEDS_FIXES | ❌ Return to developers |
+| **MEDIUM** | /ready returns 200 when dependencies down | NEEDS_FIXES | ⚠️ Fix before Gate 3 |
+| **LOW** | Dashboard deferred for non-critical service | PARTIAL | ✅ Can proceed with note |
+
 ## Pressure Resistance
 
 **Gate 2 (SRE/Observability) is MANDATORY before production. Pressure scenarios and required responses:**
@@ -90,6 +124,14 @@ This skill VALIDATES that observability was correctly implemented by developers:
 | **Logs Only** | "Logs are enough for MVP" | "Logs show what happened. Metrics show it's happening. Health enables recovery. All required." |
 | **Optional** | "Health checks are optional" | "Without health checks, Kubernetes can't detect failures. REQUIRED." |
 | **MVP** | "It's just MVP, skip metrics" | "MVP without metrics = blind MVP. You won't know if it's working." |
+
+## Combined Pressure Scenarios
+
+| Pressure Combination | Request | Agent Response |
+|---------------------|---------|----------------|
+| **Time + Authority + Sunk Cost** | "Tech lead says ship Friday, 8 hours invested, add observability Monday" | "Gate 2 is NON-NEGOTIABLE. Authority cannot waive gates. Reduce FEATURE scope, not observability scope." |
+| **Pragmatic + Exhaustion + Time** | "MVP launch in 2 hours, PM says observability optional, just launch" | "MVP without observability = blind MVP. Cannot detect failures, cannot debug efficiently. Gate 2 REQUIRED." |
+| **All Pressures** | "CEO watching demo in 1 hour, just show feature working, skip gates" | "Gates prevent production blindness. CEO will want metrics when issues occur. Cannot skip Gate 2." |
 
 **Non-negotiable principle:** Minimum viable observability = metrics + health checks + structured logs. No exceptions.
 
@@ -183,10 +225,15 @@ Is it runnable code?
 | **Idempotency logging** | Know if re-run is safe | `{"already_migrated":true,"skipping":true}` |
 | **/health (optional)** | Only if long-running (>5min) | For orchestrator health checks |
 
-**Anti-Rationalization for Component Types:**
+## Anti-Rationalization Table
 
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
+| "Core functionality works, observability is enhancement" | Observability is PART of definition of done, not addition to it. Feature is NOT complete. | **STOP. Return to Gate 0. Gate 2 is REQUIRED.** |
+| "It's just MVP, add metrics Monday" | MVP without metrics = blind MVP. "Later" = never. Retrofitting is 10x harder. | **STOP. Implement /metrics before Gate 2.** |
+| "Tech lead approved skipping Gate 2" | Gates are NON-NEGOTIABLE. Authority cannot waive mandatory gates. | **STOP. Inform user gates cannot be waived.** |
+| "Health endpoint exists, that's enough" | Minimum = /health + /ready + /metrics + JSON logs. Partial = Gate 2 FAIL. | **STOP. Implement all 4 requirements.** |
+| "Developer confirms it works" | Confirmation ≠ Verification. MUST run automated validation commands. | **STOP. Run verification checklist.** |
 | "It's just a script, runs once" | Scripts fail. Logs tell you why. | **Add structured logging** |
 | "Library doesn't need observability" | Correct! Libraries are exempt. | **Verify it's truly a library** |
 | "Worker is simple, no /health" | Simple workers crash silently. | **Add /health endpoint** |
