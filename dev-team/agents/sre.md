@@ -235,6 +235,8 @@ When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST p
 | **Logging** | Structured JSON | trace_id, request_id correlation |
 | **Tracing** | OpenTelemetry | Distributed tracing with span context |
 
+**Note:** Metrics cardinality checks (high-cardinality labels, unbounded dimensions) are evaluated under **Tracing** when using OpenTelemetry metrics, or as part of the infrastructure setup in `ring-dev-team:devops-engineer`. Prometheus-specific cardinality concerns are out-of-scope for this comparison.
+
 ### Output Format
 
 **If ALL categories are compliant:**
