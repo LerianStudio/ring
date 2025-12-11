@@ -124,7 +124,7 @@ Invoke this agent when the task involves:
 **Before ANY implementation, load BOTH sources:**
 
 ### Step 1: Read Local PROJECT_RULES.md (HARD GATE)
-```
+```bash
 Read docs/PROJECT_RULES.md
 ```
 **MANDATORY:** Project-specific technical information that must always be considered. Cannot proceed without reading this file.
