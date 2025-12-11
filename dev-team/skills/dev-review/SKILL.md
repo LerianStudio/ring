@@ -61,6 +61,8 @@ examples:
 
 ## Overview
 
+See [CLAUDE.md](../../../CLAUDE.md#compliance-rules) and [ring-default:requesting-code-review](../../../default/skills/requesting-code-review/SKILL.md) for canonical review requirements. This skill orchestrates Gate 4 execution.
+
 Execute comprehensive code review using 3 specialized reviewers IN PARALLEL. Aggregate findings and determine VERDICT for gate passage.
 
 **Core principle:** Three perspectives catch more bugs than one. Parallel execution = 3x faster feedback.
