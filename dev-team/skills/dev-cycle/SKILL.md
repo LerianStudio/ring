@@ -520,20 +520,22 @@ For current execution unit:
    Task tool:
      subagent_type: "ring-dev-team:sre"
      prompt: |
-       Implement observability for: [unit_id]
+       Validate observability for: [unit_id]
 
        Service Information:
        - Language: [Go/TypeScript/Python]
        - Service type: [API/Worker/Batch]
        - External dependencies: [list]
+       - Implementation from Gate 0: [summary of what was implemented]
 
-       Requirements:
-       - Prometheus metrics at /metrics
-       - Health endpoints (/health, /ready)
-       - Structured JSON logging
-       - OpenTelemetry tracing (if external calls)
+       Validation Requirements:
+       - Verify /metrics endpoint exists and exposes standard metrics
+       - Verify /health endpoint responds correctly
+       - Verify /ready endpoint checks dependencies
+       - Verify structured JSON logging with trace_id
+       - Verify OpenTelemetry tracing (if external calls)
 
-       Report: files created, metrics added, endpoints verified.
+       Report: validation results with PASS/FAIL for each component (/metrics, /health, /ready, JSON logs, tracing), issues found by severity, verification commands executed.
 
 4. If SRE not needed:
    - Mark as "skipped" with reason
