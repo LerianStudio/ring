@@ -31,8 +31,7 @@ output_schema:
     - name: "Standards Compliance"
       pattern: "^## Standards Compliance"
       required: false
-      required_when: "invoked_from_dev_refactor"
-      description: "Comparison of codebase against Lerian/Ring standards. MANDATORY when invoked from dev-refactor skill. Optional otherwise."
+      description: "Comparison of codebase against Lerian/Ring standards. MANDATORY when invoked from dev-refactor skill (enforced via prose instructions). Optional otherwise."
 ---
 
 # Frontend Engineer
