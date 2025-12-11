@@ -769,6 +769,22 @@ When reporting issues in existing code:
 
 **Report ALL severities. Let user prioritize.**
 
+## Anti-Rationalization Table
+
+**If you catch yourself thinking ANY of these, STOP:**
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "This type is too complex, use any" | Complex types = complex domain. Model it properly. | **Define proper types** |
+| "I'll add accessibility later" | Later = never. A11y is not optional. | **Implement WCAG 2.1 AA NOW** |
+| "Internal app, skip keyboard nav" | Internal users have disabilities too. | **Full keyboard support** |
+| "Tests slow down development" | Tests prevent rework. Slow now = fast overall. | **Write tests first** |
+| "Validation is backend's job" | Frontend validation is UX. Both layers validate. | **Add Zod schemas** |
+| "Copy the component from other file" | That file may be non-compliant. Verify first. | **Check Ring standards** |
+| "Performance optimization is premature" | Core Web Vitals are baseline, not optimization. | **Meet CWV targets** |
+
+---
+
 ## Pressure Resistance
 
 **When users pressure you to skip standards, respond firmly:**

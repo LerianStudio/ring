@@ -28,22 +28,70 @@ The ring-dev-team plugin provides 7 specialized developer agents. Use them via `
 
 ---
 
+## Blocker Criteria - STOP and Report
+
+**ALWAYS pause and report blocker for:**
+
+| Decision Type | Examples | Action |
+|--------------|----------|--------|
+| **Technology Stack** | Go vs TypeScript for new service | STOP. Check existing patterns. Ask user. |
+| **Architecture** | Monolith vs microservices | STOP. This is a business decision. Ask user. |
+| **Infrastructure** | K8s vs Docker Compose | STOP. Check scale requirements. Ask user. |
+| **Testing Strategy** | Unit vs E2E vs both | STOP. Check QA requirements. Ask user. |
+
+**You CANNOT make technology decisions autonomously. STOP and ask.**
+
+---
+
 ## Common Misconceptions - REJECTED
 
 | Misconception | Reality |
 |--------------|---------|
-| "I can handle this myself" | ORCHESTRATOR principle: dispatch specialists, don't implement directly. |
-| "Overhead of dispatching not worth it" | Specialist quality > self-implementation. Dispatch is investment, not cost. |
-| "Simple task, no specialist needed" | Simplicity is not your judgment. Follow dispatch guidelines. |
-| "I know Go/TypeScript well enough" | Specialists have standards loading. You don't. Dispatch. |
-| "Faster if I do it myself" | Faster ≠ better. Specialist output follows Ring standards. |
+| "I can handle this myself" | ORCHESTRATOR principle: dispatch specialists, don't implement directly. This is NON-NEGOTIABLE. |
+| "Overhead of dispatching not worth it" | Specialist quality > self-implementation. Dispatch is investment, not cost. MANDATORY dispatch. |
+| "Simple task, no specialist needed" | Simplicity is NOT your judgment. Follow dispatch guidelines. NO EXCEPTIONS. |
+| "I know Go/TypeScript well enough" | Specialists have standards loading. You don't. MUST dispatch. |
+| "Faster if I do it myself" | Faster ≠ better. Specialist output follows Ring standards. DISPATCH is REQUIRED. |
 
 **Self-sufficiency bias check:** If you're tempted to implement directly, ask:
 1. Is there a specialist for this? (Check the 7 specialists below)
 2. Would a specialist follow standards I might miss?
 3. Am I avoiding dispatch because it feels like "overhead"?
 
-**If any answer is yes → DISPATCH the specialist.**
+**If ANY answer is yes → You MUST DISPATCH the specialist. This is NON-NEGOTIABLE.**
+
+---
+
+## Anti-Rationalization Table
+
+**If you catch yourself thinking ANY of these, STOP:**
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "This is a small task, no need for specialist" | Size doesn't determine complexity. Standards always apply. | **DISPATCH specialist** |
+| "I already know how to do this" | Your knowledge ≠ Ring standards loaded by specialist. | **DISPATCH specialist** |
+| "Dispatching takes too long" | Quality > speed. Specialist follows full standards. | **DISPATCH specialist** |
+| "I'll just fix this one thing quickly" | Quick fixes bypass TDD, testing, review. | **DISPATCH specialist** |
+| "The specialist will just do what I would do" | Specialists have domain-specific anti-rationalization. You don't. | **DISPATCH specialist** |
+| "This doesn't need the full dev-cycle" | ALL implementation needs dev-cycle. No exceptions. | **Follow 6-gate cycle** |
+
+---
+
+## Cannot Be Overridden
+
+**These requirements are NON-NEGOTIABLE:**
+
+| Requirement | Why It Cannot Be Waived |
+|-------------|------------------------|
+| **Dispatch to specialist** | Specialists have standards loading, you don't |
+| **6-gate development cycle** | Gates prevent quality regressions |
+| **Parallel reviewer dispatch** | Sequential review = 3x slower, same cost |
+| **TDD in Gate 0** | Test-first ensures testability |
+| **User approval in Gate 5** | Only users can approve completion |
+
+**User cannot override these. Time pressure cannot override these. "Simple task" cannot override these.**
+
+---
 
 ## 7 Developer Specialists
 
