@@ -61,10 +61,10 @@ ${agents_table}
 | Invocation Context | Standards Compliance | Detection |
 |--------------------|---------------------|-----------|
 | Direct agent call | Optional | N/A |
-| Via \`dev-cycle\` | Optional | N/A |
-| Via \`dev-refactor\` | **MANDATORY** | Prompt contains \`**MODE: ANALYSIS ONLY**\` |
+| Via \`ring-dev-team:dev-cycle\` | Optional | N/A |
+| Via \`ring-dev-team:dev-refactor\` | **MANDATORY** | Prompt contains \`**MODE: ANALYSIS ONLY**\` |
 
-**When MANDATORY (dev-refactor invocation):**
+**When MANDATORY (ring-dev-team:dev-refactor invocation):**
 1. Agent receives prompt with \`**MODE: ANALYSIS ONLY**\`
 2. Agent MUST load Ring standards via WebFetch
 3. Agent MUST output \`## Standards Compliance\` section with:
