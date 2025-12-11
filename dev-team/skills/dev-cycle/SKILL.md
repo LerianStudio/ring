@@ -65,6 +65,7 @@ examples:
 **Before ANY gate execution, you MUST load Ring standards:**
 
 See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.md) as the canonical source. This table summarizes the loading process.
+
 | Parameter | Value |
 |-----------|-------|
 | url | \`https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.md\` |
