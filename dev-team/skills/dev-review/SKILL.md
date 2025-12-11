@@ -75,6 +75,17 @@ Execute comprehensive code review using 3 specialized reviewers IN PARALLEL. Agg
 | **Cosmetic Only** | "Only cosmetic issues, skip fixes" | "Cosmetic issues affect maintainability. Fix or document with FIXME. No silent ignoring." |
 | **Skip Re-review** | "Passed first time, skip re-review" | "After ANY fix, re-run ALL 3 reviewers. Fixes can introduce new issues." |
 | **Time** | "Review takes too long" | "3 parallel reviewers = 10 min total. Sequential = 30 min. Parallel is faster." |
+| **Authority Override** | "Manager/VP approved skip" | "Management approval ≠ technical review. HARD GATES cannot be waived by authority. Running all 3 reviewers." |
+| **Emergency** | "Production down, skip review" | "Emergencies need review MORE, not less. Parallel review = 10 minutes. Deploying unreviewed code creates bigger emergencies." |
+
+### Combined Pressure Scenarios (MOST DANGEROUS)
+
+| Scenario | Agent Response |
+|----------|----------------|
+| "CEO watching + 11 PM + 2-line fix + already tested" | "Gate 4 is NON-NEGOTIABLE. Parallel review takes 10 minutes. Running all 3 reviewers now." |
+| "VP approved + emergency + only CSS + sprint ends today" | "I cannot override HARD GATES regardless of authority or urgency. Dispatching 3 reviewers in parallel." |
+| "First reviewer passed + exhausted + small fix + senior dev approved" | "ALL 3 reviewers REQUIRED in parallel. One PASS ≠ complete review. Dispatching remaining 2 now." |
+| "Production down + $10K/min loss + 2-line obvious fix" | "Emergencies need review MORE, not less. Parallel review = 10 minutes. Deploying unreviewed code creates bigger emergencies." |
 
 **Non-negotiable principle:** ALL 3 reviewers MUST run in a SINGLE message with 3 Task tool calls. Sequential = violation.
 
@@ -116,7 +127,19 @@ If you catch yourself thinking ANY of these, STOP immediately:
 
 **All of these indicate Gate 4 violation. Run ALL 3 reviewers in parallel.**
 
-## MEDIUM Severity Handling - Explicit Protocol
+## MEDIUM Issue Protocol (MANDATORY - NOT CONDITIONAL)
+
+**You CANNOT return PASS verdict with unfixed MEDIUM issues without this protocol:**
+
+1. **STOP immediately** when MEDIUM issues found
+2. **Present MEDIUM issues to user** with clear descriptions
+3. **Ask explicitly:** "Fix now or add FIXME with tracking?"
+4. **User MUST explicitly choose** - no implicit decisions
+5. **Document choice** in review summary
+
+**If you return PASS with MEDIUM issues without user approval → Gate 4 violation**
+
+**Anti-Rationalization:** "Only 3 MEDIUM findings, aggregate should be PASS" → WRONG. MEDIUM requires explicit handling, not silent acceptance.
 
 **MEDIUM issues are NOT automatically waived:**
 
@@ -128,12 +151,17 @@ If you catch yourself thinking ANY of these, STOP immediately:
 | "Risk accept" without user | ❌ NO | User must explicitly approve |
 | Document in commit msg only | ❌ NO | Must be in code as FIXME |
 
-**If agent wants to proceed without fixing MEDIUM:**
-1. STOP
-2. Present MEDIUM issues to user
-3. Ask: "Fix now or add FIXME with tracking?"
-4. User must explicitly choose
-5. Document choice in review summary
+## Pre-Dispatch Verification (MANDATORY)
+
+**BEFORE dispatching reviewers, verify you are NOT about to:**
+- ❌ Run one reviewer "to see if others are needed"
+- ❌ Run reviewers in separate messages
+- ❌ Skip any reviewer based on change type
+- ❌ Use previous review results instead of fresh dispatch
+
+**The ONLY valid action is:** Open Task tool 3 times in THIS message, one for each reviewer.
+
+If you catch yourself planning sequential execution → STOP → Re-plan as parallel.
 
 ## Parallel Execution - MANDATORY
 
@@ -158,6 +186,17 @@ Task tool #3: ring-default:security-reviewer
 2. Discard sequential results (they're incomplete context)
 3. Re-dispatch ALL 3 reviewers in a SINGLE message with 3 Task tool calls
 4. Sequential dispatch wastes time AND misses cross-domain insights
+
+## Gate 4 Violation Consequences
+
+**If you violate Gate 4 protocol (skip reviewers, sequential dispatch, silent MEDIUM acceptance):**
+
+1. The development cycle is INVALID
+2. ALL work must be discarded and restarted from Gate 0
+3. Cycle metadata marked as violated
+4. User notified of violation
+
+**You CANNOT "fix" a violation by re-running reviews. The entire cycle is compromised.**
 
 ## Prerequisites
 
