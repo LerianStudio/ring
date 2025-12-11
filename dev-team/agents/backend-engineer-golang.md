@@ -2,10 +2,11 @@
 name: backend-engineer-golang
 description: Senior Backend Engineer specialized in Go for high-demand financial systems. Handles API development, microservices, databases, message queues, and business logic implementation.
 model: opus
-version: 1.2.0
-last_updated: 2025-01-25
+version: 1.2.1
+last_updated: 2025-12-11
 type: specialist
 changelog:
+  - 1.2.1: Added Standards Compliance documentation cross-references (CLAUDE.md, MANUAL.md, README.md, ARCHITECTURE.md, session-start.sh)
   - 1.2.0: Removed duplicated standards content, now references docs/standards/golang.md
   - 1.1.0: Added multi-tenancy patterns and security best practices
   - 1.0.0: Initial release

@@ -2,10 +2,11 @@
 name: qa-analyst
 description: Senior Quality Assurance Analyst specialized in testing financial systems. Handles test strategy, API testing, E2E automation, performance testing, and compliance validation.
 model: opus
-version: 1.1.0
-last_updated: 2025-01-25
+version: 1.1.1
+last_updated: 2025-12-11
 type: specialist
 changelog:
+  - 1.1.1: Added Standards Compliance documentation cross-references (CLAUDE.md, MANUAL.md, README.md, ARCHITECTURE.md, session-start.sh)
   - 1.1.0: Added Standards Loading section with WebFetch references to language-specific standards
   - 1.0.0: Initial release
 output_schema:

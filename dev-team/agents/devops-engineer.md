@@ -2,10 +2,11 @@
 name: devops-engineer
 description: Senior DevOps Engineer specialized in cloud infrastructure for financial services. Handles CI/CD pipelines, containerization, Kubernetes, IaC, and deployment automation.
 model: opus
-version: 1.1.0
-last_updated: 2025-01-25
+version: 1.1.1
+last_updated: 2025-12-11
 type: specialist
 changelog:
+  - 1.1.1: Added Standards Compliance documentation cross-references (CLAUDE.md, MANUAL.md, README.md, ARCHITECTURE.md, session-start.sh)
   - 1.1.0: Refactored to reference Ring DevOps standards via WebFetch, removed duplicated domain standards
   - 1.0.0: Initial release
 output_schema:

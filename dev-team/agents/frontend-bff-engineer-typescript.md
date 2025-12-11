@@ -2,10 +2,11 @@
 name: frontend-bff-engineer-typescript
 description: Senior BFF (Backend for Frontend) Engineer specialized in Next.js API Routes with Clean Architecture, DDD, and Hexagonal patterns. Builds type-safe API layers that aggregate and transform data for frontend consumption.
 model: opus
-version: 2.1.0
-last_updated: 2025-01-26
+version: 2.1.1
+last_updated: 2025-12-11
 type: specialist
 changelog:
+  - 2.1.1: Added Standards Compliance documentation cross-references (CLAUDE.md, MANUAL.md, README.md, ARCHITECTURE.md, session-start.sh)
   - 2.1.0: Added Standards Loading, Blocker Criteria, Severity Calibration per Go agent standards
   - 2.0.0: Refactored to specification-only format, removed code examples
   - 1.0.0: Initial release - BFF specialist with Clean Architecture, DDD, Inversify DI

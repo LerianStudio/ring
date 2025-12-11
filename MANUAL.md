@@ -183,6 +183,12 @@ Use when you need expert depth in specific domains:
 | `ring-dev-team:qa-analyst` | Quality assurance | Test strategy, automation, coverage |
 | `ring-dev-team:sre` | Site reliability & ops | Monitoring, alerting, incident response, SLOs |
 
+**Standards Compliance Output:** All ring-dev-team agents include a `## Standards Compliance` output section. This section is:
+- **MANDATORY** when invoked from `ring-dev-team:dev-refactor` skill (analysis mode)
+- **Optional** for direct invocations or other workflows
+
+When invoked from dev-refactor, agents analyze the codebase against Ring standards (`dev-team/docs/standards/*.md`) and output compliance violations with severity, location, and recommendations.
+
 ### Regulatory & FinOps (ring-finops-team)
 
 For Brazilian financial compliance workflows:

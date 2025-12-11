@@ -2,10 +2,11 @@
 name: backend-engineer-typescript
 description: Senior Backend Engineer specialized in TypeScript/Node.js for scalable systems. Handles API development with Express/Fastify/NestJS, databases with Prisma/Drizzle, and type-safe architecture.
 model: opus
-version: 1.3.0
-last_updated: 2025-01-26
+version: 1.3.1
+last_updated: 2025-12-11
 type: specialist
 changelog:
+  - 1.3.1: Added Standards Compliance documentation cross-references (CLAUDE.md, MANUAL.md, README.md, ARCHITECTURE.md, session-start.sh)
   - 1.3.0: Removed duplicated standards content, now references docs/standards/typescript.md
   - 1.2.0: Added Real-time, File Handling sections; HTTP Security checklist
   - 1.1.0: Removed code examples - patterns should come from project STANDARDS.md

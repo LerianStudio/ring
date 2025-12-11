@@ -135,6 +135,42 @@ dev-team/agents/
 
 **Note:** Parallel review orchestration is handled by the `/ring-default:codereview` command
 
+**Standards Compliance Output (ring-dev-team agents):**
+
+All ring-dev-team agents include a `## Standards Compliance` section in their output schema:
+
+```yaml
+- name: "Standards Compliance"
+  pattern: "^## Standards Compliance"
+  required: false  # In schema, but MANDATORY when invoked from dev-refactor
+```
+
+**Conditional Requirement:**
+- **MANDATORY** when agent is invoked from `ring-dev-team:dev-refactor` skill
+- **Optional** for direct agent invocations or other workflows
+
+**Enforcement:**
+- Enforced via prose instructions in agent prompts
+- The dev-refactor skill dispatches agents with `MODE: ANALYSIS ONLY` prompts requiring Standards Compliance output
+- Agents use WebFetch to load standards from `dev-team/docs/standards/*.md` at runtime
+
+**Output Format:**
+```markdown
+## Standards Compliance
+
+### Violations Found
+| Category | Severity | Location | Issue | Standard Reference |
+|----------|----------|----------|-------|-------------------|
+| ... | Critical/High/Medium/Low | file:line | description | standard.md#section |
+
+### Compliance Summary
+- Total Violations: N
+- Critical: N, High: N, Medium: N, Low: N
+
+### Recommendations
+1. ...
+```
+
 ### 3. Commands (`commands/`)
 **Purpose:** Slash commands that provide shortcuts to skills/workflows
 

@@ -492,6 +492,63 @@ output_schema:
 
 **Used by:** `ring-default:write-plan`
 
+### Standards Compliance (Conditional Output Section)
+
+The `ring-dev-team` agents include a **Standards Compliance** output section that is conditionally required based on invocation context:
+
+**Schema Definition:**
+```yaml
+- name: "Standards Compliance"
+  pattern: "^## Standards Compliance"
+  required: false  # In schema, but MANDATORY when invoked from dev-refactor
+  description: "Comparison of codebase against Lerian/Ring standards"
+```
+
+**When Required:**
+- **MANDATORY** when agent is invoked from `ring-dev-team:dev-refactor` skill
+- **Optional** for direct agent invocations or other workflows
+
+**Enforcement Mechanism:**
+- Enforced via prose instructions in agent prompts, not programmatically
+- The `dev-refactor` skill dispatches agents with `MODE: ANALYSIS ONLY` prompts that explicitly require Standards Compliance output
+- Agents use WebFetch to load standards at runtime from GitHub
+
+**Agents with Standards Compliance:**
+- `ring-dev-team:backend-engineer-golang`
+- `ring-dev-team:backend-engineer-typescript`
+- `ring-dev-team:devops-engineer`
+- `ring-dev-team:frontend-bff-engineer-typescript`
+- `ring-dev-team:frontend-designer`
+- `ring-dev-team:qa-analyst`
+- `ring-dev-team:sre`
+
+**Example Output Format:**
+```markdown
+## Standards Compliance
+
+### Violations Found
+| Category | Severity | Location | Issue | Standard Reference |
+|----------|----------|----------|-------|-------------------|
+| Error Handling | High | pkg/api/handler.go:45 | Using panic() instead of error returns | golang.md#error-handling |
+| Logging | Medium | internal/service/user.go:78 | Missing structured logging fields | golang.md#logging |
+
+### Compliance Summary
+- **Total Violations:** 2
+- **Critical:** 0
+- **High:** 1
+- **Medium:** 1
+- **Low:** 0
+
+### Recommendations
+1. Replace panic() with proper error returns per golang.md standards
+2. Add structured logging fields (request_id, user_id) to service layer
+```
+
+**Cross-References:**
+- Skill: `dev-team/skills/dev-refactor/SKILL.md` (defines HARD GATES requiring Standards Compliance)
+- Standards: `dev-team/docs/standards/*.md` (source of truth for compliance checks)
+- Agents: `dev-team/agents/*.md` (output_schema includes Standards Compliance)
+
 ### Anti-Patterns to Avoid
 1. **Never skip using-ring** - It's mandatory, not optional
 2. **Never run reviewers sequentially** - Always dispatch in parallel

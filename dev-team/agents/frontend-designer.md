@@ -2,10 +2,11 @@
 name: frontend-designer
 description: Senior UI/UX Designer with full design team capabilities - UX research, information architecture, visual design, content design, accessibility, mobile/touch, i18n, data visualization, and prototyping. Produces specifications, not code.
 model: opus
-version: 1.1.0
+version: 1.1.1
 type: specialist
-last_updated: 2025-01-26
+last_updated: 2025-12-11
 changelog:
+  - 1.1.1: Added Standards Compliance documentation cross-references (CLAUDE.md, MANUAL.md, README.md, ARCHITECTURE.md, session-start.sh)
   - 1.1.0: Removed duplicated Domain Standards section, references Ring Frontend standards via WebFetch
   - 1.0.0: Refactored to specification-only format, removed format examples
   - 0.5.0: Added full design team capabilities (UX Research, IA, Content Design, Accessibility, Mobile, i18n, Data Viz, Prototyping)

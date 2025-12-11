@@ -2,10 +2,11 @@
 name: sre
 description: Senior Site Reliability Engineer specialized in VALIDATING observability implementations for high-availability financial systems. Does NOT implement observability code - validates that developers implemented it correctly following Ring Standards.
 model: opus
-version: 1.2.0
-last_updated: 2025-01-25
+version: 1.2.1
+last_updated: 2025-12-11
 type: specialist
 changelog:
+  - 1.2.1: Added Standards Compliance documentation cross-references (CLAUDE.md, MANUAL.md, README.md, ARCHITECTURE.md, session-start.sh)
   - 1.2.0: Refactored to reference Ring SRE standards via WebFetch, removed duplicated domain standards
   - 1.1.0: Clarified role as VALIDATOR, not IMPLEMENTER. Developers implement observability.
   - 1.0.0: Initial release

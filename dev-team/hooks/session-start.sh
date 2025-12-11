@@ -56,6 +56,11 @@ Use via Task tool with \`subagent_type\`:
 
 ${agents_table}
 
+**Standards Compliance Output:**
+All dev-team agents include a \`## Standards Compliance\` section:
+- **MANDATORY** when invoked from \`ring-dev-team:dev-refactor\` skill (MODE: ANALYSIS ONLY)
+- **Optional** for direct invocations
+
 For full details: Skill tool with \"ring-dev-team:using-dev-team\"
 </ring-dev-team-system>"
 
@@ -86,7 +91,7 @@ else
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "<ring-dev-team-system>\n**Developer Specialists Available**\n\nFor full list: Skill tool with \"ring-dev-team:using-dev-team\"\n</ring-dev-team-system>"
+    "additionalContext": "<ring-dev-team-system>\n**Developer Specialists Available**\n\n**Standards Compliance Output:**\nAll dev-team agents include a `## Standards Compliance` section:\n- **MANDATORY** when invoked from `ring-dev-team:dev-refactor` skill\n- **Optional** for direct invocations\n\nFor full list: Skill tool with \"ring-dev-team:using-dev-team\"\n</ring-dev-team-system>"
   }
 }
 EOF
