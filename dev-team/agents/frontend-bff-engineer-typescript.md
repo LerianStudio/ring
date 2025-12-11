@@ -442,6 +442,8 @@ When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST p
 
 **Every category MUST be checked and reported. No exceptions.**
 
+Canonical policy: see [CLAUDE.md](../../../CLAUDE.md#agent-modification-verification-mandatory) for the definitive standards compliance requirements.
+
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|------------------|
 | "Codebase already uses lib-commons-js" | Partial usage ≠ full compliance. Check everything. | **Verify ALL categories** |
