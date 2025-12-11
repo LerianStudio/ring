@@ -36,6 +36,26 @@ When creating or modifying ANY agent in `*/agents/*.md`:
 - ❌ `ring:code-reviewer` (WRONG)
 - ❌ `backend-engineer-golang` (WRONG)
 
+### 5. Content Duplication Prevention (ALWAYS CHECK)
+Before adding ANY content to prompts, skills, agents, or documentation:
+1. **SEARCH FIRST**: `grep -r "keyword" --include="*.md"` - Check if content already exists
+2. **If content exists** → **REFERENCE it**, do NOT duplicate. Use: `See [file](path) for details`
+3. **If adding new content** → Add to the canonical source per table below
+4. **NEVER copy** content between files - always link to the single source of truth
+
+| Information Type | Canonical Source (Single Source of Truth) |
+|-----------------|-------------------------------------------|
+| Critical rules | CLAUDE.md |
+| Language patterns | docs/PROMPT_ENGINEERING.md |
+| Agent schemas | docs/AGENT_DESIGN.md |
+| Workflows | docs/WORKFLOWS.md |
+| Plugin overview | README.md |
+| Agent requirements | CLAUDE.md (Agent Modification section) |
+
+**Reference Pattern:**
+- ✅ `See [docs/PROMPT_ENGINEERING.md](docs/PROMPT_ENGINEERING.md) for language patterns`
+- ❌ Copying the language patterns table into another file
+
 ---
 
 ## Quick Navigation
