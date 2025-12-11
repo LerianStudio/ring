@@ -57,7 +57,7 @@ examples:
 
 # Dev Testing (Gate 3)
 
-See [CLAUDE.md](../../../CLAUDE.md#compliance-rules) and [ring-default:test-driven-development](../../../default/skills/test-driven-development/SKILL.md) for canonical TDD and testing requirements. This skill orchestrates Gate 3 execution.
+See [CLAUDE.md](../../../CLAUDE.md#compliance-rules) for canonical testing requirements.
 
 ## Overview
 
