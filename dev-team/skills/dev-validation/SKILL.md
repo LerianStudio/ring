@@ -70,6 +70,7 @@ Final validation gate requiring explicit user approval. Present evidence that ea
 | **Tests Pass** | "Tests pass, validation redundant" | "Tests verify code works. Validation verifies it meets REQUIREMENTS. Different concerns." |
 | **Minor Issues** | "Fix issues after approval" | "No partial approval. REJECTED with issues, fix first, then re-validate." |
 | **Implied Approval** | "User didn't object" | "Silence ≠ approval. Require explicit 'APPROVED' or 'REJECTED: reason'." |
+| **Manager Override** | "Manager approved, merge anyway" | "Manager ≠ stakeholder. Only original requester validates requirements. STOP and wait." |
 
 **Non-negotiable principle:** User MUST respond with "APPROVED" or "REJECTED: [reason]". No other responses accepted.
 
@@ -110,6 +111,10 @@ See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.
 | "Emergency production issue" | Emergency ≠ gate bypass. Validation protects production. |
 | "Reduced scope, easier to approve" | Reduced scope ≠ auto-approval. User must validate actual delivery. |
 | "APPROVED if X (X is true)" | Conditional approval ≠ approval. Verify X, then re-request. |
+| "I implemented it, I know requirements" | Knowledge ≠ approval authority. Implementer CANNOT self-approve. |
+| "User is slow, I'll self-approve to unblock" | Efficiency ≠ gate bypass. Self-approval is PROHIBITED. |
+| "I'm the only developer on this" | Team size is irrelevant. User approval required. |
+| "I'll switch to QA role to approve" | Role switching is STILL self-approval. PROHIBITED. |
 
 ## Red Flags - STOP
 

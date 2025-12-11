@@ -57,6 +57,7 @@ Continuous improvement system that tracks development cycle effectiveness throug
 | "Exploratory work, no metrics" | Exploration needs metrics to measure success. Track ALL work. |
 | "Task was too simple" | Simple tasks still contribute to cycle patterns. Track all. |
 | "Perfect score, no insights" | Perfect scores reveal what works. Document for replication. |
+| "Score 100, skip retrospective" | 100% scores need tracking too. Document what went well for replication. |
 | "User is happy, skip analysis" | Happiness ≠ process quality. Collect metrics objectively. |
 | "Same as last time" | Patterns only visible with data. Each task adds to baseline. |
 | "Feedback is subjective" | Metrics are objective. Assertiveness score has formula. |
@@ -201,6 +202,14 @@ Base score of 100 points, with deductions for inefficiencies:
 | 0 | Failed | Full post-mortem required |
 
 ## Step 1: Collect Cycle Metrics
+
+**MANDATORY: Execute this step for ALL tasks, regardless of:**
+- Score value (even 100%)
+- User satisfaction (even immediate approval)
+- Outcome quality (even perfect)
+
+**Anti-exemption check:**
+If you're thinking "perfect outcome, skip metrics" → STOP. This is Red Flag at line 75 ("Perfect outcome, skip the metrics").
 
 **After task completion, gather:** Gate transitions (gate, iterations, duration, outcome for each Gate 0-5), Review findings (per reviewer verdict + issues), Validation outcome (criteria verified, decision, notes)
 

@@ -121,6 +121,9 @@ Report ALL severities. Let user prioritize.
 | **Sunk Cost** | "Already did 4 gates, skip review" | "Each gate catches different issues. Prior gates don't reduce review value. Review = 10 min." |
 | **Authority** | "Director override, ship now" | "Cannot skip GATES based on authority. Can skip CHECKPOINTS (automatic mode). Gates are non-negotiable." |
 | **Simplicity** | "Simple fix, skip gates" | "Simple tasks have complex impacts. AI doesn't negotiate. ALL tasks require ALL gates. No exceptions." |
+| **Demo** | "Demo at 9 AM, ship without gates" | "Demos with unverified code = demos that crash. Gates BEFORE demo to ensure success. Automatic mode = 20 min." |
+| **Fatigue** | "It's late, exhausted, finish tomorrow" | "Fatigue reduces judgment. This is why gates are automated checklists. Gates prevent fatigue-induced errors." |
+| **Economic** | "$XM deal depends on skipping gates" | "Revenue at risk from shipping broken code >> revenue from delayed demo. Gates protect business outcomes." |
 
 **Non-negotiable principle:** Execution mode selection affects CHECKPOINTS (user approval pauses), not GATES (quality checks). ALL gates execute regardless of mode.
 
@@ -139,7 +142,7 @@ Report ALL severities. Let user prioritize.
 | "Backlog the Medium issue, it's documented" | Documented risk ≠ mitigated risk. Medium in Gate 4 = fix NOW, not later. |
 | "Risk-based prioritization allows deferral" | Gates ARE the risk-based system. Reviewers define severity, not you. |
 | "Business context justifies exception" | Business context informed gate design. Gates already account for it. |
-| "Demo tomorrow, we'll fix after" | Demo with untested code = demo that crashes. Gates BEFORE demo. |
+| "Demo tomorrow, we'll fix after" | "Fix after" = never-fix. Demo crashes are worse than delayed demos. | **Gates BEFORE demo (automatic mode = 20 min)** |
 | "Just this one gate, then catch up" | One skipped gate = precedent. Next gate also "just one". No incremental compromise. |
 | "90% done, finish without remaining gates" | 90% done with 0% gates = 0% verified. Gates verify the 90%. |
 | "Ship now, gates as fast-follow" | Fast-follow = never-follow. Gates now or not at all. |
