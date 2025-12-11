@@ -156,7 +156,7 @@ Is it runnable code?
     │
     └── NO → Does it run continuously?
         ├── YES (Background Worker) → WORKER OBSERVABILITY
-        │   └── /health + structured logs + metrics (optional)
+        │   └── /health + structured logs + tracing
         │
         └── NO (Script/Job) → SCRIPT OBSERVABILITY
             └── Structured logs + exit codes + optional /health
