@@ -216,6 +216,7 @@ Invoke this agent when the task involves:
 | "Integration tests cover this" | SCOPE_CONFUSION | "Gate 3 = unit tests. Integration tests are separate scope." |
 | "Tests slow down development" | TIME_PRESSURE | "Tests prevent rework. No tests = more time debugging later." |
 | "We can add tests after review" | DEFERRAL_PRESSURE | "Gate 3 before Gate 4. Tests NOW, not after review." |
+| "Those skipped tests are temporary" | SKIP_RATIONALIZATION | "Skipped tests excluded from coverage calculation. Fix or delete them before validation." |
 | **Authority Override** | "Tech lead says 82% is fine for this module" | "Ring threshold is 85%. Authority cannot lower threshold. 82% = FAIL." |
 | **Context Exception** | "This is utility code, 70% is enough" | "All code uses same threshold. Context doesn't change requirements. 85% required." |
 | **Combined Pressure** | "Sprint ends today + 84% achieved + manager approved" | "84% < 85% = FAIL. No rounding, no authority override, no deadline exception." |
@@ -228,13 +229,14 @@ Invoke this agent when the task involves:
 
 **These testing requirements are NON-NEGOTIABLE:**
 
-| Requirement | Why It Cannot Be Waived |
-|-------------|------------------------|
-| 85% minimum coverage | Ring standard. PROJECT_RULES.md can raise, not lower |
-| TDD RED phase verification | Proves test actually tests the right thing |
-| All acceptance criteria tested | Untested criteria = unverified claims |
-| Unit tests (not integration) | Gate 3 scope. Integration is different gate |
-| Test execution output | Proves tests actually ran and passed |
+| Requirement | Why It Cannot Be Waived | Consequence If Violated |
+|-------------|------------------------|------------------------|
+| 85% minimum coverage | Ring standard. PROJECT_RULES.md can raise, not lower | False confidence = false security/confidence |
+| TDD RED phase verification | Proves test actually tests the right thing | Tests may pass incorrectly |
+| All acceptance criteria tested | Untested criteria = unverified claims | Incomplete feature validation |
+| Unit tests (not integration) | Gate 3 scope. Integration is different gate | Wrong test type for gate |
+| Test execution output | Proves tests actually ran and passed | No proof of quality |
+| **Coverage calculation rules** (no rounding, exclude skipped, require assertions) | False coverage = false security/confidence | Cannot round 84.9% to 85%. Cannot include skipped tests. Cannot count assertion-less tests. |
 
 **User cannot override these. Manager cannot override these. Time pressure cannot override these.**
 
@@ -533,6 +535,7 @@ Coverage: 87.3%
 | **Mock Strategy** | Mock service vs test DB | STOP. Check PROJECT_RULES.md. |
 | **Coverage Target** | 80% vs 90% vs 100% | STOP. Check PROJECT_RULES.md. |
 | **E2E Tool** | Playwright vs Cypress | STOP. Check existing setup. |
+| **Skipped Test Check** | Coverage reported >85% | STOP. Run grep for .skip/.todo/.xit. Recalculate. |
 
 **Before introducing ANY new test tooling:**
 1. Check if similar exists in codebase
@@ -606,7 +609,7 @@ When TDD is enabled in project PROJECT_RULES.md, follow the RED-GREEN-REFACTOR c
 
 ### Coverage Requirements
 
-**Note:** These are historical reference values. The **Ring minimum (85%)** or **PROJECT_RULES.md threshold** takes precedence for gate validation. These per-type targets are advisory for prioritizing where to add tests.
+**Note:** These are advisory targets for prioritizing where to add tests. Gate validation MUST use 85% minimum or PROJECT_RULES.md threshold. Advisory values do NOT override the mandatory threshold.
 
 | Code Type | Advisory Target | Notes |
 |-----------|-----------------|-------|
@@ -665,6 +668,21 @@ grep -r "@pytest.mark.skip\|@unittest.skip" tests/
 3. Recalculate coverage excluding skipped test files
 4. Use recalculated coverage for PASS/FAIL verdict
 
+### How to Recalculate Coverage (Excluding Skipped Tests)
+
+```bash
+# JavaScript/TypeScript (Jest)
+jest --coverage --testPathIgnorePatterns="\.skip\." --testPathIgnorePatterns="\.todo\."
+
+# Go
+go test -coverprofile=coverage.out ./... && go tool cover -func=coverage.out | grep -v "_test.go"
+
+# Python (pytest)
+pytest --cov --ignore-glob="**/test_*_skip.py"
+```
+
+**MANDATORY:** After detecting skipped tests, you MUST recalculate coverage using these commands and report the adjusted percentage.
+
 ## TDD RED Phase Verification (MANDATORY)
 
 **You MUST verify test failed before implementation:**
@@ -676,7 +694,7 @@ grep -r "@pytest.mark.skip\|@unittest.skip" tests/
 | CI/CD log | Build failed on test before implementation | ✅ YES |
 | "I ran it locally" | No verifiable evidence | ❌ NO |
 
-**If no RED phase evidence:** Report as "TDD RED phase unverified" - does NOT automatically fail, but flag for review.
+**If no RED phase evidence:** For NEW features: MUST verify RED phase with actual failure output. For legacy code without existing tests: Flag missing RED phase for review, but do NOT auto-fail.
 
 ## Assertion-less Test Detection (Anti-Pattern)
 

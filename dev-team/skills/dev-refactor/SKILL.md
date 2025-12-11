@@ -124,8 +124,69 @@ This skill analyzes an existing codebase to identify gaps between current implem
 
 ```text
 1. Check: Does docs/PROJECT_RULES.md exist?
-   └── YES → Continue to "HARD GATES" section below
-   └── NO  → OUTPUT BLOCKER AND TERMINATE (see below)
+   └── YES → Continue to Content Adequacy Check below
+   └── NO  → OUTPUT BLOCKER AND TERMINATE (see "If File Does Not Exist" section)
+```
+
+### Content Adequacy Check
+
+After confirming file exists:
+
+2. Check: Does PROJECT_RULES.md contain substantive standards?
+
+   Minimum requirements (at least ONE of these):
+   - Architecture section (>20 lines)
+   - Code conventions section (>20 lines)
+   - Technology stack section (>15 lines)
+   - Testing requirements section (>15 lines)
+   - Total file length >100 lines
+
+   └── YES → Continue to "HARD GATES" section
+   └── NO  → OUTPUT "STUB FILE BLOCKER" AND TERMINATE
+
+### If File Is Stub/Empty → MANDATORY BLOCKER OUTPUT
+
+**⛔ You MUST output this EXACT response and TERMINATE immediately:**
+
+```markdown
+## ⛔ HARD BLOCK: PROJECT_RULES.md Contains No Standards
+
+**Status:** BLOCKED - Cannot proceed with analysis
+
+### What Was Checked
+- ✅ `docs/PROJECT_RULES.md` - File exists
+- ❌ File content - Contains no substantive design standards (stub/placeholder detected)
+
+### Why This Is a Hard Gate
+PROJECT_RULES.md must contain ACTUAL project standards, not placeholder text.
+
+**Analysis against an empty baseline = meaningless comparison.**
+
+### Current File State
+- File length: [X] lines
+- Content detected: [Stub/Placeholder/Minimal]
+- Missing: Architecture patterns, code conventions, testing requirements
+
+### What This Agent CANNOT Do
+- ❌ Proceed with stub/placeholder file
+- ❌ Use "default best practices" as substitute
+- ❌ Infer standards from existing code
+- ❌ Generate standards automatically
+
+### Required Action
+The project owner must populate `docs/PROJECT_RULES.md` with actual standards:
+- Architecture patterns (hexagonal, clean, DDD, etc.) - minimum 20 lines
+- Code conventions (naming, error handling, logging) - minimum 20 lines
+- Testing requirements (coverage thresholds, patterns) - minimum 15 lines
+- Technology stack decisions - minimum 15 lines
+
+**Minimum viable PROJECT_RULES.md: 100+ lines of substantive content**
+
+### Next Steps
+1. User populates `docs/PROJECT_RULES.md` with actual project standards
+2. Re-run `/ring-dev-team:dev-refactor` after file contains standards
+
+**This skill terminates here. No further analysis will be performed.**
 ```
 
 ### If File Does Not Exist → MANDATORY BLOCKER OUTPUT
@@ -738,6 +799,30 @@ If you reached this section, validation passed. Proceed to Step 1.
 ---
 
 ## Step 1: Detect Project Language
+
+**⛔ MANDATORY: Detect ALL languages, dispatch agents for ALL.**
+
+### Detection Sequence
+
+1. Check for go.mod → If found, add `ring-dev-team:backend-engineer-golang` to dispatch list
+2. Check for package.json → Inspect to determine:
+   - Backend TypeScript → Add `ring-dev-team:backend-engineer-typescript`
+   - Frontend → Add `ring-dev-team:frontend-bff-engineer-typescript`
+3. Check for pyproject.toml → Add Python agent (if applicable)
+
+### Multi-Language Enforcement
+
+**If 2+ languages detected:**
+- ✅ MUST dispatch specialist for EACH language in Step 3
+- ❌ Dispatching for only one language = INCOMPLETE ANALYSIS = SKILL FAILURE
+
+### Multi-Language Rationalization - DO NOT THINK THIS
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "Project is primarily Go, TypeScript is minor" | Minor ≠ skip. ALL languages MUST be analyzed. | Dispatch agents for ALL |
+| "Only one TypeScript file doesn't need full analysis" | Size irrelevant. Standards apply uniformly. | Dispatch TypeScript agent |
+| "I'll analyze the main language first, then decide" | Decide ≠ YOUR responsibility. Dispatch ALL from start. | Dispatch agents for ALL |
 
 **⛔ See "HARD GATES" section above - Gate 2 → Agent Selection by Language**
 

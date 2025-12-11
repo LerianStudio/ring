@@ -85,6 +85,8 @@ Final validation gate requiring explicit user approval. Present evidence that ea
 
 **If you implemented the code, you CANNOT approve it. Wait for user or different reviewer.**
 
+**Important:** "Different agent" means different human/entity. The same human using different agent roles (backend-engineer → code-reviewer) is STILL self-approval and PROHIBITED.
+
 ## Common Rationalizations - REJECTED
 
 | Excuse | Reality |
@@ -102,6 +104,10 @@ Final validation gate requiring explicit user approval. Present evidence that ea
 | "Looks good" = approval | "Looks good" is ambiguous. Require explicit APPROVED. |
 | "User said 'sure'" | "Sure" is ambiguous. Require explicit APPROVED. |
 | "No objections raised" | Lack of objection ≠ approval. Require explicit response. |
+| "User delegated approval to X" | Delegation ≠ stakeholder approval. Only original requester can approve. |
+| "Emergency production issue" | Emergency ≠ gate bypass. Validation protects production. |
+| "Reduced scope, easier to approve" | Reduced scope ≠ auto-approval. User must validate actual delivery. |
+| "APPROVED if X (X is true)" | Conditional approval ≠ approval. Verify X, then re-request. |
 
 ## Red Flags - STOP
 
@@ -120,6 +126,10 @@ If you catch yourself thinking ANY of these, STOP immediately:
 - "'Looks good' means approved"
 - "User said 'sure'"
 - "No objections = approved"
+- "User delegated approval authority to someone else"
+- "This is an emergency, skip validation"
+- "We implemented less than requested, so it's easier to approve"
+- "I'm switching roles to approve this"
 
 **All of these indicate Gate 5 violation. Wait for explicit "APPROVED" or "REJECTED".**
 

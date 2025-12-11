@@ -60,13 +60,56 @@ examples:
 
 # Development Cycle Orchestrator
 
+## Standards Loading (MANDATORY)
+
+**Before ANY gate execution, you MUST load Ring standards:**
+
+| Parameter | Value |
+|-----------|-------|
+| url | \`https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.md\` |
+| prompt | "Extract Agent Modification Verification requirements, Anti-Rationalization Tables requirements, and Critical Rules" |
+
+**Execute WebFetch before proceeding.** Do NOT continue until standards are loaded.
+
+If WebFetch fails → STOP and report blocker. Cannot proceed without Ring standards.
+
 ## Overview
 
 The development cycle orchestrator loads tasks/subtasks from PM team output (or manual task files) and executes through 6 quality gates. Tasks are loaded at initialization - no separate import gate.
 
 **Announce at start:** "I'm using the dev-cycle skill to orchestrate task execution through 6 gates."
 
-## Pressure Resistance
+## Blocker Criteria - STOP and Report
+
+| Decision Type | Examples | Action |
+|---------------|----------|--------|
+| **Gate Failure** | Tests not passing, review failed | STOP. Cannot proceed to next gate. |
+| **Missing Standards** | No PROJECT_RULES.md | STOP. Report blocker and wait. |
+| **Agent Failure** | Specialist agent returned errors | STOP. Diagnose and report. |
+| **User Decision Required** | Architecture choice, framework selection | STOP. Present options with trade-offs. |
+
+You CANNOT proceed when blocked. Report and wait for resolution.
+
+### Cannot Be Overridden
+
+| Requirement | Rationale | Consequence If Skipped |
+|-------------|-----------|------------------------|
+| **All 6 gates must execute** | Each gate catches different issues | Missing critical defects, security vulnerabilities |
+| **Gates execute in order (0→5)** | Dependencies exist between gates | Testing untested code, reviewing unobservable systems |
+| **Gate 4 requires ALL 3 reviewers** | Different review perspectives are complementary | Missing security issues, business logic flaws |
+| **Coverage threshold ≥ 85%** | Industry standard for quality code | Untested edge cases, regression risks |
+| **PROJECT_RULES.md must exist** | Cannot verify standards without target | Arbitrary decisions, inconsistent implementations |
+
+## Severity Calibration
+
+| Severity | Criteria | Examples |
+|----------|----------|----------|
+| **CRITICAL** | Blocks deployment, security risk, data loss | Gate violation, skipped mandatory step |
+| **HIGH** | Major functionality broken, standards violation | Missing tests, wrong agent dispatched |
+| **MEDIUM** | Code quality, maintainability issues | Incomplete documentation, minor gaps |
+| **LOW** | Best practices, optimization | Style improvements, minor refactoring |
+
+Report ALL severities. Let user prioritize.
 
 **This skill enforces MANDATORY gates. Pressure scenarios and required responses:**
 
