@@ -131,7 +131,7 @@ Invoke this agent when the task involves:
 4. **CANNOT skip** - this is a HARD GATE, not optional
 
 **MANDATORY Output Table Format:**
-```
+```markdown
 | Category | Current Pattern | Ring Standard | Status | File/Location |
 |----------|----------------|---------------|--------|---------------|
 | [category] | [what codebase does] | [what standard requires] | ✅/⚠️/❌ | [file:line] |
