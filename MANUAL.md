@@ -1,6 +1,6 @@
 # Ring Marketplace Manual
 
-Quick reference guide for the Ring skills library and workflow system. This monorepo provides 5 plugins with 55 skills, 20 agents, and 18 slash commands for enforcing proven software engineering practices.
+Quick reference guide for the Ring skills library and workflow system. This monorepo provides 5 plugins with 55 skills, 22 agents, and 17 slash commands for enforcing proven software engineering practices.
 
 ---
 
@@ -14,16 +14,16 @@ Quick reference guide for the Ring skills library and workflow system. This mono
 │  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐              │
 │  │  ring-default   │  │ ring-dev-team   │  │ ring-finops-    │              │
 │  │    (plugin)     │  │    (plugin)     │  │    team         │              │
-│  │ Skills(21)      │  │ Skills(10)      │  │ Skills(6)       │              │
-│  │ Agents(5)       │  │ Agents(7)       │  │ Agents(2)       │              │
+│  │ Skills(22)      │  │ Skills(10)      │  │ Skills(6)       │              │
+│  │ Agents(5)       │  │ Agents(9)       │  │ Agents(2)       │              │
 │  │ Cmds(7)         │  │ Cmds(5)         │  │                 │              │
 │  └─────────────────┘  └─────────────────┘  └─────────────────┘              │
 │  ┌─────────────────┐  ┌─────────────────┐                                    │
 │  │ ring-pm-team    │  │ ring-tw-team    │                                    │
 │  │    (plugin)     │  │    (plugin)     │                                    │
 │  │ Skills(10)      │  │ Skills(7)       │                                    │
-│  │ Cmds(2)         │  │ Agents(3)       │                                    │
-│  │                 │  │ Cmds(3)         │                                    │
+│  │ Agents(3)       │  │ Agents(3)       │                                    │
+│  │ Cmds(2)         │  │ Cmds(3)         │                                    │
 │  └─────────────────┘  └─────────────────┘                                    │
 └─────────────────────────────────────────────────────────────────────────────┘
 
@@ -180,6 +180,8 @@ Use when you need expert depth in specific domains:
 | `ring-dev-team:devops-engineer` | Infrastructure & CI/CD | Docker, Kubernetes, Terraform, GitHub Actions |
 | `ring-dev-team:frontend-bff-engineer-typescript` | BFF & React/Next.js frontend | Next.js API Routes, Clean Architecture, DDD, React |
 | `ring-dev-team:frontend-designer` | Visual design & aesthetics | Typography, motion, CSS, distinctive UI |
+| `ring-dev-team:frontend-engineer` | General frontend development | React, TypeScript, CSS, component architecture |
+| `ring-dev-team:prompt-quality-reviewer` | AI prompt quality review | Prompt engineering, clarity, effectiveness |
 | `ring-dev-team:qa-analyst` | Quality assurance | Test strategy, automation, coverage |
 | `ring-dev-team:sre` | Site reliability & ops | Monitoring, alerting, incident response, SLOs |
 
@@ -294,13 +296,22 @@ These enforce quality standards:
 | Need | Agent to Use |
 |------|-------------|
 | General code quality review | 3 parallel reviewers via `/ring-default:codereview` |
+| Implementation planning | `ring-default:write-plan` |
+| Deep codebase analysis | `ring-default:codebase-explorer` |
 | Go backend expertise | `ring-dev-team:backend-engineer-golang` |
 | TypeScript/Node.js backend | `ring-dev-team:backend-engineer-typescript` |
 | Infrastructure/DevOps | `ring-dev-team:devops-engineer` |
 | React/Next.js frontend & BFF | `ring-dev-team:frontend-bff-engineer-typescript` |
+| General frontend development | `ring-dev-team:frontend-engineer` |
 | Visual design & aesthetics | `ring-dev-team:frontend-designer` |
-| Deep codebase analysis | `ring-default:codebase-explorer` |
-| Regulatory compliance | `ring-finops-team:finops-analyzer` |
+| AI prompt quality review | `ring-dev-team:prompt-quality-reviewer` |
+| Quality assurance & testing | `ring-dev-team:qa-analyst` |
+| Site reliability & operations | `ring-dev-team:sre` |
+| Regulatory compliance analysis | `ring-finops-team:finops-analyzer` |
+| Regulatory template generation | `ring-finops-team:finops-automation` |
+| Best practices research | `ring-pm-team:best-practices-researcher` |
+| Framework documentation research | `ring-pm-team:framework-docs-researcher` |
+| Repository analysis | `ring-pm-team:repo-research-analyst` |
 | Functional documentation (guides) | `ring-tw-team:functional-writer` |
 | API reference documentation | `ring-tw-team:api-writer` |
 | Documentation quality review | `ring-tw-team:docs-reviewer` |
@@ -312,7 +323,7 @@ These enforce quality standards:
 ### Session Startup
 
 1. SessionStart hook runs automatically
-2. All 54 skills are auto-discovered and available
+2. All 55 skills are auto-discovered and available
 3. `using-ring` workflow is activated (skill checking is now mandatory)
 
 ### Agent Dispatching
