@@ -17,35 +17,37 @@ This file defines the specific standards for Go development at Lerian Studio.
 
 All Lerian Studio Go projects **MUST** use `lib-commons/v2` as the foundation library. This ensures consistency across all services.
 
-### Required Import
+### Required Import (lib-commons v2)
 
 ```go
 import (
     libCommons "github.com/LerianStudio/lib-commons/v2/commons"
-    libLog "github.com/LerianStudio/lib-commons/v2/commons/log"
-    libZap "github.com/LerianStudio/lib-commons/v2/commons/zap"
+    libZap "github.com/LerianStudio/lib-commons/v2/commons/zap"           // Logger initialization (config/bootstrap only)
+    libLog "github.com/LerianStudio/lib-commons/v2/commons/log"           // Logger interface (services, routes, consumers)
+    libOpentelemetry "github.com/LerianStudio/lib-commons/v2/commons/opentelemetry"
+    libServer "github.com/LerianStudio/lib-commons/v2/commons/server"
+    libHTTP "github.com/LerianStudio/lib-commons/v2/commons/net/http"
     libPostgres "github.com/LerianStudio/lib-commons/v2/commons/postgres"
     libMongo "github.com/LerianStudio/lib-commons/v2/commons/mongo"
     libRedis "github.com/LerianStudio/lib-commons/v2/commons/redis"
-    libOpentelemetry "github.com/LerianStudio/lib-commons/v2/commons/opentelemetry"
-    libHTTP "github.com/LerianStudio/lib-commons/v2/commons/net/http"
-    libServer "github.com/LerianStudio/lib-commons/v2/commons/server"
 )
 ```
 
+> **Note:** v2 uses `lib` prefix aliases (e.g., `libCommons`, `libZap`, `libLog`) to distinguish lib-commons packages from standard library and other imports.
+
 ### What lib-commons Provides
 
-| Package | Purpose |
-|---------|---------|
-| `commons` | Core utilities, config loading, tracking context |
-| `commons/zap` | Logger initialization (Zap-based) |
-| `commons/log` | Logger interface |
-| `commons/postgres` | PostgreSQL connection management, pagination |
-| `commons/mongo` | MongoDB connection management |
-| `commons/redis` | Redis connection management |
-| `commons/opentelemetry` | OpenTelemetry initialization and helpers |
-| `commons/net/http` | HTTP utilities, telemetry middleware, cursor pagination |
-| `commons/server` | Server lifecycle management with graceful shutdown |
+| Package | Purpose | Where Used |
+|---------|---------|------------|
+| `commons` | Core utilities, config loading, tracking context | Everywhere |
+| `commons/zap` | Logger initialization/configuration | **Config/bootstrap files only** |
+| `commons/log` | Logger interface (`log.Logger`) for logging operations | Services, routes, consumers, handlers |
+| `commons/postgres` | PostgreSQL connection management, pagination | Bootstrap, repositories |
+| `commons/mongo` | MongoDB connection management | Bootstrap, repositories |
+| `commons/redis` | Redis connection management | Bootstrap, repositories |
+| `commons/opentelemetry` | OpenTelemetry initialization and helpers | Bootstrap, middleware |
+| `commons/net/http` | HTTP utilities, telemetry middleware, pagination | Routes, handlers |
+| `commons/server` | Server lifecycle with graceful shutdown | Bootstrap |
 
 ---
 
@@ -59,7 +61,7 @@ import (
 | `fiber/v2` | v2.52.0 | HTTP framework |
 | `pgx/v5` | v5.7.0 | PostgreSQL driver |
 | `go.opentelemetry.io/otel` | v1.38.0 | Telemetry |
-| `zap` | v1.27.0 | Logging (via lib-commons) |
+| `zap` | v1.27.0 | Logging implementation (internal to lib-commons) |
 | `testify` | v1.10.0 | Testing |
 | `mockery` | v2.50.0 | Mock generation |
 | `mongo-driver` | v1.17.0 | MongoDB driver |
@@ -223,6 +225,8 @@ func NewService() *Service {
 type Config struct {
     PrimaryDBHost string `env:"DB_HOST"`  // Centralized
 }
+
+// Load with: libCommons.SetConfigFromEnvVars(&cfg)
 ```
 
 ---
@@ -278,7 +282,7 @@ func InitServers() *Service {
         panic(err)
     }
 
-    // Initialize logger FIRST
+    // Initialize logger FIRST (zap package for initialization in bootstrap)
     logger := libZap.InitializeLogger()
 
     // Initialize telemetry with config
@@ -433,7 +437,7 @@ func InitServers() *Service {
         panic(err)
     }
 
-    // 2. Initialize logger
+    // 2. Initialize logger (zap package for initialization in bootstrap)
     logger := libZap.InitializeLogger()
 
     // 3. Initialize telemetry
@@ -445,8 +449,8 @@ func InitServers() *Service {
     redisConnection := &libRedis.RedisConnection{...}
 
     // 5. Initialize repositories (adapters)
-    userRepo := postgres.NewUserRepository(postgresConnection)
-    cacheRepo := redis.NewCacheRepository(redisConnection)
+    userRepo := postgresadapter.NewUserRepository(postgresConnection)
+    cacheRepo := redisadapter.NewCacheRepository(redisConnection)
 
     // 6. Initialize use cases (services)
     commandUseCase := &command.UseCase{
@@ -714,10 +718,10 @@ func (h *Handler) GetAllTransactions(c *fiber.Ctx) error {
     defer span.End()
 
     // Parse and validate query parameters
-    headerParams, err := http.ValidateParameters(c.Queries())
+    headerParams, err := libHTTP.ValidateParameters(c.Queries())
     if err != nil {
         libOpentelemetry.HandleSpanBusinessErrorEvent(&span, "Invalid parameters", err)
-        return http.WithError(c, err)
+        return libHTTP.WithError(c, err)
     }
 
     // Build pagination request (cursor-based)
@@ -732,21 +736,21 @@ func (h *Handler) GetAllTransactions(c *fiber.Ctx) error {
     items, cursor, err := h.Query.GetAllTransactions(ctx, orgID, ledgerID, *headerParams)
     if err != nil {
         libOpentelemetry.HandleSpanBusinessErrorEvent(&span, "Query failed", err)
-        return http.WithError(c, err)
+        return libHTTP.WithError(c, err)
     }
 
     // Set response with cursor
     pagination.SetItems(items)
     pagination.SetCursor(cursor.Next, cursor.Prev)
 
-    return http.OK(c, pagination)
+    return libHTTP.OK(c, pagination)
 }
 ```
 
 **Repository Implementation:**
 
 ```go
-func (r *Repository) FindAll(ctx context.Context, filter http.Pagination) ([]Entity, libHTTP.CursorPagination, error) {
+func (r *Repository) FindAll(ctx context.Context, filter libHTTP.Pagination) ([]Entity, libHTTP.CursorPagination, error) {
     logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)
 
     ctx, span := tracer.Start(ctx, "postgres.find_all")
@@ -842,9 +846,9 @@ func (h *Handler) GetAllOrganizations(c *fiber.Ctx) error {
     ctx, span := tracer.Start(ctx, "handler.get_all_organizations")
     defer span.End()
 
-    headerParams, err := http.ValidateParameters(c.Queries())
+    headerParams, err := libHTTP.ValidateParameters(c.Queries())
     if err != nil {
-        return http.WithError(c, err)
+        return libHTTP.WithError(c, err)
     }
 
     // Build page-based pagination
@@ -859,12 +863,12 @@ func (h *Handler) GetAllOrganizations(c *fiber.Ctx) error {
     // Query with offset pagination (uses ToOffsetPagination())
     items, err := h.Query.GetAllOrganizations(ctx, headerParams.ToOffsetPagination())
     if err != nil {
-        return http.WithError(c, err)
+        return libHTTP.WithError(c, err)
     }
 
     pagination.SetItems(items)
 
-    return http.OK(c, pagination)
+    return libHTTP.OK(c, pagination)
 }
 ```
 
@@ -1458,6 +1462,107 @@ func (s *Service) Run() {
 - [ ] Exponential backoff for connection recovery
 - [ ] Graceful shutdown respects context cancellation
 - [ ] Separate credentials for consumer vs producer
+
+---
+
+## Standards Compliance Output Format
+
+When producing a Standards Compliance report (used by dev-refactor workflow), follow these output formats:
+
+### If ALL Categories Are Compliant
+
+```markdown
+## Standards Compliance
+
+### Lerian/Ring Standards Comparison
+
+#### Bootstrap & Initialization
+| Category | Current Pattern | Expected Pattern | Status | Evidence |
+|----------|----------------|------------------|--------|----------|
+| Config Struct | `Config` struct with `env` tags | Single struct with `env` tags | ✅ Compliant | `internal/bootstrap/config.go:15` |
+| Config Loading | `libCommons.SetConfigFromEnvVars(&cfg)` | `libCommons.SetConfigFromEnvVars(&cfg)` | ✅ Compliant | `internal/bootstrap/config.go:42` |
+| Logger Init | `libZap.InitializeLogger()` | `libZap.InitializeLogger()` (bootstrap only) | ✅ Compliant | `internal/bootstrap/config.go:45` |
+| Telemetry Init | `libOpentelemetry.InitializeTelemetry()` | `libOpentelemetry.InitializeTelemetry()` | ✅ Compliant | `internal/bootstrap/config.go:48` |
+| ... | ... | ... | ✅ Compliant | ... |
+
+#### Context & Tracking
+| Category | Current Pattern | Expected Pattern | Status | Evidence |
+|----------|----------------|------------------|--------|----------|
+| ... | ... | ... | ✅ Compliant | ... |
+
+#### Infrastructure
+| Category | Current Pattern | Expected Pattern | Status | Evidence |
+|----------|----------------|------------------|--------|----------|
+| ... | ... | ... | ✅ Compliant | ... |
+
+#### Domain Patterns
+| Category | Current Pattern | Expected Pattern | Status | Evidence |
+|----------|----------------|------------------|--------|----------|
+| ... | ... | ... | ✅ Compliant | ... |
+
+### Verdict: ✅ FULLY COMPLIANT
+
+No migration actions required. All categories verified against Lerian/Ring Go Standards.
+```
+
+### If ANY Category Is Non-Compliant
+
+```markdown
+## Standards Compliance
+
+### Lerian/Ring Standards Comparison
+
+#### Bootstrap & Initialization
+| Category | Current Pattern | Expected Pattern | Status | File/Location |
+|----------|----------------|------------------|--------|---------------|
+| Config Struct | Scattered `os.Getenv()` calls | Single struct with `env` tags | ⚠️ Non-Compliant | `cmd/api/main.go` |
+| Config Loading | Manual env parsing | `libCommons.SetConfigFromEnvVars(&cfg)` | ⚠️ Non-Compliant | `cmd/api/main.go:25` |
+| Logger Init | `libZap.InitializeLogger()` | `libZap.InitializeLogger()` (bootstrap only) | ✅ Compliant | `cmd/api/main.go:30` |
+| ... | ... | ... | ... | ... |
+
+#### Context & Tracking
+| Category | Current Pattern | Expected Pattern | Status | File/Location |
+|----------|----------------|------------------|--------|---------------|
+| ... | ... | ... | ... | ... |
+
+### Verdict: ⚠️ NON-COMPLIANT (X of Y categories)
+
+### Required Changes for Compliance
+
+1. **Config Struct Migration**
+   - Replace: Direct `os.Getenv()` calls scattered across files
+   - With: Single `Config` struct with `env` tags in `/internal/bootstrap/config.go`
+   - Import: `libCommons "github.com/LerianStudio/lib-commons/v2/commons"`
+   - Usage: `libCommons.SetConfigFromEnvVars(&cfg)`
+   - Files affected: `cmd/api/main.go`, `internal/service/user.go`
+
+2. **Logger Migration**
+   - Replace: Custom logger or `log.Println()`
+   - With: lib-commons structured logger
+   - Bootstrap import: `libZap "github.com/LerianStudio/lib-commons/v2/commons/zap"` (initialization)
+   - Application import: `libLog "github.com/LerianStudio/lib-commons/v2/commons/log"` (interface for logging calls)
+   - Bootstrap usage: `logger := libZap.InitializeLogger()` (returns `libLog.Logger` interface)
+   - Application usage: Use `libLog.Logger` interface for all logging calls
+   - Files affected: [list files]
+
+3. **Telemetry Migration**
+   - Replace: No tracing or custom tracing
+   - With: OpenTelemetry integration
+   - Import: `libOpentelemetry "github.com/LerianStudio/lib-commons/v2/commons/opentelemetry"`
+   - Usage: `telemetry := libOpentelemetry.InitializeTelemetry(&libOpentelemetry.TelemetryConfig{...})`
+   - Files affected: [list files]
+
+4. **[Next Category] Migration**
+   - Replace: ...
+   - With: ...
+   - Import: ...
+   - Usage: ...
+```
+
+**CRITICAL:** The comparison table is NOT optional. It serves as:
+1. **Evidence** that each category was actually checked
+2. **Documentation** for the codebase's compliance status
+3. **Audit trail** for future refactors
 
 ---
 

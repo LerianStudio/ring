@@ -179,6 +179,17 @@ agent_reminder="${agent_reminder}</agent-usage-reminder>\n"
 
 reminder="${reminder}${agent_reminder}"
 
+# Add duplication prevention reminder
+duplication_guard="<duplication-prevention-guard>\n"
+duplication_guard="${duplication_guard}**BEFORE ADDING CONTENT** to any file:\n"
+duplication_guard="${duplication_guard}1. SEARCH FIRST: \`grep -r 'keyword' --include='*.md'\`\n"
+duplication_guard="${duplication_guard}2. If exists -> REFERENCE it, don't copy\n"
+duplication_guard="${duplication_guard}3. Canonical sources: CLAUDE.md (rules), docs/*.md (details)\n"
+duplication_guard="${duplication_guard}4. NEVER duplicate - always link to single source of truth\n"
+duplication_guard="${duplication_guard}</duplication-prevention-guard>\n"
+
+reminder="${reminder}${duplication_guard}"
+
 # Output hook response with injected context
 cat <<EOF
 {

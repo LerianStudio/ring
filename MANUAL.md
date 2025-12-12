@@ -183,6 +183,31 @@ Use when you need expert depth in specific domains:
 | `ring-dev-team:qa-analyst` | Quality assurance | Test strategy, automation, coverage |
 | `ring-dev-team:sre` | Site reliability & ops | Monitoring, alerting, incident response, SLOs |
 
+**Standards Compliance Output:** All ring-dev-team agents include a `## Standards Compliance` output section with conditional requirement:
+
+| Invocation Context | Standards Compliance | Trigger |
+|--------------------|---------------------|---------|
+| Direct agent call | Optional | N/A |
+| Via `dev-cycle` | Optional | N/A |
+| Via `dev-refactor` | **MANDATORY** | Prompt contains `**MODE: ANALYSIS ONLY**` |
+
+**How it works:**
+1. `dev-refactor` dispatches agents with `**MODE: ANALYSIS ONLY**` in prompt
+2. Agents detect this pattern and load Ring standards via WebFetch
+3. Agents produce comparison tables: Current Pattern vs Expected Pattern
+4. Output includes severity, location, and migration recommendations
+
+**Example output when non-compliant:**
+```markdown
+## Standards Compliance
+
+| Category | Current | Expected | Status | Location |
+|----------|---------|----------|--------|----------|
+| Logging | fmt.Println | lib-commons/zap | ⚠️ | service/*.go |
+```
+
+**Cross-references:** CLAUDE.md (Standards Compliance section), `dev-team/skills/dev-refactor/SKILL.md`
+
 ### Regulatory & FinOps (ring-finops-team)
 
 For Brazilian financial compliance workflows:

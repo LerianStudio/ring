@@ -60,13 +60,75 @@ examples:
 
 # Development Cycle Orchestrator
 
+## Standards Loading (MANDATORY)
+
+**Before ANY gate execution, you MUST load Ring standards:**
+
+See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.md) as the canonical source. This table summarizes the loading process.
+
+| Parameter | Value |
+|-----------|-------|
+| url | \`https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.md\` |
+| prompt | "Extract Agent Modification Verification requirements, Anti-Rationalization Tables requirements, and Critical Rules" |
+
+**Execute WebFetch before proceeding.** Do NOT continue until standards are loaded.
+
+If WebFetch fails → STOP and report blocker. Cannot proceed without Ring standards.
+
 ## Overview
 
 The development cycle orchestrator loads tasks/subtasks from PM team output (or manual task files) and executes through 6 quality gates. Tasks are loaded at initialization - no separate import gate.
 
 **Announce at start:** "I'm using the dev-cycle skill to orchestrate task execution through 6 gates."
 
-## Pressure Resistance
+## Blocker Criteria - STOP and Report
+
+| Decision Type | Examples | Action |
+|---------------|----------|--------|
+| **Gate Failure** | Tests not passing, review failed | STOP. Cannot proceed to next gate. |
+| **Missing Standards** | No PROJECT_RULES.md | STOP. Report blocker and wait. |
+| **Agent Failure** | Specialist agent returned errors | STOP. Diagnose and report. |
+| **User Decision Required** | Architecture choice, framework selection | STOP. Present options with trade-offs. |
+
+You CANNOT proceed when blocked. Report and wait for resolution.
+
+### Cannot Be Overridden
+
+| Requirement | Rationale | Consequence If Skipped |
+|-------------|-----------|------------------------|
+| **All 6 gates must execute** | Each gate catches different issues | Missing critical defects, security vulnerabilities |
+| **Gates execute in order (0→5)** | Dependencies exist between gates | Testing untested code, reviewing unobservable systems |
+| **Gate 4 requires ALL 3 reviewers** | Different review perspectives are complementary | Missing security issues, business logic flaws |
+| **Coverage threshold ≥ 85%** | Industry standard for quality code | Untested edge cases, regression risks |
+| **PROJECT_RULES.md must exist** | Cannot verify standards without target | Arbitrary decisions, inconsistent implementations |
+
+## Severity Calibration
+
+| Severity | Criteria | Examples |
+|----------|----------|----------|
+| **CRITICAL** | Blocks deployment, security risk, data loss | Gate violation, skipped mandatory step |
+| **HIGH** | Major functionality broken, standards violation | Missing tests, wrong agent dispatched |
+| **MEDIUM** | Code quality, maintainability issues | Incomplete documentation, minor gaps |
+| **LOW** | Best practices, optimization | Style improvements, minor refactoring |
+
+Report ALL severities. Let user prioritize.
+
+### Reviewer Verdicts Are Final
+
+**MEDIUM issues found in Gate 4 MUST be fixed. No exceptions.**
+
+| Request | Why It's WRONG | Required Action |
+|---------|----------------|-----------------|
+| "Can reviewer clarify if MEDIUM can defer?" | Reviewer already decided. MEDIUM means FIX. | **Fix the issue, re-run reviewers** |
+| "Ask if this specific case is different" | Reviewer verdict accounts for context already. | **Fix the issue, re-run reviewers** |
+| "Request exception for business reasons" | Reviewers know business context. Verdict is final. | **Fix the issue, re-run reviewers** |
+
+**Severity mapping is absolute:**
+- CRITICAL/HIGH/MEDIUM → Fix NOW, re-run all 3 reviewers
+- LOW → Add TODO(review): comment
+- Cosmetic → Add FIXME(nitpick): comment
+
+No negotiation. No exceptions. No "special cases".
 
 **This skill enforces MANDATORY gates. Pressure scenarios and required responses:**
 
@@ -76,6 +138,9 @@ The development cycle orchestrator loads tasks/subtasks from PM team output (or 
 | **Sunk Cost** | "Already did 4 gates, skip review" | "Each gate catches different issues. Prior gates don't reduce review value. Review = 10 min." |
 | **Authority** | "Director override, ship now" | "Cannot skip GATES based on authority. Can skip CHECKPOINTS (automatic mode). Gates are non-negotiable." |
 | **Simplicity** | "Simple fix, skip gates" | "Simple tasks have complex impacts. AI doesn't negotiate. ALL tasks require ALL gates. No exceptions." |
+| **Demo** | "Demo at 9 AM, ship without gates" | "Demos with unverified code = demos that crash. Gates BEFORE demo to ensure success. Automatic mode = 20 min." |
+| **Fatigue** | "It's late, exhausted, finish tomorrow" | "Fatigue reduces judgment. This is why gates are automated checklists. Gates prevent fatigue-induced errors." |
+| **Economic** | "$XM deal depends on skipping gates" | "Revenue at risk from shipping broken code >> revenue from delayed demo. Gates protect business outcomes." |
 
 **Non-negotiable principle:** Execution mode selection affects CHECKPOINTS (user approval pauses), not GATES (quality checks). ALL gates execute regardless of mode.
 
@@ -94,7 +159,7 @@ The development cycle orchestrator loads tasks/subtasks from PM team output (or 
 | "Backlog the Medium issue, it's documented" | Documented risk ≠ mitigated risk. Medium in Gate 4 = fix NOW, not later. |
 | "Risk-based prioritization allows deferral" | Gates ARE the risk-based system. Reviewers define severity, not you. |
 | "Business context justifies exception" | Business context informed gate design. Gates already account for it. |
-| "Demo tomorrow, we'll fix after" | Demo with untested code = demo that crashes. Gates BEFORE demo. |
+| "Demo tomorrow, we'll fix after" | "Fix after" = never-fix. Demo crashes are worse than delayed demos. | **Gates BEFORE demo (automatic mode = 20 min)** |
 | "Just this one gate, then catch up" | One skipped gate = precedent. Next gate also "just one". No incremental compromise. |
 | "90% done, finish without remaining gates" | 90% done with 0% gates = 0% verified. Gates verify the 90%. |
 | "Ship now, gates as fast-follow" | Fast-follow = never-follow. Gates now or not at all. |
@@ -139,6 +204,43 @@ Day 4: Production incident from Day 1 code
 2. **Document every pressure** - Log who requested, why, outcome
 3. **Escalate patterns** - If same pressure repeats, escalate to team lead
 4. **Gates are binary** - Complete or incomplete. No "mostly done".
+
+## Gate Completion Definition (HARD GATE)
+
+**A gate is COMPLETE only when ALL components finish successfully:**
+
+| Gate | Components Required | Partial = FAIL |
+|------|---------------------|----------------|
+| 0 | Implementation agent completes + TDD RED verified | 1 file done ≠ gate done |
+| 1 | Dockerfile + docker-compose + .env.example | Missing any = FAIL |
+| 2 | /health + /ready + /metrics + structured logs | 3/4 endpoints = FAIL |
+| 3 | Coverage ≥ 85% + all AC tested | 84% = FAIL |
+| 4 | **ALL 3 reviewers PASS** | 2/3 reviewers = FAIL |
+| 5 | Explicit "APPROVED" from user | "Looks good" = NOT approved |
+
+**CRITICAL for Gate 4:** Running 2 of 3 reviewers is NOT a partial pass - it's a FAIL. Re-run ALL 3 reviewers.
+
+**Anti-Rationalization for Partial Gates:**
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "2 of 3 reviewers passed" | Gate 4 requires ALL 3. 2/3 = 0/3. | **Re-run ALL 3 reviewers** |
+| "Gate mostly complete" | Mostly ≠ complete. Binary: done or not done. | **Complete ALL components** |
+| "Can finish remaining in next cycle" | Gates don't carry over. Complete NOW. | **Finish current gate** |
+| "Core components done, optional can wait" | No component is optional within a gate. | **Complete ALL components** |
+
+## Gate Order Enforcement (HARD GATE)
+
+**Gates MUST execute in order: 0 → 1 → 2 → 3 → 4 → 5. No exceptions.**
+
+| Violation | Why It's WRONG | Consequence |
+|-----------|----------------|-------------|
+| Skip Gate 1 (DevOps) | "No infra changes" | Code without container = works on my machine only |
+| Skip Gate 2 (SRE) | "Observability later" | Blind production = debugging nightmare |
+| Reorder Gates | "Review before test" | Reviewing untested code wastes reviewer time |
+| Parallel Gates | "Run 2 and 3 together" | Dependencies exist. Order is intentional. |
+
+**Gates are NOT parallelizable across different gates. Sequential execution is MANDATORY.**
 
 ## The 6 Gates
 
@@ -440,20 +542,19 @@ For current execution unit:
    Task tool:
      subagent_type: "ring-dev-team:sre"
      prompt: |
-       Implement observability for: [unit_id]
+       Validate observability for: [unit_id]
 
        Service Information:
        - Language: [Go/TypeScript/Python]
        - Service type: [API/Worker/Batch]
        - External dependencies: [list]
+       - Implementation from Gate 0: [summary of what was implemented]
 
-       Requirements:
-       - Prometheus metrics at /metrics
-       - Health endpoints (/health, /ready)
-       - Structured JSON logging
-       - OpenTelemetry tracing (if external calls)
+       Validation Requirements:
+       - Verify /health endpoint responds correctly
+       - Verify OpenTelemetry tracing (if external calls)
 
-       Report: files created, metrics added, endpoints verified.
+       Report: validation results with PASS/FAIL for each component (/health, tracing), issues found by severity, verification commands executed.
 
 4. If SRE not needed:
    - Mark as "skipped" with reason
