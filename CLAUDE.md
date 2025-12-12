@@ -2,6 +2,205 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+---
+
+## ⛔ CRITICAL RULES (READ FIRST)
+
+**These rules are NON-NEGOTIABLE. They MUST be followed for EVERY task.**
+
+### 1. Agent Modification = Mandatory Verification
+When creating or modifying ANY agent in `*/agents/*.md`:
+- **MUST** verify agent has ALL required sections (see "Agent Modification Verification")
+- **MUST** use STRONG language (MUST, REQUIRED, CANNOT, FORBIDDEN)
+- **MUST** include anti-rationalization tables
+- If ANY section is missing → Agent is INCOMPLETE
+
+### 2. Agents are EXECUTORS, Not DECISION-MAKERS
+- Agents **VERIFY**, they do NOT **ASSUME**
+- Agents **REPORT** blockers, they do NOT **SOLVE** ambiguity autonomously
+- Agents **FOLLOW** gates, they do NOT **SKIP** gates
+- Agents **ASK** when uncertain, they do NOT **GUESS**
+
+### 3. Anti-Patterns (NEVER Do These)
+1. **NEVER skip using-ring** - It's mandatory, not optional
+2. **NEVER run reviewers sequentially** - Always dispatch in parallel
+3. **NEVER skip TDD's RED phase** - Test must fail before implementation
+4. **NEVER ignore skill when applicable** - "Simple task" is not an excuse
+5. **NEVER use panic() in Go** - Error handling required
+6. **NEVER commit manually** - Always use `/ring-default:commit` command
+7. **NEVER assume compliance** - VERIFY with evidence
+
+### 4. Fully Qualified Names (ALWAYS)
+- ✅ `ring-default:code-reviewer`
+- ✅ `ring-dev-team:backend-engineer-golang`
+- ❌ `ring:code-reviewer` (WRONG)
+- ❌ `backend-engineer-golang` (WRONG)
+
+### 5. Content Duplication Prevention (ALWAYS CHECK)
+Before adding ANY content to prompts, skills, agents, or documentation:
+1. **SEARCH FIRST**: `grep -r "keyword" --include="*.md"` - Check if content already exists
+2. **If content exists** → **REFERENCE it**, do NOT duplicate. Use: `See [file](path) for details`
+3. **If adding new content** → Add to the canonical source per table below
+4. **NEVER copy** content between files - always link to the single source of truth
+
+| Information Type | Canonical Source (Single Source of Truth) |
+|-----------------|-------------------------------------------|
+| Critical rules | CLAUDE.md |
+| Language patterns | docs/PROMPT_ENGINEERING.md |
+| Agent schemas | docs/AGENT_DESIGN.md |
+| Workflows | docs/WORKFLOWS.md |
+| Plugin overview | README.md |
+| Agent requirements | CLAUDE.md (Agent Modification section) |
+
+**Reference Pattern:**
+- ✅ `See [docs/PROMPT_ENGINEERING.md](docs/PROMPT_ENGINEERING.md) for language patterns`
+- ❌ Copying the language patterns table into another file
+
+---
+
+## Quick Navigation
+
+| Section | Content |
+|---------|---------|
+| [CRITICAL RULES](#-critical-rules-read-first) | Non-negotiable requirements |
+| [Content Duplication Prevention](#5-content-duplication-prevention-always-check) | Canonical sources + reference pattern |
+| [Anti-Rationalization Tables](#anti-rationalization-tables-mandatory-for-all-agents) | Prevent AI from assuming/skipping |
+| [Assertive Language Reference](#assertive-language-reference) | Quick reference + [full docs](docs/PROMPT_ENGINEERING.md) |
+| [Agent Modification Verification](#agent-modification-verification-mandatory) | Checklist for agent changes |
+| [Repository Overview](#repository-overview) | What Ring is |
+| [Architecture](#architecture) | Plugin summary |
+| [Key Workflows](#key-workflows) | Quick reference + [full docs](docs/WORKFLOWS.md) |
+| [Agent Output Schemas](#agent-output-schema-archetypes) | Schema summary + [full docs](docs/AGENT_DESIGN.md) |
+| [Compliance Rules](#compliance-rules) | TDD, Review, Commit rules |
+| [Documentation Sync](#documentation-sync-checklist) | Files to update |
+
+---
+
+## Anti-Rationalization Tables (MANDATORY for All Agents)
+
+**Every agent MUST include an anti-rationalization table.** This is NOT optional. This is REQUIRED. This is a HARD GATE for agent design.
+
+**Why This Is Mandatory:**
+AI models naturally attempt to be "helpful" by making autonomous decisions. This is DANGEROUS in structured workflows. Agents MUST NOT rationalize skipping gates, assuming compliance, or making decisions that belong to users or orchestrators.
+
+**Anti-rationalization tables use aggressive language intentionally.** Words like "MUST", "REQUIRED", "MANDATORY", "CANNOT", "NON-NEGOTIABLE" are REQUIRED to override the AI's instinct to be accommodating.
+
+**Required Table Structure:**
+```markdown
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "[Common excuse AI might generate]" | [Why this thinking is incorrect] | **[MANDATORY action in bold]** |
+```
+
+**Example from backend-engineer-golang.md:**
+```markdown
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "Codebase already uses lib-commons" | Partial usage ≠ full compliance. Check everything. | **Verify ALL categories** |
+| "Already follows Lerian standards" | Assumption ≠ verification. Prove it with evidence. | **Verify ALL categories** |
+| "Only checking what seems relevant" | You don't decide relevance. The checklist does. | **Verify ALL categories** |
+| "Code looks correct, skip verification" | Looking correct ≠ being correct. Verify. | **Verify ALL categories** |
+| "Previous refactor already checked this" | Each refactor is independent. Check again. | **Verify ALL categories** |
+| "Small codebase, not all applies" | Size is irrelevant. Standards apply uniformly. | **Verify ALL categories** |
+```
+
+**Mandatory Sections Every Agent MUST Have:**
+
+| Section | Purpose | Language Requirements |
+|---------|---------|----------------------|
+| **Blocker Criteria** | Define when to STOP and report | Use "STOP", "CANNOT proceed", "HARD BLOCK" |
+| **Cannot Be Overridden** | List non-negotiable requirements | Use "CANNOT be waived", "NON-NEGOTIABLE" |
+| **Severity Calibration** | Define issue severity levels | Use "CRITICAL", "MUST be fixed" |
+| **Pressure Resistance** | Handle user pressure to skip | Use "Cannot proceed", "I'll implement correctly" |
+| **Anti-Rationalization Table** | Prevent AI from assuming/skipping | Use "Why It's WRONG", "REQUIRED action" |
+
+**Language Guidelines for Agent Prompts:**
+
+| Weak (AVOID) | Strong (REQUIRED) |
+|--------------|-------------------|
+| "You should check..." | "You MUST check..." |
+| "It's recommended to..." | "It is REQUIRED to..." |
+| "Consider verifying..." | "MANDATORY: Verify..." |
+| "You can skip if..." | "You CANNOT skip. No exceptions." |
+| "Optionally include..." | "This section is NON-NEGOTIABLE." |
+| "Try to follow..." | "HARD GATE: You will follow..." |
+
+**If an agent lacks anti-rationalization tables → The agent is INCOMPLETE and MUST be updated.**
+
+---
+
+## Assertive Language Reference
+
+**Quick reference for prompt engineering:**
+
+| Category | Examples |
+|----------|----------|
+| Requirements | MUST, REQUIRED, MANDATORY, SHALL, ALWAYS |
+| Prohibitions | CANNOT, NEVER, FORBIDDEN, MUST NOT, PROHIBITED |
+| Enforcement | HARD GATE, NON-NEGOTIABLE, NO EXCEPTIONS, STOP AND REPORT |
+| Anti-rationalization | "Assumption ≠ Verification", "You don't decide X" |
+
+See [docs/PROMPT_ENGINEERING.md](docs/PROMPT_ENGINEERING.md) for complete language patterns and template examples.
+
+---
+
+## Agent Modification Verification (MANDATORY)
+
+**HARD GATE: Before creating or modifying ANY agent file, Claude Code MUST verify compliance with this checklist.**
+
+When you receive instructions to create or modify an agent in `*/agents/*.md`:
+
+**Step 1: Read This Section**
+Before ANY agent work, re-read this CLAUDE.md section to understand current requirements.
+
+**Step 2: Verify Agent Has ALL Required Sections**
+
+| Required Section | Pattern to Check | If Missing |
+|------------------|------------------|------------|
+| **Standards Loading (MANDATORY)** | `## Standards Loading` | MUST add with WebFetch instructions |
+| **Blocker Criteria - STOP and Report** | `## Blocker Criteria` | MUST add with decision type table |
+| **Cannot Be Overridden** | `### Cannot Be Overridden` | MUST add with non-negotiable requirements |
+| **Severity Calibration** | `## Severity Calibration` | MUST add with CRITICAL/HIGH/MEDIUM/LOW table |
+| **Pressure Resistance** | `## Pressure Resistance` | MUST add with "User Says / Your Response" table |
+| **Anti-Rationalization Table** | `Rationalization.*Why It's WRONG` | MUST add in Standards Compliance section |
+| **When Implementation is Not Needed** | `## When.*Not Needed` | MUST add with compliance signs |
+| **Standards Compliance Report** | `## Standards Compliance Report` | MUST add for dev-team agents |
+
+**Step 3: Verify Language Strength**
+
+Check agent uses STRONG language, not weak:
+
+```text
+SCAN for weak phrases → REPLACE with strong:
+- "should" → "MUST"
+- "recommended" → "REQUIRED"
+- "consider" → "MANDATORY"
+- "can skip" → "CANNOT skip"
+- "optional" → "NON-NEGOTIABLE"
+- "try to" → "HARD GATE:"
+```
+
+**Step 4: Before Completing Agent Modification**
+
+```text
+CHECKLIST (ALL must be YES):
+[ ] Does agent have Standards Loading section?
+[ ] Does agent have Blocker Criteria table?
+[ ] Does agent have Cannot Be Overridden table?
+[ ] Does agent have Severity Calibration table?
+[ ] Does agent have Pressure Resistance table?
+[ ] Does agent have Anti-Rationalization table?
+[ ] Does agent use STRONG language (MUST, REQUIRED, CANNOT)?
+[ ] Does agent define when to STOP and report?
+[ ] Does agent define non-negotiable requirements?
+
+If ANY checkbox is NO → Agent is INCOMPLETE. Add missing sections.
+```
+
+**This verification is NOT optional. This is a HARD GATE for all agent modifications.**
+
+---
+
 ## Repository Overview
 
 Ring is a comprehensive skills library and workflow system for AI agents that enforces proven software engineering practices through mandatory workflows, parallel code review, and systematic pre-development planning. Currently implemented as a Claude Code plugin marketplace with **5 active plugins**, the skills are agent-agnostic and reusable across different AI systems.
@@ -19,168 +218,33 @@ Ring is a comprehensive skills library and workflow system for AI agents that en
 
 The architecture uses markdown-based skill definitions with YAML frontmatter, auto-discovered at session start via hooks, and executed through Claude Code's native Skill/Task tools.
 
+---
+
 ## Installation
 
-Ring supports multiple AI platforms. The installer auto-detects installed platforms and transforms content appropriately.
+See [README.md](README.md#installation) or [docs/platforms/](docs/platforms/) for detailed installation instructions.
 
-### Supported Platforms
+**Quick install:** `curl -fsSL https://raw.githubusercontent.com/lerianstudio/ring/main/install-ring.sh | bash`
 
-| Platform | Install Path | Format | Components |
-|----------|-------------|--------|------------|
-| Claude Code | `~/.claude/` | Native | skills, agents, commands, hooks |
-| Factory AI | `~/.factory/` | Transformed | skills, droids, commands |
-| Cursor | `~/.cursor/` | Transformed | .cursorrules, workflows |
-| Cline | `~/.cline/` | Transformed | prompts |
-
-### Quick Install
-
-```bash
-# Interactive installer (Linux/macOS/Git Bash)
-curl -fsSL https://raw.githubusercontent.com/lerianstudio/ring/main/install-ring.sh | bash
-
-# Interactive installer (Windows PowerShell)
-irm https://raw.githubusercontent.com/lerianstudio/ring/main/install-ring.ps1 | iex
-
-# Or clone and run locally
-git clone https://github.com/lerianstudio/ring.git ~/ring
-cd ~/ring
-./installer/install-ring.sh
-```
-
-### Platform-Specific Installation
-
-```bash
-# Install to specific platform
-./installer/install-ring.sh install --platforms claude
-./installer/install-ring.sh install --platforms factory
-./installer/install-ring.sh install --platforms cursor
-./installer/install-ring.sh install --platforms cline
-
-# Install to multiple platforms
-./installer/install-ring.sh install --platforms claude,cursor,cline
-
-# Auto-detect and install all
-./installer/install-ring.sh install --platforms auto
-```
-
-### Installer Commands
-
-```bash
-./installer/install-ring.sh install   # Install to platforms
-./installer/install-ring.sh update    # Update existing installation
-./installer/install-ring.sh sync      # Sync only changed files
-./installer/install-ring.sh list      # List installed platforms
-./installer/install-ring.sh check     # Check for updates
-./installer/install-ring.sh uninstall # Remove from platforms
-./installer/install-ring.sh detect    # Detect available platforms
-```
-
-See `docs/platforms/` for platform-specific guides.
+---
 
 ## Architecture
 
-**Monorepo Structure** - Marketplace with multiple plugin collections:
+**Monorepo Structure** - 5 plugin collections:
 
-```
-ring/                                  # Monorepo root
-├── .claude-plugin/
-│   └── marketplace.json              # Multi-plugin marketplace config (5 active plugins)
-├── default/                          # Core Ring plugin (ring-default)
-│   ├── skills/                       # 22 core skills
-│   │   ├── brainstorming/            # Socratic design refinement
-│   │   ├── test-driven-development/  # RED-GREEN-REFACTOR cycle enforcement
-│   │   ├── systematic-debugging/     # 4-phase root cause analysis
-│   │   ├── using-ring/              # MANDATORY skill discovery (non-negotiable)
-│   │   └── shared-patterns/         # Reusable: state-tracking, failure-recovery
-│   ├── agents/                      # 5 specialized agents
-│   │   ├── code-reviewer.md         # Foundation review (architecture, patterns)
-│   │   ├── business-logic-reviewer.md # Correctness (requirements, edge cases)
-│   │   ├── security-reviewer.md     # Safety (OWASP, auth, validation)
-│   │   ├── write-plan.md            # Implementation planning
-│   │   └── codebase-explorer.md     # Deep architecture analysis (Opus)
-│   ├── commands/                    # 7 slash commands
-│   │   ├── codereview.md           # /ring-default:codereview - dispatch 3 parallel reviewers
-│   │   ├── brainstorm.md           # /ring-default:brainstorm - interactive design
-│   │   └── lint.md                 # /ring-default:lint - parallel lint fixing
-│   ├── hooks/                      # Session lifecycle
-│   │   ├── hooks.json             # SessionStart, UserPromptSubmit config
-│   │   ├── session-start.sh       # Load skills quick reference
-│   │   ├── generate-skills-ref.py # Parse SKILL.md frontmatter
-│   │   └── claude-md-reminder.sh  # CLAUDE.md reminder on prompt submit
-│   └── docs/                      # Documentation
-├── dev-team/                      # Developer Agents plugin (ring-dev-team)
-│   ├── skills/                    # 10 developer skills
-│   │   ├── using-dev-team/        # Plugin introduction
-│   │   ├── dev-refactor/          # Codebase analysis against standards
-│   │   ├── dev-cycle/             # 6-gate development workflow orchestrator
-│   │   ├── dev-devops/            # Gate 1: DevOps setup (Docker, compose)
-│   │   ├── dev-feedback-loop/     # Assertiveness scoring and metrics
-│   │   ├── dev-implementation/    # Gate 0: TDD implementation
-│   │   ├── dev-review/            # Gate 4: Parallel code review
-│   │   ├── dev-sre/               # Gate 2: Observability setup
-│   │   ├── dev-testing/           # Gate 3: Test coverage
-│   │   └── dev-validation/        # Gate 5: User approval
-│   └── agents/                    # 7 specialized developer agents
-│       ├── backend-engineer-golang.md      # Go backend specialist
-│       ├── backend-engineer-typescript.md  # TypeScript/Node.js backend specialist
-│       ├── devops-engineer.md              # DevOps infrastructure specialist
-│       ├── frontend-bff-engineer-typescript.md # BFF & React/Next.js frontend specialist
-│       ├── frontend-designer.md            # Visual design specialist
-│       ├── qa-analyst.md                   # Quality assurance specialist
-│       └── sre.md                          # Site reliability engineer
-├── finops-team/                   # FinOps plugin (ring-finops-team)
-│   ├── skills/                    # 6 regulatory compliance skills
-│   │   └── regulatory-templates*/ # Brazilian regulatory compliance (BACEN, RFB)
-│   ├── agents/                    # 2 FinOps agents
-│   │   ├── finops-analyzer.md    # Financial operations analysis
-│   │   └── finops-automation.md  # FinOps automation
-│   └── docs/
-│       └── regulatory/           # Brazilian regulatory documentation
-├── pm-team/                       # Product Planning plugin (ring-pm-team)
-│   ├── commands/                  # 2 slash commands
-│   │   ├── pre-dev-feature.md    # /ring-pm-team:pre-dev-feature - 4-gate workflow
-│   │   └── pre-dev-full.md       # /ring-pm-team:pre-dev-full - 9-gate workflow
-│   ├── agents/                    # 3 research agents
-│   │   ├── repo-research-analyst.md      # Codebase pattern research
-│   │   ├── best-practices-researcher.md  # Web/Context7 research
-│   │   └── framework-docs-researcher.md  # Tech stack documentation
-│   └── skills/                    # 10 pre-dev workflow skills
-│       └── pre-dev-*/            # Research→PRD→TRD→API→Data→Tasks
-├── tw-team/                       # Technical Writing plugin (ring-tw-team)
-│   ├── skills/                    # 7 documentation skills
-│   │   ├── using-tw-team/        # Plugin introduction
-│   │   ├── writing-functional-docs/ # Functional doc patterns
-│   │   ├── writing-api-docs/     # API reference patterns
-│   │   ├── documentation-structure/ # Doc hierarchy
-│   │   ├── voice-and-tone/       # Voice/tone guidelines
-│   │   ├── documentation-review/ # Quality checklist
-│   │   └── api-field-descriptions/ # Field description patterns
-│   ├── agents/                    # 3 technical writing agents
-│   │   ├── functional-writer.md  # Guides, tutorials, conceptual docs
-│   │   ├── api-writer.md         # API reference documentation
-│   │   └── docs-reviewer.md      # Documentation quality review
-│   ├── commands/                  # 3 slash commands
-│   │   ├── write-guide.md        # /ring-tw-team:write-guide
-│   │   ├── write-api.md          # /ring-tw-team:write-api
-│   │   └── review-docs.md        # /ring-tw-team:review-docs
-│   └── hooks/                     # Session lifecycle
-│       ├── hooks.json            # Hook configuration
-│       └── session-start.sh      # Context injection
-├── installer/                     # Multi-platform installer
-│   ├── ring_installer/           # Python package
-│   │   ├── adapters/             # Platform adapters (claude, factory, cursor, cline)
-│   │   ├── transformers/         # Content transformers
-│   │   ├── utils/                # Utilities (fs, version, platform_detect)
-│   │   └── core.py               # Installation logic
-│   ├── tests/                    # Test suite
-│   ├── install-ring.sh           # Bash entry point
-│   └── install-ring.ps1          # PowerShell entry point
-├── docs/
-│   ├── plans/                    # Implementation plans
-│   └── platforms/                # Platform-specific guides
-├── ops-team/                      # Team-specific skills (reserved)
-└── pmm-team/                      # Team-specific skills (reserved)
-```
+| Plugin | Path | Contents |
+|--------|------|----------|
+| ring-default | `default/` | 22 skills, 5 agents, 7 commands |
+| ring-dev-team | `dev-team/` | 10 skills, 7 agents, 5 commands |
+| ring-finops-team | `finops-team/` | 6 skills, 2 agents |
+| ring-pm-team | `pm-team/` | 10 skills, 3 agents, 2 commands |
+| ring-tw-team | `tw-team/` | 7 skills, 3 agents, 3 commands |
+
+Each plugin contains: `skills/`, `agents/`, `commands/`, `hooks/`
+
+See [README.md](README.md#architecture) for full directory structure.
+
+---
 
 ## Common Commands
 
@@ -208,136 +272,22 @@ bash default/hooks/session-start.sh      # Test skill loading
 python default/hooks/generate-skills-ref.py # Generate skill overview
 ```
 
+---
+
 ## Key Workflows
 
-### Adding a New Skill
+| Workflow | Quick Reference |
+|----------|-----------------|
+| Add skill | `mkdir default/skills/name/` → create `SKILL.md` with frontmatter |
+| Add agent | Create `*/agents/name.md` → verify required sections per [Agent Design](docs/AGENT_DESIGN.md) |
+| Modify hooks | Edit `*/hooks/hooks.json` → test with `bash */hooks/session-start.sh` |
+| Code review | `/ring-default:codereview` dispatches 3 parallel reviewers |
+| Pre-dev (small) | `/ring-pm-team:pre-dev-feature` → 4-gate workflow |
+| Pre-dev (large) | `/ring-pm-team:pre-dev-full` → 9-gate workflow |
 
-**For core Ring skills:**
-1. Create directory: `mkdir default/skills/your-skill-name/`
-2. Write `default/skills/your-skill-name/SKILL.md` with frontmatter:
-   ```yaml
-   ---
-   name: your-skill-name
-   description: |
-     Brief description of WHAT the skill does (method/technique).
+See [docs/WORKFLOWS.md](docs/WORKFLOWS.md) for detailed instructions.
 
-   trigger: |
-     - Specific condition that mandates this skill
-     - Another trigger condition
-
-   skip_when: |
-     - When NOT to use → alternative skill
-     - Another exclusion
-
-   sequence:
-     after: [prerequisite-skill]   # Optional: ordering
-     before: [following-skill]
-
-   related:
-     similar: [differentiate-from]      # Optional: disambiguation
-     complementary: [pairs-well-with]
-   ---
-   ```
-3. Test with `Skill tool: "ring-default:testing-skills-with-subagents"`
-4. Skill auto-loads next SessionStart via `default/hooks/generate-skills-ref.py`
-
-**For product/team-specific skills:**
-1. Create plugin directory: `mkdir -p product-xyz/{skills,agents,commands,hooks}`
-2. Add to `.claude-plugin/marketplace.json`:
-   ```json
-   {
-     "name": "ring-product-xyz",
-     "description": "Product XYZ specific skills",
-     "version": "0.1.0",
-     "source": "./product-xyz"
-   }
-   ```
-3. Follow same skill structure as default plugin
-
-### Modifying Hooks
-1. Edit `default/hooks/hooks.json` for trigger configuration
-2. Scripts in `default/hooks/`: `session-start.sh`, `claude-md-bootstrap.sh`
-3. Test: `bash default/hooks/session-start.sh` outputs JSON with additionalContext
-4. SessionStart hooks run on `startup|resume` and `clear|compact`
-5. Note: `${CLAUDE_PLUGIN_ROOT}` resolves to plugin root (`default/` for core plugin)
-
-### Plugin-Specific Using-* Skills
-
-Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introduce available agents and capabilities:
-
-**Default Plugin:**
-- `using-ring` → ORCHESTRATOR principle, mandatory workflow
-- Always injected, always mandatory
-- Located: `default/skills/using-ring/SKILL.md`
-
-**Ring Dev Team Plugin:**
-- `ring-dev-team:using-dev-team` → 7 specialist developer agents
-- Auto-loads when ring-dev-team plugin is enabled
-- Located: `dev-team/skills/using-dev-team/SKILL.md`
-- Agents (invoke as `ring-dev-team:{agent-name}`): backend-engineer-golang, backend-engineer-typescript, devops-engineer, frontend-bff-engineer-typescript, frontend-designer, qa-analyst, sre
-
-**Ring FinOps Team Plugin:**
-- `using-finops-team` → 2 FinOps agents for Brazilian compliance
-- Auto-loads when ring-finops-team plugin is enabled
-- Located: `finops-team/skills/using-finops-team/SKILL.md`
-- Agents (invoke as `ring-finops-team:{agent-name}`): finops-analyzer (compliance analysis), finops-automation (template generation)
-
-**Ring PM Team Plugin:**
-- `using-pm-team` → Pre-dev workflow skills (8 gates)
-- Auto-loads when ring-pm-team plugin is enabled
-- Located: `pm-team/skills/using-pm-team/SKILL.md`
-- Skills: 8 pre-dev gates for feature planning
-
-**Ring TW Team Plugin:**
-- `using-tw-team` → 3 technical writing agents for documentation
-- Auto-loads when ring-tw-team plugin is enabled
-- Located: `tw-team/skills/using-tw-team/SKILL.md`
-- Agents (invoke as `ring-tw-team:{agent-name}`): functional-writer (guides), api-writer (API reference), docs-reviewer (quality review)
-- Commands: write-guide, write-api, review-docs
-
-**Hook Configuration:**
-- Each plugin has: `{plugin}/hooks/hooks.json` + `{plugin}/hooks/session-start.sh`
-- SessionStart hook executes, outputs additionalContext with skill reference
-- Only plugins in marketplace.json get loaded (conditional)
-
-### Creating Review Agents
-1. Add to `default/agents/your-reviewer.md` with output_schema
-2. Reference in `default/skills/requesting-code-review/SKILL.md:85`
-3. Dispatch via Task tool with `subagent_type="ring-default:your-reviewer"`
-4. Must run in parallel with other reviewers (single message, multiple Tasks)
-
-### Pre-Dev Workflow
-```
-Simple (<2 days): /ring-pm-team:pre-dev-feature
-├── Gate 0: pm-team/skills/pre-dev-research → docs/pre-dev/feature/research.md (parallel agents)
-├── Gate 1: pm-team/skills/pre-dev-prd-creation → docs/pre-dev/feature/PRD.md
-├── Gate 2: pm-team/skills/pre-dev-trd-creation → docs/pre-dev/feature/TRD.md
-└── Gate 3: pm-team/skills/pre-dev-task-breakdown → docs/pre-dev/feature/tasks.md
-
-Complex (≥2 days): /ring-pm-team:pre-dev-full
-├── Gate 0: Research Phase (3 parallel agents: repo-research, best-practices, framework-docs)
-├── Gates 1-3: Same as above
-├── Gate 4: pm-team/skills/pre-dev-api-design → docs/pre-dev/feature/API.md
-├── Gate 5: pm-team/skills/pre-dev-data-model → docs/pre-dev/feature/data-model.md
-├── Gate 6: pm-team/skills/pre-dev-dependency-map → docs/pre-dev/feature/dependencies.md
-├── Gate 7: pm-team/skills/pre-dev-task-breakdown → docs/pre-dev/feature/tasks.md
-└── Gate 8: pm-team/skills/pre-dev-subtask-creation → docs/pre-dev/feature/subtasks.md
-```
-
-### Parallel Code Review
-```python
-# Instead of sequential (60 min):
-review1 = Task("ring-default:code-reviewer")      # 20 min
-review2 = Task("ring-default:business-logic-reviewer")     # 20 min
-review3 = Task("ring-default:security-reviewer")  # 20 min
-
-# Run parallel (20 min total):
-Task.parallel([
-    ("ring-default:code-reviewer", prompt),
-    ("ring-default:business-logic-reviewer", prompt),
-    ("ring-default:security-reviewer", prompt)
-])  # Single message, 3 tool calls
-```
+---
 
 ## Important Patterns
 
@@ -364,145 +314,24 @@ Task.parallel([
   - ❌ Wrong: `backend-engineer-golang` (missing plugin prefix)
 - **Rationale:** Prevents ambiguity in multi-plugin environments
 
-### Agent Output Schema Archetypes
+---
 
-Agents use standard output schema patterns based on their purpose:
+## Agent Output Schema Archetypes
 
-**Implementation Schema** (for agents that write code/configs):
-```yaml
-output_schema:
-  format: "markdown"
-  required_sections:
-    - name: "Summary"
-      pattern: "^## Summary"
-      required: true
-    - name: "Implementation"
-      pattern: "^## Implementation"
-      required: true
-    - name: "Files Changed"
-      pattern: "^## Files Changed"
-      required: true
-    - name: "Testing"
-      pattern: "^## Testing"
-      required: true
-    - name: "Next Steps"
-      pattern: "^## Next Steps"
-      required: true
-```
+| Schema Type | Used By | Key Sections |
+|-------------|---------|--------------|
+| Implementation | ring-dev-team:* engineers | Summary, Implementation, Files Changed, Testing |
+| Analysis | frontend-designer, finops-analyzer | Analysis, Findings, Recommendations |
+| Reviewer | ring-default:*-reviewer | VERDICT, Issues Found, What Was Done Well |
+| Exploration | codebase-explorer | Exploration Summary, Key Findings, Architecture |
+| Planning | write-plan | Goal, Architecture, Tech Stack, Tasks |
 
-**Used by:** `ring-dev-team:backend-engineer-golang`, `ring-dev-team:backend-engineer-typescript`, `ring-dev-team:frontend-bff-engineer-typescript`, `ring-dev-team:devops-engineer`, `ring-dev-team:qa-analyst`, `ring-dev-team:sre`, `ring-finops-team:finops-automation`
+See [docs/AGENT_DESIGN.md](docs/AGENT_DESIGN.md) for complete schema definitions and Standards Compliance requirements.
 
-**Analysis Schema** (for agents that analyze and recommend):
-```yaml
-output_schema:
-  format: "markdown"
-  required_sections:
-    - name: "Analysis"
-      pattern: "^## Analysis"
-      required: true
-    - name: "Findings"
-      pattern: "^## Findings"
-      required: true
-    - name: "Recommendations"
-      pattern: "^## Recommendations"
-      required: true
-    - name: "Next Steps"
-      pattern: "^## Next Steps"
-      required: true
-```
+---
 
-**Used by:** `ring-dev-team:frontend-designer`, `ring-finops-team:finops-analyzer`
+## Compliance Rules
 
-**Reviewer Schema** (for code review agents):
-```yaml
-output_schema:
-  format: "markdown"
-  required_sections:
-    - name: "VERDICT"
-      pattern: "^## VERDICT: (PASS|FAIL|NEEDS_DISCUSSION)$"
-      required: true
-    - name: "Summary"
-      pattern: "^## Summary"
-      required: true
-    - name: "Issues Found"
-      pattern: "^## Issues Found"
-      required: true
-    - name: "Categorized Issues"
-      pattern: "^### (Critical|High|Medium|Low)"
-      required: false
-    - name: "What Was Done Well"
-      pattern: "^## What Was Done Well"
-      required: true
-    - name: "Next Steps"
-      pattern: "^## Next Steps"
-      required: true
-```
-
-**Used by:** `ring-default:code-reviewer`, `ring-default:business-logic-reviewer`, `ring-default:security-reviewer`
-
-**Note:** `ring-default:business-logic-reviewer` and `ring-default:security-reviewer` extend the base Reviewer Schema with additional domain-specific required sections:
-- `ring-default:business-logic-reviewer` adds: "Mental Execution Analysis", "Business Requirements Coverage", "Edge Cases Analysis"
-- `ring-default:security-reviewer` adds: "OWASP Top 10 Coverage", "Compliance Status"
-
-**Exploration Schema** (for deep codebase analysis):
-```yaml
-output_schema:
-  format: "markdown"
-  required_sections:
-    - name: "EXPLORATION SUMMARY"
-      pattern: "^## EXPLORATION SUMMARY$"
-      required: true
-    - name: "KEY FINDINGS"
-      pattern: "^## KEY FINDINGS$"
-      required: true
-    - name: "ARCHITECTURE INSIGHTS"
-      pattern: "^## ARCHITECTURE INSIGHTS$"
-      required: true
-    - name: "RELEVANT FILES"
-      pattern: "^## RELEVANT FILES$"
-      required: true
-    - name: "RECOMMENDATIONS"
-      pattern: "^## RECOMMENDATIONS$"
-      required: true
-```
-
-**Used by:** `ring-default:codebase-explorer`
-
-**Planning Schema** (for implementation planning):
-```yaml
-output_schema:
-  format: "markdown"
-  required_sections:
-    - name: "Goal"
-      pattern: "^\\*\\*Goal:\\*\\*"
-      required: true
-    - name: "Architecture"
-      pattern: "^\\*\\*Architecture:\\*\\*"
-      required: true
-    - name: "Tech Stack"
-      pattern: "^\\*\\*Tech Stack:\\*\\*"
-      required: true
-    - name: "Global Prerequisites"
-      pattern: "^\\*\\*Global Prerequisites:\\*\\*"
-      required: true
-    - name: "Task"
-      pattern: "^### Task \\d+:"
-      required: true
-```
-
-**Used by:** `ring-default:write-plan`
-
-### Anti-Patterns to Avoid
-1. **Never skip using-ring** - It's mandatory, not optional
-2. **Never run reviewers sequentially** - Always dispatch in parallel
-3. **Never modify generated skill reference** - Auto-generated from frontmatter
-4. **Never skip TDD's RED phase** - Test must fail before implementation
-5. **Never ignore skill when applicable** - "Simple task" is not an excuse
-6. **Never use panic() in Go** - Error handling required
-7. **Never commit incomplete code** - No "TODO: implement" comments
-8. **Never commit manually** - Always use `/ring-default:commit` command
-
-### Compliance Rules
 ```bash
 # TDD compliance (default/skills/test-driven-development/SKILL.md:638)
 - Test file must exist before implementation
@@ -528,7 +357,10 @@ output_schema:
 - NEVER use HEREDOC to include trailers in message body
 ```
 
-### Session Context
+---
+
+## Session Context
+
 The system loads at SessionStart (from `default/` plugin):
 1. `default/hooks/session-start.sh` - Loads skill quick reference via `generate-skills-ref.py`
 2. `using-ring` skill - Injected as mandatory workflow
@@ -547,7 +379,9 @@ The system loads at SessionStart (from `default/` plugin):
 - Current git branch: `main`
 - Remote: `github.com/LerianStudio/ring`
 
-### Documentation Sync Checklist
+---
+
+## Documentation Sync Checklist
 
 **IMPORTANT:** When modifying agents, skills, commands, or hooks, check ALL these files for consistency:
 
@@ -558,9 +392,13 @@ Root Documentation:
 ├── README.md              # Public documentation
 └── ARCHITECTURE.md        # Architecture diagrams
 
+Reference Documentation:
+├── docs/PROMPT_ENGINEERING.md  # Assertive language patterns
+├── docs/AGENT_DESIGN.md        # Output schemas, standards compliance
+└── docs/WORKFLOWS.md           # Detailed workflow instructions
+
 Plugin Hooks (inject context at session start):
 ├── default/hooks/session-start.sh        # Skills reference
-├── default/hooks/claude-md-reminder.sh   # Agent reminder table
 ├── dev-team/hooks/session-start.sh       # Developer agents
 ├── finops-team/hooks/session-start.sh    # FinOps agents
 ├── pm-team/hooks/session-start.sh        # Pre-dev skills
@@ -572,9 +410,6 @@ Using-* Skills (plugin introductions):
 ├── finops-team/skills/using-finops-team/SKILL.md # FinOps guide
 ├── pm-team/skills/using-pm-team/SKILL.md        # Pre-dev workflow
 └── tw-team/skills/using-tw-team/SKILL.md        # Technical writing guide
-
-Agent Cross-References:
-└── default/agents/write-plan.md          # References reviewers
 ```
 
 **Checklist when adding/modifying:**

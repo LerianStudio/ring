@@ -54,6 +54,34 @@ examples:
       - Structured JSON logging
 ---
 
+## Standards Loading (MANDATORY)
+
+**Before ANY SRE validation, you MUST load Ring SRE standards:**
+
+See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.md) and [dev-team/docs/standards/sre.md](https://raw.githubusercontent.com/LerianStudio/ring/main/docs/standards/sre.md) for canonical requirements. This section summarizes the loading process.
+
+**MANDATORY ACTION:** You MUST use the WebFetch tool NOW:
+
+| Parameter | Value |
+|-----------|-------|
+| url | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/sre.md` |
+| prompt | "Extract all SRE standards, observability requirements, metric patterns, and health check specifications" |
+
+**Execute this WebFetch before proceeding.** Do NOT continue until standards are loaded and understood.
+
+If WebFetch fails → STOP and report blocker. Cannot proceed without Ring SRE standards.
+
+### Standards Loading Verification
+
+**After WebFetch, confirm in your analysis:**
+```markdown
+| Ring SRE Standards | ✅ Loaded |
+| Sections Extracted | Health Endpoints, Metrics, Logging, Tracing |
+```
+
+**CANNOT proceed without successful standards loading.**
+
+
 # SRE Validation (Gate 2)
 
 ## Overview
@@ -80,6 +108,40 @@ This skill VALIDATES that observability was correctly implemented by developers:
 2. Issues go back to developers to fix
 3. SRE re-validates after fixes
 
+## Blocker Criteria - STOP and Report
+
+| Decision Type | Scenario | Action | Can User Override? |
+|---------------|----------|--------|-------------------|
+| **HARD BLOCK** | Service lacks /health + /ready + /metrics + JSON logs | STOP. Return to Gate 0. Cannot proceed to Gate 3. | ❌ NO |
+| **HARD BLOCK** | Verification commands not run (no evidence) | STOP. Cannot mark Gate 2 complete without automated verification. | ❌ NO |
+| **HARD BLOCK** | User says "feature complete, add observability later" | STOP. Observability is part of completion. Gate 2 required. | ❌ NO |
+| **HIGH** | Only /health exists, missing /ready or /metrics | Report HIGH severity. Return to developers. | ❌ NO |
+| **CRITICAL** | Logs are fmt.Println/echo, not JSON structured | Report CRITICAL severity. Return to Gate 0. Must fix. | ❌ NO |
+
+## Cannot Be Overridden
+
+**These requirements are NON-NEGOTIABLE and cannot be waived by:**
+
+| Requirement | Cannot Be Waived By | Rationale |
+|-------------|---------------------|-----------|
+| Gate 2 execution | CTO, PM, "MVP" arguments | Observability prevents production blindness |
+| Automated verification | "Developer confirms it works" | Evidence required for Gate 2 PASS |
+| /health + /ready + /metrics + JSON logs | "Health is enough" | Minimum viable observability - ALL 4 required |
+| "Complete" includes observability | Deadline pressure | Definition of done is non-negotiable |
+
+**If pressured:** "Observability is PART of completion, not an addition to it. Gate 2 cannot be skipped regardless of authority or deadline."
+
+## Severity Calibration
+
+| Severity | Scenario | Gate 2 Status | Can Proceed? |
+|----------|----------|---------------|--------------|
+| **CRITICAL** | Missing ALL observability (no /health, /ready, /metrics, logs) | FAIL | ❌ Return to Gate 0 |
+| **CRITICAL** | fmt.Println/echo instead of JSON logs | FAIL | ❌ Return to Gate 0 |
+| **CRITICAL** | Verification commands not run | FAIL | ❌ Cannot mark complete |
+| **HIGH** | Missing 1-2 of required endpoints (/ready or /metrics) | NEEDS_FIXES | ❌ Return to developers |
+| **MEDIUM** | /ready returns 200 when dependencies down | NEEDS_FIXES | ⚠️ Fix before Gate 3 |
+| **LOW** | Dashboard deferred for non-critical service | PARTIAL | ✅ Can proceed with note |
+
 ## Pressure Resistance
 
 **Gate 2 (SRE/Observability) is MANDATORY before production. Pressure scenarios and required responses:**
@@ -90,6 +152,14 @@ This skill VALIDATES that observability was correctly implemented by developers:
 | **Logs Only** | "Logs are enough for MVP" | "Logs show what happened. Metrics show it's happening. Health enables recovery. All required." |
 | **Optional** | "Health checks are optional" | "Without health checks, Kubernetes can't detect failures. REQUIRED." |
 | **MVP** | "It's just MVP, skip metrics" | "MVP without metrics = blind MVP. You won't know if it's working." |
+
+## Combined Pressure Scenarios
+
+| Pressure Combination | Request | Agent Response |
+|---------------------|---------|----------------|
+| **Time + Authority + Sunk Cost** | "Tech lead says ship Friday, 8 hours invested, add observability Monday" | "Gate 2 is NON-NEGOTIABLE. Authority cannot waive gates. Reduce FEATURE scope, not observability scope." |
+| **Pragmatic + Exhaustion + Time** | "MVP launch in 2 hours, PM says observability optional, just launch" | "MVP without observability = blind MVP. Cannot detect failures, cannot debug efficiently. Gate 2 REQUIRED." |
+| **All Pressures** | "CEO watching demo in 1 hour, just show feature working, skip gates" | "Gates prevent production blindness. CEO will want metrics when issues occur. Cannot skip Gate 2." |
 
 **Non-negotiable principle:** Minimum viable observability = metrics + health checks + structured logs. No exceptions.
 
@@ -140,6 +210,63 @@ If you catch yourself thinking ANY of these, STOP immediately:
 - "Observability is enhancement"
 
 **All of these indicate Gate 2 violation. Return to developers to implement observability.**
+
+## Component Type Decision Tree
+
+**Not all code is a service. Use this tree to determine observability requirements:**
+
+```plaintext
+Is it runnable code?
+├── NO (library/package) → No observability required
+│   └── Libraries are consumed by services that have observability
+│
+└── YES → Does it expose HTTP/gRPC/TCP endpoints?
+    ├── YES (API Service) → FULL OBSERVABILITY REQUIRED
+    │   └── /health + /ready + /metrics + structured logs + tracing
+    │
+    └── NO → Does it run continuously?
+        ├── YES (Background Worker) → WORKER OBSERVABILITY
+        │   └── /health + structured logs + tracing
+        │
+        └── NO (Script/Job) → SCRIPT OBSERVABILITY
+            └── Structured logs + exit codes + optional /health
+```
+
+### Component Type Requirements
+
+| Type | /health | /ready | /metrics | JSON Logs | Tracing | Exit Codes |
+|------|---------|--------|----------|-----------|---------|------------|
+| **API Service** | REQUIRED | REQUIRED | REQUIRED | REQUIRED | Recommended | N/A |
+| **Background Worker** | REQUIRED | Optional | Recommended | REQUIRED | Optional | N/A |
+| **CLI Tool** | Optional | N/A | N/A | REQUIRED | N/A | REQUIRED |
+| **One-time Script** | N/A | N/A | N/A | REQUIRED | N/A | REQUIRED |
+| **Library** | N/A | N/A | N/A | N/A | N/A | N/A |
+
+### Migration Scripts and One-Time Jobs
+
+**Migration scripts still need observability, but different kind:**
+
+| Requirement | Why | Example |
+|-------------|-----|---------|
+| **Structured logs** | Track progress, debug failures | `{"level":"info","step":"migrate_users","count":1500}` |
+| **Exit codes** | Orchestration needs success/failure signal | `exit 0` success, `exit 1` failure |
+| **Idempotency logging** | Know if re-run is safe | `{"already_migrated":true,"skipping":true}` |
+| **/health (optional)** | Only if long-running (>5min) | For orchestrator health checks |
+
+## Anti-Rationalization Table
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "Core functionality works, observability is enhancement" | Observability is PART of definition of done, not addition to it. Feature is NOT complete. | **STOP. Return to Gate 0. Gate 2 is REQUIRED.** |
+| "It's just MVP, add metrics Monday" | MVP without metrics = blind MVP. "Later" = never. Retrofitting is 10x harder. | **STOP. Implement /metrics before Gate 2.** |
+| "Tech lead approved skipping Gate 2" | Gates are NON-NEGOTIABLE. Authority cannot waive mandatory gates. | **STOP. Inform user gates cannot be waived.** |
+| "Health endpoint exists, that's enough" | Minimum = /health + /ready + /metrics + JSON logs. Partial = Gate 2 FAIL. | **STOP. Implement all 4 requirements.** |
+| "Developer confirms it works" | Confirmation ≠ Verification. MUST run automated validation commands. | **STOP. Run verification checklist.** |
+| "It's just a script, runs once" | Scripts fail. Logs tell you why. | **Add structured logging** |
+| "Library doesn't need observability" | Correct! Libraries are exempt. | **Verify it's truly a library** |
+| "Worker is simple, no /health" | Simple workers crash silently. | **Add /health endpoint** |
+| "Exit code 0 is enough" | Exit code + logs = complete picture. | **Add structured logs** |
+| "Migration runs in CI only" | CI failures need debugging too. | **Structured logs required** |
 
 ## "Feature Complete" Redefinition Prevention
 

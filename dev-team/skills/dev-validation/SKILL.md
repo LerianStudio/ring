@@ -70,6 +70,7 @@ Final validation gate requiring explicit user approval. Present evidence that ea
 | **Tests Pass** | "Tests pass, validation redundant" | "Tests verify code works. Validation verifies it meets REQUIREMENTS. Different concerns." |
 | **Minor Issues** | "Fix issues after approval" | "No partial approval. REJECTED with issues, fix first, then re-validate." |
 | **Implied Approval** | "User didn't object" | "Silence ≠ approval. Require explicit 'APPROVED' or 'REJECTED: reason'." |
+| **Manager Override** | "Manager approved, merge anyway" | "Manager ≠ stakeholder. Only original requester validates requirements. STOP and wait." |
 
 **Non-negotiable principle:** User MUST respond with "APPROVED" or "REJECTED: [reason]". No other responses accepted.
 
@@ -84,6 +85,48 @@ Final validation gate requiring explicit user approval. Present evidence that ea
 | User explicitly approves | YES | User approval always valid |
 
 **If you implemented the code, you CANNOT approve it. Wait for user or different reviewer.**
+
+**Important:** "Different agent" means different human/entity. The same human using different agent roles (backend-engineer → code-reviewer) is STILL self-approval and PROHIBITED.
+
+See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.md) for the canonical validation policy.
+
+## Severity Calibration
+
+**When presenting validation results to user, issues are categorized by severity:**
+
+| Severity | Criteria | Examples | Action Required |
+|----------|----------|----------|-----------------|
+| **CRITICAL** | Acceptance criterion completely unmet | AC-1: "User can login" but login doesn't work at all | MUST fix before approval. Return to Gate 0. |
+| **HIGH** | Acceptance criterion partially met or degraded | AC-2: "Response < 200ms" but actually 800ms | MUST fix before approval. Return to Gate 0. |
+| **MEDIUM** | Edge case or non-critical requirement gap | AC-3 met for happy path, fails for empty input | SHOULD fix before approval. User decides. |
+| **LOW** | Quality issue, requirement technically met | Code works but is hard to understand/maintain | MAY fix or document. User decides. |
+
+**Severity Assignment Rules:**
+- Unmet acceptance criterion = CRITICAL (requirement not satisfied)
+- Degraded performance/quality vs criterion = HIGH (requirement barely met)
+- Edge case failures = MEDIUM (main path works, edges don't)
+- Quality/maintainability with working code = LOW (works but suboptimal)
+
+**Why This Matters:**
+- User needs to understand impact severity when deciding APPROVED vs REJECTED
+- CRITICAL/HIGH = automatic REJECTED recommendation
+- MEDIUM/LOW = user judgment call with context
+
+**Example Validation Checklist with Severity:**
+```markdown
+## Validation Results
+
+| AC # | Criterion | Evidence | Status | Severity |
+|------|-----------|----------|--------|----------|
+| AC-1 | User can login | ✅ Tests pass, manual verification | MET | - |
+| AC-2 | Response < 200ms | ⚠️ Measured 350ms average | NOT MET | HIGH |
+| AC-3 | Input validation | ⚠️ Works for valid input, crashes on empty | PARTIAL | MEDIUM |
+| AC-4 | Error messages clear | ✅ All errors have user-friendly messages | MET | - |
+
+**Overall Validation:** REJECTED (1 HIGH issue: AC-2 response time)
+
+**Recommendation:** Fix AC-2 (HIGH) before approval. AC-3 (MEDIUM) user can decide.
+```
 
 ## Common Rationalizations - REJECTED
 
@@ -102,6 +145,14 @@ Final validation gate requiring explicit user approval. Present evidence that ea
 | "Looks good" = approval | "Looks good" is ambiguous. Require explicit APPROVED. |
 | "User said 'sure'" | "Sure" is ambiguous. Require explicit APPROVED. |
 | "No objections raised" | Lack of objection ≠ approval. Require explicit response. |
+| "User delegated approval to X" | Delegation ≠ stakeholder approval. Only original requester can approve. |
+| "Emergency production issue" | Emergency ≠ gate bypass. Validation protects production. |
+| "Reduced scope, easier to approve" | Reduced scope ≠ auto-approval. User must validate actual delivery. |
+| "APPROVED if X (X is true)" | Conditional approval ≠ approval. Verify X, then re-request. |
+| "I implemented it, I know requirements" | Knowledge ≠ approval authority. Implementer CANNOT self-approve. |
+| "User is slow, I'll self-approve to unblock" | Efficiency ≠ gate bypass. Self-approval is PROHIBITED. |
+| "I'm the only developer on this" | Team size is irrelevant. User approval required. |
+| "I'll switch to QA role to approve" | Role switching is STILL self-approval. PROHIBITED. |
 
 ## Red Flags - STOP
 
@@ -120,6 +171,10 @@ If you catch yourself thinking ANY of these, STOP immediately:
 - "'Looks good' means approved"
 - "User said 'sure'"
 - "No objections = approved"
+- "User delegated approval authority to someone else"
+- "This is an emergency, skip validation"
+- "We implemented less than requested, so it's easier to approve"
+- "I'm switching roles to approve this"
 
 **All of these indicate Gate 5 violation. Wait for explicit "APPROVED" or "REJECTED".**
 

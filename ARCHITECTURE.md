@@ -135,6 +135,76 @@ dev-team/agents/
 
 **Note:** Parallel review orchestration is handled by the `/ring-default:codereview` command
 
+**Standards Compliance Output (ring-dev-team agents):**
+
+All ring-dev-team agents include a `## Standards Compliance` section in their output schema:
+
+```yaml
+- name: "Standards Compliance"
+  pattern: "^## Standards Compliance"
+  required: false  # In schema, but MANDATORY when invoked from dev-refactor
+  description: "MANDATORY when invoked from dev-refactor skill"
+```
+
+**Conditional Requirement: `invoked_from_dev_refactor`**
+
+| Invocation Context | Standards Compliance | Detection Mechanism |
+|--------------------|---------------------|---------------------|
+| Direct agent call | Optional | N/A |
+| Via `dev-cycle` skill | Optional | N/A |
+| Via `dev-refactor` skill | **MANDATORY** | Prompt contains `**MODE: ANALYSIS ONLY**` |
+
+**How Enforcement Works:**
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│  User invokes: /ring-dev-team:dev-refactor                          │
+│         ↓                                                           │
+│  dev-refactor skill dispatches agents with prompt:                  │
+│  "**MODE: ANALYSIS ONLY** - Compare codebase with Ring standards"   │
+│         ↓                                                           │
+│  Agent detects "**MODE: ANALYSIS ONLY**" in prompt                  │
+│         ↓                                                           │
+│  Agent loads Ring standards via WebFetch                            │
+│         ↓                                                           │
+│  Agent produces Standards Compliance output (MANDATORY)             │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+**Affected Agents:**
+- `ring-dev-team:backend-engineer-golang` → loads `golang.md`
+- `ring-dev-team:backend-engineer-typescript` → loads `typescript.md`
+- `ring-dev-team:devops-engineer` → loads `devops.md`
+- `ring-dev-team:frontend-bff-engineer-typescript` → loads `frontend.md`
+- `ring-dev-team:frontend-designer` → loads `frontend.md`
+- `ring-dev-team:qa-analyst` → loads `qa.md`
+- `ring-dev-team:sre` → loads `sre.md`
+
+**Output Format (when non-compliant):**
+```markdown
+## Standards Compliance
+
+### Lerian/Ring Standards Comparison
+| Category | Current Pattern | Expected Pattern | Status | File/Location |
+|----------|----------------|------------------|--------|---------------|
+| Logging | fmt.Println | lib-commons/zap | ⚠️ Non-Compliant | service/*.go |
+
+### Compliance Summary
+- Total Violations: N
+- Critical: N, High: N, Medium: N, Low: N
+
+### Required Changes for Compliance
+1. **Category Migration**
+   - Replace: `current pattern`
+   - With: `expected pattern`
+   - Files affected: [list]
+```
+
+**Cross-References:**
+- CLAUDE.md: Standards Compliance (Conditional Output Section)
+- `dev-team/skills/dev-refactor/SKILL.md`: HARD GATES defining requirement
+- `dev-team/hooks/session-start.sh`: Injects guidance at session start
+
 ### 3. Commands (`commands/`)
 **Purpose:** Slash commands that provide shortcuts to skills/workflows
 

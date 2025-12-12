@@ -39,6 +39,17 @@ Ring solves this by:
 - `ring-dev-team:qa-analyst` - Quality assurance specialist
 - `ring-dev-team:sre` - Site reliability engineer
 
+> **Standards Compliance:** All dev-team agents include a `## Standards Compliance` output section with conditional requirement:
+> - **Optional** when invoked directly or via `dev-cycle`
+> - **MANDATORY** when invoked from `ring-dev-team:dev-refactor` (triggered by `**MODE: ANALYSIS ONLY**` in prompt)
+>
+> When mandatory, agents load Ring standards via WebFetch and produce comparison tables with:
+> - Current Pattern vs Expected Pattern
+> - Severity classification (Critical/High/Medium/Low)
+> - File locations and migration recommendations
+>
+> See `dev-team/docs/standards/*.md` for standards source. Cross-references: CLAUDE.md (Standards Compliance section), `dev-team/skills/dev-refactor/SKILL.md`
+
 **FinOps Agents (ring-finops-team plugin):**
 - `ring-finops-team:finops-analyzer` - Financial operations analysis
 - `ring-finops-team:finops-automation` - FinOps template creation and automation

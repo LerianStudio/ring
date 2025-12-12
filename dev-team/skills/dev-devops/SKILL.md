@@ -87,6 +87,8 @@ examples:
 
 ## Overview
 
+See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.md) and [dev-team/docs/standards/devops.md](https://raw.githubusercontent.com/LerianStudio/ring/main/docs/standards/devops.md) for canonical DevOps requirements. This skill orchestrates Gate 1 execution.
+
 This skill configures the development and deployment infrastructure:
 - Creates or updates Dockerfile for the application
 - Configures docker-compose.yml for local development
@@ -135,6 +137,58 @@ If you catch yourself thinking ANY of these, STOP immediately:
 - "Quick setup for demo, proper later"
 
 **All of these indicate Gate 1 violation. Proceed with containerization.**
+
+## Modern Deployment Patterns
+
+**Different deployment targets still require containerization for development parity:**
+
+| Deployment Target | Development Requirement | Why |
+|-------------------|------------------------|-----|
+| **Traditional VM/Server** | Dockerfile + docker-compose | Standard containerization |
+| **Kubernetes** | Dockerfile + docker-compose + Helm optional | K8s uses containers |
+| **AWS Lambda/Serverless** | Dockerfile OR SAM template | Local testing needs container |
+| **Vercel/Netlify** | Dockerfile for local dev | Platform builds ≠ local builds |
+| **Static Site (CDN)** | Optional (nginx container for parity) | Recommended but not required |
+
+### Serverless Applications
+
+**Lambda/Cloud Functions still need local containerization:**
+
+```yaml
+# For AWS Lambda - use SAM or serverless framework
+# sam local invoke uses Docker under the hood
+
+# docker-compose.yml for serverless local dev
+services:
+  lambda-local:
+    build: .
+    command: sam local start-api
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/var/task
+```
+
+**Serverless does NOT exempt from Gate 1. It changes the containerization approach.**
+
+### Platform-Managed Deployments (Vercel, Netlify, Railway)
+
+**Even when platform handles production containers:**
+
+| Platform Handles | You Still Need | Why |
+|------------------|----------------|-----|
+| Production build | Dockerfile for local | Parity between local and prod |
+| Scaling | docker-compose | Team onboarding consistency |
+| SSL/CDN | .env.example | Environment documentation |
+
+**Anti-Rationalization for Serverless/Platform:**
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "Lambda doesn't need Docker" | SAM uses Docker locally. Container is hidden, not absent. | **Use SAM/serverless containers** |
+| "Vercel handles everything" | Vercel deploys. Local dev is YOUR problem. | **Dockerfile for local dev** |
+| "Platform builds from source" | Platform build ≠ your local. Parity matters. | **Match platform build locally** |
+| "Static site has no runtime" | Build process has runtime. Containerize the build. | **nginx or build container** |
 
 ## Demo Pressure Handling
 
