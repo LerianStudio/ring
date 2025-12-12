@@ -24,10 +24,10 @@ related:
 
 verification:
   automated:
-    - command: "go test ./... -cover 2>&1 | grep -E 'coverage:|PASS|FAIL'"
-      description: "Go tests pass with coverage"
-      success_pattern: "PASS.*coverage: [8-9][0-9]|100"
-      failure_pattern: "FAIL|coverage: [0-7][0-9]"
+    - command: "go test ./... -covermode=atomic -coverprofile=coverage.out 2>&1 && go tool cover -func=coverage.out | grep -E 'total:|PASS|FAIL'"
+      description: "Go tests pass with branch coverage (atomic mode)"
+      success_pattern: "PASS.*total:.*[8-9][0-9]|100"
+      failure_pattern: "FAIL|total:.*[0-7][0-9]"
     - command: "npm test -- --coverage 2>&1 | grep -E 'Tests:|Coverage'"
       description: "TypeScript tests pass with coverage"
       success_pattern: "Tests:.*passed|Coverage.*[8-9][0-9]|100"
@@ -237,7 +237,7 @@ Create traceability matrix: | ID | Criterion | Test File | Test Function | Statu
 
 ## Step 5: Execute Full Test Suite
 
-Run: `go test ./... -cover` (or `npm test -- --coverage`, `pytest --cov=src`). Verify coverage ≥85%.
+Run: `go test ./... -covermode=atomic -coverprofile=coverage.out && go tool cover -func=coverage.out` (or `npm test -- --coverage`, `pytest --cov=src`). Verify coverage ≥85%.
 
 ## Step 6: Update Traceability Matrix
 

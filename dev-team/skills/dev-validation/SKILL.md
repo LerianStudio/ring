@@ -90,6 +90,44 @@ Final validation gate requiring explicit user approval. Present evidence that ea
 
 See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.md) for the canonical validation policy.
 
+## Severity Calibration
+
+**When presenting validation results to user, issues are categorized by severity:**
+
+| Severity | Criteria | Examples | Action Required |
+|----------|----------|----------|-----------------|
+| **CRITICAL** | Acceptance criterion completely unmet | AC-1: "User can login" but login doesn't work at all | MUST fix before approval. Return to Gate 0. |
+| **HIGH** | Acceptance criterion partially met or degraded | AC-2: "Response < 200ms" but actually 800ms | MUST fix before approval. Return to Gate 0. |
+| **MEDIUM** | Edge case or non-critical requirement gap | AC-3 met for happy path, fails for empty input | SHOULD fix before approval. User decides. |
+| **LOW** | Quality issue, requirement technically met | Code works but is hard to understand/maintain | MAY fix or document. User decides. |
+
+**Severity Assignment Rules:**
+- Unmet acceptance criterion = CRITICAL (requirement not satisfied)
+- Degraded performance/quality vs criterion = HIGH (requirement barely met)
+- Edge case failures = MEDIUM (main path works, edges don't)
+- Quality/maintainability with working code = LOW (works but suboptimal)
+
+**Why This Matters:**
+- User needs to understand impact severity when deciding APPROVED vs REJECTED
+- CRITICAL/HIGH = automatic REJECTED recommendation
+- MEDIUM/LOW = user judgment call with context
+
+**Example Validation Checklist with Severity:**
+```markdown
+## Validation Results
+
+| AC # | Criterion | Evidence | Status | Severity |
+|------|-----------|----------|--------|----------|
+| AC-1 | User can login | ✅ Tests pass, manual verification | MET | - |
+| AC-2 | Response < 200ms | ⚠️ Measured 350ms average | NOT MET | HIGH |
+| AC-3 | Input validation | ⚠️ Works for valid input, crashes on empty | PARTIAL | MEDIUM |
+| AC-4 | Error messages clear | ✅ All errors have user-friendly messages | MET | - |
+
+**Overall Validation:** REJECTED (1 HIGH issue: AC-2 response time)
+
+**Recommendation:** Fix AC-2 (HIGH) before approval. AC-3 (MEDIUM) user can decide.
+```
+
 ## Common Rationalizations - REJECTED
 
 | Excuse | Reality |

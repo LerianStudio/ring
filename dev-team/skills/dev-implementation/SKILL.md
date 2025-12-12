@@ -118,8 +118,104 @@ This skill executes the implementation phase of the development cycle. It:
 | **Economic** | "$X/hour revenue loss, ship now" | "Technical debt costs more than revenue loss. Fix root cause with TDD." |
 | **Social** | "Team waiting on you, don't block them" | "Blocking with quality is better than unblocking with bugs. They'll wait longer if it breaks." |
 | **Exhaustion** | "Too tired, better tests tomorrow" | "Tired code creates more work. STOP now. Resume with TDD tomorrow." |
+| **Partial Compliance** | "I've TDDed 9 functions, just this last one without tests" | "TDD is ALL-or-nothing. Every function gets TDD. No partial credit." |
+| **Proven Track Record** | "I've proven I follow TDD, one exception is fine" | "Past compliance doesn't grant future exceptions. Every function requires TDD." |
 
-**Non-negotiable principle:** If code exists before test, DELETE IT. No exceptions. No "adapting". No "reference".
+**Non-negotiable principle:** If code exists before test, DELETE IT. No exceptions. No "adapting". No "reference". ALL code gets TDD, not just most of it.
+
+## Exploratory Spikes (Time-Boxed Learning Only)
+
+**Definition:** Time-boxed throwaway experiment to learn unfamiliar APIs/libraries. NOT for production code.
+
+**When Spike Is Legitimate:**
+- First time using new library (e.g., learning gRPC streaming API)
+- API documentation unclear - need hands-on experiment
+- Testing approach unknown - verify framework supports TDD pattern
+
+**Rules (NON-NEGOTIABLE):**
+- **Maximum Duration:** 1 hour (can extend once for 30 min if genuinely stuck)
+- **Purpose:** Learning ONLY - understanding how API works
+- **DELETE AFTER:** ALL spike code MUST be deleted before TDD implementation begins
+- **No Keeping:** Cannot "adapt" spike code - must start completely fresh with RED phase
+- **Document Learning:** Write down what you learned, then delete the code
+
+**When Spike Is NOT Acceptable:**
+- ❌ "Spike to implement feature, then add tests" (that's testing-after, not spike)
+- ❌ "Spike for 3 hours to build whole component" (no time limit = bypass)
+- ❌ "Keep spike code as reference while TDDing" (adapting spike = testing-after)
+- ❌ "Spike covered 80%, TDD the remaining 20%" (partial TDD = not TDD)
+
+**After Spike Completes:**
+1. **DELETE** all spike code (no git stash, no branch, no "just in case")
+2. **Document** what you learned (patterns, gotchas, constraints)
+3. **Start Fresh** with TDD - write failing test based on spike learnings
+4. **If spike showed TDD is impossible** → STOP, report blocker (wrong library/framework choice)
+
+**Spike vs Implementation:**
+
+| Spike (Learning) | TDD Implementation |
+|------------------|-------------------|
+| Max 90 minutes total | No time limit |
+| DELETE after | COMMIT to repo |
+| No tests required | Test-first MANDATORY |
+| Throwaway exploration | Production code |
+| "How does X work?" | "Implement feature Y" |
+
+**Red Flag:** If you want to keep spike code, you're not spiking - you're bypassing TDD. DELETE IT.
+
+## Test Refactoring and TDD
+
+**Question:** When refactoring existing tests, does TDD apply?
+
+**Answer:** Depends on what "refactoring" means:
+
+**Scenario A: Changing Test Implementation (TDD Does NOT Apply)**
+- **What:** Refactoring test code itself (extract helper, improve assertions, fix flaky test)
+- **Test-First Required:** NO - tests can't test themselves
+- **Approach:** Edit test directly, verify it still fails correctly, then passes correctly
+
+**Example:**
+```typescript
+// Before: Flaky test with timing issues
+it('should process async task', async () => {
+  await processTask();
+  await new Promise(resolve => setTimeout(resolve, 100)); // Bad: arbitrary wait
+  expect(result).toBe('done');
+});
+
+// Refactor: Fix flakiness (no TDD needed for test code itself)
+it('should process async task', async () => {
+  const result = await processTask();
+  expect(result).toBe('done'); // Better: no timing dependency
+});
+```
+
+**Scenario B: Changing Implementation Code Covered By Tests (TDD APPLIES)**
+- **What:** Refactoring production code that has tests
+- **Test-First Required:** YES - update tests first if behavior changes
+- **Approach:**
+  1. If changing behavior → Update test FIRST (RED if needed)
+  2. Refactor implementation (GREEN)
+  3. Verify tests still pass
+
+**Example:**
+```typescript
+// Refactoring: Extract method from large function
+// 1. Tests already exist and pass ✓
+// 2. Extract method (refactor implementation)
+// 3. Run tests - verify still pass ✓
+// No new test needed if behavior unchanged
+```
+
+**Scenario C: Adding Test Coverage for Untested Code (TDD APPLIES)**
+- **What:** Writing tests for code that lacks coverage
+- **Test-First Required:** YES - this is standard TDD
+- **Approach:** Write failing test (RED), verify it fails, implementation already exists (GREEN), refactor
+
+**Summary:**
+- **Test code refactoring:** TDD does NOT apply (can't test the test)
+- **Production code refactoring:** TDD applies IF behavior changes
+- **Adding coverage:** TDD applies (write failing test first)
 
 ## Common Rationalizations - REJECTED
 
@@ -135,6 +231,9 @@ This skill executes the implementation phase of the development cycle. It:
 | "Adapt existing code while writing tests" | Adapting IS writing code first. Delete the code. Start fresh. |
 | "Look at old code for guidance" | Looking leads to adapting. Delete means don't look either. |
 | "Save to branch, delete locally" | Saving anywhere = keeping. Delete from everywhere. |
+| "I've TDDed 9/10 functions, just this last one" | ALL functions get TDD, not most. 9/10 = 0/10. Start over on #10. |
+| "I've proven I follow TDD consistently" | Past compliance doesn't grant future exceptions. Every function requires TDD. |
+| "Refactoring tests doesn't need TDD" | Correct. Test code refactoring is exempt. Production code is not. |
 
 ## Red Flags - STOP
 

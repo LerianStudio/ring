@@ -116,7 +116,7 @@ This skill VALIDATES that observability was correctly implemented by developers:
 | **HARD BLOCK** | Verification commands not run (no evidence) | STOP. Cannot mark Gate 2 complete without automated verification. | ❌ NO |
 | **HARD BLOCK** | User says "feature complete, add observability later" | STOP. Observability is part of completion. Gate 2 required. | ❌ NO |
 | **HIGH** | Only /health exists, missing /ready or /metrics | Report HIGH severity. Return to developers. | ❌ NO |
-| **MEDIUM** | Logs are fmt.Println/echo, not JSON structured | Report MEDIUM severity. Must fix before Gate 3. | ❌ NO |
+| **CRITICAL** | Logs are fmt.Println/echo, not JSON structured | Report CRITICAL severity. Return to Gate 0. Must fix. | ❌ NO |
 
 ## Cannot Be Overridden
 
