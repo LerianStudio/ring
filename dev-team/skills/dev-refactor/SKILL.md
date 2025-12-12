@@ -1185,6 +1185,37 @@ Task 1:
     **Why This Matters:** [Business impact]
     ```
 
+    ## Code Transformation Context (MANDATORY FOR EACH ISSUE)
+
+    **⛔ HARD GATE:** For EACH non-compliant issue, you MUST provide a Code Transformation Context (CTC) block.
+
+    **If CTC is missing → Output is INCOMPLETE → SKILL FAILURE**
+
+    See [docs/PROMPT_ENGINEERING.md#code-transformation-context-ctc-format](../../../docs/PROMPT_ENGINEERING.md#code-transformation-context-ctc-format) for the canonical CTC template.
+
+    ### Required Elements Checklist
+
+    For EACH issue, your output MUST include:
+
+    - [ ] **Before (Current Code)** - Actual code from project with `file:line` reference
+    - [ ] **After (Ring Standards)** - Transformed code using lib-commons patterns
+    - [ ] **Standard References table** - Pattern, Source, Section, Line Range
+    - [ ] **Why This Transformation Matters** - Problem, Standard, Impact
+
+    ### Line Range Derivation (MANDATORY)
+
+    **⛔ DO NOT hardcode line numbers.** Standards files change.
+
+    **REQUIRED:** Derive `:{line_range}` at runtime:
+    1. Read the current standards file (`golang.md`, `typescript.md`, etc.)
+    2. Search for the relevant section header
+    3. Cite actual line numbers from the live file
+
+    ```
+    Example: Agent reads golang.md → Finds "## Configuration Loading" at line 99
+             Agent cites: "Configuration Loading (golang.md:99-230)"
+    ```
+
     ## Standards Compliance (MANDATORY)
 
     You MUST include a "## Standards Compliance" section at the end of your output.

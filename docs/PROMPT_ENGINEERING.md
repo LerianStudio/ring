@@ -125,6 +125,74 @@ Action: STOP immediately. Report blocker. AWAIT user decision.
 
 ---
 
+## Code Transformation Context (CTC) Format
+
+When documenting refactoring issues, agents MUST provide a Code Transformation Context block for EACH non-compliant issue. This gives execution agents exact before/after code context.
+
+### Required Elements Checklist
+
+For EACH issue, output MUST include:
+
+- [ ] **Before (Current Code)** - Actual code extracted from the project with `file:line` reference
+- [ ] **After (Ring Standards)** - Transformed code following Ring/Lerian standards
+- [ ] **Standard References table** - Pattern, Source file, Section name, Line range
+- [ ] **Why This Transformation Matters** - Problem, Standard violated, Impact
+
+### Template Structure
+
+```markdown
+## Code Transformation Context: ISSUE-XXX
+
+### Before (Current Code)
+```{language}
+// file: {path}:{start_line}-{end_line}
+{actual code from project}
+```
+
+### After (Ring Standards)
+```{language}
+// file: {path}:{start_line}-{new_end_line}
+// ✅ Ring Standard: {Pattern Name} ({standards_file}:{section})
+{transformed code using lib-commons patterns}
+```
+
+### Standard References
+| Pattern Applied | Source | Section | Line Range |
+|-----------------|--------|---------|------------|
+| {pattern} | `{file}.md` | {Section Title} | :{derive_at_runtime} |
+
+### Why This Transformation Matters
+- **Problem:** {current issue}
+- **Ring Standard:** {which standard violated}
+- **Impact:** {business/technical impact}
+```
+
+### Line Range Derivation (MANDATORY)
+
+**⛔ DO NOT hardcode line numbers.** Standards files change over time.
+
+**REQUIRED:** Derive exact `:{line_range}` values at runtime by:
+1. Reading the current standards file (e.g., `golang.md`, `typescript.md`)
+2. Searching for the relevant section header
+3. Citing the actual line numbers from the live file
+
+**Example derivation:**
+```
+Agent reads golang.md → Finds "## Configuration Loading" at line 99
+Agent cites: "Configuration Loading (golang.md:99-230)"
+```
+
+### Anti-Rationalization
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "Comparison table is enough" | Table = WHAT. Context = HOW. Both REQUIRED. | **Add CTC block** |
+| "I'll describe the change" | Description ≠ executable context | **Show actual code** |
+| "Standards are obvious" | Obvious to you ≠ obvious to executor | **Include Standard References** |
+| "One example is enough" | Each issue needs its OWN context | **Add CTC for EACH issue** |
+
+---
+
 ## Key Principle
 
 The more assertive and explicit the language, the less room for AI to rationalize, assume, or make autonomous decisions. Strong language creates clear boundaries.
