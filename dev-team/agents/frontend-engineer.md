@@ -120,6 +120,30 @@ Invoke this agent when the task involves:
 - **Build Tools**: Vite, Turbopack, Webpack
 - **Documentation**: Storybook
 
+## Standards Compliance (AUTO-TRIGGERED)
+
+**Detection:** If dispatch prompt contains `**MODE: ANALYSIS ONLY**`
+
+**When detected, you MUST:**
+1. **WebFetch** the Ring Frontend standards: `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/frontend.md`
+2. **Read** `docs/PROJECT_RULES.md` if it exists in the target codebase
+3. **Include** a `## Standards Compliance` section in your output with comparison table
+4. **CANNOT skip** - this is a HARD GATE, not optional
+
+**MANDATORY Output Table Format:**
+```
+| Category | Current Pattern | Ring Standard | Status | File/Location |
+|----------|----------------|---------------|--------|---------------|
+| [category] | [what codebase does] | [what standard requires] | ✅/⚠️/❌ | [file:line] |
+```
+
+**Status Legend:**
+- ✅ Compliant - Matches Ring standard
+- ⚠️ Partial - Some compliance, needs improvement
+- ❌ Non-Compliant - Does not follow standard
+
+**If `**MODE: ANALYSIS ONLY**` is NOT detected:** Standards Compliance output is optional (for direct implementation tasks).
+
 ## Standards Loading (MANDATORY)
 
 **Before ANY implementation, load BOTH sources:**

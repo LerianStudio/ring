@@ -598,17 +598,11 @@ ctx := otel.GetTextMapPropagator().Extract(
 
 ### Required Endpoints
 
-| Endpoint | Purpose | Response |
-|----------|---------|----------|
-| `/health` | Kubernetes liveness | `200 OK` if process running |
-| `/ready` | Kubernetes readiness | `200 OK` if can serve traffic |
-| `/metrics` | Prometheus scraping | Prometheus format |
-
 ### Implementation
 
 ```go
-// Go implementation
-type HealthChecker struct {
+// Go implementation for observability
+type ObservabilityChecker struct {
     db    *sql.DB
     redis *redis.Client
 }
@@ -658,23 +652,9 @@ func (h *HealthChecker) ReadinessHandler(w http.ResponseWriter, r *http.Request)
 ### Kubernetes Configuration
 
 ```yaml
-livenessProbe:
-  httpGet:
-    path: /health
-    port: 8080
-  initialDelaySeconds: 10
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 3
-
-readinessProbe:
-  httpGet:
-    path: /ready
-    port: 8080
-  initialDelaySeconds: 5
-  periodSeconds: 5
-  timeoutSeconds: 3
-  failureThreshold: 2
+# Observability configuration
+# JSON structured logging required
+# OpenTelemetry tracing recommended for distributed systems
 ```
 
 ---
@@ -768,10 +748,8 @@ readinessProbe:
 
 Before deploying to production:
 
-- [ ] **Metrics**: Prometheus metrics exposed at `/metrics`
-- [ ] **Dashboards**: Grafana dashboard with required panels
-- [ ] **Alerts**: Alert rules for critical scenarios
+- [ ] **Dashboards**: Grafana dashboard with required panels (optional)
+- [ ] **Alerts**: Alert rules for critical scenarios (optional)
 - [ ] **Logging**: Structured JSON logs with trace correlation
 - [ ] **Tracing**: OpenTelemetry instrumentation
-- [ ] **Health Checks**: `/health` and `/ready` endpoints
-- [ ] **Runbooks**: Documented for all critical alerts
+- [ ] **Runbooks**: Documented for all critical alerts (optional)

@@ -322,8 +322,7 @@ func NewRouter(lg libLog.Logger, tl *libOpentelemetry.Telemetry, ...) *fiber.App
 
     // ... define routes ...
 
-    // Health & Version endpoints
-    f.Get("/health", libHTTP.Ping)
+    // Version endpoint
     f.Get("/version", libHTTP.Version)
 
     // MUST be last middleware - closes root spans

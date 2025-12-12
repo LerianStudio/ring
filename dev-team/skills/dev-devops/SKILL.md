@@ -32,9 +32,9 @@ verification:
       description: "All services start and are healthy"
       success_pattern: "Up|running|healthy"
       failure_pattern: "Exit|exited|unhealthy"
-    - command: "curl -sf http://localhost:8080/health || curl -sf http://localhost:3000/health"
-      description: "Health endpoint responds"
-      success_pattern: "200|ok|healthy"
+    - command: "docker-compose logs app | head -5 | jq -e '.level'"
+      description: "Structured JSON logging works"
+      success_pattern: "info|debug|warn|error"
   manual:
     - "Verify docker-compose ps shows all services as 'Up (healthy)'"
     - "Verify .env.example documents all required environment variables"
@@ -284,13 +284,13 @@ Create `docs/LOCAL_SETUP.md` with these sections:
 
 ## Step 7: Verify Setup Works
 
-**Commands:** `docker-compose build` → `docker-compose up -d` → `docker-compose ps` → `curl localhost:8080/health` → `docker-compose logs app | grep -i error`
+**Commands:** `docker-compose build` → `docker-compose up -d` → `docker-compose ps` → `docker-compose logs app | grep -i error`
 
-**Checklist:** Build succeeds ✓ | Services start ✓ | All healthy ✓ | Health responds ✓ | No errors ✓ | DB connects ✓ | Redis connects ✓
+**Checklist:** Build succeeds ✓ | Services start ✓ | All healthy ✓ | No errors ✓ | DB connects ✓ | Redis connects ✓
 
 ## Step 8: Prepare Handoff to Gate 2
 
-**Handoff format:** DevOps status (COMPLETE/PARTIAL) | Files changed (Dockerfile, compose, .env, docs) | Services configured (App:port, DB:type/port, Cache:type/port) | Env vars added | Verification results (build/startup/health/connectivity: PASS/FAIL) | Ready for testing: YES/NO
+**Handoff format:** DevOps status (COMPLETE/PARTIAL) | Files changed (Dockerfile, compose, .env, docs) | Services configured (App:port, DB:type/port, Cache:type/port) | Env vars added | Verification results (build/startup/connectivity: PASS/FAIL) | Ready for testing: YES/NO
 
 ## Common DevOps Patterns
 

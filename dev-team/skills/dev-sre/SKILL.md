@@ -8,7 +8,7 @@ trigger: |
   - Gate 2 of development cycle
   - Gate 0 (Implementation) complete with observability code
   - Gate 1 (DevOps) setup complete
-  - Service needs observability validation (metrics, logging, tracing)
+  - Service needs observability validation (logging, tracing)
 
 skip_when: |
   - No service implementation (documentation only)
@@ -27,30 +27,20 @@ related:
 
 verification:
   automated:
-    - command: "curl -sf http://localhost:8080/health"
-      description: "Health endpoint responds 200"
-      success_pattern: "200|ok|healthy"
-    - command: "curl -sf http://localhost:8080/ready"
-      description: "Ready endpoint responds"
-      success_pattern: "200|ready"
     - command: "docker-compose logs app 2>&1 | head -5 | jq -e '.level'"
       description: "Logs are JSON structured"
       success_pattern: "info|debug|warn|error"
   manual:
-    - "Verify /ready returns 503 when database is down"
     - "Verify logs include trace_id when tracing is enabled"
 
 examples:
   - name: "API service observability validation"
     context: "Go API with PostgreSQL dependency"
     expected_output: |
-      - /health returns 200 when process running
-      - /ready checks database connectivity
       - JSON structured logging with trace correlation
   - name: "Background worker observability validation"
     context: "Job processor service"
     expected_output: |
-      - /health returns 200 when worker running
       - Structured JSON logging
 ---
 
@@ -87,8 +77,6 @@ If WebFetch fails → STOP and report blocker. Cannot proceed without Ring SRE s
 ## Overview
 
 This skill VALIDATES that observability was correctly implemented by developers:
-- Prometheus metrics exposed at `/metrics`
-- Health check endpoints (`/health`, `/ready`)
 - Structured logging with trace correlation
 - OpenTelemetry tracing instrumentation
 - Grafana dashboard (if required)
@@ -112,10 +100,9 @@ This skill VALIDATES that observability was correctly implemented by developers:
 
 | Decision Type | Scenario | Action | Can User Override? |
 |---------------|----------|--------|-------------------|
-| **HARD BLOCK** | Service lacks /health + /ready + /metrics + JSON logs | STOP. Return to Gate 0. Cannot proceed to Gate 3. | ❌ NO |
+| **HARD BLOCK** | Service lacks JSON structured logs | STOP. Return to Gate 0. Cannot proceed to Gate 3. | ❌ NO |
 | **HARD BLOCK** | Verification commands not run (no evidence) | STOP. Cannot mark Gate 2 complete without automated verification. | ❌ NO |
 | **HARD BLOCK** | User says "feature complete, add observability later" | STOP. Observability is part of completion. Gate 2 required. | ❌ NO |
-| **HIGH** | Only /health exists, missing /ready or /metrics | Report HIGH severity. Return to developers. | ❌ NO |
 | **CRITICAL** | Logs are fmt.Println/echo, not JSON structured | Report CRITICAL severity. Return to Gate 0. Must fix. | ❌ NO |
 
 ## Cannot Be Overridden
@@ -126,7 +113,7 @@ This skill VALIDATES that observability was correctly implemented by developers:
 |-------------|---------------------|-----------|
 | Gate 2 execution | CTO, PM, "MVP" arguments | Observability prevents production blindness |
 | Automated verification | "Developer confirms it works" | Evidence required for Gate 2 PASS |
-| /health + /ready + /metrics + JSON logs | "Health is enough" | Minimum viable observability - ALL 4 required |
+| JSON structured logs | "Plain text is enough" | Minimum viable observability - structured logs required |
 | "Complete" includes observability | Deadline pressure | Definition of done is non-negotiable |
 
 **If pressured:** "Observability is PART of completion, not an addition to it. Gate 2 cannot be skipped regardless of authority or deadline."
@@ -135,11 +122,9 @@ This skill VALIDATES that observability was correctly implemented by developers:
 
 | Severity | Scenario | Gate 2 Status | Can Proceed? |
 |----------|----------|---------------|--------------|
-| **CRITICAL** | Missing ALL observability (no /health, /ready, /metrics, logs) | FAIL | ❌ Return to Gate 0 |
+| **CRITICAL** | Missing ALL observability (no structured logs) | FAIL | ❌ Return to Gate 0 |
 | **CRITICAL** | fmt.Println/echo instead of JSON logs | FAIL | ❌ Return to Gate 0 |
 | **CRITICAL** | Verification commands not run | FAIL | ❌ Cannot mark complete |
-| **HIGH** | Missing 1-2 of required endpoints (/ready or /metrics) | NEEDS_FIXES | ❌ Return to developers |
-| **MEDIUM** | /ready returns 200 when dependencies down | NEEDS_FIXES | ⚠️ Fix before Gate 3 |
 | **LOW** | Dashboard deferred for non-critical service | PARTIAL | ✅ Can proceed with note |
 
 ## Pressure Resistance
@@ -149,9 +134,8 @@ This skill VALIDATES that observability was correctly implemented by developers:
 | Pressure Type | Request | Agent Response |
 |---------------|---------|----------------|
 | **Later** | "Add observability post-launch" | "No observability = no visibility into production issues. REQUIRED before deploy." |
-| **Logs Only** | "Logs are enough for MVP" | "Logs show what happened. Metrics show it's happening. Health enables recovery. All required." |
-| **Optional** | "Health checks are optional" | "Without health checks, Kubernetes can't detect failures. REQUIRED." |
-| **MVP** | "It's just MVP, skip metrics" | "MVP without metrics = blind MVP. You won't know if it's working." |
+| **Logs Only** | "Plain text logs are enough for MVP" | "Plain text logs are not searchable, not alertable. JSON logs required." |
+| **MVP** | "It's just MVP, skip structured logging" | "MVP without structured logging = debugging nightmare. You won't be able to search or alert on logs." |
 
 ## Combined Pressure Scenarios
 
@@ -161,26 +145,22 @@ This skill VALIDATES that observability was correctly implemented by developers:
 | **Pragmatic + Exhaustion + Time** | "MVP launch in 2 hours, PM says observability optional, just launch" | "MVP without observability = blind MVP. Cannot detect failures, cannot debug efficiently. Gate 2 REQUIRED." |
 | **All Pressures** | "CEO watching demo in 1 hour, just show feature working, skip gates" | "Gates prevent production blindness. CEO will want metrics when issues occur. Cannot skip Gate 2." |
 
-**Non-negotiable principle:** Minimum viable observability = metrics + health checks + structured logs. No exceptions.
+**Non-negotiable principle:** Minimum viable observability = structured logs. No exceptions.
 
 ## Common Rationalizations - REJECTED
 
 | Excuse | Reality |
 |--------|---------|
-| "Add metrics later" | Later = never. Retrofitting is 10x harder. |
-| "Logs are sufficient" | Logs are forensic. Metrics are preventive. Both required. |
-| "Health checks are optional" | Without /health, you can't detect service death. Required. |
+| "Add tracing later" | Later = never. Retrofitting is 10x harder. |
 | "It's just an internal tool" | Internal tools fail too. Observability required. |
-| "Dashboard can come later" | Dashboard is optional. Metrics endpoint is not. |
+| "Dashboard can come later" | Dashboard is optional but structured logging is not. |
 | "Too much overhead for MVP" | Observability is minimal overhead, maximum value. |
 | "Task says observability not needed" | AI cannot self-exempt. Tasks don't override gates. |
 | "Pure frontend, no backend calls" | If it calls ANY API, backend needs observability. Frontend-only = static HTML. |
-| "It's just MVP" | MVP without metrics = blind MVP. You won't know if it's working. |
+| "It's just MVP" | MVP without structured logging = debugging nightmare. |
 | "YAGNI - we don't need it yet" | YAGNI doesn't apply to observability. You need it BEFORE problems occur. |
-| "Only N users, no need for metrics" | User count is irrelevant. 1 user with silent failure = bad experience. |
+| "Only N users, no need for structured logs" | User count is irrelevant. 1 user with silent failure = bad experience. |
 | "Basic fmt.Println logs are enough" | fmt.Println is not structured, not searchable, not alertable. JSON logs required. |
-| "Single server, no Kubernetes" | /health is for ANY environment. Load balancers, systemd, monitoring all need it. |
-| "Just /health is enough for now" | /health + /ready + /metrics is the MINIMUM. Partial observability = partial blindness. |
 | "45 min overhead not worth it" | 45 min now prevents 4+ hours debugging blind production issues. |
 | "Feature complete, observability later" | Feature without observability is NOT complete. Redefine "complete". |
 | "Core functionality works" | Core functionality + observability = complete. Core alone = partial. |
@@ -191,19 +171,15 @@ This skill VALIDATES that observability was correctly implemented by developers:
 If you catch yourself thinking ANY of these, STOP immediately:
 
 - "We'll add observability after launch"
-- "Logs are enough for now"
-- "Health checks aren't critical for MVP"
-- "Metrics add too much overhead"
+- "Plain text logs are enough for now"
 - "It's just an internal service"
 - "We can monitor manually"
 - "Task says observability not required"
 - "Pure frontend, no backend impact"
-- "It's just MVP, we'll add metrics later"
+- "It's just MVP, we'll add structured logging later"
 - "YAGNI - don't need it yet"
 - "Only N users, doesn't justify"
 - "fmt.Println is fine for now"
-- "Single server doesn't need /ready"
-- "Just /health endpoint is enough"
 - "45 min not worth it"
 - "Feature complete, add observability later"
 - "Core functionality done"
@@ -234,13 +210,13 @@ Is it runnable code?
 
 ### Component Type Requirements
 
-| Type | /health | /ready | /metrics | JSON Logs | Tracing | Exit Codes |
-|------|---------|--------|----------|-----------|---------|------------|
-| **API Service** | REQUIRED | REQUIRED | REQUIRED | REQUIRED | Recommended | N/A |
-| **Background Worker** | REQUIRED | Optional | Recommended | REQUIRED | Optional | N/A |
-| **CLI Tool** | Optional | N/A | N/A | REQUIRED | N/A | REQUIRED |
-| **One-time Script** | N/A | N/A | N/A | REQUIRED | N/A | REQUIRED |
-| **Library** | N/A | N/A | N/A | N/A | N/A | N/A |
+| Type | JSON Logs | Tracing | Exit Codes |
+|------|-----------|---------|------------|
+| **API Service** | REQUIRED | Recommended | N/A |
+| **Background Worker** | REQUIRED | Optional | N/A |
+| **CLI Tool** | REQUIRED | N/A | REQUIRED |
+| **One-time Script** | REQUIRED | N/A | REQUIRED |
+| **Library** | N/A | N/A | N/A |
 
 ### Migration Scripts and One-Time Jobs
 
@@ -251,20 +227,18 @@ Is it runnable code?
 | **Structured logs** | Track progress, debug failures | `{"level":"info","step":"migrate_users","count":1500}` |
 | **Exit codes** | Orchestration needs success/failure signal | `exit 0` success, `exit 1` failure |
 | **Idempotency logging** | Know if re-run is safe | `{"already_migrated":true,"skipping":true}` |
-| **/health (optional)** | Only if long-running (>5min) | For orchestrator health checks |
 
 ## Anti-Rationalization Table
 
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
 | "Core functionality works, observability is enhancement" | Observability is PART of definition of done, not addition to it. Feature is NOT complete. | **STOP. Return to Gate 0. Gate 2 is REQUIRED.** |
-| "It's just MVP, add metrics Monday" | MVP without metrics = blind MVP. "Later" = never. Retrofitting is 10x harder. | **STOP. Implement /metrics before Gate 2.** |
+| "It's just MVP, add structured logging Monday" | MVP without structured logging = debugging nightmare. "Later" = never. Retrofitting is 10x harder. | **STOP. Implement JSON logging before Gate 2.** |
 | "Tech lead approved skipping Gate 2" | Gates are NON-NEGOTIABLE. Authority cannot waive mandatory gates. | **STOP. Inform user gates cannot be waived.** |
-| "Health endpoint exists, that's enough" | Minimum = /health + /ready + /metrics + JSON logs. Partial = Gate 2 FAIL. | **STOP. Implement all 4 requirements.** |
+| "Plain text logs exist, that's enough" | Minimum = JSON structured logs. Plain text = Gate 2 FAIL. | **STOP. Implement JSON structured logging.** |
 | "Developer confirms it works" | Confirmation ≠ Verification. MUST run automated validation commands. | **STOP. Run verification checklist.** |
 | "It's just a script, runs once" | Scripts fail. Logs tell you why. | **Add structured logging** |
 | "Library doesn't need observability" | Correct! Libraries are exempt. | **Verify it's truly a library** |
-| "Worker is simple, no /health" | Simple workers crash silently. | **Add /health endpoint** |
 | "Exit code 0 is enough" | Exit code + logs = complete picture. | **Add structured logs** |
 | "Migration runs in CI only" | CI failures need debugging too. | **Structured logs required** |
 
@@ -279,11 +253,11 @@ Is it runnable code?
 | "Ready for review" | ❌ NO - Gate 2 before Gate 4 |
 | "Gate 2 passed" | ✅ YES - This is complete |
 
-**If someone says "feature is complete, just needs observability":**
+**If someone says "feature is complete, just needs structured logging":**
 - That statement is a contradiction
 - Feature is NOT complete
 - Gate 2 is PART of completion, not addition to it
-- Correct response: "Feature is at Gate 1. Gate 2 (observability) required for completion."
+- Correct response: "Feature is at Gate 1. Gate 2 (structured logging) required for completion."
 
 **Observability is definition of done, not enhancement.**
 
@@ -293,12 +267,9 @@ Is it runnable code?
 
 | Check | Command | Expected |
 |-------|---------|----------|
-| Health endpoint | `curl -sf http://localhost:8080/health` | 200 OK |
-| Metrics endpoint | `curl -sf http://localhost:8080/metrics` | Contains `http_requests_total` |
-| Ready endpoint | `curl -sf http://localhost:8080/ready` | 200 OK |
 | Structured logs | `docker-compose logs app \| head -1 \| jq .level` | Returns log level |
 
-**All 4 checks MUST pass. Partial = Gate 2 FAIL.**
+**This check MUST pass.**
 
 ## Mandatory Requirements
 
@@ -306,9 +277,6 @@ Is it runnable code?
 
 | Requirement | Status | Notes |
 |-------------|--------|-------|
-| `/metrics` endpoint | **REQUIRED** | Prometheus-compatible metrics |
-| `/health` endpoint | **REQUIRED** | Returns 200 when healthy |
-| `/ready` endpoint | **REQUIRED** | Returns 200 when ready for traffic |
 | Structured JSON logs | **REQUIRED** | With trace_id correlation |
 | Grafana dashboard | Recommended | Can defer for non-critical services |
 | Alert rules | Recommended | Required if service has SLO |
@@ -336,15 +304,12 @@ Review Gate 0/1 handoff: Service type (API/Worker/Batch), Language, External dep
 
 ## Step 2: Dispatch SRE Agent for Validation
 
-**Dispatch:** `Task(subagent_type: "ring-dev-team:sre")` - VALIDATE observability (not implement). Include service info (type, language, deps) and Gate 0/1 handoff. Agent validates: Health endpoints, JSON logging, Tracing. Returns: PASS/FAIL per component, issues by severity.
+**Dispatch:** `Task(subagent_type: "ring-dev-team:sre")` - VALIDATE observability (not implement). Include service info (type, language, deps) and Gate 0/1 handoff. Agent validates: JSON logging, Tracing. Returns: PASS/FAIL per component, issues by severity.
 
 ## Steps 3-5: Validate Health, Logging, Tracing
 
 | Component | Validation Commands | Expected |
 |-----------|--------------------|---------:|
-| **Health** | `curl localhost:8080/health` | 200 OK |
-| **Ready** | `curl localhost:8080/ready` | 200 OK (with dep status) |
-| **Ready (dep down)** | `docker-compose stop db && curl localhost:8080/ready` | 503 |
 | **Logging** | `docker-compose logs app \| head -5 \| jq .` | JSON with timestamp/level/message/service |
 | **Tracing** | `docker-compose logs app \| grep trace_id` | trace_id/span_id present |
 
@@ -355,17 +320,17 @@ Review Gate 0/1 handoff: Service type (API/Worker/Batch), Language, External dep
 | Section | Content |
 |---------|---------|
 | **Status** | COMPLETE/PARTIAL/NEEDS_FIXES |
-| **Validated** | /health ✓, /ready ✓, JSON logging ✓, Tracing (if applicable) ✓ |
-| **Results** | Health: PASS/FAIL, Logging: PASS/FAIL, Tracing: PASS/FAIL/N/A |
+| **Validated** | JSON logging ✓, Tracing (if applicable) ✓ |
+| **Results** | Logging: PASS/FAIL, Tracing: PASS/FAIL/N/A |
 | **Issues** | List by severity (CRITICAL/HIGH/MEDIUM/LOW) or "None" |
-| **Ready for Testing** | All endpoints validated ✓, Logs structured ✓, No Critical/High ✓ |
+| **Ready for Testing** | Logs structured ✓, No Critical/High ✓ |
 
 ## Observability by Service Type
 
 | Service Type | Required | Optional |
 |--------------|----------|----------|
-| **API Service** | Health checks (/health, /ready), Structured logging, Tracing (if calls external services) | Grafana dashboard, Alert rules |
-| **Background Worker** | Health check (/health), Structured logging | Tracing |
+| **API Service** | Structured logging, Tracing (if calls external services) | Grafana dashboard, Alert rules |
+| **Background Worker** | Structured logging | Tracing |
 | **Batch Job** | Structured logging, Exit code handling | — |
 
 ## Execution Report
@@ -377,8 +342,6 @@ Review Gate 0/1 handoff: Service type (API/Worker/Batch), Language, External dep
 | Result | PASS/FAIL/NEEDS_FIXES |
 
 ### Validation Details
-- health_endpoint: VERIFIED/MISSING
-- ready_endpoint: VERIFIED/MISSING
 - logging_structured: YES/NO
 - tracing_enabled: YES/NO/N/A
 

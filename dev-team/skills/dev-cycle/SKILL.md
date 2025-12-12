@@ -213,7 +213,7 @@ Day 4: Production incident from Day 1 code
 |------|---------------------|----------------|
 | 0 | Implementation agent completes + TDD RED verified | 1 file done ≠ gate done |
 | 1 | Dockerfile + docker-compose + .env.example | Missing any = FAIL |
-| 2 | /health + /ready + /metrics + structured logs | 3/4 endpoints = FAIL |
+| 2 | Structured JSON logs with trace correlation | Partial structured logs = FAIL |
 | 3 | Coverage ≥ 85% + all AC tested | 84% = FAIL |
 | 4 | **ALL 3 reviewers PASS** | 2/3 reviewers = FAIL |
 | 5 | Explicit "APPROVED" from user | "Looks good" = NOT approved |
@@ -551,10 +551,10 @@ For current execution unit:
        - Implementation from Gate 0: [summary of what was implemented]
 
        Validation Requirements:
-       - Verify /health endpoint responds correctly
+       - Verify structured JSON logging with trace correlation
        - Verify OpenTelemetry tracing (if external calls)
 
-       Report: validation results with PASS/FAIL for each component (/health, tracing), issues found by severity, verification commands executed.
+       Report: validation results with PASS/FAIL for each component (logging, tracing), issues found by severity, verification commands executed.
 
 4. If SRE not needed:
    - Mark as "skipped" with reason

@@ -1321,13 +1321,6 @@ Task 4:
 
     Compare CURRENT observability with EXPECTED patterns:
 
-    ### Health Endpoints
-    | Standard Pattern | Codebase Has | Status | Location | Fix |
-    |-----------------|--------------|--------|----------|-----|
-    | GET /health | Missing | ❌ | routes.go | Add libHTTP.Ping |
-    | GET /ready | Missing | ❌ | routes.go | Add readiness check |
-    | GET /version | Missing | ❌ | routes.go | Add libHTTP.Version |
-
     ### Logging
     | Standard Pattern | Codebase Has | Status | Location | Fix |
     |-----------------|--------------|--------|----------|-----|
