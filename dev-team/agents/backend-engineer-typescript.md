@@ -311,24 +311,28 @@ If WebFetch fails → STOP and report blocker. Cannot proceed without Ring stand
 
 ### Step 3: Verify Standards Were Loaded (HARD GATE)
 
-After WebFetch completes, you MUST verify you now have knowledge of:
+After WebFetch completes, you MUST verify you now have knowledge of **Ring TypeScript Standards**.
 
-- [ ] **Type Safety Standards**: No `any` types, branded types for domain IDs, `unknown` with type guards
-- [ ] **Validation Standards**: Zod schemas at all external boundaries (API inputs, message queues, file uploads)
-- [ ] **Error Handling Standards**: Result type pattern, AppError from lib-commons-js for all errors
-- [ ] **Logging Standards**: createLogger from lib-commons-js, structured JSON logging, NO console.log
-- [ ] **HTTP Client Standards**: createHttpClient from lib-commons-js for all external HTTP calls
-- [ ] **Graceful Shutdown Standards**: startServerWithGracefulShutdown from lib-commons-js for HTTP servers
-- [ ] **Worker Patterns** (if applicable): RabbitMQ consumer patterns, message acknowledgment, retry strategies
+**Verification test**: Can you reference specific patterns from the standards document?
 
-**Verification test**: Can you reference specific patterns from Ring TypeScript Standards?
-- Example: "Ring Standards require branded types like `type UserId = string & { readonly __brand: 'UserId' }`"
-- Example: "Ring Standards require Zod validation at boundaries: `const result = schema.safeParse(input)`"
-- Example: "Ring Standards require lib-commons AppError: `throw new AppError('msg', { code, statusCode })`"
+**Required references (MUST be able to cite):**
+- Type safety patterns (no `any`, branded types, `unknown` with guards)
+- Validation patterns (Zod schemas at boundaries)
+- Error handling patterns (Result type, proper error propagation)
 
-**If you CANNOT provide specific pattern examples → WebFetch FAILED or was skipped → STOP and report blocker.**
+**Example citations:**
+- "Ring Standards require branded types like `type UserId = string & { readonly __brand: 'UserId' }`"
+- "Ring Standards require Zod validation: `const result = schema.safeParse(input)`"
+- "Ring Standards require Result type pattern for error handling"
 
-You CANNOT proceed with "I'll follow best practices" without demonstrating loaded standards knowledge.
+**If you CANNOT cite specific patterns from the standards → WebFetch FAILED or was skipped → STOP and report blocker.**
+
+**Additional patterns to check (if mentioned in standards OR PROJECT_RULES.md):**
+- lib-commons-js usage (createLogger, AppError, createHttpClient, etc.) - verify if documented
+- Worker patterns (RabbitMQ consumers, message ack) - verify if documented
+- Graceful shutdown patterns - verify if documented
+
+**HARD GATE:** You CANNOT proceed with generic "I'll follow best practices" without demonstrating loaded standards knowledge through specific pattern citations.
 
 ### Apply Both
 - Ring Standards = Base technical patterns (error handling, testing, architecture, lib-commons usage)
