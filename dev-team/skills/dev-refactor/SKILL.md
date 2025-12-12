@@ -1187,111 +1187,34 @@ Task 1:
 
     ## Code Transformation Context (MANDATORY FOR EACH ISSUE)
 
-    **⛔ HARD GATE: For EACH non-compliant issue, you MUST provide a complete Code Transformation Context block.**
+    **⛔ HARD GATE:** For EACH non-compliant issue, you MUST provide a Code Transformation Context (CTC) block.
 
-    **This is NOT optional. This is a NON-NEGOTIABLE requirement.**
+    **If CTC is missing → Output is INCOMPLETE → SKILL FAILURE**
 
-    **If Code Transformation Context is missing → Output is INCOMPLETE → SKILL FAILURE**
+    See [docs/PROMPT_ENGINEERING.md#code-transformation-context-ctc-format](../../../docs/PROMPT_ENGINEERING.md#code-transformation-context-ctc-format) for the canonical CTC template.
 
-    ```text
-    ╔══════════════════════════════════════════════════════════════════════════════════╗
-    ║  ⛔ NON-NEGOTIABLE: DYNAMIC CONTENT vs FIXED STANDARDS                            ║
-    ║                                                                                  ║
-    ║  • BEFORE (Current Code) = DYNAMIC - Extracted from the ACTUAL project          ║
-    ║    being analyzed. This code comes from reading the codebase.                    ║
-    ║                                                                                  ║
-    ║  • AFTER (Ring Standards) = FIXED PATTERNS - Always follows Ring/Lerian         ║
-    ║    standards (golang.md, typescript.md). The patterns are fixed, but            ║
-    ║    applied to the specific code from the project.                               ║
-    ║                                                                                  ║
-    ║  • Standard References = FIXED - Always reference the Ring standards            ║
-    ║    documents with exact section and line numbers.                               ║
-    ║                                                                                  ║
-    ║  The examples below are TEMPLATES showing the structure.                         ║
-    ║  Replace placeholders with ACTUAL code from the project being analyzed.          ║
-    ╚══════════════════════════════════════════════════════════════════════════════════╝
+    ### Required Elements Checklist
+
+    For EACH issue, your output MUST include:
+
+    - [ ] **Before (Current Code)** - Actual code from project with `file:line` reference
+    - [ ] **After (Ring Standards)** - Transformed code using lib-commons patterns
+    - [ ] **Standard References table** - Pattern, Source, Section, Line Range
+    - [ ] **Why This Transformation Matters** - Problem, Standard, Impact
+
+    ### Line Range Derivation (MANDATORY)
+
+    **⛔ DO NOT hardcode line numbers.** Standards files change.
+
+    **REQUIRED:** Derive `:{line_range}` at runtime:
+    1. Read the current standards file (`golang.md`, `typescript.md`, etc.)
+    2. Search for the relevant section header
+    3. Cite actual line numbers from the live file
+
     ```
-
-    ### Purpose
-
-    This block gives AI agents executing refactoring tasks EXACT context about:
-    1. What the current code looks like (from analysis)
-    2. What the transformed code should look like (following Ring standards)
-    3. Which specific Ring standards apply (with line references)
-
-    ### Template Structure
-
-    ```markdown
-    ## Code Transformation Context: ISSUE-XXX
-
-    ### Before (Current Code)
-    ```{language}
-    // file: {actual_path_from_codebase}:{start_line}-{end_line}
-    // ↓↓↓ ACTUAL code extracted from the project being analyzed ↓↓↓
-    {paste the actual code from the codebase that needs transformation}
+    Example: Agent reads golang.md → Finds "## Configuration Loading" at line 99
+             Agent cites: "Configuration Loading (golang.md:99-230)"
     ```
-
-    ### After (Ring Standards)
-    ```{language}
-    // file: {actual_path_from_codebase}:{start_line}-{new_end_line}
-    // ↓↓↓ Transformed code following Ring/Lerian standards ↓↓↓
-    // ✅ Ring Standard: {Pattern Name} ({standards_file}:{line_range})
-    {transformed code using lib-commons patterns}
-    ```
-
-    ### Standard References
-    | Pattern Applied | Ring Standard Source | Section | Line Reference |
-    |-----------------|---------------------|---------|----------------|
-    | {pattern_name} | `{golang.md|typescript.md|devops.md}` | {Section Title} | :{line_range} |
-
-    ### Why This Transformation Matters
-    - **Problem:** {What is wrong with the current code}
-    - **Ring Standard:** {Which standard this violates}
-    - **Impact:** {Business/technical impact of the fix}
-    ```
-
-    ### How to Fill the Template
-
-    | Field | Source | Example |
-    |-------|--------|---------|
-    | `{actual_path_from_codebase}` | From codebase-report.md or file analysis | `internal/service/user.go` |
-    | `{start_line}-{end_line}` | From code analysis | `:45-52` |
-    | `{paste the actual code}` | Read from actual project files | The real code, not examples |
-    | `{standards_file}` | Ring standards doc | `golang.md`, `typescript.md` |
-    | `{Section Title}` | Section in standards doc | `Telemetry & Observability` |
-    | `{line_range}` | Line numbers in standards doc | `:337-352` |
-
-    ### Reference: Ring Standards Sections (golang.md)
-
-    Use these ACTUAL section references when filling the template:
-
-    | Category | Section in golang.md | Line Range |
-    |----------|---------------------|------------|
-    | Configuration | Configuration Loading (MANDATORY) | :99-230 |
-    | Telemetry | Telemetry & Observability (MANDATORY) | :234-401 |
-    | Bootstrap | Bootstrap Pattern (MANDATORY) | :405-479 |
-    | Data Transformation | ToEntity/FromEntity (MANDATORY) | :483-542 |
-    | Error Codes | Error Codes Convention (MANDATORY) | :545-608 |
-    | Error Handling | Error Handling | :613-648 |
-    | Testing | Testing Patterns | :932-970 |
-    | Logging | Logging Standards | :995-1017 |
-    | Architecture | Architecture Patterns | :1056-1093 |
-    | DDD | DDD Patterns (Go Implementation) | :1174-1240 |
-
-    ### Anti-Rationalization: Code Transformation Context
-
-    **If you catch yourself thinking ANY of these, STOP. You are about to produce INCOMPLETE output:**
-
-    | Rationalization | Why It's WRONG | Required Action |
-    |-----------------|----------------|-----------------|
-    | "The comparison table is enough" | Table shows WHAT to change. Context shows HOW. Both are REQUIRED. | **Add Code Transformation Context** |
-    | "Code examples take too long" | Incomplete output is worse than slow output. Context is NON-NEGOTIABLE. | **Add Code Transformation Context** |
-    | "I'll just describe the change" | Description ≠ executable context. AI needs exact before/after code. | **Add Code Transformation Context** |
-    | "The engineer will figure it out" | Figuring out = guessing = inconsistent results. Provide exact code. | **Add Code Transformation Context** |
-    | "Ring standards are obvious" | Obvious to YOU ≠ obvious to execution agent. Reference exact lines. | **Include Standard References table** |
-    | "One example is enough" | Each issue needs its OWN context. Issues are different. | **Add context for EACH issue** |
-    | "Before code is self-evident" | Nothing is self-evident. Extract and show ACTUAL code from project. | **Include actual Before code** |
-    | "After code follows patterns" | Patterns without code = abstract. Show concrete transformed code. | **Include actual After code** |
 
     ## Standards Compliance (MANDATORY)
 
