@@ -116,7 +116,7 @@ This skill analyzes an existing codebase to identify gaps between current implem
 | "The user didn't ask for all this" | User invoked the skill. Skill defines the process. | Execute ALL steps |
 | "Other skills don't require this" | THIS skill requires it. Follow THIS skill's rules. | Execute ALL steps |
 
-**NON-NEGOTIABLE:** Every invocation of dev-refactor MUST execute Steps 0 → 1 → 2 → 2.5 → 3 → 4 → 5 → 6 → 7 → 8 → 9 in that exact order.
+**NON-NEGOTIABLE:** Every invocation of dev-refactor MUST execute Steps 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 in that exact order.
 
 See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.md) and [docs/AGENT_DESIGN.md](https://raw.githubusercontent.com/LerianStudio/ring/main/docs/AGENT_DESIGN.md) for canonical gate requirements and anti-rationalization patterns. This skill enforces those rules verbatim; only dev-refactor-specific procedures are documented below.
 
@@ -355,29 +355,7 @@ This is not about preference. Other agents are **technically incapable** of perf
 
 ---
 
-## ⛔ HARD GATES - READ AFTER STEP 0 PASSES
-
-**This skill has TWO mandatory hard gates. Violation of either gate is a SKILL FAILURE.**
-
-### Gate 0: PROJECT_RULES.md (Prerequisite) ✓
-
-**Already validated in Step 0 above.** If you reached this section, PROJECT_RULES.md exists.
-
-### Gate 1: Agent Dispatch (Execution) - HARD GATE
-
-**⛔ THIS IS A HARD GATE. Violation = SKILL FAILURE.**
-
-**⛔ MANDATORY:** ALL agents MUST have `ring-dev-team:` prefix. NO EXCEPTIONS.
-
-**⛔ See "HARD GATE 1: AGENT DISPATCH VALIDATION" above for complete validation sequence, mandatory behavior, and rationalizations to avoid.**
-
-**⛔ FORBIDDEN AGENTS (from banner):**
-- `Explore` → SKILL FAILURE
-- `general-purpose` → SKILL FAILURE
-- `ring-default:*` → SKILL FAILURE (EXCEPTION: `ring-default:codebase-explorer` allowed in Step 3 ONLY)
-- ANY agent without `ring-dev-team:` prefix → SKILL FAILURE (after Step 3)
-
-#### Parallel Dispatch (Step 4)
+## Parallel Dispatch (Step 4)
 
 **ALL applicable ring-dev-team:* agents MUST be dispatched in a SINGLE message (parallel execution).**
 
@@ -394,63 +372,22 @@ Select agents based on the analysis dimensions needed for the task. Dispatch ALL
 
 **If you already violated a gate:** STOP IMMEDIATELY. Discard invalid output. Re-execute with correct agents. There is NO way to salvage output from wrong agents.
 
-### Pressure Resistance - DO NOT RATIONALIZE
-
-**If you catch yourself thinking ANY of these, STOP immediately:**
-
-#### Agent & Execution Rationalizations
+### Analysis Rationalizations (DO NOT THINK THESE)
 
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
-| "This other agent is faster" | Speed ≠ correctness. Wrong agent = wrong analysis. | Use `ring-dev-team:*` agent |
-| "I'll just read the files directly" | Violates 3-file rule, incomplete analysis | Dispatch `ring-dev-team:*` agents |
-| "One agent is enough" | Multiple dimensions require multiple specialized agents | Dispatch ALL applicable in parallel |
-| "Sequential dispatch is fine" | Wastes time, skill requires parallel | Single message, ALL agents |
-
-**Note:** PROJECT_RULES.md rationalizations are covered in "STEP 0: PROJECT_RULES.md VALIDATION" at the top of this skill.
-
-#### Analysis Scope Rationalizations
-
-| Rationalization | Why It's WRONG | Required Action |
-|-----------------|----------------|-----------------|
-| "Code works fine" | Working ≠ maintainable. Analysis finds hidden debt. | Complete full analysis |
-| "Code works, skip analysis" | Working ≠ maintainable. Technical debt hidden. | Complete ALL dimensions |
-| "Too time-consuming" | Cost of analysis < cost of compounding debt | Complete full analysis |
-| "No time for full analysis" | Partial analysis = partial picture | ALL dimensions required |
+| "Code works fine / skip analysis" | Working ≠ maintainable. Technical debt hidden. | Complete ALL dimensions |
+| "Too time-consuming / no time" | Cost of analysis < cost of compounding debt | Complete full analysis |
 | "Standards don't fit us" | Document YOUR standards. Analysis still reveals gaps. | Analyze against project rules |
 | "Only critical matters" | Today's medium = tomorrow's critical | Document all severities |
-| "Only critical issues matter" | Medium issues become critical over time | Document all, prioritize later |
-| "Legacy gets a pass" | Legacy sets precedent. Analysis shows what to improve. | Document all gaps |
-| "Standards don't apply to legacy" | Legacy needs analysis MOST | Full analysis required |
-| "Team has their own way" | Document "their way" as standards. Analyze against it. | Use PROJECT_RULES.md |
-| "That's just how we do it here" | Undocumented patterns = inconsistent patterns | Document in PROJECT_RULES.md |
-
-#### ROI & Justification Rationalizations
-
-| Rationalization | Why It's WRONG | Required Action |
-|-----------------|----------------|-----------------|
-| "ROI of refactoring is low" | ROI calculation requires analysis. Can't calculate without data. | Complete analysis first |
-| "ROI doesn't justify full analysis" | You can't know ROI without the analysis data | Complete analysis, then evaluate |
-| "Partial analysis is enough" | Partial analysis = partial picture. Hidden debt in skipped areas. | ALL dimensions required |
-| "Partial analysis is sufficient" | Missing dimensions = missing problems | Complete all dimensions |
-| "3 years without bugs = stable" | No bugs ≠ no debt. Time doesn't validate architecture. | Full architecture analysis |
+| "Legacy gets a pass" | Legacy needs analysis MOST | Full analysis required |
+| "Team has their own way" | Undocumented patterns = inconsistent patterns | Document in PROJECT_RULES.md |
+| "ROI doesn't justify analysis" | Can't calculate ROI without analysis data | Complete analysis first |
+| "Partial analysis is enough" | Missing dimensions = missing problems | ALL dimensions required |
 | "3+ years stable = no debt" | Stability ≠ maintainability. Debt compounds silently. | Complete analysis |
-| "Analysis is overkill" | Analysis is the MINIMUM. Refactoring without analysis is guessing. | Complete all steps |
-| "Code smells ≠ problems" | Code smells ARE problems. They slow development and cause bugs. | Document all findings |
-| "Code smells aren't real problems" | Smells indicate deeper issues. They compound over time. | Document all severities |
-| "No specific problem motivating" | Technical debt IS the problem. Analysis quantifies it. | Complete analysis |
-| "No specific problem to solve" | Unknown problems are still problems. Analysis reveals them. | Full dimension scan |
-
-#### Completion Rationalizations
-
-| Rationalization | Why It's WRONG | Required Action |
-|-----------------|----------------|-----------------|
-| "Analysis complete, user can decide" | Analysis without action guidance is incomplete. | Generate tasks.md |
-| "Analysis is done, user decides next" | Skill requires tasks.md generation | Generate tasks.md before completing |
-| "Findings documented, my job done" | Findings → Tasks → Execution. Documentation alone changes nothing. | Generate tasks.md |
-| "Documented findings, job complete" | Tasks.md is mandatory output | Complete Step 7 (tasks.md) |
-
-**Non-negotiable:** These gates exist because specialized agents load Ring standards via WebFetch and have domain expertise. Generic agents do NOT have this capability.
+| "Code smells aren't problems" | Smells indicate deeper issues. They compound. | Document all severities |
+| "Analysis complete, user decides" | Skill requires tasks.md generation | Generate tasks.md |
+| "Findings documented, job done" | Findings → Tasks → Execution. Docs alone ≠ change. | Generate tasks.md |
 
 ### Execution Checklist - MUST COMPLETE IN ORDER
 
@@ -570,61 +507,11 @@ All specialist agent prompts MUST:
 
 **After Step 3, ring-default:codebase-explorer is FORBIDDEN. Specialists compare the report with Ring standards.**
 
-**❌ WRONG - Sequential dispatch (multiple separate messages):**
-- Message 1: Task with agent A → Wait → Response
-- Message 2: Task with agent B → Wait → Response
-- **This is WRONG** - Must be SINGLE message with ALL agents in parallel
+**Dispatch Pattern:**
+- ❌ WRONG: Sequential dispatch (one agent per message)
+- ✅ RIGHT: ALL agents in SINGLE message (parallel execution)
 
-**✅ RIGHT - COPY THIS PATTERN EXACTLY:**
-
-Use Task tool with these EXACT parameters for EACH agent:
-- `subagent_type`: MUST start with `ring-dev-team:` (e.g., `ring-dev-team:backend-engineer-golang`)
-- `description`: Short description (e.g., "Analyze Go architecture")
-- `prompt`: MUST start with `**MODE: ANALYSIS ONLY**` and reference PROJECT_RULES.md
-
-**✅ RIGHT - Parallel dispatch in SINGLE message:**
-
-```text
-In ONE message, dispatch ALL applicable ring-dev-team:* agents:
-
-Example for Go project:
-
-Task: subagent_type="ring-dev-team:backend-engineer-golang"
-      description="Analyze Go code quality"
-      prompt="**MODE: ANALYSIS ONLY** - Analyze Go codebase against PROJECT_RULES.md..."
-
-Task: subagent_type="ring-dev-team:qa-analyst"
-      description="Analyze test coverage"
-      prompt="**MODE: ANALYSIS ONLY** - Analyze test coverage against PROJECT_RULES.md..."
-
-Task: subagent_type="ring-dev-team:devops-engineer"
-      description="Analyze DevOps setup"
-      prompt="**MODE: ANALYSIS ONLY** - Analyze DevOps config against PROJECT_RULES.md..."
-
-Task: subagent_type="ring-dev-team:sre"
-      description="Analyze observability"
-      prompt="**MODE: ANALYSIS ONLY** - Analyze observability against PROJECT_RULES.md..."
-
-ALL Task tool calls in ONE message = PARALLEL execution = CORRECT
-```
-
-**Available ring-dev-team:* agents:**
-- `ring-dev-team:backend-engineer-golang` - Go backend analysis
-- `ring-dev-team:backend-engineer-typescript` - TypeScript backend analysis
-- `ring-dev-team:frontend-bff-engineer-typescript` - Frontend/BFF analysis
-- `ring-dev-team:frontend-designer` - UI/UX analysis
-- `ring-dev-team:devops-engineer` - DevOps/Docker analysis
-- `ring-dev-team:qa-analyst` - Test coverage analysis
-- `ring-dev-team:sre` - Observability/monitoring analysis
-
-**Select agents based on project language and analysis dimensions needed.**
-
-**Key rules:**
-- ✅ ALL agents MUST have `ring-dev-team:` prefix - NO EXCEPTIONS
-- ✅ Dispatch ALL applicable agents in SINGLE message (parallel)
-- ✅ ALL prompts MUST start with `**MODE: ANALYSIS ONLY**`
-- ✅ ALL prompts MUST reference PROJECT_RULES.md
-- ❌ NEVER use Explore, general-purpose, or ring-default:* agents for analysis
+**See Step 4 for full dispatch templates with complete prompts.**
 
 ---
 
@@ -821,14 +708,6 @@ Checks:
     └── Linting enforced
 ```
 
-## Step 0: Verify PROJECT_RULES.md Exists ✓
-
-**⛔ Already covered in "STEP 0: PROJECT_RULES.md VALIDATION" at the top of this skill.**
-
-If you reached this section, validation passed. Proceed to Step 1.
-
----
-
 ## Step 1: Detect Project Language
 
 **⛔ MANDATORY: Detect ALL languages, dispatch agents for ALL.**
@@ -979,26 +858,42 @@ Without understanding the ACTUAL codebase structure, specialists analyze blindly
 
 **⛔ You MUST use the Task tool to dispatch ring-default:codebase-explorer. This is NOT implicit.**
 
-**Agent Reference:** `ring-default:codebase-explorer` - See agent specification for output schema and exploration methodology.
-
 ```text
-Action: Use Task tool with EXACTLY these parameters:
-
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│  Task tool parameters:                                                          │
-│                                                                                 │
-│  subagent_type: "ring-default:codebase-explorer"                                │
-│  model: "opus"                                                                  │
-│  description: "Generate codebase architecture report"                           │
-│  prompt: [See prompt template below]                                            │
-│                                                                                 │
-│  Agent specification: default/agents/codebase-explorer.md                       │
-│                                                                                 │
-│  ⛔ If Task tool NOT used → codebase-report.md does NOT exist → SKILL FAILURE   │
-└─────────────────────────────────────────────────────────────────────────────────┘
-
-VERIFICATION: After Task completes, confirm agent returned output before proceeding
+╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+║  ⛔⛔⛔ CRITICAL: USE TASK TOOL - NOT EXPLORE AGENT ⛔⛔⛔                                   ║
+║                                                                                           ║
+║  ❌ DO NOT use: Explore agent (built-in)     → SKILL FAILURE                              ║
+║  ❌ DO NOT use: general-purpose agent        → SKILL FAILURE                              ║
+║                                                                                           ║
+║  ✅ MUST use: Task tool with parameters below                                             ║
+╚═══════════════════════════════════════════════════════════════════════════════════════════╝
 ```
+
+**⛔ Use Task tool with EXACTLY these parameters:**
+
+```yaml
+Task:
+  subagent_type: "ring-default:codebase-explorer"
+  model: "opus"
+  description: "Generate codebase architecture report"
+  prompt: |
+    **EXPLORATION TYPE: THOROUGH**
+
+    Generate a comprehensive codebase report describing WHAT EXISTS in this project.
+    You are NOT comparing with standards. You are DOCUMENTING what you find.
+
+    Include: Project Structure, Architecture Pattern, Technology Stack,
+    Code Patterns (config, database, handlers, errors, telemetry, testing),
+    Key Files Inventory with file:line references.
+
+    Output format: EXPLORATION SUMMARY, KEY FINDINGS, ARCHITECTURE INSIGHTS,
+    RELEVANT FILES, RECOMMENDATIONS.
+```
+
+**⛔ VERIFICATION after Task completes:**
+1. Agent used was `ring-default:codebase-explorer` (NOT `Explore`)
+2. Output contains required sections
+3. Ready to save with Write tool
 
 ### If Task Tool NOT Used → SKILL FAILURE
 
@@ -1196,16 +1091,7 @@ Step 4:   Task tool → specialist agents → READ codebase-report.md
 ╚═══════════════════════════════════════════════════════════════════════════════════════════╝
 ```
 
-### Step 4 Checkpoint: Anti-Rationalization for Skipping Step 3
-
-| Rationalization | Why It's WRONG | Required Action |
-|-----------------|----------------|-----------------|
-| "I already read PROJECT_RULES.md, that's enough context" | PROJECT_RULES.md = standards. codebase-report.md = actual code. BOTH required. | **GO BACK to Step 3** |
-| "I can dispatch specialists now and explore later" | Specialists NEED the report to compare. Without it = blind analysis. | **GO BACK to Step 3** |
-| "The specialist agents can explore the codebase themselves" | Specialists COMPARE, they don't EXPLORE. Wrong responsibility model. | **GO BACK to Step 3** |
-| "Step 3 is slow, I'll skip it to save time" | Skipping = INVALID output. Time saved = wasted on wrong analysis. | **GO BACK to Step 3** |
-| "Small codebase doesn't need codebase-explorer" | Size is irrelevant. All codebases need the report. No exceptions. | **GO BACK to Step 3** |
-| "I can infer the architecture from file names" | Inference = guessing. Report provides FACTS with file:line references. | **GO BACK to Step 3** |
+**⛔ See "Gate 2 Rationalizations" section for why you CANNOT skip Step 3.**
 
 **⛔ HARD GATE 1 APPLIES HERE - READ BEFORE DISPATCHING ANY AGENT**
 
@@ -1234,19 +1120,30 @@ Step 4:   Task tool → specialist agents → READ codebase-report.md
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Execution Template - COPY EXACTLY
+### Explicit Tool Invocation (MANDATORY)
 
-**⚠️ IMPORTANT: Each agent receives the codebase-report.md and compares with their Ring standards.**
+**⛔ You MUST use the Task tool to dispatch ALL specialist agents. This is NOT implicit.**
 
-**The prompts below instruct agents to:**
-1. Read their Ring standards via WebFetch (they have the URL in their agent definition)
-2. Read the codebase-report.md generated in Step 3
-3. Compare what EXISTS (report) with what SHOULD exist (standards)
-4. Generate specific findings with CURRENT code vs EXPECTED code
+```text
+╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+║  ⛔⛔⛔ CRITICAL: USE TASK TOOL - TEMPLATES BELOW ARE PARAMETERS ⛔⛔⛔                     ║
+║                                                                                           ║
+║  The YAML blocks below are Task tool parameters. You MUST invoke the Task tool.           ║
+║  Just reading these templates does NOT dispatch agents.                                   ║
+║                                                                                           ║
+║  If Task tool NOT used → Agents NOT dispatched → SKILL FAILURE                            ║
+╚═══════════════════════════════════════════════════════════════════════════════════════════╝
+```
+
+**Each agent receives:**
+1. Ring standards via WebFetch (URL in their agent definition)
+2. codebase-report.md generated in Step 3
+3. PROJECT_RULES.md for project-specific standards
 
 ---
 
-**For Go projects, dispatch in ONE message:**
+**For Go projects, use Task tool with these parameters (ALL in ONE message):**
+
 
 ```
 Task 1:
@@ -1263,30 +1160,6 @@ Task 1:
     ## YOUR TASK
 
     Compare the CURRENT implementation (from codebase-report.md) with EXPECTED patterns (from Ring standards).
-
-    For EACH pattern in Ring standards, check if the codebase follows it:
-
-    ### lib-commons v2 Patterns
-    | Standard Pattern | Codebase Has | Status | Location | Fix |
-    |-----------------|--------------|--------|----------|-----|
-    | `SetConfigFromEnvVars(&cfg)` | os.Getenv() calls | ❌ | config.go:15 | Replace with... |
-    | `NewTrackingFromContext(ctx)` | No telemetry recovery | ❌ | handler.go:22 | Add call... |
-    | `ToEntity() / FromEntity()` | Raw struct returns | ❌ | user_repo.go:45 | Add methods... |
-    | `InitializeTelemetry()` | Missing | ❌ | bootstrap/ | Add in config.go |
-    | `StartWithGracefulShutdown()` | app.Listen() only | ⚠️ | main.go:30 | Use ServerManager |
-
-    ### Architecture Patterns
-    | Standard Pattern | Codebase Has | Status | Location | Fix |
-    |-----------------|--------------|--------|----------|-----|
-    | Domain has no external imports | imports "database/sql" | ❌ | domain/user.go:5 | Remove import |
-    | Interfaces in consumers | In implementers | ❌ | adapters/repo.go | Move to services/ |
-
-    ### Error Handling
-    | Standard Pattern | Codebase Has | Status | Location | Fix |
-    |-----------------|--------------|--------|----------|-----|
-    | `fmt.Errorf("context: %w", err)` | Raw error return | ❌ | service.go:42 | Wrap with context |
-    | No panic() in business logic | panic() found | ❌ | handler.go:88 | Return error |
-    | Error codes with prefix | No error codes | ❌ | - | Add pkg/constant/errors.go |
 
     ## OUTPUT FORMAT
 
