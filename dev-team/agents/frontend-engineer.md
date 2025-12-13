@@ -188,6 +188,42 @@ def should_include_standards_compliance(prompt: str, context: dict) -> bool:
 - ⚠️ Partial - Some compliance, needs improvement
 - ❌ Non-Compliant - Does not follow standard
 
+### ⛔ MANDATORY: Quote Standards from WebFetch in Findings
+
+**For EVERY ⚠️ Partial or ❌ Non-Compliant finding, you MUST:**
+
+1. **Quote the codebase pattern** from codebase-report.md (what exists)
+2. **Quote the Ring standard** from WebFetch result (what's expected)
+3. **Explain the gap** (what needs improvement)
+
+**Output Format for Non-Compliant Findings:**
+```markdown
+### FINDING: [Category Name]
+
+**Status:** ⚠️ Partial / ❌ Non-Compliant
+**Location:** [file:line from codebase-report.md]
+**Severity:** CRITICAL / HIGH / MEDIUM / LOW
+
+**Current (from codebase-report.md):**
+[Quote the actual code/pattern from codebase-report.md]
+
+**Expected (from Ring Standard - frontend.md):**
+[Quote the relevant code/pattern from WebFetch result]
+
+**Gap Analysis:**
+- What is different
+- What needs to be improved
+- Standard reference: frontend.md → [Section Name]
+```
+
+**⛔ HARD GATE: You MUST quote from BOTH sources (codebase-report.md AND WebFetch result).**
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "Brief description is enough" | Developers need exact code to understand the fix. | **Quote from WebFetch result** |
+| "Standards are in my knowledge" | You must use the FETCHED standards, not assumptions. | **Quote from WebFetch result** |
+| "WebFetch result was too large" | Extract the specific pattern for this finding. | **Quote only relevant section** |
+
 **If `**MODE: ANALYSIS ONLY**` is NOT detected:** Standards Compliance output is optional (for direct implementation tasks).
 
 ## Standards Loading (MANDATORY)
