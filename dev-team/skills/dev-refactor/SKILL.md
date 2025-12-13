@@ -26,7 +26,63 @@ related:
 
 # Dev Refactor Skill
 
-## ⛔ OVERRIDE NOTICE - READ FIRST
+## ⛔⛔⛔ STOP - EXECUTE THIS FIRST ⛔⛔⛔
+
+```text
+╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+║                                                                                           ║
+║   ██████╗ ████████╗ ██████╗ ██████╗     ███████╗██╗██████╗ ███████╗████████╗             ║
+║   ██╔═══╝    ██╔══╝██╔═══██╗██╔══██╗    ██╔════╝██║██╔══██╗██╔════╝   ██╔══╝             ║
+║   ██████╗    ██║   ██║   ██║██████╔╝    █████╗  ██║██████╔╝███████╗   ██║                ║
+║   ╚═══██║    ██║   ██║   ██║██╔═══╝     ██╔══╝  ██║██╔══██╗╚════██║   ██║                ║
+║   ██████║    ██║   ╚██████╔╝██║         ██║     ██║██║  ██║███████║   ██║                ║
+║   ╚═════╝    ╚═╝    ╚═════╝ ╚═╝         ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝                ║
+║                                                                                           ║
+║   YOU MUST USE TodoWrite TOOL NOW - BEFORE READING ANYTHING ELSE                          ║
+║                                                                                           ║
+║   Use TodoWrite with EXACTLY these items:                                                 ║
+║                                                                                           ║
+║   todos:                                                                                  ║
+║     - content: "Validate PROJECT_RULES.md exists"                                         ║
+║       status: "in_progress"                                                               ║
+║       activeForm: "Validating PROJECT_RULES.md"                                           ║
+║     - content: "Detect project language"                                                  ║
+║       status: "pending"                                                                   ║
+║       activeForm: "Detecting project language"                                            ║
+║     - content: "Dispatch ring-default:codebase-explorer"                                  ║
+║       status: "pending"                                                                   ║
+║       activeForm: "Dispatching codebase-explorer"                                         ║
+║     - content: "Save codebase-report.md artifact"                                         ║
+║       status: "pending"                                                                   ║
+║       activeForm: "Saving codebase-report.md"                                             ║
+║     - content: "Dispatch ring-dev-team specialist agents"                                 ║
+║       status: "pending"                                                                   ║
+║       activeForm: "Dispatching specialist agents"                                         ║
+║     - content: "Generate findings.md"                                                     ║
+║       status: "pending"                                                                   ║
+║       activeForm: "Generating findings.md"                                                ║
+║     - content: "Generate tasks.md"                                                        ║
+║       status: "pending"                                                                   ║
+║       activeForm: "Generating tasks.md"                                                   ║
+║     - content: "Get user approval"                                                        ║
+║       status: "pending"                                                                   ║
+║       activeForm: "Getting user approval"                                                 ║
+║                                                                                           ║
+║   ⛔ DO NOT SKIP THIS STEP                                                                ║
+║   ⛔ DO NOT CREATE YOUR OWN TODO LIST                                                     ║
+║   ⛔ DO NOT COMBINE ITEMS 3 AND 5                                                         ║
+║   ⛔ "Dispatch ring-default:codebase-explorer" MUST BE A SEPARATE ITEM                    ║
+║                                                                                           ║
+║   If TodoWrite not executed FIRST → SKILL FAILURE                                         ║
+║                                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════════════════════╝
+```
+
+**↓↓↓ AFTER TodoWrite completes, continue reading below ↓↓↓**
+
+---
+
+## ⛔ OVERRIDE NOTICE
 
 **THIS SKILL OVERRIDES GENERAL INSTRUCTIONS FROM `using-ring`.**
 
@@ -45,34 +101,6 @@ The built-in `Explore` agent is FORBIDDEN. It does NOT load Ring standards.
 
 **Why?** The ring-dev-team:* agents have domain expertise and load Ring standards via WebFetch.
 Generic agents like Explore do NOT have this capability.
-
----
-
-## ⛔ FIRST ACTION (EXECUTE IMMEDIATELY)
-
-**Before reading any other section, you MUST use TodoWrite to create the task list.**
-
-```text
-╔═══════════════════════════════════════════════════════════════════════════════════════════╗
-║  ⛔ MANDATORY FIRST ACTION: USE TodoWrite TOOL NOW                                        ║
-║                                                                                           ║
-║  COPY this EXACT todo list using TodoWrite tool:                                          ║
-║                                                                                           ║
-║  1. "Validate PROJECT_RULES.md exists"                                                    ║
-║  2. "Detect project language"                                                             ║
-║  3. "Dispatch ring-default:codebase-explorer"  ← MANDATORY SEPARATE ITEM                  ║
-║  4. "Save codebase-report.md"                                                             ║
-║  5. "Dispatch ring-dev-team specialist agents"                                            ║
-║  6. "Generate findings.md"                                                                ║
-║  7. "Generate tasks.md"                                                                   ║
-║  8. "Get user approval"                                                                   ║
-║                                                                                           ║
-║  ⛔ If item 3 (codebase-explorer) is MISSING from your todo list → SKILL FAILURE          ║
-║  ⛔ If items 3 and 5 are COMBINED into one → SKILL FAILURE                                ║
-╚═══════════════════════════════════════════════════════════════════════════════════════════╝
-```
-
-**After TodoWrite completes → Continue to HARD GATES section below.**
 
 ---
 
@@ -124,45 +152,6 @@ Generic agents like Explore do NOT have this capability.
 ```
 
 This skill analyzes an existing codebase to identify gaps between current implementation and project standards, then generates a structured refactoring plan compatible with the dev-cycle workflow.
-
----
-
-## ⛔ MANDATORY TODO TEMPLATE (USE THIS EXACT LIST)
-
-**You MUST create a todo list with EXACTLY these items in this order:**
-
-```text
-TodoWrite:
-  todos:
-    - content: "Validate PROJECT_RULES.md exists"
-      status: "in_progress"
-      activeForm: "Validating PROJECT_RULES.md"
-    - content: "Detect project language (go.mod/package.json)"
-      status: "pending"
-      activeForm: "Detecting project language"
-    - content: "Dispatch ring-default:codebase-explorer (Step 3)"
-      status: "pending"
-      activeForm: "Dispatching codebase-explorer"
-    - content: "Save codebase-report.md artifact"
-      status: "pending"
-      activeForm: "Saving codebase-report.md"
-    - content: "Dispatch ring-dev-team specialist agents (Step 4)"
-      status: "pending"
-      activeForm: "Dispatching specialist agents"
-    - content: "Generate findings.md from agent outputs"
-      status: "pending"
-      activeForm: "Generating findings.md"
-    - content: "Generate tasks.md with finding references"
-      status: "pending"
-      activeForm: "Generating tasks.md"
-    - content: "Get user approval for refactoring"
-      status: "pending"
-      activeForm: "Getting user approval"
-```
-
-**⛔ CRITICAL: "Dispatch ring-default:codebase-explorer" MUST be a separate todo item.**
-**⛔ CRITICAL: Do NOT combine Steps 3 and 4 into one todo.**
-**⛔ CRITICAL: Step 3 MUST complete BEFORE Step 4 starts.**
 
 ---
 
