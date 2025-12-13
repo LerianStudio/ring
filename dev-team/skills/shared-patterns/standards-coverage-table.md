@@ -286,11 +286,11 @@ See [shared-patterns/standards-coverage-table.md](../skills/shared-patterns/stan
 |---|------------------|
 | 1 | Observability Stack |
 | 2 | Metrics Standards |
-| 3 | Alerting Standards |
-| 4 | Logging Standards |
-| 5 | Tracing Standards |
-| 6 | Health Checks |
-| 7 | Grafana Dashboard Standards |
+| 3 | Logging Standards |
+| 4 | Tracing Standards |
+| 5 | OpenTelemetry with lib-commons (MANDATORY for Go) |
+| 6 | Structured Logging with lib-common-js (MANDATORY for TypeScript) |
+| 7 | Health Checks |
 
 ---
 

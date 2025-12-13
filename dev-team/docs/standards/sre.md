@@ -252,143 +252,6 @@ APIRequestCount            # Wrong case
 
 ---
 
-## Alerting Standards
-
-### Severity Levels
-
-| Level | Response Time | Impact | Examples |
-|-------|---------------|--------|----------|
-| **Critical** | Immediate (page) | Service down, data loss | 5xx spike, database unreachable |
-| **High** | 15 minutes | Major degradation | Error rate > 5%, latency > 2s |
-| **Medium** | 1 hour | Partial degradation | Error rate > 1%, latency > 500ms |
-| **Low** | 4 hours | Potential issues | Disk 80%, cert expiring in 7 days |
-| **Info** | Next business day | No impact | Minor anomalies, warnings |
-
-### Alert Rules Template
-
-```yaml
-# alerts.yml
-groups:
-  - name: api-availability
-    rules:
-      # Critical - Page immediately
-      - alert: APIDown
-        expr: up{job="api"} == 0
-        for: 1m
-        labels:
-          severity: critical
-          team: platform
-        annotations:
-          summary: "API is down"
-          description: "API pod {{ $labels.pod }} has been down for 1 minute"
-          runbook_url: "https://wiki.example.com/runbooks/api-down"
-
-      # High - Quick response needed
-      - alert: HighErrorRate
-        expr: |
-          sum(rate(http_requests_total{status=~"5.."}[5m]))
-          /
-          sum(rate(http_requests_total[5m]))
-          > 0.05
-        for: 5m
-        labels:
-          severity: high
-          team: platform
-        annotations:
-          summary: "High error rate on API"
-          description: "Error rate is {{ $value | humanizePercentage }}"
-          runbook_url: "https://wiki.example.com/runbooks/high-error-rate"
-
-      # Medium - Investigation needed
-      - alert: HighLatency
-        expr: |
-          histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))
-          > 0.5
-        for: 10m
-        labels:
-          severity: medium
-          team: platform
-        annotations:
-          summary: "High P99 latency"
-          description: "P99 latency is {{ $value | humanizeDuration }}"
-
-      # Low - Non-urgent
-      - alert: DiskSpaceWarning
-        expr: |
-          (node_filesystem_avail_bytes / node_filesystem_size_bytes) * 100 < 20
-        for: 30m
-        labels:
-          severity: low
-          team: platform
-        annotations:
-          summary: "Disk space below 20%"
-          description: "{{ $labels.device }} has {{ $value | humanize }}% free"
-```
-
-### Alertmanager Configuration
-
-```yaml
-# alertmanager.yml
-global:
-  resolve_timeout: 5m
-  slack_api_url: 'https://hooks.slack.com/services/xxx'
-
-route:
-  receiver: 'default'
-  group_by: ['alertname', 'severity']
-  group_wait: 30s
-  group_interval: 5m
-  repeat_interval: 4h
-  routes:
-    - match:
-        severity: critical
-      receiver: 'pagerduty-critical'
-      continue: true
-    - match:
-        severity: high
-      receiver: 'slack-urgent'
-    - match:
-        severity: medium
-      receiver: 'slack-warnings'
-    - match:
-        severity: low
-      receiver: 'slack-info'
-
-receivers:
-  - name: 'default'
-    slack_configs:
-      - channel: '#alerts'
-
-  - name: 'pagerduty-critical'
-    pagerduty_configs:
-      - service_key: '<pagerduty-key>'
-        severity: critical
-
-  - name: 'slack-urgent'
-    slack_configs:
-      - channel: '#alerts-urgent'
-        send_resolved: true
-        title: '{{ if eq .Status "firing" }}:fire:{{ else }}:white_check_mark:{{ end }} {{ .CommonLabels.alertname }}'
-        text: '{{ range .Alerts }}{{ .Annotations.description }}{{ end }}'
-
-  - name: 'slack-warnings'
-    slack_configs:
-      - channel: '#alerts-warnings'
-
-  - name: 'slack-info'
-    slack_configs:
-      - channel: '#alerts-info'
-
-inhibit_rules:
-  - source_match:
-      severity: critical
-    target_match:
-      severity: high
-    equal: ['alertname']
-```
-
----
-
 ## Logging Standards
 
 ### Structured Log Format
@@ -594,6 +457,447 @@ ctx := otel.GetTextMapPropagator().Extract(
 
 ---
 
+## OpenTelemetry with lib-commons (MANDATORY for Go)
+
+All Go services **MUST** integrate OpenTelemetry using `lib-commons/v2`. This ensures consistent observability patterns across all Lerian Studio services.
+
+> **Reference**: See `dev-team/docs/standards/golang.md` for complete lib-commons integration patterns.
+
+### Required Imports
+
+```go
+import (
+    libCommons "github.com/LerianStudio/lib-commons/v2/commons"
+    libZap "github.com/LerianStudio/lib-commons/v2/commons/zap"           // Logger initialization (bootstrap only)
+    libLog "github.com/LerianStudio/lib-commons/v2/commons/log"           // Logger interface (services, routes, consumers)
+    libOpentelemetry "github.com/LerianStudio/lib-commons/v2/commons/opentelemetry"
+    libHTTP "github.com/LerianStudio/lib-commons/v2/commons/net/http"
+    libServer "github.com/LerianStudio/lib-commons/v2/commons/server"
+)
+```
+
+### Telemetry Flow (MANDATORY)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ 1. BOOTSTRAP (config.go)                                        │
+│    telemetry := libOpentelemetry.InitializeTelemetry(&config)   │
+│    → Creates OpenTelemetry provider once at startup             │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ 2. ROUTER (routes.go)                                           │
+│    tlMid := libHTTP.NewTelemetryMiddleware(tl)                  │
+│    f.Use(tlMid.WithTelemetry(tl))      ← Injects into context   │
+│    ...routes...                                                  │
+│    f.Use(tlMid.EndTracingSpans)        ← Closes root spans      │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ 3. ANY LAYER (handlers, services, repositories)                 │
+│    logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)│
+│    ctx, span := tracer.Start(ctx, "operation_name")             │
+│    defer span.End()                                              │
+│    logger.Infof("Processing...")   ← Logger from same context   │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ 4. SERVER LIFECYCLE (fiber.server.go)                           │
+│    libServer.NewServerManager(nil, &s.telemetry, s.logger)      │
+│        .WithHTTPServer(s.app, s.serverAddress)                  │
+│        .StartWithGracefulShutdown()                             │
+│    → Handles signal trapping + telemetry flush + clean shutdown │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 1. Bootstrap Initialization (MANDATORY)
+
+```go
+// bootstrap/config.go
+func InitServers() *Service {
+    cfg := &Config{}
+    if err := libCommons.SetConfigFromEnvVars(cfg); err != nil {
+        panic(err)
+    }
+
+    // Initialize logger FIRST (zap package for initialization in bootstrap)
+    logger := libZap.InitializeLogger()
+
+    // Initialize telemetry with config
+    telemetry := libOpentelemetry.InitializeTelemetry(&libOpentelemetry.TelemetryConfig{
+        LibraryName:               cfg.OtelLibraryName,
+        ServiceName:               cfg.OtelServiceName,
+        ServiceVersion:            cfg.OtelServiceVersion,
+        DeploymentEnv:             cfg.OtelDeploymentEnv,
+        CollectorExporterEndpoint: cfg.OtelColExporterEndpoint,
+        EnableTelemetry:           cfg.EnableTelemetry,
+        Logger:                    logger,
+    })
+
+    // Pass telemetry to router...
+}
+```
+
+### 2. Router Middleware Setup (MANDATORY)
+
+```go
+// adapters/http/in/routes.go
+func NewRouter(lg libLog.Logger, tl *libOpentelemetry.Telemetry, ...) *fiber.App {
+    f := fiber.New(fiber.Config{
+        DisableStartupMessage: true,
+        ErrorHandler: func(ctx *fiber.Ctx, err error) error {
+            return libHTTP.HandleFiberError(ctx, err)
+        },
+    })
+
+    // Create telemetry middleware
+    tlMid := libHTTP.NewTelemetryMiddleware(tl)
+
+    // MUST be first middleware - injects tracer+logger into context
+    f.Use(tlMid.WithTelemetry(tl))
+    f.Use(cors.New())
+    f.Use(libHTTP.WithHTTPLogging(libHTTP.WithCustomLogger(lg)))
+
+    // ... define routes ...
+
+    // Version endpoint
+    f.Get("/version", libHTTP.Version)
+
+    // MUST be last middleware - closes root spans
+    f.Use(tlMid.EndTracingSpans)
+
+    return f
+}
+```
+
+### 3. Recovering Logger & Tracer (MANDATORY)
+
+```go
+// ANY file in ANY layer (handler, service, repository)
+func (s *Service) ProcessEntity(ctx context.Context, id string) error {
+    // Single call recovers BOTH logger AND tracer from context
+    logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)
+
+    // Create child span for this operation
+    ctx, span := tracer.Start(ctx, "service.process_entity")
+    defer span.End()
+
+    // Logger is automatically correlated with trace
+    logger.Infof("Processing entity: %s", id)
+
+    // Pass ctx to downstream calls - trace propagates automatically
+    return s.repo.Update(ctx, id)
+}
+```
+
+### 4. Error Handling with Spans (MANDATORY)
+
+```go
+// For technical errors (unexpected failures)
+if err != nil {
+    libOpentelemetry.HandleSpanError(&span, "Failed to connect database", err)
+    logger.Errorf("Database error: %v", err)
+    return nil, err
+}
+
+// For business errors (expected validation failures)
+if err != nil {
+    libOpentelemetry.HandleSpanBusinessErrorEvent(&span, "Validation failed", err)
+    logger.Warnf("Validation error: %v", err)
+    return nil, err
+}
+```
+
+### 5. Server Lifecycle with Graceful Shutdown (MANDATORY)
+
+```go
+// bootstrap/fiber.server.go
+type Server struct {
+    app           *fiber.App
+    serverAddress string
+    logger        libLog.Logger
+    telemetry     libOpentelemetry.Telemetry
+}
+
+func (s *Server) Run(l *libCommons.Launcher) error {
+    libServer.NewServerManager(nil, &s.telemetry, s.logger).
+        WithHTTPServer(s.app, s.serverAddress).
+        StartWithGracefulShutdown()  // Handles: SIGINT/SIGTERM, telemetry flush, connections close
+    return nil
+}
+```
+
+### Required Environment Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `OTEL_RESOURCE_SERVICE_NAME` | Service name in traces | `service-name` |
+| `OTEL_LIBRARY_NAME` | Library identifier | `service-name` |
+| `OTEL_RESOURCE_SERVICE_VERSION` | Service version | `1.0.0` |
+| `OTEL_RESOURCE_DEPLOYMENT_ENVIRONMENT` | Environment | `production` |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | Collector endpoint | `http://otel-collector:4317` |
+| `ENABLE_TELEMETRY` | Enable/disable | `true` |
+
+### lib-commons Telemetry Checklist
+
+| Check | What to Verify | Status |
+|-------|----------------|--------|
+| Bootstrap Init | `libOpentelemetry.InitializeTelemetry()` called in bootstrap | Required |
+| Middleware Order | `WithTelemetry()` is FIRST, `EndTracingSpans` is LAST | Required |
+| Context Recovery | All layers use `libCommons.NewTrackingFromContext(ctx)` | Required |
+| Span Creation | Operations create spans via `tracer.Start(ctx, "name")` | Required |
+| Error Handling | Uses `HandleSpanError` or `HandleSpanBusinessErrorEvent` | Required |
+| Graceful Shutdown | `libServer.NewServerManager().StartWithGracefulShutdown()` | Required |
+| Env Variables | All OTEL_* variables configured | Required |
+
+### What NOT to Do
+
+```go
+// FORBIDDEN: Manual OpenTelemetry setup without lib-commons
+import "go.opentelemetry.io/otel"
+tp := trace.NewTracerProvider(...)  // DON'T do this manually
+
+// FORBIDDEN: Creating loggers without context
+logger := zap.NewLogger()  // DON'T do this in services
+
+// FORBIDDEN: Not passing context to downstream calls
+s.repo.Update(id)  // DON'T forget context
+
+// CORRECT: Always use lib-commons patterns
+telemetry := libOpentelemetry.InitializeTelemetry(&config)
+logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)
+s.repo.Update(ctx, id)  // Context propagates trace
+```
+
+### Standards Compliance Categories
+
+When evaluating a codebase for lib-commons telemetry compliance, check these categories:
+
+| Category | Expected Pattern | Evidence Location |
+|----------|------------------|-------------------|
+| Telemetry Init | `libOpentelemetry.InitializeTelemetry()` | `internal/bootstrap/config.go` |
+| Logger Init | `libZap.InitializeLogger()` (bootstrap only) | `internal/bootstrap/config.go` |
+| Middleware Setup | `NewTelemetryMiddleware()` + `WithTelemetry()` | `internal/adapters/http/in/routes.go` |
+| Middleware Order | `WithTelemetry` first, `EndTracingSpans` last | `internal/adapters/http/in/routes.go` |
+| Context Recovery | `libCommons.NewTrackingFromContext(ctx)` | All handlers, services, repositories |
+| Span Creation | `tracer.Start(ctx, "operation")` | All significant operations |
+| Error Spans | `HandleSpanError` / `HandleSpanBusinessErrorEvent` | Error handling paths |
+| Graceful Shutdown | `libServer.NewServerManager().StartWithGracefulShutdown()` | `internal/bootstrap/fiber.server.go` |
+
+---
+
+## Structured Logging with lib-common-js (MANDATORY for TypeScript)
+
+All TypeScript services **MUST** integrate structured logging using `@LerianStudio/lib-common-js`. This ensures consistent observability patterns across all Lerian Studio services.
+
+> **Note**: lib-common-js currently provides logging infrastructure. Telemetry will be added in future versions.
+
+### Required Dependencies
+
+```json
+{
+  "dependencies": {
+    "@LerianStudio/lib-common-js": "^1.0.0"
+  }
+}
+```
+
+### Required Imports
+
+```typescript
+import { initializeLogger, Logger } from '@LerianStudio/lib-common-js/logger';
+import { loadConfigFromEnv } from '@LerianStudio/lib-common-js/config';
+import { createLoggingMiddleware } from '@LerianStudio/lib-common-js/http';
+```
+
+### Logging Flow (MANDATORY)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ 1. BOOTSTRAP (config.ts)                                        │
+│    const logger = initializeLogger()                            │
+│    → Creates structured logger once at startup                  │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ 2. ROUTER (routes.ts)                                           │
+│    const logMid = createLoggingMiddleware(logger)               │
+│    app.use(logMid)            ← Injects logger into request     │
+│    ...routes...                                                  │
+└──────────────────────────┬──────────────────────────────────────┘
+                           │
+                           ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ 3. ANY LAYER (handlers, services, repositories)                 │
+│    const logger = req.logger || parentLogger                    │
+│    logger.info('Processing...', { entityId, requestId })        │
+│    → Structured JSON logs with correlation IDs                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 1. Bootstrap Initialization (MANDATORY)
+
+```typescript
+// bootstrap/config.ts
+import { initializeLogger } from '@LerianStudio/lib-common-js/logger';
+import { loadConfigFromEnv } from '@LerianStudio/lib-common-js/config';
+
+export async function initServers(): Promise<Service> {
+    // Load configuration from environment
+    const config = loadConfigFromEnv<Config>();
+
+    // Initialize logger
+    const logger = initializeLogger({
+        level: config.logLevel,
+        serviceName: config.serviceName,
+        serviceVersion: config.serviceVersion,
+    });
+
+    logger.info('Service starting', {
+        service: config.serviceName,
+        version: config.serviceVersion,
+        environment: config.envName,
+    });
+
+    // Pass logger to router...
+}
+```
+
+### 2. Router Middleware Setup (MANDATORY)
+
+```typescript
+// adapters/http/routes.ts
+import { createLoggingMiddleware } from '@LerianStudio/lib-common-js/http';
+import express from 'express';
+
+export function createRouter(
+    logger: Logger,
+    handlers: Handlers
+): express.Application {
+    const app = express();
+
+    // Create logging middleware - injects logger into request
+    const logMid = createLoggingMiddleware(logger);
+    app.use(logMid);
+    app.use(cors());
+    app.use(express.json());
+
+    // ... define routes ...
+
+    return app;
+}
+```
+
+### 3. Using Logger in Handlers/Services (MANDATORY)
+
+```typescript
+// handlers/user-handler.ts
+async function createUser(req: Request, res: Response): Promise<void> {
+    const logger = req.logger;
+    const requestId = req.headers['x-request-id'] as string;
+
+    logger.info('Creating user', {
+        requestId,
+        email: req.body.email,
+    });
+
+    try {
+        const user = await userService.create(req.body, logger);
+        logger.info('User created successfully', {
+            requestId,
+            userId: user.id,
+        });
+        res.status(201).json(user);
+    } catch (error) {
+        logger.error('Failed to create user', {
+            requestId,
+            error: error.message,
+            stack: error.stack,
+        });
+        throw error;
+    }
+}
+```
+
+### Required Structured Log Format
+
+All logs **MUST** be JSON formatted with these fields:
+
+```json
+{
+  "timestamp": "2024-01-15T10:30:00.000Z",
+  "level": "info",
+  "message": "Processing request",
+  "service": "api-service",
+  "version": "1.2.3",
+  "environment": "production",
+  "requestId": "req-001",
+  "context": {
+    "method": "POST",
+    "path": "/api/v1/users",
+    "userId": "usr_456"
+  }
+}
+```
+
+### Required Environment Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `LOG_LEVEL` | Logging level | `info` |
+| `SERVICE_NAME` | Service identifier | `api-service` |
+| `SERVICE_VERSION` | Service version | `1.0.0` |
+| `ENV_NAME` | Environment name | `production` |
+
+### lib-common-js Logging Checklist
+
+| Check | What to Verify | Status |
+|-------|----------------|--------|
+| Logger Init | `initializeLogger()` called in bootstrap | Required |
+| Middleware | `createLoggingMiddleware(logger)` configured | Required |
+| Request Correlation | Logs include `requestId` from headers | Required |
+| Structured Format | All logs are JSON formatted | Required |
+| Error Logging | Errors include message, stack, and context | Required |
+| No Sensitive Data | Passwords, tokens, PII NOT logged | Required |
+| Log Levels | Appropriate levels used (info, warn, error) | Required |
+
+### What NOT to Do
+
+```typescript
+// FORBIDDEN: Using console.log
+console.log('Processing user'); // DON'T do this
+
+// FORBIDDEN: Logging sensitive data
+logger.info('User login', { password: user.password }); // NEVER
+
+// FORBIDDEN: Unstructured log messages
+logger.info(`Processing user ${userId}`); // DON'T use string interpolation
+
+// CORRECT: Always use lib-common-js structured logging
+const logger = initializeLogger(config);
+logger.info('Processing user', { userId, requestId }); // Structured fields
+```
+
+### Standards Compliance Categories (TypeScript Logging)
+
+When evaluating a codebase for lib-common-js logging compliance, check these categories:
+
+| Category | Expected Pattern | Evidence Location |
+|----------|------------------|-------------------|
+| Logger Init | `initializeLogger()` | `src/bootstrap/config.ts` |
+| Middleware Setup | `createLoggingMiddleware(logger)` | `src/adapters/http/routes.ts` |
+| Request Correlation | `requestId` in all logs | Handlers, services |
+| JSON Format | Structured JSON output | All log statements |
+| Error Logging | Error object with stack trace | Error handlers |
+| No console.log | No direct console usage | Entire codebase |
+| No Sensitive Data | Passwords, tokens excluded | All log statements |
+
+---
+
 ## Health Checks
 
 ### Required Endpoints
@@ -659,97 +963,10 @@ func (h *HealthChecker) ReadinessHandler(w http.ResponseWriter, r *http.Request)
 
 ---
 
-## Grafana Dashboard Standards
-
-### Required Panels
-
-#### Overview Row
-1. **Request Rate** - `sum(rate(http_requests_total[5m]))`
-2. **Error Rate** - `sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))`
-3. **Latency P50/P95/P99** - `histogram_quantile(0.99, ...)`
-4. **Active Pods** - `count(up{job="api"})`
-
-#### Resources Row
-5. **CPU Usage** - `sum(rate(container_cpu_usage_seconds_total[5m]))`
-6. **Memory Usage** - `sum(container_memory_working_set_bytes)`
-7. **Network I/O** - Bytes in/out
-
-#### Dependencies Row
-8. **Database Latency** - `histogram_quantile(0.99, db_query_duration_seconds_bucket)`
-9. **Cache Hit Rate** - `sum(rate(cache_hits_total[5m])) / sum(rate(cache_requests_total[5m]))`
-10. **External API Latency** - Per-dependency
-
-#### Business Row (service-specific)
-11. **Orders/sec**, **Users online**, etc.
-
-### Dashboard JSON Template
-
-```json
-{
-  "annotations": {
-    "list": [
-      {
-        "datasource": "-- Grafana --",
-        "enable": true,
-        "name": "Deployments",
-        "iconColor": "green",
-        "type": "dashboard"
-      }
-    ]
-  },
-  "editable": true,
-  "refresh": "30s",
-  "time": {
-    "from": "now-1h",
-    "to": "now"
-  },
-  "panels": [
-    {
-      "title": "Request Rate",
-      "type": "stat",
-      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
-      "targets": [
-        {
-          "expr": "sum(rate(http_requests_total[5m]))",
-          "legendFormat": "req/s"
-        }
-      ],
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area"
-      }
-    },
-    {
-      "title": "Error Rate",
-      "type": "gauge",
-      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
-      "targets": [
-        {
-          "expr": "sum(rate(http_requests_total{status=~\"5..\"}[5m])) / sum(rate(http_requests_total[5m])) * 100"
-        }
-      ],
-      "options": {
-        "thresholds": {
-          "steps": [
-            { "value": 0, "color": "green" },
-            { "value": 1, "color": "yellow" },
-            { "value": 5, "color": "red" }
-          ]
-        }
-      }
-    }
-  ]
-}
-```
-
----
-
 ## Checklist
 
 Before deploying to production:
 
-- [ ] **Dashboards**: Grafana dashboard with required panels (optional)
-- [ ] **Alerts**: Alert rules for critical scenarios (optional)
 - [ ] **Logging**: Structured JSON logs with trace correlation
-- [ ] **Tracing**: OpenTelemetry instrumentation
-- [ ] **Runbooks**: Documented for all critical alerts (optional)
+- [ ] **Tracing**: OpenTelemetry instrumentation (Go with lib-commons)
+- [ ] **Structured Logging**: lib-common-js integration (TypeScript)
