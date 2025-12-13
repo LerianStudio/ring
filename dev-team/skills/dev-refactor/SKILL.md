@@ -73,7 +73,7 @@ Generic agents like Explore do NOT have this capability.
 ║  │     • Explore                    → SKILL FAILURE                                    │  ║
 ║  │     • general-purpose            → SKILL FAILURE                                    │  ║
 ║  │     • Plan                       → SKILL FAILURE                                    │  ║
-║  │     • ANY agent without ring-dev-team: prefix (except codebase-explorer)            │  ║
+║  │     • ANY agent without ring-dev-team: prefix (except ring-default:codebase-explorer)            │  ║
 ║  │                                                                                     │  ║
 ║  │  ✅ REQUIRED (USE THESE):                                                           │  ║
 ║  │     • ring-default:codebase-explorer (GATE 2 - generates report)                    │  ║
@@ -874,7 +874,7 @@ This file contains:
 
 **Output of this step:**
 - PROJECT_RULES.md content loaded and understood
-- Ready to dispatch codebase-explorer
+- Ready to dispatch ring-default:codebase-explorer
 
 ---
 
@@ -930,7 +930,7 @@ This file contains:
 | "Step 2.5 is optional for simple projects" | There is NO such thing as optional. It's a HARD GATE. | Execute Step 2.5 |
 | "I'll skip it this once" | Once = SKILL FAILURE. No exceptions exist. | Execute Step 2.5 |
 | "The specialists can explore themselves" | Specialists COMPARE, they don't EXPLORE. Wrong responsibility. | Execute Step 2.5 |
-| "Codebase-explorer is slow, I'll use Explore" | Explore is FORBIDDEN. Only codebase-explorer is allowed. | Execute Step 2.5 |
+| "Codebase-explorer is slow, I'll use Explore" | Explore is FORBIDDEN. Only ring-default:codebase-explorer is allowed. | Execute Step 2.5 |
 | "I can infer the architecture from file names" | Inference = guessing = INVALID. Report provides FACTS. | Execute Step 2.5 |
 | "PROJECT_RULES.md already describes the project" | PROJECT_RULES.md = standards. Report = actual implementation. Different things. | Execute Step 2.5 |
 | "Previous analysis is still valid" | Each run = fresh report. Codebase may have changed. | Execute Step 2.5 |
@@ -941,7 +941,7 @@ This file contains:
 
 1. **STOP IMMEDIATELY** - Do not continue with specialist agents
 2. **DISCARD any specialist outputs** - They are INVALID without the report
-3. **GO BACK to Step 2.5** - Execute codebase-explorer NOW
+3. **GO BACK to Step 2.5** - Execute ring-default:codebase-explorer NOW
 4. **SAVE the report** - To docs/refactor/{timestamp}/codebase-report.md
 5. **THEN proceed to Step 3** - With the report path in prompts
 6. **DOCUMENT** - Note: "Recovered from skipped Step 2.5"
@@ -960,12 +960,14 @@ Without understanding the ACTUAL codebase structure, specialists analyze blindly
 **Responsibility Split:**
 | Component | Does | Does NOT |
 |-----------|------|----------|
-| **codebase-explorer** | Maps what EXISTS in the project | Compare with standards |
+| **ring-default:codebase-explorer** | Maps what EXISTS in the project | Compare with standards |
 | **Specialist agents** | Load Ring standards + Compare with report | Explore codebase |
 
 ### Explicit Tool Invocation (MANDATORY)
 
-**⛔ You MUST use the Task tool to dispatch codebase-explorer. This is NOT implicit.**
+**⛔ You MUST use the Task tool to dispatch ring-default:codebase-explorer. This is NOT implicit.**
+
+**Agent Reference:** `ring-default:codebase-explorer` - See agent specification for output schema and exploration methodology.
 
 ```text
 Action: Use Task tool with EXACTLY these parameters:
@@ -978,6 +980,8 @@ Action: Use Task tool with EXACTLY these parameters:
 │  description: "Generate codebase architecture report"                           │
 │  prompt: [See prompt template below]                                            │
 │                                                                                 │
+│  Agent specification: default/agents/codebase-explorer.md                       │
+│                                                                                 │
 │  ⛔ If Task tool NOT used → codebase-report.md does NOT exist → SKILL FAILURE   │
 └─────────────────────────────────────────────────────────────────────────────────┘
 
@@ -988,7 +992,7 @@ VERIFICATION: After Task completes, confirm agent returned output before proceed
 
 Agent is NOT dispatched → No report generated → All subsequent steps produce INVALID output.
 
-### Prompt Template for codebase-explorer
+### Prompt Template for ring-default:codebase-explorer
 
 Use this EXACT prompt when invoking the Task tool:
 
@@ -1091,7 +1095,7 @@ For EACH major pattern, include a code snippet showing CURRENT implementation:
 
 ## OUTPUT FORMAT
 
-Use standard codebase-explorer schema:
+Use standard ring-default:codebase-explorer schema:
 - EXPLORATION SUMMARY
 - KEY FINDINGS (with file:line references)
 - ARCHITECTURE INSIGHTS
@@ -1104,9 +1108,16 @@ Use standard codebase-explorer schema:
 **⛔ After Task tool returns output, you MUST save to file using Write tool.**
 
 ```text
-Action: Use Write tool to save to docs/refactor/{timestamp}/codebase-report.md
+Action: Use Write tool with EXACTLY these parameters:
 
-Content: Full output from codebase-explorer Task
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  Write tool parameters:                                                         │
+│                                                                                 │
+│  file_path: "docs/refactor/{timestamp}/codebase-report.md"                      │
+│  content: [Full output from ring-default:codebase-explorer Task]                │
+│                                                                                 │
+│  ⛔ If Write tool NOT used → codebase-report.md does NOT exist → SKILL FAILURE  │
+└─────────────────────────────────────────────────────────────────────────────────┘
 
 VERIFICATION: After Write completes, confirm file exists before proceeding to Step 3
 ```
@@ -1115,12 +1126,36 @@ VERIFICATION: After Write completes, confirm file exists before proceeding to St
 
 codebase-report.md does NOT exist → Specialist agents have no report to compare → All findings INVALID.
 
+### Artifact Output: codebase-report.md
+
+**This file is the MANDATORY INPUT for Step 3.**
+
+| Attribute | Value |
+|-----------|-------|
+| **File Path** | `docs/refactor/{timestamp}/codebase-report.md` |
+| **Generated By** | `ring-default:codebase-explorer` via Task tool |
+| **Saved By** | Write tool (MANDATORY) |
+| **Consumed By** | Step 3 - All `ring-dev-team:*` specialist agents |
+| **Contains** | Codebase architecture map, code patterns, file inventory |
+
+**Dependency Chain:**
+```text
+Step 2.5: Task tool → ring-default:codebase-explorer → output
+                                            ↓
+          Write tool → codebase-report.md (ARTIFACT)
+                                            ↓
+Step 3:   Task tool → specialist agents → READ codebase-report.md
+```
+
+**Without this artifact, Step 3 CANNOT execute correctly.**
+
 ### Output of This Step
 
 - ✅ Task tool dispatched `ring-default:codebase-explorer`
 - ✅ Agent output received
-- ✅ Write tool saved output to `codebase-report.md`
-- ✅ Ready to dispatch specialists who will COMPARE with their standards
+- ✅ Write tool created `docs/refactor/{timestamp}/codebase-report.md`
+- ✅ Artifact ready for Step 3 consumption
+- ✅ Ready to dispatch specialists who will COMPARE report with their standards
 
 ---
 
@@ -1919,7 +1954,7 @@ Save all artifacts to project:
 
 ```text
 docs/refactor/{timestamp}/
-├── codebase-report.md    # From Step 2.5 - codebase-explorer output
+├── codebase-report.md    # From Step 2.5 - ring-default:codebase-explorer output
 ├── findings.md           # From Step 4 - Lerian standards comparison (MANDATORY)
 └── tasks.md              # From Step 6 - Refactoring tasks with finding references
 ```

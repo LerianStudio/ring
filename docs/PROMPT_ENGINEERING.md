@@ -125,6 +125,74 @@ Action: STOP immediately. Report blocker. AWAIT user decision.
 
 ---
 
+## Task Tool Invocation (Agent Dispatch)
+
+When a skill or workflow needs to dispatch an agent, the **Task tool MUST be used explicitly**. Agent dispatch is NOT implicit - if the Task tool is not called, no agent is dispatched.
+
+### Why Explicit Invocation Is Required
+
+| Implicit (WRONG) | Explicit (CORRECT) |
+|------------------|-------------------|
+| Describing what agent should do | Using Task tool to dispatch agent |
+| YAML-like templates without tool call | Task tool with exact parameters |
+| "The agent will analyze..." | "Use Task tool to dispatch agent" |
+| Agent runs automatically | Agent runs ONLY when Task tool called |
+
+**If Task tool NOT used → Agent NOT dispatched → SKILL FAILURE**
+
+### Template Structure
+
+When documenting agent dispatch in skills, use this explicit format:
+
+```markdown
+### Explicit Tool Invocation (MANDATORY)
+
+**⛔ You MUST use the Task tool to dispatch [agent-name]. This is NOT implicit.**
+
+```text
+Action: Use Task tool with EXACTLY these parameters:
+
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  Task tool parameters:                                                          │
+│                                                                                 │
+│  subagent_type: "[fully-qualified-agent-name]"                                  │
+│  model: "[model]" (optional)                                                    │
+│  description: "[short description]"                                             │
+│  prompt: [See prompt template below]                                            │
+│                                                                                 │
+│  ⛔ If Task tool NOT used → [artifact] does NOT exist → SKILL FAILURE           │
+└─────────────────────────────────────────────────────────────────────────────────┘
+
+VERIFICATION: After Task completes, confirm agent returned output before proceeding
+```
+
+### If Task Tool NOT Used → SKILL FAILURE
+
+Agent is NOT dispatched → No output generated → All subsequent steps produce INVALID output.
+```
+
+### Required Elements
+
+| Element | Required? | Purpose |
+|---------|-----------|---------|
+| **"Use Task tool"** | ✅ YES | Explicit tool instruction |
+| **subagent_type** | ✅ YES | Fully qualified agent name |
+| **description** | ✅ YES | Short task description |
+| **prompt** | ✅ YES | Instructions for the agent |
+| **SKILL FAILURE warning** | ✅ YES | Consequence of not using tool |
+| **VERIFICATION step** | ✅ YES | Confirm output before proceeding |
+
+### Anti-Rationalization
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "Template implies Task tool" | Implication ≠ instruction. Be explicit. | **Write "Use Task tool"** |
+| "Agent dispatch is obvious" | Obvious to you ≠ obvious to executor | **Add explicit parameters** |
+| "I described what agent does" | Description ≠ invocation | **Call Task tool explicitly** |
+| "Previous steps used Task tool" | Each dispatch is independent | **Explicit for EACH agent** |
+
+---
+
 ## Code Transformation Context (CTC) Format
 
 When documenting refactoring issues, agents MUST provide a Code Transformation Context block for EACH non-compliant issue. This gives execution agents exact before/after code context.
