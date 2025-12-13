@@ -57,14 +57,14 @@ Generic agents like Explore do NOT have this capability.
 ║  └─────────────────────────────────────────────────────────────────────────────────────┘  ║
 ║                                                                                           ║
 ║  ┌─────────────────────────────────────────────────────────────────────────────────────┐  ║
-║  │  HARD GATE 2: codebase-report.md MUST be generated (Step 2.5)                       │  ║
+║  │  HARD GATE 2: codebase-report.md MUST be generated (Step 3)                       │  ║
 ║  │               └── Dispatch ring-default:codebase-explorer BEFORE specialists        │  ║
 ║  │               └── Save output to docs/refactor/{timestamp}/codebase-report.md       │  ║
 ║  │               └── WITHOUT THIS → ALL SPECIALIST OUTPUT IS INVALID                   │  ║
 ║  └─────────────────────────────────────────────────────────────────────────────────────┘  ║
 ║                                                                                           ║
 ║  ┌─────────────────────────────────────────────────────────────────────────────────────┐  ║
-║  │  HARD GATE 1: ONLY ring-dev-team:* agents allowed (Step 3)                          │  ║
+║  │  HARD GATE 1: ONLY ring-dev-team:* agents allowed (Step 4)                          │  ║
 ║  │               └── BEFORE typing Task tool → CHECK subagent_type                     │  ║
 ║  │               └── Does it start with "ring-dev-team:" ? → REQUIRED                  │  ║
 ║  │               └── ✅ EXCEPTION: ring-default:codebase-explorer (GATE 2 only)        │  ║
@@ -76,7 +76,7 @@ Generic agents like Explore do NOT have this capability.
 ║  │     • ANY agent without ring-dev-team: prefix (except ring-default:codebase-explorer)            │  ║
 ║  │                                                                                     │  ║
 ║  │  ✅ REQUIRED (USE THESE):                                                           │  ║
-║  │     • ring-default:codebase-explorer (GATE 2 - generates report)                    │  ║
+║  │     • ring-default:codebase-explorer (Step 3 - generates report)                    │  ║
 ║  │     • ring-dev-team:backend-engineer-golang                                         │  ║
 ║  │     • ring-dev-team:backend-engineer-typescript                                     │  ║
 ║  │     • ring-dev-team:qa-analyst                                                      │  ║
@@ -102,11 +102,11 @@ This skill analyzes an existing codebase to identify gaps between current implem
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
 | "This project is small/simple" | Size is IRRELEVANT. ALL projects follow ALL steps. | Execute ALL steps |
-| "I already explored this codebase" | Previous exploration ≠ current report. Each run is fresh. | Execute Step 2.5 |
+| "I already explored this codebase" | Previous exploration ≠ current report. Each run is fresh. | Execute Step 3 |
 | "The user wants quick results" | Quick invalid results = useless. Valid results require ALL steps. | Execute ALL steps |
 | "This step seems redundant" | Steps are designed together. Skipping one breaks others. | Execute ALL steps |
 | "I can combine steps to save time" | Steps have dependencies. Combining = invalid order. | Execute in ORDER |
-| "The codebase hasn't changed" | You don't know that. Fresh report ensures accuracy. | Execute Step 2.5 |
+| "The codebase hasn't changed" | You don't know that. Fresh report ensures accuracy. | Execute Step 3 |
 | "I'll do a partial analysis" | Partial = incomplete = SKILL FAILURE. | Complete analysis |
 | "Just this once I'll skip" | Once = always. No exceptions exist. | Execute ALL steps |
 | "The user didn't ask for all this" | User invoked the skill. Skill defines the process. | Execute ALL steps |
@@ -262,7 +262,7 @@ After outputting the blocker above:
 - ANY agent without `ring-dev-team:` or `ring-default:codebase-explorer` prefix
 
 **✅ EXCEPTION: `ring-default:codebase-explorer` is ALLOWED**
-- This agent runs FIRST in Step 2.5 to generate `codebase-report.md`
+- This agent runs FIRST in Step 3 to generate `codebase-report.md`
 - It provides deep architectural understanding that specialists need
 - Without it, specialists analyze blindly (the problem you experienced)
 
@@ -270,7 +270,7 @@ After outputting the blocker above:
 
 ```text
 1. Check: Is subagent_type "ring-default:codebase-explorer"?
-   └── YES → ALLOWED (Step 2.5 only)
+   └── YES → ALLOWED (Step 3 only)
    └── NO  → Continue to check 2
 
 2. Check: Does subagent_type start with "ring-dev-team:" ?
@@ -370,10 +370,10 @@ This is not about preference. Other agents are **technically incapable** of perf
 **⛔ FORBIDDEN AGENTS (from banner):**
 - `Explore` → SKILL FAILURE
 - `general-purpose` → SKILL FAILURE
-- `ring-default:*` → SKILL FAILURE (EXCEPTION: `ring-default:codebase-explorer` allowed in Step 2.5 ONLY)
-- ANY agent without `ring-dev-team:` prefix → SKILL FAILURE (after Step 2.5)
+- `ring-default:*` → SKILL FAILURE (EXCEPTION: `ring-default:codebase-explorer` allowed in Step 3 ONLY)
+- ANY agent without `ring-dev-team:` prefix → SKILL FAILURE (after Step 3)
 
-#### Parallel Dispatch (Step 3)
+#### Parallel Dispatch (Step 4)
 
 **ALL applicable ring-dev-team:* agents MUST be dispatched in a SINGLE message (parallel execution).**
 
@@ -444,7 +444,7 @@ Select agents based on the analysis dimensions needed for the task. Dispatch ALL
 | "Analysis complete, user can decide" | Analysis without action guidance is incomplete. | Generate tasks.md |
 | "Analysis is done, user decides next" | Skill requires tasks.md generation | Generate tasks.md before completing |
 | "Findings documented, my job done" | Findings → Tasks → Execution. Documentation alone changes nothing. | Generate tasks.md |
-| "Documented findings, job complete" | Tasks.md is mandatory output | Complete Step 6 (tasks.md) |
+| "Documented findings, job complete" | Tasks.md is mandatory output | Complete Step 7 (tasks.md) |
 
 **Non-negotiable:** These gates exist because specialized agents load Ring standards via WebFetch and have domain expertise. Generic agents do NOT have this capability.
 
@@ -470,18 +470,18 @@ Step 2:   [ ] PROJECT_RULES.md read?
            ⛔ MANDATORY - Project-specific standards context
 
 ╔═════════════════════════════════════════════════════════════════════════════════╗
-║  STEP 2.5: CODEBASE EXPLORATION (MANDATORY - DO NOT SKIP)                       ║
+║  STEP 3: CODEBASE EXPLORATION (MANDATORY - DO NOT SKIP)                         ║
 ║                                                                                 ║
-║  [ ] 2.5a: Task tool dispatched ring-default:codebase-explorer?                 ║
-║            ⛔ HARD GATE - See "HARD GATE 2" section                             ║
-║            ⛔ This generates codebase-report.md (REQUIRED for Step 3)           ║
-║            ⛔ WITHOUT THIS, ALL SUBSEQUENT STEPS PRODUCE INVALID OUTPUT         ║
-║            ✅ EXCEPTION: This is the ONLY ring-default:* agent allowed          ║
+║  [ ] 3a: Task tool dispatched ring-default:codebase-explorer?                   ║
+║          ⛔ HARD GATE - This step is NON-NEGOTIABLE                             ║
+║          ⛔ This generates codebase-report.md (REQUIRED for Step 4)             ║
+║          ⛔ WITHOUT THIS, ALL SUBSEQUENT STEPS PRODUCE INVALID OUTPUT           ║
+║          ✅ EXCEPTION: This is the ONLY ring-default:* agent allowed            ║
 ║                                                                                 ║
-║  [ ] 2.5b: Write tool saved output to docs/refactor/{timestamp}/codebase-report.md? ║
-║            ⛔ MANDATORY - File MUST exist before Step 3                         ║
+║  [ ] 3b: Write tool saved output to docs/refactor/{timestamp}/codebase-report.md? ║
+║          ⛔ MANDATORY - File MUST exist before Step 4                           ║
 ║                                                                                 ║
-║  ⛔ IF STEP 2.5 NOT COMPLETE → CANNOT PROCEED TO STEP 3                         ║
+║  ⛔ IF STEP 3 NOT COMPLETE → CANNOT PROCEED TO STEP 4                           ║
 ╚═════════════════════════════════════════════════════════════════════════════════╝
 
 GATE 1:   [ ] Agent dispatch validated? → BEFORE typing Task tool:
@@ -490,34 +490,34 @@ GATE 1:   [ ] Agent dispatch validated? → BEFORE typing Task tool:
            ✅ EXCEPTION: ring-default:codebase-explorer (GATE 2 only)
            ❌ FORBIDDEN: Explore, general-purpose, Plan
 
-Step 3:   [ ] ALL applicable ring-dev-team:* agents dispatched in SINGLE message?
+Step 4:   [ ] ALL applicable ring-dev-team:* agents dispatched in SINGLE message?
            ⛔ MANDATORY - Agents receive codebase-report.md path
            ⛔ MANDATORY - Agents compare codebase with Ring standards
            ❌ FORBIDDEN: Any agent without ring-dev-team: prefix
 
-Step 4:   [ ] Agent outputs compiled into findings.md?
+Step 5:   [ ] Agent outputs compiled into findings.md?
            ⛔ MANDATORY - Use Write tool to CREATE findings.md
            ⛔ MANDATORY - Generate findings.md with CTC for each finding
            ⛔ MANDATORY - Each finding has Before/After/Standard References
            ❌ If Write tool NOT used → findings.md does NOT exist → SKILL FAILURE
 
-Step 5:   [ ] Findings grouped into REFACTOR-XXX tasks?
+Step 6:   [ ] Findings grouped into REFACTOR-XXX tasks?
            ⛔ MANDATORY - Group by dependency order
 
-Step 6:   [ ] tasks.md generated with finding references?
+Step 7:   [ ] tasks.md generated with finding references?
            ⛔ MANDATORY - Each task MUST reference FINDING-XXX
            ⛔ MANDATORY - Each task MUST include Execution Context from findings
            ❌ If NO → SKILL FAILURE
 
-Step 7:   [ ] User approval requested via AskUserQuestion?
+Step 8:   [ ] User approval requested via AskUserQuestion?
            ⛔ MANDATORY - User must approve before execution
 
-Step 8:   [ ] Artifacts saved to docs/refactor/{timestamp}/?
+Step 9:   [ ] Artifacts saved to docs/refactor/{timestamp}/?
            ⛔ MANDATORY - codebase-report.md saved
            ⛔ MANDATORY - findings.md saved
            ⛔ MANDATORY - tasks.md saved
 
-Step 9:   [ ] Handoff to dev-cycle (if approved)?
+Step 10:  [ ] Handoff to dev-cycle (if approved)?
            ⛔ MANDATORY (if user approved) - Use Skill tool to invoke dev-cycle
            ⛔ MANDATORY - Skill tool with skill="ring-dev-team:dev-cycle"
            ❌ If approval received AND Skill tool NOT used → SKILL FAILURE
@@ -535,12 +535,14 @@ Step 9:   [ ] Handoff to dev-cycle (if approved)?
 
 | Step | Tool Required | Action |
 |------|---------------|--------|
-| Step 4 | **Write tool** | CREATE `docs/refactor/{timestamp}/findings.md` |
-| Step 9 | **Skill tool** | INVOKE `ring-dev-team:dev-cycle` (after approval) |
+| Step 3 | **Task tool** | DISPATCH `ring-default:codebase-explorer` |
+| Step 3 | **Write tool** | SAVE `docs/refactor/{timestamp}/codebase-report.md` |
+| Step 5 | **Write tool** | CREATE `docs/refactor/{timestamp}/findings.md` |
+| Step 10 | **Skill tool** | INVOKE `ring-dev-team:dev-cycle` (after approval) |
 
 **Nothing is implicit. Tool usage = action happens. No tool = action does NOT happen.**
 
-#### Prompt Requirements for Step 3
+#### Prompt Requirements for Step 4
 
 All specialist agent prompts MUST:
 1. Reference codebase-report.md path: `docs/refactor/{timestamp}/codebase-report.md`
@@ -559,10 +561,10 @@ All specialist agent prompts MUST:
 | `Plan` | Planning agent, not for analysis | SKILL FAILURE |
 | `ring-default:code-reviewer` | Wrong plugin, for review not analysis | SKILL FAILURE |
 
-**✅ EXCEPTION for Step 2.5 ONLY:**
+**✅ EXCEPTION for Step 3 ONLY:**
 | `ring-default:codebase-explorer` | Explores codebase structure | **ALLOWED IN STEP 2.5 ONLY** - generates codebase-report.md for specialists |
 
-**After Step 2.5, ring-default:codebase-explorer is FORBIDDEN. Specialists compare the report with Ring standards.**
+**After Step 3, ring-default:codebase-explorer is FORBIDDEN. Specialists compare the report with Ring standards.**
 
 **❌ WRONG - Sequential dispatch (multiple separate messages):**
 - Message 1: Task with agent A → Wait → Response
@@ -668,8 +670,8 @@ When user requests refactoring or improvement:
 
 **If analysis ends without tasks.md:**
 1. Analysis is NOT complete
-2. Step 6 (Generate tasks.md) was skipped
-3. Return to Step 6 before declaring completion
+2. Step 7 (Generate tasks.md) was skipped
+3. Return to Step 7 before declaring completion
 
 ## Analysis Dimensions - ALL REQUIRED
 
@@ -838,7 +840,7 @@ If you reached this section, validation passed. Proceed to Step 1.
 ### Multi-Language Enforcement
 
 **If 2+ languages detected:**
-- ✅ MUST dispatch specialist for EACH language in Step 3
+- ✅ MUST dispatch specialist for EACH language in Step 4
 - ❌ Dispatching for only one language = INCOMPLETE ANALYSIS = SKILL FAILURE
 
 ### Multi-Language Rationalization - DO NOT THINK THIS
@@ -884,26 +886,26 @@ This file contains:
 
 ---
 
-## ⛔ HARD GATE 2: CODEBASE REPORT GENERATION (Step 2.5)
+## ⛔ HARD GATE 2: CODEBASE REPORT GENERATION (Step 3)
 
 ```text
 ╔═══════════════════════════════════════════════════════════════════════════════════════════╗
 ║  ⛔⛔⛔ HARD GATE 2: CODEBASE REPORT IS MANDATORY ⛔⛔⛔                                    ║
 ║                                                                                           ║
-║  Step 2.5 MUST be executed for EVERY run of this skill.                                   ║
+║  Step 3 MUST be executed for EVERY run of this skill.                                   ║
 ║  There are NO exceptions. There are NO shortcuts.                                         ║
 ║                                                                                           ║
 ║  ┌─────────────────────────────────────────────────────────────────────────────────────┐  ║
-║  │  BEFORE Step 3 (specialist agents):                                                 │  ║
+║  │  BEFORE Step 4 (specialist agents):                                                 │  ║
 ║  │                                                                                     │  ║
 ║  │  [ ] Did you dispatch ring-default:codebase-explorer?                               │  ║
 ║  │  [ ] Did you receive the codebase-report.md output?                                 │  ║
 ║  │  [ ] Did you save it to docs/refactor/{timestamp}/codebase-report.md?               │  ║
 ║  │                                                                                     │  ║
-║  │  If ANY checkbox is NO → STOP. Execute Step 2.5 before proceeding.                  │  ║
+║  │  If ANY checkbox is NO → STOP. Execute Step 3 before proceeding.                  │  ║
 ║  └─────────────────────────────────────────────────────────────────────────────────────┘  ║
 ║                                                                                           ║
-║  Skipping Step 2.5 = SKILL FAILURE. Output will be INVALID.                               ║
+║  Skipping Step 3 = SKILL FAILURE. Output will be INVALID.                               ║
 ║                                                                                           ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════╝
 ```
@@ -928,35 +930,35 @@ This file contains:
 
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
-| "The codebase is small, I can analyze directly" | Small ≠ skip steps. ALL codebases need the report. | Execute Step 2.5 |
-| "I already know this codebase from context" | Knowledge ≠ documented report. Agents need the file. | Execute Step 2.5 |
-| "This will take too long" | Time is IRRELEVANT. Invalid output is worse than slow output. | Execute Step 2.5 |
-| "The user just wants quick feedback" | Quick invalid feedback = useless. Valid output requires report. | Execute Step 2.5 |
-| "I can read the files myself instead" | You are the ORCHESTRATOR. Explorer generates the REPORT. | Execute Step 2.5 |
-| "Step 2.5 is optional for simple projects" | There is NO such thing as optional. It's a HARD GATE. | Execute Step 2.5 |
-| "I'll skip it this once" | Once = SKILL FAILURE. No exceptions exist. | Execute Step 2.5 |
-| "The specialists can explore themselves" | Specialists COMPARE, they don't EXPLORE. Wrong responsibility. | Execute Step 2.5 |
-| "Codebase-explorer is slow, I'll use Explore" | Explore is FORBIDDEN. Only ring-default:codebase-explorer is allowed. | Execute Step 2.5 |
-| "I can infer the architecture from file names" | Inference = guessing = INVALID. Report provides FACTS. | Execute Step 2.5 |
-| "PROJECT_RULES.md already describes the project" | PROJECT_RULES.md = standards. Report = actual implementation. Different things. | Execute Step 2.5 |
-| "Previous analysis is still valid" | Each run = fresh report. Codebase may have changed. | Execute Step 2.5 |
+| "The codebase is small, I can analyze directly" | Small ≠ skip steps. ALL codebases need the report. | Execute Step 3 |
+| "I already know this codebase from context" | Knowledge ≠ documented report. Agents need the file. | Execute Step 3 |
+| "This will take too long" | Time is IRRELEVANT. Invalid output is worse than slow output. | Execute Step 3 |
+| "The user just wants quick feedback" | Quick invalid feedback = useless. Valid output requires report. | Execute Step 3 |
+| "I can read the files myself instead" | You are the ORCHESTRATOR. Explorer generates the REPORT. | Execute Step 3 |
+| "Step 3 is optional for simple projects" | There is NO such thing as optional. It's a HARD GATE. | Execute Step 3 |
+| "I'll skip it this once" | Once = SKILL FAILURE. No exceptions exist. | Execute Step 3 |
+| "The specialists can explore themselves" | Specialists COMPARE, they don't EXPLORE. Wrong responsibility. | Execute Step 3 |
+| "Codebase-explorer is slow, I'll use Explore" | Explore is FORBIDDEN. Only ring-default:codebase-explorer is allowed. | Execute Step 3 |
+| "I can infer the architecture from file names" | Inference = guessing = INVALID. Report provides FACTS. | Execute Step 3 |
+| "PROJECT_RULES.md already describes the project" | PROJECT_RULES.md = standards. Report = actual implementation. Different things. | Execute Step 3 |
+| "Previous analysis is still valid" | Each run = fresh report. Codebase may have changed. | Execute Step 3 |
 
 ### Violation Recovery (If You Already Skipped)
 
-**If you ALREADY proceeded to Step 3 without codebase-report.md:**
+**If you ALREADY proceeded to Step 4 without completing Step 3:**
 
 1. **STOP IMMEDIATELY** - Do not continue with specialist agents
 2. **DISCARD any specialist outputs** - They are INVALID without the report
-3. **GO BACK to Step 2.5** - Execute ring-default:codebase-explorer NOW
+3. **GO BACK to Step 3** - Execute ring-default:codebase-explorer NOW
 4. **SAVE the report** - To docs/refactor/{timestamp}/codebase-report.md
-5. **THEN proceed to Step 3** - With the report path in prompts
-6. **DOCUMENT** - Note: "Recovered from skipped Step 2.5"
+5. **THEN proceed to Step 4** - With the report path in prompts
+6. **DOCUMENT** - Note: "Recovered from skipped Step 3"
 
 **Output from specialists without codebase-report.md is INVALID and MUST NOT be used.**
 
 ---
 
-## Step 2.5: Generate Codebase Report (MANDATORY - HARD GATE 2)
+## Step 3: Generate Codebase Report (MANDATORY)
 
 **⛔ THIS IS A HARD GATE. Skipping = SKILL FAILURE.**
 
@@ -1125,7 +1127,7 @@ Action: Use Write tool with EXACTLY these parameters:
 │  ⛔ If Write tool NOT used → codebase-report.md does NOT exist → SKILL FAILURE  │
 └─────────────────────────────────────────────────────────────────────────────────┘
 
-VERIFICATION: After Write completes, confirm file exists before proceeding to Step 3
+VERIFICATION: After Write completes, confirm file exists before proceeding to Step 4
 ```
 
 ### If Write Tool NOT Used → SKILL FAILURE
@@ -1134,72 +1136,72 @@ codebase-report.md does NOT exist → Specialist agents have no report to compar
 
 ### Artifact Output: codebase-report.md
 
-**This file is the MANDATORY INPUT for Step 3.**
+**This file is the MANDATORY INPUT for Step 4.**
 
 | Attribute | Value |
 |-----------|-------|
 | **File Path** | `docs/refactor/{timestamp}/codebase-report.md` |
 | **Generated By** | `ring-default:codebase-explorer` via Task tool |
 | **Saved By** | Write tool (MANDATORY) |
-| **Consumed By** | Step 3 - All `ring-dev-team:*` specialist agents |
+| **Consumed By** | Step 4 - All `ring-dev-team:*` specialist agents |
 | **Contains** | Codebase architecture map, code patterns, file inventory |
 
 **Dependency Chain:**
 ```text
-Step 2.5: Task tool → ring-default:codebase-explorer → output
+Step 3: Task tool → ring-default:codebase-explorer → output
                                             ↓
           Write tool → codebase-report.md (ARTIFACT)
                                             ↓
-Step 3:   Task tool → specialist agents → READ codebase-report.md
+Step 4:   Task tool → specialist agents → READ codebase-report.md
 ```
 
-**Without this artifact, Step 3 CANNOT execute correctly.**
+**Without this artifact, Step 4 CANNOT execute correctly.**
 
 ### Output of This Step
 
 - ✅ Task tool dispatched `ring-default:codebase-explorer`
 - ✅ Agent output received
 - ✅ Write tool created `docs/refactor/{timestamp}/codebase-report.md`
-- ✅ Artifact ready for Step 3 consumption
+- ✅ Artifact ready for Step 4 consumption
 - ✅ Ready to dispatch specialists who will COMPARE report with their standards
 
 ---
 
-## Step 3: Dispatch ring-dev-team Agents
+## Step 4: Dispatch ring-dev-team Agents
 
 ```text
 ╔═══════════════════════════════════════════════════════════════════════════════════════════╗
 ║  ⛔⛔⛔ MANDATORY CHECKPOINT - ANSWER BEFORE PROCEEDING ⛔⛔⛔                              ║
 ║                                                                                           ║
-║  QUESTION: Did you complete Step 2.5?                                                     ║
+║  QUESTION: Did you complete Step 3?                                                     ║
 ║                                                                                           ║
 ║  ┌─────────────────────────────────────────────────────────────────────────────────────┐  ║
 ║  │  CHECK 1: Did you dispatch ring-default:codebase-explorer using Task tool?          │  ║
 ║  │           └── YES → Continue to CHECK 2                                             │  ║
-║  │           └── NO  → ⛔ STOP. GO BACK. Execute Step 2.5 NOW.                         │  ║
+║  │           └── NO  → ⛔ STOP. GO BACK. Execute Step 3 NOW.                         │  ║
 ║  │                                                                                     │  ║
 ║  │  CHECK 2: Did you save the output to codebase-report.md using Write tool?           │  ║
-║  │           └── YES → Continue to Step 3                                              │  ║
+║  │           └── YES → Continue to Step 4                                              │  ║
 ║  │           └── NO  → ⛔ STOP. Use Write tool to save the report NOW.                 │  ║
 ║  └─────────────────────────────────────────────────────────────────────────────────────┘  ║
 ║                                                                                           ║
-║  If EITHER check is NO → You CANNOT proceed. Step 2.5 is MANDATORY.                       ║
+║  If EITHER check is NO → You CANNOT proceed. Step 3 is MANDATORY.                       ║
 ║  Specialist agents REQUIRE codebase-report.md to function correctly.                      ║
 ║  Without it, all specialist output is INVALID.                                            ║
 ║                                                                                           ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════╝
 ```
 
-### Step 3 Anti-Rationalization (DO NOT THINK THESE)
+### Step 4 Checkpoint: Anti-Rationalization for Skipping Step 3
 
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
-| "I already read PROJECT_RULES.md, that's enough context" | PROJECT_RULES.md = standards. codebase-report.md = actual code. BOTH required. | **GO BACK to Step 2.5** |
-| "I can dispatch specialists now and explore later" | Specialists NEED the report to compare. Without it = blind analysis. | **GO BACK to Step 2.5** |
-| "The specialist agents can explore the codebase themselves" | Specialists COMPARE, they don't EXPLORE. Wrong responsibility model. | **GO BACK to Step 2.5** |
-| "Step 2.5 is slow, I'll skip it to save time" | Skipping = INVALID output. Time saved = wasted on wrong analysis. | **GO BACK to Step 2.5** |
-| "Small codebase doesn't need codebase-explorer" | Size is irrelevant. All codebases need the report. No exceptions. | **GO BACK to Step 2.5** |
-| "I can infer the architecture from file names" | Inference = guessing. Report provides FACTS with file:line references. | **GO BACK to Step 2.5** |
+| "I already read PROJECT_RULES.md, that's enough context" | PROJECT_RULES.md = standards. codebase-report.md = actual code. BOTH required. | **GO BACK to Step 3** |
+| "I can dispatch specialists now and explore later" | Specialists NEED the report to compare. Without it = blind analysis. | **GO BACK to Step 3** |
+| "The specialist agents can explore the codebase themselves" | Specialists COMPARE, they don't EXPLORE. Wrong responsibility model. | **GO BACK to Step 3** |
+| "Step 3 is slow, I'll skip it to save time" | Skipping = INVALID output. Time saved = wasted on wrong analysis. | **GO BACK to Step 3** |
+| "Small codebase doesn't need codebase-explorer" | Size is irrelevant. All codebases need the report. No exceptions. | **GO BACK to Step 3** |
+| "I can infer the architecture from file names" | Inference = guessing. Report provides FACTS with file:line references. | **GO BACK to Step 3** |
 
 **⛔ HARD GATE 1 APPLIES HERE - READ BEFORE DISPATCHING ANY AGENT**
 
@@ -1234,7 +1236,7 @@ Step 3:   Task tool → specialist agents → READ codebase-report.md
 
 **The prompts below instruct agents to:**
 1. Read their Ring standards via WebFetch (they have the URL in their agent definition)
-2. Read the codebase-report.md generated in Step 2.5
+2. Read the codebase-report.md generated in Step 3
 3. Compare what EXISTS (report) with what SHOULD exist (standards)
 4. Generate specific findings with CURRENT code vs EXPECTED code
 
@@ -1597,9 +1599,9 @@ Task 5:
 3. **ALL prompts MUST start with `**MODE: ANALYSIS ONLY**`**
 4. **Select agents based on detected language** (go.mod → Go agents, package.json → TypeScript agents)
 
-**Output:** Dimension-specific findings with severities to compile in Step 4.
+**Output:** Dimension-specific findings with severities to compile in Step 5.
 
-## Step 4: Generate findings.md (MANDATORY)
+## Step 5: Generate findings.md (MANDATORY)
 
 **⛔ HARD GATE: findings.md MUST be generated. This is NOT optional.**
 
@@ -1631,7 +1633,7 @@ Action: Use Write tool to create docs/refactor/{timestamp}/findings.md
 
 Content: Compiled findings from all agent outputs using the structure below
 
-VERIFICATION: After Write completes, confirm file exists before proceeding to Step 5
+VERIFICATION: After Write completes, confirm file exists before proceeding to Step 6
 ```
 
 **If you do NOT use Write tool → findings.md does NOT exist → SKILL FAILURE**
@@ -1774,9 +1776,9 @@ See [docs/PROMPT_ENGINEERING.md](../../../docs/PROMPT_ENGINEERING.md#code-transf
 | "I described findings in my response" | Response text ≠ file. Must use Write tool to CREATE the file. | **Use Write tool explicitly** |
 | "findings.md is implicitly created" | Nothing is implicit. Write tool = file exists. No Write = no file. | **Use Write tool explicitly** |
 
-**If findings.md is NOT generated → Step 4 is INCOMPLETE → SKILL FAILURE**
+**If findings.md is NOT generated → Step 5 is INCOMPLETE → SKILL FAILURE**
 
-## Step 5: Prioritize and Group
+## Step 6: Prioritize and Group
 
 Group related issues into logical refactoring tasks:
 
@@ -1807,7 +1809,7 @@ Example grouping:
     └── DEVOPS-002: Create docker-compose.yml
 ```
 
-## Step 6: Generate tasks.md (From findings.md)
+## Step 7: Generate tasks.md (From findings.md)
 
 **⛔ HARD GATE: tasks.md MUST reference findings.md. Tasks without finding references are INVALID.**
 
@@ -1965,7 +1967,7 @@ return nil, fmt.Errorf("invalid order state: %s", state)
 | "All findings are in findings.md" | Tasks MUST be self-contained for execution. | **Copy relevant CTC to task** |
 | "I'll link to standards directly" | Standards = general. Findings = project-specific. | **Reference FINDING-XXX** |
 
-## Step 7: User Approval
+## Step 8: User Approval
 
 Present the generated plan and ask for approval using AskUserQuestion tool:
 
@@ -1986,7 +1988,7 @@ AskUserQuestion:
           description: "Abort execution, keep analysis report only"
 ```
 
-## Step 8: Save Artifacts
+## Step 9: Save Artifacts
 
 **⛔ HARD GATE: ALL artifacts MUST be saved. Missing artifacts = INCOMPLETE analysis.**
 
@@ -1994,9 +1996,9 @@ Save all artifacts to project:
 
 ```text
 docs/refactor/{timestamp}/
-├── codebase-report.md    # From Step 2.5 - ring-default:codebase-explorer output
-├── findings.md           # From Step 4 - Lerian standards comparison (MANDATORY)
-└── tasks.md              # From Step 6 - Refactoring tasks with finding references
+├── codebase-report.md    # From Step 3 - ring-default:codebase-explorer output
+├── findings.md           # From Step 5 - Lerian standards comparison (MANDATORY)
+└── tasks.md              # From Step 7 - Refactoring tasks with finding references
 ```
 
 ### Artifact Dependencies (Traceability Chain)
@@ -2013,13 +2015,13 @@ tasks.md (actionable refactoring tasks)
 
 | Artifact | Generated In | Required? | Contains |
 |----------|--------------|-----------|----------|
-| `codebase-report.md` | Step 2.5 | ✅ YES | Codebase architecture map |
-| `findings.md` | Step 4 | ✅ YES | Standards comparison with CTC |
-| `tasks.md` | Step 6 | ✅ YES | Refactoring tasks with finding refs |
+| `codebase-report.md` | Step 3 | ✅ YES | Codebase architecture map |
+| `findings.md` | Step 5 | ✅ YES | Standards comparison with CTC |
+| `tasks.md` | Step 7 | ✅ YES | Refactoring tasks with finding refs |
 
 **Note:** Ring standards are loaded dynamically by agents via WebFetch. PROJECT_RULES.md remains in its original location (`docs/PROJECT_RULES.md`).
 
-## Step 9: Handoff to dev-cycle (MANDATORY After Approval)
+## Step 10: Handoff to dev-cycle (MANDATORY After Approval)
 
 **⛔ HARD GATE: If user approves → You MUST invoke dev-cycle. This is NOT optional.**
 
@@ -2082,15 +2084,15 @@ output_schema:
     - name: "codebase-report.md"
       location: "docs/refactor/{timestamp}/"
       required: true
-      generated_by: "Step 2.5 - ring-default:codebase-explorer"
+      generated_by: "Step 3 - ring-default:codebase-explorer"
     - name: "findings.md"
       location: "docs/refactor/{timestamp}/"
       required: true
-      generated_by: "Step 4 - Orchestrator compiles agent outputs"
+      generated_by: "Step 5 - Orchestrator compiles agent outputs"
     - name: "tasks.md"
       location: "docs/refactor/{timestamp}/"
       required: true
-      generated_by: "Step 6 - From findings.md"
+      generated_by: "Step 7 - From findings.md"
   required_sections:
     findings_md:
       - name: "Executive Summary"
