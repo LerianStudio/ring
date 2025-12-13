@@ -1,19 +1,16 @@
 ---
 name: dev-refactor
 description: |
-  MANDATORY EXECUTION SEQUENCE:
+  BEFORE dispatching any specialist agents, you MUST first dispatch ring-default:codebase-explorer.
 
-  Step 1: Validate docs/PROJECT_RULES.md exists
-  Step 2: Detect project language
-  Step 3: Use Task tool with subagent_type="ring-default:codebase-explorer"
-          DO NOT use built-in Explore agent - it is FORBIDDEN
-          DO NOT use subagent_type="Explore" - WRONG AGENT
-  Step 4: Use Task tool with subagent_type="ring-dev-team:backend-engineer-golang" etc.
-  Step 5: Generate findings.md
-  Step 6: Generate tasks.md
+  REQUIRED FIRST AGENT DISPATCH:
+  Task tool → subagent_type: "ring-default:codebase-explorer"
 
-  CRITICAL: Step 3 uses Task tool with "ring-default:codebase-explorer" (NOT Explore)
-  FORBIDDEN: Explore, general-purpose, Plan agents
+  DO NOT use bash commands (find, ls, grep) to explore codebase yourself.
+  DO NOT use built-in Explore agent.
+  DO NOT skip this step.
+
+  After codebase-explorer completes, THEN dispatch specialist agents.
 
 trigger: |
   - User wants to refactor existing project to follow standards
