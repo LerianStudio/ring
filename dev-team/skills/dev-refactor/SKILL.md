@@ -984,7 +984,9 @@ Action: Use Task tool with EXACTLY these parameters:
 VERIFICATION: After Task completes, confirm agent returned output before proceeding
 ```
 
-**If you do NOT use Task tool → Agent is NOT dispatched → No report → SKILL FAILURE**
+### If Task Tool NOT Used → SKILL FAILURE
+
+Agent is NOT dispatched → No report generated → All subsequent steps produce INVALID output.
 
 ### Prompt Template for codebase-explorer
 
@@ -1109,7 +1111,9 @@ Content: Full output from codebase-explorer Task
 VERIFICATION: After Write completes, confirm file exists before proceeding to Step 3
 ```
 
-**If Write tool NOT used → codebase-report.md does NOT exist → SKILL FAILURE**
+### If Write Tool NOT Used → SKILL FAILURE
+
+codebase-report.md does NOT exist → Specialist agents have no report to compare → All findings INVALID.
 
 ### Output of This Step
 
