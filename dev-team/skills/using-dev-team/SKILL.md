@@ -265,7 +265,7 @@ All workflows converge to the 6-gate development cycle:
 |------|-------|----------|
 | **0: Implementation** | TDD: RED→GREEN→REFACTOR | `backend-engineer-*`, `frontend-bff-engineer-typescript` |
 | **1: DevOps** | Dockerfile, docker-compose, .env | `devops-engineer` |
-| **2: SRE** | Health checks, logging, metrics | `sre` |
+| **2: SRE** | Health checks, logging, tracing | `sre` |
 | **3: Testing** | Unit tests, coverage ≥85% | `qa-analyst` |
 | **4: Review** | 3 reviewers IN PARALLEL | `code-reviewer`, `business-logic`, `security` |
 | **5: Validation** | User approval: APPROVED/REJECTED | User decision |

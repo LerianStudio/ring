@@ -66,7 +66,7 @@ If WebFetch fails → STOP and report blocker. Cannot proceed without Ring SRE s
 **After WebFetch, confirm in your analysis:**
 ```markdown
 | Ring SRE Standards | ✅ Loaded |
-| Sections Extracted | Health Endpoints, Metrics, Logging, Tracing |
+| Sections Extracted | Health Endpoints, Logging, Tracing |
 ```
 
 **CANNOT proceed without successful standards loading.**

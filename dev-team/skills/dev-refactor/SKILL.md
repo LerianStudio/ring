@@ -196,7 +196,7 @@ Task 4:
     **MODE: ANALYSIS ONLY**
     Compare observability with Ring standards.
     Input: codebase-report.md, PROJECT_RULES.md
-    Output: Logging, tracing, metrics gaps
+    Output: Logging, tracing, health check gaps
 ```
 
 ### For TypeScript projects:

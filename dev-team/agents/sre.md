@@ -109,10 +109,10 @@ Invoke this agent when you need to VALIDATE observability implementations:
 
 ### Issue Reporting
 When validation fails, report issues to developers:
-- CRITICAL: Missing observability endpoints
-- HIGH: Non-compliant metrics (high cardinality)
-- MEDIUM: Missing trace correlation
-- LOW: Dashboard improvements
+- CRITICAL: Missing observability (no structured logs)
+- HIGH: Missing trace correlation
+- MEDIUM: Incomplete health endpoints
+- LOW: Logging improvements
 
 **Developers then fix the issues. SRE does NOT fix them.**
 
@@ -398,7 +398,7 @@ None. This agent cannot proceed until `docs/PROJECT_RULES.md` is created by the 
 - **Options:**
   1. Create docs/PROJECT_RULES.md adopting Ring SRE standards (RECOMMENDED)
   2. Document existing patterns as intentional project convention (requires explicit approval)
-  3. Migrate existing observability to Ring standards before adding new metrics
+  3. Migrate existing observability to Ring standards before adding new components
 - **Recommendation:** Option 1 - Establish standards first, then implement
 - **Awaiting:** User decision on standards establishment
 ```
@@ -417,8 +417,6 @@ When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST p
 |----------|--------------|------------------|
 | **Logging** | Structured JSON | trace_id, request_id correlation |
 | **Tracing** | OpenTelemetry | Distributed tracing with span context |
-
-**Note:** Metrics cardinality checks (high-cardinality labels, unbounded dimensions) are evaluated under **Tracing** when using OpenTelemetry metrics, or as part of the infrastructure setup in `ring-dev-team:devops-engineer`. Prometheus-specific cardinality concerns are out-of-scope for this comparison.
 
 ### Output Format
 
@@ -500,7 +498,7 @@ If observability is ALREADY adequate:
 **Testing:** "Health checks verified" OR "Recommend: [specific improvements]"
 **Next Steps:** "Proceed to deployment"
 
-**CRITICAL:** Do NOT add unnecessary metrics to well-instrumented services.
+**CRITICAL:** Do NOT add unnecessary observability to well-instrumented services.
 
 **Signs observability is already adequate:**
 - Structured JSON logging with trace_id

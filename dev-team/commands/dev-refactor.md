@@ -146,7 +146,7 @@ Then re-run `/ring-dev-team:dev-refactor`.
 | **Architecture** | DDD patterns, layer separation, dependency direction, directory structure |
 | **Code Quality** | Naming conventions, error handling, forbidden practices, security |
 | **Testing** | Coverage percentage, test patterns, naming, missing tests |
-| **DevOps** | Dockerfile, docker-compose, env management, CI/CD |
+| **DevOps** | Dockerfile, docker-compose, env management, Helm charts |
 
 ## Output
 
@@ -251,14 +251,14 @@ Task 3 (ring-dev-team:devops-engineer):
   prompt: |
     **MODE: ANALYSIS ONLY**
     Compare DevOps setup with Ring standards.
-    Output: Dockerfile, docker-compose, CI/CD gaps
+    Output: Dockerfile, docker-compose, Helm chart gaps
 
 Task 4 (ring-dev-team:sre):
   model: "opus"
   prompt: |
     **MODE: ANALYSIS ONLY**
     Compare observability with Ring standards.
-    Output: Logging, tracing, metrics gaps
+    Output: Logging, tracing, health check gaps
 ```
 
 ## Step 4: Generate Findings

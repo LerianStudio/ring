@@ -43,7 +43,7 @@ This file defines the MANDATORY output format for agents comparing codebases aga
 |---------|---------------------|
 | Containers | Dockerfile patterns AND Docker Compose patterns |
 | Infrastructure as Code | Terraform structure AND state management AND modules |
-| Observability | Metrics AND Logging AND Tracing |
+| Observability | Logging AND Tracing |
 | Security | Secrets management AND Network policies |
 
 ### Process
