@@ -288,7 +288,7 @@ ls <file>  # Should return "No such file"
 
 **Anti-Rationalization for Mental Reference:**
 
-See [shared-patterns/anti-rationalization.md](../shared-patterns/anti-rationalization.md) for universal anti-rationalizations.
+See [shared-patterns/skills-anti-rationalization.md](../shared-patterns/skills-anti-rationalization.md) for universal anti-rationalizations.
 
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|

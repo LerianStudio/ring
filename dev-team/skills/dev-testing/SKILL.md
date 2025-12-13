@@ -84,7 +84,7 @@ See [shared-patterns/pressure-resistance.md](../shared-patterns/pressure-resista
 
 ## Common Rationalizations - REJECTED
 
-See [shared-patterns/anti-rationalization.md](../shared-patterns/anti-rationalization.md) for universal anti-rationalizations.
+See [shared-patterns/skills-anti-rationalization.md](../shared-patterns/skills-anti-rationalization.md) for universal anti-rationalizations.
 
 | Excuse | Reality |
 |--------|---------|
@@ -174,7 +174,7 @@ If you catch yourself thinking ANY of these, STOP immediately:
 
 ### Anti-Rationalization for Coverage
 
-See [shared-patterns/anti-rationalization.md](../shared-patterns/anti-rationalization.md) for universal anti-rationalizations.
+See [shared-patterns/skills-anti-rationalization.md](../shared-patterns/skills-anti-rationalization.md) for universal anti-rationalizations.
 
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|

@@ -37,7 +37,7 @@ Skills should reference this file and add gate-specific anti-rationalizations:
 ```markdown
 ## Anti-Rationalization Table
 
-See [shared-patterns/anti-rationalization.md](../shared-patterns/anti-rationalization.md) for universal anti-rationalizations.
+See [shared-patterns/skills-anti-rationalization.md](../shared-patterns/skills-anti-rationalization.md) for universal anti-rationalizations.
 
 ### Gate-Specific Anti-Rationalizations
 
