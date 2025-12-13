@@ -324,16 +324,7 @@ See [shared-patterns/orchestrator-principle.md](../shared-patterns/orchestrator-
 
 **Summary:** You orchestrate. Agents execute. Agents implement observability (logs, traces, metrics). If using Read/Write/Edit/Bash on source code → STOP. Dispatch agent.
 
-**Include in EVERY dispatch prompt:**
-```
-OBSERVABILITY REQUIREMENTS:
-- Add structured JSON logging for all operations (info for success, error for failures)
-- Add OpenTelemetry tracing spans for external calls and key operations
-- Add metrics where applicable (request counts, latencies, business events)
-- Ensure trace_id propagation in all log entries
-```
-
-**Gate 2 (SRE) validates this was done correctly. Gate 0 implements it.**
+See [shared-patterns/tdd-prompt-templates.md](../shared-patterns/tdd-prompt-templates.md) for observability requirements to include in dispatch prompts.
 
 ## Prerequisites
 
@@ -387,30 +378,9 @@ OBSERVABILITY REQUIREMENTS:
 
 **Dispatch:** `Task(subagent_type: "ring-dev-team:{agent}", model: "opus")`
 
-**MANDATORY in prompt:**
-```
-**TDD-RED PHASE ONLY**
-
-INSTRUCTIONS:
-1. Write a failing test for the acceptance criteria
-2. Run the test
-3. **CAPTURE THE FAILURE OUTPUT** - this is MANDATORY
-
-**STOP AFTER RED PHASE.** Do NOT write implementation code.
-
-REQUIRED OUTPUT:
-- Test file path
-- Test function name
-- **FAILURE OUTPUT** (copy/paste actual test failure)
-```
+See [shared-patterns/tdd-prompt-templates.md](../shared-patterns/tdd-prompt-templates.md) for the TDD-RED prompt template.
 
 **Agent returns:** Test file + Failure output
-
-**HARD GATE VERIFICATION:**
-```
-IF failure_output is empty OR contains "PASS":
-  → STOP. Cannot proceed. "TDD-RED incomplete"
-```
 
 **On success:** Store `tdd_red.failure_output` → Proceed to Gate 0.2
 
@@ -422,43 +392,9 @@ IF failure_output is empty OR contains "PASS":
 
 **Dispatch:** `Task(subagent_type: "ring-dev-team:{agent}", model: "opus")`
 
-**MANDATORY in prompt:**
-```
-**TDD-GREEN PHASE**
-
-CONTEXT FROM TDD-RED:
-- Test file: [tdd_red.test_file]
-- Failure output: [tdd_red.failure_output]
-
-INSTRUCTIONS:
-1. Write MINIMAL code to make the test pass
-2. Run the test
-3. **CAPTURE THE PASS OUTPUT** - this is MANDATORY
-4. Refactor if needed (keeping tests green)
-5. Commit
-
-OBSERVABILITY REQUIREMENTS (implement as part of the code):
-- Add structured JSON logging for all operations (info for success, error for failures)
-- Add OpenTelemetry tracing spans for external calls and key operations
-- Add metrics where applicable (request counts, latencies, business events)
-- Ensure trace_id propagation in all log entries
-
-REQUIRED OUTPUT:
-- Implementation file path
-- **PASS OUTPUT** (copy/paste actual test pass)
-- Files changed
-- Observability added (logging: Y/N, tracing: Y/N, metrics: Y/N)
-- Commit SHA
-```
+See [shared-patterns/tdd-prompt-templates.md](../shared-patterns/tdd-prompt-templates.md) for the TDD-GREEN prompt template (includes observability requirements).
 
 **Agent returns:** Implementation + Pass output + Commit SHA
-
-**HARD GATE VERIFICATION:**
-```
-IF pass_output is empty OR contains "FAIL":
-  → Return to Step 3 (retry, max 3 times)
-  → After 3 failures: STOP and report blocker
-```
 
 **On success:** Store `tdd_green.test_pass_output` → Gate 0 complete
 

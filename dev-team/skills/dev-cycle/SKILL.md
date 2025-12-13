@@ -471,43 +471,13 @@ See [shared-patterns/orchestrator-principle.md](../shared-patterns/orchestrator-
    - Infrastructure → ring-dev-team:devops-engineer
 
 4. Dispatch to selected agent for TDD-RED ONLY:
-   ```
-   Task tool:
-     subagent_type: "[selected_agent]"
-     prompt: |
-       **TDD-RED PHASE ONLY** for: [unit_id] - [title]
 
-       Requirements:
-       [requirements from task/subtask file]
+   See [shared-patterns/tdd-prompt-templates.md](../shared-patterns/tdd-prompt-templates.md) for the TDD-RED prompt template.
 
-       Acceptance Criteria:
-       [acceptance_criteria]
-
-       **INSTRUCTIONS (TDD-RED):**
-       1. Write a failing test that captures the expected behavior
-       2. Run the test
-       3. **CAPTURE THE FAILURE OUTPUT** - this is MANDATORY
-
-       **STOP AFTER RED PHASE.** Do NOT write implementation code.
-
-       **REQUIRED OUTPUT:**
-       - Test file path
-       - Test function name
-       - **FAILURE OUTPUT** (copy/paste the actual test failure)
-
-       Example failure output:
-       ```
-       === FAIL: TestUserAuthentication (0.00s)
-           auth_test.go:15: expected token to be valid, got nil
-       ```
-   ```
+   Include: unit_id, title, requirements, acceptance_criteria in the prompt.
 
 5. Receive TDD-RED report from agent
-6. **VERIFY FAILURE OUTPUT EXISTS (HARD GATE):**
-   ```
-   IF failure_output is empty OR contains "PASS":
-     → STOP. Cannot proceed. Report: "TDD-RED incomplete - no failure output captured"
-   ```
+6. **VERIFY FAILURE OUTPUT EXISTS (HARD GATE):** See shared-patterns/tdd-prompt-templates.md for verification rules.
 
 7. Update state:
    ```json
@@ -540,51 +510,13 @@ See [shared-patterns/orchestrator-principle.md](../shared-patterns/orchestrator-
 1. Set `gate_progress.implementation.tdd_green.status = "in_progress"`
 
 2. Dispatch to same agent for TDD-GREEN:
-   ```
-   Task tool:
-     subagent_type: "[selected_agent]"
-     prompt: |
-       **TDD-GREEN PHASE** for: [unit_id] - [title]
 
-       **CONTEXT FROM TDD-RED:**
-       - Test file: [tdd_red.test_file]
-       - Failure output: [tdd_red.failure_output]
+   See [shared-patterns/tdd-prompt-templates.md](../shared-patterns/tdd-prompt-templates.md) for the TDD-GREEN prompt template (includes observability requirements).
 
-       **INSTRUCTIONS (TDD-GREEN):**
-       1. Write MINIMAL code to make the test pass
-       2. Run the test
-       3. **CAPTURE THE PASS OUTPUT** - this is MANDATORY
-       4. Refactor if needed (keeping tests green)
-       5. Commit
-
-       **OBSERVABILITY REQUIREMENTS (implement as part of the code):**
-       - Add structured JSON logging for all operations (info for success, error for failures)
-       - Add OpenTelemetry tracing spans for external calls and key operations
-       - Add metrics where applicable (request counts, latencies, business events)
-       - Ensure trace_id propagation in all log entries
-
-       **REQUIRED OUTPUT:**
-       - Implementation file path
-       - **PASS OUTPUT** (copy/paste the actual test pass)
-       - Files changed
-       - Observability added (logging: Y/N, tracing: Y/N, metrics: Y/N)
-       - Commit SHA
-
-       Example pass output:
-       ```
-       === PASS: TestUserAuthentication (0.003s)
-       PASS
-       ok      myapp/auth    0.015s
-       ```
-   ```
+   Include: unit_id, title, tdd_red.test_file, tdd_red.failure_output in the prompt.
 
 3. Receive TDD-GREEN report from agent
-4. **VERIFY PASS OUTPUT EXISTS (HARD GATE):**
-   ```
-   IF pass_output is empty OR contains "FAIL":
-     → Return to Step 2.2 (retry implementation)
-     → Max 3 retries, then STOP and report blocker
-   ```
+4. **VERIFY PASS OUTPUT EXISTS (HARD GATE):** See shared-patterns/tdd-prompt-templates.md for verification rules.
 
 5. Update state:
    ```json
