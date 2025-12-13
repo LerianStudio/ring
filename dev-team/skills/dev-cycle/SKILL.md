@@ -357,30 +357,6 @@ State is persisted to `.ring/dev-team/current-cycle.json`:
 
 ## Step 0: Verify PROJECT_RULES.md Exists (HARD GATE)
 
-| Mode | Step 7.1 (unit) | Step 7.2 (task) |
-|------|-----------------|-----------------|
-| `manual_per_subtask` | ✓ Every unit | ✓ Every task |
-| `manual_per_task` | ✗ Skip | ✓ Every task |
-| `automatic` | ✗ Skip | ✗ Skip |
-
-**Checkpoint Options:** Continue / Test First / Stop (7.1) | Continue / Integration Test / Stop (7.2)
-
-## State Management
-
-State persisted to `.ring/dev-team/current-cycle.json`:
-
-| Field | Type | Values |
-|-------|------|--------|
-| `execution_mode` | string | `manual_per_subtask` \| `manual_per_task` \| `automatic` |
-| `status` | string | `in_progress` \| `completed` \| `failed` \| `paused` \| `paused_for_approval` \| `paused_for_testing` \| `paused_for_task_approval` \| `paused_for_integration_testing` |
-| `current_task_index` | int | Current task position |
-| `current_gate` | int | 0-5 |
-| `tasks[].status` | string | `pending` \| `in_progress` \| `completed` \| `failed` \| `blocked` |
-| `tasks[].gate_progress` | object | Status per gate (implementation, devops, sre, testing, review, validation) |
-| `metrics` | object | `total_duration_ms`, `gate_durations`, `review_iterations` |
-
-## Step 0: Verify PROJECT_RULES.md Exists (HARD GATE)
-
 **NON-NEGOTIABLE. Cycle CANNOT proceed without project standards.**
 
 **Check:** (1) docs/PROJECT_RULES.md (2) docs/STANDARDS.md (legacy) (3) --resume state file → Found: Proceed | NOT Found: STOP with blocker `missing_prerequisite`
