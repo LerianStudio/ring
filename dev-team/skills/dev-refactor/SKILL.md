@@ -3,19 +3,22 @@ name: dev-refactor
 description: |
   Analyzes codebase against Ring/Lerian standards and generates refactoring tasks.
 
-  EXECUTION SEQUENCE:
-  1. Validate docs/PROJECT_RULES.md exists (BLOCKER if missing)
-  2. Detect project language (go.mod, package.json)
-  3. Dispatch ring-default:codebase-explorer (Task tool, model: opus)
+  MANDATORY FIRST ACTION - Create this exact TodoWrite:
+  1. Validate PROJECT_RULES.md exists
+  2. Detect project language
+  3. Dispatch ring-default:codebase-explorer ← REQUIRED BEFORE step 5
   4. Save codebase-report.md
-  5. Dispatch ring-dev-team specialist agents (Task tool, model: opus, parallel)
-  6. Generate findings.md with Code Transformation Context
-  7. Generate tasks.md referencing findings
-  8. Get user approval
+  5. Dispatch specialist agents (BLOCKED until step 4 complete)
+  6. Generate findings.md
+  7. Generate tasks.md
+  8. User approval
   9. Handoff to dev-cycle
 
-  FORBIDDEN: Explore, general-purpose, Plan agents
-  REQUIRED: ring-default:codebase-explorer (step 3), ring-dev-team:* (step 5)
+  HARD DEPENDENCY: Step 5 (specialist agents) REQUIRES codebase-report.md from Step 3-4.
+  If codebase-report.md does NOT exist → Step 5 CANNOT run.
+
+  FORBIDDEN: Explore, general-purpose, Plan agents (they lack Ring standards context)
+  REQUIRED: ring-default:codebase-explorer for Step 3
 
 trigger: |
   - User wants to refactor existing project to follow standards
@@ -113,6 +116,14 @@ Write tool:
 ---
 
 ## Step 4: Dispatch Specialist Agents
+
+**⛔ HARD GATE: Verify codebase-report.md exists BEFORE dispatching agents.**
+
+```
+Check: Does docs/refactor/{timestamp}/codebase-report.md exist?
+- YES → Continue to dispatch agents
+- NO → STOP. Go back to Step 3. Dispatch ring-default:codebase-explorer first.
+```
 
 **Dispatch ALL applicable agents in ONE message (parallel):**
 
