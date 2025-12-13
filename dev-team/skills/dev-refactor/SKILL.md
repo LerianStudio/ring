@@ -490,8 +490,10 @@ Step 3:   [ ] ALL applicable ring-dev-team:* agents dispatched in SINGLE message
            ❌ FORBIDDEN: Any agent without ring-dev-team: prefix
 
 Step 4:   [ ] Agent outputs compiled into findings.md?
+           ⛔ MANDATORY - Use Write tool to CREATE findings.md
            ⛔ MANDATORY - Generate findings.md with CTC for each finding
            ⛔ MANDATORY - Each finding has Before/After/Standard References
+           ❌ If Write tool NOT used → findings.md does NOT exist → SKILL FAILURE
 
 Step 5:   [ ] Findings grouped into REFACTOR-XXX tasks?
            ⛔ MANDATORY - Group by dependency order
@@ -510,7 +512,9 @@ Step 8:   [ ] Artifacts saved to docs/refactor/{timestamp}/?
            ⛔ MANDATORY - tasks.md saved
 
 Step 9:   [ ] Handoff to dev-cycle (if approved)?
-           ⛔ MANDATORY (if user approved) - Execute via dev-cycle
+           ⛔ MANDATORY (if user approved) - Use Skill tool to invoke dev-cycle
+           ⛔ MANDATORY - Skill tool with skill="ring-dev-team:dev-cycle"
+           ❌ If approval received AND Skill tool NOT used → SKILL FAILURE
 ```
 
 **⛔ SKIP PREVENTION:** You CANNOT proceed to Step N+1 without completing Step N. There are NO exceptions. There are NO shortcuts. There are NO "quick modes".
@@ -520,6 +524,15 @@ Step 9:   [ ] Handoff to dev-cycle (if approved)?
 **⛔ GATE 2 (CODEBASE REPORT):** If codebase-report.md doesn't exist, you CANNOT dispatch specialist agents. This is not optional. This is not "nice to have". Without the report, ALL specialist output is INVALID.
 
 **⛔ GATE 1 (AGENT PREFIX):** If subagent_type doesn't start with `ring-dev-team:`, STOP and use the correct agent. EXCEPTION: `ring-default:codebase-explorer` is allowed ONLY in GATE 2.
+
+**⛔ EXPLICIT TOOL REQUIREMENTS (MANDATORY):**
+
+| Step | Tool Required | Action |
+|------|---------------|--------|
+| Step 4 | **Write tool** | CREATE `docs/refactor/{timestamp}/findings.md` |
+| Step 9 | **Skill tool** | INVOKE `ring-dev-team:dev-cycle` (after approval) |
+
+**Nothing is implicit. Tool usage = action happens. No tool = action does NOT happen.**
 
 #### Prompt Requirements for Step 3
 
@@ -1505,6 +1518,20 @@ The orchestrator MUST collect all agent outputs and compile into `findings.md` -
 4. **VERIFY** each finding has Code Transformation Context
 5. **SORT** by severity (Critical → High → Medium → Low)
 
+### Explicit File Creation (MANDATORY)
+
+**⛔ You MUST use the Write tool to create findings.md. This is NOT implicit.**
+
+```text
+Action: Use Write tool to create docs/refactor/{timestamp}/findings.md
+
+Content: Compiled findings from all agent outputs using the structure below
+
+VERIFICATION: After Write completes, confirm file exists before proceeding to Step 5
+```
+
+**If you do NOT use Write tool → findings.md does NOT exist → SKILL FAILURE**
+
 ### findings.md Structure (Dynamic - Generated Per Project)
 
 ```markdown
@@ -1640,6 +1667,8 @@ See [docs/PROMPT_ENGINEERING.md](../../../docs/PROMPT_ENGINEERING.md#code-transf
 | "Code comparison tables are sufficient" | Tables = WHAT. CTC = HOW. Both REQUIRED. | **Add full CTC per finding** |
 | "Only critical findings need CTC" | ALL findings need context. Severity is irrelevant. | **CTC for EVERY finding** |
 | "Agents already provided the context" | Agents provide raw data. Orchestrator compiles into findings.md. | **Compile into findings.md** |
+| "I described findings in my response" | Response text ≠ file. Must use Write tool to CREATE the file. | **Use Write tool explicitly** |
+| "findings.md is implicitly created" | Nothing is implicit. Write tool = file exists. No Write = no file. | **Use Write tool explicitly** |
 
 **If findings.md is NOT generated → Step 4 is INCOMPLETE → SKILL FAILURE**
 
@@ -1886,16 +1915,53 @@ tasks.md (actionable refactoring tasks)
 
 **Note:** Ring standards are loaded dynamically by agents via WebFetch. PROJECT_RULES.md remains in its original location (`docs/PROJECT_RULES.md`).
 
-## Step 9: Handoff to dev-cycle
+## Step 9: Handoff to dev-cycle (MANDATORY After Approval)
 
-If approved, the workflow continues:
+**⛔ HARD GATE: If user approves → You MUST invoke dev-cycle. This is NOT optional.**
 
-```bash
-# Automatic handoff
-/ring-dev-team:dev-cycle docs/refactor/{timestamp}/tasks.md
+### Approval Response Handling
+
+| User Selection | Required Action |
+|----------------|-----------------|
+| "Approve all" | **MUST invoke dev-cycle** with full tasks.md |
+| "Approve with changes" | Wait for user edits → **MUST invoke dev-cycle** |
+| "Critical only" | Filter tasks.md → **MUST invoke dev-cycle** |
+| "Cancel" | Save artifacts, document cancellation reason, TERMINATE |
+
+### Explicit Skill Invocation (MANDATORY)
+
+**⛔ You MUST use the Skill tool to invoke dev-cycle. This is NOT implicit.**
+
+```text
+Action: Use Skill tool with skill="ring-dev-team:dev-cycle"
+
+BEFORE invoking:
+1. Confirm tasks.md exists at docs/refactor/{timestamp}/tasks.md
+2. Confirm findings.md exists at docs/refactor/{timestamp}/findings.md
+3. Confirm user approval was "Approve all", "Approve with changes", or "Critical only"
+
+INVOCATION:
+- Skill tool: skill="ring-dev-team:dev-cycle"
+- The dev-cycle skill will read tasks.md and execute each REFACTOR-XXX task
+
+VERIFICATION: dev-cycle skill starts executing tasks through 6-gate process
 ```
 
-This executes each refactoring task through the standard 6-gate process:
+**If approval received AND dev-cycle NOT invoked → SKILL FAILURE**
+
+### Anti-Rationalization - dev-cycle Invocation
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "User can invoke dev-cycle manually" | User approved HERE. Handoff is YOUR responsibility. | **Invoke dev-cycle NOW** |
+| "Analysis is complete, my job is done" | Analysis + Approval + Execution = complete workflow. | **Invoke dev-cycle NOW** |
+| "I'll let the user decide when to execute" | User ALREADY decided by approving. Execute immediately. | **Invoke dev-cycle NOW** |
+| "dev-cycle invocation is implicit" | Nothing is implicit. Skill tool = invocation. No Skill = no execution. | **Use Skill tool explicitly** |
+| "Tasks are saved, that's enough" | Saved tasks ≠ executed tasks. Approval = execute. | **Invoke dev-cycle NOW** |
+
+### dev-cycle Execution
+
+Once invoked, dev-cycle executes each refactoring task through the standard 6-gate process:
 - Gate 0: Implementation (TDD)
 - Gate 1: DevOps Setup
 - Gate 2: SRE (Observability)
