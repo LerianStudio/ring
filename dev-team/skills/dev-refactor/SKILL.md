@@ -37,7 +37,11 @@ This skill has its own specialized agents that MUST be used instead.
 - ❌ DO NOT use `Explore` agent (even though using-ring recommends it for codebase work)
 - ❌ DO NOT use `general-purpose` agent
 - ❌ DO NOT use `Plan` agent
-- ✅ ONLY use `ring-dev-team:*` agents (see list below)
+- ✅ Step 3: Use `ring-default:codebase-explorer` (ONLY agent allowed for codebase exploration)
+- ✅ Step 4+: Use `ring-dev-team:*` agents (specialists)
+
+**⛔ CRITICAL: For codebase exploration, use `ring-default:codebase-explorer`, NOT `Explore`.**
+The built-in `Explore` agent is FORBIDDEN. It does NOT load Ring standards.
 
 **Why?** The ring-dev-team:* agents have domain expertise and load Ring standards via WebFetch.
 Generic agents like Explore do NOT have this capability.
@@ -562,7 +566,7 @@ All specialist agent prompts MUST:
 | `ring-default:code-reviewer` | Wrong plugin, for review not analysis | SKILL FAILURE |
 
 **✅ EXCEPTION for Step 3 ONLY:**
-| `ring-default:codebase-explorer` | Explores codebase structure | **ALLOWED IN STEP 2.5 ONLY** - generates codebase-report.md for specialists |
+| `ring-default:codebase-explorer` | Explores codebase structure | **ALLOWED IN STEP 3 ONLY** - generates codebase-report.md for specialists |
 
 **After Step 3, ring-default:codebase-explorer is FORBIDDEN. Specialists compare the report with Ring standards.**
 
