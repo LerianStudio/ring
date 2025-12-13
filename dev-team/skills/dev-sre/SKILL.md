@@ -79,8 +79,6 @@ If WebFetch fails → STOP and report blocker. Cannot proceed without Ring SRE s
 This skill VALIDATES that observability was correctly implemented by developers:
 - Structured logging with trace correlation
 - OpenTelemetry tracing instrumentation
-- Grafana dashboard (if required)
-- Alert rules (if required)
 
 ## CRITICAL: Role Clarification
 
@@ -284,17 +282,13 @@ See [shared-patterns/skills-anti-rationalization.md](../shared-patterns/skills-a
 | Requirement | Status | Notes |
 |-------------|--------|-------|
 | Structured JSON logs | **REQUIRED** | With trace_id correlation |
-| Grafana dashboard | Recommended | Can defer for non-critical services |
-| Alert rules | Recommended | Required if service has SLO |
 
 **Can be deferred with explicit approval:**
-- Grafana dashboard (if service non-critical)
-- Alert rules (if no SLOs defined yet)
 - Distributed tracing (for standalone workers only)
 
 ## Handling Pushback
 
-**Response:** "Observability is not optional. Without it: no auto-detection of failures, no SLO measurement, no efficient debugging, no auto-recovery. If time-constrained, reduce FEATURE scope, not observability scope."
+**Response:** "Observability is not optional. Without it: no auto-detection of failures, no efficient debugging, no auto-recovery. If time-constrained, reduce FEATURE scope, not observability scope."
 
 ## Prerequisites
 
@@ -335,7 +329,7 @@ Review Gate 0/1 handoff: Service type (API/Worker/Batch), Language, External dep
 
 | Service Type | Required | Optional |
 |--------------|----------|----------|
-| **API Service** | Structured logging, Tracing (if calls external services) | Grafana dashboard, Alert rules |
+| **API Service** | Structured logging, Tracing (if calls external services) | — |
 | **Background Worker** | Structured logging | Tracing |
 | **Batch Job** | Structured logging, Exit code handling | — |
 

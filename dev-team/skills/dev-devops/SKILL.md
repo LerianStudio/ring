@@ -90,7 +90,7 @@ See [shared-patterns/pressure-resistance.md](../shared-patterns/pressure-resista
 | "Docker is overkill for this" | Docker is baseline, not overkill. Complexity is hidden, not added. |
 | "We'll add Docker later" | Later = never. Context lost = mistakes made. |
 | "Just need docker run" | docker-compose is reproducible. docker run is not documented. |
-| "CI/CD will handle Docker" | CI/CD uses your Dockerfile. No Dockerfile = no CI/CD. |
+| "Build system will handle Docker" | Build system uses your Dockerfile. No Dockerfile = no reproducible builds. |
 | "It's just a script/tool" | Scripts need reproducible environments too. Containerize. |
 | "Demo tomorrow, Docker later" | Demo with environment issues = failed demo. Docker BEFORE demo. |
 | "Works on demo machine" | Demo machine ≠ production. Docker ensures consistency. |
@@ -119,7 +119,7 @@ If you catch yourself thinking ANY of these, STOP immediately:
 | Deployment Target | Development Requirement | Why |
 |-------------------|------------------------|-----|
 | **Traditional VM/Server** | Dockerfile + docker-compose | Standard containerization |
-| **Kubernetes** | Dockerfile + docker-compose + Helm optional | K8s uses containers |
+| **Helm Deployment** | Dockerfile + docker-compose + Helm chart | Helm uses container images |
 | **AWS Lambda/Serverless** | Dockerfile OR SAM template | Local testing needs container |
 | **Vercel/Netlify** | Dockerfile for local dev | Platform builds ≠ local builds |
 | **Static Site (CDN)** | Optional (nginx container for parity) | Recommended but not required |

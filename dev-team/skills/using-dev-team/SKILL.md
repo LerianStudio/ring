@@ -38,7 +38,7 @@ See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.
 |--------------|----------|--------|
 | **Technology Stack** | Go vs TypeScript for new service | STOP. Check existing patterns. Ask user. |
 | **Architecture** | Monolith vs microservices | STOP. This is a business decision. Ask user. |
-| **Infrastructure** | K8s vs Docker Compose | STOP. Check scale requirements. Ask user. |
+| **Infrastructure** | Cloud provider choice | STOP. Check existing infrastructure. Ask user. |
 | **Testing Strategy** | Unit vs E2E vs both | STOP. Check QA requirements. Ask user. |
 
 **You CANNOT make technology decisions autonomously. STOP and ask.**
@@ -167,11 +167,11 @@ Task tool:
 |-------|-----------------|----------|
 | **`ring-dev-team:backend-engineer-golang`** | Go microservices, PostgreSQL/MongoDB, Kafka/RabbitMQ, OAuth2/JWT, gRPC, concurrency | Go services, DB optimization, auth/authz, concurrency issues |
 | **`ring-dev-team:backend-engineer-typescript`** | TypeScript/Node.js, Express/Fastify/NestJS, Prisma/TypeORM, async patterns, Jest/Vitest | TS backends, JS→TS migration, NestJS design, full-stack TS |
-| **`ring-dev-team:devops-engineer`** | GitHub Actions/GitLab CI, Docker/Compose, Kubernetes, Terraform/Helm, cloud infra | CI/CD pipelines, containerization, K8s, IaC provisioning |
+| **`ring-dev-team:devops-engineer`** | Docker/Compose, Terraform/Helm, cloud infra, secrets management | Containerization, local dev setup, IaC provisioning, Helm charts |
 | **`ring-dev-team:frontend-bff-engineer-typescript`** | Next.js API Routes BFF, Clean/Hexagonal Architecture, DDD patterns, Inversify DI, repository pattern | BFF layer, Clean Architecture, DDD domains, API orchestration |
 | **`ring-dev-team:frontend-designer`** | Bold typography, color systems, animations, unexpected layouts, textures/gradients | Landing pages, portfolios, distinctive dashboards, design systems |
 | **`ring-dev-team:qa-analyst`** | Test strategy, Cypress/Playwright E2E, coverage analysis, API testing, performance | Test planning, E2E suites, coverage gaps, quality gates |
-| **`ring-dev-team:sre`** | Monitoring/logging/tracing, SLOs/alerting, incident response, scalability | Observability setup, alerts, incident planning, reliability |
+| **`ring-dev-team:sre`** | Structured logging, tracing, health checks, observability | Logging validation, tracing setup, health endpoint verification |
 
 **Dispatch template:**
 ```

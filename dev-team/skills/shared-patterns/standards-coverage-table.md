@@ -312,12 +312,11 @@ See [shared-patterns/standards-coverage-table.md](../skills/shared-patterns/stan
 | # | Section to Check |
 |---|------------------|
 | 1 | Observability Stack |
-| 2 | Metrics Standards |
-| 3 | Logging Standards |
-| 4 | Tracing Standards |
-| 5 | OpenTelemetry with lib-commons (MANDATORY for Go) |
-| 6 | Structured Logging with lib-common-js (MANDATORY for TypeScript) |
-| 7 | Health Checks |
+| 2 | Logging Standards |
+| 3 | Tracing Standards |
+| 4 | OpenTelemetry with lib-commons (MANDATORY for Go) |
+| 5 | Structured Logging with lib-common-js (MANDATORY for TypeScript) |
+| 6 | Health Checks |
 
 ---
 

@@ -635,8 +635,8 @@ For current execution unit:
 
        Check:
        - Dockerfile updates needed?
-       - K8s manifests needed?
-       - CI/CD pipeline updates?
+       - docker-compose updates needed?
+       - Helm chart updates needed?
        - Environment variables?
 
        Report: changes made, deployment notes.

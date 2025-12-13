@@ -733,7 +733,6 @@ coverage: 87.3% of statements
 ## What This Agent Does NOT Handle
 
 - Frontend/UI development (use `ring-dev-team:frontend-bff-engineer-typescript`)
-- Docker/Kubernetes configuration (use `ring-dev-team:devops-engineer`)
-- Infrastructure monitoring and alerting setup (use `ring-dev-team:sre`)
+- Docker/docker-compose configuration (use `ring-dev-team:devops-engineer`)
+- Observability validation (use `ring-dev-team:sre`)
 - End-to-end test scenarios and manual testing (use `ring-dev-team:qa-analyst`)
-- CI/CD pipeline configuration (use `ring-dev-team:devops-engineer`)
