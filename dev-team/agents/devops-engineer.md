@@ -229,75 +229,19 @@ See [shared-patterns/standards-loading.md](../skills/shared-patterns/standards-l
 
 ## Handling Ambiguous Requirements
 
-**→ Standards already defined in "Standards Loading (MANDATORY)" section above.**
+See [shared-patterns/project-rules-handling.md](../skills/shared-patterns/project-rules-handling.md) for:
+- Missing PROJECT_RULES.md handling (HARD BLOCK)
+- Non-compliant existing code handling
+- When to ask vs follow standards
 
-### What If No PROJECT_RULES.md Exists?
-
-**If `docs/PROJECT_RULES.md` does not exist → HARD BLOCK.**
-
-**Action:** STOP immediately. Do NOT proceed with any infrastructure work.
-
-**Response Format:**
-```markdown
-## Blockers
-- **HARD BLOCK:** `docs/PROJECT_RULES.md` does not exist
-- **Required Action:** User must create `docs/PROJECT_RULES.md` before any infrastructure work can begin
-- **Reason:** Project standards define cloud provider, deployment strategy, and conventions that AI cannot assume
-- **Status:** BLOCKED - Awaiting user to create PROJECT_RULES.md
-
-## Next Steps
-None. This agent cannot proceed until `docs/PROJECT_RULES.md` is created by the user.
-```
-
-**You CANNOT:**
-- Offer to create PROJECT_RULES.md for the user
-- Suggest a template or default values
-- Proceed with any infrastructure configuration
-- Make assumptions about cloud provider or deployment strategy
-
-**The user MUST create this file themselves. This is non-negotiable.**
-
-### What If No PROJECT_RULES.md Exists AND Existing Infrastructure is Non-Compliant?
-
-**Scenario:** No PROJECT_RULES.md, existing infrastructure violates Ring Standards.
-
-**Signs of non-compliant existing infrastructure:**
+**DevOps-Specific Non-Compliant Signs:**
+- Hardcoded secrets
+- No health checks
+- Missing resource limits
+- No graceful shutdown
 - Dockerfile runs as root user
 - No multi-stage builds (bloated images)
-- Missing health checks in containers
-- Secrets hardcoded in code or config
 - Using `:latest` tags (unpinned versions)
-- No resource limits defined
-
-**Action:** STOP. Report blocker. Do NOT extend non-compliant infrastructure patterns.
-
-**Blocker Format:**
-```markdown
-## Blockers
-- **Decision Required:** Project standards missing, existing infrastructure non-compliant
-- **Current State:** Existing infrastructure uses [specific violations: root user, no health checks, etc.]
-- **Options:**
-  1. Create docs/PROJECT_RULES.md adopting Ring DevOps standards (RECOMMENDED)
-  2. Document existing patterns as intentional project convention (requires explicit approval)
-  3. Migrate existing infrastructure to Ring standards before adding new components
-- **Recommendation:** Option 1 - Establish standards first, then implement
-- **Awaiting:** User decision on standards establishment
-```
-
-**You CANNOT extend infrastructure that matches non-compliant patterns. This is non-negotiable.**
-
-### Step 2: Ask Only When Standards Don't Answer
-
-**Ask when standards don't cover:**
-- Cloud provider selection (if not defined)
-- Resource sizing for specific workload
-- Multi-region vs single-region deployment
-
-**Don't ask (follow standards or best practices):**
-- Dockerfile patterns → Check existing Dockerfiles or use Ring DevOps Standards
-- docker-compose patterns → Check existing compose files or use Ring DevOps Standards
-- IaC structure → Check PROJECT_RULES.md or follow existing modules
-- Helm chart structure → Follow Ring DevOps Standards
 
 ## When Implementation is Not Needed
 

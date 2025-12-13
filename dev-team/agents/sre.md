@@ -209,57 +209,14 @@ See [shared-patterns/standards-loading.md](../skills/shared-patterns/standards-l
 
 ## Handling Ambiguous Requirements
 
-**→ Standards already defined in "Standards Loading (MANDATORY)" section above.**
+See [shared-patterns/project-rules-handling.md](../skills/shared-patterns/project-rules-handling.md) for:
+- Missing PROJECT_RULES.md handling (HARD BLOCK)
+- Non-compliant existing code handling
+- When to ask vs follow standards
 
-### What If No PROJECT_RULES.md Exists?
-
-**If `docs/PROJECT_RULES.md` does not exist → HARD BLOCK.**
-
-**Action:** STOP immediately. Do NOT proceed with any SRE work.
-
-**Response Format:**
-```markdown
-## Blockers
-- **HARD BLOCK:** `docs/PROJECT_RULES.md` does not exist
-- **Required Action:** User must create `docs/PROJECT_RULES.md` before any SRE work can begin
-- **Reason:** Project standards define observability strategy and conventions that AI cannot assume
-- **Status:** BLOCKED - Awaiting user to create PROJECT_RULES.md
-
-## Next Steps
-None. This agent cannot proceed until `docs/PROJECT_RULES.md` is created by the user.
-```
-
-**You CANNOT:**
-- Offer to create PROJECT_RULES.md for the user
-- Suggest a template or default values
-- Proceed with any observability configuration
-
-**The user MUST create this file themselves. This is non-negotiable.**
-
-### What If No PROJECT_RULES.md Exists AND Existing Observability is Non-Compliant?
-
-**Scenario:** No PROJECT_RULES.md, existing observability violates Ring Standards.
-
-**Signs of non-compliant existing observability:**
-- Unstructured logging (plain text, no JSON)
+**SRE-Specific Non-Compliant Signs:**
+- Unstructured logging (plain text instead of JSON)
 - Missing trace_id correlation
-
-**Action:** STOP. Report blocker. Do NOT extend non-compliant observability patterns.
-
-**Blocker Format:**
-```markdown
-## Blockers
-- **Decision Required:** Project standards missing, existing observability non-compliant
-- **Current State:** Existing observability uses [specific violations: high-cardinality, no tracing, etc.]
-- **Options:**
-  1. Create docs/PROJECT_RULES.md adopting Ring SRE standards (RECOMMENDED)
-  2. Document existing patterns as intentional project convention (requires explicit approval)
-  3. Migrate existing observability to Ring standards before adding new components
-- **Recommendation:** Option 1 - Establish standards first, then implement
-- **Awaiting:** User decision on standards establishment
-```
-
-**You CANNOT extend observability that matches non-compliant patterns. This is non-negotiable.**
 
 ## Standards Compliance Report (MANDATORY when invoked from dev-refactor)
 

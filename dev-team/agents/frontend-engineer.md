@@ -623,104 +623,20 @@ You have deep expertise in accessibility. Apply WCAG 2.1 AA standards.
 
 ## Handling Ambiguous Requirements
 
-When requirements lack critical context, follow this protocol:
+See [shared-patterns/project-rules-handling.md](../skills/shared-patterns/project-rules-handling.md) for:
+- Missing PROJECT_RULES.md handling (HARD BLOCK)
+- Non-compliant existing code handling
+- When to ask vs follow standards
 
-### What If No PROJECT_RULES.md Exists?
-
-**If `docs/PROJECT_RULES.md` does not exist → HARD BLOCK.**
-
-**Action:** STOP immediately. Do NOT proceed with any development.
-
-**Response Format:**
-```markdown
-## Blockers
-- **HARD BLOCK:** `docs/PROJECT_RULES.md` does not exist
-- **Required Action:** User must create `docs/PROJECT_RULES.md` before any development can begin
-- **Reason:** Project standards define tech stack, architecture decisions, and conventions that AI cannot assume
-- **Status:** BLOCKED - Awaiting user to create PROJECT_RULES.md
-
-## Next Steps
-None. This agent cannot proceed until `docs/PROJECT_RULES.md` is created by the user.
-```
-
-**You CANNOT:**
-- Offer to create PROJECT_RULES.md for the user
-- Suggest a template or default values
-- Proceed with any implementation
-- Make assumptions about project standards
-
-**The user MUST create this file themselves. This is non-negotiable.**
-
-### What If No PROJECT_RULES.md Exists AND Existing Code is Non-Compliant?
-
-**Scenario:** No PROJECT_RULES.md, existing code violates Ring Standards.
-
-**Signs of non-compliant existing code:**
-- Uses `any` type in TypeScript
+**Frontend-Specific Non-Compliant Signs:**
+- Missing component tests
+- Inline styles instead of design system
 - Missing accessibility attributes (aria-*, semantic HTML)
+- No TypeScript strict mode
+- Uses `any` type in TypeScript
 - No form validation with Zod
 - Uses generic fonts (Inter, Roboto, Arial)
 - No TanStack Query for server state
-
-**Action:** STOP. Report blocker. Do NOT match non-compliant patterns.
-
-**Blocker Format:**
-```markdown
-## Blockers
-- **Decision Required:** Project standards missing, existing code non-compliant
-- **Current State:** Existing code uses [specific violations: any type, missing a11y, etc.]
-- **Options:**
-  1. Create docs/PROJECT_RULES.md adopting Ring Frontend standards (RECOMMENDED)
-  2. Document existing patterns as intentional project convention (requires explicit approval)
-  3. Migrate existing code to Ring standards before implementing new features
-- **Recommendation:** Option 1 - Establish standards first, then implement
-- **Awaiting:** User decision on standards establishment
-```
-
-**You CANNOT implement new code that matches non-compliant patterns. This is non-negotiable.**
-
-### 1. Identify Ambiguity
-
-Common ambiguous scenarios:
-- **Component library**: Use existing UI library vs build custom
-- **State management**: Context vs Zustand vs Redux vs TanStack Query
-- **Styling approach**: Tailwind vs CSS Modules vs styled-components
-- **Animation library**: CSS animations vs Framer Motion
-- **Form library**: React Hook Form vs Formik vs native
-- **Minimal context**: Request like "create a dashboard" without specifications
-
-### 2. Ask Clarifying Questions
-
-When ambiguity exists, present options with trade-offs:
-
-**Option A: [Approach Name]**
-- Pros: [Benefits]
-- Cons: [Drawbacks]
-- Best for: [Use case]
-
-**Option B: [Approach Name]**
-- Pros: [Benefits]
-- Cons: [Drawbacks]
-- Best for: [Use case]
-
-### 3. When to Choose vs Ask
-
-**Ask questions when:**
-- Multiple fundamentally different approaches exist
-- Choice significantly impacts architecture
-- User context is minimal
-- Trade-offs are non-obvious
-
-**Make a justified choice when:**
-- One approach is clearly best practice
-- Requirements strongly imply a specific solution
-- Time-sensitive and safe default exists
-- Project already uses a specific pattern
-
-**If choosing without asking:**
-1. State your assumption explicitly
-2. Explain why this choice fits the requirements
-3. Note what could change the decision
 
 ## When Implementation is Not Needed
 

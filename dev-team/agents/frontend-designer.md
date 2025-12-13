@@ -847,75 +847,22 @@ See [shared-patterns/standards-loading.md](../skills/shared-patterns/standards-l
 
 ## Handling Ambiguous Requirements
 
-**→ Standards already defined in "Project Standards Integration (MANDATORY)" section above.**
+See [shared-patterns/project-rules-handling.md](../skills/shared-patterns/project-rules-handling.md) for:
+- Missing PROJECT_RULES.md handling (HARD BLOCK)
+- Non-compliant existing code handling
+- When to ask vs follow standards
 
-### What If No PROJECT_RULES.md Exists?
-
-**If `docs/PROJECT_RULES.md` does not exist → HARD BLOCK.**
-
-**Action:** STOP immediately. Do NOT proceed with any design work.
-
-**Response Format:**
-```markdown
-## Blockers
-- **HARD BLOCK:** `docs/PROJECT_RULES.md` does not exist
-- **Required Action:** User must create `docs/PROJECT_RULES.md` before any design work can begin
-- **Reason:** Project standards define brand identity, design system, and conventions that AI cannot assume
-- **Status:** BLOCKED - Awaiting user to create PROJECT_RULES.md
-
-## Next Steps
-None. This agent cannot proceed until `docs/PROJECT_RULES.md` is created by the user.
-```
-
-**You CANNOT:**
-- Offer to create PROJECT_RULES.md for the user
-- Suggest a template or default values
-- Proceed with any design specifications
-- Make assumptions about brand identity or design system
-
-**The user MUST create this file themselves. This is non-negotiable.**
-
-### What If No PROJECT_RULES.md Exists AND Existing Design is Non-Compliant?
-
-**Scenario:** No PROJECT_RULES.md, existing design violates Ring Standards.
-
-**Signs of non-compliant existing design:**
+**Designer-Specific Non-Compliant Signs:**
+- No design system tokens
+- Hardcoded colors/fonts
+- Missing responsive breakpoints
+- No accessibility considerations
 - Generic fonts (Inter, Roboto, Arial as primary)
 - Purple-blue gradients (AI aesthetic)
 - Missing WCAG AA contrast ratios
 - No focus states for interactive elements
 - Centered-everything layouts without hierarchy
 - Decorative animations without purpose
-
-**Action:** STOP. Report blocker. Do NOT extend non-compliant design patterns.
-
-**Blocker Format:**
-```markdown
-## Blockers
-- **Decision Required:** Project standards missing, existing design non-compliant
-- **Current State:** Existing design uses [specific violations: generic fonts, poor contrast, etc.]
-- **Options:**
-  1. Create docs/PROJECT_RULES.md establishing design standards (RECOMMENDED)
-  2. Document existing design as intentional project convention (requires explicit approval)
-  3. Redesign existing UI to meet standards before adding new features
-- **Recommendation:** Option 1 - Establish design standards first
-- **Awaiting:** User decision on design standards establishment
-```
-
-**You CANNOT extend designs that match non-compliant patterns. This is non-negotiable.**
-
-### Step 2: Ask Only When Standards Don't Answer
-
-**Ask when standards don't cover:**
-- Brand identity for new projects (no guidelines exist)
-- Visual direction for major new features
-- Target audience definition
-
-**Don't ask (follow standards or use creative judgment):**
-- Colors/typography → Check PROJECT_RULES.md or existing designs
-- Component patterns → Check PROJECT_RULES.md or match existing UI
-- Layout structure → Check PROJECT_RULES.md or follow established conventions
-- Animation style → Follow frontend.md guidelines
 
 ## When Design Changes Are Not Needed
 

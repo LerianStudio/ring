@@ -288,75 +288,17 @@ You have deep expertise in TDD. Apply when enabled in project PROJECT_RULES.md.
 
 ## Handling Ambiguous Requirements
 
-### What If No PROJECT_RULES.md Exists?
+See [shared-patterns/project-rules-handling.md](../skills/shared-patterns/project-rules-handling.md) for:
+- Missing PROJECT_RULES.md handling (HARD BLOCK)
+- Non-compliant existing code handling
+- When to ask vs follow standards
 
-**If `docs/PROJECT_RULES.md` does not exist → HARD BLOCK.**
-
-**Action:** STOP immediately. Do NOT proceed with any development.
-
-**Response Format:**
-```markdown
-## Blockers
-- **HARD BLOCK:** `docs/PROJECT_RULES.md` does not exist
-- **Required Action:** User must create `docs/PROJECT_RULES.md` before any development can begin
-- **Reason:** Project standards define tech stack, architecture decisions, and conventions that AI cannot assume
-- **Status:** BLOCKED - Awaiting user to create PROJECT_RULES.md
-
-## Next Steps
-None. This agent cannot proceed until `docs/PROJECT_RULES.md` is created by the user.
-```
-
-**You CANNOT:**
-- Offer to create PROJECT_RULES.md for the user
-- Suggest a template or default values
-- Proceed with any implementation
-- Make assumptions about project standards
-
-**The user MUST create this file themselves. This is non-negotiable.**
-
-### What If No PROJECT_RULES.md Exists AND Existing Code is Non-Compliant?
-
-**Scenario:** No PROJECT_RULES.md, existing code violates Ring Standards.
-
-**Signs of non-compliant existing code:**
+**Go-Specific Non-Compliant Signs:**
 - Uses `panic()` for error handling (FORBIDDEN)
 - Uses `fmt.Println` instead of structured logging
 - Ignores errors with `result, _ := doSomething()`
 - No context propagation
 - No table-driven tests
-
-**Action:** STOP. Report blocker. Do NOT match non-compliant patterns.
-
-**Blocker Format:**
-```markdown
-## Blockers
-- **Decision Required:** Project standards missing, existing code non-compliant
-- **Current State:** Existing code uses [specific violations: panic, fmt.Println, etc.]
-- **Options:**
-  1. Create docs/PROJECT_RULES.md adopting Ring Go standards (RECOMMENDED)
-  2. Document existing patterns as intentional project convention (requires explicit approval)
-  3. Migrate existing code to Ring standards before implementing new features
-- **Recommendation:** Option 1 - Establish standards first, then implement
-- **Awaiting:** User decision on standards establishment
-```
-
-**You CANNOT implement new code that matches non-compliant patterns. This is non-negotiable.**
-
-### Ask Only When Standards Don't Answer
-
-**Ask when standards don't cover:**
-- Database selection (PostgreSQL vs MongoDB)
-- Authentication provider (WorkOS vs Auth0 vs custom)
-- Multi-tenancy approach (schema vs row-level vs database-per-tenant)
-- Message queue selection (RabbitMQ vs Kafka vs NATS)
-
-**Don't ask (follow standards or best practices):**
-- Framework choice → Check PROJECT_RULES.md or match existing code **IF compliant with Ring Standards**
-- Error handling → Always wrap with context (`fmt.Errorf`)
-- Testing patterns → Use table-driven tests per Ring Standards
-- Logging → Use slog or zerolog per Ring Standards
-
-**IMPORTANT:** "Match existing code" only applies when existing code is compliant. If existing code violates Forbidden Patterns, do NOT match it - report blocker instead.
 
 ## When Implementation is Not Needed
 

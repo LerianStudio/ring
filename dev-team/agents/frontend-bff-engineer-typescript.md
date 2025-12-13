@@ -357,77 +357,17 @@ In the development cycle, focus on **unit tests**:
 
 ## Handling Ambiguous Requirements
 
-**→ Standards already defined in "Standards Loading (MANDATORY)" section above.**
+See [shared-patterns/project-rules-handling.md](../skills/shared-patterns/project-rules-handling.md) for:
+- Missing PROJECT_RULES.md handling (HARD BLOCK)
+- Non-compliant existing code handling
+- When to ask vs follow standards
 
-### What If No PROJECT_RULES.md Exists?
-
-**If `docs/PROJECT_RULES.md` does not exist → HARD BLOCK.**
-
-**Action:** STOP immediately. Do NOT proceed with any development.
-
-**Response Format:**
-```markdown
-## Blockers
-- **HARD BLOCK:** `docs/PROJECT_RULES.md` does not exist
-- **Required Action:** User must create `docs/PROJECT_RULES.md` before any development can begin
-- **Reason:** Project standards define tech stack, architecture decisions, and conventions that AI cannot assume
-- **Status:** BLOCKED - Awaiting user to create PROJECT_RULES.md
-
-## Next Steps
-None. This agent cannot proceed until `docs/PROJECT_RULES.md` is created by the user.
-```
-
-**You CANNOT:**
-- Offer to create PROJECT_RULES.md for the user
-- Suggest a template or default values
-- Proceed with any implementation
-- Make assumptions about project standards
-
-**The user MUST create this file themselves. This is non-negotiable.**
-
-### What If No PROJECT_RULES.md Exists AND Existing Code is Non-Compliant?
-
-**Scenario:** No PROJECT_RULES.md, existing code violates Ring Standards.
-
-**Signs of non-compliant existing code:**
+**BFF TypeScript-Specific Non-Compliant Signs:**
 - Uses `any` type instead of `unknown` with type guards
 - No Zod validation on external data
 - Missing Result type for error handling
 - Uses `// @ts-ignore` without explanation
 - No branded types for domain IDs
-
-**Action:** STOP. Report blocker. Do NOT match non-compliant patterns.
-
-**Blocker Format:**
-```markdown
-## Blockers
-- **Decision Required:** Project standards missing, existing code non-compliant
-- **Current State:** Existing code uses [specific violations: any types, no validation, etc.]
-- **Options:**
-  1. Create docs/PROJECT_RULES.md adopting Ring TypeScript standards (RECOMMENDED)
-  2. Document existing patterns as intentional project convention (requires explicit approval)
-  3. Migrate existing code to Ring standards before implementing new features
-- **Recommendation:** Option 1 - Establish standards first, then implement
-- **Awaiting:** User decision on standards establishment
-```
-
-**You CANNOT implement new code that matches non-compliant patterns. This is non-negotiable.**
-
-### Step 2: Ask Only When Standards Don't Answer
-
-**Ask when standards don't cover:**
-- API design (REST vs GraphQL vs tRPC)
-- Authentication provider (NextAuth vs Auth0 vs custom)
-- Caching strategy (In-memory vs Redis vs HTTP cache)
-- Data aggregation approach (Which services to aggregate)
-
-**Don't ask (follow standards or best practices):**
-- Framework choice → Check PROJECT_RULES.md or match existing code **IF compliant with Ring Standards**
-- Type safety → Always use strict mode, branded types per typescript.md
-- Validation → Use Zod per typescript.md
-- Error handling → Use Result type pattern per typescript.md
-
-**IMPORTANT:** "Match existing code" only applies when existing code is compliant. If existing code violates Forbidden Patterns (any types, ignored errors), do NOT match it - report blocker instead.
 
 ## When Implementation is Not Needed
 
