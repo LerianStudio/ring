@@ -1,32 +1,6 @@
 ---
 name: dev-refactor
-description: |
-  Analyzes codebase against Ring/Lerian standards and generates refactoring tasks.
-
-  ⛔ CRITICAL TOOL RESTRICTIONS:
-  - FORBIDDEN: Bash find/ls/tree commands for codebase exploration
-  - FORBIDDEN: Task tool with subagent_type="Explore" or "general-purpose" or "Plan"
-  - REQUIRED: Task tool with subagent_type="ring-default:codebase-explorer" (exact string)
-
-  MANDATORY FIRST ACTION - Create TodoWrite with THESE EXACT ITEMS:
-  1. "Validate PROJECT_RULES.md exists"
-  2. "Detect project language (go.mod or package.json)"
-  3. "Use Task tool: subagent_type=ring-default:codebase-explorer" ← NOT Bash, NOT Explore
-  4. "Save codebase-report.md (GATE: blocks step 5)"
-  5. "Dispatch specialist agents in parallel (BLOCKED until codebase-report.md exists)"
-  6. "Generate findings.md"
-  7. "Generate tasks.md"
-  8. "User approval"
-  9. "Handoff to dev-cycle"
-
-  HARD GATE FOR STEP 3:
-  ✅ CORRECT: Task(subagent_type="ring-default:codebase-explorer", model="opus", ...)
-  ❌ WRONG: Bash(find ...), Bash(ls ...), Bash(tree ...)
-  ❌ WRONG: Task(subagent_type="Explore", ...)
-  ❌ WRONG: Task(subagent_type="general-purpose", ...)
-
-  If you use Bash or wrong subagent_type for codebase exploration → SKILL FAILURE
-
+description: Analyzes codebase against standards and generates refactoring tasks for dev-cycle.
 trigger: |
   - User wants to refactor existing project to follow standards
   - Legacy codebase needs modernization
