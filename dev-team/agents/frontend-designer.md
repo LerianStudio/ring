@@ -853,6 +853,35 @@ def should_include_standards_compliance(prompt: str, context: dict) -> bool:
 - ⚠️ Partial - Some compliance, needs improvement
 - ❌ Non-Compliant - Does not follow standard
 
+### ⛔ MANDATORY: Compare EVERY Section from Standards File
+
+**You MUST systematically compare EVERY section from the WebFetch result (frontend.md) with the codebase-report.md.**
+
+**Process:**
+1. **Parse the WebFetch result** - Identify ALL sections in frontend.md
+2. **For EACH section in the standards file:**
+   - Find the corresponding pattern in codebase-report.md
+   - Compare: Does the codebase follow this standard?
+   - Report: ✅ Compliant, ⚠️ Partial, or ❌ Non-Compliant
+3. **Do NOT skip sections** - If a standard section exists, you MUST check it
+
+**Example sections from frontend.md to check:**
+- Design System Components
+- Color Palette & Theming
+- Typography Scale
+- Spacing System
+- Responsive Breakpoints
+- Animation Guidelines
+- Accessibility (contrast, focus states)
+- Dark Mode Support
+- Component Variants
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "I'll check the main sections only" | ALL sections must be checked. You don't decide relevance. | **Check EVERY section from WebFetch result** |
+| "This section doesn't apply" | Report it as N/A with reason, don't skip silently. | **Report ALL sections with status** |
+| "Codebase doesn't have this pattern" | That's a finding! Report as Non-Compliant or N/A. | **Report missing patterns** |
+
 ### ⛔ MANDATORY: Quote Standards from WebFetch in Findings
 
 **For EVERY ⚠️ Partial or ❌ Non-Compliant finding, you MUST:**
