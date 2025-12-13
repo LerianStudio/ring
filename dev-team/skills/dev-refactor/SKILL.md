@@ -469,14 +469,20 @@ Step 1:   [ ] Language detected? → go.mod / package.json found
 Step 2:   [ ] PROJECT_RULES.md read?
            ⛔ MANDATORY - Project-specific standards context
 
-GATE 2:   [ ] Codebase Explorer dispatched? → ring-default:codebase-explorer
-           ⛔ HARD GATE - See "HARD GATE 2" section
-           ⛔ This generates codebase-report.md (REQUIRED for Step 3)
-           ⛔ WITHOUT THIS, ALL SUBSEQUENT STEPS PRODUCE INVALID OUTPUT
-           ✅ EXCEPTION: This is the ONLY ring-default:* agent allowed
-
-Step 2.5b:[ ] codebase-report.md saved to docs/refactor/{timestamp}/?
-           ⛔ MANDATORY - File MUST exist before Step 3
+╔═════════════════════════════════════════════════════════════════════════════════╗
+║  STEP 2.5: CODEBASE EXPLORATION (MANDATORY - DO NOT SKIP)                       ║
+║                                                                                 ║
+║  [ ] 2.5a: Task tool dispatched ring-default:codebase-explorer?                 ║
+║            ⛔ HARD GATE - See "HARD GATE 2" section                             ║
+║            ⛔ This generates codebase-report.md (REQUIRED for Step 3)           ║
+║            ⛔ WITHOUT THIS, ALL SUBSEQUENT STEPS PRODUCE INVALID OUTPUT         ║
+║            ✅ EXCEPTION: This is the ONLY ring-default:* agent allowed          ║
+║                                                                                 ║
+║  [ ] 2.5b: Write tool saved output to docs/refactor/{timestamp}/codebase-report.md? ║
+║            ⛔ MANDATORY - File MUST exist before Step 3                         ║
+║                                                                                 ║
+║  ⛔ IF STEP 2.5 NOT COMPLETE → CANNOT PROCEED TO STEP 3                         ║
+╚═════════════════════════════════════════════════════════════════════════════════╝
 
 GATE 1:   [ ] Agent dispatch validated? → BEFORE typing Task tool:
            ⛔ HARD GATE - See "HARD GATE 1" section
@@ -1160,6 +1166,40 @@ Step 3:   Task tool → specialist agents → READ codebase-report.md
 ---
 
 ## Step 3: Dispatch ring-dev-team Agents
+
+```text
+╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+║  ⛔⛔⛔ MANDATORY CHECKPOINT - ANSWER BEFORE PROCEEDING ⛔⛔⛔                              ║
+║                                                                                           ║
+║  QUESTION: Did you complete Step 2.5?                                                     ║
+║                                                                                           ║
+║  ┌─────────────────────────────────────────────────────────────────────────────────────┐  ║
+║  │  CHECK 1: Did you dispatch ring-default:codebase-explorer using Task tool?          │  ║
+║  │           └── YES → Continue to CHECK 2                                             │  ║
+║  │           └── NO  → ⛔ STOP. GO BACK. Execute Step 2.5 NOW.                         │  ║
+║  │                                                                                     │  ║
+║  │  CHECK 2: Did you save the output to codebase-report.md using Write tool?           │  ║
+║  │           └── YES → Continue to Step 3                                              │  ║
+║  │           └── NO  → ⛔ STOP. Use Write tool to save the report NOW.                 │  ║
+║  └─────────────────────────────────────────────────────────────────────────────────────┘  ║
+║                                                                                           ║
+║  If EITHER check is NO → You CANNOT proceed. Step 2.5 is MANDATORY.                       ║
+║  Specialist agents REQUIRE codebase-report.md to function correctly.                      ║
+║  Without it, all specialist output is INVALID.                                            ║
+║                                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════════════════════╝
+```
+
+### Step 3 Anti-Rationalization (DO NOT THINK THESE)
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "I already read PROJECT_RULES.md, that's enough context" | PROJECT_RULES.md = standards. codebase-report.md = actual code. BOTH required. | **GO BACK to Step 2.5** |
+| "I can dispatch specialists now and explore later" | Specialists NEED the report to compare. Without it = blind analysis. | **GO BACK to Step 2.5** |
+| "The specialist agents can explore the codebase themselves" | Specialists COMPARE, they don't EXPLORE. Wrong responsibility model. | **GO BACK to Step 2.5** |
+| "Step 2.5 is slow, I'll skip it to save time" | Skipping = INVALID output. Time saved = wasted on wrong analysis. | **GO BACK to Step 2.5** |
+| "Small codebase doesn't need codebase-explorer" | Size is irrelevant. All codebases need the report. No exceptions. | **GO BACK to Step 2.5** |
+| "I can infer the architecture from file names" | Inference = guessing. Report provides FACTS with file:line references. | **GO BACK to Step 2.5** |
 
 **⛔ HARD GATE 1 APPLIES HERE - READ BEFORE DISPATCHING ANY AGENT**
 
