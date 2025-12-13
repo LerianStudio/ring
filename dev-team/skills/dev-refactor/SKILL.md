@@ -981,36 +981,40 @@ Without understanding the ACTUAL codebase structure, specialists analyze blindly
 
 ```text
 ╔═══════════════════════════════════════════════════════════════════════════════════════════╗
-║  ⛔⛔⛔ CRITICAL: USE TASK TOOL WITH THESE EXACT PARAMETERS ⛔⛔⛔                          ║
+║  ⛔⛔⛔ CRITICAL: USE TASK TOOL - NOT EXPLORE AGENT ⛔⛔⛔                                   ║
 ║                                                                                           ║
 ║  ❌ DO NOT use: Explore agent (built-in)     → SKILL FAILURE                              ║
 ║  ❌ DO NOT use: general-purpose agent        → SKILL FAILURE                              ║
-║  ❌ DO NOT use: Any other exploration method → SKILL FAILURE                              ║
 ║                                                                                           ║
-║  ✅ MUST use: Task tool with subagent_type = "ring-default:codebase-explorer"             ║
-║                                                                                           ║
+║  ✅ MUST use: Task tool with parameters below                                             ║
 ╚═══════════════════════════════════════════════════════════════════════════════════════════╝
-
-┌─────────────────────────────────────────────────────────────────────────────────────────────┐
-│  COPY THESE EXACT PARAMETERS INTO TASK TOOL:                                                │
-│                                                                                             │
-│  subagent_type: "ring-default:codebase-explorer"   ← MUST be exactly this string            │
-│  model: "opus"                                     ← Uses Opus for deep analysis            │
-│  description: "Generate codebase architecture report"                                       │
-│  prompt: [See prompt template below]                                                        │
-│                                                                                             │
-│  ⛔ subagent_type MUST be "ring-default:codebase-explorer"                                  │
-│  ⛔ subagent_type MUST NOT be "Explore"                                                     │
-│  ⛔ subagent_type MUST NOT be "general-purpose"                                             │
-│                                                                                             │
-│  If you use ANY other agent → codebase-report.md does NOT exist → SKILL FAILURE             │
-└─────────────────────────────────────────────────────────────────────────────────────────────┘
-
-VERIFICATION: After Task completes, confirm:
-1. Agent used was "ring-default:codebase-explorer" (NOT "Explore")
-2. Output contains EXPLORATION SUMMARY, KEY FINDINGS, ARCHITECTURE INSIGHTS sections
-3. Ready to save with Write tool
 ```
+
+**⛔ Use Task tool with EXACTLY these parameters:**
+
+```yaml
+Task:
+  subagent_type: "ring-default:codebase-explorer"
+  model: "opus"
+  description: "Generate codebase architecture report"
+  prompt: |
+    **EXPLORATION TYPE: THOROUGH**
+
+    Generate a comprehensive codebase report describing WHAT EXISTS in this project.
+    You are NOT comparing with standards. You are DOCUMENTING what you find.
+
+    Include: Project Structure, Architecture Pattern, Technology Stack,
+    Code Patterns (config, database, handlers, errors, telemetry, testing),
+    Key Files Inventory with file:line references.
+
+    Output format: EXPLORATION SUMMARY, KEY FINDINGS, ARCHITECTURE INSIGHTS,
+    RELEVANT FILES, RECOMMENDATIONS.
+```
+
+**⛔ VERIFICATION after Task completes:**
+1. Agent used was `ring-default:codebase-explorer` (NOT `Explore`)
+2. Output contains required sections
+3. Ready to save with Write tool
 
 ### If Task Tool NOT Used → SKILL FAILURE
 
@@ -1260,6 +1264,7 @@ Step 4:   Task tool → specialist agents → READ codebase-report.md
 
 **For Go projects, dispatch in ONE message:**
 
+
 ```
 Task 1:
   subagent_type: "ring-dev-team:backend-engineer-golang"
@@ -1275,30 +1280,6 @@ Task 1:
     ## YOUR TASK
 
     Compare the CURRENT implementation (from codebase-report.md) with EXPECTED patterns (from Ring standards).
-
-    For EACH pattern in Ring standards, check if the codebase follows it:
-
-    ### lib-commons v2 Patterns
-    | Standard Pattern | Codebase Has | Status | Location | Fix |
-    |-----------------|--------------|--------|----------|-----|
-    | `SetConfigFromEnvVars(&cfg)` | os.Getenv() calls | ❌ | config.go:15 | Replace with... |
-    | `NewTrackingFromContext(ctx)` | No telemetry recovery | ❌ | handler.go:22 | Add call... |
-    | `ToEntity() / FromEntity()` | Raw struct returns | ❌ | user_repo.go:45 | Add methods... |
-    | `InitializeTelemetry()` | Missing | ❌ | bootstrap/ | Add in config.go |
-    | `StartWithGracefulShutdown()` | app.Listen() only | ⚠️ | main.go:30 | Use ServerManager |
-
-    ### Architecture Patterns
-    | Standard Pattern | Codebase Has | Status | Location | Fix |
-    |-----------------|--------------|--------|----------|-----|
-    | Domain has no external imports | imports "database/sql" | ❌ | domain/user.go:5 | Remove import |
-    | Interfaces in consumers | In implementers | ❌ | adapters/repo.go | Move to services/ |
-
-    ### Error Handling
-    | Standard Pattern | Codebase Has | Status | Location | Fix |
-    |-----------------|--------------|--------|----------|-----|
-    | `fmt.Errorf("context: %w", err)` | Raw error return | ❌ | service.go:42 | Wrap with context |
-    | No panic() in business logic | panic() found | ❌ | handler.go:88 | Return error |
-    | Error codes with prefix | No error codes | ❌ | - | Add pkg/constant/errors.go |
 
     ## OUTPUT FORMAT
 
