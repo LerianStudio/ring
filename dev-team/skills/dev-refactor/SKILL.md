@@ -1,9 +1,21 @@
 ---
 name: dev-refactor
 description: |
-  Analyzes existing codebase against standards to identify gaps in architecture, code quality,
-  testing, and DevOps. Auto-detects project language and uses appropriate agent standards
-  (Go, TypeScript, Frontend, DevOps, SRE). Generates refactoring tasks.md compatible with dev-cycle.
+  MANDATORY EXECUTION SEQUENCE (follow EXACTLY):
+
+  1. Validate docs/PROJECT_RULES.md exists
+  2. Detect project language (go.mod = Go, package.json = TypeScript)
+  3. DISPATCH ring-default:codebase-explorer FIRST (generates codebase-report.md)
+     - This step is MANDATORY and CANNOT be skipped
+     - Must complete BEFORE step 4
+  4. THEN dispatch ring-dev-team specialist agents (backend-engineer-golang, qa-analyst, etc.)
+  5. Generate findings.md from agent outputs
+  6. Generate tasks.md for dev-cycle
+
+  WARNING: If you skip step 3 (codebase-explorer) → SKILL FAILURE
+  WARNING: codebase-explorer and specialist agents are SEPARATE steps
+
+  Purpose: Analyzes existing codebase against standards to identify gaps.
 
 trigger: |
   - User wants to refactor existing project to follow standards
