@@ -1120,19 +1120,29 @@ Step 4:   Task tool → specialist agents → READ codebase-report.md
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Execution Template - COPY EXACTLY
+### Explicit Tool Invocation (MANDATORY)
 
-**⚠️ IMPORTANT: Each agent receives the codebase-report.md and compares with their Ring standards.**
+**⛔ You MUST use the Task tool to dispatch ALL specialist agents. This is NOT implicit.**
 
-**The prompts below instruct agents to:**
-1. Read their Ring standards via WebFetch (they have the URL in their agent definition)
-2. Read the codebase-report.md generated in Step 3
-3. Compare what EXISTS (report) with what SHOULD exist (standards)
-4. Generate specific findings with CURRENT code vs EXPECTED code
+```text
+╔═══════════════════════════════════════════════════════════════════════════════════════════╗
+║  ⛔⛔⛔ CRITICAL: USE TASK TOOL - TEMPLATES BELOW ARE PARAMETERS ⛔⛔⛔                     ║
+║                                                                                           ║
+║  The YAML blocks below are Task tool parameters. You MUST invoke the Task tool.           ║
+║  Just reading these templates does NOT dispatch agents.                                   ║
+║                                                                                           ║
+║  If Task tool NOT used → Agents NOT dispatched → SKILL FAILURE                            ║
+╚═══════════════════════════════════════════════════════════════════════════════════════════╝
+```
+
+**Each agent receives:**
+1. Ring standards via WebFetch (URL in their agent definition)
+2. codebase-report.md generated in Step 3
+3. PROJECT_RULES.md for project-specific standards
 
 ---
 
-**For Go projects, dispatch in ONE message:**
+**For Go projects, use Task tool with these parameters (ALL in ONE message):**
 
 
 ```
