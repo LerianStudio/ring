@@ -342,6 +342,35 @@ This is the ORCHESTRATOR principle. You are the orchestrator. Agents are the exe
 ✅ Task(subagent_type="ring-dev-team:frontend-bff-engineer-typescript", model="opus", prompt="...")
 ```
 
+### Agent Responsibilities (Built Into Implementation)
+
+**Backend agents MUST implement observability as part of the code, not as a separate step:**
+
+| Responsibility | Description | When Required |
+|----------------|-------------|---------------|
+| **Structured Logging** | JSON logs with level, message, timestamp, service, trace_id | ALL code paths |
+| **Tracing** | OpenTelemetry spans for operations, trace context propagation | External calls, DB queries, HTTP handlers |
+| **Metrics** | Counters, histograms, gauges for business and technical metrics | Performance-critical paths, business events |
+
+**Implementation Requirements:**
+
+| Component | Go | TypeScript |
+|-----------|-----|------------|
+| **Logging** | `zerolog` or `zap` with JSON output | `pino` or `winston` with JSON output |
+| **Tracing** | `go.opentelemetry.io/otel` | `@opentelemetry/sdk-node` |
+| **Metrics** | `prometheus/client_golang` | `prom-client` |
+
+**Include in EVERY dispatch prompt:**
+```
+OBSERVABILITY REQUIREMENTS:
+- Add structured JSON logging for all operations (info for success, error for failures)
+- Add OpenTelemetry tracing spans for external calls and key operations
+- Add metrics where applicable (request counts, latencies, business events)
+- Ensure trace_id propagation in all log entries
+```
+
+**Gate 2 (SRE) validates this was done correctly. Gate 0 implements it.**
+
 ### Anti-Rationalization Table for Agent Dispatch
 
 | Rationalization | Why It's WRONG | Required Action |
@@ -465,10 +494,17 @@ INSTRUCTIONS:
 4. Refactor if needed (keeping tests green)
 5. Commit
 
+OBSERVABILITY REQUIREMENTS (implement as part of the code):
+- Add structured JSON logging for all operations (info for success, error for failures)
+- Add OpenTelemetry tracing spans for external calls and key operations
+- Add metrics where applicable (request counts, latencies, business events)
+- Ensure trace_id propagation in all log entries
+
 REQUIRED OUTPUT:
 - Implementation file path
 - **PASS OUTPUT** (copy/paste actual test pass)
 - Files changed
+- Observability added (logging: Y/N, tracing: Y/N, metrics: Y/N)
 - Commit SHA
 ```
 
