@@ -329,12 +329,14 @@ docs/refactor/{timestamp}/
 
 ## Step 10: Handoff to dev-cycle
 
-**If user approved, use Skill tool:**
+**If user approved, use SlashCommand tool with tasks path:**
 
 ```yaml
-Skill:
-  skill: "ring-dev-team:dev-cycle"
+SlashCommand:
+  command: "/ring-dev-team:dev-cycle docs/refactor/{timestamp}/tasks.md"
 ```
+
+Where `{timestamp}` is the same timestamp used in Step 9 artifacts.
 
 dev-cycle executes each REFACTOR-XXX task through 6-gate process.
 
