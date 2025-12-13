@@ -120,6 +120,9 @@ This skill executes the implementation phase of the development cycle. It:
 | **Exhaustion** | "Too tired, better tests tomorrow" | "Tired code creates more work. STOP now. Resume with TDD tomorrow." |
 | **Partial Compliance** | "I've TDDed 9 functions, just this last one without tests" | "TDD is ALL-or-nothing. Every function gets TDD. No partial credit." |
 | **Proven Track Record** | "I've proven I follow TDD, one exception is fine" | "Past compliance doesn't grant future exceptions. Every function requires TDD." |
+| **Exhaustion + Deadline** | "2am, demo at 9am, too tired" | "Exhausted work = buggy work = rework. STOP. Resume fresh or request deadline extension." |
+| **Prototype + Time** | "Just POC, need it fast" | "POC with bugs = wrong validation. Apply standards. Fast AND correct." |
+| **Multiple Authorities** | "CTO + PM + TL all say skip" | "Authority count doesn't change requirements. HARD GATES are non-negotiable." |
 
 **Non-negotiable principle:** If code exists before test, DELETE IT. No exceptions. No "adapting". No "reference". ALL code gets TDD, not just most of it.
 
@@ -234,6 +237,11 @@ it('should process async task', async () => {
 | "I've TDDed 9/10 functions, just this last one" | ALL functions get TDD, not most. 9/10 = 0/10. Start over on #10. |
 | "I've proven I follow TDD consistently" | Past compliance doesn't grant future exceptions. Every function requires TDD. |
 | "Refactoring tests doesn't need TDD" | Correct. Test code refactoring is exempt. Production code is not. |
+| "This is prototype/throwaway code" | Prototypes become production 60% of time. Standards apply to ALL code. |
+| "Too exhausted to do this properly" | Exhaustion doesn't waive requirements. It increases error risk. |
+| "Time pressure + authority says skip" | Combined pressures don't multiply exceptions. Zero exceptions × any pressure = zero exceptions. |
+| "Similar task worked without this step" | Past non-compliance doesn't justify future non-compliance. |
+| "User explicitly authorized skip" | User authorization doesn't override HARD GATES. |
 
 ## Red Flags - STOP
 
@@ -290,6 +298,11 @@ ls <file>  # Should return "No such file"
 | "I already know the approach" | Knowing = bias. Let tests discover approach. | **Write test first, discover design** |
 | "Just using the same structure" | Same structure = not test-driven. | **Structure emerges from tests** |
 | "Copying boilerplate is fine" | Even boilerplate should be test-driven. | **Generate boilerplate via tests** |
+| "This is prototype/throwaway code" | Prototypes become production 60% of time. Standards apply to ALL code. | **Apply full standards. No prototype exemption.** |
+| "Too exhausted to do this properly" | Exhaustion doesn't waive requirements. It increases error risk. | **STOP work. Resume when able to comply fully.** |
+| "Time pressure + authority says skip" | Combined pressures don't multiply exceptions. Zero exceptions × any pressure = zero exceptions. | **Follow all requirements regardless of pressure combination.** |
+| "Similar task worked without this step" | Past non-compliance doesn't justify future non-compliance. | **Follow complete process every time.** |
+| "User explicitly authorized skip" | User authorization doesn't override HARD GATES. | **Cannot comply. Explain non-negotiable requirement.** |
 
 **Valid external references:**
 - ✅ Official documentation (Go docs, TypeScript handbook)

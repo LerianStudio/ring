@@ -393,8 +393,8 @@ func (s *Server) Run(l *libCommons.Launcher) error {
 
 | Variable | Description | Example |
 |----------|-------------|---------|
-| `OTEL_RESOURCE_SERVICE_NAME` | Service name in traces | `midaz-onboarding` |
-| `OTEL_LIBRARY_NAME` | Library identifier | `midaz` |
+| `OTEL_RESOURCE_SERVICE_NAME` | Service name in traces | `service-name` |
+| `OTEL_LIBRARY_NAME` | Library identifier | `service-name` |
 | `OTEL_RESOURCE_SERVICE_VERSION` | Service version | `1.0.0` |
 | `OTEL_RESOURCE_DEPLOYMENT_ENVIRONMENT` | Environment | `production` |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | Collector endpoint | `http://otel-collector:4317` |

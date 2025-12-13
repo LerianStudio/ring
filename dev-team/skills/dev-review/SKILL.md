@@ -79,6 +79,9 @@ Execute comprehensive code review using 3 specialized reviewers IN PARALLEL. Agg
 | **Time** | "Review takes too long" | "3 parallel reviewers = 10 min total. Sequential = 30 min. Parallel is faster." |
 | **Authority Override** | "Manager/VP approved skip" | "Management approval ≠ technical review. HARD GATES cannot be waived by authority. Running all 3 reviewers." |
 | **Emergency** | "Production down, skip review" | "Emergencies need review MORE, not less. Parallel review = 10 minutes. Deploying unreviewed code creates bigger emergencies." |
+| **Exhaustion + Deadline** | "2am, demo at 9am, too tired" | "Exhausted work = buggy work = rework. STOP. Resume fresh or request deadline extension." |
+| **Prototype + Time** | "Just POC, need it fast" | "POC with bugs = wrong validation. Apply standards. Fast AND correct." |
+| **Multiple Authorities** | "CTO + PM + TL all say skip" | "Authority count doesn't change requirements. HARD GATES are non-negotiable." |
 
 ### Combined Pressure Scenarios (MOST DANGEROUS)
 
@@ -212,6 +215,11 @@ Execute comprehensive code review using 3 specialized reviewers IN PARALLEL. Agg
 | "Fix some MEDIUMs, FIXME others" | ALL MEDIUMs require same treatment. Cannot mix approaches without explicit user approval for EACH. |
 | "Only frontend changes" | Frontend code requires ALL 3 reviewers. JavaScript has logic (business), CSS has security risks, architecture matters. |
 | "Create draft PR, defer review" | Gate 4 completes BEFORE proceeding. Draft/deferral = gate violation. Complete ALL reviews now. |
+| "This is prototype/throwaway code" | Prototypes become production 60% of time. Standards apply to ALL code. |
+| "Too exhausted to do this properly" | Exhaustion doesn't waive requirements. It increases error risk. |
+| "Time pressure + authority says skip" | Combined pressures don't multiply exceptions. Zero exceptions × any pressure = zero exceptions. |
+| "Similar task worked without this step" | Past non-compliance doesn't justify future non-compliance. |
+| "User explicitly authorized skip" | User authorization doesn't override HARD GATES. |
 
 ## Red Flags - STOP
 

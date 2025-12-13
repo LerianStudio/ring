@@ -78,6 +78,11 @@ See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.
 | "This doesn't need the full dev-cycle" | ALL implementation needs dev-cycle. No exceptions. | **Follow 6-gate cycle** |
 | "I've already implemented 80% without specialist" | Past mistakes don't justify continuing wrong approach. Dispatch specialist, discard non-compliant work if needed. | **STOP. DISPATCH specialist. Accept sunk cost.** |
 | "Prototyping first, dispatch later" | Prototyping without standards = technical debt seed. | **DISPATCH specialist BEFORE any code** |
+| "This is prototype/throwaway code" | Prototypes become production 60% of time. Standards apply to ALL code. | **Apply full standards. No prototype exemption.** |
+| "Too exhausted to do this properly" | Exhaustion doesn't waive requirements. It increases error risk. | **STOP work. Resume when able to comply fully.** |
+| "Time pressure + authority says skip" | Combined pressures don't multiply exceptions. Zero exceptions × any pressure = zero exceptions. | **Follow all requirements regardless of pressure combination.** |
+| "Similar task worked without this step" | Past non-compliance doesn't justify future non-compliance. | **Follow complete process every time.** |
+| "User explicitly authorized skip" | User authorization doesn't override HARD GATES. | **Cannot comply. Explain non-negotiable requirement.** |
 
 ---
 
@@ -109,6 +114,9 @@ See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.
 | "This is a 2-line change, specialist is overkill" | "Line count doesn't determine complexity. Every change MUST follow TDD and standards. I CANNOT make code changes without specialist dispatch. This is a HARD GATE." |
 | "Dispatch both at once seems risky, do them sequentially" | "Sequential dispatch doubles execution time. Specialists work independently with provided context. Parallel dispatch is REQUIRED. I'll dispatch both now." |
 | "Just copy our existing Docker setup, don't bother the DevOps agent" | "Copying patterns without standards verification creates technical debt. The `devops-engineer` ensures the copy follows current Ring standards. I MUST dispatch the specialist." |
+| "2am, demo at 9am, too tired" | "Exhausted work = buggy work = rework. STOP. Resume fresh or request deadline extension." |
+| "Just POC, need it fast" | "POC with bugs = wrong validation. Apply standards. Fast AND correct." |
+| "CTO + PM + TL all say skip" | "Authority count doesn't change requirements. HARD GATES are non-negotiable." |
 
 **Critical Reminder:**
 - **Urgency ≠ Permission to bypass** - Emergencies require MORE care, not less
