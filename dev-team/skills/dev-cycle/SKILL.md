@@ -294,6 +294,7 @@ State is persisted to `docs/refactor/current-cycle.json`:
   "source_file": "path/to/tasks.md",
   "execution_mode": "manual_per_subtask|manual_per_task|automatic",
   "status": "in_progress|completed|failed|paused|paused_for_approval|paused_for_testing|paused_for_task_approval|paused_for_integration_testing",
+  "feedback_loop_completed": false,
   "current_task_index": 0,
   "current_gate": 0,
   "current_subtask_index": 0,
@@ -302,6 +303,7 @@ State is persisted to `docs/refactor/current-cycle.json`:
       "id": "T-001",
       "title": "Task title",
       "status": "pending|in_progress|completed|failed|blocked",
+      "feedback_loop_completed": false,
       "subtasks": [
         {
           "id": "ST-001-01",
@@ -836,7 +838,18 @@ After completing all subtasks of a task:
 
 2. **⛔ MANDATORY: Run dev-feedback-loop skill**
 
-   **YOU MUST EXECUTE THIS TOOL CALL:**
+   **2a. TodoWrite: Add feedback-loop to todo list (REQUIRED)**
+   
+   ```yaml
+   TodoWrite tool:
+     todos:
+       - id: "feedback-loop-task-{task_id}"
+         content: "Execute dev-feedback-loop for task {task_id} (MANDATORY)"
+         status: "in_progress"
+         priority: "high"
+   ```
+
+   **2b. YOU MUST EXECUTE THIS TOOL CALL:**
 
    ```yaml
    Skill tool:
@@ -851,6 +864,11 @@ After completing all subtasks of a task:
    c) Generate improvement suggestions
    d) Write feedback to docs/feedbacks/cycle-{date}/{agent}.md
 
+   **2c. After feedback-loop completes, update state and todo:**
+   
+   - Set `tasks[current].feedback_loop_completed = true` in state file
+   - TodoWrite: Mark "feedback-loop-task-{task_id}" as "completed"
+
    **Anti-Rationalization for Feedback Loop:**
 
    | Rationalization | Why It's WRONG | Required Action |
@@ -862,6 +880,8 @@ After completing all subtasks of a task:
    | "Time pressure, skip metrics" | Metrics take <2 min, prevent future issues | **Execute Skill tool** |
 
    **⛔ HARD GATE: You CANNOT proceed to step 3 without executing the Skill tool above.**
+   
+   **Hook Enforcement:** A UserPromptSubmit hook (`feedback-loop-enforcer.sh`) monitors state and will inject reminders if feedback-loop is not executed.
 
 3. Set cycle status = "paused_for_task_approval"
 4. Save state
@@ -952,14 +972,32 @@ After completing all subtasks of a task:
 
 4. **⛔ MANDATORY: Run dev-feedback-loop skill for cycle metrics**
 
-   **YOU MUST EXECUTE THIS TOOL CALL:**
+   **4a. TodoWrite: Add feedback-loop to todo list (REQUIRED)**
+   
+   ```yaml
+   TodoWrite tool:
+     todos:
+       - id: "feedback-loop-cycle"
+         content: "Execute dev-feedback-loop for cycle completion (MANDATORY)"
+         status: "in_progress"
+         priority: "high"
+   ```
+
+   **4b. YOU MUST EXECUTE THIS TOOL CALL:**
 
    ```yaml
    Skill tool:
      skill_name: "ring-dev-team:dev-feedback-loop"
    ```
 
+   **4c. After feedback-loop completes, update state and todo:**
+   
+   - Set `feedback_loop_completed = true` at cycle level in state file
+   - TodoWrite: Mark "feedback-loop-cycle" as "completed"
+
    **⛔ HARD GATE: Cycle is NOT complete until feedback-loop executes.**
+   
+   **Hook Enforcement:** A UserPromptSubmit hook (`feedback-loop-enforcer.sh`) monitors state and will inject reminders if feedback-loop is not executed.
 
    | Rationalization | Why It's WRONG | Required Action |
    |-----------------|----------------|-----------------|
