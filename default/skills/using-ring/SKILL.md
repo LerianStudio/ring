@@ -77,6 +77,20 @@ RESULT: [Agent: ___] or [Direct: why]
 
 # Getting Started with Skills
 
+## Quick Discovery
+
+Unsure which Ring component handles your task? Query the index:
+
+```bash
+ring-cli "code review before PR"      # Natural language search
+ring-cli --type agent "backend Go"    # Filter: skill | agent | command
+ring-cli --json "debugging" | jq      # JSON output for scripting
+```
+
+Full documentation: `tools/ring-cli/README.md`
+
+---
+
 ## MANDATORY FIRST RESPONSE PROTOCOL
 
 Before responding to ANY user message, you MUST complete this checklist IN ORDER:

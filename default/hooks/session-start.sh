@@ -139,6 +139,24 @@ State assumption → Explain why → Note what would change it
 **Full pattern:** See shared-patterns/doubt-triggered-questions.md
 '
 
+# CLI Discovery - Natural language component search
+CLI_DISCOVERY='## 🔍 Ring CLI - Component Discovery
+
+**Can'"'"'t find the right skill/agent/command?**
+
+```bash
+ring-cli "what you need"
+```
+
+**Examples:**
+- `ring-cli "code review"` → finds all review-related components
+- `ring-cli --type agent "backend Go"` → finds Go backend specialists
+- `ring-cli --json "debugging"` → JSON output for scripting
+
+**Setup:** `cd tools/ring-cli && ./build.sh` then add to PATH
+**Docs:** See `tools/ring-cli/README.md`
+'
+
 # Generate skills overview with cascading fallback
 # Priority: Python+PyYAML > Python regex > Bash fallback > Error message
 generate_skills_overview() {
@@ -206,6 +224,7 @@ fi
 overview_escaped=$(json_escape "$skills_overview")
 critical_rules_escaped=$(json_escape "$CRITICAL_RULES")
 doubt_questions_escaped=$(json_escape "$DOUBT_QUESTIONS")
+cli_discovery_escaped=$(json_escape "$CLI_DISCOVERY")
 
 # Build JSON output - include update notification if marketplace was updated
 if [ "$marketplace_updated" = "true" ]; then
@@ -213,7 +232,7 @@ if [ "$marketplace_updated" = "true" ]; then
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "<ring-marketplace-updated>\nThe Ring marketplace was just updated to a new version. New skills and agents have been installed but won't be available until the session is restarted. Inform the user they should restart their session (type 'clear' or restart Claude Code) to load the new capabilities.\n</ring-marketplace-updated>\n\n<ring-critical-rules>\n${critical_rules_escaped}\n</ring-critical-rules>\n\n<ring-doubt-questions>\n${doubt_questions_escaped}\n</ring-doubt-questions>\n\n<ring-skills-system>\n${overview_escaped}\n</ring-skills-system>"
+    "additionalContext": "<ring-marketplace-updated>\nThe Ring marketplace was just updated to a new version. New skills and agents have been installed but won't be available until the session is restarted. Inform the user they should restart their session (type 'clear' or restart Claude Code) to load the new capabilities.\n</ring-marketplace-updated>\n\n<ring-critical-rules>\n${critical_rules_escaped}\n</ring-critical-rules>\n\n<ring-cli-discovery>\n${cli_discovery_escaped}\n</ring-cli-discovery>\n\n<ring-doubt-questions>\n${doubt_questions_escaped}\n</ring-doubt-questions>\n\n<ring-skills-system>\n${overview_escaped}\n</ring-skills-system>"
   }
 }
 EOF
@@ -222,7 +241,7 @@ else
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "<ring-critical-rules>\n${critical_rules_escaped}\n</ring-critical-rules>\n\n<ring-doubt-questions>\n${doubt_questions_escaped}\n</ring-doubt-questions>\n\n<ring-skills-system>\n${overview_escaped}\n</ring-skills-system>"
+    "additionalContext": "<ring-critical-rules>\n${critical_rules_escaped}\n</ring-critical-rules>\n\n<ring-cli-discovery>\n${cli_discovery_escaped}\n</ring-cli-discovery>\n\n<ring-doubt-questions>\n${doubt_questions_escaped}\n</ring-doubt-questions>\n\n<ring-skills-system>\n${overview_escaped}\n</ring-skills-system>"
   }
 }
 EOF

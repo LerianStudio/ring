@@ -217,6 +217,38 @@ When you start a new Claude Code session with Ring installed, you'll see:
 ... and 50 more skills
 ```
 
+## 🔍 Component Discovery
+
+Ring includes a CLI tool for discovering components through natural language queries:
+
+```bash
+# Search for components
+ring-cli "code review"
+ring-cli --type agent "backend golang"
+ring-cli --json "debugging" | jq '.[] | .fqn'
+```
+
+**Features:**
+- Natural language search across all Ring components (162 skills, agents, commands)
+- Filter by type (skill, agent, command)
+- JSON output for scripting and automation
+- Pre-built FTS5 index for instant searches
+
+**When to use CLI:**
+- Pre-session planning ("what Ring components exist for X?")
+- Quick lookups without context cost
+- CI/CD automation and scripting
+- Terminal-native workflow
+
+**Installation:**
+```bash
+cd tools/ring-cli
+./build.sh
+# Add to PATH or use directly: ./ring-cli "query"
+```
+
+Full documentation: [tools/ring-cli/README.md](tools/ring-cli/README.md)
+
 ## 🎯 Core Skills
 
 ### The Big Four (Use These First!)
