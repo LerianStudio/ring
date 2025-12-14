@@ -1066,6 +1066,51 @@ Examples:
 - TestMoney_Add_SameCurrency_ReturnsSum
 ```
 
+### Edge Case Coverage (MANDATORY)
+
+**Every acceptance criterion MUST have edge case tests beyond the happy path.**
+
+| AC Type | Required Edge Cases | Minimum Count |
+|---------|---------------------|---------------|
+| Input validation | nil, empty string, boundary values, invalid format, special chars, max length | 3+ |
+| CRUD operations | not found, duplicate key, concurrent modification, large payload | 3+ |
+| Business logic | zero value, negative numbers, overflow, boundary conditions, invalid state | 3+ |
+| Error handling | context timeout, connection refused, invalid response, retry exhausted | 2+ |
+| Authentication | expired token, invalid signature, missing claims, revoked token | 2+ |
+
+**Table-Driven Edge Cases Pattern:**
+
+```go
+func TestUserService_CreateUser(t *testing.T) {
+    tests := []struct {
+        name    string
+        input   CreateUserInput
+        wantErr error
+    }{
+        // Happy path
+        {name: "valid user", input: validInput(), wantErr: nil},
+        
+        // Edge cases (MANDATORY - minimum 3)
+        {name: "nil input", input: CreateUserInput{}, wantErr: ErrInvalidInput},
+        {name: "empty email", input: CreateUserInput{Name: "John", Email: ""}, wantErr: ErrEmailRequired},
+        {name: "invalid email format", input: CreateUserInput{Name: "John", Email: "invalid"}, wantErr: ErrInvalidEmail},
+        {name: "email too long", input: CreateUserInput{Name: "John", Email: strings.Repeat("a", 256) + "@test.com"}, wantErr: ErrEmailTooLong},
+        {name: "name with special chars", input: CreateUserInput{Name: "<script>", Email: "test@test.com"}, wantErr: ErrInvalidName},
+    }
+    // ... test execution
+}
+```
+
+**Anti-Pattern (FORBIDDEN):**
+
+```go
+// ❌ WRONG: Only happy path
+func TestUserService_CreateUser(t *testing.T) {
+    result, err := service.CreateUser(validInput())
+    require.NoError(t, err)  // No edge cases = incomplete test
+}
+```
+
 ### Mock Generation
 
 ```go

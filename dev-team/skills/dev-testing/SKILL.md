@@ -253,16 +253,48 @@ Update matrix with line numbers and PASS status for each criterion.
 
 Before proceeding to Gate 4 (Review):
 
-- [ ] Every acceptance criterion has at least one unit test
-- [ ] All tests follow TDD cycle (RED verified before GREEN)
-- [ ] Full test suite passes (0 failures)
+### Coverage Gate (Existing)
+
 - [ ] **Coverage MUST meet 85% branch coverage minimum** (or project-defined threshold in PROJECT_RULES.md). This is MANDATORY, not aspirational.
   - Below threshold = FAIL
   - No exceptions for "close enough"
   - All acceptance criteria MUST have executable tests
+
+### Quality Gate (NEW - Prevents dev-refactor Duplicates)
+
+**⛔ HARD GATE: ALL quality checks must PASS, not just coverage %**
+
+| Check | Verification | PASS Criteria |
+|-------|--------------|---------------|
+| [ ] Skipped tests | `grep -rn "\.skip\|\.todo\|xit\|xdescribe"` | 0 found |
+| [ ] Assertion-less tests | Review test bodies for `expect`/`assert` | 0 found |
+| [ ] Shared state | Check `beforeAll`/`afterAll` usage | No shared mutable state |
+| [ ] Naming convention | Pattern: `Test{Unit}_{Scenario}` | 100% compliant |
+| [ ] Edge cases | Count per AC | ≥2 edge cases per AC |
+| [ ] TDD evidence | Captured RED phase output | All new tests |
+| [ ] Test isolation | No execution order dependency | Tests pass in any order |
+
+**Why this matters:** Issues caught here won't escape to dev-refactor. If dev-refactor finds test-related issues, Gate 3 failed.
+
+### Completeness Gate (Existing)
+
+- [ ] Every acceptance criterion has at least one unit test
+- [ ] All tests follow TDD cycle (RED verified before GREEN)
+- [ ] Full test suite passes (0 failures)
 - [ ] Traceability matrix complete and updated
 - [ ] No skipped or pending tests for this task
 - [ ] **QA Analyst VERDICT = PASS** (mandatory for gate progression)
+
+### Edge Case Requirements
+
+| AC Type | Required Edge Cases | Minimum |
+|---------|---------------------|---------|
+| Input validation | null, empty, boundary, invalid format | 3+ |
+| CRUD operations | not found, duplicate, concurrent access | 3+ |
+| Business logic | zero, negative, overflow, boundary | 3+ |
+| Error handling | timeout, connection failure, retry exhausted | 2+ |
+
+**Rule:** Happy path only = incomplete testing. Each AC needs edge cases.
 
 ## QA Verdict Handling
 

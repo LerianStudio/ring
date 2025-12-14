@@ -511,6 +511,52 @@ Write tool:
 | "I'll consolidate to reduce noise" | Consolidation = data loss. Noise is signal. | **Preserve ALL individual issues** |
 | "Some findings are duplicates across agents" | Different agents = different perspectives. Keep both. | **Create separate findings per agent** |
 
+### ⛔ Gate Escape Detection (Anti-Duplication)
+
+**When mapping findings, identify which gate SHOULD have caught the issue:**
+
+| Finding Category | Should Be Caught In | Flag |
+|------------------|---------------------|------|
+| Missing edge case tests | Gate 3 (Testing) | `🚨 GATE 3 ESCAPE` |
+| Test isolation issues | Gate 3 (Testing) | `🚨 GATE 3 ESCAPE` |
+| Skipped/assertion-less tests | Gate 3 (Testing) | `🚨 GATE 3 ESCAPE` |
+| Test naming convention | Gate 3 (Testing) | `🚨 GATE 3 ESCAPE` |
+| Missing test coverage | Gate 3 (Testing) | `🚨 GATE 3 ESCAPE` |
+| TDD RED phase missing | Gate 3 (Testing) | `🚨 GATE 3 ESCAPE` |
+| Implementation pattern gaps | Gate 0 (Implementation) | Normal finding |
+| Standards compliance gaps | Gate 0 (Implementation) | Normal finding |
+| Observability gaps | Gate 2 (SRE) | `🚨 GATE 2 ESCAPE` |
+| Docker/DevOps gaps | Gate 1 (DevOps) | `🚨 GATE 1 ESCAPE` |
+
+**Gate Escape Output Format:**
+
+```markdown
+### FINDING-XXX: [Issue Title] 🚨 GATE 3 ESCAPE
+
+**Escaped From:** Gate 3 (Testing)
+**Why It Escaped:** [Quality Gate check that should have caught this]
+**Prevention:** [Specific check to add to Gate 3 exit criteria]
+
+[Rest of finding format...]
+```
+
+**Purpose:** Track which issues escape which gates. If many `GATE 3 ESCAPE` findings occur, the Quality Gate checks need strengthening.
+
+**Summary Table (MANDATORY at end of findings.md):**
+
+```markdown
+## Gate Escape Summary
+
+| Gate | Escaped Issues | Most Common Type |
+|------|----------------|------------------|
+| Gate 0 (Implementation) | N | [type] |
+| Gate 1 (DevOps) | N | [type] |
+| Gate 2 (SRE) | N | [type] |
+| Gate 3 (Testing) | N | [type] |
+
+**Action Required:** If any gate has >2 escapes, review that gate's exit criteria.
+```
+
 **TodoWrite:** Mark "Map agent findings to FINDING-XXX entries" as `completed`
 
 ---

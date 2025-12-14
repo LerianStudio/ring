@@ -331,13 +331,26 @@ See [shared-patterns/standards-coverage-table.md](../skills/shared-patterns/stan
 | # | Section to Check |
 |---|------------------|
 | 1 | Testing Patterns (MANDATORY) |
-| 2 | Linting (MANDATORY) |
+| 2 | Edge Case Coverage (MANDATORY) |
+| 3 | Test Naming Convention (MANDATORY) |
+| 4 | Linting (MANDATORY) |
 
 **For TypeScript projects:**
 | # | Section to Check |
 |---|------------------|
 | 1 | Testing Patterns (MANDATORY) |
-| 2 | Type Safety Rules (MANDATORY) |
+| 2 | Edge Case Coverage (MANDATORY) |
+| 3 | Type Safety Rules (MANDATORY) |
+
+**Test Quality Gate Checks (Gate 3 Exit - ALL REQUIRED):**
+| # | Check | Detection |
+|---|-------|-----------|
+| 1 | Skipped tests | `grep -rn "\.skip\|\.todo\|xit"` = 0 |
+| 2 | Assertion-less tests | All tests have expect/assert |
+| 3 | Shared state | No beforeAll DB/state mutation |
+| 4 | Edge cases | ≥2 per acceptance criterion |
+| 5 | TDD evidence | RED phase captured |
+| 6 | Test isolation | No order dependency |
 
 ---
 
