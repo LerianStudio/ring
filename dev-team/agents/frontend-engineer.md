@@ -1,4 +1,3 @@
-
 ---
 name: frontend-engineer
 version: 3.2.4
