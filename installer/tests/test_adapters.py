@@ -235,6 +235,12 @@ class TestClaudeAdapter:
         result = adapter.get_target_filename("test-agent.md", "agent")
         assert result == "test-agent.md"
 
+    def test_requires_flat_components_is_false(self, adapter):
+        """ClaudeAdapter does not require flat structure (uses plugin system)."""
+        assert adapter.requires_flat_components("agents") is False
+        assert adapter.requires_flat_components("commands") is False
+        assert adapter.requires_flat_components("skills") is False
+
 
 # ==============================================================================
 # Tests for FactoryAdapter (agent -> droid)
@@ -322,6 +328,31 @@ subagent_type: helper
         result = adapter.transform_skill(content)
 
         assert "ring:code-droid" in result or "droid" in result.lower()
+
+    def test_requires_flat_components_for_agents(self, adapter):
+        """FactoryAdapter requires flat structure for agents (droids)."""
+        assert adapter.requires_flat_components("agents") is True
+
+    def test_requires_flat_components_for_other_types(self, adapter):
+        """FactoryAdapter does not require flat structure for other component types."""
+        assert adapter.requires_flat_components("commands") is False
+        assert adapter.requires_flat_components("skills") is False
+        assert adapter.requires_flat_components("hooks") is False
+
+    def test_get_flat_filename_for_agent(self, adapter):
+        """get_flat_filename() should generate prefixed droid filename."""
+        result = adapter.get_flat_filename("code-reviewer.md", "agent", "default")
+        assert result == "ring-default-code-reviewer-droid.md"
+
+    def test_get_flat_filename_strips_agent_suffix(self, adapter):
+        """get_flat_filename() should strip -agent suffix before adding -droid."""
+        result = adapter.get_flat_filename("code-agent.md", "agent", "default")
+        assert result == "ring-default-code-droid.md"
+
+    def test_get_flat_filename_for_command(self, adapter):
+        """get_flat_filename() should work for non-agent types too."""
+        result = adapter.get_flat_filename("test-command.md", "command", "dev-team")
+        assert result == "ring-dev-team-test-command.md"
 
 
 # ==============================================================================

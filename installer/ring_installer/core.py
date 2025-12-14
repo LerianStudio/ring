@@ -556,8 +556,11 @@ def install(
                 target_config = component_mapping[component_type]
                 target_dir = install_path / target_config["target_dir"]
 
-                # For multi-plugin installs, add plugin subdirectory
-                if len(components) > 1:
+                # Check if platform requires flat structure for this component type
+                requires_flat = adapter.requires_flat_components(component_type)
+
+                # For multi-plugin installs, add plugin subdirectory UNLESS platform requires flat structure
+                if len(components) > 1 and not requires_flat:
                     target_dir = target_dir / plugin_name
 
                 # Ensure target directory exists
@@ -580,6 +583,14 @@ def install(
                         # Skills use their directory name
                         skill_name = source_file.parent.name
                         target_file = target_dir / skill_name / source_file.name
+                    elif requires_flat and len(components) > 1:
+                        # Platform requires flat structure - use prefixed filename
+                        target_filename = adapter.get_flat_filename(
+                            source_file.name,
+                            component_type.rstrip("s"),  # agents -> agent
+                            plugin_name
+                        )
+                        target_file = target_dir / target_filename
                     else:
                         target_filename = adapter.get_target_filename(
                             source_file.name,
@@ -930,7 +941,11 @@ def update_with_diff(
                 target_config = component_mapping[component_type]
                 target_dir = install_path / target_config["target_dir"]
 
-                if len(components) > 1:
+                # Check if platform requires flat structure for this component type
+                requires_flat = adapter.requires_flat_components(component_type)
+
+                # For multi-plugin installs, add plugin subdirectory UNLESS platform requires flat structure
+                if len(components) > 1 and not requires_flat:
                     target_dir = target_dir / plugin_name
 
                 if not options.dry_run:
@@ -948,6 +963,14 @@ def update_with_diff(
                     if component_type == "skills":
                         skill_name = source_file.parent.name
                         target_file = target_dir / skill_name / source_file.name
+                    elif requires_flat and len(components) > 1:
+                        # Platform requires flat structure - use prefixed filename
+                        target_filename = adapter.get_flat_filename(
+                            source_file.name,
+                            component_type.rstrip("s"),
+                            plugin_name
+                        )
+                        target_file = target_dir / target_filename
                     else:
                         target_filename = adapter.get_target_filename(
                             source_file.name,

@@ -269,5 +269,40 @@ class PlatformAdapter(ABC):
         mapping = self.get_component_mapping()
         return component_type in mapping
 
+    def requires_flat_components(self, component_type: str) -> bool:
+        """
+        Check if this platform requires flat (non-nested) directory structure for a component type.
+
+        Some platforms (e.g., Factory/Droid) only scan top-level files in their
+        component directories and won't discover files in subdirectories.
+
+        Args:
+            component_type: Type of component (agents, commands, skills, hooks)
+
+        Returns:
+            True if the platform requires flat structure (no subdirectories)
+        """
+        return False
+
+    def get_flat_filename(self, source_filename: str, component_type: str, plugin_name: str) -> str:
+        """
+        Get a flattened filename with plugin prefix to avoid collisions.
+
+        Used when requires_flat_components() returns True for multi-plugin installs.
+
+        Args:
+            source_filename: Original filename
+            component_type: Type of component (agent, command, skill)
+            plugin_name: Name of the plugin this component belongs to
+
+        Returns:
+            Filename with plugin prefix (e.g., "ring-default-code-reviewer.md")
+        """
+        base_filename = self.get_target_filename(source_filename, component_type)
+        source_path = Path(base_filename)
+
+        # Add plugin prefix for disambiguation
+        return f"ring-{plugin_name}-{source_path.stem}{source_path.suffix}"
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(platform_id='{self.platform_id}')"

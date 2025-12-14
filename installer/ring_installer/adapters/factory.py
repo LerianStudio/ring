@@ -367,3 +367,50 @@ class FactoryAdapter(PlatformAdapter):
             filename = re.sub(r'_agent\.md$', '_droid.md', filename)
 
         return filename
+
+    def requires_flat_components(self, component_type: str) -> bool:
+        """
+        Check if Factory requires flat directory structure for a component type.
+
+        Factory/Droid only scans top-level .md files in ~/.factory/droids/
+        and won't discover droids in subdirectories.
+
+        Args:
+            component_type: Type of component (agents, commands, skills, hooks)
+
+        Returns:
+            True for agents (droids) since Factory requires flat structure
+        """
+        # Factory only scans top-level files in droids/ directory
+        return component_type == "agents"
+
+    def get_flat_filename(self, source_filename: str, component_type: str, plugin_name: str) -> str:
+        """
+        Get a flattened filename with plugin prefix for Factory.
+
+        Factory requires droids to be in top-level ~/.factory/droids/ directory.
+        When installing multiple plugins, we prefix filenames to avoid collisions.
+
+        Args:
+            source_filename: Original filename
+            component_type: Type of component (agent, command, skill)
+            plugin_name: Name of the plugin this component belongs to
+
+        Returns:
+            Filename with plugin prefix and droid suffix
+            (e.g., "code-reviewer.md" from "default" plugin -> "ring-default-code-reviewer-droid.md")
+        """
+        from pathlib import Path
+
+        source_path = Path(source_filename)
+        stem = source_path.stem
+
+        # For agents/droids, apply the agent->droid transformation and add prefix
+        if component_type == "agent":
+            # Remove -agent suffix if present before adding -droid
+            stem = re.sub(r'-agent$', '', stem)
+            stem = re.sub(r'_agent$', '', stem)
+            return f"ring-{plugin_name}-{stem}-droid.md"
+
+        # For other component types, just add prefix
+        return f"ring-{plugin_name}-{stem}{source_path.suffix}"
