@@ -29,10 +29,10 @@ related:
 
 verification:
   automated:
-    - command: "test -f .ring/dev-team/current-cycle.json"
+    - command: "test -f docs/refactor/current-cycle.json"
       description: "State file exists"
       success_pattern: "exit 0"
-    - command: "cat .ring/dev-team/current-cycle.json | jq '.current_gate'"
+    - command: "cat docs/refactor/current-cycle.json | jq '.current_gate'"
       description: "Current gate is valid"
       success_pattern: "[0-5]"
   manual:
@@ -283,7 +283,7 @@ Day 4: Production incident from Day 1 code
 
 ## State Management
 
-State is persisted to `.ring/dev-team/current-cycle.json`:
+State is persisted to `docs/refactor/current-cycle.json`:
 
 ```json
 {
@@ -396,7 +396,7 @@ State is persisted to `.ring/dev-team/current-cycle.json`:
 
 1. **Detect input:** File → Load directly | Directory → Load tasks.md + discover subtasks/
 2. **Build order:** Read tasks, check for subtasks (ST-XXX-01, 02...) or TDD autonomous mode
-3. **Initialize state:** Generate cycle_id, create `.ring/dev-team/current-cycle.json`, set indices to 0
+3. **Initialize state:** Generate cycle_id, create `docs/refactor/current-cycle.json`, set indices to 0
 4. **Display plan:** "Loaded X tasks with Y subtasks"
 5. **ASK EXECUTION MODE (MANDATORY - AskUserQuestion):**
    - Options: (a) Manual per subtask (b) Manual per task (c) Automatic
@@ -405,7 +405,7 @@ State is persisted to `.ring/dev-team/current-cycle.json`:
 
 ### Resume Cycle (--resume flag)
 
-1. Load `.ring/dev-team/current-cycle.json`, validate
+1. Load `docs/refactor/current-cycle.json`, validate
 2. Display: cycle started, tasks completed/total, current task/subtask/gate, paused reason
 3. **Handle paused states:**
 
@@ -834,16 +834,34 @@ After completing all subtasks of a task:
 
 1. Set task status = "completed"
 
-2. **Run dev-feedback-loop skill (MANDATORY)**
-   This skill now handles BOTH assertiveness metrics AND prompt quality analysis.
+2. **⛔ MANDATORY: Run dev-feedback-loop skill**
 
-   Invoke: Skill "ring-dev-team:dev-feedback-loop"
+   **YOU MUST EXECUTE THIS TOOL CALL:**
+
+   ```yaml
+   Skill tool:
+     skill_name: "ring-dev-team:dev-feedback-loop"
+   ```
+
+   This skill handles BOTH assertiveness metrics AND prompt quality analysis.
 
    The skill will:
    a) Calculate assertiveness score for the task
    b) Dispatch prompt-quality-reviewer agent with agent_outputs from state
    c) Generate improvement suggestions
    d) Write feedback to docs/feedbacks/cycle-{date}/{agent}.md
+
+   **Anti-Rationalization for Feedback Loop:**
+
+   | Rationalization | Why It's WRONG | Required Action |
+   |-----------------|----------------|-----------------|
+   | "Task was simple, skip feedback" | Simple tasks still contribute to patterns | **Execute Skill tool** |
+   | "Already at 100% score" | High scores need tracking for replication | **Execute Skill tool** |
+   | "User approved, feedback unnecessary" | Approval ≠ process quality metrics | **Execute Skill tool** |
+   | "No issues found, nothing to report" | Absence of issues IS data | **Execute Skill tool** |
+   | "Time pressure, skip metrics" | Metrics take <2 min, prevent future issues | **Execute Skill tool** |
+
+   **⛔ HARD GATE: You CANNOT proceed to step 3 without executing the Skill tool above.**
 
 3. Set cycle status = "paused_for_task_approval"
 4. Save state
@@ -931,7 +949,24 @@ After completing all subtasks of a task:
 1. **Calculate metrics:** total_duration_ms, average gate durations, review iterations, pass/fail ratio
 2. **Update state:** `status = "completed"`, `completed_at = timestamp`
 3. **Generate report:** Task | Subtasks | Duration | Review Iterations | Status
-4. **REQUIRED:** Invoke `ring-dev-team:dev-feedback-loop` for metrics tracking
+
+4. **⛔ MANDATORY: Run dev-feedback-loop skill for cycle metrics**
+
+   **YOU MUST EXECUTE THIS TOOL CALL:**
+
+   ```yaml
+   Skill tool:
+     skill_name: "ring-dev-team:dev-feedback-loop"
+   ```
+
+   **⛔ HARD GATE: Cycle is NOT complete until feedback-loop executes.**
+
+   | Rationalization | Why It's WRONG | Required Action |
+   |-----------------|----------------|-----------------|
+   | "Cycle done, feedback is extra" | Feedback IS part of cycle completion | **Execute Skill tool** |
+   | "Will run feedback next session" | Next session = never. Run NOW. | **Execute Skill tool** |
+   | "All tasks passed, no insights" | Pass patterns need documentation too | **Execute Skill tool** |
+
 5. **Report:** "Cycle completed. Tasks X/X, Subtasks Y, Time Xh Xm, Review iterations X"
 
 ## Quick Commands
@@ -986,4 +1021,4 @@ After completing all subtasks of a task:
 | Validation | - | pending |
 
 ### State File Location
-`.ring/dev-team/current-cycle.json`
+`docs/refactor/current-cycle.json`

@@ -223,7 +223,7 @@ After calculating assertiveness, analyze prompt quality for all **agents** that 
 
 ### 3.1 Load Agent Outputs
 
-Read `agent_outputs` from `.ring/dev-team/current-cycle.json`:
+Read `agent_outputs` from `docs/refactor/current-cycle.json`:
 
 ```text
 Agents to analyze (if executed, not null):

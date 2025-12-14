@@ -26,10 +26,10 @@ related:
 
 verification:
   automated:
-    - command: "cat .ring/dev-team/current-cycle.json | jq '.gates[4].code_reviewer.verdict'"
+    - command: "cat docs/refactor/current-cycle.json | jq '.gates[4].code_reviewer.verdict'"
       description: "Code reviewer verdict captured"
       success_pattern: "PASS|FAIL|NEEDS_DISCUSSION"
-    - command: "cat .ring/dev-team/current-cycle.json | jq '.gates[4].aggregate_verdict'"
+    - command: "cat docs/refactor/current-cycle.json | jq '.gates[4].aggregate_verdict'"
       description: "Aggregate verdict determined"
       success_pattern: "PASS|FAIL"
   manual:

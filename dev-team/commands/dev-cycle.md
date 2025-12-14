@@ -65,7 +65,7 @@ After all tasks: `ring-dev-team:dev-feedback-loop` generates metrics report.
 
 ## Output
 
-- **State file**: `.ring/dev-team/current-cycle.json`
+- **State file**: `docs/refactor/current-cycle.json`
 - **Feedback report**: `.ring/dev-team/feedback/cycle-YYYY-MM-DD.md`
 
 ## Related Commands
@@ -104,7 +104,7 @@ Pass the following context to the skill:
 | `--task` | If provided, filter to specific task ID |
 | `--skip-gates` | If provided, list of gates to skip |
 | `--dry-run` | If provided, validate only |
-| `--resume` | If provided, resume from `.ring/dev-team/current-cycle.json` |
+| `--resume` | If provided, resume from `docs/refactor/current-cycle.json` |
 
 ## Step 1: ASK EXECUTION MODE (MANDATORY)
 
