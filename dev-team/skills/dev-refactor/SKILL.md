@@ -15,6 +15,57 @@ skip_when: |
 
 Analyzes existing codebase against Ring/Lerian standards and generates refactoring tasks compatible with dev-cycle.
 
+---
+
+## ⛔ MANDATORY: Initialize Todo List FIRST
+
+**Before ANY other action, create the todo list with ALL steps:**
+
+```yaml
+TodoWrite:
+  todos:
+    - content: "Validate PROJECT_RULES.md exists"
+      status: "pending"
+      activeForm: "Validating PROJECT_RULES.md exists"
+    - content: "Detect project stack (Go/TypeScript/Frontend)"
+      status: "pending"
+      activeForm: "Detecting project stack"
+    - content: "Read PROJECT_RULES.md for context"
+      status: "pending"
+      activeForm: "Reading PROJECT_RULES.md"
+    - content: "Generate codebase report via codebase-explorer"
+      status: "pending"
+      activeForm: "Generating codebase report"
+    - content: "Dispatch specialist agents in parallel"
+      status: "pending"
+      activeForm: "Dispatching specialist agents"
+    - content: "Map agent findings to FINDING-XXX entries"
+      status: "pending"
+      activeForm: "Mapping agent findings"
+    - content: "Generate findings.md"
+      status: "pending"
+      activeForm: "Generating findings.md"
+    - content: "Group findings into REFACTOR-XXX tasks"
+      status: "pending"
+      activeForm: "Grouping findings into tasks"
+    - content: "Generate tasks.md"
+      status: "pending"
+      activeForm: "Generating tasks.md"
+    - content: "Get user approval"
+      status: "pending"
+      activeForm: "Getting user approval"
+    - content: "Save all artifacts"
+      status: "pending"
+      activeForm: "Saving artifacts"
+    - content: "Handoff to dev-cycle"
+      status: "pending"
+      activeForm: "Handing off to dev-cycle"
+```
+
+**This is NON-NEGOTIABLE. Do NOT skip creating the todo list.**
+
+---
+
 ## ⛔ CRITICAL: Specialized Agents Perform All Tasks
 
 See [shared-patterns/orchestrator-principle.md](../shared-patterns/orchestrator-principle.md) for full ORCHESTRATOR principle, role separation, forbidden/required actions, step-to-agent mapping, and anti-rationalization table.
@@ -25,9 +76,11 @@ See [shared-patterns/orchestrator-principle.md](../shared-patterns/orchestrator-
 
 ## Step 0: Validate PROJECT_RULES.md
 
+**TodoWrite:** Mark "Validate PROJECT_RULES.md exists" as `in_progress`
+
 **Check:** Does `docs/PROJECT_RULES.md` exist?
 
-- **YES** → Continue to Step 1
+- **YES** → Mark todo as `completed`, continue to Step 1
 - **NO** → Output blocker and TERMINATE:
 
 ```markdown
@@ -48,6 +101,8 @@ Re-run after file exists.
 
 ## Step 1: Detect Project Stack
 
+**TodoWrite:** Mark "Detect project stack (Go/TypeScript/Frontend)" as `in_progress`
+
 Check for manifest files and frontend indicators:
 
 | File/Pattern | Stack | Agent |
@@ -65,9 +120,13 @@ Check for manifest files and frontend indicators:
 
 If multiple stacks detected, dispatch agents for ALL.
 
+**TodoWrite:** Mark "Detect project stack (Go/TypeScript/Frontend)" as `completed`
+
 ---
 
 ## Step 2: Read PROJECT_RULES.md
+
+**TodoWrite:** Mark "Read PROJECT_RULES.md for context" as `in_progress`
 
 ```
 Read tool: docs/PROJECT_RULES.md
@@ -75,9 +134,13 @@ Read tool: docs/PROJECT_RULES.md
 
 Extract project-specific conventions for agent context.
 
+**TodoWrite:** Mark "Read PROJECT_RULES.md for context" as `completed`
+
 ---
 
 ## Step 3: Generate Codebase Report
+
+**TodoWrite:** Mark "Generate codebase report via codebase-explorer" as `in_progress`
 
 ### ⛔ MANDATORY: Use Task Tool with ring-default:codebase-explorer
 
@@ -137,9 +200,13 @@ Write tool:
   content: [Task output]
 ```
 
+**TodoWrite:** Mark "Generate codebase report via codebase-explorer" as `completed`
+
 ---
 
 ## Step 4: Dispatch Specialist Agents
+
+**TodoWrite:** Mark "Dispatch specialist agents in parallel" as `in_progress`
 
 ### ⛔ HARD GATE: Verify codebase-report.md Exists
 
@@ -308,9 +375,13 @@ Task 6:
 | TypeScript Backend + Frontend | Task 1 (TS Backend) + Task 5 (Frontend) + Task 2-4 |
 | BFF detected | Add Task 6 (BFF) to above |
 
+**TodoWrite:** Mark "Dispatch specialist agents in parallel" as `completed`
+
 ---
 
 ## Step 4.1: Agent Report → Findings Mapping (HARD GATE)
+
+**TodoWrite:** Mark "Map agent findings to FINDING-XXX entries" as `in_progress`
 
 **⛔ MANDATORY: ALL agent-reported issues MUST become findings.**
 
@@ -331,9 +402,13 @@ Task 6:
 - ✅ Preserve agent's severity assessment
 - ✅ Include exact file:line references from agent report
 
+**TodoWrite:** Mark "Map agent findings to FINDING-XXX entries" as `completed`
+
 ---
 
 ## Step 5: Generate findings.md
+
+**TodoWrite:** Mark "Generate findings.md" as `in_progress`
 
 **Use Write tool to create findings.md:**
 
@@ -378,9 +453,13 @@ Task 6:
 ## FINDING-002: ...
 ```
 
+**TodoWrite:** Mark "Generate findings.md" as `completed`
+
 ---
 
 ## Step 6: Group Findings into Tasks
+
+**TodoWrite:** Mark "Group findings into REFACTOR-XXX tasks" as `in_progress`
 
 **⛔ HARD GATE: Every FINDING-XXX MUST appear in at least one REFACTOR-XXX task.**
 
@@ -399,9 +478,13 @@ Before proceeding to Step 7, verify:
 
 **If ANY finding is not mapped to a task → STOP. Add missing findings to tasks.**
 
+**TodoWrite:** Mark "Group findings into REFACTOR-XXX tasks" as `completed`
+
 ---
 
 ## Step 7: Generate tasks.md
+
+**TodoWrite:** Mark "Generate tasks.md" as `in_progress`
 
 **Use Write tool to create tasks.md:**
 
@@ -441,9 +524,13 @@ Before proceeding to Step 7, verify:
 - [ ] {additional criteria from findings}
 ```
 
+**TodoWrite:** Mark "Generate tasks.md" as `completed`
+
 ---
 
 ## Step 8: User Approval
+
+**TodoWrite:** Mark "Get user approval" as `in_progress`
 
 ```yaml
 AskUserQuestion:
@@ -459,9 +546,13 @@ AskUserQuestion:
           description: "Keep analysis, skip execution"
 ```
 
+**TodoWrite:** Mark "Get user approval" as `completed`
+
 ---
 
 ## Step 9: Save Artifacts
+
+**TodoWrite:** Mark "Save all artifacts" as `in_progress`
 
 ```
 docs/refactor/{timestamp}/
@@ -470,9 +561,13 @@ docs/refactor/{timestamp}/
 └── tasks.md           (Step 7)
 ```
 
+**TodoWrite:** Mark "Save all artifacts" as `completed`
+
 ---
 
 ## Step 10: Handoff to dev-cycle
+
+**TodoWrite:** Mark "Handoff to dev-cycle" as `in_progress`
 
 **If user approved, use SlashCommand tool with tasks path:**
 
@@ -484,6 +579,8 @@ SlashCommand:
 Where `{timestamp}` is the same timestamp used in Step 9 artifacts.
 
 dev-cycle executes each REFACTOR-XXX task through 6-gate process.
+
+**TodoWrite:** Mark "Handoff to dev-cycle" as `completed`
 
 ---
 
@@ -512,18 +609,23 @@ traceability:
 ❌ WRONG:   Task(subagent_type="general-purpose")
 ```
 
-### Rule 2: Todo Items MUST Be Exact
+### Rule 2: Todo Items MUST Be Initialized at Start
 
-Create these EXACT todo items (copy/paste):
+**MANDATORY:** Use the TodoWrite call from "Initialize Todo List FIRST" section before ANY other action.
+
+Todo items tracked:
 1. `Validate PROJECT_RULES.md exists`
-2. `Detect project language (go.mod or package.json)`
-3. `Use Task tool: subagent_type=ring-default:codebase-explorer`
-4. `Save codebase-report.md (GATE: blocks step 5)`
+2. `Detect project stack (Go/TypeScript/Frontend)`
+3. `Read PROJECT_RULES.md for context`
+4. `Generate codebase report via codebase-explorer`
 5. `Dispatch specialist agents in parallel`
-6. `Generate findings.md`
-7. `Generate tasks.md`
-8. `User approval`
-9. `Handoff to dev-cycle`
+6. `Map agent findings to FINDING-XXX entries`
+7. `Generate findings.md`
+8. `Group findings into REFACTOR-XXX tasks`
+9. `Generate tasks.md`
+10. `Get user approval`
+11. `Save all artifacts`
+12. `Handoff to dev-cycle`
 
 ### Rule 3: Step 3 Blocks Step 5
 
