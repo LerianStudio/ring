@@ -1,6 +1,6 @@
 {
   "name": "ring",
-  "description": "Lerian Studio plugin marketplace: Core software engineering skills (TDD, debugging, code review), specialized developer agents (Backend, DevOps, Frontend, QA, SRE), product planning workflows (8-gate pre-dev system), FinOps tools with Brazilian regulatory compliance templates, and technical writing specialists for documentation.",
+  "description": "Lerian Studio plugin marketplace: Core software engineering skills (TDD, debugging, code review), specialized developer agents (Backend, DevOps, Frontend, QA, SRE), product planning workflows (9-gate pre-dev system), PMO portfolio governance (portfolio management, resource planning, risk analysis), product marketing specialists (positioning, GTM, launch), FinOps tools with Brazilian regulatory compliance templates, and technical writing specialists for documentation.",
   "owner": {
     "name": "Fred Amaral",
     "email": "fred@fredamaral.com.br"
@@ -115,7 +115,100 @@
         "agents",
         "content-quality"
       ]
+    },
+    {
+      "name": "ring-finance-team",
+      "description": "Financial operations specialists for FP&A, budgeting, and modeling. 6 financial agents (financial-analyst, budget-planner, financial-modeler, treasury-specialist, accounting-specialist, metrics-analyst) + 8 skills + 3 commands. Complete financial operations covering analysis, budgeting, modeling, treasury, accounting, and metrics with Ring compliance.",
+      "version": "0.1.0",
+      "source": "./finance-team",
+      "homepage": "https://github.com/lerianstudio/ring/tree/finance-team",
+      "repository": "https://github.com/lerianstudio/ring/tree/finance-team",
+      "license": "MIT",
+      "keywords": [
+        "finance",
+        "financial-analysis",
+        "budgeting",
+        "forecasting",
+        "modeling",
+        "treasury",
+        "accounting",
+        "fp&a",
+        "metrics",
+        "kpi",
+        "cash-flow",
+        "financial-close",
+        "agents"
+      ]
+    },
+    {
+      "name": "ring-ops-team",
+      "description": "Production operations and platform engineering specialists. 5 operations agents (platform-engineer, incident-responder, cloud-cost-optimizer, infrastructure-architect, security-operations) + 8 skills + 4 commands. Complete production operations covering incident response, capacity planning, cost optimization, disaster recovery, security audits, platform onboarding, and infrastructure migrations.",
+      "version": "0.1.0",
+      "source": "./ops-team",
+      "homepage": "https://github.com/lerianstudio/ring/tree/ops-team",
+      "repository": "https://github.com/lerianstudio/ring/tree/ops-team",
+      "license": "MIT",
+      "keywords": [
+        "operations",
+        "platform-engineering",
+        "incident-response",
+        "cost-optimization",
+        "disaster-recovery",
+        "security-operations",
+        "capacity-planning",
+        "finops",
+        "kubernetes",
+        "service-mesh",
+        "api-gateway",
+        "compliance",
+        "infrastructure",
+        "agents"
+      ]
+    },
+    {
+      "name": "ring-pmm-team",
+      "description": "Product marketing specialists for go-to-market strategy. 7 PMM skills + 6 specialist agents (market-researcher, positioning-strategist, messaging-specialist, gtm-planner, launch-coordinator, pricing-analyst). Complete GTM workflow from market analysis through launch coordination with positioning, messaging, and pricing strategy.",
+      "version": "0.1.0",
+      "source": "./pmm-team",
+      "homepage": "https://github.com/lerianstudio/ring/tree/pmm-team",
+      "repository": "https://github.com/lerianstudio/ring/tree/pmm-team",
+      "license": "MIT",
+      "keywords": [
+        "product-marketing",
+        "gtm",
+        "go-to-market",
+        "positioning",
+        "messaging",
+        "competitive-intelligence",
+        "pricing",
+        "launch",
+        "market-analysis",
+        "agents",
+        "strategy"
+      ]
+    },
+    {
+      "name": "ring-pmo-team",
+      "description": "Project Management Office specialists for portfolio governance. 5 PMO agents (portfolio-manager, resource-planner, governance-specialist, risk-analyst, executive-reporter) + 8 skills + 3 commands. Complete portfolio management with multi-project coordination, resource planning, risk management, governance gates, and executive reporting.",
+      "version": "1.0.0",
+      "source": "./pmo-team",
+      "homepage": "https://github.com/lerianstudio/ring/tree/pmo-team",
+      "repository": "https://github.com/lerianstudio/ring/tree/pmo-team",
+      "license": "MIT",
+      "keywords": [
+        "pmo",
+        "portfolio-management",
+        "governance",
+        "resource-planning",
+        "risk-management",
+        "executive-reporting",
+        "project-health",
+        "dependency-mapping",
+        "agents",
+        "raid-log",
+        "capacity-planning"
+      ]
     }
   ],
-  "version": "0.120.0"
+  "version": "0.121.0"
 }
