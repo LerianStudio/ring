@@ -15,8 +15,8 @@ skip_when: |
   - Already have a plan → use executing-plans
 
 sequence:
-  after: [brainstorming, pre-dev-trd-creation]
-  before: [executing-plans, subagent-driven-development]
+  after: [ring-default:brainstorming, ring-pm-team:pre-dev-trd-creation]
+  before: [ring-default:executing-plans, ring-default:subagent-driven-development]
 
 related:
   similar: [brainstorming]

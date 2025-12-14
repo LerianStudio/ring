@@ -13,8 +13,8 @@ skip_when: |
   - Gate 2 already passed → proceed to Gate 3
 
 sequence:
-  after: [regulatory-templates-gate1]
-  before: [regulatory-templates-gate3]
+  after: [ring-finops-team:regulatory-templates-gate1]
+  before: [ring-finops-team:regulatory-templates-gate3]
 ---
 
 # Regulatory Templates - Gate 2: Technical Validation

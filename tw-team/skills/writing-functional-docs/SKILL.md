@@ -16,7 +16,7 @@ skip_when: |
   - Writing code → use dev-team agents
 
 sequence:
-  before: [documentation-review]
+  before: [ring-tw-team:documentation-review]
 
 related:
   similar: [writing-api-docs]

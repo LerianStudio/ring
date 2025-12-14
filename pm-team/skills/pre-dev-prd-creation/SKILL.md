@@ -16,7 +16,7 @@ skip_when: |
   - Bug fix → systematic-debugging
 
 sequence:
-  before: [pre-dev-feature-map, pre-dev-trd-creation]
+  before: [ring-pm-team:pre-dev-feature-map, ring-pm-team:pre-dev-trd-creation]
 ---
 
 # PRD Creation - Business Before Technical

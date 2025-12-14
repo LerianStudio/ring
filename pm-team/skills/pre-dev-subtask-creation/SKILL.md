@@ -16,8 +16,8 @@ skip_when: |
   - Tasks not validated → complete Gate 7 first
 
 sequence:
-  after: [pre-dev-task-breakdown]
-  before: [executing-plans, subagent-driven-development]
+  after: [ring-pm-team:pre-dev-task-breakdown]
+  before: [ring-default:executing-plans, ring-default:subagent-driven-development]
 ---
 
 # Subtask Creation - Bite-Sized, Zero-Context Steps

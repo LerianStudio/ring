@@ -16,8 +16,8 @@ skip_when: |
   - TRD not validated → complete Gate 3 first
 
 sequence:
-  after: [pre-dev-trd-creation]
-  before: [pre-dev-data-model]
+  after: [ring-pm-team:pre-dev-trd-creation]
+  before: [ring-pm-team:pre-dev-data-model]
 ---
 
 # API/Contract Design - Defining Component Interfaces

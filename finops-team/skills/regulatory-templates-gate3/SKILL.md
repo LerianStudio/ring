@@ -13,7 +13,7 @@ skip_when: |
   - Template already generated → verify or regenerate
 
 sequence:
-  after: [regulatory-templates-gate2]
+  after: [ring-finops-team:regulatory-templates-gate2]
 ---
 
 # Regulatory Templates - Gate 3: Template File Generation

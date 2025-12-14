@@ -15,7 +15,7 @@ skip_when: |
   - Template already exists, just needs updates → modify directly
 
 sequence:
-  before: [regulatory-templates-setup]
+  before: [ring-finops-team:regulatory-templates-setup]
 ---
 
 # Regulatory Templates - Orchestrator

@@ -16,8 +16,8 @@ skip_when: |
   - API Design not validated → complete Gate 4 first
 
 sequence:
-  after: [pre-dev-api-design]
-  before: [pre-dev-dependency-map]
+  after: [ring-pm-team:pre-dev-api-design]
+  before: [ring-pm-team:pre-dev-dependency-map]
 ---
 
 # Data Modeling - Defining Data Structures

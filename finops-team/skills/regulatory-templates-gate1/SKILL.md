@@ -13,8 +13,8 @@ skip_when: |
   - Gate 1 already passed → proceed to Gate 2
 
 sequence:
-  after: [regulatory-templates-setup]
-  before: [regulatory-templates-gate2]
+  after: [ring-finops-team:regulatory-templates-setup]
+  before: [ring-finops-team:regulatory-templates-gate2]
 ---
 
 # Regulatory Templates - Gate 1: Placeholder Mapping (Post Gate 0)

@@ -17,8 +17,8 @@ skip_when: |
   - Data Model not validated → complete Gate 5 first
 
 sequence:
-  after: [pre-dev-data-model]
-  before: [pre-dev-task-breakdown]
+  after: [ring-pm-team:pre-dev-data-model]
+  before: [ring-pm-team:pre-dev-task-breakdown]
 ---
 
 # Dependency Map - Explicit Technology Choices

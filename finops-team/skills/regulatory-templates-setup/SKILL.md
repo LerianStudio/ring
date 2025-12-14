@@ -13,8 +13,8 @@ skip_when: |
   - Setup already completed for current template
 
 sequence:
-  after: [regulatory-templates]
-  before: [regulatory-templates-gate1]
+  after: [ring-finops-team:regulatory-templates]
+  before: [ring-finops-team:regulatory-templates-gate1]
 ---
 
 # Regulatory Templates - Initial Setup

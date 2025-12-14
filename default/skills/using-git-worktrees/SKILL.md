@@ -15,8 +15,8 @@ skip_when: |
   - Repository doesn't use worktrees → use standard branch workflow
 
 sequence:
-  after: [brainstorming]
-  before: [writing-plans, executing-plans]
+  after: [ring-default:brainstorming]
+  before: [ring-default:writing-plans, ring-default:executing-plans]
 ---
 
 # Using Git Worktrees

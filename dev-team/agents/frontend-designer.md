@@ -934,6 +934,17 @@ If design is ALREADY distinctive and standards-compliant:
 
 ## Design Requirements & Severity
 
+### Cannot Be Overridden
+
+| Requirement | Cannot Override Because |
+|-------------|------------------------|
+| Accessibility (a11y) compliance | Legal requirement, user inclusivity |
+| Design system consistency | Brand integrity, UX coherence |
+| Performance budgets | User experience, Core Web Vitals |
+| Responsive design requirements | Multi-device support is mandatory |
+| Color contrast ratios | WCAG compliance is non-negotiable |
+| Typography hierarchy | Readability and scannability |
+
 ### Requirement Levels
 
 | Level | Elements | Action |

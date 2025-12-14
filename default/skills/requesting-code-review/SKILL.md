@@ -16,8 +16,8 @@ skip_when: |
   - Already reviewed and no changes since → proceed
 
 sequence:
-  after: [verification-before-completion]
-  before: [finishing-a-development-branch]
+  after: [ring-default:verification-before-completion]
+  before: [ring-default:finishing-a-development-branch]
 ---
 
 # Requesting Code Review

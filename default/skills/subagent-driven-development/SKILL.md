@@ -15,7 +15,7 @@ skip_when: |
   - Plan needs revision → use brainstorming first
 
 sequence:
-  after: [writing-plans, pre-dev-task-breakdown]
+  after: [ring-default:writing-plans, ring-pm-team:pre-dev-task-breakdown]
 
 related:
   similar: [executing-plans]

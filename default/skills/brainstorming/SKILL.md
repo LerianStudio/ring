@@ -16,7 +16,7 @@ skip_when: |
   - Just need task breakdown from existing design → use writing-plans
 
 sequence:
-  before: [writing-plans, using-git-worktrees]
+  before: [ring-default:writing-plans, ring-default:using-git-worktrees]
 
 related:
   similar: [writing-plans]

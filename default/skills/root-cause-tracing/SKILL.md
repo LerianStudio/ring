@@ -16,7 +16,7 @@ skip_when: |
   - Root cause is obvious → just fix it
 
 sequence:
-  after: [systematic-debugging]
+  after: [ring-default:systematic-debugging]
 
 related:
   complementary: [systematic-debugging]
