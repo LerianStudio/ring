@@ -10,7 +10,7 @@ set -euo pipefail
 # Re-inject every 3 prompts - balances context freshness with token overhead
 # Lower values = more frequent reminders but higher token cost
 # Higher values = less overhead but risk of context being forgotten
-readonly THROTTLE_INTERVAL=3
+readonly THROTTLE_INTERVAL=2
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
