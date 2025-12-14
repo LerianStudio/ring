@@ -72,6 +72,24 @@ When invoking agents via Task tool:
 **Agent Self-Verification:**
 All agents with `model:` field in frontmatter MUST include "Model Requirements" section that verifies they are running on the correct model and STOPS if not.
 
+### 8. CLAUDE.md ↔ AGENTS.md Synchronization (AUTOMATIC via Symlink)
+
+**⛔ AGENTS.md IS A SYMLINK TO CLAUDE.md - DO NOT BREAK:**
+- `CLAUDE.md` - Primary project instructions (source of truth)
+- `AGENTS.md` - Symlink to CLAUDE.md (automatically synchronized)
+
+**Current Setup:** `AGENTS.md -> CLAUDE.md` (symlink)
+
+**Why:** Both files serve as entry points for AI agents. CLAUDE.md is read by Claude Code, AGENTS.md is read by other AI systems. The symlink ensures they ALWAYS contain identical information.
+
+**Rules:**
+- **NEVER delete the AGENTS.md symlink**
+- **NEVER replace AGENTS.md with a regular file**
+- **ALWAYS edit CLAUDE.md** - changes automatically appear in AGENTS.md
+- If symlink is broken → Restore with: `ln -sf CLAUDE.md AGENTS.md`
+
+---
+
 ### 7. Content Duplication Prevention (ALWAYS CHECK)
 Before adding ANY content to prompts, skills, agents, or documentation:
 1. **SEARCH FIRST**: `grep -r "keyword" --include="*.md"` - Check if content already exists
@@ -115,7 +133,8 @@ When content is reused across multiple skills within a plugin:
 | Section | Content |
 |---------|---------|
 | [CRITICAL RULES](#-critical-rules-read-first) | Non-negotiable requirements |
-| [Content Duplication Prevention](#6-content-duplication-prevention-always-check) | Canonical sources + reference pattern |
+| [CLAUDE.md ↔ AGENTS.md Sync](#8-claudemd--agentsmd-synchronization-automatic-via-symlink) | Symlink ensures sync |
+| [Content Duplication Prevention](#7-content-duplication-prevention-always-check) | Canonical sources + reference pattern |
 | [Anti-Rationalization Tables](#anti-rationalization-tables-mandatory-for-all-agents) | Prevent AI from assuming/skipping |
 | [Assertive Language Reference](#assertive-language-reference) | Quick reference + [full docs](docs/PROMPT_ENGINEERING.md) |
 | [Agent Modification Verification](#agent-modification-verification-mandatory) | Checklist for agent changes |
@@ -468,6 +487,8 @@ Using-* Skills (plugin introductions):
 ```
 
 **Checklist when adding/modifying:**
+- [ ] CLAUDE.md updated? → AGENTS.md auto-updates (it's a symlink)
+- [ ] AGENTS.md symlink broken? → Restore with `ln -sf CLAUDE.md AGENTS.md`
 - [ ] Agent added? Update hooks, using-* skills, MANUAL.md, README.md
 - [ ] Skill added? Update CLAUDE.md architecture, hooks if plugin-specific
 - [ ] Command added? Update MANUAL.md, README.md

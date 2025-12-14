@@ -36,6 +36,50 @@ Continuous improvement system that tracks development cycle effectiveness throug
 
 **Core principle:** What gets measured gets improved. Track every gate transition to identify systemic issues.
 
+## Step 0: TodoWrite Tracking (MANDATORY FIRST ACTION)
+
+**⛔ HARD GATE: Before ANY other action, you MUST add feedback-loop to todo list.**
+
+**Execute this TodoWrite call IMMEDIATELY when this skill starts:**
+
+```yaml
+TodoWrite tool:
+  todos:
+    - id: "feedback-loop-execution"
+      content: "Execute dev-feedback-loop: collect metrics, calculate scores, write report"
+      status: "in_progress"
+      priority: "high"
+```
+
+**Why this is mandatory:**
+- TodoWrite creates visible tracking of feedback-loop execution
+- Prevents skill from being "forgotten" mid-execution
+- Creates audit trail that feedback was collected
+- Hook enforcer checks for this todo item
+
+**After completing ALL feedback-loop steps, mark as completed:**
+
+```yaml
+TodoWrite tool:
+  todos:
+    - id: "feedback-loop-execution"
+      content: "Execute dev-feedback-loop: collect metrics, calculate scores, write report"
+      status: "completed"
+      priority: "high"
+```
+
+**Anti-Rationalization:**
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "TodoWrite slows things down" | 1 tool call = 2 seconds. Not an excuse. | **Execute TodoWrite NOW** |
+| "I'll remember to complete it" | Memory is unreliable. Todo is proof. | **Execute TodoWrite NOW** |
+| "Skill is simple, no tracking needed" | Simple ≠ optional. ALL skills get tracked. | **Execute TodoWrite NOW** |
+
+**You CANNOT proceed to Step 1 without executing TodoWrite above.**
+
+---
+
 ## Pressure Resistance
 
 **Feedback collection is MANDATORY for all completed tasks. Pressure scenarios and required responses:**
@@ -336,7 +380,7 @@ If file already exists (from previous task in same cycle), **append** the new ta
 
 **Report formats:** RCA = Score → Failure Events → 5 Whys → Root cause → Corrective action | Gate Blocked = History → Issue → BLOCKED UNTIL human decision | Deep Analysis = Distribution → Patterns → Improvement Plan
 
-## Step 4: Write Feedback Report
+## Step 5: Write Feedback Report
 
 **Location:** `.ring/dev-team/feedback/cycle-YYYY-MM-DD.md`
 
@@ -352,7 +396,7 @@ If file already exists (from previous task in same cycle), **append** the new ta
 | **Recommendations** | Immediate (this sprint), Short-term (this month), Long-term (this quarter) |
 | **Next Review** | Date, Target assertiveness, Focus areas |
 
-## Step 5: Generate Improvement Suggestions
+## Step 6: Generate Improvement Suggestions
 
 **Improvement types based on pattern analysis:**
 
@@ -361,6 +405,33 @@ If file already exists (from previous task in same cycle), **append** the new ta
 | **Agents** | Same issue type recurring in reviews | Agent name → Issue → Suggestion → Specific addition to prompt |
 | **Skills** | Gate consistently needs iterations | Skill name → Issue → Suggestion → Specific change to skill |
 | **Process** | Pattern spans multiple tasks | Process area → Issue → Suggestion → Implementation |
+
+## Step 7: Complete TodoWrite Tracking (MANDATORY FINAL ACTION)
+
+**⛔ HARD GATE: After ALL steps complete, you MUST mark feedback-loop todo as completed.**
+
+**Execute this TodoWrite call to finalize:**
+
+```yaml
+TodoWrite tool:
+  todos:
+    - id: "feedback-loop-execution"
+      content: "Execute dev-feedback-loop: collect metrics, calculate scores, write report"
+      status: "completed"
+      priority: "high"
+```
+
+**Verification before marking complete:**
+- [ ] Step 1: Metrics collected from state file
+- [ ] Step 2: Assertiveness score calculated
+- [ ] Step 3: Prompt quality analyzed (if agents executed)
+- [ ] Step 4: Threshold alerts checked
+- [ ] Step 5: Feedback report written to `.ring/dev-team/feedback/`
+- [ ] Step 6: Improvement suggestions generated
+
+**You CANNOT mark todo as completed until ALL steps above are done.**
+
+---
 
 ## Execution Report
 

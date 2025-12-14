@@ -480,15 +480,36 @@ Write tool:
 | Any deprecated pattern usage | → Create FINDING-XXX |
 | Any observability gap | → Create FINDING-XXX |
 
-**FORBIDDEN:**
-- ❌ Ignoring agent-reported issues because they seem "minor"
-- ❌ Filtering out issues based on personal judgment
-- ❌ Summarizing multiple issues into one finding (each issue = one finding)
+### FORBIDDEN Actions for Step 4.1
 
-**REQUIRED:**
-- ✅ Every line item from agent reports becomes a FINDING-XXX entry
-- ✅ Preserve agent's severity assessment
-- ✅ Include exact file:line references from agent report
+```
+❌ Ignoring agent-reported issues because they seem "minor"  → SKILL FAILURE
+❌ Filtering out issues based on personal judgment           → SKILL FAILURE
+❌ Summarizing multiple issues into one finding              → SKILL FAILURE
+❌ Skipping issues without ISSUE-XXX format from agent       → SKILL FAILURE
+❌ Creating findings only for "interesting" gaps             → SKILL FAILURE
+```
+
+### REQUIRED Actions for Step 4.1
+
+```
+✅ Every line item from agent reports becomes a FINDING-XXX entry
+✅ Preserve agent's severity assessment exactly as reported
+✅ Include exact file:line references from agent report
+✅ Every non-✅ item in Standards Coverage Table = one FINDING-XXX
+✅ Count findings in Step 5 MUST equal total issues from all agent reports
+```
+
+### Anti-Rationalization Table for Step 4.1
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "This issue is too minor to track" | You don't decide severity. The agent already assessed it. | **Create FINDING-XXX for EVERY issue** |
+| "Multiple similar issues can be one finding" | Distinct file:line = distinct finding. Merging loses traceability. | **One issue = One FINDING-XXX** |
+| "Agent report didn't use ISSUE-XXX format" | Format varies; presence matters. Every gap = one finding. | **Extract ALL gaps into findings** |
+| "Codebase already mostly compliant" | Mostly ≠ fully. Document ALL differences. | **Create findings for ALL non-✅ items** |
+| "I'll consolidate to reduce noise" | Consolidation = data loss. Noise is signal. | **Preserve ALL individual issues** |
+| "Some findings are duplicates across agents" | Different agents = different perspectives. Keep both. | **Create separate findings per agent** |
 
 **TodoWrite:** Mark "Map agent findings to FINDING-XXX entries" as `completed`
 
@@ -497,6 +518,50 @@ Write tool:
 ## Step 5: Generate findings.md
 
 **TodoWrite:** Mark "Generate findings.md" as `in_progress`
+
+### ⛔ HARD GATE: Verify All Issues Are Mapped
+
+**BEFORE creating findings.md, verify:**
+
+```
+Check 1: Count total issues from ALL agent reports in Step 4.5
+Check 2: Count total FINDING-XXX entries you will create
+Check 3: Count 1 MUST equal Count 2
+
+If counts don't match → STOP. Go back to Step 4.1. Map missing issues.
+```
+
+### FORBIDDEN Actions for Step 5
+
+```
+❌ Creating findings.md with fewer entries than agent issues  → SKILL FAILURE
+❌ Omitting file:line references from findings                → SKILL FAILURE
+❌ Using vague descriptions instead of specific code excerpts → SKILL FAILURE
+❌ Skipping "Why This Matters" section for any finding        → SKILL FAILURE
+❌ Generating findings.md without reading ALL agent reports   → SKILL FAILURE
+```
+
+### REQUIRED Actions for Step 5
+
+```
+✅ Every FINDING-XXX includes: Severity, Category, Agent, Standard reference
+✅ Every FINDING-XXX includes: Current Code with exact file:line
+✅ Every FINDING-XXX includes: Ring Standard Reference with URL
+✅ Every FINDING-XXX includes: Required Changes as numbered actions
+✅ Every FINDING-XXX includes: Why This Matters with Problem/Standard/Impact
+✅ Total finding count MUST match total issues from Step 4.1
+```
+
+### Anti-Rationalization Table for Step 5
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "I'll add details later during implementation" | findings.md is the source of truth. Incomplete = useless. | **Complete ALL sections for EVERY finding** |
+| "Code snippet is too long to include" | Truncate to relevant lines, but NEVER omit. Context is required. | **Include code with file:line reference** |
+| "Standard URL is obvious, skip it" | Agents and humans need direct links. Nothing is obvious. | **Include full URL for EVERY standard** |
+| "Why This Matters is redundant" | It explains business impact. Standards alone don't convey urgency. | **Write Problem/Standard/Impact for ALL** |
+| "Some findings are self-explanatory" | Self-explanatory to you ≠ clear to implementer. | **Complete ALL sections without exception** |
+| "I'll group small findings together" | Grouping happens in Step 6 (tasks). findings.md = atomic issues. | **One finding = one FINDING-XXX entry** |
 
 **Use Write tool to create findings.md:**
 
