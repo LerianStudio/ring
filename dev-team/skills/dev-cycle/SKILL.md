@@ -380,6 +380,50 @@ State is persisted to `docs/refactor/current-cycle.json`:
 }
 ```
 
+## State Persistence (MANDATORY)
+
+**⛔ HARD GATE: State MUST be persisted to file after EVERY gate completion.**
+
+Instructions like "Update state" mean you MUST execute a tool call to write to the file. Mental tracking is NOT persistence.
+
+**After each gate, execute:**
+
+```yaml
+Read tool:
+  file_path: "docs/refactor/current-cycle.json"
+```
+
+Then update the relevant fields and write back:
+
+```yaml
+Edit tool:
+  file_path: "docs/refactor/current-cycle.json"
+  old_str: [current JSON section to update]
+  new_str: [updated JSON with new values]
+```
+
+**Minimum fields to update per gate:**
+
+| Field | Update Trigger |
+|-------|----------------|
+| `updated_at` | Every state change |
+| `current_gate` | Gate transition |
+| `tasks[N].status` | Task start/complete |
+| `tasks[N].gate_progress.{gate}.status` | Gate start/complete |
+| `tasks[N].agent_outputs.{gate}` | Agent returns output |
+
+**Anti-Rationalization:**
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "I'll update state at the end" | Crash = lost progress. Update after EACH gate. | **Edit tool NOW** |
+| "State is tracked mentally" | Mental state ≠ file persistence. Resume needs file. | **Edit tool NOW** |
+| "Small change, not worth saving" | Small changes accumulate. All changes persist. | **Edit tool NOW** |
+
+**Verification:** After Edit tool, the `updated_at` timestamp in the file MUST be newer than before.
+
+---
+
 ## Step 0: Verify PROJECT_RULES.md Exists (HARD GATE)
 
 **NON-NEGOTIABLE. Cycle CANNOT proceed without project standards.**
@@ -481,7 +525,7 @@ See [shared-patterns/orchestrator-principle.md](../shared-patterns/orchestrator-
 5. Receive TDD-RED report from agent
 6. **VERIFY FAILURE OUTPUT EXISTS (HARD GATE):** See shared-patterns/tdd-prompt-templates.md for verification rules.
 
-7. Update state:
+7. **⛔ PERSIST STATE (See "State Persistence" section):**
    ```json
    gate_progress.implementation.tdd_red = {
      "status": "completed",
@@ -520,7 +564,7 @@ See [shared-patterns/orchestrator-principle.md](../shared-patterns/orchestrator-
 3. Receive TDD-GREEN report from agent
 4. **VERIFY PASS OUTPUT EXISTS (HARD GATE):** See shared-patterns/tdd-prompt-templates.md for verification rules.
 
-5. Update state:
+5. **⛔ PERSIST STATE (See "State Persistence" section):**
    ```json
    gate_progress.implementation.tdd_green = {
      "status": "completed",
@@ -603,7 +647,7 @@ For current execution unit:
        duration_ms: [execution time]
      }
 
-6. Update state and proceed to Gate 2
+6. **⛔ PERSIST STATE (See "State Persistence" section)** and proceed to Gate 2
 ```
 
 ## Step 4: Gate 2 - SRE (Per Execution Unit)
@@ -649,7 +693,7 @@ For current execution unit:
        duration_ms: [execution time]
      }
 
-6. Update state and proceed to Gate 3
+6. **⛔ PERSIST STATE (See "State Persistence" section)** and proceed to Gate 3
 ```
 
 ## Step 5: Gate 3 - Testing (Per Execution Unit)
@@ -766,7 +810,7 @@ For current execution unit:
    - Repeat until clean (max 3 iterations)
 
 7. When all issues resolved:
-   - Update state
+   - **⛔ PERSIST STATE (See "State Persistence" section)**
    - Proceed to Gate 5
 ```
 
@@ -807,7 +851,7 @@ For current execution unit:
 
 **Checkpoint depends on `execution_mode`:** `manual_per_subtask` → Execute | `manual_per_task` / `automatic` → Skip
 
-1. Set `status = "paused_for_approval"`, save state
+1. Set `status = "paused_for_approval"`, **⛔ PERSIST STATE**
 2. Present summary: Unit ID, Parent Task, Gates 0-5 status, Criteria X/X, Duration, Files Changed
 3. **AskUserQuestion:** "Ready to proceed?" Options: (a) Continue (b) Test First (c) Stop Here
 4. **Handle response:**
@@ -822,7 +866,7 @@ For current execution unit:
 
 **Checkpoint depends on `execution_mode`:** `manual_per_subtask` / `manual_per_task` → Execute | `automatic` → Skip
 
-1. Set task `status = "completed"`, cycle `status = "paused_for_task_approval"`, save state
+1. Set task `status = "completed"`, cycle `status = "paused_for_task_approval"`, **⛔ PERSIST STATE**
 2. Present summary: Task ID, Subtasks X/X, Total Duration, Review Iterations, Files Changed
 3. **AskUserQuestion:** "Task complete. Ready for next?" Options: (a) Continue (b) Integration Test (c) Stop Here
 4. **Handle response:**
@@ -884,7 +928,7 @@ After completing all subtasks of a task:
    **Hook Enforcement:** A UserPromptSubmit hook (`feedback-loop-enforcer.sh`) monitors state and will inject reminders if feedback-loop is not executed.
 
 3. Set cycle status = "paused_for_task_approval"
-4. Save state
+4. **⛔ PERSIST STATE (See "State Persistence" section)**
 
 5. Present task completion summary (with feedback metrics):
    ┌─────────────────────────────────────────────────┐
@@ -947,7 +991,7 @@ After completing all subtasks of a task:
 
    If "Integration Test":
      - Set status = "paused_for_integration_testing"
-     - Save state
+     - **⛔ PERSIST STATE**
      - Output: "Cycle paused for integration testing.
                 Test task [task_id] integration and run:
                 /ring-dev-team:dev-cycle --resume
@@ -956,7 +1000,7 @@ After completing all subtasks of a task:
 
    If "Stop Here":
      - Set status = "paused"
-     - Save state
+     - **⛔ PERSIST STATE**
      - Output: "Cycle paused after task [task_id]. Resume with:
                 /ring-dev-team:dev-cycle --resume"
      - STOP execution
@@ -967,7 +1011,7 @@ After completing all subtasks of a task:
 ## Step 8: Cycle Completion
 
 1. **Calculate metrics:** total_duration_ms, average gate durations, review iterations, pass/fail ratio
-2. **Update state:** `status = "completed"`, `completed_at = timestamp`
+2. **⛔ PERSIST STATE:** `status = "completed"`, `completed_at = timestamp`
 3. **Generate report:** Task | Subtasks | Duration | Review Iterations | Status
 
 4. **⛔ MANDATORY: Run dev-feedback-loop skill for cycle metrics**
@@ -1036,7 +1080,7 @@ After completing all subtasks of a task:
 | **Non-Recoverable** | Invalid state file | Must restart (cannot resume) |
 | **Non-Recoverable** | Max review iterations | Pause for user |
 
-**On any error:** Update state → Set status (failed/paused) → Save immediately → Report (what failed, why, how to recover, resume command)
+**On any error:** **⛔ PERSIST STATE** → Set status (failed/paused) → Report (what failed, why, how to recover, resume command)
 
 ## Execution Report
 
