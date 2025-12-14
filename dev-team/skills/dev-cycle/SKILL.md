@@ -380,6 +380,67 @@ State is persisted to `docs/refactor/current-cycle.json`:
 }
 ```
 
+## ⛔ State Persistence Rule (MANDATORY)
+
+**"Update state" means BOTH update the object AND write to file. Not just in-memory.**
+
+### After EVERY Gate Transition
+
+You MUST execute these steps after completing ANY gate (0, 1, 2, 3, 4, or 5):
+
+```yaml
+# Step 1: Update state object with gate results
+state.tasks[current_task_index].gate_progress.[gate_name].status = "completed"
+state.tasks[current_task_index].gate_progress.[gate_name].completed_at = "[ISO timestamp]"
+state.current_gate = [next_gate_number]
+state.updated_at = "[ISO timestamp]"
+
+# Step 2: Write to file (MANDATORY - use Write tool)
+Write tool:
+  file_path: "docs/refactor/current-cycle.json"
+  content: [full JSON state]
+
+# Step 3: Verify persistence (MANDATORY - use Read tool)
+Read tool:
+  file_path: "docs/refactor/current-cycle.json"
+# Confirm current_gate and gate_progress match expected values
+```
+
+### State Persistence Checkpoints
+
+| After | MUST Update | MUST Write File |
+|-------|-------------|-----------------|
+| Gate 0.1 (TDD-RED) | `tdd_red.status`, `tdd_red.failure_output` | ✅ YES |
+| Gate 0.2 (TDD-GREEN) | `tdd_green.status`, `implementation.status` | ✅ YES |
+| Gate 1 (DevOps) | `devops.status`, `agent_outputs.devops` | ✅ YES |
+| Gate 2 (SRE) | `sre.status`, `agent_outputs.sre` | ✅ YES |
+| Gate 3 (Testing) | `testing.status`, `agent_outputs.testing` | ✅ YES |
+| Gate 4 (Review) | `review.status`, `agent_outputs.review` | ✅ YES |
+| Gate 5 (Validation) | `validation.status`, task `status` | ✅ YES |
+| Step 7.1 (Unit Approval) | `status = "paused_for_approval"` | ✅ YES |
+| Step 7.2 (Task Approval) | `status = "paused_for_task_approval"` | ✅ YES |
+
+### Anti-Rationalization for State Persistence
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "I'll save state at the end" | Crash/timeout loses ALL progress | **Save after EACH gate** |
+| "State is in memory, that's updated" | Memory is volatile. File is persistent. | **Write to JSON file** |
+| "Only save on checkpoints" | Gates without saves = unrecoverable on resume | **Save after EVERY gate** |
+| "Write tool is slow" | Write takes <100ms. Lost progress takes hours. | **Write after EVERY gate** |
+| "I updated the state variable" | Variable ≠ file. Without Write tool, nothing persists. | **Use Write tool explicitly** |
+
+### Verification Command
+
+After each gate, the state file MUST reflect:
+- `current_gate` = next gate number
+- `updated_at` = recent timestamp
+- Previous gate `status` = "completed"
+
+**If verification fails → State was not persisted. Re-execute Write tool.**
+
+---
+
 ## Step 0: Verify PROJECT_RULES.md Exists (HARD GATE)
 
 **NON-NEGOTIABLE. Cycle CANNOT proceed without project standards.**
@@ -550,7 +611,15 @@ See [shared-patterns/orchestrator-principle.md](../shared-patterns/orchestrator-
    └─────────────────────────────────────────────────┘
    ```
 
-7. Proceed to Gate 1
+7. **⛔ SAVE STATE TO FILE (MANDATORY):**
+   ```yaml
+   Write tool:
+     file_path: "docs/refactor/current-cycle.json"
+     content: [full updated state JSON]
+   ```
+   See "State Persistence Rule" section. State MUST be written to file after Gate 0.
+
+8. Proceed to Gate 1
 
 ### TDD Sub-Phase Anti-Rationalization
 
@@ -603,7 +672,12 @@ For current execution unit:
        duration_ms: [execution time]
      }
 
-6. Update state and proceed to Gate 2
+6. Update state
+7. **⛔ SAVE STATE TO FILE (MANDATORY):**
+   Write tool → "docs/refactor/current-cycle.json"
+   See "State Persistence Rule" section.
+
+8. Proceed to Gate 2
 ```
 
 ## Step 4: Gate 2 - SRE (Per Execution Unit)
@@ -649,7 +723,12 @@ For current execution unit:
        duration_ms: [execution time]
      }
 
-6. Update state and proceed to Gate 3
+6. Update state
+7. **⛔ SAVE STATE TO FILE (MANDATORY):**
+   Write tool → "docs/refactor/current-cycle.json"
+   See "State Persistence Rule" section.
+
+8. Proceed to Gate 3
 ```
 
 ## Step 5: Gate 3 - Testing (Per Execution Unit)
@@ -691,6 +770,10 @@ For current execution unit:
    - Max 3 iterations allowed
    - After 3rd failure: STOP and escalate to user
    - Do NOT attempt 4th iteration automatically
+
+5. **⛔ SAVE STATE TO FILE (MANDATORY):**
+   Write tool → "docs/refactor/current-cycle.json"
+   See "State Persistence Rule" section.
 ```
 
 ### State Tracking
@@ -838,36 +921,23 @@ After completing all subtasks of a task:
 
 2. **⛔ MANDATORY: Run dev-feedback-loop skill**
 
-   **2a. TodoWrite: Add feedback-loop to todo list (REQUIRED)**
-   
-   ```yaml
-   TodoWrite tool:
-     todos:
-       - id: "feedback-loop-task-{task_id}"
-         content: "Execute dev-feedback-loop for task {task_id} (MANDATORY)"
-         status: "in_progress"
-         priority: "high"
-   ```
-
-   **2b. YOU MUST EXECUTE THIS TOOL CALL:**
-
    ```yaml
    Skill tool:
      skill_name: "ring-dev-team:dev-feedback-loop"
    ```
 
-   This skill handles BOTH assertiveness metrics AND prompt quality analysis.
-
-   The skill will:
-   a) Calculate assertiveness score for the task
-   b) Dispatch prompt-quality-reviewer agent with agent_outputs from state
-   c) Generate improvement suggestions
-   d) Write feedback to docs/feedbacks/cycle-{date}/{agent}.md
-
-   **2c. After feedback-loop completes, update state and todo:**
+   **Note:** dev-feedback-loop manages its own TodoWrite tracking internally.
    
+   The skill will:
+   - Add its own todo item for tracking
+   - Calculate assertiveness score for the task
+   - Dispatch prompt-quality-reviewer agent with agent_outputs from state
+   - Generate improvement suggestions
+   - Write feedback to docs/feedbacks/cycle-{date}/{agent}.md
+   - Mark its todo as completed
+
+   **After feedback-loop completes, update state:**
    - Set `tasks[current].feedback_loop_completed = true` in state file
-   - TodoWrite: Mark "feedback-loop-task-{task_id}" as "completed"
 
    **Anti-Rationalization for Feedback Loop:**
 
@@ -972,28 +1042,15 @@ After completing all subtasks of a task:
 
 4. **⛔ MANDATORY: Run dev-feedback-loop skill for cycle metrics**
 
-   **4a. TodoWrite: Add feedback-loop to todo list (REQUIRED)**
-   
-   ```yaml
-   TodoWrite tool:
-     todos:
-       - id: "feedback-loop-cycle"
-         content: "Execute dev-feedback-loop for cycle completion (MANDATORY)"
-         status: "in_progress"
-         priority: "high"
-   ```
-
-   **4b. YOU MUST EXECUTE THIS TOOL CALL:**
-
    ```yaml
    Skill tool:
      skill_name: "ring-dev-team:dev-feedback-loop"
    ```
 
-   **4c. After feedback-loop completes, update state and todo:**
-   
+   **Note:** dev-feedback-loop manages its own TodoWrite tracking internally.
+
+   **After feedback-loop completes, update state:**
    - Set `feedback_loop_completed = true` at cycle level in state file
-   - TodoWrite: Mark "feedback-loop-cycle" as "completed"
 
    **⛔ HARD GATE: Cycle is NOT complete until feedback-loop executes.**
    
