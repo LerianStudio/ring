@@ -1,5 +1,5 @@
 ---
-name: capacity-review
+name: ring-ops-team:capacity-review
 description: Execute infrastructure capacity review and planning workflow
 argument-hint: "[scope: production|staging|all] [timeframe: quarterly|annual]"
 ---

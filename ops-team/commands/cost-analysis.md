@@ -1,5 +1,5 @@
 ---
-name: cost-analysis
+name: ring-ops-team:cost-analysis
 description: Execute cloud cost analysis and optimization workflow
 argument-hint: "[scope: full|service|account] [focus: general|rightsizing|ri|anomaly]"
 ---

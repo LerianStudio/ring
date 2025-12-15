@@ -1,5 +1,5 @@
 ---
-name: incident
+name: ring-ops-team:incident
 description: Initiate production incident response workflow with structured triage, coordination, and documentation
 argument-hint: "[severity] [brief-description]"
 ---
