@@ -170,16 +170,18 @@ git commit \
 
 Trailers can be queried programmatically:
 
-```bash
-# Find all commits with internal system reference
-git log --all --grep="X-Lerian-Ref: 0x1"
+**Note:** `git log --grep` searches commit message content only, not trailers. Use `--format` with `%(trailers)` to query trailer values.
 
-# Show trailers for a commit
+```bash
+# Find all commits with specific X-Lerian-Ref trailer value
+git log --all --format="%H %s %(trailers:key=X-Lerian-Ref,valueonly)" | grep "0x1"
+
+# Show all trailers for a commit
 git log -1 --format="%(trailers)"
 
-# Filter by specific trailer
+# Filter commits by trailer existence (any value)
 git log --all --format="%H %s" | while read hash msg; do
-  git log -1 --format="%(trailers:key=X-Lerian-Ref)" $hash | grep -q "0x1" && echo "$hash $msg"
+  git log -1 --format="%(trailers:key=X-Lerian-Ref)" $hash | grep -q "." && echo "$hash $msg"
 done
 ```
 
