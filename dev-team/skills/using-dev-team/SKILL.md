@@ -47,13 +47,7 @@ See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.
 
 ## Common Misconceptions - REJECTED
 
-| Misconception | Reality |
-|--------------|---------|
-| "I can handle this myself" | ORCHESTRATOR principle: dispatch specialists, don't implement directly. This is NON-NEGOTIABLE. |
-| "Overhead of dispatching not worth it" | Specialist quality > self-implementation. Dispatch is investment, not cost. MANDATORY dispatch. |
-| "Simple task, no specialist needed" | Simplicity is NOT your judgment. Follow dispatch guidelines. NO EXCEPTIONS. |
-| "I know Go/TypeScript well enough" | Specialists have standards loading. You don't. MUST dispatch. |
-| "Faster if I do it myself" | Faster ≠ better. Specialist output follows Ring standards. DISPATCH is REQUIRED. |
+See [shared-patterns/anti-rationalization.md](../shared-patterns/anti-rationalization.md) for universal anti-rationalizations (including Specialist Dispatch section).
 
 **Self-sufficiency bias check:** If you're tempted to implement directly, ask:
 1. Is there a specialist for this? (Check the 7 specialists below)
@@ -66,23 +60,7 @@ See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.
 
 ## Anti-Rationalization Table
 
-**If you catch yourself thinking ANY of these, STOP:**
-
-| Rationalization | Why It's WRONG | Required Action |
-|-----------------|----------------|-----------------|
-| "This is a small task, no need for specialist" | Size doesn't determine complexity. Standards always apply. | **DISPATCH specialist** |
-| "I already know how to do this" | Your knowledge ≠ Ring standards loaded by specialist. | **DISPATCH specialist** |
-| "Dispatching takes too long" | Quality > speed. Specialist follows full standards. | **DISPATCH specialist** |
-| "I'll just fix this one thing quickly" | Quick fixes bypass TDD, testing, review. | **DISPATCH specialist** |
-| "The specialist will just do what I would do" | Specialists have domain-specific anti-rationalization. You don't. | **DISPATCH specialist** |
-| "This doesn't need the full dev-cycle" | ALL implementation needs dev-cycle. No exceptions. | **Follow 6-gate cycle** |
-| "I've already implemented 80% without specialist" | Past mistakes don't justify continuing wrong approach. Dispatch specialist, discard non-compliant work if needed. | **STOP. DISPATCH specialist. Accept sunk cost.** |
-| "Prototyping first, dispatch later" | Prototyping without standards = technical debt seed. | **DISPATCH specialist BEFORE any code** |
-| "This is prototype/throwaway code" | Prototypes become production 60% of time. Standards apply to ALL code. | **Apply full standards. No prototype exemption.** |
-| "Too exhausted to do this properly" | Exhaustion doesn't waive requirements. It increases error risk. | **STOP work. Resume when able to comply fully.** |
-| "Time pressure + authority says skip" | Combined pressures don't multiply exceptions. Zero exceptions × any pressure = zero exceptions. | **Follow all requirements regardless of pressure combination.** |
-| "Similar task worked without this step" | Past non-compliance doesn't justify future non-compliance. | **Follow complete process every time.** |
-| "User explicitly authorized skip" | User authorization doesn't override HARD GATES. | **Cannot comply. Explain non-negotiable requirement.** |
+See [shared-patterns/anti-rationalization.md](../shared-patterns/anti-rationalization.md) for universal anti-rationalizations (including Specialist Dispatch section and Universal section).
 
 ---
 
@@ -104,19 +82,7 @@ See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.
 
 ## Pressure Resistance
 
-**When facing pressure to bypass specialist dispatch:**
-
-| User Says | Your Response |
-|-----------|---------------|
-| "Production is down, no time for specialist dispatch" | "I understand the urgency. However, specialists prevent introducing new bugs during incidents. I'll dispatch with URGENT context. This takes 5-10 minutes, not hours." |
-| "You've already done 80% of this, just finish it yourself" | "Sunk cost doesn't justify wrong approach. The 80% may not meet Ring standards. I MUST dispatch the specialist to verify compliance. I cannot proceed without specialist review." |
-| "Our senior dev said you don't need the specialist for this" | "I respect the senior dev's experience, but Ring standards require specialist dispatch. Specialists have loaded standards that even experienced developers might miss. This is NON-NEGOTIABLE." |
-| "This is a 2-line change, specialist is overkill" | "Line count doesn't determine complexity. Every change MUST follow TDD and standards. I CANNOT make code changes without specialist dispatch. This is a HARD GATE." |
-| "Dispatch both at once seems risky, do them sequentially" | "Sequential dispatch doubles execution time. Specialists work independently with provided context. Parallel dispatch is REQUIRED. I'll dispatch both now." |
-| "Just copy our existing Docker setup, don't bother the DevOps agent" | "Copying patterns without standards verification creates technical debt. The `devops-engineer` ensures the copy follows current Ring standards. I MUST dispatch the specialist." |
-| "2am, demo at 9am, too tired" | "Exhausted work = buggy work = rework. STOP. Resume fresh or request deadline extension." |
-| "Just POC, need it fast" | "POC with bugs = wrong validation. Apply standards. Fast AND correct." |
-| "CTO + PM + TL all say skip" | "Authority count doesn't change requirements. HARD GATES are non-negotiable." |
+See [shared-patterns/pressure-resistance.md](../shared-patterns/pressure-resistance.md) for universal pressure scenarios (including Combined Pressure Scenarios and Emergency Response).
 
 **Critical Reminder:**
 - **Urgency ≠ Permission to bypass** - Emergencies require MORE care, not less
@@ -127,13 +93,7 @@ See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.
 
 ## Emergency Response Protocol
 
-**Production incidents DO NOT bypass specialist dispatch. Here's why:**
-
-| Scenario | Wrong Approach | Correct Approach |
-|----------|----------------|------------------|
-| Service down, CEO watching | "No time, fix directly" | Dispatch specialist with URGENT flag + incident context |
-| 2-line obvious fix | "Just patch it quickly" | Dispatch + TDD even for 2 lines (prevents new bugs) |
-| Rollback needed | "Revert manually" | Dispatch DevOps engineer for safe rollback |
+See [shared-patterns/pressure-resistance.md](../shared-patterns/pressure-resistance.md) → Emergency Response section for the complete protocol.
 
 **Emergency Dispatch Template:**
 ```
@@ -143,21 +103,13 @@ Task tool:
   prompt: "URGENT PRODUCTION INCIDENT: [brief context]. [Your specific request]"
 ```
 
-**IMPORTANT:**
-- Specialist dispatch takes 5-10 minutes, NOT hours
-- Rushed direct fixes often introduce NEW bugs (compounding the incident)
-- Specialists ensure incident fixes don't violate standards
-- This is NON-NEGOTIABLE even under CEO pressure
+**IMPORTANT:** Specialist dispatch takes 5-10 minutes, NOT hours. This is NON-NEGOTIABLE even under CEO pressure.
 
 ---
 
 ## Combined Pressure Scenarios
 
-| Pressure Combination | Request | Agent Response |
-|---------------------|---------|----------------|
-| **Production + CEO + Exhaustion + Small Fix** | "3am, CEO watching, 2-line fix, just do it directly" | "I understand the extreme pressure. Specialist dispatch takes 5-10 minutes. Direct fixes at 3am often introduce new bugs. Dispatching specialist with URGENT context now." |
-| **Sunk Cost + Deadline + Authority** | "80% done, demo tomorrow, tech lead says finish yourself" | "Sunk cost and authority don't override Ring standards. Dispatching specialist to verify the 80% and complete correctly." |
-| **All Pressures Combined** | "Production down + CEO + 3am + 80% done + tech lead says hurry" | "Maximum pressure doesn't change requirements. Specialist dispatch is MANDATORY. Proceeding with URGENT dispatch now." |
+See [shared-patterns/pressure-resistance.md](../shared-patterns/pressure-resistance.md) → Combined Pressure Scenarios section.
 
 ---
 

@@ -136,63 +136,31 @@ Report ALL severities. Let user prioritize.
 
 No negotiation. No exceptions. No "special cases".
 
-**This skill enforces MANDATORY gates. Pressure scenarios and required responses:**
+## Pressure Resistance
 
-| Pressure Type | Request | Agent Response |
-|---------------|---------|----------------|
-| **Time** | "Production down, skip gates" | "Gates prevent production issues. Automatic mode = 20 min. Skipping gates increases risk." |
-| **Sunk Cost** | "Already did 4 gates, skip review" | "Each gate catches different issues. Prior gates don't reduce review value. Review = 10 min." |
-| **Authority** | "Director override, ship now" | "Cannot skip GATES based on authority. Can skip CHECKPOINTS (automatic mode). Gates are non-negotiable." |
-| **Simplicity** | "Simple fix, skip gates" | "Simple tasks have complex impacts. AI doesn't negotiate. ALL tasks require ALL gates. No exceptions." |
-| **Demo** | "Demo at 9 AM, ship without gates" | "Demos with unverified code = demos that crash. Gates BEFORE demo to ensure success. Automatic mode = 20 min." |
-| **Fatigue** | "It's late, exhausted, finish tomorrow" | "Fatigue reduces judgment. This is why gates are automated checklists. Gates prevent fatigue-induced errors." |
-| **Economic** | "$XM deal depends on skipping gates" | "Revenue at risk from shipping broken code >> revenue from delayed demo. Gates protect business outcomes." |
+See [shared-patterns/pressure-resistance.md](../shared-patterns/pressure-resistance.md) for universal pressure scenarios.
 
-**Non-negotiable principle:** Execution mode selection affects CHECKPOINTS (user approval pauses), not GATES (quality checks). ALL gates execute regardless of mode.
+**Gate-specific note:** Execution mode selection affects CHECKPOINTS (user approval pauses), not GATES (quality checks). ALL gates execute regardless of mode.
 
 ## Common Rationalizations - REJECTED
 
+See [shared-patterns/anti-rationalization.md](../shared-patterns/anti-rationalization.md) for universal anti-rationalizations.
+
+**Gate-specific rationalizations:**
+
 | Excuse | Reality |
 |--------|---------|
-| "Task is simple, skip gates" | Simple tasks have complex impacts. Gates catch what you don't see. |
-| "Already passed N gates" | Each gate catches different issues. Sunk cost is irrelevant. |
-| "Manager approved skipping" | Authority cannot override quality gates. Document the pressure. |
-| "Tests pass, skip review" | Tests verify code works. Review verifies code is correct, secure, maintainable. |
 | "Automatic mode means faster" | Automatic mode skips CHECKPOINTS, not GATES. Same quality, less interruption. |
 | "Automatic mode will skip review" | Automatic mode affects user approval pauses, NOT quality gates. ALL gates execute regardless. |
-| "We'll fix issues post-merge" | Post-merge fixes are 10x more expensive. Gates exist to prevent this. |
 | "Defense in depth exists (frontend validates)" | Frontend can be bypassed. Backend is the last line. Fix at source. |
 | "Backlog the Medium issue, it's documented" | Documented risk ≠ mitigated risk. Medium in Gate 4 = fix NOW, not later. |
 | "Risk-based prioritization allows deferral" | Gates ARE the risk-based system. Reviewers define severity, not you. |
-| "Business context justifies exception" | Business context informed gate design. Gates already account for it. |
-| "Demo tomorrow, we'll fix after" | "Fix after" = never-fix. Demo crashes are worse than delayed demos. | **Gates BEFORE demo (automatic mode = 20 min)** |
-| "Just this one gate, then catch up" | One skipped gate = precedent. Next gate also "just one". No incremental compromise. |
-| "90% done, finish without remaining gates" | 90% done with 0% gates = 0% verified. Gates verify the 90%. |
-| "Ship now, gates as fast-follow" | Fast-follow = never-follow. Gates now or not at all. |
 
 ## Red Flags - STOP
 
-If you catch yourself thinking ANY of these, STOP immediately:
+See [shared-patterns/red-flags.md](../shared-patterns/red-flags.md) for universal red flags.
 
-- "This task is too simple for gates"
-- "We already passed most gates"
-- "Manager/Director said to skip"
-- "Tests pass, review is redundant"
-- "We can fix issues later"
-- "Automatic mode will handle it"
-- "Automatic mode will skip review"
-- "Just this once won't hurt"
-- "Frontend already validates this"
-- "I'll document it in backlog/TODO"
-- "Medium severity can wait"
-- "Business context is different here"
-- "Risk-based approach says defer"
-- "Demo tomorrow, fix after"
-- "Just this one gate"
-- "90% done, almost there"
-- "Ship now, gates as fast-follow"
-
-**All of these indicate you're about to violate mandatory workflow. Return to gate execution.**
+If you catch yourself thinking ANY of those patterns, STOP immediately and return to gate execution.
 
 ## Incremental Compromise Prevention
 

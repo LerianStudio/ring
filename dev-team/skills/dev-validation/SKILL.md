@@ -64,17 +64,7 @@ Final validation gate requiring explicit user approval. Present evidence that ea
 
 See [shared-patterns/pressure-resistance.md](../shared-patterns/pressure-resistance.md) for universal pressure scenarios.
 
-**Gate 5 (Validation) requires EXPLICIT user approval. Pressure scenarios and required responses:**
-
-| Pressure Type | Request | Agent Response |
-|---------------|---------|----------------|
-| **User Busy** | "User is busy, assume approval" | "CANNOT assume approval. Wait for explicit response. Document pending status." |
-| **Tests Pass** | "Tests pass, validation redundant" | "Tests verify code works. Validation verifies it meets REQUIREMENTS. Different concerns." |
-| **Minor Issues** | "Fix issues after approval" | "No partial approval. REJECTED with issues, fix first, then re-validate." |
-| **Implied Approval** | "User didn't object" | "Silence ≠ approval. Require explicit 'APPROVED' or 'REJECTED: reason'." |
-| **Manager Override** | "Manager approved, merge anyway" | "Manager ≠ stakeholder. Only original requester validates requirements. STOP and wait." |
-
-**Non-negotiable principle:** User MUST respond with "APPROVED" or "REJECTED: [reason]". No other responses accepted.
+**Gate 5-specific note:** User MUST respond with "APPROVED" or "REJECTED: [reason]". No other responses accepted. Silence ≠ approval.
 
 ## Self-Approval Prohibition
 
@@ -132,53 +122,23 @@ See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.
 
 ## Common Rationalizations - REJECTED
 
+See [shared-patterns/anti-rationalization.md](../shared-patterns/anti-rationalization.md) for universal anti-rationalizations (including Validation section).
+
+**Gate 5-specific rationalizations:**
+
 | Excuse | Reality |
 |--------|---------|
-| "User is unavailable" | Unavailability ≠ approval. STOP and wait. Document pending. |
-| "Tests prove it works" | Tests verify behavior. User validates requirements alignment. |
-| "Minor issues can wait" | No partial approval. Fix issues, then revalidate. |
-| "User seemed happy" | Seeming ≠ approval. Require explicit response. |
-| "Implicit approval after demo" | Demo ≠ approval. Ask for explicit decision. |
-| "User approved similar before" | Past ≠ present. Each validation requires fresh approval. |
 | "Async over sync - work in parallel" | Validation is a GATE, not async task. STOP means STOP. |
 | "Continue other tasks while waiting" | Other tasks may conflict. Validation blocks ALL related work. |
-| "Cost of waiting is too high" | Cost of wrong approval is higher. Wait is investment. |
-| "Send message and continue" | Message sent ≠ waiting for response. STOP until APPROVED. |
-| "Looks good" = approval | "Looks good" is ambiguous. Require explicit APPROVED. |
-| "User said 'sure'" | "Sure" is ambiguous. Require explicit APPROVED. |
-| "No objections raised" | Lack of objection ≠ approval. Require explicit response. |
 | "User delegated approval to X" | Delegation ≠ stakeholder approval. Only original requester can approve. |
-| "Emergency production issue" | Emergency ≠ gate bypass. Validation protects production. |
-| "Reduced scope, easier to approve" | Reduced scope ≠ auto-approval. User must validate actual delivery. |
-| "APPROVED if X (X is true)" | Conditional approval ≠ approval. Verify X, then re-request. |
 | "I implemented it, I know requirements" | Knowledge ≠ approval authority. Implementer CANNOT self-approve. |
-| "User is slow, I'll self-approve to unblock" | Efficiency ≠ gate bypass. Self-approval is PROHIBITED. |
-| "I'm the only developer on this" | Team size is irrelevant. User approval required. |
 | "I'll switch to QA role to approve" | Role switching is STILL self-approval. PROHIBITED. |
 
 ## Red Flags - STOP
 
-If you catch yourself thinking ANY of these, STOP immediately:
+See [shared-patterns/red-flags.md](../shared-patterns/red-flags.md) for universal red flags (including Validation section).
 
-- "User is busy, I'll assume approval"
-- "Tests pass, validation is redundant"
-- "These minor issues can be fixed later"
-- "User didn't say no, so it's approved"
-- "User seemed satisfied with the demo"
-- "Previous similar work was approved"
-- "I'll work on other tasks while waiting"
-- "Async over sync - don't block"
-- "Send message and continue"
-- "Cost of waiting is too high"
-- "'Looks good' means approved"
-- "User said 'sure'"
-- "No objections = approved"
-- "User delegated approval authority to someone else"
-- "This is an emergency, skip validation"
-- "We implemented less than requested, so it's easier to approve"
-- "I'm switching roles to approve this"
-
-**All of these indicate Gate 5 violation. Wait for explicit "APPROVED" or "REJECTED".**
+If you catch yourself thinking ANY of those patterns, STOP immediately. Wait for explicit "APPROVED" or "REJECTED".
 
 ## Ambiguous Response Handling
 

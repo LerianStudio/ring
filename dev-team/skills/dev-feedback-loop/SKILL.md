@@ -82,51 +82,28 @@ TodoWrite tool:
 
 ## Pressure Resistance
 
-**Feedback collection is MANDATORY for all completed tasks. Pressure scenarios and required responses:**
+See [shared-patterns/pressure-resistance.md](../shared-patterns/pressure-resistance.md) for universal pressure scenarios.
 
-| Pressure Type | Request | Agent Response |
-|---------------|---------|----------------|
-| **Simple Task** | "Task was simple, skip feedback" | "Simple tasks contribute to patterns. Collect metrics for ALL tasks." |
-| **Perfect Score** | "Score 100, feedback unnecessary" | "High scores need tracking too. Document what went well for replication." |
-| **User Approved** | "User approved, skip retrospective" | "Approval ≠ feedback. Collect metrics regardless of outcome." |
-| **No Issues** | "No issues found, nothing to report" | "No issues IS data. Document absence of problems for baseline." |
-
-**Non-negotiable principle:** Feedback MUST be collected for EVERY completed task, regardless of outcome or complexity.
+**Feedback-specific note:** Feedback MUST be collected for EVERY completed task, regardless of outcome or complexity. "Simple tasks" and "perfect scores" still need tracking.
 
 ## Common Rationalizations - REJECTED
+
+See [shared-patterns/anti-rationalization.md](../shared-patterns/anti-rationalization.md) for universal anti-rationalizations.
+
+**Feedback-specific rationalizations:**
 
 | Excuse | Reality |
 |--------|---------|
 | "It was just a spike/experiment" | Spikes produce learnings. Track what worked and what didn't. |
-| "Exploratory work, no metrics" | Exploration needs metrics to measure success. Track ALL work. |
-| "Task was too simple" | Simple tasks still contribute to cycle patterns. Track all. |
 | "Perfect score, no insights" | Perfect scores reveal what works. Document for replication. |
-| "Score 100, skip retrospective" | 100% scores need tracking too. Document what went well for replication. |
-| "User is happy, skip analysis" | Happiness ≠ process quality. Collect metrics objectively. |
-| "Same as last time" | Patterns only visible with data. Each task adds to baseline. |
-| "Feedback is subjective" | Metrics are objective. Assertiveness score has formula. |
-| "No time for retrospective" | Retrospective prevents future time waste. Investment, not cost. |
 | "Reporting my own failures reflects badly" | Unreported failures compound. Self-reporting is professional. |
-| "Low score makes me look bad" | Low score identifies improvement. Hiding score perpetuates problems. |
 | "Round up to passing threshold" | Rounding is falsification. Report exact score. |
 
 ## Red Flags - STOP
 
-If you catch yourself thinking ANY of these, STOP immediately:
+See [shared-patterns/red-flags.md](../shared-patterns/red-flags.md) for universal red flags.
 
-- "It was just a spike, no need to track"
-- "Exploratory work doesn't need metrics"
-- "This task was too simple to track"
-- "Perfect outcome, no need for feedback"
-- "User approved, skip the metrics"
-- "Same pattern as before, skip analysis"
-- "Feedback is subjective anyway"
-- "No time for retrospective"
-- "This score reflects badly on me"
-- "Round up to 70 (from 68)"
-- "Skip reporting this failure"
-
-**All of these indicate feedback loop violation. Collect metrics for EVERY task.**
+If you catch yourself thinking ANY of those patterns, STOP immediately. Collect metrics for EVERY task.
 
 ## Self-Preservation Bias Prevention
 
