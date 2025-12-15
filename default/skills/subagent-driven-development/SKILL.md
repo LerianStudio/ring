@@ -94,8 +94,8 @@ After all Critical/High/Medium issues resolved for current task:
 ### 7. Complete Development
 
 After final review passes:
-- Announce: "I'm using the finishing-a-development-branch skill to complete this work."
-- **REQUIRED SUB-SKILL:** Use finishing-a-development-branch
+- Announce: "I'm using the ring-default:finishing-a-development-branch skill to complete this work."
+- **REQUIRED SUB-SKILL:** Use ring-default:finishing-a-development-branch
 - Follow that skill to verify tests, present options, execute choice
 
 ## Example Workflow
@@ -142,14 +142,14 @@ After final review passes:
 ## Integration
 
 **Required workflow skills:**
-- **writing-plans** - REQUIRED: Creates the plan that this skill executes
-- **requesting-code-review** - REQUIRED: Review after each task (see Step 3)
-- **finishing-a-development-branch** - REQUIRED: Complete development after all tasks (see Step 7)
+- **ring-default:writing-plans** - REQUIRED: Creates the plan that this skill executes
+- **ring-default:requesting-code-review** - REQUIRED: Review after each task (see Step 3)
+- **ring-default:finishing-a-development-branch** - REQUIRED: Complete development after all tasks (see Step 7)
 
 **Subagents must use:**
-- **test-driven-development** - Subagents follow TDD for each task
+- **ring-default:test-driven-development** - Subagents follow TDD for each task
 
 **Alternative workflow:**
-- **executing-plans** - Use for parallel session instead of same-session execution
+- **ring-default:executing-plans** - Use for parallel session instead of same-session execution
 
 See reviewer agent definitions: code-reviewer (agents/code-reviewer.md), security-reviewer (agents/security-reviewer.md), business-logic-reviewer (agents/business-logic-reviewer.md)
