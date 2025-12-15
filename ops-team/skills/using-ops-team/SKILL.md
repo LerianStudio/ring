@@ -143,7 +143,7 @@ See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.
 | **`ring-ops-team:incident-responder`** | Incident management, RCA, post-mortems, blameless culture | Production incidents, outages, incident coordination, root cause analysis |
 | **`ring-ops-team:cloud-cost-optimizer`** | Cost analysis, RI management, FinOps, tagging | Cost reviews, optimization recommendations, reserved instance planning |
 | **`ring-ops-team:infrastructure-architect`** | Multi-region, DR, capacity planning, migrations | Architecture design, DR strategy, capacity planning, infrastructure lifecycle |
-| **`security-operations`** | Security audits, compliance, vulnerability management | Security assessments, compliance validation, vulnerability remediation |
+| **`ring-ops-team:security-operations`** | Security audits, compliance, vulnerability management | Security assessments, compliance validation, vulnerability remediation |
 
 **Dispatch template:**
 ```

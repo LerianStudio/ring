@@ -459,9 +459,9 @@ Measurement: December 31, 2024 vs January 1, 2024
 
 ## What This Agent Does NOT Handle
 
-- Financial statement analysis (use `financial-analyst`)
-- Budget creation and forecasting (use `budget-planner`)
-- Financial model building (use `financial-modeler`)
-- Treasury and cash management (use `treasury-specialist`)
-- Accounting entries and close (use `accounting-specialist`)
-- Brazilian regulatory compliance (use `finops-analyzer`)
+- Financial statement analysis (use `ring-finance-team:financial-analyst`)
+- Budget creation and forecasting (use `ring-finance-team:budget-planner`)
+- Financial model building (use `ring-finance-team:financial-modeler`)
+- Treasury and cash management (use `ring-finance-team:treasury-specialist`)
+- Accounting entries and close (use `ring-finance-team:accounting-specialist`)
+- Brazilian regulatory compliance (use `ring-finops-team:finops-analyzer`)
