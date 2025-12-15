@@ -15,10 +15,10 @@ skip_when: |
   - No acceptance criteria defined -> request criteria first
 
 sequence:
-  after: [dev-review]
+  after: [ring-dev-team:dev-review]
 
 related:
-  complementary: [verification-before-completion]
+  complementary: [ring-default:verification-before-completion]
 
 verification:
   automated:
