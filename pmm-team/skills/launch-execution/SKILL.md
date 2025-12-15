@@ -1,5 +1,5 @@
 ---
-name: launch-execution
+name: ring-pmm-team:launch-execution
 description: |
   Launch coordination skill for managing launch checklists, stakeholder alignment,
   and day-of execution for product and feature launches.

@@ -1,3 +1,9 @@
+---
+name: ring-dev-team:dev-refactor
+description: Analyze existing codebase against standards and execute refactoring through dev-cycle
+argument-hint: "[path]"
+---
+
 Analyze existing codebase against standards and execute refactoring through dev-cycle.
 
 ## ⛔ PRE-EXECUTION CHECK (EXECUTE FIRST)

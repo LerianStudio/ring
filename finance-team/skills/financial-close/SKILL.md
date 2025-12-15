@@ -1,5 +1,5 @@
 ---
-name: financial-close
+name: ring-finance-team:financial-close
 description: |
   Month-end and year-end close workflow covering journal entries, reconciliations,
   close procedures, and audit preparation. Delivers accurate, timely close with full audit trail.

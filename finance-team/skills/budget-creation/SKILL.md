@@ -1,5 +1,5 @@
 ---
-name: budget-creation
+name: ring-finance-team:budget-creation
 description: |
   Complete budgeting and forecasting workflow covering annual budgets, departmental budgets,
   rolling forecasts, and variance analysis. Delivers documented budgets with approval trails.

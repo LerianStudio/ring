@@ -1,5 +1,5 @@
 ---
-name: write-guide
+name: ring-tw-team:write-guide
 description: Start writing a functional guide with voice, tone, and structure guidance
 argument-hint: "[topic]"
 arguments:

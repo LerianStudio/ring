@@ -1,5 +1,5 @@
 ---
-name: verification-before-completion
+name: ring-default:verification-before-completion
 description: |
   Evidence-first completion gate - requires running verification commands and
   confirming output before making any success claims.

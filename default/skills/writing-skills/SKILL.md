@@ -1,5 +1,5 @@
 ---
-name: writing-skills
+name: ring-default:writing-skills
 description: |
   TDD for process documentation - write test cases (pressure scenarios), watch
   baseline fail, write skill, iterate until bulletproof against rationalization.

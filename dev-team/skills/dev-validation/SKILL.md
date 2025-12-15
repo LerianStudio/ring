@@ -1,5 +1,5 @@
 ---
-name: dev-validation
+name: ring-dev-team:dev-validation
 description: |
   Development cycle validation gate (Gate 5) - validates all acceptance criteria are met
   and requires explicit user approval before completion.

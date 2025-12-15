@@ -1,5 +1,5 @@
 ---
-name: dev-refactor
+name: ring-dev-team:dev-refactor
 description: Analyzes codebase against standards and generates refactoring tasks for dev-cycle.
 trigger: |
   - User wants to refactor existing project to follow standards

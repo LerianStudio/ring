@@ -1,5 +1,5 @@
 ---
-name: ops-migration-planning
+name: ring-ops-team:ops-migration-planning
 description: |
   Structured workflow for infrastructure migration planning including cloud migrations,
   technology upgrades, and data center transitions.

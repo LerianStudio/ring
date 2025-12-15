@@ -1,5 +1,5 @@
 ---
-name: receiving-code-review
+name: ring-default:receiving-code-review
 description: |
   Review reception protocol - requires technical verification before implementing
   suggestions. Prevents performative agreement and blind implementation.

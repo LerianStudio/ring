@@ -1,5 +1,5 @@
 ---
-name: financial-modeler
+name: ring-finance-team:financial-modeler
 version: 1.0.0
 description: Financial Modeling Expert specialized in DCF valuation, LBO models, merger models, scenario analysis, and sensitivity testing. Builds robust, auditable financial models with comprehensive documentation.
 type: specialist

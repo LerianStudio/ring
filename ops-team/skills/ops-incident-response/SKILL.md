@@ -1,5 +1,5 @@
 ---
-name: ops-incident-response
+name: ring-ops-team:ops-incident-response
 description: |
   Structured workflow for production incident management following SRE best practices.
   Covers incident declaration, triage, coordination, resolution, and post-mortem.

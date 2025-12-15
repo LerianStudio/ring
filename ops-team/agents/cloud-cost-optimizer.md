@@ -1,5 +1,5 @@
 ---
-name: cloud-cost-optimizer
+name: ring-ops-team:cloud-cost-optimizer
 version: 1.0.0
 description: Cloud Cost Operations Specialist focused on cloud infrastructure cost analysis, optimization recommendations, reserved instance management, and FinOps practices. Expert in AWS, GCP, and Azure cost optimization.
 type: specialist

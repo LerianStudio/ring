@@ -1,5 +1,5 @@
 ---
-name: using-finance-team
+name: ring-finance-team:using-finance-team
 description: |
   6 specialist financial agents for analysis, budgeting, modeling, treasury,
   accounting, and metrics. Dispatch when you need deep financial expertise.

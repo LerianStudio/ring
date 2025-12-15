@@ -1,5 +1,5 @@
 ---
-name: resource-planner
+name: ring-pmo-team:resource-planner
 version: 1.0.0
 description: Resource Planning Specialist for capacity planning, allocation optimization, skills management, and conflict resolution across portfolio projects.
 type: specialist

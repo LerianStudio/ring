@@ -1,5 +1,5 @@
 ---
-name: executive-reporter
+name: ring-pmo-team:executive-reporter
 version: 1.0.0
 description: Executive Reporting Specialist for creating dashboards, status summaries, board packages, and stakeholder communications. Focuses on actionable insights for leadership.
 type: specialist

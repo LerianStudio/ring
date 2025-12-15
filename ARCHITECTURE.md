@@ -176,13 +176,13 @@ All ring-dev-team agents include a `## Standards Compliance` section in their ou
 ```
 
 **Affected Agents:**
-- `backend-engineer-golang` → loads `golang.md`
-- `backend-engineer-typescript` → loads `typescript.md`
-- `devops-engineer` → loads `devops.md`
-- `frontend-bff-engineer-typescript` → loads `frontend.md`
-- `frontend-designer` → loads `frontend.md`
-- `qa-analyst` → loads `qa.md`
-- `sre` → loads `sre.md`
+- `ring-dev-team:backend-engineer-golang` → loads `golang.md`
+- `ring-dev-team:backend-engineer-typescript` → loads `typescript.md`
+- `ring-dev-team:devops-engineer` → loads `devops.md`
+- `ring-dev-team:frontend-bff-engineer-typescript` → loads `frontend.md`
+- `ring-dev-team:frontend-designer` → loads `frontend.md`
+- `ring-dev-team:qa-analyst` → loads `qa.md`
+- `ring-dev-team:sre` → loads `sre.md`
 
 **Output Format (when non-compliant):**
 ```markdown
@@ -386,12 +386,12 @@ sequenceDiagram
 Ring leverages four primary Claude Code tools:
 
 1. **Skill Tool**
-   - Invokes skills by name: `skill: "test-driven-development"`
+   - Invokes skills by name: `skill: "ring-default:test-driven-development"`
    - Skills expand into full instructions within conversation
    - Skill content becomes part of Claude's working context
 
 2. **Task Tool**
-   - Dispatches agents to subagent instances: `Task(subagent_type="code-reviewer", model="opus")`
+   - Dispatches agents to subagent instances: `Task(subagent_type="ring-default:code-reviewer", model="opus")`
    - Enables parallel execution (multiple Tasks in one message)
    - Returns structured reports from independent analysis
 
@@ -433,9 +433,9 @@ User Request → using-ring check → Relevant skill?
 
 ```
 Review Request → /codereview → Dispatch 3 Tasks (parallel)
-    ├─ code-reviewer           ─┐
-    ├─ business-logic-reviewer ─┼─→ Aggregate findings → Handle by severity
-    └─ security-reviewer       ─┘
+    ├─ ring-default:code-reviewer           ─┐
+    ├─ ring-default:business-logic-reviewer ─┼─→ Aggregate findings → Handle by severity
+    └─ ring-default:security-reviewer       ─┘
 ```
 
 **Implementation:** Single message with 3 Task tool calls ensures parallel execution. All reviewers work independently and return simultaneously.
@@ -489,9 +489,9 @@ Complex Skill → TodoWrite tracking
 - Some commands (like review) orchestrate multiple components
 
 **Example Mappings:**
-- `/brainstorm` → `brainstorming` skill
-- `/write-plan` → `writing-plans` skill
-- `/codereview` → dispatches 3 parallel review agents (`code-reviewer`, `business-logic-reviewer`, `security-reviewer`)
+- `/ring-default:brainstorm` → `ring-default:brainstorming` skill
+- `/ring-default:write-plan` → `ring-default:writing-plans` skill
+- `/ring-default:codereview` → dispatches 3 parallel review agents (`ring-default:code-reviewer`, `ring-default:business-logic-reviewer`, `ring-default:security-reviewer`)
 
 ### Skills ↔ Shared Patterns
 

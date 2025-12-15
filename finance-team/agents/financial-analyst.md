@@ -1,5 +1,5 @@
 ---
-name: financial-analyst
+name: ring-finance-team:financial-analyst
 version: 1.0.0
 description: Senior Financial Analyst specialized in financial statement analysis, ratio analysis, trend analysis, benchmarking, and investment evaluation. Delivers actionable insights with documented methodology.
 type: specialist

@@ -31,10 +31,10 @@ When creating or modifying ANY agent in `*/agents/*.md`:
 7. **NEVER assume compliance** - VERIFY with evidence
 
 ### 4. Fully Qualified Names (ALWAYS)
-- ✅ `code-reviewer`
-- ✅ `backend-engineer-golang`
-- ❌ `ring:code-reviewer` (WRONG)
-- ❌ `backend-engineer-golang` (WRONG)
+- ✅ `ring-default:code-reviewer`
+- ✅ `ring-dev-team:backend-engineer-golang`
+- ❌ `code-reviewer` (missing plugin prefix)
+- ❌ `ring:code-reviewer` (ambiguous shorthand)
 
 ### 5. Standards-Agent Synchronization (ALWAYS CHECK)
 When modifying standards files (`dev-team/docs/standards/*.md`):
@@ -89,10 +89,10 @@ When invoking agents via Task tool:
 - **NEVER** let system auto-select model for agents with model requirements
 
 **Examples:**
-- ✅ `Task(subagent_type="code-reviewer", model="opus", ...)`
-- ✅ `Task(subagent_type="backend-engineer-golang", model="opus", ...)`
-- ❌ `Task(subagent_type="code-reviewer", ...)` - Missing model parameter
-- ❌ `Task(subagent_type="code-reviewer", model="sonnet", ...)` - Wrong model
+- ✅ `Task(subagent_type="ring-default:code-reviewer", model="opus", ...)`
+- ✅ `Task(subagent_type="ring-dev-team:backend-engineer-golang", model="opus", ...)`
+- ❌ `Task(subagent_type="ring-default:code-reviewer", ...)` - Missing model parameter
+- ❌ `Task(subagent_type="ring-default:code-reviewer", model="sonnet", ...)` - Wrong model
 
 **Agent Self-Verification:**
 All agents with `model:` field in frontmatter MUST include "Model Requirements" section that verifies they are running on the correct model and STOPS if not.
@@ -410,16 +410,16 @@ See [docs/WORKFLOWS.md](docs/WORKFLOWS.md) for detailed instructions.
 ### Naming Conventions
 - Skills: `kebab-case` matching directory name
 - Agents: `{domain}-reviewer.md` format
-- Commands: `/ring-{plugin}:{action}` format (e.g., `/brainstorm`, `/pre-dev-feature`)
+- Commands: `/ring-{plugin}:{action}` format (e.g., `/ring-default:brainstorm`, `/ring-pm-team:pre-dev-feature`)
 - Hooks: `{event}-{purpose}.sh` format
 
 #### Agent/Skill/Command Invocation
 - **ALWAYS use fully qualified names**: `ring-{plugin}:{component}`
 - **Examples:**
-  - ✅ Correct: `code-reviewer`
-  - ✅ Correct: `backend-engineer-golang`
+  - ✅ Correct: `ring-default:code-reviewer`
+  - ✅ Correct: `ring-dev-team:backend-engineer-golang`
+  - ❌ Wrong: `code-reviewer` (missing plugin prefix)
   - ❌ Wrong: `ring:code-reviewer` (ambiguous shorthand)
-  - ❌ Wrong: `backend-engineer-golang` (missing plugin prefix)
 - **Rationale:** Prevents ambiguity in multi-plugin environments
 
 ---
@@ -547,4 +547,4 @@ Using-* Skills (plugin introductions):
 - [ ] No `ring:` shorthand used (except in historical examples with context)
 - [ ] No bare agent/skill names in invocation contexts
 
-**Always use fully qualified names:** `ring-{plugin}:{component}` (e.g., `code-reviewer`)
+**Always use fully qualified names:** `ring-{plugin}:{component}` (e.g., `ring-default:code-reviewer`)

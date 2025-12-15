@@ -1,5 +1,5 @@
 ---
-name: pre-dev-subtask-creation
+name: ring-pm-team:pre-dev-subtask-creation
 description: |
   Gate 8: Zero-context implementation steps - 2-5 minute atomic subtasks with
   complete code, exact commands, TDD pattern. Large Track only.

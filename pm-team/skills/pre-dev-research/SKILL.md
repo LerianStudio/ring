@@ -1,5 +1,5 @@
 ---
-name: pre-dev-research
+name: ring-pm-team:pre-dev-research
 description: |
   Gate 0 research phase for pre-dev workflow. Dispatches 3 parallel research agents
   to gather codebase patterns, external best practices, and framework documentation

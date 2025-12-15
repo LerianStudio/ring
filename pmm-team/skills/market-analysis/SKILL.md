@@ -1,5 +1,5 @@
 ---
-name: market-analysis
+name: ring-pmm-team:market-analysis
 description: |
   Systematic market analysis skill for understanding market size, segmentation,
   trends, and opportunities. Produces quantified market intelligence.

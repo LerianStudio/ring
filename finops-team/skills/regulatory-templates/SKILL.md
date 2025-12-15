@@ -1,5 +1,5 @@
 ---
-name: regulatory-templates
+name: ring-finops-team:regulatory-templates
 description: |
   3-gate regulatory template orchestrator - manages setup, Gate 1 (analysis),
   Gate 2 (validation), Gate 3 (generation) for BACEN/RFB compliance.

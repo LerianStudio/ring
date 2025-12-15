@@ -1,3 +1,9 @@
+---
+name: ring-pmo-team:portfolio-review
+description: Conduct a comprehensive portfolio review across multiple projects
+argument-hint: "[scope] [options]"
+---
+
 Conduct a comprehensive portfolio review across multiple projects.
 
 ## Usage

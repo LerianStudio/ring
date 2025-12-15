@@ -1,5 +1,5 @@
 ---
-name: messaging-specialist
+name: ring-pmm-team:messaging-specialist
 version: 1.0.0
 description: Messaging & Copywriting Specialist for value propositions, messaging frameworks, proof points, and channel-specific messaging. Creates compelling, consistent messaging.
 type: specialist

@@ -1,5 +1,5 @@
 ---
-name: ops-capacity-planning
+name: ring-ops-team:ops-capacity-planning
 description: |
   Structured workflow for infrastructure capacity planning including growth
   forecasting, scaling strategy, and resource provisioning decisions.

@@ -1,5 +1,5 @@
 ---
-name: root-cause-tracing
+name: ring-default:root-cause-tracing
 description: |
   Backward call-chain tracing - systematically trace bugs from error location back
   through call stack to original trigger. Adds instrumentation when needed.

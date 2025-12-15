@@ -1,5 +1,5 @@
 ---
-name: security-operations
+name: ring-ops-team:security-operations
 version: 1.0.0
 description: Security Operations Specialist focused on infrastructure security, compliance validation, vulnerability management, and security monitoring for financial services organizations.
 type: specialist

@@ -1,5 +1,5 @@
 ---
-name: regulatory-templates-setup
+name: ring-finops-team:regulatory-templates-setup
 description: |
   Initial setup sub-skill - handles template selection and context initialization
   for the 3-gate regulatory workflow.

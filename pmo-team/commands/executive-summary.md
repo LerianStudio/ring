@@ -1,3 +1,9 @@
+---
+name: ring-pmo-team:executive-summary
+description: Generate an executive summary of portfolio status for leadership
+argument-hint: "[type] [options]"
+---
+
 Generate an executive summary of portfolio status for leadership.
 
 ## Usage

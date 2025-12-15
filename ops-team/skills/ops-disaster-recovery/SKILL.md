@@ -1,5 +1,5 @@
 ---
-name: ops-disaster-recovery
+name: ring-ops-team:ops-disaster-recovery
 description: |
   Structured workflow for disaster recovery planning, implementation, and testing
   including RTO/RPO definition, DR strategy selection, and failover procedures.

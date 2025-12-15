@@ -1,5 +1,5 @@
 ---
-name: functional-writer
+name: ring-tw-team:functional-writer
 version: 0.2.0
 description: Senior Technical Writer specialized in functional documentation including guides, conceptual explanations, tutorials, and best practices.
 type: specialist

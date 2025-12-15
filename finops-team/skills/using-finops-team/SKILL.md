@@ -1,5 +1,5 @@
 ---
-name: using-finops-team
+name: ring-finops-team:using-finops-team
 description: |
   2 FinOps agents for Brazilian financial regulatory compliance (BACEN, RFB,
   Open Banking). Dispatch for compliance analysis or template generation.

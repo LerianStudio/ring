@@ -1,5 +1,5 @@
 ---
-name: using-pm-team
+name: ring-pm-team:using-pm-team
 description: |
   10 pre-dev workflow skills + 3 research agents organized into Small Track (4 gates, <2 days) and
   Large Track (9 gates, 2+ days) for systematic feature planning with research-first approach.

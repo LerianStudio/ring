@@ -1,5 +1,5 @@
 ---
-name: pre-dev-dependency-map
+name: ring-pm-team:pre-dev-dependency-map
 description: |
   Gate 6: Technology choices document - explicit, versioned, validated technology
   selections with justifications. Large Track only. HARD BLOCK: Must load Ring Standards

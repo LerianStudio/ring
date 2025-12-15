@@ -1,5 +1,5 @@
 ---
-name: executing-plans
+name: ring-default:executing-plans
 description: |
   Controlled plan execution with human review checkpoints - loads plan, executes
   in batches, pauses for feedback. Supports one-go (autonomous) or batch modes.

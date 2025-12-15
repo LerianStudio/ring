@@ -1,5 +1,5 @@
 ---
-name: using-pmo-team
+name: ring-pmo-team:using-pmo-team
 description: |
   5 specialist PMO agents for portfolio management, resource planning, governance,
   risk analysis, and executive reporting. Dispatch when you need portfolio-level oversight.

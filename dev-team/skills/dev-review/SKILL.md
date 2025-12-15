@@ -1,5 +1,5 @@
 ---
-name: dev-review
+name: ring-dev-team:dev-review
 description: |
   Development cycle review gate (Gate 4) - executes parallel code review with 3 specialized
   reviewers, aggregates findings, and determines VERDICT for gate passage.

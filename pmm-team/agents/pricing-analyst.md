@@ -1,5 +1,5 @@
 ---
-name: pricing-analyst
+name: ring-pmm-team:pricing-analyst
 version: 1.0.0
 description: Pricing Strategy Specialist for pricing model analysis, competitive pricing intelligence, value-based pricing, and pricing recommendations. Creates data-driven pricing strategies.
 type: specialist

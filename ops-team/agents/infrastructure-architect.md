@@ -1,5 +1,5 @@
 ---
-name: infrastructure-architect
+name: ring-ops-team:infrastructure-architect
 version: 1.0.0
 description: Senior Infrastructure Architect specialized in cloud infrastructure design, capacity planning, disaster recovery, and infrastructure lifecycle management for high-availability financial systems.
 type: specialist

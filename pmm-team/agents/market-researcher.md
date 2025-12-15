@@ -1,5 +1,5 @@
 ---
-name: market-researcher
+name: ring-pmm-team:market-researcher
 version: 1.0.0
 description: Market Intelligence Specialist for TAM/SAM/SOM analysis, market segmentation, trend analysis, and customer research. Provides data-driven market insights for strategic decisions.
 type: specialist

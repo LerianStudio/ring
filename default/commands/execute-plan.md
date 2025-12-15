@@ -1,5 +1,5 @@
 ---
-name: execute-plan
+name: ring-default:execute-plan
 description: Execute plan in batches with review checkpoints
 argument-hint: "[plan-file-path]"
 ---

@@ -1,5 +1,5 @@
 ---
-name: systematic-debugging
+name: ring-default:systematic-debugging
 description: |
   Four-phase debugging framework - root cause investigation, pattern analysis,
   hypothesis testing, implementation. Ensures understanding before attempting fixes.

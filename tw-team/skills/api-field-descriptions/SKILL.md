@@ -1,5 +1,5 @@
 ---
-name: api-field-descriptions
+name: ring-tw-team:api-field-descriptions
 description: |
   Patterns for writing clear, consistent API field descriptions including
   types, constraints, examples, and edge cases.

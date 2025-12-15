@@ -1,5 +1,5 @@
 ---
-name: cash-flow-analysis
+name: ring-finance-team:cash-flow-analysis
 description: |
   Cash flow analysis and treasury management workflow covering liquidity assessment,
   cash forecasting, working capital optimization, and treasury operations.

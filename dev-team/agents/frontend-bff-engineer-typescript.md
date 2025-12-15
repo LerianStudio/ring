@@ -1,5 +1,5 @@
 ---
-name: frontend-bff-engineer-typescript
+name: ring-dev-team:frontend-bff-engineer-typescript
 version: 2.1.5
 description: Senior BFF (Backend for Frontend) Engineer specialized in Next.js API Routes with Clean Architecture, DDD, and Hexagonal patterns. Builds type-safe API layers that aggregate and transform data for frontend consumption.
 type: specialist

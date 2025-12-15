@@ -1,5 +1,5 @@
 ---
-name: competitive-intelligence
+name: ring-pmm-team:competitive-intelligence
 description: |
   Competitive intelligence skill for analyzing competitive landscape, creating
   battlecards, and tracking competitor movements.

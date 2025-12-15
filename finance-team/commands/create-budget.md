@@ -1,3 +1,9 @@
+---
+name: ring-finance-team:create-budget
+description: Create budget or forecast with documented assumptions and approval workflow
+argument-hint: "[type] [options]"
+---
+
 Create budget or forecast with documented assumptions and approval workflow.
 
 ## Usage

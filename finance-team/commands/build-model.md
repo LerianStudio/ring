@@ -1,3 +1,9 @@
+---
+name: ring-finance-team:build-model
+description: Build financial model (DCF, LBO, M&A, or operating model) with validated methodology
+argument-hint: "[type] [options]"
+---
+
 Build financial model (DCF, LBO, M&A, or operating model) with validated methodology.
 
 ## Usage

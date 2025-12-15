@@ -1,5 +1,5 @@
 ---
-name: lint
+name: ring-default:lint
 description: Run lint checks and dispatch parallel agents to fix all issues
 argument-hint: "[path]"
 ---

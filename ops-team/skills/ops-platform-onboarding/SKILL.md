@@ -1,5 +1,5 @@
 ---
-name: ops-platform-onboarding
+name: ring-ops-team:ops-platform-onboarding
 description: |
   Structured workflow for onboarding new services to the internal platform
   including infrastructure provisioning, observability setup, and documentation.

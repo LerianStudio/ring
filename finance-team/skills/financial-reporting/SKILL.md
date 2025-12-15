@@ -1,5 +1,5 @@
 ---
-name: financial-reporting
+name: ring-finance-team:financial-reporting
 description: |
   Financial reporting workflow covering report preparation, management reporting,
   board presentations, and investor communications. Delivers polished, accurate reports.

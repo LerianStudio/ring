@@ -1,5 +1,5 @@
 ---
-name: finishing-a-development-branch
+name: ring-default:finishing-a-development-branch
 description: |
   Branch completion workflow - guides merge/PR/cleanup decisions after implementation
   is verified complete.

@@ -1,5 +1,5 @@
 ---
-name: metrics-analyst
+name: ring-finance-team:metrics-analyst
 version: 1.0.0
 description: Financial Metrics and KPI Specialist with expertise in KPI definition, dashboard design, performance measurement, data visualization, and anomaly detection. Delivers actionable metrics with clear methodology and data lineage.
 type: specialist

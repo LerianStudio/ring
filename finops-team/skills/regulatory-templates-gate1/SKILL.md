@@ -1,5 +1,5 @@
 ---
-name: regulatory-templates-gate1
+name: ring-finops-team:regulatory-templates-gate1
 description: |
   Gate 1 sub-skill - performs regulatory compliance analysis and field mapping
   from template specifications.

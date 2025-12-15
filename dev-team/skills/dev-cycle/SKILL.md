@@ -1,5 +1,5 @@
 ---
-name: dev-cycle
+name: ring-dev-team:dev-cycle
 description: |
   Main orchestrator for the 6-gate development cycle system. Loads tasks/subtasks
   from PM team output and executes through implementation, devops, SRE, testing, review,

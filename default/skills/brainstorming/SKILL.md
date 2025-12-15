@@ -1,5 +1,5 @@
 ---
-name: brainstorming
+name: ring-default:brainstorming
 description: |
   Socratic design refinement - transforms rough ideas into validated designs through
   structured questioning, alternative exploration, and incremental validation.

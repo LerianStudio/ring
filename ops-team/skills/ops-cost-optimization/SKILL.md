@@ -1,5 +1,5 @@
 ---
-name: ops-cost-optimization
+name: ring-ops-team:ops-cost-optimization
 description: |
   Structured workflow for cloud cost analysis and optimization including
   rightsizing, reserved capacity planning, and FinOps practices.

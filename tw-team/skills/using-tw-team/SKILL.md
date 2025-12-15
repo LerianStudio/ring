@@ -1,5 +1,5 @@
 ---
-name: using-tw-team
+name: ring-tw-team:using-tw-team
 description: |
   Technical writing specialists for functional and API documentation. Dispatch when
   you need to create guides, conceptual docs, or API references following established

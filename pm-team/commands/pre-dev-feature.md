@@ -1,5 +1,5 @@
 ---
-name: pre-dev-feature
+name: ring-pm-team:pre-dev-feature
 description: Lightweight 4-gate pre-dev workflow for small features (<2 days)
 argument-hint: "[feature-name]"
 ---

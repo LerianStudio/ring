@@ -1,5 +1,5 @@
 ---
-name: gtm-planner
+name: ring-pmm-team:gtm-planner
 version: 1.0.0
 description: Go-to-Market Strategy Specialist for channel strategy, campaign planning, launch tactics, and GTM execution planning. Creates comprehensive GTM plans.
 type: specialist

@@ -1,5 +1,5 @@
 ---
-name: using-ops-team
+name: ring-ops-team:using-ops-team
 description: |
   5 specialist operations agents for platform engineering, incident response,
   cloud cost optimization, infrastructure architecture, and security operations.

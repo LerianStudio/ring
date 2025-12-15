@@ -1,5 +1,5 @@
 ---
-name: financial-modeling
+name: ring-finance-team:financial-modeling
 description: |
   Financial modeling workflow for DCF, LBO, merger, and operating models.
   Delivers validated, documented models with sensitivity and scenario analysis.

@@ -1,5 +1,5 @@
 ---
-name: review-docs
+name: ring-tw-team:review-docs
 description: Review existing documentation for quality, voice, tone, and completeness
 argument-hint: "[file]"
 arguments:

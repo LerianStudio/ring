@@ -1,5 +1,5 @@
 ---
-name: dev-testing
+name: ring-dev-team:dev-testing
 description: |
   Development cycle testing gate (Gate 3) - ensures unit test coverage for all
   acceptance criteria using TDD methodology (RED-GREEN-REFACTOR).

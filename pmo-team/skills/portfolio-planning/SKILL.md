@@ -1,5 +1,5 @@
 ---
-name: portfolio-planning
+name: ring-pmo-team:portfolio-planning
 description: |
   Strategic portfolio planning skill for multi-project coordination, capacity assessment,
   and portfolio optimization. Provides framework for portfolio-level decision making.

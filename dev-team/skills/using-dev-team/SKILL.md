@@ -1,5 +1,5 @@
 ---
-name: using-dev-team
+name: ring-dev-team:using-dev-team
 description: |
   7 specialist developer agents for backend (Go/TypeScript), DevOps, frontend,
   design, QA, and SRE. Dispatch when you need deep technology expertise.

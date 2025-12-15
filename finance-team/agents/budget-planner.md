@@ -1,5 +1,5 @@
 ---
-name: budget-planner
+name: ring-finance-team:budget-planner
 version: 1.0.0
 description: Budget and Forecasting Specialist with expertise in annual budgeting, rolling forecasts, variance analysis, and financial planning. Delivers comprehensive budgets with documented assumptions and approval workflows.
 type: specialist

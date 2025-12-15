@@ -1,5 +1,5 @@
 ---
-name: business-logic-reviewer
+name: ring-default:business-logic-reviewer
 version: 5.2.0
 description: "Correctness Review: reviews domain correctness, business rules, edge cases, and requirements. Uses mental execution to trace code paths and analyzes full file context, not just changes. Runs in parallel with code-reviewer and security-reviewer for fast feedback."
 type: reviewer

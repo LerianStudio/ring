@@ -1,5 +1,5 @@
 ---
-name: subagent-driven-development
+name: ring-default:subagent-driven-development
 description: |
   Autonomous plan execution - fresh subagent per task with automated code review
   between tasks. No human-in-loop, high throughput with quality gates.

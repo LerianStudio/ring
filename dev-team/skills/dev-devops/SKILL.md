@@ -1,5 +1,5 @@
 ---
-name: dev-devops
+name: ring-dev-team:dev-devops
 description: |
   Gate 1 of the development cycle. Creates/updates Docker configuration,
   docker-compose setup, and environment variables for local development

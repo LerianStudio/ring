@@ -1,5 +1,5 @@
 ---
-name: platform-engineer
+name: ring-ops-team:platform-engineer
 version: 1.0.0
 description: Senior Platform Engineer specialized in building and maintaining internal developer platforms, service mesh, API gateways, and self-service infrastructure. Focuses on enabling developer productivity through golden paths and platform abstractions.
 type: specialist

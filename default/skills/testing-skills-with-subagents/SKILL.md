@@ -1,5 +1,5 @@
 ---
-name: testing-skills-with-subagents
+name: ring-default:testing-skills-with-subagents
 description: |
   Skill testing methodology - run scenarios without skill (RED), observe failures,
   write skill (GREEN), close loopholes (REFACTOR).

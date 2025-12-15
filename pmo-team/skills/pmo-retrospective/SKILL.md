@@ -1,5 +1,5 @@
 ---
-name: pmo-retrospective
+name: ring-pmo-team:pmo-retrospective
 description: |
   Portfolio retrospective skill for capturing lessons learned, process improvements,
   and organizational learning across completed projects.

@@ -1,3 +1,9 @@
+---
+name: ring-pmo-team:dependency-analysis
+description: Analyze cross-project dependencies across the portfolio
+argument-hint: "[scope] [options]"
+---
+
 Analyze cross-project dependencies across the portfolio.
 
 ## Usage

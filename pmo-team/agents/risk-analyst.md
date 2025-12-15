@@ -1,5 +1,5 @@
 ---
-name: risk-analyst
+name: ring-pmo-team:risk-analyst
 version: 1.0.0
 description: Portfolio Risk Analyst specialized in risk identification, assessment, correlation analysis, and mitigation planning across portfolio projects. Manages RAID logs and portfolio risk exposure.
 type: specialist

@@ -1,5 +1,5 @@
 ---
-name: financial-analysis
+name: ring-finance-team:financial-analysis
 description: |
   Comprehensive financial analysis workflow covering ratio analysis, trend analysis,
   benchmarking, and variance analysis. Delivers documented, audit-ready insights.

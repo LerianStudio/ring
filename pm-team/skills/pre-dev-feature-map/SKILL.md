@@ -1,5 +1,5 @@
 ---
-name: pre-dev-feature-map
+name: ring-pm-team:pre-dev-feature-map
 description: |
   Gate 2: Feature relationship map - visualizes feature landscape, groupings,
   and interactions at business level before technical architecture.

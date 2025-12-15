@@ -1,5 +1,5 @@
 ---
-name: test-driven-development
+name: ring-default:test-driven-development
 description: |
   RED-GREEN-REFACTOR implementation methodology - write failing test first,
   minimal implementation to pass, then refactor. Ensures tests verify behavior.

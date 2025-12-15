@@ -1,5 +1,5 @@
 ---
-name: positioning-strategist
+name: ring-pmm-team:positioning-strategist
 version: 1.0.0
 description: Strategic Positioning Specialist for differentiation strategy, category design, positioning statements, and competitive framing. Creates defensible market positions.
 type: specialist

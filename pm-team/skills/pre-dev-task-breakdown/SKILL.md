@@ -1,5 +1,5 @@
 ---
-name: pre-dev-task-breakdown
+name: ring-pm-team:pre-dev-task-breakdown
 description: |
   Gate 7: Implementation tasks - value-driven decomposition into working increments
   that deliver measurable user value.

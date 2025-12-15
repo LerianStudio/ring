@@ -1,5 +1,5 @@
 ---
-name: accounting-specialist
+name: ring-finance-team:accounting-specialist
 version: 1.0.0
 description: Accounting Operations Specialist with expertise in journal entries, reconciliations, month-end close, GAAP/IFRS compliance, and audit support. Delivers accurate, compliant accounting with complete audit trails.
 type: specialist

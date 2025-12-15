@@ -1,5 +1,5 @@
 ---
-name: pricing-strategy
+name: ring-pmm-team:pricing-strategy
 description: |
   Pricing analysis skill for developing pricing models, competitive pricing analysis,
   and pricing recommendations for products and features.

@@ -1,5 +1,5 @@
 ---
-name: finops-automation
+name: ring-finops-team:finops-automation
 version: 1.1.0
 description: Senior Template Implementation Engineer specializing in .tpl template creation for Brazilian regulatory compliance (Gate 3). Expert in Reporter platform with XML, HTML and TXT template formats.
 type: specialist

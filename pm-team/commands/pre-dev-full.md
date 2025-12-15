@@ -1,5 +1,5 @@
 ---
-name: pre-dev-full
+name: ring-pm-team:pre-dev-full
 description: Complete 9-gate pre-dev workflow for large features (≥2 days)
 argument-hint: "[feature-name]"
 ---

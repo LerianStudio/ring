@@ -1,5 +1,5 @@
 ---
-name: executive-reporting
+name: ring-pmo-team:executive-reporting
 description: |
   Executive communication and reporting skill for creating dashboards, status summaries,
   and board packages. Focuses on actionable insights for leadership.

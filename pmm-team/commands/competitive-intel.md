@@ -1,5 +1,5 @@
 ---
-name: competitive-intel
+name: ring-pmm-team:competitive-intel
 description: Competitive intelligence workflow for landscape analysis and battlecards
 argument-hint: "[market-or-competitor-name]"
 ---

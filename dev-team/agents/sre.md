@@ -1,5 +1,5 @@
 ---
-name: sre
+name: ring-dev-team:sre
 version: 1.4.0
 description: Senior Site Reliability Engineer specialized in VALIDATING observability implementations for high-availability financial systems. Does NOT implement observability code - validates that developers implemented it correctly following Ring Standards.
 type: specialist

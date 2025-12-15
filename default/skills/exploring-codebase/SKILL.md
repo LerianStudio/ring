@@ -1,5 +1,5 @@
 ---
-name: exploring-codebase
+name: ring-default:exploring-codebase
 description: |
   Autonomous two-phase codebase exploration - first discovers natural perspectives
   (layers, components, boundaries), then dispatches adaptive deep-dive explorers

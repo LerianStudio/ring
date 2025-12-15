@@ -1,3 +1,9 @@
+---
+name: ring-finance-team:analyze-financials
+description: Perform comprehensive financial analysis on provided financial data
+argument-hint: "[data-source] [options]"
+---
+
 Perform comprehensive financial analysis on provided financial data.
 
 ## Usage

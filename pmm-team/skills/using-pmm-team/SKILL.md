@@ -1,5 +1,5 @@
 ---
-name: using-pmm-team
+name: ring-pmm-team:using-pmm-team
 description: |
   7 product marketing skills + 6 specialist agents for go-to-market strategy,
   positioning, messaging, competitive intelligence, and launch coordination.

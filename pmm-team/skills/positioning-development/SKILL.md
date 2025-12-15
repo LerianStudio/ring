@@ -1,5 +1,5 @@
 ---
-name: positioning-development
+name: ring-pmm-team:positioning-development
 description: |
   Strategic positioning skill for developing differentiated market position,
   positioning statements, and competitive framing.

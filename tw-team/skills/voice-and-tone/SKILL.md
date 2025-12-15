@@ -1,5 +1,5 @@
 ---
-name: voice-and-tone
+name: ring-tw-team:voice-and-tone
 description: |
   Voice and tone guidelines for technical documentation. Ensures consistent,
   clear, and human writing across all documentation.

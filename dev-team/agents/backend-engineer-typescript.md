@@ -1,5 +1,5 @@
 ---
-name: backend-engineer-typescript
+name: ring-dev-team:backend-engineer-typescript
 version: 1.3.5
 description: Senior Backend Engineer specialized in TypeScript/Node.js for scalable systems. Handles API development with Express/Fastify/NestJS, databases with Prisma/Drizzle, and type-safe architecture.
 type: specialist

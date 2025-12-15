@@ -1,5 +1,5 @@
 ---
-name: incident-responder
+name: ring-ops-team:incident-responder
 version: 1.0.0
 description: Senior Incident Commander specialized in production incident management, root cause analysis, and incident response coordination. Expert in SRE incident practices for high-availability financial systems.
 type: specialist

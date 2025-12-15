@@ -1,5 +1,5 @@
 ---
-name: brainstorm
+name: ring-default:brainstorm
 description: Interactive design refinement using Socratic method
 argument-hint: "[topic]"
 ---

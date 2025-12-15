@@ -1,5 +1,5 @@
 ---
-name: requesting-code-review
+name: ring-default:requesting-code-review
 description: |
   Parallel code review dispatch - sends to 3 specialized reviewers (code, business-logic,
   security) simultaneously for comprehensive feedback.

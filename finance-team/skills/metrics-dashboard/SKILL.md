@@ -1,5 +1,5 @@
 ---
-name: metrics-dashboard
+name: ring-finance-team:metrics-dashboard
 description: |
   KPI and metrics dashboard workflow covering metric definition, data sourcing,
   visualization design, and anomaly detection. Delivers actionable dashboards.

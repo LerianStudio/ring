@@ -1,6 +1,6 @@
 
 ---
-name: frontend-engineer
+name: ring-dev-team:frontend-engineer
 version: 3.2.4
 description: Senior Frontend Engineer specialized in React/Next.js for financial dashboards and enterprise applications. Expert in App Router, Server Components, accessibility, performance optimization, and modern React patterns.
 type: specialist

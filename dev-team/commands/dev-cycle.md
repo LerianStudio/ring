@@ -1,3 +1,9 @@
+---
+name: ring-dev-team:dev-cycle
+description: Execute the development cycle for tasks in a markdown file
+argument-hint: "[tasks-file] [options]"
+---
+
 Execute the development cycle for tasks in a markdown file.
 
 ## Usage

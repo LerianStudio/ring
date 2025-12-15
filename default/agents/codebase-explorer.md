@@ -1,5 +1,5 @@
 ---
-name: codebase-explorer
+name: ring-default:codebase-explorer
 version: 1.3.0
 description: "Deep codebase exploration agent for architecture understanding, pattern discovery, and comprehensive code analysis. Uses Opus for thorough analysis vs built-in Explore's Haiku speed-focus."
 type: exploration

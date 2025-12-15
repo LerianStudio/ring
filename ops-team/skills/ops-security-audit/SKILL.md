@@ -1,5 +1,5 @@
 ---
-name: ops-security-audit
+name: ring-ops-team:ops-security-audit
 description: |
   Structured workflow for infrastructure security audits including compliance
   validation, vulnerability assessment, and security posture review.

@@ -1,3 +1,9 @@
+---
+name: ring-dev-team:dev-status
+description: Check the status of the current development cycle
+argument-hint: ""
+---
+
 Check the status of the current development cycle.
 
 ## Usage

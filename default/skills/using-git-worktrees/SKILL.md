@@ -1,5 +1,5 @@
 ---
-name: using-git-worktrees
+name: ring-default:using-git-worktrees
 description: |
   Isolated workspace creation - creates git worktrees with smart directory selection
   and safety verification for parallel feature development.

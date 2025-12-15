@@ -1,5 +1,5 @@
 ---
-name: regulatory-templates-gate3
+name: ring-finops-team:regulatory-templates-gate3
 description: |
   Gate 3 sub-skill - generates complete .tpl template file with all validated
   mappings from Gates 1-2.

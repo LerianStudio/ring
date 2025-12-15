@@ -1,3 +1,9 @@
+---
+name: ring-dev-team:dev-cancel
+description: Cancel the current development cycle
+argument-hint: "[--force]"
+---
+
 Cancel the current development cycle.
 
 ## Usage

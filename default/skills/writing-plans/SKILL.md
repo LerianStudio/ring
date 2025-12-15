@@ -1,5 +1,5 @@
 ---
-name: writing-plans
+name: ring-default:writing-plans
 description: |
   Creates comprehensive implementation plans with exact file paths, complete code
   examples, and verification steps for engineers with zero codebase context.

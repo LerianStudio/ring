@@ -1,5 +1,5 @@
 ---
-name: documentation-review
+name: ring-tw-team:documentation-review
 description: |
   Comprehensive checklist and process for reviewing documentation quality
   including voice, tone, structure, completeness, and technical accuracy.

@@ -1,5 +1,5 @@
 ---
-name: governance-specialist
+name: ring-pmo-team:governance-specialist
 version: 1.0.0
 description: Project Governance Specialist for gate reviews, process compliance, audit readiness, and governance framework implementation across portfolio projects.
 type: specialist

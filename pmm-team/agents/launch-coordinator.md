@@ -1,5 +1,5 @@
 ---
-name: launch-coordinator
+name: ring-pmm-team:launch-coordinator
 version: 1.0.0
 description: Launch Execution Specialist for launch checklists, stakeholder coordination, day-of execution, and post-launch monitoring. Ensures smooth launch execution.
 type: specialist

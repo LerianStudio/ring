@@ -1,5 +1,5 @@
 ---
-name: commit
+name: ring-default:commit
 description: Create a git commit with internal system tracing via Git trailers (no visible markers in message)
 argument-hint: "[message]"
 ---

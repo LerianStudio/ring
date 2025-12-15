@@ -1,5 +1,5 @@
 ---
-name: treasury-specialist
+name: ring-finance-team:treasury-specialist
 version: 1.0.0
 description: Treasury and Cash Management Specialist with expertise in cash flow forecasting, liquidity management, working capital optimization, FX exposure, and debt management. Delivers actionable treasury insights with risk awareness.
 type: specialist

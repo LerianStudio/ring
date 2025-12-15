@@ -1,5 +1,5 @@
 ---
-name: writing-api-docs
+name: ring-tw-team:writing-api-docs
 description: |
   Patterns and structure for writing API reference documentation including
   endpoint descriptions, request/response schemas, and error documentation.

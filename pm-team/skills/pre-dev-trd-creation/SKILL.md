@@ -1,5 +1,5 @@
 ---
-name: pre-dev-trd-creation
+name: ring-pm-team:pre-dev-trd-creation
 description: |
   Gate 3: Technical architecture document - defines HOW/WHERE with technology-agnostic
   patterns before concrete implementation choices.

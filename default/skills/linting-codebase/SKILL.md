@@ -1,5 +1,5 @@
 ---
-name: linting-codebase
+name: ring-default:linting-codebase
 description: |
   Parallel lint fixing pattern - runs lint checks, groups issues into independent
   streams, and dispatches AI agents to fix all issues until the codebase is clean.

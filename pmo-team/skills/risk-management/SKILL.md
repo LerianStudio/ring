@@ -1,5 +1,5 @@
 ---
-name: risk-management
+name: ring-pmo-team:risk-management
 description: |
   Portfolio-level risk management skill for identifying, assessing, and mitigating
   risks across multiple projects. Maintains RAID logs and tracks risk responses.

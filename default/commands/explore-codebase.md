@@ -1,5 +1,5 @@
 ---
-name: explore-codebase
+name: ring-default:explore-codebase
 description: Autonomous two-phase codebase exploration with adaptive agents
 argument-hint: "[target]"
 ---

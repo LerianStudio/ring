@@ -1,5 +1,5 @@
 ---
-name: gtm-planning
+name: ring-pmm-team:gtm-planning
 description: |
   Go-to-market planning skill for developing channel strategy, tactics,
   timeline, and budget allocation for product launches.
