@@ -312,7 +312,7 @@ description: use when implementing any feature or bugfix, before writing impleme
 | **GREEN** | Write skill addressing specific failures → verify agent complies |
 | **REFACTOR** | Find new rationalizations → add counters → re-test until bulletproof |
 
-**REQUIRED SUB-SKILL:** Use testing-skills-with-subagents for pressure scenarios, pressure types, hole-plugging, meta-testing.
+**REQUIRED SUB-SKILL:** Use ring-default:testing-skills-with-subagents for pressure scenarios, pressure types, hole-plugging, meta-testing.
 
 ## Anti-Patterns
 
