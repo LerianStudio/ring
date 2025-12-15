@@ -23,21 +23,21 @@ Ring solves this by:
 ## 🤖 Specialized Agents
 
 **Review & Planning Agents (default plugin):**
-- `code-reviewer` - Foundation review (architecture, code quality, design patterns)
-- `business-logic-reviewer` - Correctness review (domain logic, requirements, edge cases)
-- `security-reviewer` - Safety review (vulnerabilities, OWASP, authentication)
-- `write-plan` - Implementation planning agent
-- `codebase-explorer` - Deep architecture analysis (Opus-powered, complements built-in Explore)
-- Use `/codereview` command to orchestrate parallel review workflow
+- `ring-default:code-reviewer` - Foundation review (architecture, code quality, design patterns)
+- `ring-default:business-logic-reviewer` - Correctness review (domain logic, requirements, edge cases)
+- `ring-default:security-reviewer` - Safety review (vulnerabilities, OWASP, authentication)
+- `ring-default:write-plan` - Implementation planning agent
+- `ring-default:codebase-explorer` - Deep architecture analysis (Opus-powered, complements built-in Explore)
+- Use `/ring-default:codereview` command to orchestrate parallel review workflow
 
 **Developer Agents (dev-team plugin):**
-- `backend-engineer-golang` - Go backend specialist for financial systems
-- `backend-engineer-typescript` - TypeScript/Node.js backend specialist (Express, NestJS, Fastify)
-- `devops-engineer` - DevOps infrastructure specialist
-- `frontend-bff-engineer-typescript` - BFF & React/Next.js frontend with Clean Architecture
-- `frontend-designer` - Visual design specialist
-- `qa-analyst` - Quality assurance specialist
-- `sre` - Site reliability engineer
+- `ring-dev-team:backend-engineer-golang` - Go backend specialist for financial systems
+- `ring-dev-team:backend-engineer-typescript` - TypeScript/Node.js backend specialist (Express, NestJS, Fastify)
+- `ring-dev-team:devops-engineer` - DevOps infrastructure specialist
+- `ring-dev-team:frontend-bff-engineer-typescript` - BFF & React/Next.js frontend with Clean Architecture
+- `ring-dev-team:frontend-designer` - Visual design specialist
+- `ring-dev-team:qa-analyst` - Quality assurance specialist
+- `ring-dev-team:sre` - Site reliability engineer
 
 > **Standards Compliance:** All dev-team agents include a `## Standards Compliance` output section with conditional requirement:
 > - **Optional** when invoked directly or via `dev-cycle`
@@ -51,43 +51,43 @@ Ring solves this by:
 > See `dev-team/docs/standards/*.md` for standards source. Cross-references: CLAUDE.md (Standards Compliance section), `dev-team/skills/dev-refactor/SKILL.md`
 
 **FinOps Agents (ring-finops-team plugin):**
-- `finops-analyzer` - Financial operations analysis
-- `finops-automation` - FinOps template creation and automation
+- `ring-finops-team:finops-analyzer` - Financial operations analysis
+- `ring-finops-team:finops-automation` - FinOps template creation and automation
 
 **Technical Writing Agents (ring-tw-team plugin):**
-- `functional-writer` - Functional documentation (guides, tutorials, conceptual docs)
-- `api-writer` - API reference documentation (endpoints, schemas, examples)
-- `docs-reviewer` - Documentation quality review (voice, tone, structure, completeness)
+- `ring-tw-team:functional-writer` - Functional documentation (guides, tutorials, conceptual docs)
+- `ring-tw-team:api-writer` - API reference documentation (endpoints, schemas, examples)
+- `ring-tw-team:docs-reviewer` - Documentation quality review (voice, tone, structure, completeness)
 
 **Financial Operations Agents (ring-finance-team plugin):**
-- `financial-analyst` - Financial statement analysis, ratio analysis, trend analysis
-- `budget-planner` - Annual budgets, rolling forecasts, variance analysis
-- `financial-modeler` - DCF valuation, LBO models, M&A models, scenario analysis
-- `treasury-specialist` - Cash flow forecasting, liquidity management, working capital
-- `accounting-specialist` - Journal entries, reconciliations, month-end close
-- `metrics-analyst` - KPI definition, dashboard design, anomaly detection
+- `ring-finance-team:financial-analyst` - Financial statement analysis, ratio analysis, trend analysis
+- `ring-finance-team:budget-planner` - Annual budgets, rolling forecasts, variance analysis
+- `ring-finance-team:financial-modeler` - DCF valuation, LBO models, M&A models, scenario analysis
+- `ring-finance-team:treasury-specialist` - Cash flow forecasting, liquidity management, working capital
+- `ring-finance-team:accounting-specialist` - Journal entries, reconciliations, month-end close
+- `ring-finance-team:metrics-analyst` - KPI definition, dashboard design, anomaly detection
 
 **Production Operations Agents (ring-ops-team plugin):**
-- `platform-engineer` - Service mesh, API gateways, developer platforms
-- `incident-responder` - Production incidents, RCA, post-mortems
-- `cloud-cost-optimizer` - Cost analysis, reserved instances, FinOps practices
-- `infrastructure-architect` - Multi-region architecture, DR, capacity planning
-- `security-operations` - Security audits, compliance, vulnerability management
+- `ring-ops-team:platform-engineer` - Service mesh, API gateways, developer platforms
+- `ring-ops-team:incident-responder` - Production incidents, RCA, post-mortems
+- `ring-ops-team:cloud-cost-optimizer` - Cost analysis, reserved instances, FinOps practices
+- `ring-ops-team:infrastructure-architect` - Multi-region architecture, DR, capacity planning
+- `ring-ops-team:security-operations` - Security audits, compliance, vulnerability management
 
 **Product Marketing Agents (ring-pmm-team plugin):**
-- `market-researcher` - TAM/SAM/SOM analysis, market segmentation, trend analysis
-- `positioning-strategist` - Differentiation strategy, category design, positioning
-- `messaging-specialist` - Value propositions, messaging frameworks, proof points
-- `gtm-planner` - Go-to-market strategy, channel selection, campaign planning
-- `launch-coordinator` - Launch checklists, stakeholder coordination, day-of execution
-- `pricing-analyst` - Pricing models, competitive pricing, value-based pricing
+- `ring-pmm-team:market-researcher` - TAM/SAM/SOM analysis, market segmentation, trend analysis
+- `ring-pmm-team:positioning-strategist` - Differentiation strategy, category design, positioning
+- `ring-pmm-team:messaging-specialist` - Value propositions, messaging frameworks, proof points
+- `ring-pmm-team:gtm-planner` - Go-to-market strategy, channel selection, campaign planning
+- `ring-pmm-team:launch-coordinator` - Launch checklists, stakeholder coordination, day-of execution
+- `ring-pmm-team:pricing-analyst` - Pricing models, competitive pricing, value-based pricing
 
 **Portfolio Management Agents (ring-pmo-team plugin):**
-- `portfolio-manager` - Multi-project coordination, strategic alignment, portfolio optimization
-- `resource-planner` - Capacity planning, allocation optimization, conflict resolution
-- `governance-specialist` - Gate reviews, process compliance, audit readiness
-- `risk-analyst` - Risk identification, RAID logs, mitigation planning
-- `executive-reporter` - Executive dashboards, board packages, stakeholder communication
+- `ring-pmo-team:portfolio-manager` - Multi-project coordination, strategic alignment, portfolio optimization
+- `ring-pmo-team:resource-planner` - Capacity planning, allocation optimization, conflict resolution
+- `ring-pmo-team:governance-specialist` - Gate reviews, process compliance, audit readiness
+- `ring-pmo-team:risk-analyst` - Risk identification, RAID logs, mitigation planning
+- `ring-pmo-team:executive-reporter` - Executive dashboards, board packages, stakeholder communication
 
 *Plugin versions are managed in `.claude-plugin/marketplace.json`*
 
@@ -337,32 +337,32 @@ Ring provides 18 slash commands across 4 plugins for common workflows.
 
 ### Core Workflows (ring-default)
 
-- `/codereview [files-or-paths]` - Dispatch 3 parallel code reviewers for comprehensive review
-- `/commit [message]` - Create git commit with AI identification via Git trailers
-- `/worktree [branch-name]` - Create isolated git workspace for parallel development
-- `/brainstorm [topic]` - Interactive design refinement using Socratic method
-- `/write-plan [feature]` - Create detailed implementation plan with bite-sized tasks
-- `/execute-plan [path]` - Execute plan in batches with review checkpoints
-- `/lint [path]` - Run lint checks and dispatch parallel agents to fix all issues
+- `/ring-default:codereview [files-or-paths]` - Dispatch 3 parallel code reviewers for comprehensive review
+- `/ring-default:commit [message]` - Create git commit with AI identification via Git trailers
+- `/ring-default:worktree [branch-name]` - Create isolated git workspace for parallel development
+- `/ring-default:brainstorm [topic]` - Interactive design refinement using Socratic method
+- `/ring-default:write-plan [feature]` - Create detailed implementation plan with bite-sized tasks
+- `/ring-default:execute-plan [path]` - Execute plan in batches with review checkpoints
+- `/ring-default:lint [path]` - Run lint checks and dispatch parallel agents to fix all issues
 
 ### Product Planning (ring-pm-team)
 
-- `/pre-dev-feature [feature-name]` - Lightweight 4-gate pre-dev workflow for small features (<2 days)
-- `/pre-dev-full [feature-name]` - Complete 9-gate pre-dev workflow for large features (>=2 days)
+- `/ring-pm-team:pre-dev-feature [feature-name]` - Lightweight 4-gate pre-dev workflow for small features (<2 days)
+- `/ring-pm-team:pre-dev-full [feature-name]` - Complete 9-gate pre-dev workflow for large features (>=2 days)
 
 ### Development Cycle (ring-dev-team)
 
-- `/dev-cycle [task]` - Start 6-gate development workflow (implementation→devops→SRE→testing→review→validation)
-- `/dev-refactor [path]` - Analyze codebase against standards
-- `/dev-status` - Show current gate progress
-- `/dev-report` - Generate development cycle report
-- `/dev-cancel` - Cancel active development cycle
+- `/ring-dev-team:dev-cycle [task]` - Start 6-gate development workflow (implementation→devops→SRE→testing→review→validation)
+- `/ring-dev-team:dev-refactor [path]` - Analyze codebase against standards
+- `/ring-dev-team:dev-status` - Show current gate progress
+- `/ring-dev-team:dev-report` - Generate development cycle report
+- `/ring-dev-team:dev-cancel` - Cancel active development cycle
 
 ### Technical Writing (ring-tw-team)
 
-- `/write-guide [topic]` - Start writing a functional guide with voice/tone guidance
-- `/write-api [endpoint]` - Start writing API reference documentation
-- `/review-docs [file]` - Review existing documentation for quality
+- `/ring-tw-team:write-guide [topic]` - Start writing a functional guide with voice/tone guidance
+- `/ring-tw-team:write-api [endpoint]` - Start writing API reference documentation
+- `/ring-tw-team:review-docs [file]` - Review existing documentation for quality
 
 ## 💡 Usage Examples
 

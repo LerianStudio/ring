@@ -133,11 +133,11 @@ dev-team/agents/
 **Key Characteristics:**
 - Invoked via Claude's `Task` tool with `subagent_type`
 - Must specify model (typically "opus" for comprehensive analysis)
-- Review agents run in parallel (3 reviewers dispatch simultaneously via `/codereview` command)
+- Review agents run in parallel (3 reviewers dispatch simultaneously via `/ring-default:codereview` command)
 - Developer agents provide specialized domain expertise
 - Return structured reports with severity-based findings
 
-**Note:** Parallel review orchestration is handled by the `/codereview` command
+**Note:** Parallel review orchestration is handled by the `/ring-default:codereview` command
 
 **Standards Compliance Output (ring-dev-team agents):**
 
@@ -162,7 +162,7 @@ All ring-dev-team agents include a `## Standards Compliance` section in their ou
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│  User invokes: /dev-refactor                          │
+│  User invokes: /ring-dev-team:dev-refactor                          │
 │         ↓                                                           │
 │  dev-refactor skill dispatches agents with prompt:                  │
 │  "**MODE: ANALYSIS ONLY** - Compare codebase with Ring standards"   │
@@ -215,15 +215,15 @@ All ring-dev-team agents include a `## Standards Compliance` section in their ou
 **Structure:**
 ```
 default/commands/
-├── brainstorm.md       # /brainstorm - Socratic design refinement
-├── write-plan.md       # /write-plan - Implementation planning
-├── execute-plan.md     # /execute-plan - Batch execution
-├── codereview.md       # /codereview - Parallel 3-reviewer dispatch
-└── worktree.md         # /worktree - Git worktree creation
+├── brainstorm.md       # /ring-default:brainstorm - Socratic design refinement
+├── write-plan.md       # /ring-default:write-plan - Implementation planning
+├── execute-plan.md     # /ring-default:execute-plan - Batch execution
+├── codereview.md       # /ring-default:codereview - Parallel 3-reviewer dispatch
+└── worktree.md         # /ring-default:worktree - Git worktree creation
 
 pm-team/commands/
-├── pre-dev-feature.md  # /pre-dev-feature - 3-gate workflow
-└── pre-dev-full.md     # /pre-dev-full - 8-gate workflow
+├── pre-dev-feature.md  # /ring-pm-team:pre-dev-feature - 3-gate workflow
+└── pre-dev-full.md     # /ring-pm-team:pre-dev-full - 8-gate workflow
 ```
 
 **Key Characteristics:**
@@ -358,7 +358,7 @@ sequenceDiagram
     participant business-reviewer
     participant security-reviewer
 
-    User->>Claude: /codereview
+    User->>Claude: /ring-default:codereview
     Note over Claude: Command provides<br/>parallel review workflow
 
     Claude->>Task Tool: Dispatch 3 parallel tasks
@@ -401,7 +401,7 @@ Ring leverages four primary Claude Code tools:
    - Provides progress visibility to users
 
 4. **SlashCommand Tool**
-   - Executes commands: `SlashCommand(command="/brainstorm")`
+   - Executes commands: `SlashCommand(command="/ring-default:brainstorm")`
    - Commands expand to skill/agent invocations
    - Provides user-friendly shortcuts
 
@@ -432,7 +432,7 @@ User Request → using-ring check → Relevant skill?
 ### Pattern 2: Parallel Review Execution
 
 ```
-Review Request → /codereview → Dispatch 3 Tasks (parallel)
+Review Request → /ring-default:codereview → Dispatch 3 Tasks (parallel)
     ├─ ring-default:code-reviewer           ─┐
     ├─ ring-default:business-logic-reviewer ─┼─→ Aggregate findings → Handle by severity
     └─ ring-default:security-reviewer       ─┘
@@ -443,7 +443,7 @@ Review Request → /codereview → Dispatch 3 Tasks (parallel)
 ### Pattern 3: Skill-to-Command Mapping
 
 ```
-User: /brainstorm
+User: /ring-default:brainstorm
     ↓
 SlashCommand Tool
     ↓
@@ -451,7 +451,7 @@ commands/brainstorm.md
     ↓
 "Use and follow the brainstorming skill"
     ↓
-Skill Tool: brainstorming
+Skill Tool: ring-default:brainstorming
     ↓
 skills/brainstorming/SKILL.md
 ```
@@ -569,7 +569,7 @@ SKILL.md frontmatter → generate-skills-ref.py → formatted overview → sessi
 1. Create `{plugin}/agents/{name}.md` with model specification
 2. Include YAML frontmatter: `name`, `description`, `model`, `version`
 3. Invoke via Task tool with `subagent_type="ring-{plugin}:{name}"`
-4. Review agents can run in parallel via `/codereview`
+4. Review agents can run in parallel via `/ring-default:codereview`
 5. Developer agents provide domain expertise via direct Task invocation
 
 ### Adding New Commands
