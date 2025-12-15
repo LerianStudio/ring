@@ -58,8 +58,8 @@ When modifying standards files (`dev-team/docs/standards/*.md`):
 |----------------|-------------------|
 | `golang.md` | `ring-dev-team:backend-engineer-golang`, `ring-dev-team:qa-analyst` |
 | `typescript.md` | `ring-dev-team:backend-engineer-typescript`, `ring-dev-team:frontend-bff-engineer-typescript`, `ring-dev-team:qa-analyst` |
-| `frontend.md` | `frontend-engineer`, `frontend-designer` |
-| `devops.md` | `devops-engineer` |
+| `frontend.md` | `ring-dev-team:frontend-engineer`, `ring-dev-team:frontend-designer` |
+| `devops.md` | `ring-dev-team:devops-engineer` |
 | `sre.md` | `sre` |
 
 **Section Index Location:** `dev-team/skills/shared-patterns/standards-coverage-table.md` → "Agent → Standards Section Index"
@@ -73,7 +73,7 @@ When modifying standards files (`dev-team/docs/standards/*.md`):
 | `ring-dev-team:frontend-bff-engineer-typescript` | typescript.md | See coverage table |
 | `frontend-engineer` | frontend.md | See coverage table |
 | `frontend-designer` | frontend.md | See coverage table |
-| `devops-engineer` | devops.md | See coverage table |
+| `ring-dev-team:devops-engineer` | devops.md | See coverage table |
 | `sre` | sre.md | See coverage table |
 | `ring-dev-team:qa-analyst` | golang.md OR typescript.md | See coverage table |
 
@@ -471,7 +471,7 @@ See [docs/AGENT_DESIGN.md](docs/AGENT_DESIGN.md) for complete schema definitions
 
 The system loads at SessionStart (from `default/` plugin):
 1. `default/hooks/session-start.sh` - Loads skill quick reference via `generate-skills-ref.py`
-2. `using-ring` skill - Injected as mandatory workflow
+2. `ring-default:using-ring` skill - Injected as mandatory workflow
 3. `default/hooks/claude-md-reminder.sh` - Reminds about CLAUDE.md on prompt submit
 
 **Monorepo Context:**

@@ -252,13 +252,13 @@ Remember:
 
 **Skills:**
 - `ring-pmo-team:using-pmo-team` (this) - Introduction and dispatch guide
-- `portfolio-planning` - Portfolio strategy and planning
-- `resource-allocation` - Resource and capacity management
-- `risk-management` - Portfolio risk management
+- `ring-pmo-team:portfolio-planning` - Portfolio strategy and planning
+- `ring-pmo-team:resource-allocation` - Resource and capacity management
+- `ring-pmo-team:risk-management` - Portfolio risk management
 - `ring-pmo-team:project-health-check` - Individual project health assessment
-- `dependency-mapping` - Cross-project dependency analysis
-- `executive-reporting` - Executive communication and reporting
-- `pmo-retrospective` - Portfolio retrospectives and lessons learned
+- `ring-pmo-team:dependency-mapping` - Cross-project dependency analysis
+- `ring-pmo-team:executive-reporting` - Executive communication and reporting
+- `ring-pmo-team:pmo-retrospective` - Portfolio retrospectives and lessons learned
 
 **Commands:**
 - `/ring-pmo-team:portfolio-review` - Conduct portfolio review

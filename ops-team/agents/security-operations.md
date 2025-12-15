@@ -386,7 +386,7 @@ None - all HIGH findings must be remediated, not risk-accepted.
 ## What This Agent Does NOT Handle
 
 - Application security testing (use `security-reviewer`)
-- Infrastructure provisioning (use `infrastructure-architect`)
-- Incident response coordination (use `incident-responder`)
-- Platform engineering (use `platform-engineer`)
+- Infrastructure provisioning (use `ring-ops-team:infrastructure-architect`)
+- Incident response coordination (use `ring-ops-team:incident-responder`)
+- Platform engineering (use `ring-ops-team:platform-engineer`)
 - Cost optimization (use `ring-ops-team:cloud-cost-optimizer`)

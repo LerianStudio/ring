@@ -276,7 +276,7 @@ $ curl -k https://api.example.com/health
 ## What This Agent Does NOT Handle
 
 - Application code development (use `backend-engineer-*`)
-- Infrastructure provisioning (use `infrastructure-architect`)
-- Incident response (use `incident-responder`)
+- Infrastructure provisioning (use `ring-ops-team:infrastructure-architect`)
+- Incident response (use `ring-ops-team:incident-responder`)
 - Cost optimization (use `ring-ops-team:cloud-cost-optimizer`)
-- Security audits (use `security-operations`)
+- Security audits (use `ring-ops-team:security-operations`)

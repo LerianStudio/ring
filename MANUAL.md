@@ -194,11 +194,11 @@ Use when you need expert depth in specific domains:
 | Invocation Context | Standards Compliance | Trigger |
 |--------------------|---------------------|---------|
 | Direct agent call | Optional | N/A |
-| Via `dev-cycle` | Optional | N/A |
-| Via `dev-refactor` | **MANDATORY** | Prompt contains `**MODE: ANALYSIS ONLY**` |
+| Via `ring-dev-team:dev-cycle` | Optional | N/A |
+| Via `ring-dev-team:dev-refactor` | **MANDATORY** | Prompt contains `**MODE: ANALYSIS ONLY**` |
 
 **How it works:**
-1. `dev-refactor` dispatches agents with `**MODE: ANALYSIS ONLY**` in prompt
+1. `ring-dev-team:dev-refactor` dispatches agents with `**MODE: ANALYSIS ONLY**` in prompt
 2. Agents detect this pattern and load Ring standards via WebFetch
 3. Agents produce comparison tables: Current Pattern vs Expected Pattern
 4. Output includes severity, location, and migration recommendations
@@ -421,7 +421,7 @@ These enforce quality standards:
 
 1. SessionStart hook runs automatically
 2. All 87 skills are auto-discovered and available
-3. `using-ring` workflow is activated (skill checking is now mandatory)
+3. `ring-default:using-ring` workflow is activated (skill checking is now mandatory)
 
 ### Agent Dispatching
 
@@ -465,5 +465,5 @@ Consolidated report
 ## ❓ Need Help?
 
 - **How to use Claude Code?** → Ask about Claude Code features, MCP servers, slash commands
-- **How to use Ring?** → Check skill names in this manual or in `using-ring` skill
+- **How to use Ring?** → Check skill names in this manual or in `ring-default:using-ring` skill
 - **Feature/bug tracking?** → https://github.com/lerianstudio/ring/issues
