@@ -22,7 +22,7 @@ related:
 
 # Financial Analysis Workflow
 
-This skill provides a structured workflow for comprehensive financial analysis using the `financial-analyst` agent.
+This skill provides a structured workflow for comprehensive financial analysis using the `ring-finance-team:financial-analyst` agent.
 
 ## Workflow Overview
 

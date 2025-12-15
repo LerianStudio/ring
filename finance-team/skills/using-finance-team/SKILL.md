@@ -27,7 +27,7 @@ The ring-finance-team plugin provides 6 specialized financial agents. Use them v
 
 See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.md) and [using-ring](https://raw.githubusercontent.com/LerianStudio/ring/main/default/skills/using-ring/SKILL.md) for canonical workflow requirements and ORCHESTRATOR principle. This skill introduces finance-team-specific agents.
 
-**Remember:** Follow the **ORCHESTRATOR principle** from `using-ring`. Dispatch agents to handle complexity; don't operate tools directly.
+**Remember:** Follow the **ORCHESTRATOR principle** from `ring-default:using-ring`. Dispatch agents to handle complexity; don't operate tools directly.
 
 **Domain Distinction:**
 - **ring-finops-team**: Brazilian regulatory compliance (BACEN, RFB, Open Banking)
@@ -126,12 +126,12 @@ See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.
 
 | Agent | Specializations | Use When |
 |-------|-----------------|----------|
-| **`financial-analyst`** | Ratio analysis, trend analysis, benchmarking, variance analysis, financial statement analysis | Financial health assessment, performance analysis, investment evaluation |
+| **`ring-finance-team:financial-analyst`** | Ratio analysis, trend analysis, benchmarking, variance analysis, financial statement analysis | Financial health assessment, performance analysis, investment evaluation |
 | **`budget-planner`** | Budget creation, forecasting, variance analysis, rolling forecasts, zero-based budgeting | Annual budgets, departmental budgets, budget-to-actual analysis |
-| **`financial-modeler`** | DCF models, LBO models, merger models, scenario analysis, sensitivity analysis | Valuation, investment analysis, strategic planning, M&A |
-| **`treasury-specialist`** | Cash flow forecasting, liquidity management, working capital, FX exposure, debt management | Cash position, liquidity planning, treasury operations |
-| **`accounting-specialist`** | Journal entries, reconciliations, close procedures, GAAP/IFRS compliance, audit support | Month-end close, year-end close, accounting entries, compliance |
-| **`metrics-analyst`** | KPI definition, dashboard design, performance metrics, data visualization, anomaly detection | Executive dashboards, KPI tracking, performance monitoring |
+| **`ring-finance-team:financial-modeler`** | DCF models, LBO models, merger models, scenario analysis, sensitivity analysis | Valuation, investment analysis, strategic planning, M&A |
+| **`ring-finance-team:treasury-specialist`** | Cash flow forecasting, liquidity management, working capital, FX exposure, debt management | Cash position, liquidity planning, treasury operations |
+| **`ring-finance-team:accounting-specialist`** | Journal entries, reconciliations, close procedures, GAAP/IFRS compliance, audit support | Month-end close, year-end close, accounting entries, compliance |
+| **`ring-finance-team:metrics-analyst`** | KPI definition, dashboard design, performance metrics, data visualization, anomaly detection | Executive dashboards, KPI tracking, performance monitoring |
 
 **Dispatch template:**
 ```
@@ -190,7 +190,7 @@ Remember:
 - **Combine with using-ring principle** - Skills + Specialists = complete workflow
 
 ### Good Example (ORCHESTRATOR):
-> "I need a DCF valuation. Let me dispatch `financial-modeler` to build it."
+> "I need a DCF valuation. Let me dispatch `ring-finance-team:financial-modeler` to build it."
 
 ### Bad Example (OPERATOR):
 > "I'll calculate the DCF myself and just note my assumptions."
@@ -203,7 +203,7 @@ Remember:
 
 **Skills:**
 - `ring-finance-team:using-finance-team` (this) - Plugin introduction
-- `financial-analysis` - Comprehensive financial analysis workflow
+- `ring-finance-team:financial-analysis` - Comprehensive financial analysis workflow
 - `budget-creation` - Budget planning and forecasting workflow
 - `financial-modeling` - Financial model building workflow
 - `ring-finance-team:cash-flow-analysis` - Cash flow and liquidity workflow

@@ -22,7 +22,7 @@ related:
 
 # Budget Creation Workflow
 
-This skill provides a structured workflow for comprehensive budget development using the `budget-planner` agent.
+This skill provides a structured workflow for comprehensive budget development using the `ring-finance-team:budget-planner` agent.
 
 ## Workflow Overview
 

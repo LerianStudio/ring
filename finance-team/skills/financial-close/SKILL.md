@@ -22,7 +22,7 @@ related:
 
 # Financial Close Workflow
 
-This skill provides a structured workflow for month-end and year-end close using the `accounting-specialist` agent.
+This skill provides a structured workflow for month-end and year-end close using the `ring-finance-team:accounting-specialist` agent.
 
 ## Workflow Overview
 

@@ -22,7 +22,7 @@ related:
 
 # Metrics Dashboard Workflow
 
-This skill provides a structured workflow for designing KPI dashboards using the `metrics-analyst` agent.
+This skill provides a structured workflow for designing KPI dashboards using the `ring-finance-team:metrics-analyst` agent.
 
 ## Workflow Overview
 
