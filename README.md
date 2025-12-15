@@ -258,12 +258,12 @@ No "should work" → Only "does work" with proof
 - `ring-default:systematic-debugging` - 4-phase root cause investigation
 - `ring-default:verification-before-completion` - Evidence before claims
 - `ring-default:testing-anti-patterns` - Common test pitfalls to avoid
-- `condition-based-waiting` - Replace timeouts with conditions
+- `ring-default:condition-based-waiting` - Replace timeouts with conditions
 - `ring-default:defense-in-depth` - Multi-layer validation
 - `ring-default:linting-codebase` - Parallel lint fixing with agent dispatch
 
 **Collaboration & Planning (10):**
-- `brainstorming` - Structured design refinement
+- `ring-default:brainstorming` - Structured design refinement
 - `ring-default:writing-plans` - Zero-context implementation plans
 - `ring-default:executing-plans` - Batch execution with checkpoints
 - `ring-default:requesting-code-review` - **Parallel 3-reviewer dispatch** with severity-based handling
@@ -271,14 +271,14 @@ No "should work" → Only "does work" with proof
 - `ring-default:dispatching-parallel-agents` - Concurrent workflows
 - `ring-default:subagent-driven-development` - Fast iteration with **parallel reviews**
 - `ring-default:using-git-worktrees` - Isolated development
-- `finishing-a-development-branch` - Merge/PR decisions
-- `root-cause-tracing` - Backward bug tracking
+- `ring-default:finishing-a-development-branch` - Merge/PR decisions
+- `ring-default:root-cause-tracing` - Backward bug tracking
 
 **Meta Skills (4):**
 - `ring-default:using-ring` - Mandatory skill discovery
 - `ring-default:writing-skills` - TDD for documentation
-- `testing-skills-with-subagents` - Skill validation
-- `testing-agents-with-subagents` - Subagent-specific testing
+- `ring-default:testing-skills-with-subagents` - Skill validation
+- `ring-default:testing-agents-with-subagents` - Subagent-specific testing
 
 ### Developer Skills (ring-dev-team plugin - 10 skills)
 
