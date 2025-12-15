@@ -16,11 +16,11 @@ skip_when: |
   - Already has full test coverage verified -> proceed to review
 
 sequence:
-  after: [dev-implementation, dev-devops, dev-sre]
-  before: [dev-review]
+  after: [ring-dev-team:dev-implementation, ring-dev-team:dev-devops, ring-dev-team:dev-sre]
+  before: [ring-dev-team:dev-review]
 
 related:
-  complementary: [test-driven-development, qa-analyst]
+  complementary: [ring-default:test-driven-development, ring-dev-team:qa-analyst]
 
 verification:
   automated:
