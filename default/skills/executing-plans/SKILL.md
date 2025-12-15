@@ -10,12 +10,12 @@ trigger: |
   - Need structured checkpoints during implementation
 
 skip_when: |
-  - Same session with independent tasks → use subagent-driven-development
-  - No plan exists → use writing-plans first
-  - Plan needs revision → use brainstorming first
+  - Same session with independent tasks → use ring-default:subagent-driven-development
+  - No plan exists → use ring-default:writing-plans first
+  - Plan needs revision → use ring-default:brainstorming first
 
 sequence:
-  after: [writing-plans, pre-dev-task-breakdown]
+  after: [ring-default:writing-plans, ring-pm-team:pre-dev-task-breakdown]
 
 related:
   similar: [ring-default:subagent-driven-development]
@@ -83,7 +83,7 @@ User saying "don't wait", "don't ask questions", or "just execute" does NOT skip
 For each task: Mark in_progress → Dispatch to agent → Follow plan steps exactly → Run verifications → Mark completed
 
 ### Step 4: Run Code Review
-**After each batch, REQUIRED:** Use requesting-code-review (all 3 reviewers in parallel)
+**After each batch, REQUIRED:** Use ring-default:requesting-code-review (all 3 reviewers in parallel)
 
 **Handle by severity:**
 - **Critical/High/Medium:** Fix immediately (no TODO) → re-run all 3 reviewers → repeat until resolved
@@ -99,7 +99,7 @@ For each task: Mark in_progress → Dispatch to agent → Follow plan steps exac
 
 ### Step 6: Complete Development
 
-Use finishing-a-development-branch to verify tests, present options, execute choice.
+Use ring-default:finishing-a-development-branch to verify tests, present options, execute choice.
 
 ## When to Stop
 
