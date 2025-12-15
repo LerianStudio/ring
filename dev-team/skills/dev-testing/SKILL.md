@@ -71,57 +71,26 @@ Ensure every acceptance criterion has at least one **unit test** proving it work
 
 See [shared-patterns/pressure-resistance.md](../shared-patterns/pressure-resistance.md) for universal pressure scenarios.
 
-**Gate 3 (Testing) enforces MANDATORY unit test coverage. Pressure scenarios and required responses:**
-
-| Pressure Type | Request | Agent Response |
-|---------------|---------|----------------|
-| **Manual Testing** | "I manually tested everything" | "Manual tests are not executable, not repeatable. Write unit tests." |
-| **Close Enough** | "83% coverage, close to 85%" | "85% is MINIMUM, not target. 83% = FAIL. Write more tests." |
-| **Integration** | "My integration tests cover this" | "Gate 3 = unit tests only. Integration tests are separate scope." |
-| **Time** | "Tests will slow us down" | "Tests prevent rework. No tests = more time debugging later." |
-
-**Non-negotiable principle:** Coverage threshold is MANDATORY minimum, not aspirational target. Below threshold = FAIL.
+**Gate 3-specific note:** Coverage threshold (85%) is MANDATORY minimum, not aspirational target. Below threshold = FAIL.
 
 ## Common Rationalizations - REJECTED
 
 See [shared-patterns/anti-rationalization.md](../shared-patterns/anti-rationalization.md) for universal anti-rationalizations.
 
+**Gate 3-specific rationalizations:**
+
 | Excuse | Reality |
 |--------|---------|
-| "Manual testing validates all criteria" | Manual tests are not executable, not repeatable, not automatable. Gate 3 requires unit tests. |
-| "Coverage is 83%, close enough to 85%" | Threshold is mandatory minimum. 83% = FAIL. No exceptions. |
-| "Integration tests are better verification" | Gate 3 scope is unit tests only. Integration tests are different gate. |
-| "We can add tests later" | Gate 3 exit criteria require tests NOW. Later = never. |
+| "Manual testing validates all criteria" | Manual tests are not executable, not repeatable. Gate 3 requires unit tests. |
+| "Integration tests are better verification" | Gate 3 scope is unit tests only. Integration tests are different scope. |
 | "These mocks make it a unit test" | If you hit DB/API/filesystem, it's integration. Mock the interface. |
-| "All criteria tested, coverage low" | Write edge case tests until threshold met. |
-| "Coverage % is vanity metric" | Coverage is GATE metric. Vanity or not, below threshold = FAIL. |
-| "Integration tests compensate low coverage" | Different scope. Integration tests are NOT unit test substitute. |
-| "Edge cases are obscure/unlikely" | Edge cases cause production incidents. Test them. |
-| "Time spent on edge cases not worth it" | Time spent debugging production incidents is worse. Test now. |
-| "84% with AC tested is defensible" | Defensible ≠ passing. Threshold is 85%. Period. |
 | "PROJECT_RULES.md says 70% is OK" | Ring minimum is 85%. PROJECT_RULES.md can raise, not lower. |
-| "Team decided lower threshold" | Team decisions don't override Ring gates. 85% is non-negotiable. |
-| "This module is simple, 60% enough" | Module complexity doesn't lower threshold. 85% everywhere. |
 
 ## Red Flags - STOP
 
-If you catch yourself thinking ANY of these, STOP immediately:
+See [shared-patterns/red-flags.md](../shared-patterns/red-flags.md) for universal red flags (including Testing section).
 
-- "Manual testing already validated this"
-- "Close enough to coverage threshold"
-- "These integration tests prove it better"
-- "We can add tests after review"
-- "All criteria covered, percentage doesn't matter"
-- "Tests slow down development"
-- "Coverage % is vanity metric"
-- "Integration tests compensate"
-- "Edge cases are unlikely"
-- "Time spent not worth it for 4%"
-- "76% is defensible"
-- "PROJECT_RULES.md allows lower"
-- "Team agreed to 70%"
-
-**All of these indicate Gate 3 violation. Write unit tests until threshold met.**
+If you catch yourself thinking ANY of those patterns, STOP immediately. Write unit tests until threshold met.
 
 ## Coverage Threshold Governance
 

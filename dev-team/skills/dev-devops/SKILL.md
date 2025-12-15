@@ -71,46 +71,28 @@ This skill configures the development and deployment infrastructure:
 
 See [shared-patterns/pressure-resistance.md](../shared-patterns/pressure-resistance.md) for universal pressure scenarios.
 
-**Gate 1 (DevOps) is MANDATORY for all containerizable applications. Pressure scenarios and required responses:**
-
-| Pressure Type | Request | Agent Response |
-|---------------|---------|----------------|
-| **Works Locally** | "App runs fine without Docker" | "Local ≠ production. Docker ensures reproducible environments. REQUIRED." |
-| **Complexity** | "Docker adds unnecessary complexity" | "Docker removes environment complexity. One command to run = simpler." |
-| **Later** | "We'll containerize before production" | "Later = never. Containerize now while context is fresh." |
-| **Simple App** | "Just use docker run" | "docker-compose ensures reproducibility. Even single-service apps need it." |
-
-**Non-negotiable principle:** If the application can run in a container, it MUST be containerized in Gate 1.
+**Gate 1-specific note:** If the application can run in a container, it MUST be containerized. docker-compose ensures reproducibility.
 
 ## Common Rationalizations - REJECTED
+
+See [shared-patterns/anti-rationalization.md](../shared-patterns/anti-rationalization.md) for universal anti-rationalizations.
+
+**Gate 1-specific rationalizations:**
 
 | Excuse | Reality |
 |--------|---------|
 | "Works fine locally" | Your machine ≠ production. Docker = consistency. |
 | "Docker is overkill for this" | Docker is baseline, not overkill. Complexity is hidden, not added. |
-| "We'll add Docker later" | Later = never. Context lost = mistakes made. |
 | "Just need docker run" | docker-compose is reproducible. docker run is not documented. |
 | "Build system will handle Docker" | Build system uses your Dockerfile. No Dockerfile = no reproducible builds. |
-| "It's just a script/tool" | Scripts need reproducible environments too. Containerize. |
-| "Demo tomorrow, Docker later" | Demo with environment issues = failed demo. Docker BEFORE demo. |
 | "Works on demo machine" | Demo machine ≠ production. Docker ensures consistency. |
 | "Quick demo setup, proper later" | Quick setup becomes permanent. Proper setup now or never. |
 
 ## Red Flags - STOP
 
-If you catch yourself thinking ANY of these, STOP immediately:
+See [shared-patterns/red-flags.md](../shared-patterns/red-flags.md) for universal red flags.
 
-- "This works fine without Docker"
-- "Docker is too complex for this project"
-- "We can add containerization later"
-- "docker run is good enough"
-- "It's just an internal tool"
-- "The developer can set up their own environment"
-- "Demo tomorrow, Docker later"
-- "Works on demo machine"
-- "Quick setup for demo, proper later"
-
-**All of these indicate Gate 1 violation. Proceed with containerization.**
+If you catch yourself thinking ANY of those patterns, STOP immediately. Proceed with containerization.
 
 ## Modern Deployment Patterns
 

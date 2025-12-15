@@ -108,25 +108,7 @@ This skill executes the implementation phase of the development cycle. It:
 
 See [shared-patterns/pressure-resistance.md](../shared-patterns/pressure-resistance.md) for universal pressure scenarios.
 
-**TDD is NON-NEGOTIABLE in Ring workflows. Pressure scenarios and required responses:**
-
-| Pressure Type | Request | Agent Response |
-|---------------|---------|----------------|
-| **Code Exists** | "Code already written, just add tests" | "DELETE the code. TDD means test-first. Existing code = start over." |
-| **Time** | "No time for TDD, just implement" | "TDD is faster long-term. RED-GREEN-REFACTOR prevents rework." |
-| **Simplicity** | "Too simple for TDD" | "Simple code still needs tests. TDD is mandatory for ALL changes." |
-| **Standards Missing** | "PROJECT_RULES.md doesn't require TDD" | "Ring workflows ALWAYS require TDD. PROJECT_RULES.md adds to, not replaces." |
-| **Authority** | "CTO/Senior says skip TDD and ship" | "TDD is non-negotiable in Ring. Escalate to me if authority conflicts with process." |
-| **Economic** | "$X/hour revenue loss, ship now" | "Technical debt costs more than revenue loss. Fix root cause with TDD." |
-| **Social** | "Team waiting on you, don't block them" | "Blocking with quality is better than unblocking with bugs. They'll wait longer if it breaks." |
-| **Exhaustion** | "Too tired, better tests tomorrow" | "Tired code creates more work. STOP now. Resume with TDD tomorrow." |
-| **Partial Compliance** | "I've TDDed 9 functions, just this last one without tests" | "TDD is ALL-or-nothing. Every function gets TDD. No partial credit." |
-| **Proven Track Record** | "I've proven I follow TDD, one exception is fine" | "Past compliance doesn't grant future exceptions. Every function requires TDD." |
-| **Exhaustion + Deadline** | "2am, demo at 9am, too tired" | "Exhausted work = buggy work = rework. STOP. Resume fresh or request deadline extension." |
-| **Prototype + Time** | "Just POC, need it fast" | "POC with bugs = wrong validation. Apply standards. Fast AND correct." |
-| **Multiple Authorities** | "CTO + PM + TL all say skip" | "Authority count doesn't change requirements. HARD GATES are non-negotiable." |
-
-**Non-negotiable principle:** If code exists before test, DELETE IT. No exceptions. No "adapting". No "reference". ALL code gets TDD, not just most of it.
+**TDD-specific note:** If code exists before test, DELETE IT. No exceptions. No "adapting". No "reference". ALL code gets TDD, not just most of it.
 
 ## Exploratory Spikes (Time-Boxed Learning Only)
 
@@ -224,37 +206,21 @@ it('should process async task', async () => {
 
 ## Common Rationalizations - REJECTED
 
+See [shared-patterns/anti-rationalization.md](../shared-patterns/anti-rationalization.md) for universal anti-rationalizations (including TDD section).
+
+**Implementation-specific rationalizations:**
+
 | Excuse | Reality |
 |--------|---------|
-| "Code already works" | Working ≠ tested. Delete it. Write test first. |
-| "I'll add tests after" | Tests-after is not TDD. You're testing your assumptions, not the requirements. |
 | "Keep code as reference" | Reference = adapting = testing-after. Delete means DELETE. No "reference", no "backup", no "just in case". |
-| "TDD not configured in PROJECT_RULES.md" | TDD is ALWAYS required in Ring. PROJECT_RULES.md adds constraints, not permissions. |
-| "Simple CRUD doesn't need TDD" | CRUD still has edge cases. TDD catches them before production. |
-| "Manual testing proves it works" | Manual tests are not repeatable. Write automated tests. |
-| "I'm following the spirit of TDD" | Spirit without letter is rationalization. Follow the process exactly. |
-| "Adapt existing code while writing tests" | Adapting IS writing code first. Delete the code. Start fresh. |
-| "Look at old code for guidance" | Looking leads to adapting. Delete means don't look either. |
 | "Save to branch, delete locally" | Saving anywhere = keeping. Delete from everywhere. |
-| "I've TDDed 9/10 functions, just this last one" | ALL functions get TDD, not most. 9/10 = 0/10. Start over on #10. |
-| "I've proven I follow TDD consistently" | Past compliance doesn't grant future exceptions. Every function requires TDD. |
-| "Refactoring tests doesn't need TDD" | Correct. Test code refactoring is exempt. Production code is not. |
+| "Look at old code for guidance" | Looking leads to adapting. Delete means don't look either. |
 
 ## Red Flags - STOP
 
-If you catch yourself thinking ANY of these, STOP immediately:
+See [shared-patterns/red-flags.md](../shared-patterns/red-flags.md) for universal red flags (including TDD section).
 
-- "I'll write tests after the code works"
-- "Let me keep this code as reference"
-- "This is too simple for full TDD"
-- "Manual testing already validated this"
-- "I'm being pragmatic, not dogmatic"
-- "TDD isn't explicitly required here"
-- "I can adapt the existing code"
-- "I'll save it as reference in another branch"
-- "Let me just look at what I had"
-
-**All of these indicate TDD violation. DELETE any existing code. Start with failing test.**
+If you catch yourself thinking ANY of those patterns, STOP immediately. DELETE any existing code. Start with failing test.
 
 ## What "DELETE" Means - No Ambiguity
 

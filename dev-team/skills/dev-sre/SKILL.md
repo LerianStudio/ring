@@ -125,65 +125,29 @@ This skill VALIDATES that observability was correctly implemented by developers:
 
 ## Pressure Resistance
 
-See [shared-patterns/pressure-resistance.md](../shared-patterns/pressure-resistance.md) for universal pressure scenarios.
+See [shared-patterns/pressure-resistance.md](../shared-patterns/pressure-resistance.md) for universal pressure scenarios (including Combined Pressure Scenarios).
 
-**Gate 2 (SRE/Observability) is MANDATORY before production. Gate-specific pressure scenarios and required responses:**
-
-| Pressure Type | Request | Agent Response |
-|---------------|---------|----------------|
-| **Later** | "Add observability post-launch" | "No observability = no visibility into production issues. REQUIRED before deploy." |
-| **Logs Only** | "Plain text logs are enough for MVP" | "Plain text logs are not searchable, not alertable. JSON logs required." |
-| **MVP** | "It's just MVP, skip structured logging" | "MVP without structured logging = debugging nightmare. You won't be able to search or alert on logs." |
-
-### Combined Pressure Scenarios
-
-| Pressure Combination | Request | Agent Response |
-|---------------------|---------|----------------|
-| **Time + Authority + Sunk Cost** | "Tech lead says ship Friday, 8 hours invested, add observability Monday" | "Gate 2 is NON-NEGOTIABLE. Authority cannot waive gates. Reduce FEATURE scope, not observability scope." |
-| **Pragmatic + Exhaustion + Time** | "MVP launch in 2 hours, PM says observability optional, just launch" | "MVP without observability = blind MVP. Cannot detect failures, cannot debug efficiently. Gate 2 REQUIRED." |
-| **All Pressures** | "CEO watching demo in 1 hour, just show feature working, skip gates" | "Gates prevent production blindness. CEO will want observability when issues occur. Cannot skip Gate 2." |
-
-**Non-negotiable principle:** Minimum viable observability = structured logs. No exceptions.
+**Gate 2-specific note:** Minimum viable observability = structured JSON logs. No exceptions.
 
 ## Common Rationalizations - REJECTED
+
+See [shared-patterns/anti-rationalization.md](../shared-patterns/anti-rationalization.md) for universal anti-rationalizations.
+
+**Gate 2-specific rationalizations:**
 
 | Excuse | Reality |
 |--------|---------|
 | "Add tracing later" | Later = never. Retrofitting is 10x harder. |
-| "It's just an internal tool" | Internal tools fail too. Observability required. |
 | "Dashboard can come later" | Dashboard is optional but structured logging is not. |
-| "Too much overhead for MVP" | Observability is minimal overhead, maximum value. |
 | "Task says observability not needed" | AI cannot self-exempt. Tasks don't override gates. |
-| "Pure frontend, no backend calls" | If it calls ANY API, backend needs observability. Frontend-only = static HTML. |
-| "It's just MVP" | MVP without structured logging = debugging nightmare. |
-| "YAGNI - we don't need it yet" | YAGNI doesn't apply to observability. You need it BEFORE problems occur. |
-| "Only N users, no need for structured logs" | User count is irrelevant. 1 user with silent failure = bad experience. |
 | "Basic fmt.Println logs are enough" | fmt.Println is not structured, not searchable, not alertable. JSON logs required. |
-| "45 min overhead not worth it" | 45 min now prevents 4+ hours debugging blind production issues. |
 | "Feature complete, observability later" | Feature without observability is NOT complete. Redefine "complete". |
-| "Core functionality works" | Core functionality + observability = complete. Core alone = partial. |
-| "Observability is enhancement, not feature" | Observability is REQUIREMENT, not enhancement. It's part of definition of done. |
 
 ## Red Flags - STOP
 
-If you catch yourself thinking ANY of these, STOP immediately:
+See [shared-patterns/red-flags.md](../shared-patterns/red-flags.md) for universal red flags (including Observability section).
 
-- "We'll add observability after launch"
-- "Plain text logs are enough for now"
-- "It's just an internal service"
-- "We can monitor manually"
-- "Task says observability not required"
-- "Pure frontend, no backend impact"
-- "It's just MVP, we'll add structured logging later"
-- "YAGNI - don't need it yet"
-- "Only N users, doesn't justify"
-- "fmt.Println is fine for now"
-- "45 min not worth it"
-- "Feature complete, add observability later"
-- "Core functionality done"
-- "Observability is enhancement"
-
-**All of these indicate Gate 2 violation. Return to developers to implement observability.**
+If you catch yourself thinking ANY of those patterns, STOP immediately. Return to developers to implement observability.
 
 ## Component Type Decision Tree
 
