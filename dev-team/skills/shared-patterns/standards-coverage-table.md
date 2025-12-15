@@ -215,7 +215,7 @@ See [shared-patterns/standards-coverage-table.md](../skills/shared-patterns/stan
 
 ---
 
-### backend-engineer-typescript → typescript.md
+### typescript.md (Used by: backend-engineer-typescript, frontend-bff-engineer-typescript)
 
 | # | Section to Check | Key Subsections |
 |---|------------------|-----------------|
@@ -235,47 +235,7 @@ See [shared-patterns/standards-coverage-table.md](../skills/shared-patterns/stan
 
 ---
 
-### frontend-bff-engineer-typescript → typescript.md
-
-| # | Section to Check | Key Subsections |
-|---|------------------|-----------------|
-| 1 | Strict Configuration (MANDATORY) | |
-| 2 | Frameworks & Libraries (MANDATORY) | |
-| 3 | Type Safety Rules (MANDATORY) | |
-| 4 | Zod Validation Patterns (MANDATORY) | |
-| 5 | Dependency Injection (MANDATORY) | |
-| 6 | AsyncLocalStorage for Context (MANDATORY) | |
-| 7 | Testing Patterns (MANDATORY) | |
-| 8 | Error Handling (MANDATORY) | |
-| 9 | Function Design (MANDATORY) | |
-| 10 | DDD Patterns (MANDATORY) | |
-| 11 | Naming Conventions (MANDATORY) | |
-| 12 | Directory Structure (MANDATORY) | |
-| 13 | RabbitMQ Worker Pattern (MANDATORY) | |
-
----
-
-### frontend-engineer → frontend.md
-
-| # | Section to Check |
-|---|------------------|
-| 1 | Framework (MANDATORY) |
-| 2 | Libraries & Tools (MANDATORY) |
-| 3 | State Management Patterns (MANDATORY) |
-| 4 | Form Patterns (MANDATORY) |
-| 5 | Styling Standards (MANDATORY) |
-| 6 | Typography Standards (MANDATORY) |
-| 7 | Animation Standards (MANDATORY) |
-| 8 | Component Patterns (MANDATORY) |
-| 9 | Accessibility (a11y) (MANDATORY) |
-| 10 | Performance (MANDATORY) |
-| 11 | Directory Structure (MANDATORY) |
-| 12 | FORBIDDEN Patterns (MANDATORY) |
-| 13 | Standards Compliance Categories (MANDATORY) |
-
----
-
-### frontend-designer → frontend.md
+### frontend.md (Used by: frontend-engineer, frontend-designer)
 
 | # | Section to Check |
 |---|------------------|
