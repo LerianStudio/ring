@@ -489,7 +489,7 @@ class TestInstall:
         assert "factory" in result.targets
 
     def test_install_factory_skill_structure(self, tmp_ring_root, tmp_path):
-        """Factory installs skills as skills/<name>/<name>.md (no plugin subdir)."""
+        """Factory installs skills as skills/<name>/SKILL.md (no plugin subdir)."""
         from ring_installer.core import InstallOptions, InstallTarget, install
 
         factory_dir = tmp_path / "factory"
@@ -502,7 +502,7 @@ class TestInstall:
         )
         assert result.components_installed > 0 or result.components_skipped > 0
 
-        expected = factory_dir / "skills" / "sample-skill" / "sample-skill.md"
+        expected = factory_dir / "skills" / "sample-skill" / "SKILL.md"
         assert expected.exists()
 
         # Legacy nested paths should not be used

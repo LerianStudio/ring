@@ -479,7 +479,7 @@ class FactoryAdapter(PlatformAdapter):
         Returns:
             True for agents (droids) since Factory requires flat structure
         """
-        # Factory scans droids as a flat list and expects skills at skills/<name>/<name>.md.
+        # Factory scans droids as a flat list and expects skills at skills/<name>/SKILL.md.
         return component_type in {"agents", "skills"}
 
     def get_flat_filename(self, source_filename: str, component_type: str, plugin_name: str) -> str:

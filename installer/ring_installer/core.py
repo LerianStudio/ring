@@ -603,10 +603,10 @@ def install(
                     # Determine target filename
                     if component_type == "skills":
                         # Skills use their directory name.
-                        # Factory expects: ~/.factory/skills/<name>/<name>.md
+                        # Factory expects: ~/.factory/skills/<name>/SKILL.md
                         skill_name = source_file.parent.name
                         if adapter.platform_id == "factory":
-                            target_file = target_dir / skill_name / f"{skill_name}{target_config['extension']}"
+                            target_file = target_dir / skill_name / "SKILL.md"
                         else:
                             target_file = target_dir / skill_name / source_file.name
                     elif requires_flat and len(components) > 1:
