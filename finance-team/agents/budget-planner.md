@@ -82,7 +82,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-finance-team:budget-planner", model="opus", ...)  # REQUIRED
+Task(subagent_type="budget-planner", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Budget planning requires Opus-level reasoning for complex interdependencies between line items, appropriate assumption validation, and coherent multi-period projections.

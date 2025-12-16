@@ -66,7 +66,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-pmm-team:market-researcher", model="opus", ...)  # REQUIRED
+Task(subagent_type="market-researcher", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Market analysis requires Opus-level reasoning for synthesizing disparate data sources, identifying non-obvious patterns, and providing reliable strategic recommendations.

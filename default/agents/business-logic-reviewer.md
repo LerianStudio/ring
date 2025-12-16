@@ -57,7 +57,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 **Orchestrator Requirement:**
 When calling this agent, you MUST specify the model parameter:
 ```
-Task(subagent_type="ring-default:business-logic-reviewer", model="opus", ...)  # REQUIRED
+Task(subagent_type="business-logic-reviewer", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Mental execution analysis of complex business logic requires advanced reasoning capabilities to trace execution paths with concrete scenarios, identify edge cases (null, zero, negative, boundary conditions), verify state machine transitions, detect financial calculation errors, and analyze full file context including ripple effects on adjacent code - capabilities that require Opus-level depth.

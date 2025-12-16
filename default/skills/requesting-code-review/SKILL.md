@@ -1,5 +1,5 @@
 ---
-name: ring-default:requesting-code-review
+name: requesting-code-review
 description: |
   Parallel code review dispatch - sends to 3 specialized reviewers (code, business-logic,
   security) simultaneously for comprehensive feedback.
@@ -16,8 +16,8 @@ skip_when: |
   - Already reviewed and no changes since → proceed
 
 sequence:
-  after: [ring-default:verification-before-completion]
-  before: [ring-default:finishing-a-development-branch]
+  after: [verification-before-completion]
+  before: [finishing-a-development-branch]
 ---
 
 # Requesting Code Review
@@ -30,17 +30,17 @@ Dispatch all three reviewer subagents in parallel for fast, comprehensive feedba
 
 Three specialized reviewers run in **parallel** for maximum speed:
 
-**1. ring-default:code-reviewer** (Foundation)
+**1. code-reviewer** (Foundation)
 - **Focus:** Architecture, design patterns, code quality, maintainability
 - **Model:** Opus (required for comprehensive analysis)
 - **Reports:** Code quality issues, architectural concerns
 
-**2. ring-default:business-logic-reviewer** (Correctness)
+**2. business-logic-reviewer** (Correctness)
 - **Focus:** Domain correctness, business rules, edge cases, requirements
 - **Model:** Opus (required for deep domain understanding)
 - **Reports:** Business logic issues, requirement gaps
 
-**3. ring-default:security-reviewer** (Safety)
+**3. security-reviewer** (Safety)
 - **Focus:** Vulnerabilities, authentication, input validation, OWASP risks
 - **Model:** Opus (required for thorough security analysis)
 - **Reports:** Security vulnerabilities, OWASP risks
@@ -74,7 +74,7 @@ Three specialized reviewers run in **parallel** for maximum speed:
 
 **Two ways to run parallel reviews:**
 1. **Direct parallel dispatch:** Launch 3 Task calls in single message (explicit control)
-2. **/ring-default:codereview command:** Command that provides workflow instructions for parallel review (convenience)
+2. **/codereview command:** Command that provides workflow instructions for parallel review (convenience)
 
 ## How to Request
 

@@ -1,5 +1,5 @@
 ---
-name: ring-tw-team:documentation-review
+name: documentation-review
 description: |
   Comprehensive checklist and process for reviewing documentation quality
   including voice, tone, structure, completeness, and technical accuracy.
@@ -11,14 +11,14 @@ trigger: |
   - Ensuring style guide compliance
 
 skip_when: |
-  - Writing new documentation → use ring-tw-team:writing-functional-docs or ring-tw-team:writing-api-docs
-  - Only checking voice → use ring-tw-team:voice-and-tone
+  - Writing new documentation → use writing-functional-docs or writing-api-docs
+  - Only checking voice → use voice-and-tone
 
 sequence:
-  after: [ring-tw-team:writing-functional-docs, ring-tw-team:writing-api-docs]
+  after: [writing-functional-docs, writing-api-docs]
 
 related:
-  complementary: [ring-tw-team:voice-and-tone, ring-tw-team:documentation-structure]
+  complementary: [voice-and-tone, documentation-structure]
 ---
 
 # Documentation Review Process

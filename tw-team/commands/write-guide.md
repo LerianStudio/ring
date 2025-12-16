@@ -1,5 +1,5 @@
 ---
-name: ring-tw-team:write-guide
+name: write-guide
 description: Start writing a functional guide with voice, tone, and structure guidance
 argument-hint: "[topic]"
 arguments:
@@ -66,7 +66,7 @@ For complex documentation, dispatch the functional-writer agent:
 
 ```
 Task tool:
-  subagent_type: "ring-tw-team:functional-writer"
+  subagent_type: "functional-writer"
   model: "opus"
   prompt: "Write a [document type] for [topic]. Target audience: [audience].
           The reader should be able to [goal] after reading."
@@ -74,11 +74,11 @@ Task tool:
 
 ## 5. Review Before Publishing
 
-After writing, use the ring-tw-team:docs-reviewer agent:
+After writing, use the docs-reviewer agent:
 
 ```
 Task tool:
-  subagent_type: "ring-tw-team:docs-reviewer"
+  subagent_type: "docs-reviewer"
   model: "opus"
   prompt: "Review this documentation for voice, tone, structure, and completeness:
           [paste documentation]"

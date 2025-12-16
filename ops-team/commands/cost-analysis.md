@@ -1,5 +1,5 @@
 ---
-name: ring-ops-team:cost-analysis
+name: cost-analysis
 description: Execute cloud cost analysis and optimization workflow
 argument-hint: "[scope: full|service|account] [focus: general|rightsizing|ri|anomaly]"
 ---
@@ -11,9 +11,9 @@ This command initiates structured cloud cost analysis following the ops-cost-opt
 ## Usage
 
 ```
-/ring-ops-team:cost-analysis full general
-/ring-ops-team:cost-analysis service:payment-api rightsizing
-/ring-ops-team:cost-analysis account:production ri
+/cost-analysis full general
+/cost-analysis service:payment-api rightsizing
+/cost-analysis account:production ri
 ```
 
 ## Workflow
@@ -43,7 +43,7 @@ Parse scope and focus from arguments.
 
 ```
 Task tool:
-  subagent_type: "ring-ops-team:cloud-cost-optimizer"
+  subagent_type: "cloud-cost-optimizer"
   model: "opus"
   prompt: |
     COST ANALYSIS REQUEST
@@ -204,8 +204,8 @@ Additional output:
 
 ## Related Skills
 
-- `ring-ops-team:ops-cost-optimization` - Full cost optimization workflow
-- `ring-ops-team:ops-capacity-planning` - Capacity planning (cost component)
+- `ops-cost-optimization` - Full cost optimization workflow
+- `ops-capacity-planning` - Capacity planning (cost component)
 
 ## Anti-Rationalization
 

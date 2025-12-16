@@ -69,7 +69,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-dev-team:prompt-quality-reviewer", model="opus", ...)  # REQUIRED
+Task(subagent_type="prompt-quality-reviewer", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Deep prompt analysis + behavioral scoring requires Opus-level reasoning for pattern detection across multiple agent executions, root cause diagnosis, and precise improvement generation.

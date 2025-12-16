@@ -1,5 +1,5 @@
 ---
-name: ring-dev-team:dev-review
+name: dev-review
 description: |
   Development cycle review gate (Gate 4) - executes parallel code review with 3 specialized
   reviewers, aggregates findings, and determines VERDICT for gate passage.
@@ -18,11 +18,11 @@ NOT_skip_when: |
   - "Only N lines" → Line count is irrelevant. AI doesn't negotiate. Review ALL changes.
 
 sequence:
-  after: [ring-dev-team:dev-testing]
-  before: [ring-dev-team:dev-validation]
+  after: [dev-testing]
+  before: [dev-validation]
 
 related:
-  complementary: [ring-default:requesting-code-review, ring-default:receiving-code-review]
+  complementary: [requesting-code-review, receiving-code-review]
 
 verification:
   automated:
@@ -235,14 +235,14 @@ If you catch yourself planning sequential execution → STOP → Re-plan as para
 **REQUIRED Format:** `{reviewer-name}`
 
 **Valid Reviewers:**
-- ✅ `ring-default:code-reviewer`
-- ✅ `ring-default:business-logic-reviewer`
-- ✅ `ring-default:security-reviewer`
+- ✅ `code-reviewer`
+- ✅ `business-logic-reviewer`
+- ✅ `security-reviewer`
 
 **FORBIDDEN (Wrong Prefix/Name):**
-- ❌ `ring-default:code-reviewer` (missing prefix)
+- ❌ `code-reviewer` (missing prefix)
 - ❌ `ring:code-reviewer` (wrong prefix)
-- ❌ `ring-default:code-reviewer` (wrong plugin)
+- ❌ `code-reviewer` (wrong plugin)
 - ❌ `general-purpose` (generic agent, not specialized reviewer)
 - ❌ `Explore` (not a reviewer)
 
@@ -269,9 +269,9 @@ THEN STOP - Invalid agent prefix
 **You MUST dispatch all 3 reviewers in a SINGLE message:**
 
 ```
-Task tool #1: ring-default:code-reviewer
-Task tool #2: ring-default:business-logic-reviewer
-Task tool #3: ring-default:security-reviewer
+Task tool #1: code-reviewer
+Task tool #2: business-logic-reviewer
+Task tool #3: security-reviewer
 ```
 
 **VIOLATIONS:**
@@ -310,9 +310,9 @@ Before starting this gate:
 
 | Reviewer | Focus Area | Catches |
 |----------|------------|---------|
-| `ring-default:code-reviewer` | Architecture, patterns, maintainability | Design flaws, code smells, DRY violations |
-| `ring-default:business-logic-reviewer` | Correctness, requirements, edge cases | Logic errors, missing cases, requirement gaps |
-| `ring-default:security-reviewer` | OWASP, auth, input validation | Vulnerabilities, injection risks, auth bypasses |
+| `code-reviewer` | Architecture, patterns, maintainability | Design flaws, code smells, DRY violations |
+| `business-logic-reviewer` | Correctness, requirements, edge cases | Logic errors, missing cases, requirement gaps |
+| `security-reviewer` | OWASP, auth, input validation | Vulnerabilities, injection risks, auth bypasses |
 
 ## Step 1: Prepare Review Context
 
@@ -326,9 +326,9 @@ Gather: `BASE_SHA=$(git merge-base HEAD main)`, `HEAD_SHA=$(git rev-parse HEAD)`
 
 | Task | Agent | Prompt |
 |------|-------|--------|
-| #1 | `ring-default:code-reviewer` | Review context (WHAT_WAS_IMPLEMENTED, PLAN, ACs, SHAs) |
-| #2 | `ring-default:business-logic-reviewer` | Same context |
-| #3 | `ring-default:security-reviewer` | Same context |
+| #1 | `code-reviewer` | Review context (WHAT_WAS_IMPLEMENTED, PLAN, ACs, SHAs) |
+| #2 | `business-logic-reviewer` | Same context |
+| #3 | `security-reviewer` | Same context |
 
 **Wait for ALL three to complete before proceeding.**
 

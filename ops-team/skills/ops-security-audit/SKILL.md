@@ -1,5 +1,5 @@
 ---
-name: ring-ops-team:ops-security-audit
+name: ops-security-audit
 description: |
   Structured workflow for infrastructure security audits including compliance
   validation, vulnerability assessment, and security posture review.
@@ -16,8 +16,8 @@ skip_when: |
   - Penetration testing -> external security team
 
 related:
-  similar: [ring-default:security-reviewer]
-  uses: [ring-ops-team:security-operations]
+  similar: [security-reviewer]
+  uses: [security-operations]
 ---
 
 # Security Audit Workflow
@@ -379,7 +379,7 @@ For security audit tasks, dispatch:
 
 ```
 Task tool:
-  subagent_type: "ring-ops-team:security-operations"
+  subagent_type: "security-operations"
   model: "opus"
   prompt: |
     SECURITY AUDIT REQUEST

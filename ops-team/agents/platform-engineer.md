@@ -60,7 +60,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-ops-team:platform-engineer", model="opus", ...)  # REQUIRED
+Task(subagent_type="platform-engineer", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Platform engineering requires comprehensive understanding of service mesh configurations, API gateway patterns, and complex platform abstractions that require Opus-level reasoning.

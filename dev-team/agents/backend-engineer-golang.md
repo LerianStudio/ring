@@ -92,7 +92,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-dev-team:backend-engineer-golang", model="opus", ...)  # REQUIRED
+Task(subagent_type="backend-engineer-golang", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Standards compliance verification + complex Go implementation requires Opus-level reasoning for reliable error handling, architectural pattern recognition, and comprehensive validation against Ring standards.

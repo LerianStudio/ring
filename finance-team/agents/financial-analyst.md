@@ -85,7 +85,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-finance-team:financial-analyst", model="opus", ...)  # REQUIRED
+Task(subagent_type="financial-analyst", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Financial analysis requires Opus-level reasoning for accurate ratio interpretation, trend identification, and nuanced recommendations that consider multiple factors simultaneously.

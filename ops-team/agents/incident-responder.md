@@ -70,7 +70,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-ops-team:incident-responder", model="opus", ...)  # REQUIRED
+Task(subagent_type="incident-responder", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Incident response requires rapid analysis of complex distributed systems, correlation of multiple signals, and decisive action under pressure - all requiring Opus-level reasoning capabilities.

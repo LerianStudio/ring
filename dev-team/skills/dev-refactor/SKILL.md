@@ -172,11 +172,11 @@ Task tool:
 
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
-| "I'll use Bash find/ls to quickly explore" | Bash cannot analyze patterns, just lists files. codebase-explorer provides architectural analysis. | **Use Task with subagent_type="ring-default:codebase-explorer"** |
-| "The Explore agent is faster" | "Explore" subagent_type ≠ "codebase-explorer". Different agents. | **Use exact string: "ring-default:codebase-explorer"** |
-| "I already know the structure from find output" | Knowing file paths ≠ understanding architecture. Agent provides analysis. | **Use Task with subagent_type="ring-default:codebase-explorer"** |
-| "This is a small codebase, Bash is enough" | Size is irrelevant. The agent provides standardized output format required by Step 4. | **Use Task with subagent_type="ring-default:codebase-explorer"** |
-| "I'll explore manually then dispatch agents" | Manual exploration skips the codebase-report.md artifact required for Step 4 gate. | **Use Task with subagent_type="ring-default:codebase-explorer"** |
+| "I'll use Bash find/ls to quickly explore" | Bash cannot analyze patterns, just lists files. codebase-explorer provides architectural analysis. | **Use Task with subagent_type="codebase-explorer"** |
+| "The Explore agent is faster" | "Explore" subagent_type ≠ "codebase-explorer". Different agents. | **Use exact string: "codebase-explorer"** |
+| "I already know the structure from find output" | Knowing file paths ≠ understanding architecture. Agent provides analysis. | **Use Task with subagent_type="codebase-explorer"** |
+| "This is a small codebase, Bash is enough" | Size is irrelevant. The agent provides standardized output format required by Step 4. | **Use Task with subagent_type="codebase-explorer"** |
+| "I'll explore manually then dispatch agents" | Manual exploration skips the codebase-report.md artifact required for Step 4 gate. | **Use Task with subagent_type="codebase-explorer"** |
 
 ### FORBIDDEN Actions for Step 3
 
@@ -185,14 +185,14 @@ Task tool:
 ❌ Bash(command="ls -la ...")                → SKILL FAILURE
 ❌ Bash(command="tree ...")                  → SKILL FAILURE
 ❌ Task(subagent_type="Explore", ...)        → SKILL FAILURE
-❌ Task(subagent_type="ring-default:general-purpose", ...)→ SKILL FAILURE
+❌ Task(subagent_type="general-purpose", ...)→ SKILL FAILURE
 ❌ Task(subagent_type="Plan", ...)           → SKILL FAILURE
 ```
 
 ### REQUIRED Action for Step 3
 
 ```
-✅ Task(subagent_type="ring-default:codebase-explorer", model="opus", ...)
+✅ Task(subagent_type="codebase-explorer", model="opus", ...)
 ```
 
 **After Task completes, save with Write tool:**
@@ -833,10 +833,10 @@ traceability:
 ### Rule 1: Codebase Exploration MUST Use Specific Agent
 
 ```
-✅ CORRECT: Task(subagent_type="ring-default:codebase-explorer", model="opus")
+✅ CORRECT: Task(subagent_type="codebase-explorer", model="opus")
 ❌ WRONG:   Bash(find/ls/tree)
 ❌ WRONG:   Task(subagent_type="Explore")
-❌ WRONG:   Task(subagent_type="ring-default:general-purpose")
+❌ WRONG:   Task(subagent_type="general-purpose")
 ```
 
 ### Rule 2: Todo Items MUST Be Initialized at Start
@@ -882,6 +882,6 @@ Step 5 (specialist agents) → ONLY runs if gate passes
 1. STOP current execution
 2. DELETE any codebase-report.md created by wrong method
 3. Go back to Step 3
-4. Use correct Task tool call with `subagent_type="ring-default:codebase-explorer"`
+4. Use correct Task tool call with `subagent_type="codebase-explorer"`
 5. Save output as codebase-report.md
 6. Continue from Step 4

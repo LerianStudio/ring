@@ -1,5 +1,5 @@
 ---
-name: ring-finops-team:regulatory-templates-setup
+name: regulatory-templates-setup
 description: |
   Initial setup sub-skill - handles template selection and context initialization
   for the 3-gate regulatory workflow.
@@ -13,8 +13,8 @@ skip_when: |
   - Setup already completed for current template
 
 sequence:
-  after: [ring-finops-team:regulatory-templates]
-  before: [ring-finops-team:regulatory-templates-gate1]
+  after: [regulatory-templates]
+  before: [regulatory-templates-gate1]
 ---
 
 # Regulatory Templates - Initial Setup
@@ -23,7 +23,7 @@ sequence:
 
 **This sub-skill handles the initial setup phase for regulatory template creation, including template selection and context initialization.**
 
-**Parent skill:** `ring-finops-team:regulatory-templates`
+**Parent skill:** `regulatory-templates`
 
 **Output:** Complete initial context object with all selections and configurations
 
@@ -51,7 +51,7 @@ Setup is not "just configuration" - it's critical validation:
 
 ## When to Use
 
-**Called by:** `ring-finops-team:regulatory-templates` skill at the beginning of the workflow
+**Called by:** `regulatory-templates` skill at the beginning of the workflow
 
 **Purpose:** Gather all user selections and initialize the context object that will flow through all gates
 

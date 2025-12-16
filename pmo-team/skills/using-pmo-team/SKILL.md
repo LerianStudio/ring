@@ -1,5 +1,5 @@
 ---
-name: ring-pmo-team:using-pmo-team
+name: using-pmo-team
 description: |
   5 specialist PMO agents for portfolio management, resource planning, governance,
   risk analysis, and executive reporting. Dispatch when you need portfolio-level oversight.
@@ -18,7 +18,7 @@ skip_when: |
   - Technical writing → use ring-tw-team
 
 related:
-  similar: [ring-default:using-ring, ring-pm-team:using-pm-team]
+  similar: [using-ring, using-pm-team]
 ---
 
 # Using Ring PMO Team
@@ -27,7 +27,7 @@ The ring-pmo-team plugin provides 5 specialized PMO agents for portfolio-level m
 
 See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.md) and [using-ring](https://raw.githubusercontent.com/LerianStudio/ring/main/default/skills/using-ring/SKILL.md) for canonical workflow requirements and ORCHESTRATOR principle. This skill introduces pmo-team-specific agents.
 
-**Remember:** Follow the **ORCHESTRATOR principle** from `ring-default:using-ring`. Dispatch agents to handle complexity; don't operate tools directly.
+**Remember:** Follow the **ORCHESTRATOR principle** from `using-ring`. Dispatch agents to handle complexity; don't operate tools directly.
 
 ---
 
@@ -154,7 +154,7 @@ See [shared-patterns/pressure-resistance.md](../shared-patterns/pressure-resista
 **Emergency Dispatch Template:**
 ```
 Task tool:
-  subagent_type: "ring-pmo-team:portfolio-manager"
+  subagent_type: "portfolio-manager"
   model: "opus"
   prompt: "URGENT: [context]. [specific request]"
 ```
@@ -171,11 +171,11 @@ Task tool:
 
 | Agent | Specializations | Use When |
 |-------|-----------------|----------|
-| **`ring-pmo-team:portfolio-manager`** | Multi-project coordination, strategic alignment, portfolio health, prioritization | Portfolio reviews, project prioritization, capacity assessment |
-| **`ring-pmo-team:resource-planner`** | Capacity planning, skills matrix, allocation optimization, conflict resolution | Resource allocation, capacity planning, team assignments |
-| **`ring-pmo-team:governance-specialist`** | Gate reviews, compliance, process adherence, audit readiness | Gate approvals, process compliance, governance audits |
-| **`ring-pmo-team:risk-analyst`** | RAID logs, risk aggregation, mitigation planning, portfolio risk | Risk assessments, RAID management, mitigation strategies |
-| **`ring-pmo-team:executive-reporter`** | Dashboards, status summaries, escalation reports, board packages | Executive updates, board reports, stakeholder communication |
+| **`portfolio-manager`** | Multi-project coordination, strategic alignment, portfolio health, prioritization | Portfolio reviews, project prioritization, capacity assessment |
+| **`resource-planner`** | Capacity planning, skills matrix, allocation optimization, conflict resolution | Resource allocation, capacity planning, team assignments |
+| **`governance-specialist`** | Gate reviews, compliance, process adherence, audit readiness | Gate approvals, process compliance, governance audits |
+| **`risk-analyst`** | RAID logs, risk aggregation, mitigation planning, portfolio risk | Risk assessments, RAID management, mitigation strategies |
+| **`executive-reporter`** | Dashboards, status summaries, escalation reports, board packages | Executive updates, board reports, stakeholder communication |
 
 **Dispatch template:**
 ```
@@ -239,7 +239,7 @@ Remember:
 - **Combine with other plugins** - PMO + PM + Dev = complete delivery lifecycle
 
 ### Good Example (ORCHESTRATOR):
-> "I need portfolio status. Let me dispatch `ring-pmo-team:portfolio-manager` to analyze."
+> "I need portfolio status. Let me dispatch `portfolio-manager` to analyze."
 
 ### Bad Example (OPERATOR):
 > "I'll manually review each project and create a summary myself."
@@ -251,19 +251,19 @@ Remember:
 **Agents:** See "5 PMO Specialists" table above.
 
 **Skills:**
-- `ring-pmo-team:using-pmo-team` (this) - Introduction and dispatch guide
-- `ring-pmo-team:portfolio-planning` - Portfolio strategy and planning
-- `ring-pmo-team:resource-allocation` - Resource and capacity management
-- `ring-pmo-team:risk-management` - Portfolio risk management
-- `ring-pmo-team:project-health-check` - Individual project health assessment
-- `ring-pmo-team:dependency-mapping` - Cross-project dependency analysis
-- `ring-pmo-team:executive-reporting` - Executive communication and reporting
-- `ring-pmo-team:pmo-retrospective` - Portfolio retrospectives and lessons learned
+- `using-pmo-team` (this) - Introduction and dispatch guide
+- `portfolio-planning` - Portfolio strategy and planning
+- `resource-allocation` - Resource and capacity management
+- `risk-management` - Portfolio risk management
+- `project-health-check` - Individual project health assessment
+- `dependency-mapping` - Cross-project dependency analysis
+- `executive-reporting` - Executive communication and reporting
+- `pmo-retrospective` - Portfolio retrospectives and lessons learned
 
 **Commands:**
-- `/ring-pmo-team:portfolio-review` - Conduct portfolio review
-- `/ring-pmo-team:executive-summary` - Generate executive summary
-- `/ring-pmo-team:dependency-analysis` - Analyze cross-project dependencies
+- `/portfolio-review` - Conduct portfolio review
+- `/executive-summary` - Generate executive summary
+- `/dependency-analysis` - Analyze cross-project dependencies
 
 **Note:** Missing agents? Check `.claude-plugin/marketplace.json` for ring-pmo-team plugin.
 
@@ -273,9 +273,9 @@ Remember:
 
 | Workflow | Entry Point | Output |
 |----------|-------------|--------|
-| **Portfolio Review** | `/ring-pmo-team:portfolio-review` | `docs/pmo/{date}/portfolio-status.md` |
-| **Executive Report** | `/ring-pmo-team:executive-summary` | `docs/pmo/{date}/executive-summary.md` |
-| **Dependency Analysis** | `/ring-pmo-team:dependency-analysis` | `docs/pmo/{date}/dependency-map.md` |
+| **Portfolio Review** | `/portfolio-review` | `docs/pmo/{date}/portfolio-status.md` |
+| **Executive Report** | `/executive-summary` | `docs/pmo/{date}/executive-summary.md` |
+| **Dependency Analysis** | `/dependency-analysis` | `docs/pmo/{date}/dependency-map.md` |
 
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: ring-pm-team:pre-dev-research
+name: pre-dev-research
 description: |
   Gate 0 research phase for pre-dev workflow. Dispatches 3 parallel research agents
   to gather codebase patterns, external best practices, and framework documentation
@@ -15,10 +15,10 @@ skip_when: |
   - Research already completed (research.md exists and is recent)
 
 sequence:
-  before: [ring-pm-team:pre-dev-prd-creation, ring-pm-team:pre-dev-feature-map]
+  before: [pre-dev-prd-creation, pre-dev-feature-map]
 
 related:
-  complementary: [ring-pm-team:pre-dev-prd-creation, ring-pm-team:pre-dev-trd-creation]
+  complementary: [pre-dev-prd-creation, pre-dev-trd-creation]
 
 research_modes:
   greenfield:
@@ -74,9 +74,9 @@ Research prevents: Reinventing existing patterns, ignoring conventions, missing 
 
 | Agent | Prompt Focus |
 |-------|--------------|
-| `ring-pm-team:repo-research-analyst` | Codebase patterns for [feature]. Search docs/solutions/ knowledge base. Return file:line references. If modification mode: PRIMARY focus. |
-| `ring-pm-team:best-practices-researcher` | External best practices for [feature]. Use Context7 + WebSearch. Return URLs. If greenfield mode: PRIMARY focus. |
-| `ring-pm-team:framework-docs-researcher` | Tech stack docs for [feature]. Detect versions from manifests. Use Context7. Return version constraints. If integration mode: focus on SDK/API docs. |
+| `repo-research-analyst` | Codebase patterns for [feature]. Search docs/solutions/ knowledge base. Return file:line references. If modification mode: PRIMARY focus. |
+| `best-practices-researcher` | External best practices for [feature]. Use Context7 + WebSearch. Return URLs. If greenfield mode: PRIMARY focus. |
+| `framework-docs-researcher` | Tech stack docs for [feature]. Detect versions from manifests. Use Context7. Return version constraints. If integration mode: focus on SDK/API docs. |
 
 ## Step 3: Aggregate Research Findings
 

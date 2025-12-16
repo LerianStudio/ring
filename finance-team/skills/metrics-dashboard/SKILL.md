@@ -1,5 +1,5 @@
 ---
-name: ring-finance-team:metrics-dashboard
+name: metrics-dashboard
 description: |
   KPI and metrics dashboard workflow covering metric definition, data sourcing,
   visualization design, and anomaly detection. Delivers actionable dashboards.
@@ -11,18 +11,18 @@ trigger: |
   - Setting up anomaly detection
 
 skip_when: |
-  - Detailed financial analysis → use ring-finance-team:financial-analysis
-  - Building models → use ring-finance-team:financial-modeling
-  - Preparing reports → use ring-finance-team:financial-reporting
+  - Detailed financial analysis → use financial-analysis
+  - Building models → use financial-modeling
+  - Preparing reports → use financial-reporting
 
 related:
-  similar: [ring-finance-team:financial-reporting, ring-finance-team:financial-analysis]
-  uses: [ring-finance-team:metrics-analyst]
+  similar: [financial-reporting, financial-analysis]
+  uses: [metrics-analyst]
 ---
 
 # Metrics Dashboard Workflow
 
-This skill provides a structured workflow for designing KPI dashboards using the `ring-finance-team:metrics-analyst` agent.
+This skill provides a structured workflow for designing KPI dashboards using the `metrics-analyst` agent.
 
 ## Workflow Overview
 
@@ -141,7 +141,7 @@ The metrics dashboard workflow follows 5 phases:
 
 ```
 Task tool:
-  subagent_type: "ring-finance-team:metrics-analyst"
+  subagent_type: "metrics-analyst"
   model: "opus"
   prompt: |
     Design metrics dashboard per these specifications:

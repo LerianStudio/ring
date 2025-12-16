@@ -1,5 +1,5 @@
 ---
-name: ring-pm-team:pre-dev-feature
+name: pre-dev-feature
 description: Lightweight 4-gate pre-dev workflow for small features (<2 days)
 argument-hint: "[feature-name]"
 ---
@@ -14,7 +14,7 @@ I'm running the **Small Track** pre-development workflow (4 gates) for your feat
 - ✅ Don't require multi-service integration
 - ✅ Can be completed by a single developer
 
-**If any of the above are false, use `/ring-pm-team:pre-dev-full` instead.**
+**If any of the above are false, use `/pre-dev-full` instead.**
 
 ## Document Organization
 
@@ -151,7 +151,7 @@ Next steps:
 
 - This is the **Small Track** - lightweight and fast
 - **Gate 0 (Research) checks for existing patterns** even for small features
-- If feature grows during planning, switch to `/ring-pm-team:pre-dev-full`
+- If feature grows during planning, switch to `/pre-dev-full`
 - All documents saved to `docs/pre-dev/<feature-name>/`
 - Get human approval at each gate
 - Technology decisions happen later in Dependency Map (not in this track)

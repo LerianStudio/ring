@@ -66,7 +66,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-ops-team:security-operations", model="opus", ...)  # REQUIRED
+Task(subagent_type="security-operations", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Security operations requires comprehensive analysis of complex attack vectors, compliance requirements, and nuanced risk assessment - all requiring Opus-level reasoning capabilities.

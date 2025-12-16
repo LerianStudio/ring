@@ -1,5 +1,5 @@
 ---
-name: ring-default:executing-plans
+name: executing-plans
 description: |
   Controlled plan execution with human review checkpoints - loads plan, executes
   in batches, pauses for feedback. Supports one-go (autonomous) or batch modes.
@@ -10,15 +10,15 @@ trigger: |
   - Need structured checkpoints during implementation
 
 skip_when: |
-  - Same session with independent tasks → use ring-default:subagent-driven-development
-  - No plan exists → use ring-default:writing-plans first
-  - Plan needs revision → use ring-default:brainstorming first
+  - Same session with independent tasks → use subagent-driven-development
+  - No plan exists → use writing-plans first
+  - Plan needs revision → use brainstorming first
 
 sequence:
-  after: [ring-default:writing-plans, ring-pm-team:pre-dev-task-breakdown]
+  after: [writing-plans, pre-dev-task-breakdown]
 
 related:
-  similar: [ring-default:subagent-driven-development]
+  similar: [subagent-driven-development]
 ---
 
 # Executing Plans
@@ -78,12 +78,12 @@ User saying "don't wait", "don't ask questions", or "just execute" does NOT skip
 ### Step 3: Execute Batch
 **Default: First 3 tasks**
 
-**Agent Selection:** Backend Go → `ring-dev-team:backend-engineer-golang` | Backend TS → `ring-dev-team:backend-engineer-typescript` | Frontend → `ring-dev-team:frontend-bff-engineer-typescript` | Infra → `ring-dev-team:devops-engineer` | Testing → `ring-dev-team:qa-analyst` | Reliability → `ring-dev-team:sre`
+**Agent Selection:** Backend Go → `backend-engineer-golang` | Backend TS → `backend-engineer-typescript` | Frontend → `frontend-bff-engineer-typescript` | Infra → `devops-engineer` | Testing → `qa-analyst` | Reliability → `sre`
 
 For each task: Mark in_progress → Dispatch to agent → Follow plan steps exactly → Run verifications → Mark completed
 
 ### Step 4: Run Code Review
-**After each batch, REQUIRED:** Use ring-default:requesting-code-review (all 3 reviewers in parallel)
+**After each batch, REQUIRED:** Use requesting-code-review (all 3 reviewers in parallel)
 
 **Handle by severity:**
 - **Critical/High/Medium:** Fix immediately (no TODO) → re-run all 3 reviewers → repeat until resolved
@@ -99,7 +99,7 @@ For each task: Mark in_progress → Dispatch to agent → Follow plan steps exac
 
 ### Step 6: Complete Development
 
-Use ring-default:finishing-a-development-branch to verify tests, present options, execute choice.
+Use finishing-a-development-branch to verify tests, present options, execute choice.
 
 ## When to Stop
 

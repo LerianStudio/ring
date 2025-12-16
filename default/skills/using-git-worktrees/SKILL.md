@@ -1,5 +1,5 @@
 ---
-name: ring-default:using-git-worktrees
+name: using-git-worktrees
 description: |
   Isolated workspace creation - creates git worktrees with smart directory selection
   and safety verification for parallel feature development.
@@ -15,8 +15,8 @@ skip_when: |
   - Repository doesn't use worktrees → use standard branch workflow
 
 sequence:
-  after: [ring-default:brainstorming]
-  before: [ring-default:writing-plans, ring-default:executing-plans]
+  after: [brainstorming]
+  before: [writing-plans, executing-plans]
 ---
 
 # Using Git Worktrees

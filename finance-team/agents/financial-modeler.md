@@ -85,7 +85,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-finance-team:financial-modeler", model="opus", ...)  # REQUIRED
+Task(subagent_type="financial-modeler", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Financial modeling requires Opus-level reasoning for complex interdependencies, circular reference management, sensitivity analysis design, and scenario probability weighting.

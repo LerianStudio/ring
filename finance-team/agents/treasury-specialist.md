@@ -82,7 +82,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-finance-team:treasury-specialist", model="opus", ...)  # REQUIRED
+Task(subagent_type="treasury-specialist", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Treasury management requires Opus-level reasoning for multi-currency cash flow timing, liquidity risk assessment, covenant compliance monitoring, and optimal cash deployment strategies.

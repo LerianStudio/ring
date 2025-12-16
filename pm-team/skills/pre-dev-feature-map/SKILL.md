@@ -1,5 +1,5 @@
 ---
-name: ring-pm-team:pre-dev-feature-map
+name: pre-dev-feature-map
 description: |
   Gate 2: Feature relationship map - visualizes feature landscape, groupings,
   and interactions at business level before technical architecture.
@@ -16,8 +16,8 @@ skip_when: |
   - PRD not validated → complete Gate 1 first
 
 sequence:
-  after: [ring-pm-team:pre-dev-prd-creation]
-  before: [ring-pm-team:pre-dev-trd-creation]
+  after: [pre-dev-prd-creation]
+  before: [pre-dev-trd-creation]
 ---
 
 # Feature Map Creation - Understanding the Feature Landscape

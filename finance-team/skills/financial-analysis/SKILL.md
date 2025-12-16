@@ -1,5 +1,5 @@
 ---
-name: ring-finance-team:financial-analysis
+name: financial-analysis
 description: |
   Comprehensive financial analysis workflow covering ratio analysis, trend analysis,
   benchmarking, and variance analysis. Delivers documented, audit-ready insights.
@@ -16,13 +16,13 @@ skip_when: |
   - Cash flow specific analysis → use cash-flow-analysis
 
 related:
-  similar: [ring-finance-team:budget-creation, ring-finance-team:financial-reporting]
-  uses: [ring-finance-team:financial-analyst]
+  similar: [budget-creation, financial-reporting]
+  uses: [financial-analyst]
 ---
 
 # Financial Analysis Workflow
 
-This skill provides a structured workflow for comprehensive financial analysis using the `ring-finance-team:financial-analyst` agent.
+This skill provides a structured workflow for comprehensive financial analysis using the `financial-analyst` agent.
 
 ## Workflow Overview
 
@@ -102,7 +102,7 @@ The financial analysis workflow follows 5 phases:
 
 ```
 Task tool:
-  subagent_type: "ring-finance-team:financial-analyst"
+  subagent_type: "financial-analyst"
   model: "opus"
   prompt: |
     Perform financial analysis per these specifications:

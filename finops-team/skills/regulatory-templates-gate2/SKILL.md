@@ -1,5 +1,5 @@
 ---
-name: ring-finops-team:regulatory-templates-gate2
+name: regulatory-templates-gate2
 description: |
   Gate 2 sub-skill - validates uncertain mappings from Gate 1 and confirms
   all field specifications through testing.
@@ -13,8 +13,8 @@ skip_when: |
   - Gate 2 already passed → proceed to Gate 3
 
 sequence:
-  after: [ring-finops-team:regulatory-templates-gate1]
-  before: [ring-finops-team:regulatory-templates-gate3]
+  after: [regulatory-templates-gate1]
+  before: [regulatory-templates-gate3]
 ---
 
 # Regulatory Templates - Gate 2: Technical Validation
@@ -23,7 +23,7 @@ sequence:
 
 **This sub-skill executes Gate 2 of the regulatory template workflow: validating uncertain mappings from Gate 1 and confirming all field specifications through testing.**
 
-**Parent skill:** `ring-finops-team:regulatory-templates`
+**Parent skill:** `regulatory-templates`
 
 **Prerequisites:**
 - Gate 1 PASSED
@@ -56,7 +56,7 @@ Gate 2 is the quality gate between analysis (Gate 1) and implementation (Gate 3)
 
 ## When to Use
 
-**Called by:** `ring-finops-team:regulatory-templates` skill after Gate 1 passes
+**Called by:** `regulatory-templates` skill after Gate 1 passes
 
 **Purpose:** Resolve uncertainties, validate field mappings, test transformations, define validation rules
 
@@ -144,7 +144,7 @@ Check for template-specific sub-skill at `skills/regulatory-{template}/SKILL.md`
 
 ### Agent Dispatch with Gate 1 Context
 
-**Dispatch:** `Task(subagent_type: "ring-finops-team:finops-analyzer", model: "opus")`
+**Dispatch:** `Task(subagent_type: "finops-analyzer", model: "opus")`
 
 **CRITICAL:** ⚠️ DO NOT MAKE MCP API CALLS - use Gate 1 context ONLY
 

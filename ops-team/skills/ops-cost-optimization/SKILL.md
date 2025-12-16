@@ -1,5 +1,5 @@
 ---
-name: ring-ops-team:ops-cost-optimization
+name: ops-cost-optimization
 description: |
   Structured workflow for cloud cost analysis and optimization including
   rightsizing, reserved capacity planning, and FinOps practices.
@@ -16,8 +16,8 @@ skip_when: |
   - Application performance -> use ring-dev-team specialists
 
 related:
-  similar: [ring-ops-team:ops-capacity-planning]
-  uses: [ring-ops-team:cloud-cost-optimizer]
+  similar: [ops-capacity-planning]
+  uses: [cloud-cost-optimizer]
 ---
 
 # Cost Optimization Workflow
@@ -355,7 +355,7 @@ For cost optimization tasks, dispatch:
 
 ```
 Task tool:
-  subagent_type: "ring-ops-team:cloud-cost-optimizer"
+  subagent_type: "cloud-cost-optimizer"
   model: "opus"
   prompt: |
     COST ANALYSIS REQUEST

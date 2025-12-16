@@ -33,7 +33,7 @@ output_schema:
       required: true
 ```
 
-**Used by:** `ring-dev-team:backend-engineer-golang`, `ring-dev-team:backend-engineer-typescript`, `ring-dev-team:frontend-bff-engineer-typescript`, `ring-dev-team:devops-engineer`, `ring-dev-team:qa-analyst`, `ring-dev-team:sre`, `ring-finops-team:finops-automation`
+**Used by:** `backend-engineer-golang`, `backend-engineer-typescript`, `frontend-bff-engineer-typescript`, `devops-engineer`, `qa-analyst`, `sre`, `finops-automation`
 
 ---
 
@@ -59,7 +59,7 @@ output_schema:
       required: true
 ```
 
-**Used by:** `ring-dev-team:frontend-designer`, `ring-finops-team:finops-analyzer`
+**Used by:** `frontend-designer`, `finops-analyzer`
 
 ---
 
@@ -91,11 +91,11 @@ output_schema:
       required: true
 ```
 
-**Used by:** `ring-default:code-reviewer`, `ring-default:business-logic-reviewer`, `ring-default:security-reviewer`
+**Used by:** `code-reviewer`, `business-logic-reviewer`, `security-reviewer`
 
-**Note:** `ring-default:business-logic-reviewer` and `ring-default:security-reviewer` extend the base Reviewer Schema with additional domain-specific required sections:
-- `ring-default:business-logic-reviewer` adds: "Mental Execution Analysis", "Business Requirements Coverage", "Edge Cases Analysis"
-- `ring-default:security-reviewer` adds: "OWASP Top 10 Coverage", "Compliance Status"
+**Note:** `business-logic-reviewer` and `security-reviewer` extend the base Reviewer Schema with additional domain-specific required sections:
+- `business-logic-reviewer` adds: "Mental Execution Analysis", "Business Requirements Coverage", "Edge Cases Analysis"
+- `security-reviewer` adds: "OWASP Top 10 Coverage", "Compliance Status"
 
 ---
 
@@ -124,7 +124,7 @@ output_schema:
       required: true
 ```
 
-**Used by:** `ring-default:codebase-explorer`
+**Used by:** `codebase-explorer`
 
 ---
 
@@ -153,7 +153,7 @@ output_schema:
       required: true
 ```
 
-**Used by:** `ring-default:write-plan`
+**Used by:** `write-plan`
 
 ---
 
@@ -177,8 +177,8 @@ All ring-dev-team agents include this in their `output_schema`:
 | Context | Standards Compliance Required | Enforcement |
 |---------|------------------------------|-------------|
 | Direct agent invocation | Optional | Agent may include if relevant |
-| Via `ring-dev-team:dev-cycle` | Optional | Agent may include if relevant |
-| Via `ring-dev-team:dev-refactor` | **MANDATORY** | Prompt includes `MODE: ANALYSIS ONLY` |
+| Via `dev-cycle` | Optional | Agent may include if relevant |
+| Via `dev-refactor` | **MANDATORY** | Prompt includes `MODE: ANALYSIS ONLY` |
 
 **How It's Triggered:**
 1. User invokes `/dev-refactor` command
@@ -204,13 +204,13 @@ All ring-dev-team agents support Standards Compliance:
 
 | Agent | Standards Source | Categories Checked |
 |-------|------------------|-------------------|
-| `ring-dev-team:backend-engineer-golang` | `golang.md` | lib-commons, Error Handling, Logging, Config |
-| `ring-dev-team:backend-engineer-typescript` | `typescript.md` | Type Safety, Error Handling, Validation |
-| `ring-dev-team:devops-engineer` | `devops.md` | Dockerfile, docker-compose, CI/CD |
-| `ring-dev-team:frontend-bff-engineer-typescript` | `frontend.md` | Component patterns, State management |
-| `ring-dev-team:frontend-designer` | `frontend.md` | Accessibility, Design patterns |
-| `ring-dev-team:qa-analyst` | `qa.md` | Test coverage, Test patterns |
-| `ring-dev-team:sre` | `sre.md` | Health endpoints, Logging, Tracing |
+| `backend-engineer-golang` | `golang.md` | lib-commons, Error Handling, Logging, Config |
+| `backend-engineer-typescript` | `typescript.md` | Type Safety, Error Handling, Validation |
+| `devops-engineer` | `devops.md` | Dockerfile, docker-compose, CI/CD |
+| `frontend-bff-engineer-typescript` | `frontend.md` | Component patterns, State management |
+| `frontend-designer` | `frontend.md` | Accessibility, Design patterns |
+| `qa-analyst` | `qa.md` | Test coverage, Test patterns |
+| `sre` | `sre.md` | Health endpoints, Logging, Tracing |
 
 ### Output Format Examples
 

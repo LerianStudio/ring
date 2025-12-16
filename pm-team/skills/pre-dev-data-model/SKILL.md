@@ -1,5 +1,5 @@
 ---
-name: ring-pm-team:pre-dev-data-model
+name: pre-dev-data-model
 description: |
   Gate 5: Data structures document - defines entities, relationships, and ownership
   before database technology selection. Large Track only.
@@ -16,8 +16,8 @@ skip_when: |
   - API Design not validated → complete Gate 4 first
 
 sequence:
-  after: [ring-pm-team:pre-dev-api-design]
-  before: [ring-pm-team:pre-dev-dependency-map]
+  after: [pre-dev-api-design]
+  before: [pre-dev-dependency-map]
 ---
 
 # Data Modeling - Defining Data Structures

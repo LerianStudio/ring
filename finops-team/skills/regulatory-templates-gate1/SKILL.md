@@ -1,5 +1,5 @@
 ---
-name: ring-finops-team:regulatory-templates-gate1
+name: regulatory-templates-gate1
 description: |
   Gate 1 sub-skill - performs regulatory compliance analysis and field mapping
   from template specifications.
@@ -13,8 +13,8 @@ skip_when: |
   - Gate 1 already passed → proceed to Gate 2
 
 sequence:
-  after: [ring-finops-team:regulatory-templates-setup]
-  before: [ring-finops-team:regulatory-templates-gate2]
+  after: [regulatory-templates-setup]
+  before: [regulatory-templates-gate2]
 ---
 
 # Regulatory Templates - Gate 1: Placeholder Mapping (Post Gate 0)
@@ -23,11 +23,11 @@ sequence:
 
 **UPDATED: Gate 1 now maps placeholders from Gate 0 template to data sources. NO structure creation, NO logic addition.**
 
-**Parent skill:** `ring-finops-team:regulatory-templates`
+**Parent skill:** `regulatory-templates`
 
 **Prerequisites:**
-- Context from `ring-finops-team:regulatory-templates-setup`
-- Template base from `ring-finops-team:regulatory-templates-setup`
+- Context from `regulatory-templates-setup`
+- Template base from `regulatory-templates-setup`
 
 **Output:** Mapping of placeholders to backend data sources
 
@@ -57,7 +57,7 @@ Gate 1 is the foundation of regulatory template accuracy:
 
 ## When to Use
 
-**Called by:** `ring-finops-team:regulatory-templates` skill after Gate 0 template structure copy
+**Called by:** `regulatory-templates` skill after Gate 0 template structure copy
 
 **Purpose:** Map each placeholder to its data source - structure already defined in Gate 0
 
@@ -330,7 +330,7 @@ Consulte os dicionários existentes antes de iniciar o mapeamento de campos.
 
 ### Agent Dispatch
 
-**Dispatch:** `Task(subagent_type: "ring-finops-team:finops-analyzer", model: "opus")`
+**Dispatch:** `Task(subagent_type: "finops-analyzer", model: "opus")`
 
 **Pre-dispatch:** Check dictionary at `~/.claude/docs/regulatory/dictionaries/{category}-{code}.yaml`
 
@@ -470,7 +470,7 @@ Ensure these patterns are followed:
 
 ## Output to Parent Skill
 
-**Return to `ring-finops-team:regulatory-templates`:** `{ gate1_passed: bool, gate1_context: {...}, uncertainties_count: N, critical_gaps: [], next_action: "proceed_to_gate2" | "fix_gaps_and_retry" }`
+**Return to `regulatory-templates`:** `{ gate1_passed: bool, gate1_context: {...}, uncertainties_count: N, critical_gaps: [], next_action: "proceed_to_gate2" | "fix_gaps_and_retry" }`
 
 ---
 

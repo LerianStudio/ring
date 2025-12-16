@@ -1,5 +1,5 @@
 ---
-name: ring-dev-team:dev-sre
+name: dev-sre
 description: |
   Gate 2 of the development cycle. VALIDATES that observability was correctly implemented
   by developers. Does NOT implement observability code - only validates it.
@@ -19,11 +19,11 @@ NOT_skip_when: |
   - "MVP doesn't need observability" → MVP without observability = blind MVP. No exceptions.
 
 sequence:
-  after: [ring-dev-team:dev-devops]
-  before: [ring-dev-team:dev-testing]
+  after: [dev-devops]
+  before: [dev-testing]
 
 related:
-  complementary: [ring-dev-team:dev-cycle, ring-dev-team:dev-devops, ring-dev-team:dev-testing]
+  complementary: [dev-cycle, dev-devops, dev-testing]
 
 verification:
   automated:
@@ -266,7 +266,7 @@ Review Gate 0/1 handoff: Service type (API/Worker/Batch), Language, External dep
 
 ## Step 2: Dispatch SRE Agent for Validation
 
-**Dispatch:** `Task(subagent_type: "ring-dev-team:sre")` - VALIDATE observability (not implement). Include service info (type, language, deps) and Gate 0/1 handoff. Agent validates: JSON logging, Tracing. Returns: PASS/FAIL per component, issues by severity.
+**Dispatch:** `Task(subagent_type: "sre")` - VALIDATE observability (not implement). Include service info (type, language, deps) and Gate 0/1 handoff. Agent validates: JSON logging, Tracing. Returns: PASS/FAIL per component, issues by severity.
 
 ## Steps 3-5: Validate Health, Logging, Tracing
 

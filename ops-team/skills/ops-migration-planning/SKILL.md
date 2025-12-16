@@ -1,5 +1,5 @@
 ---
-name: ring-ops-team:ops-migration-planning
+name: ops-migration-planning
 description: |
   Structured workflow for infrastructure migration planning including cloud migrations,
   technology upgrades, and data center transitions.
@@ -16,8 +16,8 @@ skip_when: |
   - Simple resource moves -> standard change management
 
 related:
-  similar: [ring-ops-team:ops-disaster-recovery]
-  uses: [ring-ops-team:infrastructure-architect, ring-ops-team:platform-engineer]
+  similar: [ops-disaster-recovery]
+  uses: [infrastructure-architect, platform-engineer]
 ---
 
 # Migration Planning Workflow
@@ -465,7 +465,7 @@ For migration planning tasks, dispatch:
 
 ```
 Task tool:
-  subagent_type: "ring-ops-team:infrastructure-architect"
+  subagent_type: "infrastructure-architect"
   model: "opus"
   prompt: |
     MIGRATION PLANNING REQUEST
@@ -481,7 +481,7 @@ For platform preparation:
 
 ```
 Task tool:
-  subagent_type: "ring-ops-team:platform-engineer"
+  subagent_type: "platform-engineer"
   model: "opus"
   prompt: |
     MIGRATION ENVIRONMENT PREPARATION

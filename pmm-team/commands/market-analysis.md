@@ -1,5 +1,5 @@
 ---
-name: ring-pmm-team:market-analysis
+name: market-analysis
 description: Comprehensive market analysis workflow for TAM/SAM/SOM, segmentation, and trends
 argument-hint: "[market-or-product-name]"
 ---

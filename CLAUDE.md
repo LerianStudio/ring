@@ -31,8 +31,8 @@ When creating or modifying ANY agent in `*/agents/*.md`:
 7. **NEVER assume compliance** - VERIFY with evidence
 
 ### 4. Fully Qualified Names (ALWAYS)
-- ✅ `ring-default:code-reviewer`
-- ✅ `ring-dev-team:backend-engineer-golang`
+- ✅ `code-reviewer`
+- ✅ `backend-engineer-golang`
 - ❌ `code-reviewer` (missing plugin prefix)
 - ❌ `ring:code-reviewer` (ambiguous shorthand)
 
@@ -56,11 +56,11 @@ When modifying standards files (`dev-team/docs/standards/*.md`):
 
 | Standards File | Agents That Use It |
 |----------------|-------------------|
-| `golang.md` | `ring-dev-team:backend-engineer-golang`, `ring-dev-team:qa-analyst` |
-| `typescript.md` | `ring-dev-team:backend-engineer-typescript`, `ring-dev-team:frontend-bff-engineer-typescript`, `ring-dev-team:qa-analyst` |
-| `frontend.md` | `ring-dev-team:frontend-engineer`, `ring-dev-team:frontend-designer` |
-| `devops.md` | `ring-dev-team:devops-engineer` |
-| `sre.md` | `ring-dev-team:sre` |
+| `golang.md` | `backend-engineer-golang`, `qa-analyst` |
+| `typescript.md` | `backend-engineer-typescript`, `frontend-bff-engineer-typescript`, `qa-analyst` |
+| `frontend.md` | `frontend-engineer`, `frontend-designer` |
+| `devops.md` | `devops-engineer` |
+| `sre.md` | `sre` |
 
 **Section Index Location:** `dev-team/skills/shared-patterns/standards-coverage-table.md` → "Agent → Standards Section Index"
 
@@ -68,14 +68,14 @@ When modifying standards files (`dev-team/docs/standards/*.md`):
 
 | Agent | Standards File | Section Count |
 |-------|----------------|---------------|
-| `ring-dev-team:backend-engineer-golang` | golang.md | See coverage table |
-| `ring-dev-team:backend-engineer-typescript` | typescript.md | See coverage table |
-| `ring-dev-team:frontend-bff-engineer-typescript` | typescript.md | See coverage table |
-| `ring-dev-team:frontend-engineer` | frontend.md | See coverage table |
-| `ring-dev-team:frontend-designer` | frontend.md | See coverage table |
-| `ring-dev-team:devops-engineer` | devops.md | See coverage table |
-| `ring-dev-team:sre` | sre.md | See coverage table |
-| `ring-dev-team:qa-analyst` | golang.md OR typescript.md | See coverage table |
+| `backend-engineer-golang` | golang.md | See coverage table |
+| `backend-engineer-typescript` | typescript.md | See coverage table |
+| `frontend-bff-engineer-typescript` | typescript.md | See coverage table |
+| `frontend-engineer` | frontend.md | See coverage table |
+| `frontend-designer` | frontend.md | See coverage table |
+| `devops-engineer` | devops.md | See coverage table |
+| `sre` | sre.md | See coverage table |
+| `qa-analyst` | golang.md OR typescript.md | See coverage table |
 
 **⛔ If section counts in skills don't match this table → Update the skill.**
 
@@ -89,10 +89,10 @@ When invoking agents via Task tool:
 - **NEVER** let system auto-select model for agents with model requirements
 
 **Examples:**
-- ✅ `Task(subagent_type="ring-default:code-reviewer", model="opus", ...)`
-- ✅ `Task(subagent_type="ring-dev-team:backend-engineer-golang", model="opus", ...)`
-- ❌ `Task(subagent_type="ring-default:code-reviewer", ...)` - Missing model parameter
-- ❌ `Task(subagent_type="ring-default:code-reviewer", model="sonnet", ...)` - Wrong model
+- ✅ `Task(subagent_type="code-reviewer", model="opus", ...)`
+- ✅ `Task(subagent_type="backend-engineer-golang", model="opus", ...)`
+- ❌ `Task(subagent_type="code-reviewer", ...)` - Missing model parameter
+- ❌ `Task(subagent_type="code-reviewer", model="sonnet", ...)` - Wrong model
 
 **Agent Self-Verification:**
 All agents with `model:` field in frontmatter MUST include "Model Requirements" section that verifies they are running on the correct model and STOPS if not.
@@ -416,8 +416,8 @@ See [docs/WORKFLOWS.md](docs/WORKFLOWS.md) for detailed instructions.
 #### Agent/Skill/Command Invocation
 - **ALWAYS use fully qualified names**: `ring-{plugin}:{component}`
 - **Examples:**
-  - ✅ Correct: `ring-default:code-reviewer`
-  - ✅ Correct: `ring-dev-team:backend-engineer-golang`
+  - ✅ Correct: `code-reviewer`
+  - ✅ Correct: `backend-engineer-golang`
   - ❌ Wrong: `code-reviewer` (missing plugin prefix)
   - ❌ Wrong: `ring:code-reviewer` (ambiguous shorthand)
 - **Rationale:** Prevents ambiguity in multi-plugin environments
@@ -547,4 +547,4 @@ Using-* Skills (plugin introductions):
 - [ ] No `ring:` shorthand used (except in historical examples with context)
 - [ ] No bare agent/skill names in invocation contexts
 
-**Always use fully qualified names:** `ring-{plugin}:{component}` (e.g., `ring-default:code-reviewer`)
+**Always use fully qualified names:** `ring-{plugin}:{component}` (e.g., `code-reviewer`)

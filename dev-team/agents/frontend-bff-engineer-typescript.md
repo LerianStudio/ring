@@ -93,7 +93,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-dev-team:frontend-bff-engineer-typescript", model="opus", ...)  # REQUIRED
+Task(subagent_type="frontend-bff-engineer-typescript", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Clean Architecture + DDD pattern implementation requires Opus-level reasoning for architectural boundary enforcement, dependency injection patterns, and comprehensive standards validation.

@@ -1,5 +1,5 @@
 ---
-name: ring-default:execute-plan
+name: execute-plan
 description: Execute plan in batches with review checkpoints
 argument-hint: "[plan-file-path]"
 ---
@@ -9,7 +9,7 @@ Execute an existing implementation plan with controlled checkpoints and code rev
 ## Usage
 
 ```
-/ring-default:execute-plan [plan-file-path]
+/execute-plan [plan-file-path]
 ```
 
 ## Arguments
@@ -22,19 +22,19 @@ Execute an existing implementation plan with controlled checkpoints and code rev
 
 ### Execute a Feature Plan
 ```
-/ring-default:execute-plan docs/plans/2024-01-15-oauth-integration.md
+/execute-plan docs/plans/2024-01-15-oauth-integration.md
 ```
 Loads and executes the OAuth integration plan with review checkpoints.
 
 ### Execute from Absolute Path
 ```
-/ring-default:execute-plan /Users/dev/project/docs/plans/2024-01-15-api-refactor.md
+/execute-plan /Users/dev/project/docs/plans/2024-01-15-api-refactor.md
 ```
 Executes a plan using its full path.
 
 ### Execute Latest Plan
 ```
-/ring-default:execute-plan docs/plans/2024-01-20-notification-system.md
+/execute-plan docs/plans/2024-01-20-notification-system.md
 ```
 Executes the most recent plan for the notification system feature.
 
@@ -58,18 +58,18 @@ You will be asked to choose between:
 - Default batch size: first 3 tasks
 - Each task is marked in_progress, executed, then completed
 - Dispatches to specialized agents when available:
-  - Backend Go: `ring-dev-team:backend-engineer-golang`
-  - Backend TypeScript: `ring-dev-team:backend-engineer-typescript`
-  - Frontend React/Next.js/BFF: `ring-dev-team:frontend-bff-engineer-typescript`
-  - Infrastructure: `ring-dev-team:devops-engineer`
-  - Testing: `ring-dev-team:qa-analyst`
-  - Reliability: `ring-dev-team:sre`
+  - Backend Go: `backend-engineer-golang`
+  - Backend TypeScript: `backend-engineer-typescript`
+  - Frontend React/Next.js/BFF: `frontend-bff-engineer-typescript`
+  - Infrastructure: `devops-engineer`
+  - Testing: `qa-analyst`
+  - Reliability: `sre`
 
 ### Step 4: Run Code Review
 After each batch, all 3 reviewers run in parallel:
-- `ring-default:code-reviewer` - Architecture and patterns
-- `ring-default:business-logic-reviewer` - Requirements and edge cases
-- `ring-default:security-reviewer` - OWASP and auth validation
+- `code-reviewer` - Architecture and patterns
+- `business-logic-reviewer` - Requirements and edge cases
+- `security-reviewer` - OWASP and auth validation
 
 **Issue handling by severity:**
 | Severity | Action |
@@ -85,7 +85,7 @@ After each batch, all 3 reviewers run in parallel:
 
 ### Step 6: Complete Development
 After all tasks complete:
-- Uses `ring-default:finishing-a-development-branch` skill
+- Uses `finishing-a-development-branch` skill
 - Verifies tests pass
 - Presents options for branch completion
 
@@ -93,10 +93,10 @@ After all tasks complete:
 
 | Command/Skill | Relationship |
 |---------------|--------------|
-| `/ring-default:write-plan` | Use first to create the plan file |
-| `/ring-default:brainstorm` | Use before writing-plans if design unclear |
-| `ring-default:writing-plans` | Creates the plan files this command executes |
-| `ring-default:requesting-code-review` | Called automatically after each batch |
+| `/write-plan` | Use first to create the plan file |
+| `/brainstorm` | Use before writing-plans if design unclear |
+| `writing-plans` | Creates the plan files this command executes |
+| `requesting-code-review` | Called automatically after each batch |
 | `finishing-a-development-branch` | Called at completion |
 
 ## Troubleshooting
@@ -117,6 +117,6 @@ All Critical, High, and Medium issues must be fixed before proceeding. The revie
 If you're not prompted for execution mode, this is a violation of the skill protocol. The mode selection is mandatory regardless of any "just execute" or "don't wait" instructions.
 
 ### When NOT to use this command
-- No plan exists - use `/ring-default:write-plan` first
-- Plan needs revision - use `/ring-default:brainstorm` to refine the design
-- Working on independent tasks in current session - use `ring-default:subagent-driven-development` skill directly
+- No plan exists - use `/write-plan` first
+- Plan needs revision - use `/brainstorm` to refine the design
+- Working on independent tasks in current session - use `subagent-driven-development` skill directly

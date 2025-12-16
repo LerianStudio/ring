@@ -109,7 +109,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-dev-team:frontend-designer", model="opus", ...)  # REQUIRED
+Task(subagent_type="frontend-designer", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Comprehensive design analysis + accessibility verification requires Opus-level reasoning for WCAG compliance evaluation, design system coherence, and detailed specification generation.
