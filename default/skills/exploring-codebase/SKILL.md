@@ -655,7 +655,7 @@ Based on autonomous exploration:
 - `file1.ext:line` - [why important]
 - `file2.ext:line` - [why important]
 
-Ready to create implementation plan? (Use /write-plan)
+Ready to create implementation plan? (Use /ring-default:write-plan)
 ```
 
 **If user's goal is debugging:**
