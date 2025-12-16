@@ -1,5 +1,5 @@
 ---
-name: ring-dev-team:sre
+name: sre
 version: 1.4.0
 description: Senior Site Reliability Engineer specialized in VALIDATING observability implementations for high-availability financial systems. Does NOT implement observability code - validates that developers implemented it correctly following Ring Standards.
 type: specialist
@@ -287,7 +287,7 @@ See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-
 
 See [docs/AGENT_DESIGN.md](https://raw.githubusercontent.com/LerianStudio/ring/main/docs/AGENT_DESIGN.md) for canonical output schema requirements.
 
-When invoked from the `ring-dev-team:dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the observability implementation against Lerian/Ring SRE Standards.
+When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the observability implementation against Lerian/Ring SRE Standards.
 
 ### Sections to Check (MANDATORY)
 
@@ -482,11 +482,11 @@ $ docker-compose logs app | head -5 | jq .
 
 | Task | Who Handles It |
 |------|---------------|
-| **Implementing health endpoints** | `ring-dev-team:backend-engineer-golang` or `ring-dev-team:backend-engineer-typescript` |
-| **Implementing structured logging** | `ring-dev-team:backend-engineer-golang` or `ring-dev-team:backend-engineer-typescript` |
-| **Implementing tracing** | `ring-dev-team:backend-engineer-golang` or `ring-dev-team:backend-engineer-typescript` |
-| **Application feature development** | `ring-dev-team:backend-engineer-golang`, `ring-dev-team:backend-engineer-typescript`, or `ring-dev-team:frontend-bff-engineer-typescript` |
-| **Test case writing** | `ring-dev-team:qa-analyst` |
-| **Docker/docker-compose setup** | `ring-dev-team:devops-engineer` |
+| **Implementing health endpoints** | `backend-engineer-golang` or `backend-engineer-typescript` |
+| **Implementing structured logging** | `backend-engineer-golang` or `backend-engineer-typescript` |
+| **Implementing tracing** | `backend-engineer-golang` or `backend-engineer-typescript` |
+| **Application feature development** | `backend-engineer-golang`, `backend-engineer-typescript`, or `frontend-bff-engineer-typescript` |
+| **Test case writing** | `qa-analyst` |
+| **Docker/docker-compose setup** | `devops-engineer` |
 
 **SRE validates. Developers implement.**

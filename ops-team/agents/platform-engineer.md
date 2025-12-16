@@ -1,5 +1,5 @@
 ---
-name: ring-ops-team:platform-engineer
+name: platform-engineer
 version: 1.0.0
 description: Senior Platform Engineer specialized in building and maintaining internal developer platforms, service mesh, API gateways, and self-service infrastructure. Focuses on enabling developer productivity through golden paths and platform abstractions.
 type: specialist
@@ -275,8 +275,8 @@ $ curl -k https://api.example.com/health
 
 ## What This Agent Does NOT Handle
 
-- Application code development (use `ring-dev-team:backend-engineer-*`)
-- Infrastructure provisioning (use `ring-ops-team:infrastructure-architect`)
-- Incident response (use `ring-ops-team:incident-responder`)
-- Cost optimization (use `ring-ops-team:cloud-cost-optimizer`)
-- Security audits (use `ring-ops-team:security-operations`)
+- Application code development (use `backend-engineer-*`)
+- Infrastructure provisioning (use `infrastructure-architect`)
+- Incident response (use `incident-responder`)
+- Cost optimization (use `cloud-cost-optimizer`)
+- Security audits (use `security-operations`)

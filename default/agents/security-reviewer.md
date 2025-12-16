@@ -1,5 +1,5 @@
 ---
-name: ring-default:security-reviewer
+name: security-reviewer
 version: 3.2.0
 description: "Safety Review: Reviews vulnerabilities, authentication, input validation, and OWASP risks. Runs in parallel with code-reviewer and business-logic-reviewer for fast feedback."
 type: reviewer

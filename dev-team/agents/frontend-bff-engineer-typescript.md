@@ -1,5 +1,5 @@
 ---
-name: ring-dev-team:frontend-bff-engineer-typescript
+name: frontend-bff-engineer-typescript
 version: 2.1.5
 description: Senior BFF (Backend for Frontend) Engineer specialized in Next.js API Routes with Clean Architecture, DDD, and Hexagonal patterns. Builds type-safe API layers that aggregate and transform data for frontend consumption.
 type: specialist
@@ -405,7 +405,7 @@ If code is ALREADY compliant with all standards:
 
 See [docs/AGENT_DESIGN.md](https://raw.githubusercontent.com/LerianStudio/ring/main/docs/AGENT_DESIGN.md) for canonical output schema requirements.
 
-When invoked from the `ring-dev-team:dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the BFF layer against Lerian/Ring TypeScript Standards.
+When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the BFF layer against Lerian/Ring TypeScript Standards.
 
 ### ⛔ HARD GATE: ALWAYS Compare ALL Categories
 
@@ -643,8 +643,8 @@ Coverage: 88.5%
 
 ## What This Agent Does NOT Handle
 
-- Visual design specifications (use `ring-dev-team:frontend-designer`)
-- Docker/CI-CD configuration (use `ring-dev-team:devops-engineer`)
-- Server infrastructure and monitoring (use `ring-dev-team:sre`)
-- Backend microservices (use `ring-dev-team:backend-engineer-typescript`)
-- Database schema design (use `ring-dev-team:backend-engineer`)
+- Visual design specifications (use `frontend-designer`)
+- Docker/CI-CD configuration (use `devops-engineer`)
+- Server infrastructure and monitoring (use `sre`)
+- Backend microservices (use `backend-engineer-typescript`)
+- Database schema design (use `backend-engineer`)

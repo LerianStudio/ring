@@ -1,5 +1,5 @@
 ---
-name: ring-finance-team:financial-modeler
+name: financial-modeler
 version: 1.0.0
 description: Financial Modeling Expert specialized in DCF valuation, LBO models, merger models, scenario analysis, and sensitivity testing. Builds robust, auditable financial models with comprehensive documentation.
 type: specialist
@@ -418,9 +418,9 @@ If model is ALREADY complete and validated:
 
 ## What This Agent Does NOT Handle
 
-- Financial statement analysis (use `ring-finance-team:financial-analyst`)
-- Budget creation and forecasting (use `ring-finance-team:budget-planner`)
-- Treasury and cash management (use `ring-finance-team:treasury-specialist`)
-- Accounting entries and close (use `ring-finance-team:accounting-specialist`)
-- KPI dashboard design (use `ring-finance-team:metrics-analyst`)
-- Brazilian regulatory compliance (use `ring-finops-team:finops-analyzer`)
+- Financial statement analysis (use `financial-analyst`)
+- Budget creation and forecasting (use `budget-planner`)
+- Treasury and cash management (use `treasury-specialist`)
+- Accounting entries and close (use `accounting-specialist`)
+- KPI dashboard design (use `metrics-analyst`)
+- Brazilian regulatory compliance (use `finops-analyzer`)

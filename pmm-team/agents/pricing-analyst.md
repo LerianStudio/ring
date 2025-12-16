@@ -1,5 +1,5 @@
 ---
-name: ring-pmm-team:pricing-analyst
+name: pricing-analyst
 version: 1.0.0
 description: Pricing Strategy Specialist for pricing model analysis, competitive pricing intelligence, value-based pricing, and pricing recommendations. Creates data-driven pricing strategies.
 type: specialist
@@ -330,8 +330,8 @@ If pricing already exists and is performing:
 
 ## What This Agent Does NOT Handle
 
-- Market analysis (use `ring-pmm-team:market-researcher`)
-- Positioning strategy (use `ring-pmm-team:positioning-strategist`)
-- Messaging development (use `ring-pmm-team:messaging-specialist`)
-- GTM planning (use `ring-pmm-team:gtm-planner`)
-- Launch coordination (use `ring-pmm-team:launch-coordinator`)
+- Market analysis (use `market-researcher`)
+- Positioning strategy (use `positioning-strategist`)
+- Messaging development (use `messaging-specialist`)
+- GTM planning (use `gtm-planner`)
+- Launch coordination (use `launch-coordinator`)

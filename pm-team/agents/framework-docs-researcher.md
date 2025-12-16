@@ -1,5 +1,5 @@
 ---
-name: ring-pm-team:framework-docs-researcher
+name: framework-docs-researcher
 description: |
   Tech stack analysis specialist for pre-dev planning. Detects project tech stack
   from manifest files and fetches relevant framework/library documentation.

@@ -1,5 +1,5 @@
 ---
-name: ring-pmm-team:market-researcher
+name: market-researcher
 version: 1.0.0
 description: Market Intelligence Specialist for TAM/SAM/SOM analysis, market segmentation, trend analysis, and customer research. Provides data-driven market insights for strategic decisions.
 type: specialist
@@ -302,8 +302,8 @@ If market analysis already exists and is adequate:
 
 ## What This Agent Does NOT Handle
 
-- Positioning strategy (use `ring-pmm-team:positioning-strategist`)
-- Messaging development (use `ring-pmm-team:messaging-specialist`)
+- Positioning strategy (use `positioning-strategist`)
+- Messaging development (use `messaging-specialist`)
 - Competitive battlecards (use competitive-intelligence skill, then positioning-strategist)
-- GTM planning (use `ring-pmm-team:gtm-planner`)
-- Pricing strategy (use `ring-pmm-team:pricing-analyst`)
+- GTM planning (use `gtm-planner`)
+- Pricing strategy (use `pricing-analyst`)

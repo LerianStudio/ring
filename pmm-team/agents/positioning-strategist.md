@@ -1,5 +1,5 @@
 ---
-name: ring-pmm-team:positioning-strategist
+name: positioning-strategist
 version: 1.0.0
 description: Strategic Positioning Specialist for differentiation strategy, category design, positioning statements, and competitive framing. Creates defensible market positions.
 type: specialist
@@ -293,8 +293,8 @@ UNLIKE [competitive alternative]
 
 ## What This Agent Does NOT Handle
 
-- Market sizing and research (use `ring-pmm-team:market-researcher`)
-- Messaging and copywriting (use `ring-pmm-team:messaging-specialist`)
-- GTM channel strategy (use `ring-pmm-team:gtm-planner`)
-- Launch coordination (use `ring-pmm-team:launch-coordinator`)
-- Pricing strategy (use `ring-pmm-team:pricing-analyst`)
+- Market sizing and research (use `market-researcher`)
+- Messaging and copywriting (use `messaging-specialist`)
+- GTM channel strategy (use `gtm-planner`)
+- Launch coordination (use `launch-coordinator`)
+- Pricing strategy (use `pricing-analyst`)

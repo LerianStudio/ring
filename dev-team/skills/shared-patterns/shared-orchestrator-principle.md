@@ -127,40 +127,40 @@ This principle is NON-NEGOTIABLE for all dev-team skills.
 
 | Review Type | Agent to Dispatch |
 |-------------|-------------------|
-| Code quality, patterns, maintainability | `ring-default:code-reviewer` |
-| Business logic, domain correctness | `ring-default:business-logic-reviewer` |
-| Security vulnerabilities, auth, input validation | `ring-default:security-reviewer` |
+| Code quality, patterns, maintainability | `code-reviewer` |
+| Business logic, domain correctness | `business-logic-reviewer` |
+| Security vulnerabilities, auth, input validation | `security-reviewer` |
 
 ### Research & Analysis
 
 | Task Type | Agent to Dispatch |
 |-----------|-------------------|
-| Codebase architecture understanding | `ring-default:codebase-explorer` |
-| Framework/library documentation | `ring-pm-team:framework-docs-researcher` |
-| Industry best practices | `ring-pm-team:best-practices-researcher` |
-| Repository/codebase analysis | `ring-pm-team:repo-research-analyst` |
+| Codebase architecture understanding | `codebase-explorer` |
+| Framework/library documentation | `framework-docs-researcher` |
+| Industry best practices | `best-practices-researcher` |
+| Repository/codebase analysis | `repo-research-analyst` |
 
 ### Documentation
 
 | Doc Type | Agent to Dispatch |
 |----------|-------------------|
-| Functional documentation, user guides | `ring-tw-team:functional-writer` |
-| API documentation, OpenAPI specs | `ring-tw-team:api-writer` |
-| Documentation review | `ring-tw-team:docs-reviewer` |
+| Functional documentation, user guides | `functional-writer` |
+| API documentation, OpenAPI specs | `api-writer` |
+| Documentation review | `docs-reviewer` |
 
 ### Financial Operations
 
 | Task Type | Agent to Dispatch |
 |-----------|-------------------|
-| Cost analysis, FinOps metrics | `ring-finops-team:finops-analyzer` |
-| FinOps automation, alerts | `ring-finops-team:finops-automation` |
+| Cost analysis, FinOps metrics | `finops-analyzer` |
+| FinOps automation, alerts | `finops-automation` |
 
 ### Planning & Quality
 
 | Task Type | Agent to Dispatch |
 |-----------|-------------------|
-| Implementation planning | `ring-default:write-plan` |
-| Prompt/agent quality analysis | `ring-dev-team:prompt-quality-reviewer` |
+| Implementation planning | `write-plan` |
+| Prompt/agent quality analysis | `prompt-quality-reviewer` |
 
 ## Agent Responsibilities (Implementation)
 

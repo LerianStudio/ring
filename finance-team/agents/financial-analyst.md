@@ -1,5 +1,5 @@
 ---
-name: ring-finance-team:financial-analyst
+name: financial-analyst
 version: 1.0.0
 description: Senior Financial Analyst specialized in financial statement analysis, ratio analysis, trend analysis, benchmarking, and investment evaluation. Delivers actionable insights with documented methodology.
 type: specialist
@@ -343,9 +343,9 @@ Analysis of XYZ Corp FY2024 financial statements reveals strong profitability (R
 
 ## What This Agent Does NOT Handle
 
-- Financial model building (use `ring-finance-team:financial-modeler`)
-- Budget creation and forecasting (use `ring-finance-team:budget-planner`)
-- Treasury and cash management (use `ring-finance-team:treasury-specialist`)
-- Accounting entries and close (use `ring-finance-team:accounting-specialist`)
-- KPI dashboard design (use `ring-finance-team:metrics-analyst`)
-- Brazilian regulatory compliance (use `ring-finops-team:finops-analyzer`)
+- Financial model building (use `financial-modeler`)
+- Budget creation and forecasting (use `budget-planner`)
+- Treasury and cash management (use `treasury-specialist`)
+- Accounting entries and close (use `accounting-specialist`)
+- KPI dashboard design (use `metrics-analyst`)
+- Brazilian regulatory compliance (use `finops-analyzer`)

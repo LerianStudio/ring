@@ -1,5 +1,5 @@
 ---
-name: ring-pm-team:repo-research-analyst
+name: repo-research-analyst
 description: |
   Codebase research specialist for pre-dev planning. Searches target repository
   for existing patterns, conventions, and prior solutions. Returns findings with

@@ -1,5 +1,5 @@
 ---
-name: ring-ops-team:infrastructure-architect
+name: infrastructure-architect
 version: 1.0.0
 description: Senior Infrastructure Architect specialized in cloud infrastructure design, capacity planning, disaster recovery, and infrastructure lifecycle management for high-availability financial systems.
 type: specialist
@@ -371,8 +371,8 @@ Designed multi-region active-passive architecture for payment processing platfor
 
 ## What This Agent Does NOT Handle
 
-- Day-to-day platform operations (use `ring-ops-team:platform-engineer`)
-- Incident response (use `ring-ops-team:incident-responder`)
-- Cost optimization analysis (use `ring-ops-team:cloud-cost-optimizer`)
-- Security operations (use `ring-ops-team:security-operations`)
-- Application development (use `ring-dev-team:backend-engineer-*`)
+- Day-to-day platform operations (use `platform-engineer`)
+- Incident response (use `incident-responder`)
+- Cost optimization analysis (use `cloud-cost-optimizer`)
+- Security operations (use `security-operations`)
+- Application development (use `backend-engineer-*`)

@@ -133,11 +133,11 @@ dev-team/agents/
 **Key Characteristics:**
 - Invoked via Claude's `Task` tool with `subagent_type`
 - Must specify model (typically "opus" for comprehensive analysis)
-- Review agents run in parallel (3 reviewers dispatch simultaneously via `/ring-default:codereview` command)
+- Review agents run in parallel (3 reviewers dispatch simultaneously via `/codereview` command)
 - Developer agents provide specialized domain expertise
 - Return structured reports with severity-based findings
 
-**Note:** Parallel review orchestration is handled by the `/ring-default:codereview` command
+**Note:** Parallel review orchestration is handled by the `/codereview` command
 
 **Standards Compliance Output (ring-dev-team agents):**
 
@@ -155,14 +155,14 @@ All ring-dev-team agents include a `## Standards Compliance` section in their ou
 | Invocation Context | Standards Compliance | Detection Mechanism |
 |--------------------|---------------------|---------------------|
 | Direct agent call | Optional | N/A |
-| Via `ring-dev-team:dev-cycle` skill | Optional | N/A |
-| Via `ring-dev-team:dev-refactor` skill | **MANDATORY** | Prompt contains `**MODE: ANALYSIS ONLY**` |
+| Via `dev-cycle` skill | Optional | N/A |
+| Via `dev-refactor` skill | **MANDATORY** | Prompt contains `**MODE: ANALYSIS ONLY**` |
 
 **How Enforcement Works:**
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│  User invokes: /ring-dev-team:dev-refactor                          │
+│  User invokes: /dev-refactor                          │
 │         ↓                                                           │
 │  dev-refactor skill dispatches agents with prompt:                  │
 │  "**MODE: ANALYSIS ONLY** - Compare codebase with Ring standards"   │
@@ -176,13 +176,13 @@ All ring-dev-team agents include a `## Standards Compliance` section in their ou
 ```
 
 **Affected Agents:**
-- `ring-dev-team:backend-engineer-golang` → loads `golang.md`
-- `ring-dev-team:backend-engineer-typescript` → loads `typescript.md`
-- `ring-dev-team:devops-engineer` → loads `devops.md`
-- `ring-dev-team:frontend-bff-engineer-typescript` → loads `frontend.md`
-- `ring-dev-team:frontend-designer` → loads `frontend.md`
-- `ring-dev-team:qa-analyst` → loads `qa.md`
-- `ring-dev-team:sre` → loads `sre.md`
+- `backend-engineer-golang` → loads `golang.md`
+- `backend-engineer-typescript` → loads `typescript.md`
+- `devops-engineer` → loads `devops.md`
+- `frontend-bff-engineer-typescript` → loads `frontend.md`
+- `frontend-designer` → loads `frontend.md`
+- `qa-analyst` → loads `qa.md`
+- `sre` → loads `sre.md`
 
 **Output Format (when non-compliant):**
 ```markdown
@@ -215,15 +215,15 @@ All ring-dev-team agents include a `## Standards Compliance` section in their ou
 **Structure:**
 ```
 default/commands/
-├── brainstorm.md       # /ring-default:brainstorm - Socratic design refinement
-├── write-plan.md       # /ring-default:write-plan - Implementation planning
-├── execute-plan.md     # /ring-default:execute-plan - Batch execution
-├── codereview.md       # /ring-default:codereview - Parallel 3-reviewer dispatch
-└── worktree.md         # /ring-default:worktree - Git worktree creation
+├── brainstorm.md       # /brainstorm - Socratic design refinement
+├── write-plan.md       # /write-plan - Implementation planning
+├── execute-plan.md     # /execute-plan - Batch execution
+├── codereview.md       # /codereview - Parallel 3-reviewer dispatch
+└── worktree.md         # /worktree - Git worktree creation
 
 pm-team/commands/
-├── pre-dev-feature.md  # /ring-pm-team:pre-dev-feature - 3-gate workflow
-└── pre-dev-full.md     # /ring-pm-team:pre-dev-full - 8-gate workflow
+├── pre-dev-feature.md  # /pre-dev-feature - 3-gate workflow
+└── pre-dev-full.md     # /pre-dev-full - 8-gate workflow
 ```
 
 **Key Characteristics:**
@@ -358,7 +358,7 @@ sequenceDiagram
     participant business-reviewer
     participant security-reviewer
 
-    User->>Claude: /ring-default:codereview
+    User->>Claude: /codereview
     Note over Claude: Command provides<br/>parallel review workflow
 
     Claude->>Task Tool: Dispatch 3 parallel tasks
@@ -386,7 +386,7 @@ sequenceDiagram
 Ring leverages four primary Claude Code tools:
 
 1. **Skill Tool**
-   - Invokes skills by name: `skill: "ring-default:test-driven-development"`
+   - Invokes skills by name: `skill: "test-driven-development"`
    - Skills expand into full instructions within conversation
    - Skill content becomes part of Claude's working context
 
@@ -401,7 +401,7 @@ Ring leverages four primary Claude Code tools:
    - Provides progress visibility to users
 
 4. **SlashCommand Tool**
-   - Executes commands: `SlashCommand(command="/ring-default:brainstorm")`
+   - Executes commands: `SlashCommand(command="/brainstorm")`
    - Commands expand to skill/agent invocations
    - Provides user-friendly shortcuts
 
@@ -432,10 +432,10 @@ User Request → using-ring check → Relevant skill?
 ### Pattern 2: Parallel Review Execution
 
 ```
-Review Request → /ring-default:codereview → Dispatch 3 Tasks (parallel)
-    ├─ ring-default:code-reviewer           ─┐
-    ├─ ring-default:business-logic-reviewer ─┼─→ Aggregate findings → Handle by severity
-    └─ ring-default:security-reviewer       ─┘
+Review Request → /codereview → Dispatch 3 Tasks (parallel)
+    ├─ code-reviewer           ─┐
+    ├─ business-logic-reviewer ─┼─→ Aggregate findings → Handle by severity
+    └─ security-reviewer       ─┘
 ```
 
 **Implementation:** Single message with 3 Task tool calls ensures parallel execution. All reviewers work independently and return simultaneously.
@@ -443,7 +443,7 @@ Review Request → /ring-default:codereview → Dispatch 3 Tasks (parallel)
 ### Pattern 3: Skill-to-Command Mapping
 
 ```
-User: /ring-default:brainstorm
+User: /brainstorm
     ↓
 SlashCommand Tool
     ↓
@@ -451,7 +451,7 @@ commands/brainstorm.md
     ↓
 "Use and follow the brainstorming skill"
     ↓
-Skill Tool: ring-default:brainstorming
+Skill Tool: brainstorming
     ↓
 skills/brainstorming/SKILL.md
 ```
@@ -489,9 +489,9 @@ Complex Skill → TodoWrite tracking
 - Some commands (like review) orchestrate multiple components
 
 **Example Mappings:**
-- `/ring-default:brainstorm` → `ring-default:brainstorming` skill
-- `/ring-default:write-plan` → `ring-default:writing-plans` skill
-- `/ring-default:codereview` → dispatches 3 parallel review agents (`ring-default:code-reviewer`, `ring-default:business-logic-reviewer`, `ring-default:security-reviewer`)
+- `/brainstorm` → `brainstorming` skill
+- `/write-plan` → `writing-plans` skill
+- `/codereview` → dispatches 3 parallel review agents (`code-reviewer`, `business-logic-reviewer`, `security-reviewer`)
 
 ### Skills ↔ Shared Patterns
 
@@ -569,7 +569,7 @@ SKILL.md frontmatter → generate-skills-ref.py → formatted overview → sessi
 1. Create `{plugin}/agents/{name}.md` with model specification
 2. Include YAML frontmatter: `name`, `description`, `model`, `version`
 3. Invoke via Task tool with `subagent_type="ring-{plugin}:{name}"`
-4. Review agents can run in parallel via `/ring-default:codereview`
+4. Review agents can run in parallel via `/codereview`
 5. Developer agents provide domain expertise via direct Task invocation
 
 ### Adding New Commands

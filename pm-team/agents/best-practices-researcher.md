@@ -1,5 +1,5 @@
 ---
-name: ring-pm-team:best-practices-researcher
+name: best-practices-researcher
 description: |
   External research specialist for pre-dev planning. Searches web and documentation
   for industry best practices, open source examples, and authoritative guidance.

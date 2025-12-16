@@ -1,5 +1,5 @@
 ---
-name: ring-dev-team:dev-refactor
+name: dev-refactor
 description: Analyzes codebase against standards and generates refactoring tasks for dev-cycle.
 trigger: |
   - User wants to refactor existing project to follow standards
@@ -151,7 +151,7 @@ Extract project-specific conventions for agent context.
 
 ```yaml
 Task tool:
-  subagent_type: "ring-default:codebase-explorer"  # ← EXACT STRING, NOT "Explore"
+  subagent_type: "codebase-explorer"  # ← EXACT STRING, NOT "Explore"
   model: "opus"
   description: "Generate codebase architecture report"
   prompt: |
@@ -173,7 +173,7 @@ Task tool:
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
 | "I'll use Bash find/ls to quickly explore" | Bash cannot analyze patterns, just lists files. codebase-explorer provides architectural analysis. | **Use Task with subagent_type="ring-default:codebase-explorer"** |
-| "The Explore agent is faster" | "Explore" subagent_type ≠ "codebase-explorer". Different agents. | **Use exact string: "codebase-explorer"** |
+| "The Explore agent is faster" | "Explore" subagent_type ≠ "codebase-explorer". Different agents. | **Use exact string: "ring-default:codebase-explorer"** |
 | "I already know the structure from find output" | Knowing file paths ≠ understanding architecture. Agent provides analysis. | **Use Task with subagent_type="ring-default:codebase-explorer"** |
 | "This is a small codebase, Bash is enough" | Size is irrelevant. The agent provides standardized output format required by Step 4. | **Use Task with subagent_type="ring-default:codebase-explorer"** |
 | "I'll explore manually then dispatch agents" | Manual exploration skips the codebase-report.md artifact required for Step 4 gate. | **Use Task with subagent_type="ring-default:codebase-explorer"** |
@@ -185,7 +185,7 @@ Task tool:
 ❌ Bash(command="ls -la ...")                → SKILL FAILURE
 ❌ Bash(command="tree ...")                  → SKILL FAILURE
 ❌ Task(subagent_type="Explore", ...)        → SKILL FAILURE
-❌ Task(subagent_type="general-purpose", ...)→ SKILL FAILURE
+❌ Task(subagent_type="ring-default:general-purpose", ...)→ SKILL FAILURE
 ❌ Task(subagent_type="Plan", ...)           → SKILL FAILURE
 ```
 
@@ -245,7 +245,7 @@ Check 2: Was codebase-report.md created by codebase-explorer?
 
 ```yaml
 Task tool 1:
-  subagent_type: "ring-dev-team:backend-engineer-golang"
+  subagent_type: "backend-engineer-golang"
   model: "opus"
   description: "Go standards analysis"
   prompt: |
@@ -273,7 +273,7 @@ Task tool 1:
     2. ISSUE-XXX for each ⚠️/❌ finding with: Pattern name, Severity, file:line, Current Code, Expected Code
 
 Task tool 2:
-  subagent_type: "ring-dev-team:qa-analyst"
+  subagent_type: "qa-analyst"
   model: "opus"
   description: "Test coverage analysis"
   prompt: |
@@ -283,7 +283,7 @@ Task tool 2:
     Output: Standards Coverage Table + ISSUE-XXX for gaps
 
 Task tool 3:
-  subagent_type: "ring-dev-team:devops-engineer"
+  subagent_type: "devops-engineer"
   model: "opus"
   description: "DevOps analysis"
   prompt: |
@@ -295,7 +295,7 @@ Task tool 3:
     Output: Standards Coverage Table + ISSUE-XXX for gaps
 
 Task tool 4:
-  subagent_type: "ring-dev-team:sre"
+  subagent_type: "sre"
   model: "opus"
   description: "Observability analysis"
   prompt: |
@@ -309,7 +309,7 @@ Task tool 4:
 
 ```yaml
 Task tool 1:
-  subagent_type: "ring-dev-team:backend-engineer-typescript"
+  subagent_type: "backend-engineer-typescript"
   model: "opus"
   description: "TypeScript backend standards analysis"
   prompt: |
@@ -341,7 +341,7 @@ Task tool 1:
 
 ```yaml
 Task tool 5:
-  subagent_type: "ring-dev-team:frontend-engineer"
+  subagent_type: "frontend-engineer"
   model: "opus"
   description: "Frontend standards analysis"
   prompt: |
@@ -364,7 +364,7 @@ Task tool 5:
 
 ```yaml
 Task tool 6:
-  subagent_type: "ring-dev-team:frontend-bff-engineer-typescript"
+  subagent_type: "frontend-bff-engineer-typescript"
   model: "opus"
   description: "BFF TypeScript standards analysis"
   prompt: |
@@ -836,7 +836,7 @@ traceability:
 ✅ CORRECT: Task(subagent_type="ring-default:codebase-explorer", model="opus")
 ❌ WRONG:   Bash(find/ls/tree)
 ❌ WRONG:   Task(subagent_type="Explore")
-❌ WRONG:   Task(subagent_type="general-purpose")
+❌ WRONG:   Task(subagent_type="ring-default:general-purpose")
 ```
 
 ### Rule 2: Todo Items MUST Be Initialized at Start
@@ -875,7 +875,7 @@ Step 5 (specialist agents) → ONLY runs if gate passes
 | `Bash find/ls` | Lists file paths | No architectural analysis, no pattern detection |
 | `Task(Explore)` | Fast codebase search | Different agent, lacks Ring standards context |
 | `Task(general-purpose)` | Generic tasks | No specialized codebase analysis output format |
-| `ring-default:codebase-explorer` | Deep architecture analysis | ✅ Correct - provides structured report for Step 5 |
+| `codebase-explorer` | Deep architecture analysis | ✅ Correct - provides structured report for Step 5 |
 
 ### If You Violated These Rules
 

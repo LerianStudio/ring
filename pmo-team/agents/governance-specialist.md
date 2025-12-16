@@ -1,5 +1,5 @@
 ---
-name: ring-pmo-team:governance-specialist
+name: governance-specialist
 version: 1.0.0
 description: Project Governance Specialist for gate reviews, process compliance, audit readiness, and governance framework implementation across portfolio projects.
 type: specialist
@@ -320,8 +320,8 @@ Conducted Gate 2 (Planning Complete) review for Project Phoenix. Recommendation:
 
 ## What This Agent Does NOT Handle
 
-- Project planning (use `ring-pm-team:pre-dev-feature`)
-- Portfolio prioritization (use `ring-pmo-team:portfolio-manager`)
-- Resource allocation (use `ring-pmo-team:resource-planner`)
-- Risk analysis detail (use `ring-pmo-team:risk-analyst`)
-- Executive communication (use `ring-pmo-team:executive-reporter`)
+- Project planning (use `pre-dev-feature`)
+- Portfolio prioritization (use `portfolio-manager`)
+- Resource allocation (use `resource-planner`)
+- Risk analysis detail (use `risk-analyst`)
+- Executive communication (use `executive-reporter`)

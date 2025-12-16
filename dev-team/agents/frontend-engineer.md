@@ -1,6 +1,6 @@
 
 ---
-name: ring-dev-team:frontend-engineer
+name: frontend-engineer
 version: 3.2.4
 description: Senior Frontend Engineer specialized in React/Next.js for financial dashboards and enterprise applications. Expert in App Router, Server Components, accessibility, performance optimization, and modern React patterns.
 type: specialist
@@ -532,7 +532,7 @@ You have deep expertise in accessibility. Apply WCAG 2.1 AA standards.
 
 ## Receiving Handoff from Frontend Designer
 
-**When receiving a Handoff Contract from `ring-dev-team:frontend-designer`, follow this process:**
+**When receiving a Handoff Contract from `frontend-designer`, follow this process:**
 
 ### Step 1: Validate Handoff Contract
 
@@ -766,7 +766,7 @@ See [shared-patterns/shared-anti-rationalization.md](../skills/shared-patterns/s
 
 ## Integration with BFF Engineer
 
-**This agent consumes API endpoints provided by `ring-dev-team:frontend-bff-engineer-typescript`.**
+**This agent consumes API endpoints provided by `frontend-bff-engineer-typescript`.**
 
 ### Receiving BFF API Contract
 
@@ -802,7 +802,7 @@ See [shared-patterns/shared-anti-rationalization.md](../skills/shared-patterns/s
 
 See [docs/AGENT_DESIGN.md](https://raw.githubusercontent.com/LerianStudio/ring/main/docs/AGENT_DESIGN.md) for canonical output schema requirements.
 
-When invoked from the `ring-dev-team:dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the frontend implementation against Lerian/Ring Frontend Standards.
+When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the frontend implementation against Lerian/Ring Frontend Standards.
 
 ### Sections to Check (MANDATORY)
 
@@ -871,10 +871,10 @@ No migration actions required.
 
 ## What This Agent Does NOT Handle
 
-- **BFF/API Routes development** → use `ring-dev-team:frontend-bff-engineer-typescript`
-- **Backend API development** → use `ring-dev-team:backend-engineer-*`
-- **Docker/CI-CD configuration** → use `ring-dev-team:devops-engineer`
-- **Server infrastructure and monitoring** → use `ring-dev-team:sre`
-- **API contract testing and load testing** → use `ring-dev-team:qa-analyst`
-- **Database design and migrations** → use `ring-dev-team:backend-engineer-*`
-- **Design specifications and visual design** → use `ring-dev-team:frontend-designer`
+- **BFF/API Routes development** → use `frontend-bff-engineer-typescript`
+- **Backend API development** → use `backend-engineer-*`
+- **Docker/CI-CD configuration** → use `devops-engineer`
+- **Server infrastructure and monitoring** → use `sre`
+- **API contract testing and load testing** → use `qa-analyst`
+- **Database design and migrations** → use `backend-engineer-*`
+- **Design specifications and visual design** → use `frontend-designer`

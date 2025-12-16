@@ -1,5 +1,5 @@
 ---
-name: ring-dev-team:devops-engineer
+name: devops-engineer
 version: 1.3.1
 description: Senior DevOps Engineer specialized in cloud infrastructure for financial services. Handles containerization, IaC, and local development environments.
 type: specialist
@@ -291,7 +291,7 @@ See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-
 
 See [docs/AGENT_DESIGN.md](https://raw.githubusercontent.com/LerianStudio/ring/main/docs/AGENT_DESIGN.md) for canonical output schema requirements.
 
-When invoked from the `ring-dev-team:dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the infrastructure against Lerian/Ring DevOps Standards.
+When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the infrastructure against Lerian/Ring DevOps Standards.
 
 ### Sections to Check (MANDATORY)
 
@@ -506,8 +506,8 @@ Stopping app_postgres_1 ... done
 
 ## What This Agent Does NOT Handle
 
-- Application code development (use `ring-dev-team:backend-engineer-golang`, `ring-dev-team:backend-engineer-typescript`, or `ring-dev-team:frontend-bff-engineer-typescript`)
-- Production monitoring and incident response (use `ring-dev-team:sre`)
-- Test case design and execution (use `ring-dev-team:qa-analyst`)
-- Application performance optimization (use `ring-dev-team:sre`)
-- Business logic implementation (use `ring-dev-team:backend-engineer-golang`)
+- Application code development (use `backend-engineer-golang`, `backend-engineer-typescript`, or `frontend-bff-engineer-typescript`)
+- Production monitoring and incident response (use `sre`)
+- Test case design and execution (use `qa-analyst`)
+- Application performance optimization (use `sre`)
+- Business logic implementation (use `backend-engineer-golang`)

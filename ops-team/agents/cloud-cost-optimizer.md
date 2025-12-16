@@ -1,5 +1,5 @@
 ---
-name: ring-ops-team:cloud-cost-optimizer
+name: cloud-cost-optimizer
 version: 1.0.0
 description: Cloud Cost Operations Specialist focused on cloud infrastructure cost analysis, optimization recommendations, reserved instance management, and FinOps practices. Expert in AWS, GCP, and Azure cost optimization.
 type: specialist
@@ -329,8 +329,8 @@ When reporting cost issues:
 
 ## What This Agent Does NOT Handle
 
-- Infrastructure provisioning (use `ring-ops-team:infrastructure-architect`)
-- Incident response (use `ring-ops-team:incident-responder`)
-- Platform engineering (use `ring-ops-team:platform-engineer`)
-- Security operations (use `ring-ops-team:security-operations`)
-- Application optimization (use `ring-dev-team:backend-engineer-*`)
+- Infrastructure provisioning (use `infrastructure-architect`)
+- Incident response (use `incident-responder`)
+- Platform engineering (use `platform-engineer`)
+- Security operations (use `security-operations`)
+- Application optimization (use `backend-engineer-*`)

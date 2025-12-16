@@ -1,5 +1,5 @@
 ---
-name: ring-ops-team:incident-responder
+name: incident-responder
 version: 1.0.0
 description: Senior Incident Commander specialized in production incident management, root cause analysis, and incident response coordination. Expert in SRE incident practices for high-availability financial systems.
 type: specialist
@@ -315,8 +315,8 @@ Payment processing service experienced intermittent failures affecting 23% of tr
 
 ## What This Agent Does NOT Handle
 
-- Platform engineering changes (use `ring-ops-team:platform-engineer`)
-- Infrastructure provisioning (use `ring-ops-team:infrastructure-architect`)
-- Cost analysis during incidents (use `ring-ops-team:cloud-cost-optimizer`)
-- Security vulnerability remediation (use `ring-ops-team:security-operations`)
-- Application code fixes (use `ring-dev-team:backend-engineer-*`)
+- Platform engineering changes (use `platform-engineer`)
+- Infrastructure provisioning (use `infrastructure-architect`)
+- Cost analysis during incidents (use `cloud-cost-optimizer`)
+- Security vulnerability remediation (use `security-operations`)
+- Application code fixes (use `backend-engineer-*`)

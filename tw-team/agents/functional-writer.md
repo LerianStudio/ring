@@ -1,5 +1,5 @@
 ---
-name: ring-tw-team:functional-writer
+name: functional-writer
 version: 0.2.0
 description: Senior Technical Writer specialized in functional documentation including guides, conceptual explanations, tutorials, and best practices.
 type: specialist
@@ -62,9 +62,9 @@ Step accuracy verification and prerequisite completeness analysis requires Opus 
 ## Related Skills
 
 This agent applies patterns from these skills:
-- `ring-tw-team:writing-functional-docs` - Document structure and writing patterns
-- `ring-tw-team:voice-and-tone` - Voice and tone guidelines
-- `ring-tw-team:documentation-structure` - Content hierarchy and organization
+- `writing-functional-docs` - Document structure and writing patterns
+- `voice-and-tone` - Voice and tone guidelines
+- `documentation-structure` - Content hierarchy and organization
 
 ## Standards Loading
 
@@ -78,8 +78,8 @@ This agent applies patterns from these skills:
 
 2. **Loading Method:**
    - Search for `docs/standards/`, `CONTRIBUTING.md`, or documentation guides in repository
-   - Check `ring-tw-team:voice-and-tone` skill for voice standards
-   - Check `ring-tw-team:writing-functional-docs` skill for structure patterns
+   - Check `voice-and-tone` skill for voice standards
+   - Check `writing-functional-docs` skill for structure patterns
    - Reference existing documentation for tone and style consistency
 
 3. **Verification:**
@@ -310,10 +310,10 @@ Show, don't just tell. Provide realistic examples for technical concepts.
 
 ## What This Agent Does NOT Handle
 
-- API endpoint documentation (use `ring-tw-team:api-writer`)
-- Documentation quality review (use `ring-tw-team:docs-reviewer`)
+- API endpoint documentation (use `api-writer`)
+- Documentation quality review (use `docs-reviewer`)
 - Code implementation (use `*` agents)
-- Technical architecture decisions (use `ring-dev-team:backend-engineer-golang` or `ring-dev-team:backend-engineer-typescript`)
+- Technical architecture decisions (use `backend-engineer-golang` or `backend-engineer-typescript`)
 
 ## Output Expectations
 

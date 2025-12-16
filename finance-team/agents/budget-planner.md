@@ -1,5 +1,5 @@
 ---
-name: ring-finance-team:budget-planner
+name: budget-planner
 version: 1.0.0
 description: Budget and Forecasting Specialist with expertise in annual budgeting, rolling forecasts, variance analysis, and financial planning. Delivers comprehensive budgets with documented assumptions and approval workflows.
 type: specialist
@@ -354,9 +354,9 @@ Comparison to preliminary targets:
 
 ## What This Agent Does NOT Handle
 
-- Financial statement analysis (use `ring-finance-team:financial-analyst`)
-- Financial model building (use `ring-finance-team:financial-modeler`)
-- Treasury and cash management (use `ring-finance-team:treasury-specialist`)
-- Accounting entries and close (use `ring-finance-team:accounting-specialist`)
-- KPI dashboard design (use `ring-finance-team:metrics-analyst`)
-- Brazilian regulatory compliance (use `ring-finops-team:finops-analyzer`)
+- Financial statement analysis (use `financial-analyst`)
+- Financial model building (use `financial-modeler`)
+- Treasury and cash management (use `treasury-specialist`)
+- Accounting entries and close (use `accounting-specialist`)
+- KPI dashboard design (use `metrics-analyst`)
+- Brazilian regulatory compliance (use `finops-analyzer`)

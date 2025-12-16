@@ -1,5 +1,5 @@
 ---
-name: ring-dev-team:backend-engineer-typescript
+name: backend-engineer-typescript
 version: 1.3.5
 description: Senior Backend Engineer specialized in TypeScript/Node.js for scalable systems. Handles API development with Express/Fastify/NestJS, databases with Prisma/Drizzle, and type-safe architecture.
 type: specialist
@@ -498,7 +498,7 @@ When reporting issues in existing code:
 
 See [docs/AGENT_DESIGN.md](https://raw.githubusercontent.com/LerianStudio/ring/main/docs/AGENT_DESIGN.md) for canonical output schema requirements.
 
-When invoked from the `ring-dev-team:dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the codebase against Lerian/Ring TypeScript Standards.
+When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the codebase against Lerian/Ring TypeScript Standards.
 
 ### Sections to Check (MANDATORY)
 
@@ -619,8 +619,8 @@ Coverage: 89.2%
 
 ## What This Agent Does NOT Handle
 
-- Frontend/UI development (use `ring-dev-team:frontend-bff-engineer-typescript`)
-- Docker/docker-compose configuration (use `ring-dev-team:devops-engineer`)
-- Observability validation (use `ring-dev-team:sre`)
-- End-to-end test scenarios and manual testing (use `ring-dev-team:qa-analyst`)
-- Visual design and component styling (use `ring-dev-team:frontend-designer`)
+- Frontend/UI development (use `frontend-bff-engineer-typescript`)
+- Docker/docker-compose configuration (use `devops-engineer`)
+- Observability validation (use `sre`)
+- End-to-end test scenarios and manual testing (use `qa-analyst`)
+- Visual design and component styling (use `frontend-designer`)

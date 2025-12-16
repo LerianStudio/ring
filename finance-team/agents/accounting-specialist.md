@@ -1,5 +1,5 @@
 ---
-name: ring-finance-team:accounting-specialist
+name: accounting-specialist
 version: 1.0.0
 description: Accounting Operations Specialist with expertise in journal entries, reconciliations, month-end close, GAAP/IFRS compliance, and audit support. Delivers accurate, compliant accounting with complete audit trails.
 type: specialist
@@ -417,9 +417,9 @@ Monthly amortization: $180,000 / 12 = $15,000
 
 ## What This Agent Does NOT Handle
 
-- Financial statement analysis (use `ring-finance-team:financial-analyst`)
-- Budget creation and forecasting (use `ring-finance-team:budget-planner`)
-- Financial model building (use `ring-finance-team:financial-modeler`)
-- Treasury and cash management (use `ring-finance-team:treasury-specialist`)
-- KPI dashboard design (use `ring-finance-team:metrics-analyst`)
-- Brazilian regulatory compliance (use `ring-finops-team:finops-analyzer`)
+- Financial statement analysis (use `financial-analyst`)
+- Budget creation and forecasting (use `budget-planner`)
+- Financial model building (use `financial-modeler`)
+- Treasury and cash management (use `treasury-specialist`)
+- KPI dashboard design (use `metrics-analyst`)
+- Brazilian regulatory compliance (use `finops-analyzer`)

@@ -1,5 +1,5 @@
 ---
-name: ring-pmm-team:messaging-specialist
+name: messaging-specialist
 version: 1.0.0
 description: Messaging & Copywriting Specialist for value propositions, messaging frameworks, proof points, and channel-specific messaging. Creates compelling, consistent messaging.
 type: specialist
@@ -307,8 +307,8 @@ If messaging already exists and is effective:
 
 ## What This Agent Does NOT Handle
 
-- Market analysis (use `ring-pmm-team:market-researcher`)
-- Positioning strategy (use `ring-pmm-team:positioning-strategist`)
-- GTM channel strategy (use `ring-pmm-team:gtm-planner`)
-- Launch coordination (use `ring-pmm-team:launch-coordinator`)
-- Pricing strategy (use `ring-pmm-team:pricing-analyst`)
+- Market analysis (use `market-researcher`)
+- Positioning strategy (use `positioning-strategist`)
+- GTM channel strategy (use `gtm-planner`)
+- Launch coordination (use `launch-coordinator`)
+- Pricing strategy (use `pricing-analyst`)

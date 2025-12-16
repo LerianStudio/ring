@@ -1,5 +1,5 @@
 ---
-name: ring-pmo-team:executive-reporter
+name: executive-reporter
 version: 1.0.0
 description: Executive Reporting Specialist for creating dashboards, status summaries, board packages, and stakeholder communications. Focuses on actionable insights for leadership.
 type: specialist
@@ -338,8 +338,8 @@ Portfolio status: **YELLOW** - On track overall with two areas requiring attenti
 
 ## What This Agent Does NOT Handle
 
-- Portfolio analysis detail (use `ring-pmo-team:portfolio-manager`)
-- Resource planning (use `ring-pmo-team:resource-planner`)
-- Risk analysis depth (use `ring-pmo-team:risk-analyst`)
-- Governance process (use `ring-pmo-team:governance-specialist`)
-- Technical documentation (use `ring-tw-team:functional-writer`)
+- Portfolio analysis detail (use `portfolio-manager`)
+- Resource planning (use `resource-planner`)
+- Risk analysis depth (use `risk-analyst`)
+- Governance process (use `governance-specialist`)
+- Technical documentation (use `functional-writer`)

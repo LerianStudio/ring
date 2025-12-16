@@ -1,5 +1,5 @@
 ---
-name: ring-pmm-team:gtm-planner
+name: gtm-planner
 version: 1.0.0
 description: Go-to-Market Strategy Specialist for channel strategy, campaign planning, launch tactics, and GTM execution planning. Creates comprehensive GTM plans.
 type: specialist
@@ -332,8 +332,8 @@ If GTM plan already exists and is current:
 
 ## What This Agent Does NOT Handle
 
-- Market analysis (use `ring-pmm-team:market-researcher`)
-- Positioning strategy (use `ring-pmm-team:positioning-strategist`)
-- Messaging development (use `ring-pmm-team:messaging-specialist`)
-- Launch day execution (use `ring-pmm-team:launch-coordinator`)
-- Pricing strategy (use `ring-pmm-team:pricing-analyst`)
+- Market analysis (use `market-researcher`)
+- Positioning strategy (use `positioning-strategist`)
+- Messaging development (use `messaging-specialist`)
+- Launch day execution (use `launch-coordinator`)
+- Pricing strategy (use `pricing-analyst`)

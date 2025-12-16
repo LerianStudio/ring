@@ -1,5 +1,5 @@
 ---
-name: ring-default:business-logic-reviewer
+name: business-logic-reviewer
 version: 5.2.0
 description: "Correctness Review: reviews domain correctness, business rules, edge cases, and requirements. Uses mental execution to trace code paths and analyzes full file context, not just changes. Runs in parallel with code-reviewer and security-reviewer for fast feedback."
 type: reviewer
@@ -82,7 +82,7 @@ Missing ANY required section will cause your entire review to be rejected. Alway
 
 ## Your Role
 
-**Position:** Parallel reviewer (runs simultaneously with ring-default:code-reviewer and ring-default:security-reviewer)
+**Position:** Parallel reviewer (runs simultaneously with code-reviewer and security-reviewer)
 **Purpose:** Validate business correctness, requirements, and edge cases
 **Independence:** Review independently - do not assume other reviewers will catch issues outside your domain
 
@@ -638,7 +638,7 @@ test('scenario that fails', () => {
 
 **If PASS:**
 - ✅ Business logic review complete
-- ✅ Findings will be aggregated with ring-default:code-reviewer and ring-default:security-reviewer results
+- ✅ Findings will be aggregated with code-reviewer and security-reviewer results
 
 **If FAIL:**
 - ❌ Critical/High/Medium issues must be fixed

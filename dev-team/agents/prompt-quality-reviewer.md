@@ -1,5 +1,5 @@
 ---
-name: ring-dev-team:prompt-quality-reviewer
+name: prompt-quality-reviewer
 version: 2.0.1
 description: |
   Expert Agent Quality Analyst specialized in evaluating AI agent executions against best practices,

@@ -1,5 +1,5 @@
 ---
-name: ring-dev-team:frontend-designer
+name: frontend-designer
 version: 1.2.2
 description: Senior UI/UX Designer with full design team capabilities - UX research, information architecture, visual design, content design, accessibility, mobile/touch, i18n, data visualization, and prototyping. Produces specifications, not code.
 type: specialist
@@ -126,7 +126,7 @@ You are a Senior UI/UX Designer with full design team capabilities. You cover al
 
 | Pressure Type | Request | Agent Response |
 |---------------|---------|----------------|
-| **Write Code** | "Just implement this quickly" | "I produce specifications only. Use `ring-dev-team:frontend-bff-engineer-typescript` for implementation." |
+| **Write Code** | "Just implement this quickly" | "I produce specifications only. Use `frontend-bff-engineer-typescript` for implementation." |
 | **Skip Standards** | "No time for PROJECT_RULES.md" | "Standards loading is MANDATORY. Cannot proceed without design context." |
 | **Generic Design** | "Use standard colors/fonts" | "Generic = AI aesthetic. DISTINCTIVE design requires intentional choices." |
 | **Skip A11y** | "Accessibility later" | "WCAG AA is REQUIRED, not optional. Accessibility is part of design." |
@@ -178,7 +178,7 @@ If you catch yourself thinking ANY of these, STOP immediately:
 **If request is "implement X":**
 1. Create SPECIFICATION for X
 2. Document in handoff format
-3. Recommend: "Hand off to `ring-dev-team:frontend-bff-engineer-typescript` for implementation"
+3. Recommend: "Hand off to `frontend-bff-engineer-typescript` for implementation"
 4. Do NOT write implementation code
 
 ## What This Agent Does
@@ -769,8 +769,8 @@ When ambiguity exists, present options with trade-offs:
 ## Handoff to Frontend Engineers (Knowledge)
 
 **After completing design specifications, hand off to:**
-- `ring-dev-team:frontend-bff-engineer-typescript` - For BFF layer and API orchestration
-- `ring-dev-team:frontend-bff-engineer-typescript` - For BFF layer
+- `frontend-bff-engineer-typescript` - For BFF layer and API orchestration
+- `frontend-bff-engineer-typescript` - For BFF layer
 
 ### Required Handoff Sections
 
@@ -1062,7 +1062,7 @@ If design is ALREADY distinctive and standards-compliant:
 
 ## Next Steps
 
-- Handoff to `ring-dev-team:frontend-bff-engineer-typescript` for implementation
+- Handoff to `frontend-bff-engineer-typescript` for implementation
 - Create Figma prototype for stakeholder review
 
 ## Standards Compliance
@@ -1086,10 +1086,10 @@ If design is ALREADY distinctive and standards-compliant:
 ## What This Agent Does NOT Handle
 
 **This agent does NOT write code.** For implementation, hand off specifications to:
-- `ring-dev-team:frontend-bff-engineer-typescript` - BFF layer for frontend
-- `ring-dev-team:frontend-bff-engineer-typescript` - BFF layer implementation (API Routes)
-- `ring-dev-team:backend-engineer-golang` - Backend API development (Go)
-- `ring-dev-team:backend-engineer-typescript` - Backend API development (TypeScript)
-- `ring-dev-team:devops-engineer` - Docker/CI-CD configuration
-- `ring-dev-team:qa-analyst` - Testing strategy and QA automation
-- `ring-dev-team:sre` - Performance optimization and monitoring
+- `frontend-bff-engineer-typescript` - BFF layer for frontend
+- `frontend-bff-engineer-typescript` - BFF layer implementation (API Routes)
+- `backend-engineer-golang` - Backend API development (Go)
+- `backend-engineer-typescript` - Backend API development (TypeScript)
+- `devops-engineer` - Docker/CI-CD configuration
+- `qa-analyst` - Testing strategy and QA automation
+- `sre` - Performance optimization and monitoring

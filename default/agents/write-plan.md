@@ -1,5 +1,5 @@
 ---
-name: ring-default:write-plan
+name: write-plan
 version: 1.1.0
 description: "Implementation Planning: Creates comprehensive plans for engineers with zero codebase context. Plans are executable by developers unfamiliar with the codebase, with bite-sized tasks (2-5 min each) and code review checkpoints."
 type: planning
@@ -294,7 +294,7 @@ If NO to any → Add more detail
 ```markdown
 # [Feature Name] Implementation Plan
 
-> **For Agents:** REQUIRED SUB-SKILL: Use ring-default:executing-plans to implement this plan task-by-task.
+> **For Agents:** REQUIRED SUB-SKILL: Use executing-plans to implement this plan task-by-task.
 
 **Goal:** [One sentence describing what this builds]
 
@@ -482,20 +482,20 @@ After saving the plan to `docs/plans/<filename>.md`, return to the main conversa
 
 **1. Subagent-Driven (this session)** - I dispatch fresh subagent per task, review between tasks, fast iteration
 
-**2. Parallel Session (separate)** - Open new session with ring-default:executing-plans, batch execution with checkpoints
+**2. Parallel Session (separate)** - Open new session with executing-plans, batch execution with checkpoints
 
 **Which approach?"**
 
 Then wait for human to choose.
 
 **If Subagent-Driven chosen:**
-- Inform: **REQUIRED SUB-SKILL:** Use ring-default:subagent-driven-development
+- Inform: **REQUIRED SUB-SKILL:** Use subagent-driven-development
 - Stay in current session
 - Fresh subagent per task + code review between tasks
 
 **If Parallel Session chosen:**
 - Guide them to open new session in the worktree
-- Inform: **REQUIRED SUB-SKILL:** New session uses ring-default:executing-plans
+- Inform: **REQUIRED SUB-SKILL:** New session uses executing-plans
 - Provide exact command: `cd <worktree-path> && claude`
 
 ## Critical Reminders

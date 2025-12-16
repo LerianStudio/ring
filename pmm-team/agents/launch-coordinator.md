@@ -1,5 +1,5 @@
 ---
-name: ring-pmm-team:launch-coordinator
+name: launch-coordinator
 version: 1.0.0
 description: Launch Execution Specialist for launch checklists, stakeholder coordination, day-of execution, and post-launch monitoring. Ensures smooth launch execution.
 type: specialist
@@ -333,8 +333,8 @@ If launch is already well-coordinated:
 
 ## What This Agent Does NOT Handle
 
-- Market analysis (use `ring-pmm-team:market-researcher`)
-- Positioning strategy (use `ring-pmm-team:positioning-strategist`)
-- Messaging development (use `ring-pmm-team:messaging-specialist`)
-- GTM planning (use `ring-pmm-team:gtm-planner`)
-- Pricing strategy (use `ring-pmm-team:pricing-analyst`)
+- Market analysis (use `market-researcher`)
+- Positioning strategy (use `positioning-strategist`)
+- Messaging development (use `messaging-specialist`)
+- GTM planning (use `gtm-planner`)
+- Pricing strategy (use `pricing-analyst`)

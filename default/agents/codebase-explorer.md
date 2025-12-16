@@ -1,5 +1,5 @@
 ---
-name: ring-default:codebase-explorer
+name: codebase-explorer
 version: 1.3.0
 description: "Deep codebase exploration agent for architecture understanding, pattern discovery, and comprehensive code analysis. Uses Opus for thorough analysis vs built-in Explore's Haiku speed-focus."
 type: exploration
@@ -199,7 +199,7 @@ Use this matrix to quickly determine the appropriate exploration depth:
 | "What's the architecture of X?" | Thorough | 30-45 min | "What's the architecture of the payment system?" |
 | "What patterns does X use?" | Thorough | 30-45 min | "What patterns does this monorepo use?" |
 
-**Multi-Area Exploration:** For questions spanning multiple domains (e.g., "How do auth, payments, and notifications integrate?"), use `ring-default:dispatching-parallel-agents` skill to launch parallel exploration agents, one per domain.
+**Multi-Area Exploration:** For questions spanning multiple domains (e.g., "How do auth, payments, and notifications integrate?"), use `dispatching-parallel-agents` skill to launch parallel exploration agents, one per domain.
 
 ## Blocker Criteria - STOP and Report
 
