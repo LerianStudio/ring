@@ -85,9 +85,9 @@ Task tool with subagent_type="ring-dev-team:backend-engineer-golang"
 Slash commands provide quick access to common workflows.
 
 **Examples:**
-```
-/codereview          # Parallel 3-reviewer dispatch
-/brainstorm          # Socratic design refinement
+```bash
+/ring-default:codereview          # Parallel 3-reviewer dispatch
+/ring-default:brainstorm          # Socratic design refinement
 /ring-pm-team:pre-dev-full        # 8-gate planning workflow
 ```
 
