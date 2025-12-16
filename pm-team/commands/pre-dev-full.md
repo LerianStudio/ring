@@ -251,8 +251,8 @@ Planning time: 2-4 hours (comprehensive)
 
 Next steps:
 1. Review artifacts in docs/pre-dev/<feature-name>/
-2. Use /worktree to create isolated workspace
-3. Use /write-plan to create implementation plan
+2. Use /ring-default:worktree to create isolated workspace
+3. Use /ring-default:write-plan to create implementation plan
 4. Execute the plan
 ```
 
