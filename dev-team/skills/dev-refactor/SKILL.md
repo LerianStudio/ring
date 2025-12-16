@@ -17,6 +17,87 @@ Analyzes existing codebase against Ring/Lerian standards and generates refactori
 
 ---
 
+## ⛔ MANDATORY GAP PRINCIPLE (NON-NEGOTIABLE)
+
+**ANY divergence from Ring standards = MANDATORY gap to implement.**
+
+This is NOT optional. This is NOT subject to interpretation. This is a HARD RULE.
+
+| Principle | Meaning |
+|-----------|---------|
+| **ALL divergences are gaps** | Every difference between codebase and Ring standards MUST be tracked as FINDING-XXX |
+| **Severity affects PRIORITY, not TRACKING** | Low severity = lower execution priority, NOT "optional to track" |
+| **NO filtering allowed** | You CANNOT decide which divergences "matter" - ALL matter |
+| **NO alternative patterns accepted** | "Codebase uses different but valid approach" = STILL A GAP |
+| **NO cosmetic exceptions** | Naming, formatting, structure differences = GAPS |
+
+### Anti-Rationalization: Mandatory Gap Principle
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "This divergence is too minor to track" | You don't decide what's minor. Standards do. | **Create FINDING-XXX** |
+| "Codebase pattern is acceptable alternative" | Alternative ≠ compliant. Ring standards are the baseline. | **Create FINDING-XXX** |
+| "Low severity means optional" | Low severity = low priority, NOT optional. | **Create FINDING-XXX** |
+| "Cosmetic differences don't count" | Cosmetic = standards compliance. They count. | **Create FINDING-XXX** |
+| "This would create too many findings" | Quantity is not your concern. Completeness is. | **Create ALL FINDING-XXX entries** |
+| "Team prefers current approach" | Preference ≠ compliance. Document the gap. | **Create FINDING-XXX** |
+| "Fixing this adds no value" | You don't assess value. Standards define value. | **Create FINDING-XXX** |
+
+### Verification Rule
+
+```
+COUNT(non-✅ items in ALL Standards Coverage Tables) == COUNT(FINDING-XXX entries)
+
+If counts don't match → SKILL FAILURE. Go back and add missing findings.
+```
+
+---
+
+## ⛔ Architecture Pattern Applicability
+
+**Not all architecture patterns apply to all services.** Before flagging gaps, verify the pattern is applicable.
+
+| Service Type | Hexagonal/Clean Architecture | DDD Patterns |
+|--------------|------------------------------|--------------|
+| CRUD API (with domains, entities) | ✅ APPLY | ✅ APPLY |
+| Complex business logic | ✅ APPLY | ✅ APPLY |
+| Multiple bounded contexts | ✅ APPLY | ✅ APPLY |
+| Event-driven systems | ✅ APPLY | ✅ APPLY |
+| Simple scripts/utilities | ❌ NOT APPLICABLE | ❌ NOT APPLICABLE |
+| CLI tools | ❌ NOT APPLICABLE | ❌ NOT APPLICABLE |
+| Workers/background jobs | ❌ NOT APPLICABLE | ❌ NOT APPLICABLE |
+| Simple lambda/functions | ❌ NOT APPLICABLE | ❌ NOT APPLICABLE |
+
+### Detection Criteria
+
+**CRUD API (Hexagonal/DDD APPLICABLE):**
+- Service exposes API endpoints (REST, gRPC, GraphQL)
+- Contains domain entities and models
+- Has CRUD operations (Create, Read, Update, Delete)
+- Uses repositories for data access
+- → **MUST follow Hexagonal Architecture and DDD patterns**
+
+**Simple Service (Hexagonal/DDD NOT applicable):**
+- CLI tools and scripts
+- Workers and background jobs
+- Simple utility functions
+- Lambda functions with single responsibility
+- No domain model or entities
+
+### Agent Instruction
+
+When dispatching specialist agents, include:
+
+```
+⛔ ARCHITECTURE APPLICABILITY CHECK:
+1. If service is an API with CRUD operations and domains → APPLY Hexagonal/DDD standards
+2. If service is CLI tool, script, or simple utility → Do NOT flag Hexagonal/DDD gaps
+
+CRUD APIs with domain entities MUST follow Hexagonal Architecture (ports/adapters) and DDD patterns.
+```
+
+---
+
 ## ⛔ MANDATORY: Initialize Todo List FIRST
 
 **Before ANY other action, create the todo list with ALL steps:**
@@ -544,14 +625,28 @@ Write tool:
 
 ### Anti-Rationalization Table for Step 4.1
 
+**⛔ See also: "Anti-Rationalization: Mandatory Gap Principle" at top of this skill.**
+
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
-| "This issue is too minor to track" | You don't decide severity. The agent already assessed it. | **Create FINDING-XXX for EVERY issue** |
 | "Multiple similar issues can be one finding" | Distinct file:line = distinct finding. Merging loses traceability. | **One issue = One FINDING-XXX** |
 | "Agent report didn't use ISSUE-XXX format" | Format varies; presence matters. Every gap = one finding. | **Extract ALL gaps into findings** |
-| "Codebase already mostly compliant" | Mostly ≠ fully. Document ALL differences. | **Create findings for ALL non-✅ items** |
 | "I'll consolidate to reduce noise" | Consolidation = data loss. Noise is signal. | **Preserve ALL individual issues** |
 | "Some findings are duplicates across agents" | Different agents = different perspectives. Keep both. | **Create separate findings per agent** |
+| "Team has approved this deviation" | Team approval ≠ standards compliance. Document the gap. | **Create FINDING-XXX, note team decision** |
+| "Fixing this would break existing code" | Breaking risk = implementation concern, not tracking concern. | **Create FINDING-XXX, note risk in description** |
+
+### ⛔ MANDATORY GAP RULE FOR STEP 4.1
+
+**Per the Mandatory Gap Principle (see top of skill): ANY divergence from Ring standards = FINDING-XXX.**
+
+This means:
+- ✅ items in Standards Coverage Table = No finding needed
+- ⚠️ items = MUST create FINDING-XXX (partial compliance is a gap)
+- ❌ items = MUST create FINDING-XXX (non-compliance is a gap)
+- Different pattern = MUST create FINDING-XXX (alternative is still a gap)
+
+**Verification:** Use formula from "Mandatory Gap Principle → Verification Rule" section.
 
 ### ⛔ Gate Escape Detection (Anti-Duplication)
 
@@ -609,15 +704,9 @@ Write tool:
 
 ### ⛔ HARD GATE: Verify All Issues Are Mapped
 
-**BEFORE creating findings.md, verify:**
-
-```
-Check 1: Count total issues from ALL agent reports in Step 4.5
-Check 2: Count total FINDING-XXX entries you will create
-Check 3: Count 1 MUST equal Count 2
+**BEFORE creating findings.md, apply the Verification Rule from "Mandatory Gap Principle" section.**
 
 If counts don't match → STOP. Go back to Step 4.1. Map missing issues.
-```
 
 ### FORBIDDEN Actions for Step 5
 
@@ -661,9 +750,29 @@ If counts don't match → STOP. Go back to Step 4.1. Map missing issues.
 **Generated:** {timestamp}
 **Total Findings:** {count}
 
+## ⛔ Mandatory Gap Principle Applied
+
+**ALL divergences from Ring standards are tracked below. No filtering applied.**
+
+| Metric | Count |
+|--------|-------|
+| Total non-✅ items from agent reports | {X} |
+| Total FINDING-XXX entries below | {X} |
+| **Counts match?** | ✅ YES (REQUIRED) |
+
+**Severity does NOT affect tracking - ALL gaps are mandatory:**
+| Severity | Count | Priority | Tracking |
+|----------|-------|----------|----------|
+| Critical | {N} | Execute first | **MANDATORY** |
+| High | {N} | Execute in current sprint | **MANDATORY** |
+| Medium | {N} | Execute in next sprint | **MANDATORY** |
+| Low | {N} | Execute when capacity | **MANDATORY** |
+
+---
+
 ## FINDING-001: {Pattern Name}
 
-**Severity:** Critical | High | Medium | Low
+**Severity:** Critical | High | Medium | Low (ALL MANDATORY)
 **Category:** {lib-commons | architecture | testing | devops}
 **Agent:** {agent-name}
 **Standard:** {file}.md:{section}
@@ -735,9 +844,27 @@ Before proceeding to Step 7, verify:
 **Source:** findings.md
 **Total Tasks:** {count}
 
+## ⛔ Mandatory Gap Verification
+
+**ALL findings from findings.md MUST be addressed in tasks below.**
+
+| Metric | Count |
+|--------|-------|
+| Total FINDING-XXX in findings.md | {X} |
+| Total FINDING-XXX referenced in tasks | {X} |
+| Orphan findings (not in any task) | 0 (REQUIRED) |
+| **All findings mapped?** | ✅ YES (REQUIRED) |
+
+**Priority affects execution order, NOT whether to include:**
+- Critical/High tasks: Execute first
+- Medium tasks: Execute in current cycle
+- Low tasks: Execute when capacity - STILL MANDATORY TO COMPLETE
+
+---
+
 ## REFACTOR-001: {Task Name}
 
-**Priority:** Critical | High | Medium
+**Priority:** Critical | High | Medium | Low (ALL ARE MANDATORY)
 **Effort:** {hours}h
 **Dependencies:** {other tasks or none}
 
@@ -843,62 +970,4 @@ traceability:
   Ring Standard → Agent Report → FINDING-XXX → REFACTOR-XXX → Implementation
 ```
 
----
 
-## ⛔ Critical Rules Summary (READ THIS)
-
-### Rule 1: Codebase Exploration MUST Use Specific Agent
-
-```
-✅ CORRECT: Task(subagent_type="codebase-explorer", model="opus")
-❌ WRONG:   Bash(find/ls/tree)
-❌ WRONG:   Task(subagent_type="Explore")
-❌ WRONG:   Task(subagent_type="general-purpose")
-```
-
-### Rule 2: Todo Items MUST Be Initialized at Start
-
-**MANDATORY:** Use the TodoWrite call from "Initialize Todo List FIRST" section before ANY other action.
-
-Todo items tracked:
-1. `Validate PROJECT_RULES.md exists`
-2. `Detect project stack (Go/TypeScript/Frontend)`
-3. `Read PROJECT_RULES.md for context`
-4. `Generate codebase report via codebase-explorer`
-5. `Dispatch specialist agents in parallel`
-6. `Save individual agent reports`
-7. `Map agent findings to FINDING-XXX entries`
-8. `Generate findings.md`
-9. `Group findings into REFACTOR-XXX tasks`
-10. `Generate tasks.md`
-11. `Get user approval`
-12. `Save all artifacts`
-13. `Handoff to dev-cycle`
-
-### Rule 3: Step 3 Blocks Step 5
-
-```
-Step 3 (codebase-explorer) → Creates codebase-report.md
-                                    ↓
-Step 4 (GATE) → Verifies file exists
-                                    ↓
-Step 5 (specialist agents) → ONLY runs if gate passes
-```
-
-### Why These Rules Exist
-
-| Tool | What It Does | Why Wrong for Step 3 |
-|------|--------------|---------------------|
-| `Bash find/ls` | Lists file paths | No architectural analysis, no pattern detection |
-| `Task(Explore)` | Fast codebase search | Different agent, lacks Ring standards context |
-| `Task(general-purpose)` | Generic tasks | No specialized codebase analysis output format |
-| `codebase-explorer` | Deep architecture analysis | ✅ Correct - provides structured report for Step 5 |
-
-### If You Violated These Rules
-
-1. STOP current execution
-2. DELETE any codebase-report.md created by wrong method
-3. Go back to Step 3
-4. Use correct Task tool call with `subagent_type="codebase-explorer"`
-5. Save output as codebase-report.md
-6. Continue from Step 4
