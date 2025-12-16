@@ -1092,4 +1092,4 @@ If design is ALREADY distinctive and standards-compliant:
 - `ring-dev-team:backend-engineer-typescript` - Backend API development (TypeScript)
 - `ring-dev-team:devops-engineer` - Docker/CI-CD configuration
 - `ring-dev-team:qa-analyst` - Testing strategy and QA automation
-- `sre` - Performance optimization and monitoring
+- `ring-dev-team:sre` - Performance optimization and monitoring
