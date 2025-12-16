@@ -108,14 +108,16 @@ The skill defines all steps including: stack detection, codebase-explorer dispat
 - Same format as PM Team output
 - Compatible with dev-cycle execution
 
-## Severity Levels
+## Severity Levels (ALL ARE MANDATORY)
 
-| Level | Description | Action |
-|-------|-------------|--------|
-| **Critical** | Security vulnerabilities, data loss risk | Fix immediately |
-| **High** | Architecture violations, major code smells | Fix in current sprint |
-| **Medium** | Convention violations, minor issues | Fix when touching file |
-| **Low** | Style issues, suggestions | Optional improvements |
+| Level | Description | Priority | Tracking |
+|-------|-------------|----------|----------|
+| **Critical** | Security vulnerabilities, data loss risk | Fix immediately | **MANDATORY** |
+| **High** | Architecture violations, major code smells | Fix in current sprint | **MANDATORY** |
+| **Medium** | Convention violations, moderate gaps | Fix in next sprint | **MANDATORY** |
+| **Low** | Style issues, minor gaps | Fix when capacity | **MANDATORY** |
+
+**⛔ ALL severities are MANDATORY to track and fix. Low ≠ Optional. Low = Lower priority, still required.**
 
 ## Prerequisites
 
