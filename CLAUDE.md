@@ -378,12 +378,6 @@ Skill tool: "using-ring"               # Load mandatory workflows
 # Hook validation (from default plugin)
 bash default/hooks/session-start.sh      # Test skill loading
 python default/hooks/generate-skills-ref.py # Generate skill overview
-
-# Component discovery (standalone CLI)
-ring-cli "code review"          # Search all components
-ring-cli --type skill "tdd"     # Find TDD-related skills
-ring-cli --type agent "golang"  # Find Go backend agents
-ring-cli --json "debugging"     # JSON output for scripting
 ```
 
 ---

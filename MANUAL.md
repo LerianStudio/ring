@@ -462,24 +462,6 @@ Consolidated report
 
 ---
 
-## 🔧 Developer Tools
-
-### ring-cli (Component Discovery)
-
-Natural language search for Ring components without starting a Claude session:
-
-| Command | Result |
-|---------|--------|
-| `ring-cli "testing"` | Find all components related to testing |
-| `ring-cli --type skill "debugging"` | Find debugging skills only |
-| `ring-cli --type agent "backend"` | Find backend-related agents |
-| `ring-cli --json "query"` | JSON output for scripting |
-
-**Build:** `cd tools/ring-cli && ./build.sh`
-**Details:** [tools/ring-cli/README.md](tools/ring-cli/README.md)
-
----
-
 ## ❓ Need Help?
 
 - **How to use Claude Code?** → Ask about Claude Code features, MCP servers, slash commands

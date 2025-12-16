@@ -1,5 +1,0 @@
-# Ring CLI Metadata Extractor dependencies
-# Install with: pip install -r requirements.txt
-
-# YAML parsing (same as root requirements.txt)
-PyYAML>=6.0.0,<7.0.0

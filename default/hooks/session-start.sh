@@ -140,153 +140,6 @@ State assumption → Explain why → Note what would change it
 **Full pattern:** See shared-patterns/doubt-triggered-questions.md
 '
 
-# CLI Discovery - Natural language component search (dynamic detection)
-# Detects ring-cli availability and injects appropriate context
-#
-# CLI Status Detection State Machine:
-# ready        = binary executable + index exists -> fully operational
-# needs_chmod  = binary file exists but not executable -> fix permissions
-# needs_build  = binary exists but index missing (+ Python available) -> rebuild index
-# can_build    = deps available but not built yet -> run build.sh from scratch
-# missing_deps = cannot build (no python3/go) -> show install instructions
-generate_cli_discovery() {
-    local cli_binary="${MONOREPO_ROOT}/tools/ring-cli/cli/ring-cli"
-    local cli_db="${MONOREPO_ROOT}/tools/ring-cli/ring-index.db"
-
-    # Determine CLI status (order matters - check most specific conditions first)
-    local status="missing_deps"
-
-    # State: READY - both binary (executable) and index available
-    if [[ -x "$cli_binary" ]] && [[ -f "$cli_db" ]]; then
-        status="ready"
-    # State: NEEDS_BUILD - binary works but index needs regeneration (requires Python)
-    elif [[ -x "$cli_binary" ]] && ! [[ -f "$cli_db" ]]; then
-        if command -v python3 &>/dev/null; then
-            status="needs_build"
-        else
-            status="missing_python"
-        fi
-    # State: NEEDS_CHMOD - binary file exists but lacks execute permission
-    elif [[ -f "$cli_binary" ]] && ! [[ -x "$cli_binary" ]] && [[ -f "$cli_db" ]]; then
-        status="needs_chmod"
-    # State: CAN_BUILD - index exists but binary needs compilation (requires Go)
-    elif [[ -f "$cli_db" ]] && ! [[ -f "$cli_binary" ]]; then
-        if command -v go &>/dev/null; then
-            status="can_build"
-        fi
-    # State: CAN_BUILD - nothing exists but build deps available
-    elif command -v python3 &>/dev/null && command -v go &>/dev/null; then
-        status="can_build"
-    fi
-    # else: missing_deps (default) - show dependency installation instructions
-
-    case "$status" in
-        ready)
-            cat <<DISCOVERY
-## Ring CLI - Component Discovery
-
-**Can't find the right skill/agent/command? Use ring-cli:**
-
-\`\`\`bash
-${cli_binary} --db "${cli_db}" "your query"
-\`\`\`
-
-**Examples:**
-- \`${cli_binary} --db "${cli_db}" "code review"\`
-- \`${cli_binary} --db "${cli_db}" --type agent "backend Go"\`
-- \`${cli_binary} --db "${cli_db}" --json "debugging" | jq '.'\`
-
-**Status:** Ready (binary and index available)
-DISCOVERY
-            ;;
-        needs_chmod)
-            cat <<DISCOVERY
-## Ring CLI - Component Discovery
-
-**Status:** Binary exists but lacks execute permission
-
-**To fix:**
-\`\`\`bash
-chmod +x "${cli_binary}"
-\`\`\`
-
-**Then use:**
-\`\`\`bash
-${cli_binary} --db "${cli_db}" "your query"
-\`\`\`
-DISCOVERY
-            ;;
-        needs_build)
-            cat <<DISCOVERY
-## Ring CLI - Component Discovery
-
-**Status:** Index missing - needs rebuild
-
-**To rebuild index:**
-\`\`\`bash
-cd "${MONOREPO_ROOT}/tools/ring-cli" && ./build.sh
-\`\`\`
-
-**After build, use:**
-\`\`\`bash
-${cli_binary} --db "${cli_db}" "your query"
-\`\`\`
-DISCOVERY
-            ;;
-        missing_python)
-            cat <<DISCOVERY
-## Ring CLI - Component Discovery
-
-**Status:** Index missing and Python not available
-
-**To enable CLI search, install Python 3.8+ then run:**
-\`\`\`bash
-cd "${MONOREPO_ROOT}/tools/ring-cli" && ./build.sh
-\`\`\`
-
-**Binary is ready at:** \`${cli_binary}\`
-DISCOVERY
-            ;;
-        can_build)
-            cat <<DISCOVERY
-## Ring CLI - Component Discovery
-
-**Status:** Not built yet
-
-**To enable CLI search:**
-\`\`\`bash
-cd "${MONOREPO_ROOT}/tools/ring-cli" && ./build.sh
-\`\`\`
-
-**Prerequisites:** Python 3.8+ (with PyYAML), Go 1.21+ with CGO, C compiler
-**Docs:** See \`${MONOREPO_ROOT}/tools/ring-cli/README.md\`
-DISCOVERY
-            ;;
-        *)
-            cat <<DISCOVERY
-## Ring CLI - Component Discovery
-
-**Status:** Missing dependencies
-
-**To enable CLI search, install:**
-- Python 3.8+ with PyYAML
-- Go 1.21+ with CGO enabled
-- C compiler (gcc/clang)
-
-**Then run:**
-\`\`\`bash
-cd "${MONOREPO_ROOT}/tools/ring-cli" && ./build.sh
-\`\`\`
-
-**Docs:** See \`${MONOREPO_ROOT}/tools/ring-cli/README.md\`
-DISCOVERY
-            ;;
-    esac
-}
-
-# Generate CLI discovery context
-CLI_DISCOVERY=$(generate_cli_discovery)
-
 # Generate skills overview with cascading fallback
 # Priority: Python+PyYAML > Python regex > Bash fallback > Error message
 generate_skills_overview() {
@@ -354,7 +207,6 @@ fi
 overview_escaped=$(json_escape "$skills_overview")
 critical_rules_escaped=$(json_escape "$CRITICAL_RULES")
 doubt_questions_escaped=$(json_escape "$DOUBT_QUESTIONS")
-cli_discovery_escaped=$(json_escape "$CLI_DISCOVERY")
 
 # Build JSON output - include update notification if marketplace was updated
 if [ "$marketplace_updated" = "true" ]; then
@@ -362,7 +214,7 @@ if [ "$marketplace_updated" = "true" ]; then
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "<ring-marketplace-updated>\nThe Ring marketplace was just updated to a new version. New skills and agents have been installed but won't be available until the session is restarted. Inform the user they should restart their session (type 'clear' or restart Claude Code) to load the new capabilities.\n</ring-marketplace-updated>\n\n<ring-critical-rules>\n${critical_rules_escaped}\n</ring-critical-rules>\n\n<ring-cli-discovery>\n${cli_discovery_escaped}\n</ring-cli-discovery>\n\n<ring-doubt-questions>\n${doubt_questions_escaped}\n</ring-doubt-questions>\n\n<ring-skills-system>\n${overview_escaped}\n</ring-skills-system>"
+    "additionalContext": "<ring-marketplace-updated>\nThe Ring marketplace was just updated to a new version. New skills and agents have been installed but won't be available until the session is restarted. Inform the user they should restart their session (type 'clear' or restart Claude Code) to load the new capabilities.\n</ring-marketplace-updated>\n\n<ring-critical-rules>\n${critical_rules_escaped}\n</ring-critical-rules>\n\n<ring-doubt-questions>\n${doubt_questions_escaped}\n</ring-doubt-questions>\n\n<ring-skills-system>\n${overview_escaped}\n</ring-skills-system>"
   }
 }
 EOF
@@ -371,7 +223,7 @@ else
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "<ring-critical-rules>\n${critical_rules_escaped}\n</ring-critical-rules>\n\n<ring-cli-discovery>\n${cli_discovery_escaped}\n</ring-cli-discovery>\n\n<ring-doubt-questions>\n${doubt_questions_escaped}\n</ring-doubt-questions>\n\n<ring-skills-system>\n${overview_escaped}\n</ring-skills-system>"
+    "additionalContext": "<ring-critical-rules>\n${critical_rules_escaped}\n</ring-critical-rules>\n\n<ring-doubt-questions>\n${doubt_questions_escaped}\n</ring-doubt-questions>\n\n<ring-skills-system>\n${overview_escaped}\n</ring-skills-system>"
   }
 }
 EOF
