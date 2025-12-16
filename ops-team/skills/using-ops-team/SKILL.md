@@ -1,5 +1,5 @@
 ---
-name: ring-ops-team:using-ops-team
+name: using-ops-team
 description: |
   5 specialist operations agents for platform engineering, incident response,
   cloud cost optimization, infrastructure architecture, and security operations.
@@ -18,7 +18,7 @@ skip_when: |
   - Code review -> use ring-default reviewers
 
 related:
-  similar: [ring-default:using-ring, ring-dev-team:using-dev-team]
+  similar: [using-ring, using-dev-team]
 ---
 
 # Using Ring Operations Specialists
@@ -27,7 +27,7 @@ The ring-ops-team plugin provides 5 specialized operations agents. Use them via 
 
 See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.md) and [using-ring](https://raw.githubusercontent.com/LerianStudio/ring/main/default/skills/using-ring/SKILL.md) for canonical workflow requirements and ORCHESTRATOR principle. This skill introduces ops-team-specific agents.
 
-**Remember:** Follow the **ORCHESTRATOR principle** from `ring-default:using-ring`. Dispatch agents to handle complexity; don't operate tools directly.
+**Remember:** Follow the **ORCHESTRATOR principle** from `using-ring`. Dispatch agents to handle complexity; don't operate tools directly.
 
 ---
 
@@ -42,12 +42,12 @@ See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.
 
 | Scenario | Use |
 |----------|-----|
-| "Set up Dockerfile and docker-compose" | `ring-dev-team:devops-engineer` |
-| "Configure service mesh for production" | `ring-ops-team:platform-engineer` |
-| "Create Terraform modules" | `ring-dev-team:devops-engineer` |
-| "Design multi-region architecture" | `ring-ops-team:infrastructure-architect` |
-| "Handle production outage" | `ring-ops-team:incident-responder` |
-| "Optimize cloud costs" | `ring-ops-team:cloud-cost-optimizer` |
+| "Set up Dockerfile and docker-compose" | `devops-engineer` |
+| "Configure service mesh for production" | `platform-engineer` |
+| "Create Terraform modules" | `devops-engineer` |
+| "Design multi-region architecture" | `infrastructure-architect` |
+| "Handle production outage" | `incident-responder` |
+| "Optimize cloud costs" | `cloud-cost-optimizer` |
 
 ---
 
@@ -139,11 +139,11 @@ See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.
 
 | Agent | Specializations | Use When |
 |-------|-----------------|----------|
-| **`ring-ops-team:platform-engineer`** | Service mesh, API gateways, developer platforms, self-service infrastructure | Service mesh config, API gateway setup, platform abstractions, developer portals |
-| **`ring-ops-team:incident-responder`** | Incident management, RCA, post-mortems, blameless culture | Production incidents, outages, incident coordination, root cause analysis |
-| **`ring-ops-team:cloud-cost-optimizer`** | Cost analysis, RI management, FinOps, tagging | Cost reviews, optimization recommendations, reserved instance planning |
-| **`ring-ops-team:infrastructure-architect`** | Multi-region, DR, capacity planning, migrations | Architecture design, DR strategy, capacity planning, infrastructure lifecycle |
-| **`ring-ops-team:security-operations`** | Security audits, compliance, vulnerability management | Security assessments, compliance validation, vulnerability remediation |
+| **`platform-engineer`** | Service mesh, API gateways, developer platforms, self-service infrastructure | Service mesh config, API gateway setup, platform abstractions, developer portals |
+| **`incident-responder`** | Incident management, RCA, post-mortems, blameless culture | Production incidents, outages, incident coordination, root cause analysis |
+| **`cloud-cost-optimizer`** | Cost analysis, RI management, FinOps, tagging | Cost reviews, optimization recommendations, reserved instance planning |
+| **`infrastructure-architect`** | Multi-region, DR, capacity planning, migrations | Architecture design, DR strategy, capacity planning, infrastructure lifecycle |
+| **`security-operations`** | Security audits, compliance, vulnerability management | Security assessments, compliance validation, vulnerability remediation |
 
 **Dispatch template:**
 ```
@@ -214,7 +214,7 @@ Task #2: security-operations
 **Emergency Dispatch Template:**
 ```
 Task tool:
-  subagent_type: "ring-ops-team:incident-responder"
+  subagent_type: "incident-responder"
   model: "opus"
   prompt: "URGENT PRODUCTION INCIDENT: [brief context]. [Your specific request]"
 ```
@@ -226,20 +226,20 @@ Task tool:
 **Agents:** See "5 Operations Specialists" table above.
 
 **Skills:**
-- `ring-ops-team:using-ops-team` (this) - Plugin introduction
-- `ring-ops-team:ops-incident-response` - Incident management workflow
-- `ring-ops-team:ops-capacity-planning` - Capacity planning process
-- `ring-ops-team:ops-cost-optimization` - Cost optimization workflow
-- `ring-ops-team:ops-disaster-recovery` - DR planning and testing
-- `ring-ops-team:ops-security-audit` - Security audit workflow
-- `ring-ops-team:ops-platform-onboarding` - Service onboarding to platform
-- `ring-ops-team:ops-migration-planning` - Migration planning process
+- `using-ops-team` (this) - Plugin introduction
+- `ops-incident-response` - Incident management workflow
+- `ops-capacity-planning` - Capacity planning process
+- `ops-cost-optimization` - Cost optimization workflow
+- `ops-disaster-recovery` - DR planning and testing
+- `ops-security-audit` - Security audit workflow
+- `ops-platform-onboarding` - Service onboarding to platform
+- `ops-migration-planning` - Migration planning process
 
 **Commands:**
-- `/ring-ops-team:incident` - Production incident management
-- `/ring-ops-team:capacity-review` - Infrastructure capacity review
-- `/ring-ops-team:cost-analysis` - Cloud cost analysis
-- `/ring-ops-team:security-audit` - Security audit workflow
+- `/incident` - Production incident management
+- `/capacity-review` - Infrastructure capacity review
+- `/cost-analysis` - Cloud cost analysis
+- `/security-audit` - Security audit workflow
 
 ---
 

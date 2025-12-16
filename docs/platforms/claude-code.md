@@ -43,8 +43,8 @@ Skills are markdown files with YAML frontmatter that define workflows, processes
 
 **Invocation:**
 ```
-Skill tool: "ring-default:test-driven-development"
-Skill tool: "ring-default:systematic-debugging"
+Skill tool: "test-driven-development"
+Skill tool: "systematic-debugging"
 ```
 
 **Structure:**
@@ -69,16 +69,16 @@ Agents are specialized AI personas with defined expertise and output schemas.
 
 **Invocation:**
 ```
-Task tool with subagent_type="ring-default:code-reviewer"
-Task tool with subagent_type="ring-dev-team:backend-engineer-golang"
+Task tool with subagent_type="code-reviewer"
+Task tool with subagent_type="backend-engineer-golang"
 ```
 
 **Categories** (invoke as `ring-{plugin}:{agent-name}`):
-- **Review agents**: ring-default:code-reviewer, ring-default:business-logic-reviewer, ring-default:security-reviewer
-- **Planning agents**: ring-default:write-plan, ring-default:codebase-explorer
-- **Developer agents**: 9 language/role specialists (ring-dev-team:*)
-- **FinOps agents**: ring-finops-team:finops-analyzer, ring-finops-team:finops-automation
-- **TW agents**: ring-tw-team:functional-writer, ring-tw-team:api-writer, ring-tw-team:docs-reviewer
+- **Review agents**: code-reviewer, business-logic-reviewer, security-reviewer
+- **Planning agents**: write-plan, codebase-explorer
+- **Developer agents**: 9 language/role specialists (*)
+- **FinOps agents**: finops-analyzer, finops-automation
+- **TW agents**: functional-writer, api-writer, docs-reviewer
 
 ### Commands (14 total)
 
@@ -86,9 +86,9 @@ Slash commands provide quick access to common workflows.
 
 **Examples:**
 ```bash
-/ring-default:codereview          # Parallel 3-reviewer dispatch
-/ring-default:brainstorm          # Socratic design refinement
-/ring-pm-team:pre-dev-full        # 8-gate planning workflow
+/codereview          # Parallel 3-reviewer dispatch
+/brainstorm          # Socratic design refinement
+/pre-dev-full        # 8-gate planning workflow
 ```
 
 ### Hooks
@@ -152,7 +152,7 @@ To install specific plugins only:
 
 ### Agent not found
 1. Ensure plugin is installed that contains the agent
-2. Use fully qualified name: `ring-dev-team:backend-engineer-golang`
+2. Use fully qualified name: `backend-engineer-golang`
 
 ### Commands not available
 1. Commands require their parent plugin

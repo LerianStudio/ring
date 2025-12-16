@@ -1,5 +1,5 @@
 ---
-name: ring-default:testing-agents-with-subagents
+name: testing-agents-with-subagents
 description: |
   Agent testing methodology - run agents with test inputs, observe outputs,
   iterate until outputs are accurate and well-structured.
@@ -14,7 +14,7 @@ skip_when: |
   - Agent already tested for this use case
 
 related:
-  complementary: [ring-default:test-driven-development]
+  complementary: [test-driven-development]
 ---
 
 # Testing Agents With Subagents
@@ -27,7 +27,7 @@ You run agents with known test inputs (RED - observe incorrect outputs), fix the
 
 **Core principle:** If you didn't run an agent with test inputs and verify its outputs, you don't know if the agent works correctly.
 
-**REQUIRED BACKGROUND:** You MUST understand `ring-default:test-driven-development` before using this skill. That skill defines the fundamental RED-GREEN-REFACTOR cycle. This skill provides agent-specific test formats (test inputs, output verification, accuracy metrics).
+**REQUIRED BACKGROUND:** You MUST understand `test-driven-development` before using this skill. That skill defines the fundamental RED-GREEN-REFACTOR cycle. This skill provides agent-specific test formats (test inputs, output verification, accuracy metrics).
 
 **Key difference from testing-skills-with-subagents:**
 - **Skills** = instructions that guide behavior; test if agent follows rules under pressure

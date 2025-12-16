@@ -1,5 +1,5 @@
 ---
-name: ring-ops-team:ops-disaster-recovery
+name: ops-disaster-recovery
 description: |
   Structured workflow for disaster recovery planning, implementation, and testing
   including RTO/RPO definition, DR strategy selection, and failover procedures.
@@ -16,8 +16,8 @@ skip_when: |
   - Single-instance failure recovery -> standard runbooks
 
 related:
-  similar: [ring-ops-team:ops-capacity-planning]
-  uses: [ring-ops-team:infrastructure-architect]
+  similar: [ops-capacity-planning]
+  uses: [infrastructure-architect]
 ---
 
 # Disaster Recovery Workflow
@@ -371,7 +371,7 @@ For DR planning tasks, dispatch:
 
 ```
 Task tool:
-  subagent_type: "ring-ops-team:infrastructure-architect"
+  subagent_type: "infrastructure-architect"
   model: "opus"
   prompt: |
     DR PLANNING REQUEST

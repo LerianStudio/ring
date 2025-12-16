@@ -72,7 +72,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-pmm-team:gtm-planner", model="opus", ...)  # REQUIRED
+Task(subagent_type="gtm-planner", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** GTM planning requires Opus-level reasoning for synthesizing positioning, messaging, and market context into executable plans with appropriate resource allocation.

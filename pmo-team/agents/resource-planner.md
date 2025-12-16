@@ -70,7 +70,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-pmo-team:resource-planner", model="opus", ...)  # REQUIRED
+Task(subagent_type="resource-planner", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Resource planning requires complex capacity modeling, conflict resolution, and optimization across multiple projects that demands Opus-level reasoning capabilities.

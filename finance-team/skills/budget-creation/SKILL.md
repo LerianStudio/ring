@@ -1,5 +1,5 @@
 ---
-name: ring-finance-team:budget-creation
+name: budget-creation
 description: |
   Complete budgeting and forecasting workflow covering annual budgets, departmental budgets,
   rolling forecasts, and variance analysis. Delivers documented budgets with approval trails.
@@ -16,13 +16,13 @@ skip_when: |
   - Cash flow specific work → use cash-flow-analysis
 
 related:
-  similar: [ring-finance-team:financial-analysis, ring-finance-team:financial-modeling]
-  uses: [ring-finance-team:budget-planner]
+  similar: [financial-analysis, financial-modeling]
+  uses: [budget-planner]
 ---
 
 # Budget Creation Workflow
 
-This skill provides a structured workflow for comprehensive budget development using the `ring-finance-team:budget-planner` agent.
+This skill provides a structured workflow for comprehensive budget development using the `budget-planner` agent.
 
 ## Workflow Overview
 
@@ -115,7 +115,7 @@ The budget creation workflow follows 6 phases:
 
 ```
 Task tool:
-  subagent_type: "ring-finance-team:budget-planner"
+  subagent_type: "budget-planner"
   model: "opus"
   prompt: |
     Build budget per these specifications:

@@ -1,5 +1,5 @@
 ---
-name: ring-finance-team:cash-flow-analysis
+name: cash-flow-analysis
 description: |
   Cash flow analysis and treasury management workflow covering liquidity assessment,
   cash forecasting, working capital optimization, and treasury operations.
@@ -11,18 +11,18 @@ trigger: |
   - Treasury operations review
 
 skip_when: |
-  - Financial statement analysis → use ring-finance-team:financial-analysis
-  - Creating budgets → use ring-finance-team:budget-creation
-  - Building valuation models → use ring-finance-team:financial-modeling
+  - Financial statement analysis → use financial-analysis
+  - Creating budgets → use budget-creation
+  - Building valuation models → use financial-modeling
 
 related:
-  similar: [ring-finance-team:financial-analysis, ring-finance-team:budget-creation]
-  uses: [ring-finance-team:treasury-specialist]
+  similar: [financial-analysis, budget-creation]
+  uses: [treasury-specialist]
 ---
 
 # Cash Flow Analysis Workflow
 
-This skill provides a structured workflow for cash flow analysis and treasury management using the `ring-finance-team:treasury-specialist` agent.
+This skill provides a structured workflow for cash flow analysis and treasury management using the `treasury-specialist` agent.
 
 ## Workflow Overview
 
@@ -111,7 +111,7 @@ The cash flow analysis workflow follows 5 phases:
 
 ```
 Task tool:
-  subagent_type: "ring-finance-team:treasury-specialist"
+  subagent_type: "treasury-specialist"
   model: "opus"
   prompt: |
     Perform cash flow analysis per these specifications:

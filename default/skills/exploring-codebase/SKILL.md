@@ -1,5 +1,5 @@
 ---
-name: ring-default:exploring-codebase
+name: exploring-codebase
 description: |
   Autonomous two-phase codebase exploration - first discovers natural perspectives
   (layers, components, boundaries), then dispatches adaptive deep-dive explorers
@@ -24,9 +24,9 @@ skip_when: |
   - "Colleague told me structure" → High-level ≠ implementation details
 
 related:
-  similar: [ring-default:dispatching-parallel-agents, ring-default:systematic-debugging]
-  sequence_after: [ring-default:brainstorming]
-  sequence_before: [ring-default:writing-plans, ring-default:executing-plans]
+  similar: [dispatching-parallel-agents, systematic-debugging]
+  sequence_after: [brainstorming]
+  sequence_before: [writing-plans, executing-plans]
 ---
 
 # Autonomous Two-Phase Codebase Exploration
@@ -655,7 +655,7 @@ Based on autonomous exploration:
 - `file1.ext:line` - [why important]
 - `file2.ext:line` - [why important]
 
-Ready to create implementation plan? (Use /ring-default:write-plan)
+Ready to create implementation plan? (Use /write-plan)
 ```
 
 **If user's goal is debugging:**
@@ -672,7 +672,7 @@ Based on autonomous exploration:
 **Common failure modes:**
 - [Pattern from cross-cutting analysis]
 
-Ready to investigate systematically? (Use ring-default:systematic-debugging)
+Ready to investigate systematically? (Use systematic-debugging)
 ```
 
 **If user's goal is learning:**

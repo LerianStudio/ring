@@ -1,5 +1,5 @@
 ---
-name: ring-default:defense-in-depth
+name: defense-in-depth
 description: |
   Multi-layer validation pattern - validates data at EVERY layer it passes through
   to make bugs structurally impossible, not just caught.
@@ -14,7 +14,7 @@ skip_when: |
   - Simple input validation sufficient → add single check
 
 related:
-  complementary: [ring-default:root-cause-tracing]
+  complementary: [root-cause-tracing]
 ---
 
 # Defense-in-Depth Validation

@@ -66,7 +66,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-ops-team:infrastructure-architect", model="opus", ...)  # REQUIRED
+Task(subagent_type="infrastructure-architect", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Infrastructure architecture decisions have long-term implications requiring comprehensive analysis of tradeoffs, compliance requirements, and scalability patterns - all requiring Opus-level reasoning.

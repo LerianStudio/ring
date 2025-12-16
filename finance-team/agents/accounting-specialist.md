@@ -82,7 +82,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-finance-team:accounting-specialist", model="opus", ...)  # REQUIRED
+Task(subagent_type="accounting-specialist", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Accounting requires Opus-level reasoning for complex GAAP/IFRS treatment decisions, multi-entity consolidation logic, and ensuring complete audit trails across interconnected transactions.

@@ -1,5 +1,5 @@
 ---
-name: ring-dev-team:dev-cancel
+name: dev-cancel
 description: Cancel the current development cycle
 argument-hint: "[--force]"
 ---
@@ -9,7 +9,7 @@ Cancel the current development cycle.
 ## Usage
 
 ```
-/ring-dev-team:dev-cancel [--force]
+/dev-cancel [--force]
 ```
 
 ## Options
@@ -54,7 +54,7 @@ State saved to: docs/refactor/current-cycle.json
 Partial report: .ring/dev-team/feedback/cycle-2024-01-15-partial.md
 
 To resume later:
-  /ring-dev-team:dev-cycle --resume
+  /dev-cycle --resume
 ```
 
 ## When No Cycle is Running
@@ -63,16 +63,16 @@ To resume later:
 ℹ️ No development cycle to cancel.
 
 Check status with:
-  /ring-dev-team:dev-status
+  /dev-status
 ```
 
 ## Related Commands
 
 | Command | Description |
 |---------|-------------|
-| `/ring-dev-team:dev-cycle` | Start or resume cycle |
-| `/ring-dev-team:dev-status` | Check current status |
-| `/ring-dev-team:dev-report` | View feedback report |
+| `/dev-cycle` | Start or resume cycle |
+| `/dev-status` | Check current status |
+| `/dev-report` | View feedback report |
 
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: ring-pmm-team:gtm-plan
+name: gtm-plan
 description: Full go-to-market planning workflow from positioning through launch
 argument-hint: "[product-or-feature-name]"
 ---

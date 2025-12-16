@@ -66,7 +66,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-pmm-team:messaging-specialist", model="opus", ...)  # REQUIRED
+Task(subagent_type="messaging-specialist", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Messaging requires Opus-level reasoning for translating positioning into compelling copy, maintaining consistency across channels, and ensuring claims are properly supported.

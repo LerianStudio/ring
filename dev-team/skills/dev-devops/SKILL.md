@@ -1,5 +1,5 @@
 ---
-name: ring-dev-team:dev-devops
+name: dev-devops
 description: |
   Gate 1 of the development cycle. Creates/updates Docker configuration,
   docker-compose setup, and environment variables for local development
@@ -16,11 +16,11 @@ skip_when: |
   - Only documentation changes
 
 sequence:
-  after: [ring-dev-team:dev-implementation]
-  before: [ring-dev-team:dev-sre]
+  after: [dev-implementation]
+  before: [dev-sre]
 
 related:
-  complementary: [ring-dev-team:dev-implementation, ring-dev-team:dev-testing]
+  complementary: [dev-implementation, dev-testing]
 
 verification:
   automated:
@@ -205,7 +205,7 @@ Before starting Gate 1:
 
 ## Step 2: Dispatch DevOps Agent
 
-**MANDATORY:** `Task(subagent_type: "ring-dev-team:devops-engineer", model: "opus")`
+**MANDATORY:** `Task(subagent_type: "devops-engineer", model: "opus")`
 
 **Prompt includes:** Gate 0 handoff summary, existing config files, requirements for Dockerfile/compose/.env/docs
 

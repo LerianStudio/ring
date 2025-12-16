@@ -1,5 +1,5 @@
 ---
-name: ring-pmo-team:portfolio-planning
+name: portfolio-planning
 description: |
   Strategic portfolio planning skill for multi-project coordination, capacity assessment,
   and portfolio optimization. Provides framework for portfolio-level decision making.
@@ -11,13 +11,13 @@ trigger: |
   - Rebalancing portfolio priorities
 
 skip_when: |
-  - Single project planning → use ring-pm-team:pre-dev-feature
-  - Immediate status report → use ring-pmo-team:executive-reporting
-  - Resource-only analysis → use ring-pmo-team:resource-allocation
+  - Single project planning → use pre-dev-feature
+  - Immediate status report → use executive-reporting
+  - Resource-only analysis → use resource-allocation
 
 related:
-  similar: [ring-pm-team:pre-dev-feature]
-  complementary: [ring-pmo-team:resource-allocation, ring-pmo-team:risk-management, ring-pmo-team:executive-reporting]
+  similar: [pre-dev-feature]
+  complementary: [resource-allocation, risk-management, executive-reporting]
 ---
 
 # Portfolio Planning Skill
@@ -104,7 +104,7 @@ Before starting portfolio planning, ensure:
 3. Identify over/under allocation
 4. Document skill gaps
 
-**Dispatch:** `ring-pmo-team:resource-planner` for detailed analysis
+**Dispatch:** `resource-planner` for detailed analysis
 
 **Output:** `docs/pmo/{date}/capacity-assessment.md`
 
@@ -120,7 +120,7 @@ Before starting portfolio planning, ensure:
 3. Assess portfolio risk exposure
 4. Plan portfolio-level mitigations
 
-**Dispatch:** `ring-pmo-team:risk-analyst` for detailed analysis
+**Dispatch:** `risk-analyst` for detailed analysis
 
 **Output:** `docs/pmo/{date}/portfolio-risks.md`
 

@@ -66,7 +66,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-pmm-team:launch-coordinator", model="opus", ...)  # REQUIRED
+Task(subagent_type="launch-coordinator", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Launch coordination requires Opus-level reasoning for managing complex dependencies, anticipating issues, and ensuring nothing falls through the cracks during high-stakes execution.

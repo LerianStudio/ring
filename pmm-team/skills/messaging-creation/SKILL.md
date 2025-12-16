@@ -1,5 +1,5 @@
 ---
-name: ring-pmm-team:messaging-creation
+name: messaging-creation
 description: |
   Messaging framework skill for developing value propositions, proof points,
   and consistent messaging across audiences and channels.

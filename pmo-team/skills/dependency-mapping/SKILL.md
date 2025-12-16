@@ -1,5 +1,5 @@
 ---
-name: ring-pmo-team:dependency-mapping
+name: dependency-mapping
 description: |
   Cross-project dependency mapping and analysis skill for identifying, tracking,
   and managing dependencies across portfolio projects.
@@ -16,7 +16,7 @@ skip_when: |
   - Risk from dependencies → use risk-management
 
 related:
-  complementary: [ring-pmo-team:portfolio-planning, ring-pmo-team:risk-management]
+  complementary: [portfolio-planning, risk-management]
 ---
 
 # Dependency Mapping Skill

@@ -41,7 +41,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-finops-team:finops-analyzer", model="opus", ...)  # REQUIRED
+Task(subagent_type="finops-analyzer", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:**

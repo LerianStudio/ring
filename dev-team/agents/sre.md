@@ -75,7 +75,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-dev-team:sre", model="opus", ...)  # REQUIRED
+Task(subagent_type="sre", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Observability validation + OpenTelemetry expertise requires Opus-level reasoning for structured logging validation, distributed tracing analysis, and comprehensive SRE standards verification.

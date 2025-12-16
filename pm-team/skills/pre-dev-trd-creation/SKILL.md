@@ -1,5 +1,5 @@
 ---
-name: ring-pm-team:pre-dev-trd-creation
+name: pre-dev-trd-creation
 description: |
   Gate 3: Technical architecture document - defines HOW/WHERE with technology-agnostic
   patterns before concrete implementation choices.
@@ -16,8 +16,8 @@ skip_when: |
   - Pure business requirement change → update PRD
 
 sequence:
-  after: [ring-pm-team:pre-dev-prd-creation, ring-pm-team:pre-dev-feature-map]
-  before: [ring-pm-team:pre-dev-api-design, ring-pm-team:pre-dev-task-breakdown]
+  after: [pre-dev-prd-creation, pre-dev-feature-map]
+  before: [pre-dev-api-design, pre-dev-task-breakdown]
 ---
 
 # TRD Creation - Architecture Before Implementation

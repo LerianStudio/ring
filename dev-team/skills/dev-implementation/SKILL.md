@@ -1,5 +1,5 @@
 ---
-name: ring-dev-team:dev-implementation
+name: dev-implementation
 description: |
   Gate 0 of the development cycle. Executes code implementation using the appropriate
   specialized agent based on task content and project language. Handles both tasks
@@ -22,26 +22,26 @@ skip_when: |
     - "PROJECT_RULES.md doesn't require" → Ring ALWAYS requires TDD.
 
 sequence:
-  before: [ring-dev-team:dev-devops]
+  before: [dev-devops]
 
 related:
-  complementary: [ring-dev-team:dev-cycle, ring-default:test-driven-development, ring-default:requesting-code-review]
-  similar: [ring-default:subagent-driven-development, ring-default:executing-plans]
+  complementary: [dev-cycle, test-driven-development, requesting-code-review]
+  similar: [subagent-driven-development, executing-plans]
 
 agent_selection:
   criteria:
     - pattern: "*.go"
       keywords: ["go.mod", "golang", "Go"]
-      agent: "ring-dev-team:backend-engineer-golang"
+      agent: "backend-engineer-golang"
     - pattern: "*.ts"
       keywords: ["express", "fastify", "nestjs", "backend", "api", "server"]
-      agent: "ring-dev-team:backend-engineer-typescript"
+      agent: "backend-engineer-typescript"
     - pattern: "*.tsx"
       keywords: ["react", "next", "frontend", "component", "page"]
-      agent: "ring-dev-team:frontend-bff-engineer-typescript"
+      agent: "frontend-bff-engineer-typescript"
     - pattern: "*.css|*.scss"
       keywords: ["design", "visual", "aesthetic", "styling", "ui"]
-      agent: "ring-dev-team:frontend-designer"
+      agent: "frontend-designer"
   fallback: "ASK_USER"  # Do NOT assume language - ask user
   detection_order:
     - "Check task.type field in tasks.md"
@@ -53,10 +53,10 @@ agent_selection:
     If language cannot be detected, use AskUserQuestion:
     Question: "Could not detect project language. Which agent should implement this task?"
     Options:
-      - "Go Backend" → ring-dev-team:backend-engineer-golang
-      - "TypeScript Backend" → ring-dev-team:backend-engineer-typescript
-      - "TypeScript Frontend" → ring-dev-team:frontend-bff-engineer-typescript
-      - "Frontend Design" → ring-dev-team:frontend-designer
+      - "Go Backend" → backend-engineer-golang
+      - "TypeScript Backend" → backend-engineer-typescript
+      - "TypeScript Frontend" → frontend-bff-engineer-typescript
+      - "Frontend Design" → frontend-designer
     NEVER assume Go. Wrong agent = wrong patterns = rework.
 
 verification:
@@ -76,7 +76,7 @@ examples:
   - name: "Go backend implementation"
     context: "Task: Add user authentication endpoint"
     expected_flow: |
-      1. Detect go.mod -> Select ring-dev-team:backend-engineer-golang
+      1. Detect go.mod -> Select backend-engineer-golang
       2. Load PROJECT_RULES.md for Go standards
       3. Write failing test (RED)
       4. Implement auth handler (GREEN)
@@ -85,7 +85,7 @@ examples:
   - name: "TypeScript frontend component"
     context: "Task: Create dashboard widget"
     expected_flow: |
-      1. Detect package.json with react -> Select ring-dev-team:frontend-bff-engineer-typescript
+      1. Detect package.json with react -> Select frontend-bff-engineer-typescript
       2. Load frontend.md standards
       3. Write component test (RED)
       4. Implement Dashboard component (GREEN)
@@ -369,11 +369,11 @@ See [shared-patterns/template-tdd-prompts.md](../shared-patterns/template-tdd-pr
 | Approach | When to Use | Process |
 |----------|-------------|---------|
 | **Subagent-Driven** (recommended) | Real-time feedback needed, human intervention | Dispatch agent → Review → Code review at checkpoints → Repeat |
-| **Parallel Session** | Well-defined plans, batch execution | New terminal in worktree → `ring-default:executing-plans` with plan path |
+| **Parallel Session** | Well-defined plans, batch execution | New terminal in worktree → `executing-plans` with plan path |
 
 ## Step 5: Code Review Checkpoints
 
-**Every 3-5 tasks:** Use `ring-default:requesting-code-review` → dispatch 3 reviewers in parallel (code, business-logic, security)
+**Every 3-5 tasks:** Use `requesting-code-review` → dispatch 3 reviewers in parallel (code, business-logic, security)
 
 **Severity handling:** Critical/High/Medium → Fix immediately, re-run all | Low → `TODO(review):` | Cosmetic → `FIXME(nitpick):`
 
@@ -393,10 +393,10 @@ Use the agent selected in Gate 1 based on technology:
 
 | Stack | Agent |
 |-------|-------|
-| Go backend | `ring-dev-team:backend-engineer-golang` |
-| TypeScript backend | `ring-dev-team:backend-engineer-typescript` |
-| React/Next.js frontend | `ring-dev-team:frontend-bff-engineer-typescript` |
-| BFF layer (Next.js API Routes) | `ring-dev-team:frontend-bff-engineer-typescript` |
+| Go backend | `backend-engineer-golang` |
+| TypeScript backend | `backend-engineer-typescript` |
+| React/Next.js frontend | `frontend-bff-engineer-typescript` |
+| BFF layer (Next.js API Routes) | `frontend-bff-engineer-typescript` |
 
 ## TDD Compliance
 

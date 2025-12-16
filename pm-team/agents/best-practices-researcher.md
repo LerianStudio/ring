@@ -56,7 +56,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-pm-team:best-practices-researcher", model="opus", ...)  # REQUIRED
+Task(subagent_type="best-practices-researcher", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:**

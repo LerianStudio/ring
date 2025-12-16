@@ -1,5 +1,5 @@
 ---
-name: ring-dev-team:dev-feedback-loop
+name: dev-feedback-loop
 description: |
   Development cycle feedback system - calculates assertiveness scores, analyzes prompt
   quality for all agents executed, aggregates cycle metrics, performs root cause analysis
@@ -20,10 +20,10 @@ NOT_skip_when: |
   - "Just experimenting" → Experiments need metrics to measure success. No exceptions.
 
 sequence:
-  after: [ring-dev-team:dev-validation]
+  after: [dev-validation]
 
 related:
-  complementary: [ring-dev-team:dev-cycle, ring-dev-team:dev-validation]
+  complementary: [dev-cycle, dev-validation]
 ---
 
 # Dev Feedback Loop
@@ -259,7 +259,7 @@ Agents to analyze (if executed, not null):
 
 ```text
 Task tool:
-  subagent_type: "ring-dev-team:prompt-quality-reviewer"
+  subagent_type: "prompt-quality-reviewer"
   prompt: |
     Analyze prompt quality for agents in task [task_id].
 

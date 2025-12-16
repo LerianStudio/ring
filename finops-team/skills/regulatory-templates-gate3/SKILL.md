@@ -1,5 +1,5 @@
 ---
-name: ring-finops-team:regulatory-templates-gate3
+name: regulatory-templates-gate3
 description: |
   Gate 3 sub-skill - generates complete .tpl template file with all validated
   mappings from Gates 1-2.
@@ -13,7 +13,7 @@ skip_when: |
   - Template already generated → verify or regenerate
 
 sequence:
-  after: [ring-finops-team:regulatory-templates-gate2]
+  after: [regulatory-templates-gate2]
 ---
 
 # Regulatory Templates - Gate 3: Template File Generation
@@ -22,7 +22,7 @@ sequence:
 
 **This sub-skill executes Gate 3 of the regulatory template workflow: generating the complete .tpl template file with all validated mappings and transformations from Gates 1-2.**
 
-**Parent skill:** `ring-finops-team:regulatory-templates`
+**Parent skill:** `regulatory-templates`
 
 **Prerequisites:**
 - Gate 1 PASSED (field mappings complete)
@@ -38,7 +38,7 @@ sequence:
 **Template generation is the final quality gate before production deployment.**
 
 Gate 3 transforms validated specifications into production artifacts:
-- **Agent-based generation**: ring-finops-team:finops-automation applies validated mappings consistently - manual creation introduces human error
+- **Agent-based generation**: finops-automation applies validated mappings consistently - manual creation introduces human error
 - **Two-file separation**: Clean .tpl (production code) + .tpl.docs (documentation) - inline comments bloat production artifacts
 - **All mandatory fields**: 100% inclusion required - 95% = 5% of regulatory data missing in BACEN submission
 - **Correct transformations**: Django filters applied per Gates 1-2 validation - errors here multiply in every submission
@@ -56,7 +56,7 @@ Gate 3 transforms validated specifications into production artifacts:
 
 ## When to Use
 
-**Called by:** `ring-finops-team:regulatory-templates` skill after Gate 2 passes
+**Called by:** `regulatory-templates` skill after Gate 2 passes
 
 **Purpose:** Create the final Django/Jinja2 template file with all field mappings, transformations, and validation logic
 
@@ -78,7 +78,7 @@ Gate 3 transforms validated specifications into production artifacts:
 ### Generation Requirements (Non-Negotiable)
 
 **Agent-Based Generation:**
-- ✅ REQUIRED: Use ring-finops-team:finops-automation agent for all template generation
+- ✅ REQUIRED: Use finops-automation agent for all template generation
 - ❌ FORBIDDEN: Manual .tpl creation, editing agent output
 - Why: Agent applies Gates 1-2 validations consistently, prevents fatigue errors
 
@@ -132,7 +132,7 @@ Gate 3 is where 5+ hours of Gates 1-2 work becomes a production artifact. Shortc
 
 ### Agent Dispatch
 
-**Dispatch:** `Task(subagent_type: "ring-finops-team:finops-automation", model: "sonnet")`
+**Dispatch:** `Task(subagent_type: "finops-automation", model: "sonnet")`
 
 **Prompt includes:**
 

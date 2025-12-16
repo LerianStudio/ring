@@ -94,7 +94,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-dev-team:backend-engineer-typescript", model="opus", ...)  # REQUIRED
+Task(subagent_type="backend-engineer-typescript", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Standards compliance verification + TypeScript type safety analysis requires Opus-level reasoning for complex type systems, runtime validation patterns, and comprehensive standards validation.

@@ -1,5 +1,5 @@
 ---
-name: ring-default:systematic-debugging
+name: systematic-debugging
 description: |
   Four-phase debugging framework - root cause investigation, pattern analysis,
   hypothesis testing, implementation. Ensures understanding before attempting fixes.
@@ -12,11 +12,11 @@ trigger: |
 
 skip_when: |
   - Root cause already known → just fix it
-  - Error deep in call stack, need to trace backward → use ring-default:root-cause-tracing
+  - Error deep in call stack, need to trace backward → use root-cause-tracing
   - Issue obviously caused by your last change → quick verification first
 
 related:
-  complementary: [ring-default:root-cause-tracing]
+  complementary: [root-cause-tracing]
 ---
 
 # Systematic Debugging
@@ -46,7 +46,7 @@ Complete each phase before proceeding to the next.
 2. **Reproduce Consistently** - Exact steps to trigger. Intermittent → gather more data.
 3. **Check Recent Changes** - `git diff`, recent commits, new dependencies, config changes.
 4. **Multi-Component Systems** - Log at each boundary: what enters, what exits, env/config state. Run once, analyze, identify failing layer.
-5. **Trace Data Flow** - Error deep in stack? **Use ring-default:root-cause-tracing skill.** Quick: Where does bad value originate? Trace up call stack, fix at source not symptom.
+5. **Trace Data Flow** - Error deep in stack? **Use root-cause-tracing skill.** Quick: Where does bad value originate? Trace up call stack, fix at source not symptom.
 
 **Phase 1 Summary:** Error: [exact] | Reproduces: [steps] | Recent changes: [commits] | Component evidence: [each] | Data origin: [source]
 
@@ -69,7 +69,7 @@ Complete each phase before proceeding to the next.
 
 **Fix root cause, not symptom:**
 
-1. **Create Failing Test** - Simplest reproduction. **Use ring-default:test-driven-development skill.**
+1. **Create Failing Test** - Simplest reproduction. **Use test-driven-development skill.**
 2. **Implement Single Fix** - Address root cause only. ONE change at a time. No "while I'm here" improvements.
 3. **Verify Fix** - Test passes? No other tests broken? Issue resolved?
 4. **If Fix Doesn't Work** - Count fixes. If < 3: Return to Phase 1. **If ≥ 3: STOP → Architecture review required.**

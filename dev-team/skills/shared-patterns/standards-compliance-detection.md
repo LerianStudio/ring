@@ -9,7 +9,7 @@ Canonical source for Standards Compliance detection logic used by all dev-team a
 | Exact match | `**MODE: ANALYSIS ONLY**` |
 | Case variations | `MODE: Analysis Only`, `mode: analysis only`, `**mode: ANALYSIS ONLY**` |
 | Partial markers | `ANALYSIS MODE`, `analysis-only`, `analyze only`, `MODE ANALYSIS` |
-| Context clues | Invoked from `ring-dev-team:dev-refactor` skill |
+| Context clues | Invoked from `dev-refactor` skill |
 | Explicit request | "compare against standards", "audit compliance", "check against Ring standards" |
 
 ## Detection Logic

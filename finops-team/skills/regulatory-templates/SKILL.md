@@ -1,5 +1,5 @@
 ---
-name: ring-finops-team:regulatory-templates
+name: regulatory-templates
 description: |
   3-gate regulatory template orchestrator - manages setup, Gate 1 (analysis),
   Gate 2 (validation), Gate 3 (generation) for BACEN/RFB compliance.
@@ -15,7 +15,7 @@ skip_when: |
   - Template already exists, just needs updates → modify directly
 
 sequence:
-  before: [ring-finops-team:regulatory-templates-setup]
+  before: [regulatory-templates-setup]
 ---
 
 # Regulatory Templates - Orchestrator
@@ -25,10 +25,10 @@ sequence:
 **This skill orchestrates the regulatory template creation workflow through modular sub-skills, managing a 3-gate sequential validation process with dynamic context passing between gates.**
 
 **Architecture:** Modular design with dedicated sub-skills for each phase:
-- `ring-finops-team:regulatory-templates-setup` - Initial configuration and selection
-- `ring-finops-team:regulatory-templates-gate1` - Regulatory compliance analysis and field mapping
-- `ring-finops-team:regulatory-templates-gate2` - Technical validation of mappings
-- `ring-finops-team:regulatory-templates-gate3` - Template file generation (.tpl)
+- `regulatory-templates-setup` - Initial configuration and selection
+- `regulatory-templates-gate1` - Regulatory compliance analysis and field mapping
+- `regulatory-templates-gate2` - Technical validation of mappings
+- `regulatory-templates-gate3` - Template file generation (.tpl)
 
 **Template Specifications:** All template specifications are dynamically loaded within gates from centralized configurations. Templates are organized by regulatory authority with cascading selection:
 
@@ -41,8 +41,8 @@ sequence:
 - **DIMP:** v10 (Movimentação Patrimonial)
 
 **REQUIRED AGENTS:** The sub-skills dispatch specialized agents:
-- `ring-finops-team:finops-analyzer` - For Gates 1-2 and Discussion (regulatory analysis and validation)
-- `ring-finops-team:finops-automation` - For Gate 3 (template file generation)
+- `finops-analyzer` - For Gates 1-2 and Discussion (regulatory analysis and validation)
+- `finops-automation` - For Gate 3 (template file generation)
 
 ---
 
@@ -160,10 +160,10 @@ The workflow exists specifically to prevent these exact thoughts from leading to
 
 | Phase | Sub-skill | Purpose | Agent |
 |-------|-----------|---------|-------|
-| Setup | `ring-finops-team:regulatory-templates-setup` | Template selection, context init | — |
-| Gate 1 | `ring-finops-team:regulatory-templates-gate1` | Regulatory analysis, field mapping | `ring-finops-team:finops-analyzer` (opus) |
-| Gate 2 | `ring-finops-team:regulatory-templates-gate2` | Validate mappings, test transformations | `ring-finops-team:finops-analyzer` (opus) |
-| Gate 3 | `ring-finops-team:regulatory-templates-gate3` | Generate .tpl template file | `ring-finops-team:finops-automation` (sonnet) |
+| Setup | `regulatory-templates-setup` | Template selection, context init | — |
+| Gate 1 | `regulatory-templates-gate1` | Regulatory analysis, field mapping | `finops-analyzer` (opus) |
+| Gate 2 | `regulatory-templates-gate2` | Validate mappings, test transformations | `finops-analyzer` (opus) |
+| Gate 3 | `regulatory-templates-gate3` | Generate .tpl template file | `finops-automation` (sonnet) |
 
 ---
 
@@ -175,10 +175,10 @@ The workflow exists specifically to prevent these exact thoughts from leading to
 
 | Step | Skill | On PASS | On FAIL |
 |------|-------|---------|---------|
-| 2 | `ring-finops-team:regulatory-templates-setup` | Store context → Gate 1 | Fix selection issues |
-| 3 | `ring-finops-team:regulatory-templates-gate1` | Store spec report → Gate 2 | Address critical gaps, retry |
-| 4 | `ring-finops-team:regulatory-templates-gate2` | Store finalized report → Gate 3 | Resolve uncertainties, retry |
-| 5 | `ring-finops-team:regulatory-templates-gate3` | Template complete | 401=refresh token, 500/503=wait+retry |
+| 2 | `regulatory-templates-setup` | Store context → Gate 1 | Fix selection issues |
+| 3 | `regulatory-templates-gate1` | Store spec report → Gate 2 | Address critical gaps, retry |
+| 4 | `regulatory-templates-gate2` | Store finalized report → Gate 3 | Resolve uncertainties, retry |
+| 5 | `regulatory-templates-gate3` | Template complete | 401=refresh token, 500/503=wait+retry |
 
 **Context flows in memory** - no intermediate files created
 

@@ -70,7 +70,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-pmo-team:governance-specialist", model="opus", ...)  # REQUIRED
+Task(subagent_type="governance-specialist", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Governance assessment requires detailed analysis of process compliance, risk evaluation, and nuanced judgment about gate passage that demands Opus-level reasoning capabilities.

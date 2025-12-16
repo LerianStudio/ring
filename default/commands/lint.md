@@ -1,5 +1,5 @@
 ---
-name: ring-default:lint
+name: lint
 description: Run lint checks and dispatch parallel agents to fix all issues
 argument-hint: "[path]"
 ---
@@ -9,7 +9,7 @@ Run linting tools, analyze results, and dispatch parallel AI agents to fix all i
 ## Usage
 
 ```
-/ring-default:lint [path]
+/lint [path]
 ```
 
 ## Arguments
@@ -27,7 +27,7 @@ Run linting tools, analyze results, and dispatch parallel AI agents to fix all i
 
 ## Process
 
-This command invokes the `ring-default:linting-codebase` skill which handles:
+This command invokes the `linting-codebase` skill which handles:
 
 ### Phase 1: Lint Execution
 - Runs `make lint` (or detects appropriate lint command)
@@ -59,13 +59,13 @@ This command invokes the `ring-default:linting-codebase` skill which handles:
 
 ### Lint Entire Codebase
 ```
-/ring-default:lint
+/lint
 ```
 Runs full lint, dispatches agents to fix everything.
 
 ### Lint Specific Path
 ```
-/ring-default:lint src/services/
+/lint src/services/
 ```
 Lints only the services directory.
 
@@ -73,6 +73,6 @@ Lints only the services directory.
 
 | Command/Skill | Relationship |
 |---------------|--------------|
-| `ring-default:linting-codebase` | Underlying skill with full logic |
-| `ring-default:dispatching-parallel-agents` | Pattern used for parallel fixes |
-| `/ring-default:codereview` | Use after lint passes for deeper review |
+| `linting-codebase` | Underlying skill with full logic |
+| `dispatching-parallel-agents` | Pattern used for parallel fixes |
+| `/codereview` | Use after lint passes for deeper review |

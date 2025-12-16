@@ -1,5 +1,5 @@
 ---
-name: ring-pmo-team:portfolio-review
+name: portfolio-review
 description: Conduct a comprehensive portfolio review across multiple projects
 argument-hint: "[scope] [options]"
 ---
@@ -9,7 +9,7 @@ Conduct a comprehensive portfolio review across multiple projects.
 ## Usage
 
 ```
-/ring-pmo-team:portfolio-review [scope] [options]
+/portfolio-review [scope] [options]
 ```
 
 ## Arguments
@@ -30,27 +30,27 @@ Conduct a comprehensive portfolio review across multiple projects.
 
 ```bash
 # Full portfolio review
-/ring-pmo-team:portfolio-review
+/portfolio-review
 
 # Review specific program
-/ring-pmo-team:portfolio-review "Digital Transformation Program"
+/portfolio-review "Digital Transformation Program"
 
 # Focus on resource utilization
-/ring-pmo-team:portfolio-review --focus resources
+/portfolio-review --focus resources
 
 # Generate executive format
-/ring-pmo-team:portfolio-review --format executive
+/portfolio-review --format executive
 ```
 
 ## What Gets Reviewed
 
 | Dimension | Agent | Skill |
 |-----------|-------|-------|
-| Portfolio Health | `ring-pmo-team:portfolio-manager` | `ring-pmo-team:portfolio-planning` |
-| Resource Capacity | `ring-pmo-team:resource-planner` | `ring-pmo-team:resource-allocation` |
-| Risk Posture | `ring-pmo-team:risk-analyst` | `ring-pmo-team:risk-management` |
-| Governance Status | `ring-pmo-team:governance-specialist` | Gate compliance |
-| Dependencies | Orchestrator | `ring-pmo-team:dependency-mapping` |
+| Portfolio Health | `portfolio-manager` | `portfolio-planning` |
+| Resource Capacity | `resource-planner` | `resource-allocation` |
+| Risk Posture | `risk-analyst` | `risk-management` |
+| Governance Status | `governance-specialist` | Gate compliance |
+| Dependencies | Orchestrator | `dependency-mapping` |
 
 ## Output
 
@@ -63,8 +63,8 @@ Conduct a comprehensive portfolio review across multiple projects.
 
 | Command | Description |
 |---------|-------------|
-| `/ring-pmo-team:executive-summary` | Generate executive summary from review |
-| `/ring-pmo-team:dependency-analysis` | Deep dive on dependencies |
+| `/executive-summary` | Generate executive summary from review |
+| `/dependency-analysis` | Deep dive on dependencies |
 
 ---
 
@@ -73,7 +73,7 @@ Conduct a comprehensive portfolio review across multiple projects.
 **This command MUST load the portfolio-planning skill for complete workflow execution.**
 
 ```
-Use Skill tool: ring-pmo-team:portfolio-planning
+Use Skill tool: portfolio-planning
 ```
 
 The skill contains the complete portfolio review gates with:
@@ -89,7 +89,7 @@ The skill contains the complete portfolio review gates with:
 
 ```
 Task tool:
-  subagent_type: "ring-pmo-team:portfolio-manager"
+  subagent_type: "portfolio-manager"
   model: "opus"
   prompt: "Conduct portfolio health assessment. Scope: [scope]. Focus: [focus]."
 ```
@@ -98,7 +98,7 @@ Task tool:
 
 ```
 Task tool:
-  subagent_type: "ring-pmo-team:resource-planner"
+  subagent_type: "resource-planner"
   model: "opus"
   prompt: "Analyze resource utilization across portfolio."
 ```
@@ -107,7 +107,7 @@ Task tool:
 
 ```
 Task tool:
-  subagent_type: "ring-pmo-team:risk-analyst"
+  subagent_type: "risk-analyst"
   model: "opus"
   prompt: "Assess portfolio risk posture and correlations."
 ```

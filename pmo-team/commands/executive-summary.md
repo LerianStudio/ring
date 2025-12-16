@@ -1,5 +1,5 @@
 ---
-name: ring-pmo-team:executive-summary
+name: executive-summary
 description: Generate an executive summary of portfolio status for leadership
 argument-hint: "[type] [options]"
 ---
@@ -9,7 +9,7 @@ Generate an executive summary of portfolio status for leadership.
 ## Usage
 
 ```
-/ring-pmo-team:executive-summary [type] [options]
+/executive-summary [type] [options]
 ```
 
 ## Arguments
@@ -31,16 +31,16 @@ Generate an executive summary of portfolio status for leadership.
 
 ```bash
 # Weekly dashboard
-/ring-pmo-team:executive-summary dashboard
+/executive-summary dashboard
 
 # Board package
-/ring-pmo-team:executive-summary board --period "Q4 2024"
+/executive-summary board --period "Q4 2024"
 
 # Escalation report
-/ring-pmo-team:executive-summary escalation
+/executive-summary escalation
 
 # Custom audience
-/ring-pmo-team:executive-summary --audience "Steering Committee"
+/executive-summary --audience "Steering Committee"
 ```
 
 ## Report Types
@@ -62,8 +62,8 @@ Generate an executive summary of portfolio status for leadership.
 
 | Command | Description |
 |---------|-------------|
-| `/ring-pmo-team:portfolio-review` | Conduct full review first |
-| `/ring-pmo-team:dependency-analysis` | Add dependency details |
+| `/portfolio-review` | Conduct full review first |
+| `/dependency-analysis` | Add dependency details |
 
 ---
 
@@ -72,7 +72,7 @@ Generate an executive summary of portfolio status for leadership.
 **This command MUST load the executive-reporting skill for complete workflow execution.**
 
 ```
-Use Skill tool: ring-pmo-team:executive-reporting
+Use Skill tool: executive-reporting
 ```
 
 The skill contains the complete reporting workflow with:
@@ -88,7 +88,7 @@ The skill contains the complete reporting workflow with:
 
 ```
 Task tool:
-  subagent_type: "ring-pmo-team:executive-reporter"
+  subagent_type: "executive-reporter"
   model: "opus"
   prompt: "Create [type] executive report. Audience: [audience]. Period: [period]."
 ```
@@ -97,7 +97,7 @@ Task tool:
 
 ```
 Task tool:
-  subagent_type: "ring-pmo-team:portfolio-manager"
+  subagent_type: "portfolio-manager"
   model: "opus"
   prompt: "Provide portfolio status data for executive report."
 ```

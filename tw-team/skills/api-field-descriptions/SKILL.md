@@ -1,5 +1,5 @@
 ---
-name: ring-tw-team:api-field-descriptions
+name: api-field-descriptions
 description: |
   Patterns for writing clear, consistent API field descriptions including
   types, constraints, examples, and edge cases.
@@ -14,7 +14,7 @@ skip_when: |
   - Full API endpoint docs → use writing-api-docs
 
 related:
-  complementary: [ring-tw-team:writing-api-docs]
+  complementary: [writing-api-docs]
 ---
 
 # API Field Descriptions

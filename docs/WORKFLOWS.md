@@ -40,7 +40,7 @@ This document contains detailed workflow instructions for adding skills, agents,
 
 3. Test with:
    ```
-   Skill tool: "ring-default:testing-skills-with-subagents"
+   Skill tool: "testing-skills-with-subagents"
    ```
 
 4. Skill auto-loads next SessionStart via `default/hooks/generate-skills-ref.py`
@@ -93,12 +93,12 @@ This document contains detailed workflow instructions for adding skills, agents,
 Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introduce available agents and capabilities:
 
 ### Default Plugin
-- `ring-default:using-ring` → ORCHESTRATOR principle, mandatory workflow
+- `using-ring` → ORCHESTRATOR principle, mandatory workflow
 - Always injected, always mandatory
 - Located: `default/skills/using-ring/SKILL.md`
 
 ### Ring Dev Team Plugin
-- `ring-dev-team:using-dev-team` → 7 specialist developer agents
+- `using-dev-team` → 7 specialist developer agents
 - Auto-loads when ring-dev-team plugin is enabled
 - Located: `dev-team/skills/using-dev-team/SKILL.md`
 - Agents (invoke as `{agent-name}`):
@@ -111,7 +111,7 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
   - sre
 
 ### Ring FinOps Team Plugin
-- `ring-finops-team:using-finops-team` → 2 FinOps agents for Brazilian compliance
+- `using-finops-team` → 2 FinOps agents for Brazilian compliance
 - Auto-loads when ring-finops-team plugin is enabled
 - Located: `finops-team/skills/using-finops-team/SKILL.md`
 - Agents (invoke as `{agent-name}`):
@@ -119,19 +119,19 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
   - finops-automation (template generation)
 
 ### Ring PM Team Plugin
-- `ring-pm-team:using-pm-team` → Pre-dev workflow skills (8 gates)
+- `using-pm-team` → Pre-dev workflow skills (8 gates)
 - Auto-loads when ring-pm-team plugin is enabled
 - Located: `pm-team/skills/using-pm-team/SKILL.md`
 - Skills: 8 pre-dev gates for feature planning
 
 ### Ring TW Team Plugin
-- `ring-tw-team:using-tw-team` → 3 technical writing agents for documentation
+- `using-tw-team` → 3 technical writing agents for documentation
 - Auto-loads when ring-tw-team plugin is enabled
 - Located: `tw-team/skills/using-tw-team/SKILL.md`
 - Agents (invoke as `{agent-name}`):
   - functional-writer (guides)
   - api-writer (API reference)
-  - ring-tw-team:docs-reviewer (quality review)
+  - docs-reviewer (quality review)
 - Commands: write-guide, write-api, review-docs
 
 ### Hook Configuration
