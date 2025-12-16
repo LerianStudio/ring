@@ -198,7 +198,7 @@ Remember:
 - **Combine with using-ring principle** – Skills + Agents = complete workflow
 
 ### Good Example (ORCHESTRATOR):
-> "I need BACEN compliance. Let me dispatch finops-analyzer to understand requirements, then finops-automation to generate templates."
+> "I need BACEN compliance. Let me dispatch ring-finops-team:finops-analyzer to understand requirements, then ring-finops-team:finops-automation to generate templates."
 
 ### Bad Example (OPERATOR):
 > "I'll manually read BACEN documentation and write templates myself."
