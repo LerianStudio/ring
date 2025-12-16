@@ -165,7 +165,24 @@ Task tool:
     - Key files inventory with file:line references
     - Code snippets showing current implementation patterns
 
-    Output format: EXPLORATION SUMMARY, KEY FINDINGS, ARCHITECTURE INSIGHTS, RELEVANT FILES
+    ⛔ MANDATORY OUTPUT: You MUST return your findings using EXACTLY this format:
+
+    ## EXPLORATION SUMMARY
+    [Your summary here]
+
+    ## KEY FINDINGS
+    [Your findings here]
+
+    ## ARCHITECTURE INSIGHTS
+    [Your insights here]
+
+    ## RELEVANT FILES
+    [Your file inventory here]
+
+    ## RECOMMENDATIONS
+    [Your recommendations here]
+
+    **Do NOT complete without outputting your full report in the format above.**
 ```
 
 ### Anti-Rationalization Table for Step 3
