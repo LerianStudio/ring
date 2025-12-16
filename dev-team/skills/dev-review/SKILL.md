@@ -269,9 +269,9 @@ THEN STOP - Invalid agent prefix
 **You MUST dispatch all 3 reviewers in a SINGLE message:**
 
 ```
-Task tool #1: code-reviewer
-Task tool #2: business-logic-reviewer
-Task tool #3: security-reviewer
+Task tool #1: ring-default:code-reviewer
+Task tool #2: ring-default:business-logic-reviewer
+Task tool #3: ring-default:security-reviewer
 ```
 
 **VIOLATIONS:**
