@@ -11,7 +11,7 @@ This command initiates structured incident response following SRE best practices
 ## Usage
 
 ```
-/incident SEV2 API latency spike affecting 30% of users
+/ring-ops-team:incident SEV2 API latency spike affecting 30% of users
 ```
 
 ## Workflow
