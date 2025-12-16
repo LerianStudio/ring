@@ -342,7 +342,7 @@ See [shared-patterns/template-tdd-prompts.md](../shared-patterns/template-tdd-pr
 
 **Purpose:** Write a test that captures expected behavior and FAILS.
 
-**Dispatch:** `Task(subagent_type: "{agent}", model: "opus")`
+**Dispatch:** `Task(subagent_type: "{agent}", model: "opus")` <!-- {agent} MUST be fully qualified: ring-{plugin}:{component} -->
 
 See [shared-patterns/template-tdd-prompts.md](../shared-patterns/template-tdd-prompts.md) for the TDD-RED prompt template.
 
@@ -356,7 +356,7 @@ See [shared-patterns/template-tdd-prompts.md](../shared-patterns/template-tdd-pr
 
 **Purpose:** Write minimal code to make the failing test pass.
 
-**Dispatch:** `Task(subagent_type: "{agent}", model: "opus")`
+**Dispatch:** `Task(subagent_type: "{agent}", model: "opus")` <!-- {agent} MUST be fully qualified: ring-{plugin}:{component} -->
 
 See [shared-patterns/template-tdd-prompts.md](../shared-patterns/template-tdd-prompts.md) for the TDD-GREEN prompt template (includes observability requirements).
 
