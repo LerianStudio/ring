@@ -14,7 +14,7 @@ trigger: |
 skip_when: |
   - General code review → use default plugin reviewers
   - Planning/design → use brainstorming
-  - Debugging → use systematic-debugging
+  - Debugging → use ring-default:systematic-debugging
 
 related:
   similar: [ring-default:using-ring]

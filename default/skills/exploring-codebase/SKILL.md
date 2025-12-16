@@ -672,7 +672,7 @@ Based on autonomous exploration:
 **Common failure modes:**
 - [Pattern from cross-cutting analysis]
 
-Ready to investigate systematically? (Use systematic-debugging)
+Ready to investigate systematically? (Use ring-default:systematic-debugging)
 ```
 
 **If user's goal is learning:**

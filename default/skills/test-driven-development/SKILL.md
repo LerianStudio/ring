@@ -46,7 +46,7 @@ composition:
   works_well_with:
     - skill: "ring-default:systematic-debugging"
       when: "test reveals unexpected behavior or bug"
-      transition: "Pause TDD at current phase, use systematic-debugging to find root cause, return to TDD after fix"
+      transition: "Pause TDD at current phase, use ring-default:systematic-debugging to find root cause, return to TDD after fix"
 
     - skill: "ring-default:verification-before-completion"
       when: "before marking test suite or feature complete"
