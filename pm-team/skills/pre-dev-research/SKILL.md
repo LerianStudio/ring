@@ -15,10 +15,10 @@ skip_when: |
   - Research already completed (research.md exists and is recent)
 
 sequence:
-  before: [pre-dev-prd-creation, pre-dev-feature-map]
+  before: [ring-pm-team:pre-dev-prd-creation, ring-pm-team:pre-dev-feature-map]
 
 related:
-  complementary: [pre-dev-prd-creation, pre-dev-trd-creation]
+  complementary: [ring-pm-team:pre-dev-prd-creation, ring-pm-team:pre-dev-trd-creation]
 
 research_modes:
   greenfield:

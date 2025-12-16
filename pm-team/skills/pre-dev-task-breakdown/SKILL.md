@@ -16,8 +16,8 @@ skip_when: |
   - Trivial change → direct implementation
 
 sequence:
-  after: [pre-dev-trd-creation, pre-dev-dependency-map]
-  before: [pre-dev-subtask-creation, executing-plans]
+  after: [ring-pm-team:pre-dev-trd-creation, ring-pm-team:pre-dev-dependency-map]
+  before: [ring-pm-team:pre-dev-subtask-creation, ring-default:executing-plans]
 ---
 
 # Task Breakdown - Value-Driven Decomposition
