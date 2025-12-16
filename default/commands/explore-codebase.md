@@ -1,5 +1,5 @@
 ---
-name: ring-default:explore-codebase
+name: explore-codebase
 description: Autonomous two-phase codebase exploration with adaptive agents
 argument-hint: "[target]"
 ---
@@ -9,7 +9,7 @@ Autonomously discover codebase structure, then explore deeply with adaptive agen
 ## Usage
 
 ```
-/ring-default:explore-codebase [target]
+/explore-codebase [target]
 ```
 
 ## Arguments
@@ -66,7 +66,7 @@ Target: "account creation"
 
 ## Process Details
 
-This command invokes the `ring-default:exploring-codebase` skill which handles:
+This command invokes the `exploring-codebase` skill which handles:
 
 ### Phase 1: Discovery Pass (3-4 parallel agents)
 
@@ -126,7 +126,7 @@ The number and focus of agents adapts to Phase 1 findings:
 ### Example 1: Exploring Account Creation
 
 ```bash
-/ring-default:explore-codebase account creation
+/explore-codebase account creation
 ```
 
 **Phase 1 might discover:**
@@ -144,7 +144,7 @@ The number and focus of agents adapts to Phase 1 findings:
 ### Example 2: Exploring Transaction Processing
 
 ```bash
-/ring-default:explore-codebase transaction processing
+/explore-codebase transaction processing
 ```
 
 **Phase 1 might discover:**
@@ -162,7 +162,7 @@ The number and focus of agents adapts to Phase 1 findings:
 ### Example 3: Exploring Authentication
 
 ```bash
-/ring-default:explore-codebase authentication system
+/explore-codebase authentication system
 ```
 
 **Phase 1 might discover:**
@@ -255,12 +255,12 @@ Recommendations based on your goal (implementation, debugging, or learning)
 
 | Command/Skill | Relationship |
 |---------------|--------------|
-| `/ring-default:brainstorm` | Use explore-codebase in Phase 1 for context |
-| `/ring-default:write-plan` | Use explore-codebase before planning implementation |
-| `/ring-default:execute-plan` | Use if plan execution reveals gaps in understanding |
-| `ring-default:exploring-codebase` | Underlying skill with full logic and prompts |
-| `ring-default:dispatching-parallel-agents` | Pattern used twice (discovery + deep dive) |
-| `ring-default:systematic-debugging` | Use explore-codebase before debugging |
+| `/brainstorm` | Use explore-codebase in Phase 1 for context |
+| `/write-plan` | Use explore-codebase before planning implementation |
+| `/execute-plan` | Use if plan execution reveals gaps in understanding |
+| `exploring-codebase` | Underlying skill with full logic and prompts |
+| `dispatching-parallel-agents` | Pattern used twice (discovery + deep dive) |
+| `systematic-debugging` | Use explore-codebase before debugging |
 
 ## Troubleshooting
 
@@ -289,23 +289,23 @@ Recommendations based on your goal (implementation, debugging, or learning)
 ### Narrow Scope
 Focus discovery on specific area:
 ```bash
-/ring-default:explore-codebase transaction processing in payment service only
+/explore-codebase transaction processing in payment service only
 ```
 
 ### Deep Exploration
 Request comprehensive analysis:
 ```bash
-/ring-default:explore-codebase authentication (include all integrations and edge cases)
+/explore-codebase authentication (include all integrations and edge cases)
 ```
 
 ### Comparative Analysis
 Run twice to understand changes:
 ```bash
 # Before refactoring
-/ring-default:explore-codebase user management
+/explore-codebase user management
 
 # After refactoring
-/ring-default:explore-codebase user management
+/explore-codebase user management
 # Compare the two synthesis documents
 ```
 
@@ -354,40 +354,40 @@ The command suggests appropriate follow-up:
 
 **If you're implementing something:**
 ```
-Ready to create implementation plan? Use /ring-default:write-plan
+Ready to create implementation plan? Use /write-plan
 ```
 
 **If you're setting up workspace:**
 ```
-Ready for isolated workspace? Use /ring-default:worktree
+Ready for isolated workspace? Use /worktree
 ```
 
 **If you're debugging:**
 ```
-Ready to investigate? Use ring-default:systematic-debugging skill
+Ready to investigate? Use systematic-debugging skill
 ```
 
 **If you're designing:**
 ```
-Ready to refine design? Use /ring-default:brainstorm
+Ready to refine design? Use /brainstorm
 ```
 
 ## Real-World Workflow
 
 ```bash
 # 1. Understand the codebase
-/ring-default:explore-codebase payment processing
+/explore-codebase payment processing
 
 # 2. Review synthesis document (architecture + implementation)
 
 # 3. Based on findings, plan your changes
-/ring-default:write-plan add-refund-support
+/write-plan add-refund-support
 
 # 4. Set up isolated workspace
-/ring-default:worktree feature/add-refund-support
+/worktree feature/add-refund-support
 
 # 5. Execute the plan
-/ring-default:execute-plan <plan-file>
+/execute-plan <plan-file>
 ```
 
 ## Key Takeaways

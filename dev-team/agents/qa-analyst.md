@@ -1,5 +1,5 @@
 ---
-name: ring-dev-team:qa-analyst
+name: qa-analyst
 version: 1.3.0
 description: Senior Quality Assurance Analyst specialized in testing financial systems. Handles test strategy, API testing, E2E automation, performance testing, and compliance validation.
 type: specialist
@@ -118,7 +118,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-dev-team:qa-analyst", model="opus", ...)  # REQUIRED
+Task(subagent_type="qa-analyst", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Test strategy design + compliance validation requires Opus-level reasoning for comprehensive test case generation, edge case identification, and rigorous standards validation.
@@ -430,7 +430,7 @@ See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-
 
 See [docs/AGENT_DESIGN.md](https://raw.githubusercontent.com/LerianStudio/ring/main/docs/AGENT_DESIGN.md) for canonical output schema requirements.
 
-When invoked from the `ring-dev-team:dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the test implementation against Lerian/Ring QA Standards.
+When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the test implementation against Lerian/Ring QA Standards.
 
 ### Sections to Check (MANDATORY)
 

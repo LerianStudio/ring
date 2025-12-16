@@ -1,5 +1,5 @@
 ---
-name: ring-finops-team:finops-analyzer
+name: finops-analyzer
 version: 1.1.0
 description: Senior Regulatory Compliance Analyst specializing in Brazilian financial regulatory template analysis and field mapping validation (Gates 1-2). Expert in BACEN, RFB, and Open Banking compliance.
 type: specialist
@@ -41,7 +41,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-finops-team:finops-analyzer", model="opus", ...)  # REQUIRED
+Task(subagent_type="finops-analyzer", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:**
@@ -429,7 +429,7 @@ You have access to critical regulatory documentation and data dictionaries:
 - Confirmed transformation rules
 - Template structure ready for implementation
 - All uncertainties resolved
-- Ready for ring-finops-team:finops-automation to implement
+- Ready for finops-automation to implement
 
 ---
 
@@ -539,7 +539,7 @@ specification_report:
     ready_for_implementation: true
 ```
 
-This report is the CONTRACT between you (analyzer) and ring-finops-team:finops-automation (implementer).
+This report is the CONTRACT between you (analyzer) and finops-automation (implementer).
 
 ---
 
@@ -552,7 +552,7 @@ You are the ANALYZER, not the implementer. Your role:
 4. **Validate** transformations are implementable
 5. **Ensure** 100% mandatory fields coverage (BLOCKER for Gate 3)
 6. **Document** any uncertainties clearly
-7. **Generate** complete Specification Report for ring-finops-team:finops-automation
+7. **Generate** complete Specification Report for finops-automation
 
 Key principle: Your Specification Report is the single source of truth for template implementation.
-The ring-finops-team:finops-automation agent will implement EXACTLY what you specify - no more, no less.
+The finops-automation agent will implement EXACTLY what you specify - no more, no less.

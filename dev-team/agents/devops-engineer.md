@@ -1,5 +1,5 @@
 ---
-name: ring-dev-team:devops-engineer
+name: devops-engineer
 version: 1.3.1
 description: Senior DevOps Engineer specialized in cloud infrastructure for financial services. Handles containerization, IaC, and local development environments.
 type: specialist
@@ -95,7 +95,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-dev-team:devops-engineer", model="opus", ...)  # REQUIRED
+Task(subagent_type="devops-engineer", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Infrastructure compliance verification + IaC analysis requires Opus-level reasoning for security pattern recognition, multi-stage build optimization, and comprehensive DevOps standards validation.
@@ -291,7 +291,7 @@ See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-
 
 See [docs/AGENT_DESIGN.md](https://raw.githubusercontent.com/LerianStudio/ring/main/docs/AGENT_DESIGN.md) for canonical output schema requirements.
 
-When invoked from the `ring-dev-team:dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the infrastructure against Lerian/Ring DevOps Standards.
+When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the infrastructure against Lerian/Ring DevOps Standards.
 
 ### Sections to Check (MANDATORY)
 

@@ -1,5 +1,5 @@
 ---
-name: ring-pm-team:pre-dev-subtask-creation
+name: pre-dev-subtask-creation
 description: |
   Gate 8: Zero-context implementation steps - 2-5 minute atomic subtasks with
   complete code, exact commands, TDD pattern. Large Track only.
@@ -16,8 +16,8 @@ skip_when: |
   - Tasks not validated → complete Gate 7 first
 
 sequence:
-  after: [ring-pm-team:pre-dev-task-breakdown]
-  before: [ring-default:executing-plans, ring-default:subagent-driven-development]
+  after: [pre-dev-task-breakdown]
+  before: [executing-plans, subagent-driven-development]
 ---
 
 # Subtask Creation - Bite-Sized, Zero-Context Steps
@@ -138,8 +138,8 @@ If you catch yourself writing any of these in a subtask, **STOP and rewrite**:
 After creating subtasks, offer execution choice:
 
 **"Subtasks complete. Two execution options:**
-1. **Subagent-Driven** - Fresh subagent per subtask, review between, fast iteration → Use `ring-default:subagent-driven-development`
-2. **Parallel Session** - New session with executing-plans, batch with checkpoints → Use `ring-default:executing-plans`
+1. **Subagent-Driven** - Fresh subagent per subtask, review between, fast iteration → Use `subagent-driven-development`
+2. **Parallel Session** - New session with executing-plans, batch with checkpoints → Use `executing-plans`
 
 **Which approach?"**
 

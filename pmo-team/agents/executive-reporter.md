@@ -1,5 +1,5 @@
 ---
-name: ring-pmo-team:executive-reporter
+name: executive-reporter
 version: 1.0.0
 description: Executive Reporting Specialist for creating dashboards, status summaries, board packages, and stakeholder communications. Focuses on actionable insights for leadership.
 type: specialist
@@ -70,7 +70,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-pmo-team:executive-reporter", model="opus", ...)  # REQUIRED
+Task(subagent_type="executive-reporter", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Executive communication requires sophisticated audience analysis, appropriate abstraction levels, and nuanced presentation of complex information that demands Opus-level reasoning capabilities.

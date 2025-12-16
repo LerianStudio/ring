@@ -1,5 +1,5 @@
 ---
-name: ring-pm-team:pre-dev-feature
+name: pre-dev-feature
 description: Lightweight 4-gate pre-dev workflow for small features (<2 days)
 argument-hint: "[feature-name]"
 ---
@@ -14,7 +14,7 @@ I'm running the **Small Track** pre-development workflow (4 gates) for your feat
 - ✅ Don't require multi-service integration
 - ✅ Can be completed by a single developer
 
-**If any of the above are false, use `/ring-pm-team:pre-dev-full` instead.**
+**If any of the above are false, use `/pre-dev-full` instead.**
 
 ## Document Organization
 
@@ -37,7 +37,7 @@ mkdir -p docs/pre-dev/<feature-name>
 
 ## Gate 0: Research Phase (Lightweight)
 
-**Skill:** pre-dev-research
+**Skill:** ring-pm-team:pre-dev-research
 
 Even small features benefit from quick research:
 
@@ -55,7 +55,7 @@ Even small features benefit from quick research:
 
 ## Gate 1: PRD Creation
 
-**Skill:** pre-dev-prd-creation
+**Skill:** ring-pm-team:pre-dev-prd-creation
 
 1. Ask user to describe the feature (what problem does it solve, who are the users, what's the business value)
 2. Create PRD document with:
@@ -76,7 +76,7 @@ Even small features benefit from quick research:
 
 ## Gate 2: TRD Creation (Skipping Feature Map)
 
-**Skill:** pre-dev-trd-creation
+**Skill:** ring-pm-team:pre-dev-trd-creation
 
 1. Load PRD from `docs/pre-dev/<feature-name>/prd.md`
 2. Note: No Feature Map exists (small track) - map PRD features directly to components
@@ -99,7 +99,7 @@ Even small features benefit from quick research:
 
 ## Gate 3: Task Breakdown (Skipping API/Data/Deps)
 
-**Skill:** pre-dev-task-breakdown
+**Skill:** ring-pm-team:pre-dev-task-breakdown
 
 1. Load PRD from `docs/pre-dev/<feature-name>/prd.md`
 2. Load TRD from `docs/pre-dev/<feature-name>/trd.md`
@@ -151,7 +151,7 @@ Next steps:
 
 - This is the **Small Track** - lightweight and fast
 - **Gate 0 (Research) checks for existing patterns** even for small features
-- If feature grows during planning, switch to `/ring-pm-team:pre-dev-full`
+- If feature grows during planning, switch to `/pre-dev-full`
 - All documents saved to `docs/pre-dev/<feature-name>/`
 - Get human approval at each gate
 - Technology decisions happen later in Dependency Map (not in this track)

@@ -1,5 +1,5 @@
 ---
-name: ring-default:subagent-driven-development
+name: subagent-driven-development
 description: |
   Autonomous plan execution - fresh subagent per task with automated code review
   between tasks. No human-in-loop, high throughput with quality gates.
@@ -15,10 +15,10 @@ skip_when: |
   - Plan needs revision → use brainstorming first
 
 sequence:
-  after: [ring-default:writing-plans, ring-pm-team:pre-dev-task-breakdown]
+  after: [writing-plans, pre-dev-task-breakdown]
 
 related:
-  similar: [ring-default:executing-plans]
+  similar: [executing-plans]
 ---
 
 # Subagent-Driven Development
@@ -61,9 +61,9 @@ Read plan file, create TodoWrite with all tasks.
 
 | Reviewer | Model | Context |
 |----------|-------|---------|
-| `ring-default:code-reviewer` | opus | WHAT_WAS_IMPLEMENTED, PLAN, BASE_SHA, HEAD_SHA |
-| `ring-default:business-logic-reviewer` | opus | Same context |
-| `ring-default:security-reviewer` | opus | Same context |
+| `code-reviewer` | opus | WHAT_WAS_IMPLEMENTED, PLAN, BASE_SHA, HEAD_SHA |
+| `business-logic-reviewer` | opus | Same context |
+| `security-reviewer` | opus | Same context |
 
 **Each returns:** Strengths, Issues (Critical/High/Medium/Low/Cosmetic), Assessment (PASS/FAIL)
 
@@ -94,8 +94,8 @@ After all Critical/High/Medium issues resolved for current task:
 ### 7. Complete Development
 
 After final review passes:
-- Announce: "I'm using the ring-default:finishing-a-development-branch skill to complete this work."
-- **REQUIRED SUB-SKILL:** Use ring-default:finishing-a-development-branch
+- Announce: "I'm using the finishing-a-development-branch skill to complete this work."
+- **REQUIRED SUB-SKILL:** Use finishing-a-development-branch
 - Follow that skill to verify tests, present options, execute choice
 
 ## Example Workflow
@@ -142,14 +142,14 @@ After final review passes:
 ## Integration
 
 **Required workflow skills:**
-- **ring-default:writing-plans** - REQUIRED: Creates the plan that this skill executes
-- **ring-default:requesting-code-review** - REQUIRED: Review after each task (see Step 3)
-- **ring-default:finishing-a-development-branch** - REQUIRED: Complete development after all tasks (see Step 7)
+- **writing-plans** - REQUIRED: Creates the plan that this skill executes
+- **requesting-code-review** - REQUIRED: Review after each task (see Step 3)
+- **finishing-a-development-branch** - REQUIRED: Complete development after all tasks (see Step 7)
 
 **Subagents must use:**
-- **ring-default:test-driven-development** - Subagents follow TDD for each task
+- **test-driven-development** - Subagents follow TDD for each task
 
 **Alternative workflow:**
-- **ring-default:executing-plans** - Use for parallel session instead of same-session execution
+- **executing-plans** - Use for parallel session instead of same-session execution
 
 See reviewer agent definitions: code-reviewer (agents/code-reviewer.md), security-reviewer (agents/security-reviewer.md), business-logic-reviewer (agents/business-logic-reviewer.md)

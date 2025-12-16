@@ -1,5 +1,5 @@
 ---
-name: ring-ops-team:infrastructure-architect
+name: infrastructure-architect
 version: 1.0.0
 description: Senior Infrastructure Architect specialized in cloud infrastructure design, capacity planning, disaster recovery, and infrastructure lifecycle management for high-availability financial systems.
 type: specialist
@@ -66,7 +66,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-ops-team:infrastructure-architect", model="opus", ...)  # REQUIRED
+Task(subagent_type="infrastructure-architect", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Infrastructure architecture decisions have long-term implications requiring comprehensive analysis of tradeoffs, compliance requirements, and scalability patterns - all requiring Opus-level reasoning.

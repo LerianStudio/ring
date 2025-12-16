@@ -1,5 +1,5 @@
 ---
-name: ring-pm-team:repo-research-analyst
+name: repo-research-analyst
 description: |
   Codebase research specialist for pre-dev planning. Searches target repository
   for existing patterns, conventions, and prior solutions. Returns findings with
@@ -56,7 +56,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-pm-team:repo-research-analyst", model="opus", ...)  # REQUIRED
+Task(subagent_type="repo-research-analyst", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:**

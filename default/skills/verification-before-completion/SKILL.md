@@ -1,5 +1,5 @@
 ---
-name: ring-default:verification-before-completion
+name: verification-before-completion
 description: |
   Evidence-first completion gate - requires running verification commands and
   confirming output before making any success claims.
@@ -15,7 +15,7 @@ skip_when: |
   - Still in development (not claiming completion) → continue working
 
 sequence:
-  before: [ring-default:finishing-a-development-branch, ring-default:requesting-code-review]
+  before: [finishing-a-development-branch, requesting-code-review]
 ---
 
 # Verification Before Completion

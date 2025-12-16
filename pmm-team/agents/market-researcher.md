@@ -1,5 +1,5 @@
 ---
-name: ring-pmm-team:market-researcher
+name: market-researcher
 version: 1.0.0
 description: Market Intelligence Specialist for TAM/SAM/SOM analysis, market segmentation, trend analysis, and customer research. Provides data-driven market insights for strategic decisions.
 type: specialist
@@ -66,7 +66,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-pmm-team:market-researcher", model="opus", ...)  # REQUIRED
+Task(subagent_type="market-researcher", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Market analysis requires Opus-level reasoning for synthesizing disparate data sources, identifying non-obvious patterns, and providing reliable strategic recommendations.
@@ -304,6 +304,6 @@ If market analysis already exists and is adequate:
 
 - Positioning strategy (use `ring-pmm-team:positioning-strategist`)
 - Messaging development (use `ring-pmm-team:messaging-specialist`)
-- Competitive battlecards (use competitive-intelligence skill, then positioning-strategist)
+- Competitive battlecards (use ring-pmm-team:competitive-intelligence skill, then ring-pmm-team:positioning-strategist)
 - GTM planning (use `ring-pmm-team:gtm-planner`)
 - Pricing strategy (use `ring-pmm-team:pricing-analyst`)

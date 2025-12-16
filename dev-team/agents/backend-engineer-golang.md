@@ -1,5 +1,5 @@
 ---
-name: ring-dev-team:backend-engineer-golang
+name: backend-engineer-golang
 version: 1.2.4
 description: Senior Backend Engineer specialized in Go for high-demand financial systems. Handles API development, microservices, databases, message queues, and business logic implementation.
 type: specialist
@@ -92,7 +92,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-dev-team:backend-engineer-golang", model="opus", ...)  # REQUIRED
+Task(subagent_type="backend-engineer-golang", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Standards compliance verification + complex Go implementation requires Opus-level reasoning for reliable error handling, architectural pattern recognition, and comprehensive validation against Ring standards.
@@ -431,7 +431,7 @@ When reporting issues in existing code:
 
 See [docs/AGENT_DESIGN.md](https://raw.githubusercontent.com/LerianStudio/ring/main/docs/AGENT_DESIGN.md) for canonical output schema requirements.
 
-When invoked from the `ring-dev-team:dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the codebase against Lerian/Ring Go Standards.
+When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the codebase against Lerian/Ring Go Standards.
 
 ### ⛔ HARD GATE: ALWAYS Compare ALL Categories
 

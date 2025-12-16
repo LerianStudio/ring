@@ -1,5 +1,5 @@
 ---
-name: ring-finance-team:financial-modeler
+name: financial-modeler
 version: 1.0.0
 description: Financial Modeling Expert specialized in DCF valuation, LBO models, merger models, scenario analysis, and sensitivity testing. Builds robust, auditable financial models with comprehensive documentation.
 type: specialist
@@ -85,7 +85,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-finance-team:financial-modeler", model="opus", ...)  # REQUIRED
+Task(subagent_type="financial-modeler", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Financial modeling requires Opus-level reasoning for complex interdependencies, circular reference management, sensitivity analysis design, and scenario probability weighting.

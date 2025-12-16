@@ -1,5 +1,5 @@
 ---
-name: ring-tw-team:api-writer
+name: api-writer
 version: 0.2.0
 description: Senior Technical Writer specialized in API reference documentation including endpoint descriptions, request/response schemas, and error documentation.
 type: specialist
@@ -44,7 +44,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-tw-team:api-writer", model="opus", ...)  # REQUIRED
+Task(subagent_type="api-writer", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:**
@@ -62,8 +62,8 @@ API accuracy verification and comprehensive field documentation requires Opus at
 ## Related Skills
 
 This agent applies patterns from these skills:
-- `ring-tw-team:writing-api-docs` - Endpoint documentation structure and patterns
-- `ring-tw-team:api-field-descriptions` - Field description patterns by data type
+- `writing-api-docs` - Endpoint documentation structure and patterns
+- `api-field-descriptions` - Field description patterns by data type
 
 ## Standards Loading
 

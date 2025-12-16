@@ -1,5 +1,5 @@
 ---
-name: ring-dev-team:backend-engineer-typescript
+name: backend-engineer-typescript
 version: 1.3.5
 description: Senior Backend Engineer specialized in TypeScript/Node.js for scalable systems. Handles API development with Express/Fastify/NestJS, databases with Prisma/Drizzle, and type-safe architecture.
 type: specialist
@@ -94,7 +94,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-dev-team:backend-engineer-typescript", model="opus", ...)  # REQUIRED
+Task(subagent_type="backend-engineer-typescript", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Standards compliance verification + TypeScript type safety analysis requires Opus-level reasoning for complex type systems, runtime validation patterns, and comprehensive standards validation.
@@ -498,7 +498,7 @@ When reporting issues in existing code:
 
 See [docs/AGENT_DESIGN.md](https://raw.githubusercontent.com/LerianStudio/ring/main/docs/AGENT_DESIGN.md) for canonical output schema requirements.
 
-When invoked from the `ring-dev-team:dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the codebase against Lerian/Ring TypeScript Standards.
+When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST produce a Standards Compliance section comparing the codebase against Lerian/Ring TypeScript Standards.
 
 ### Sections to Check (MANDATORY)
 

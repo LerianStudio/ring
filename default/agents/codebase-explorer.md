@@ -1,5 +1,5 @@
 ---
-name: ring-default:codebase-explorer
+name: codebase-explorer
 version: 1.3.0
 description: "Deep codebase exploration agent for architecture understanding, pattern discovery, and comprehensive code analysis. Uses Opus for thorough analysis vs built-in Explore's Haiku speed-focus."
 type: exploration
@@ -46,7 +46,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 **Orchestrator Requirement:**
 When calling this agent, you MUST specify the model parameter:
 ```
-Task(subagent_type="ring-default:codebase-explorer", model="opus", ...)  # REQUIRED
+Task(subagent_type="codebase-explorer", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Deep codebase understanding requires Opus thoroughness to perform architectural tracing (entry points → processing → storage → output), pattern recognition across components (directory conventions, naming patterns, architectural patterns like Clean Architecture/DRY/SOLID), synthesis of findings into actionable insights, and the ability to answer "how" and "why" questions that require connecting disparate code elements into coherent explanations - analysis depth beyond simple file location.

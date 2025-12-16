@@ -1,5 +1,5 @@
 ---
-name: ring-pmm-team:competitive-intel
+name: competitive-intel
 description: Competitive intelligence workflow for landscape analysis and battlecards
 argument-hint: "[market-or-competitor-name]"
 ---
@@ -225,17 +225,17 @@ Next steps:
 
 | Competitive Intel Feeds | Use For |
 |-------------------------|---------|
-| ring-pmm-team:positioning-development | Differentiation strategy |
-| ring-pmm-team:messaging-creation | Competitive responses |
-| ring-pmm-team:pricing-strategy | Price positioning |
-| ring-pmm-team:gtm-planning | Channel decisions |
+| positioning-development | Differentiation strategy |
+| messaging-creation | Competitive responses |
+| pricing-strategy | Price positioning |
+| gtm-planning | Channel decisions |
 
 ## Quick Competitive Intel (Alternative)
 
 For urgent competitive needs, use the skill directly:
 
 ```
-Skill tool: "ring-pmm-team:competitive-intelligence"
+Skill tool: "competitive-intelligence"
 ```
 
 This provides the analysis framework without the full command workflow.

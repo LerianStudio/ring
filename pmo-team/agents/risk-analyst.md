@@ -1,5 +1,5 @@
 ---
-name: ring-pmo-team:risk-analyst
+name: risk-analyst
 version: 1.0.0
 description: Portfolio Risk Analyst specialized in risk identification, assessment, correlation analysis, and mitigation planning across portfolio projects. Manages RAID logs and portfolio risk exposure.
 type: specialist
@@ -70,7 +70,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-pmo-team:risk-analyst", model="opus", ...)  # REQUIRED
+Task(subagent_type="risk-analyst", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Risk analysis requires nuanced probability assessment, impact analysis, correlation identification, and strategic judgment that demands Opus-level reasoning capabilities.

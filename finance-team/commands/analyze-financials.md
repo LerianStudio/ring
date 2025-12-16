@@ -1,5 +1,5 @@
 ---
-name: ring-finance-team:analyze-financials
+name: analyze-financials
 description: Perform comprehensive financial analysis on provided financial data
 argument-hint: "[data-source] [options]"
 ---
@@ -9,7 +9,7 @@ Perform comprehensive financial analysis on provided financial data.
 ## Usage
 
 ```
-/ring-finance-team:analyze-financials [data-source] [options]
+/analyze-financials [data-source] [options]
 ```
 
 ## Arguments
@@ -32,16 +32,16 @@ Perform comprehensive financial analysis on provided financial data.
 
 ```bash
 # Analyze financial statements
-/ring-finance-team:analyze-financials docs/financials/statements-2024.xlsx
+/analyze-financials docs/financials/statements-2024.xlsx
 
 # Year-over-year analysis
-/ring-finance-team:analyze-financials docs/financials/Q4-2024.xlsx --comparison prior-year
+/analyze-financials docs/financials/Q4-2024.xlsx --comparison prior-year
 
 # Specific analysis types
-/ring-finance-team:analyze-financials docs/financials/annual-report.pdf --type "ratio,trend,benchmark"
+/analyze-financials docs/financials/annual-report.pdf --type "ratio,trend,benchmark"
 
 # With industry comparison
-/ring-finance-team:analyze-financials docs/financials/income-statement.csv --benchmark industry
+/analyze-financials docs/financials/income-statement.csv --benchmark industry
 ```
 
 ## Prerequisites
@@ -76,8 +76,8 @@ The command produces a comprehensive analysis report including:
 
 | Command | Description |
 |---------|-------------|
-| `/ring-finance-team:create-budget` | Create budget or forecast |
-| `/ring-finance-team:build-model` | Build financial model |
+| `/create-budget` | Create budget or forecast |
+| `/build-model` | Build financial model |
 
 ---
 
@@ -86,7 +86,7 @@ The command produces a comprehensive analysis report including:
 **This command MUST load the skill for complete workflow execution.**
 
 ```
-Use Skill tool: ring-finance-team:financial-analysis
+Use Skill tool: financial-analysis
 ```
 
 The skill contains the complete 5-phase workflow with:
@@ -137,7 +137,7 @@ AskUserQuestion:
 
 ## Quick Reference
 
-See skill `ring-finance-team:financial-analysis` for full details. Key rules:
+See skill `financial-analysis` for full details. Key rules:
 
 - **All data sources cited** - No uncited figures
 - **All calculations shown** - Audit-ready documentation

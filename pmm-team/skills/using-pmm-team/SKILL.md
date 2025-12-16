@@ -1,5 +1,5 @@
 ---
-name: ring-pmm-team:using-pmm-team
+name: using-pmm-team
 description: |
   7 product marketing skills + 6 specialist agents for go-to-market strategy,
   positioning, messaging, competitive intelligence, and launch coordination.
@@ -20,7 +20,7 @@ skip_when: |
 
 The ring-pmm-team plugin provides 7 product marketing skills and 6 specialist agents. Use them via `Skill tool: "skill-name"` or via slash commands.
 
-**Remember:** Follow the **ORCHESTRATOR principle** from `ring-default:using-ring`. Dispatch PMM specialists to handle marketing strategy; don't attempt marketing analysis without structured process.
+**Remember:** Follow the **ORCHESTRATOR principle** from `using-ring`. Dispatch PMM specialists to handle marketing strategy; don't attempt marketing analysis without structured process.
 
 ## PMM Philosophy
 
@@ -48,24 +48,24 @@ PMM workflow ensures:
 
 | Skill | Purpose | Output |
 |-------|---------|--------|
-| `ring-pmm-team:market-analysis` | Market sizing, segmentation, trends | market-analysis.md |
-| `ring-pmm-team:positioning-development` | Differentiation, positioning statement | positioning.md |
-| `ring-pmm-team:messaging-creation` | Value props, proof points, messaging | messaging-framework.md |
-| `ring-pmm-team:gtm-planning` | Channels, tactics, timeline | gtm-plan.md |
-| `ring-pmm-team:launch-execution` | Launch checklist, coordination | launch-plan.md |
-| `ring-pmm-team:pricing-strategy` | Pricing models, analysis | pricing-strategy.md |
-| `ring-pmm-team:competitive-intelligence` | Competitive landscape, battlecards | competitive-intel.md |
+| `market-analysis` | Market sizing, segmentation, trends | market-analysis.md |
+| `positioning-development` | Differentiation, positioning statement | positioning.md |
+| `messaging-creation` | Value props, proof points, messaging | messaging-framework.md |
+| `gtm-planning` | Channels, tactics, timeline | gtm-plan.md |
+| `launch-execution` | Launch checklist, coordination | launch-plan.md |
+| `pricing-strategy` | Pricing models, analysis | pricing-strategy.md |
+| `competitive-intelligence` | Competitive landscape, battlecards | competitive-intel.md |
 
 ## Agents Overview
 
 | Agent | Expertise | Use For |
 |-------|-----------|---------|
-| `ring-pmm-team:market-researcher` | Market intelligence, sizing, trends | TAM/SAM/SOM, market segmentation |
-| `ring-pmm-team:positioning-strategist` | Differentiation, category design | Positioning statements, competitive framing |
-| `ring-pmm-team:messaging-specialist` | Copywriting, value propositions | Messaging frameworks, proof points |
-| `ring-pmm-team:gtm-planner` | Channel strategy, launch planning | GTM plans, campaign strategy |
-| `ring-pmm-team:launch-coordinator` | Launch execution, stakeholder mgmt | Launch checklists, coordination |
-| `ring-pmm-team:pricing-analyst` | Pricing models, competitive pricing | Pricing strategy, packaging |
+| `market-researcher` | Market intelligence, sizing, trends | TAM/SAM/SOM, market segmentation |
+| `positioning-strategist` | Differentiation, category design | Positioning statements, competitive framing |
+| `messaging-specialist` | Copywriting, value propositions | Messaging frameworks, proof points |
+| `gtm-planner` | Channel strategy, launch planning | GTM plans, campaign strategy |
+| `launch-coordinator` | Launch execution, stakeholder mgmt | Launch checklists, coordination |
+| `pricing-analyst` | Pricing models, competitive pricing | Pricing strategy, packaging |
 
 ## Recommended Workflow
 
@@ -107,17 +107,17 @@ PMM workflow ensures:
 ### Via Slash Commands
 
 ```
-/ring-pmm-team:market-analysis fintech-b2b    # Full market analysis
-/ring-pmm-team:gtm-plan new-feature           # GTM planning
-/ring-pmm-team:competitive-intel competitor-x  # Competitive analysis
+/market-analysis fintech-b2b    # Full market analysis
+/gtm-plan new-feature           # GTM planning
+/competitive-intel competitor-x  # Competitive analysis
 ```
 
 ### Via Skills (Manual)
 
 ```
-Skill tool: "ring-pmm-team:market-analysis"
+Skill tool: "market-analysis"
 (Review output)
-Skill tool: "ring-pmm-team:positioning-development"
+Skill tool: "positioning-development"
 (Review output)
 ```
 
@@ -145,7 +145,7 @@ docs/pmm/{product-or-feature}/
 
 **Combined with:**
 - `pre-dev-prd-creation` – Business requirements inform market analysis
-- `ring-tw-team:functional-writer` – Turn positioning into documentation
+- `functional-writer` – Turn positioning into documentation
 - `brainstorm` – Explore positioning options
 
 ## Blocker Criteria

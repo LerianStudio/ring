@@ -1,5 +1,5 @@
 ---
-name: ring-pm-team:pre-dev-full
+name: pre-dev-full
 description: Complete 9-gate pre-dev workflow for large features (≥2 days)
 argument-hint: "[feature-name]"
 ---
@@ -14,7 +14,7 @@ I'm running the **Full Track** pre-development workflow (9 gates) for your featu
 - ❌ Use new architecture patterns
 - ❌ Require team collaboration
 
-**If feature is simple (<2 days, existing patterns), use `/ring-pm-team:pre-dev-feature` instead.**
+**If feature is simple (<2 days, existing patterns), use `/pre-dev-feature` instead.**
 
 ## Document Organization
 
@@ -45,9 +45,9 @@ mkdir -p docs/pre-dev/<feature-name>
    - **integration**: Connecting external systems
 
 2. Dispatch 3 research agents in PARALLEL:
-   - repo-research-analyst (codebase patterns, file:line refs)
-   - best-practices-researcher (web search, Context7)
-   - framework-docs-researcher (tech stack, versions)
+   - ring-pm-team:repo-research-analyst (codebase patterns, file:line refs)
+   - ring-pm-team:best-practices-researcher (web search, Context7)
+   - ring-pm-team:framework-docs-researcher (tech stack, versions)
 
 3. Aggregate findings into research document
 4. Save to: `docs/pre-dev/<feature-name>/research.md`
@@ -251,8 +251,8 @@ Planning time: 2-4 hours (comprehensive)
 
 Next steps:
 1. Review artifacts in docs/pre-dev/<feature-name>/
-2. Use /ring-default:worktree to create isolated workspace
-3. Use /ring-default:write-plan to create implementation plan
+2. Use /worktree to create isolated workspace
+3. Use /write-plan to create implementation plan
 4. Execute the plan
 ```
 

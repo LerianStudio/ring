@@ -1,5 +1,5 @@
 ---
-name: ring-default:writing-skills
+name: writing-skills
 description: |
   TDD for process documentation - write test cases (pressure scenarios), watch
   baseline fail, write skill, iterate until bulletproof against rationalization.
@@ -14,7 +14,7 @@ skip_when: |
   - Skill has no compliance costs → no rationalization risk
 
 related:
-  complementary: [ring-default:testing-skills-with-subagents]
+  complementary: [testing-skills-with-subagents]
 ---
 
 # Writing Skills
@@ -29,7 +29,7 @@ You write test cases (pressure scenarios with subagents), watch them fail (basel
 
 **Core principle:** If you didn't watch an agent fail without the skill, you don't know if the skill teaches the right thing.
 
-**REQUIRED BACKGROUND:** You MUST understand ring-default:test-driven-development before using this skill. That skill defines the fundamental RED-GREEN-REFACTOR cycle. This skill adapts TDD to documentation.
+**REQUIRED BACKGROUND:** You MUST understand test-driven-development before using this skill. That skill defines the fundamental RED-GREEN-REFACTOR cycle. This skill adapts TDD to documentation.
 
 **Official guidance:** For Anthropic's official skill authoring best practices, see anthropic-best-practices.md. This document provides additional patterns and guidelines that complement the TDD-focused approach in this skill.
 
@@ -178,8 +178,8 @@ Use words agents would search for:
 **When writing documentation that references other skills:**
 
 Use skill name only, with explicit requirement markers:
-- ✅ Good: `**REQUIRED SUB-SKILL:** Use ring-default:test-driven-development`
-- ✅ Good: `**REQUIRED BACKGROUND:** You MUST understand ring-default:systematic-debugging`
+- ✅ Good: `**REQUIRED SUB-SKILL:** Use test-driven-development`
+- ✅ Good: `**REQUIRED BACKGROUND:** You MUST understand systematic-debugging`
 - ❌ Bad: `See skills/testing/test-driven-development` (unclear if required)
 - ❌ Bad: `@skills/testing/test-driven-development/SKILL.md` (force-loads, burns context)
 
@@ -220,7 +220,7 @@ Edit skill without testing? Same violation.
 - Don't "adapt" while running tests
 - Delete means delete
 
-**REQUIRED BACKGROUND:** The ring-default:test-driven-development skill explains why this matters. Same principles apply to documentation.
+**REQUIRED BACKGROUND:** The test-driven-development skill explains why this matters. Same principles apply to documentation.
 
 ## Testing All Skill Types
 
@@ -312,7 +312,7 @@ description: use when implementing any feature or bugfix, before writing impleme
 | **GREEN** | Write skill addressing specific failures → verify agent complies |
 | **REFACTOR** | Find new rationalizations → add counters → re-test until bulletproof |
 
-**REQUIRED SUB-SKILL:** Use ring-default:testing-skills-with-subagents for pressure scenarios, pressure types, hole-plugging, meta-testing.
+**REQUIRED SUB-SKILL:** Use testing-skills-with-subagents for pressure scenarios, pressure types, hole-plugging, meta-testing.
 
 ## Anti-Patterns
 

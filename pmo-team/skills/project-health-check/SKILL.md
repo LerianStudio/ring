@@ -1,5 +1,5 @@
 ---
-name: ring-pmo-team:project-health-check
+name: project-health-check
 description: |
   Individual project health assessment skill for evaluating project status across
   multiple dimensions. Provides early warning of troubled projects.
@@ -16,7 +16,7 @@ skip_when: |
   - Risk-only analysis → use risk-management
 
 related:
-  complementary: [ring-pmo-team:portfolio-planning, ring-pmo-team:risk-management]
+  complementary: [portfolio-planning, risk-management]
 ---
 
 # Project Health Check Skill

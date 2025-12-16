@@ -1,5 +1,5 @@
 ---
-name: ring-pmm-team:positioning-strategist
+name: positioning-strategist
 version: 1.0.0
 description: Strategic Positioning Specialist for differentiation strategy, category design, positioning statements, and competitive framing. Creates defensible market positions.
 type: specialist
@@ -66,7 +66,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-pmm-team:positioning-strategist", model="opus", ...)  # REQUIRED
+Task(subagent_type="positioning-strategist", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Positioning strategy requires Opus-level reasoning for evaluating competitive dynamics, identifying defensible differentiators, and creating compelling positioning that stands up to market scrutiny.

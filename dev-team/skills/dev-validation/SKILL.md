@@ -1,5 +1,5 @@
 ---
-name: ring-dev-team:dev-validation
+name: dev-validation
 description: |
   Development cycle validation gate (Gate 5) - validates all acceptance criteria are met
   and requires explicit user approval before completion.
@@ -15,10 +15,10 @@ skip_when: |
   - No acceptance criteria defined -> request criteria first
 
 sequence:
-  after: [ring-dev-team:dev-review]
+  after: [dev-review]
 
 related:
-  complementary: [ring-default:verification-before-completion]
+  complementary: [verification-before-completion]
 
 verification:
   automated:

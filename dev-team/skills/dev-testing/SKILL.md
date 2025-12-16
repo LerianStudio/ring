@@ -1,5 +1,5 @@
 ---
-name: ring-dev-team:dev-testing
+name: dev-testing
 description: |
   Development cycle testing gate (Gate 3) - ensures unit test coverage for all
   acceptance criteria using TDD methodology (RED-GREEN-REFACTOR).
@@ -16,11 +16,11 @@ skip_when: |
   - Already has full test coverage verified -> proceed to review
 
 sequence:
-  after: [ring-dev-team:dev-implementation, ring-dev-team:dev-devops, ring-dev-team:dev-sre]
-  before: [ring-dev-team:dev-review]
+  after: [dev-implementation, dev-devops, dev-sre]
+  before: [dev-review]
 
 related:
-  complementary: [ring-default:test-driven-development, ring-dev-team:qa-analyst]
+  complementary: [test-driven-development, qa-analyst]
 
 verification:
   automated:
@@ -208,7 +208,7 @@ Create traceability matrix: | ID | Criterion | Test File | Test Function | Statu
 
 ## Step 4: Dispatch QA Analyst for Unit Tests
 
-**Dispatch:** `Task(subagent_type: "ring-dev-team:qa-analyst")` with TASK_ID, ACCEPTANCE_CRITERIA, IMPLEMENTATION_FILES. Requirements: 1+ test/criterion, edge cases, mock deps, naming: `Test{Unit}_{Method}_{Scenario}`. Unit tests ONLY.
+**Dispatch:** `Task(subagent_type: "qa-analyst")` with TASK_ID, ACCEPTANCE_CRITERIA, IMPLEMENTATION_FILES. Requirements: 1+ test/criterion, edge cases, mock deps, naming: `Test{Unit}_{Method}_{Scenario}`. Unit tests ONLY.
 
 ## Step 5: Execute Full Test Suite
 

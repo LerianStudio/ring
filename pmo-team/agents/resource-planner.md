@@ -1,5 +1,5 @@
 ---
-name: ring-pmo-team:resource-planner
+name: resource-planner
 version: 1.0.0
 description: Resource Planning Specialist for capacity planning, allocation optimization, skills management, and conflict resolution across portfolio projects.
 type: specialist
@@ -70,7 +70,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-pmo-team:resource-planner", model="opus", ...)  # REQUIRED
+Task(subagent_type="resource-planner", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Resource planning requires complex capacity modeling, conflict resolution, and optimization across multiple projects that demands Opus-level reasoning capabilities.

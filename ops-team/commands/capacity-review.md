@@ -1,5 +1,5 @@
 ---
-name: ring-ops-team:capacity-review
+name: capacity-review
 description: Execute infrastructure capacity review and planning workflow
 argument-hint: "[scope: production|staging|all] [timeframe: quarterly|annual]"
 ---
@@ -11,7 +11,7 @@ This command initiates a structured capacity review following the ops-capacity-p
 ## Usage
 
 ```
-/ring-ops-team:capacity-review production quarterly
+/capacity-review production quarterly
 ```
 
 ## Workflow
@@ -38,7 +38,7 @@ Parse the scope and timeframe from arguments.
 
 ```
 Task tool:
-  subagent_type: "ring-ops-team:infrastructure-architect"
+  subagent_type: "infrastructure-architect"
   model: "opus"
   prompt: |
     CAPACITY REVIEW REQUEST
@@ -66,7 +66,7 @@ Task tool:
 
 ```
 Task tool:
-  subagent_type: "ring-ops-team:cloud-cost-optimizer"
+  subagent_type: "cloud-cost-optimizer"
   model: "opus"
   prompt: |
     CAPACITY COST ANALYSIS
@@ -167,8 +167,8 @@ Combine findings from both specialists into comprehensive capacity plan.
 
 ## Related Skills
 
-- `ring-ops-team:ops-capacity-planning` - Full capacity planning workflow
-- `ring-ops-team:ops-cost-optimization` - Cost optimization workflow
+- `ops-capacity-planning` - Full capacity planning workflow
+- `ops-cost-optimization` - Cost optimization workflow
 
 ## Anti-Rationalization
 

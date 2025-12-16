@@ -1,5 +1,5 @@
 ---
-name: ring-pm-team:pre-dev-api-design
+name: pre-dev-api-design
 description: |
   Gate 4: API contracts document - defines component interfaces and data contracts
   before protocol/technology selection. Large Track only.
@@ -16,8 +16,8 @@ skip_when: |
   - TRD not validated → complete Gate 3 first
 
 sequence:
-  after: [ring-pm-team:pre-dev-trd-creation]
-  before: [ring-pm-team:pre-dev-data-model]
+  after: [pre-dev-trd-creation]
+  before: [pre-dev-data-model]
 ---
 
 # API/Contract Design - Defining Component Interfaces

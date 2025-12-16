@@ -1,5 +1,5 @@
 ---
-name: ring-pmm-team:launch-coordinator
+name: launch-coordinator
 version: 1.0.0
 description: Launch Execution Specialist for launch checklists, stakeholder coordination, day-of execution, and post-launch monitoring. Ensures smooth launch execution.
 type: specialist
@@ -66,7 +66,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-pmm-team:launch-coordinator", model="opus", ...)  # REQUIRED
+Task(subagent_type="launch-coordinator", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Launch coordination requires Opus-level reasoning for managing complex dependencies, anticipating issues, and ensuring nothing falls through the cracks during high-stakes execution.

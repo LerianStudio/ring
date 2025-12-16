@@ -1,5 +1,5 @@
 ---
-name: ring-default:brainstorming
+name: brainstorming
 description: |
   Socratic design refinement - transforms rough ideas into validated designs through
   structured questioning, alternative exploration, and incremental validation.
@@ -16,10 +16,10 @@ skip_when: |
   - Just need task breakdown from existing design → use writing-plans
 
 sequence:
-  before: [ring-default:writing-plans, ring-default:using-git-worktrees]
+  before: [writing-plans, using-git-worktrees]
 
 related:
-  similar: [ring-default:writing-plans]
+  similar: [writing-plans]
 ---
 
 # Brainstorming Ideas Into Designs

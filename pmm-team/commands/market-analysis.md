@@ -1,5 +1,5 @@
 ---
-name: ring-pmm-team:market-analysis
+name: market-analysis
 description: Comprehensive market analysis workflow for TAM/SAM/SOM, segmentation, and trends
 argument-hint: "[market-or-product-name]"
 ---
@@ -51,7 +51,7 @@ mkdir -p docs/pmm/<market-name>
 
 ## Phase 1: Market Definition
 
-**Skill:** market-analysis
+**Skill:** ring-pmm-team:market-analysis
 
 1. Define market boundaries:
    - What's included in scope
@@ -67,9 +67,9 @@ mkdir -p docs/pmm/<market-name>
 
 ## Phase 2: Market Sizing
 
-**Agent:** market-researcher (model: opus)
+**Agent:** ring-pmm-team:market-researcher (model: opus)
 
-Dispatch the market-researcher agent to calculate:
+Dispatch the ring-pmm-team:market-researcher agent to calculate:
 
 1. **TAM (Total Addressable Market)**
    - Use top-down or bottom-up methodology

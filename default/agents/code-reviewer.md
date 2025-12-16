@@ -1,5 +1,5 @@
 ---
-name: ring-default:code-reviewer
+name: code-reviewer
 version: 3.2.0
 description: "Foundation Review: Reviews code quality, architecture, design patterns, algorithmic flow, and maintainability. Runs in parallel with business-logic-reviewer and security-reviewer for fast feedback."
 type: reviewer
@@ -58,7 +58,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 **Orchestrator Requirement:**
 When calling this agent, you MUST specify the model parameter:
 ```
-Task(subagent_type="ring-default:code-reviewer", model="opus", ...)  # REQUIRED
+Task(subagent_type="code-reviewer", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Comprehensive architectural analysis requires Opus-level reasoning capabilities to trace data flows across components, identify subtle design patterns, catch complex algorithmic issues (context propagation, state sequencing, inconsistent patterns), and perform thorough "mental walking" through execution paths that surface issues invisible to less capable models.

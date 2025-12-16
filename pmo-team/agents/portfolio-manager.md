@@ -1,5 +1,5 @@
 ---
-name: ring-pmo-team:portfolio-manager
+name: portfolio-manager
 version: 1.0.0
 description: Senior Portfolio Manager specialized in multi-project coordination, strategic alignment assessment, and portfolio optimization. Handles portfolio-level planning, prioritization, and health monitoring.
 type: specialist
@@ -70,7 +70,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-pmo-team:portfolio-manager", model="opus", ...)  # REQUIRED
+Task(subagent_type="portfolio-manager", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Portfolio management requires complex multi-project analysis, strategic alignment assessment, and nuanced decision support that demands Opus-level reasoning capabilities.

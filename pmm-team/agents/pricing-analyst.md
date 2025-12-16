@@ -1,5 +1,5 @@
 ---
-name: ring-pmm-team:pricing-analyst
+name: pricing-analyst
 version: 1.0.0
 description: Pricing Strategy Specialist for pricing model analysis, competitive pricing intelligence, value-based pricing, and pricing recommendations. Creates data-driven pricing strategies.
 type: specialist
@@ -69,7 +69,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-pmm-team:pricing-analyst", model="opus", ...)  # REQUIRED
+Task(subagent_type="pricing-analyst", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Pricing analysis requires Opus-level reasoning for evaluating complex trade-offs, synthesizing competitive intelligence, and providing reliable recommendations that directly impact revenue.

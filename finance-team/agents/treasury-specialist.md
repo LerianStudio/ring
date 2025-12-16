@@ -1,5 +1,5 @@
 ---
-name: ring-finance-team:treasury-specialist
+name: treasury-specialist
 version: 1.0.0
 description: Treasury and Cash Management Specialist with expertise in cash flow forecasting, liquidity management, working capital optimization, FX exposure, and debt management. Delivers actionable treasury insights with risk awareness.
 type: specialist
@@ -82,7 +82,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-finance-team:treasury-specialist", model="opus", ...)  # REQUIRED
+Task(subagent_type="treasury-specialist", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Treasury management requires Opus-level reasoning for multi-currency cash flow timing, liquidity risk assessment, covenant compliance monitoring, and optimal cash deployment strategies.

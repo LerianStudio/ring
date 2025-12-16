@@ -1,5 +1,5 @@
 ---
-name: ring-finance-team:build-model
+name: build-model
 description: Build financial model (DCF, LBO, M&A, or operating model) with validated methodology
 argument-hint: "[type] [options]"
 ---
@@ -9,7 +9,7 @@ Build financial model (DCF, LBO, M&A, or operating model) with validated methodo
 ## Usage
 
 ```
-/ring-finance-team:build-model [type] [options]
+/build-model [type] [options]
 ```
 
 ## Arguments
@@ -32,19 +32,19 @@ Build financial model (DCF, LBO, M&A, or operating model) with validated methodo
 
 ```bash
 # DCF valuation model
-/ring-finance-team:build-model dcf --purpose "standalone valuation" --data docs/financials.xlsx
+/build-model dcf --purpose "standalone valuation" --data docs/financials.xlsx
 
 # LBO model
-/ring-finance-team:build-model lbo --purpose "PE acquisition" --data docs/target-financials.xlsx
+/build-model lbo --purpose "PE acquisition" --data docs/target-financials.xlsx
 
 # M&A accretion/dilution
-/ring-finance-team:build-model merger --purpose "strategic acquisition" --scenarios 3
+/build-model merger --purpose "strategic acquisition" --scenarios 3
 
 # Three-statement operating model
-/ring-finance-team:build-model operating --purpose "5-year projection" --data docs/historical.xlsx
+/build-model operating --purpose "5-year projection" --data docs/historical.xlsx
 
 # With specific sensitivity analysis
-/ring-finance-team:build-model dcf --sensitivity "wacc,terminal-growth,revenue-growth"
+/build-model dcf --sensitivity "wacc,terminal-growth,revenue-growth"
 ```
 
 ## Prerequisites
@@ -80,8 +80,8 @@ The command produces a complete financial model including:
 
 | Command | Description |
 |---------|-------------|
-| `/ring-finance-team:analyze-financials` | Financial analysis |
-| `/ring-finance-team:create-budget` | Create budget |
+| `/analyze-financials` | Financial analysis |
+| `/create-budget` | Create budget |
 
 ---
 
@@ -90,7 +90,7 @@ The command produces a complete financial model including:
 **This command MUST load the skill for complete workflow execution.**
 
 ```
-Use Skill tool: ring-finance-team:financial-modeling
+Use Skill tool: financial-modeling
 ```
 
 The skill contains the complete 6-phase workflow with:
@@ -147,7 +147,7 @@ AskUserQuestion:
 
 ## Quick Reference
 
-See skill `ring-finance-team:financial-modeling` for full details. Key rules:
+See skill `financial-modeling` for full details. Key rules:
 
 - **All inputs in input section** - No hardcoded values
 - **WACC calculated from components** - Not assumed

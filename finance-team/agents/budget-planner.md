@@ -1,5 +1,5 @@
 ---
-name: ring-finance-team:budget-planner
+name: budget-planner
 version: 1.0.0
 description: Budget and Forecasting Specialist with expertise in annual budgeting, rolling forecasts, variance analysis, and financial planning. Delivers comprehensive budgets with documented assumptions and approval workflows.
 type: specialist
@@ -82,7 +82,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-finance-team:budget-planner", model="opus", ...)  # REQUIRED
+Task(subagent_type="budget-planner", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** Budget planning requires Opus-level reasoning for complex interdependencies between line items, appropriate assumption validation, and coherent multi-period projections.

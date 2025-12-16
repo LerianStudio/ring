@@ -1,5 +1,5 @@
 ---
-name: ring-ops-team:incident
+name: incident
 description: Initiate production incident response workflow with structured triage, coordination, and documentation
 argument-hint: "[severity] [brief-description]"
 ---
@@ -11,7 +11,7 @@ This command initiates structured incident response following SRE best practices
 ## Usage
 
 ```
-/ring-ops-team:incident SEV2 API latency spike affecting 30% of users
+/incident SEV2 API latency spike affecting 30% of users
 ```
 
 ## Workflow
@@ -22,7 +22,7 @@ Parse the severity and description from the command arguments.
 
 **If severity not provided:**
 - Ask user to classify: SEV1 (Critical), SEV2 (Major), SEV3 (Minor), SEV4 (Low)
-- Reference severity criteria from `ring-ops-team:ops-incident-response` skill
+- Reference severity criteria from `ops-incident-response` skill
 
 **If description not provided:**
 - Ask for brief incident description
@@ -33,7 +33,7 @@ Parse the severity and description from the command arguments.
 
 ```
 Task tool:
-  subagent_type: "ring-ops-team:incident-responder"
+  subagent_type: "incident-responder"
   model: "opus"
   prompt: |
     PRODUCTION INCIDENT DECLARED
@@ -120,8 +120,8 @@ Expected: [timestamp]
 
 ## Related Skills
 
-- `ring-ops-team:ops-incident-response` - Full incident response workflow
-- `ring-ops-team:incident-responder` - Specialist agent for incident management
+- `ops-incident-response` - Full incident response workflow
+- `incident-responder` - Specialist agent for incident management
 
 ## Anti-Rationalization
 

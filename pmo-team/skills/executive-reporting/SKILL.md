@@ -1,5 +1,5 @@
 ---
-name: ring-pmo-team:executive-reporting
+name: executive-reporting
 description: |
   Executive communication and reporting skill for creating dashboards, status summaries,
   and board packages. Focuses on actionable insights for leadership.
@@ -16,7 +16,7 @@ skip_when: |
   - Financial deep dive → use ring-finops-team
 
 related:
-  complementary: [ring-pmo-team:portfolio-planning, ring-pmo-team:project-health-check]
+  complementary: [portfolio-planning, project-health-check]
 ---
 
 # Executive Reporting Skill

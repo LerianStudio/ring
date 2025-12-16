@@ -1,5 +1,5 @@
 ---
-name: ring-pmm-team:gtm-planner
+name: gtm-planner
 version: 1.0.0
 description: Go-to-Market Strategy Specialist for channel strategy, campaign planning, launch tactics, and GTM execution planning. Creates comprehensive GTM plans.
 type: specialist
@@ -72,7 +72,7 @@ Action: Cannot proceed. Orchestrator must reinvoke with model="opus"
 
 **Orchestrator Requirement:**
 ```
-Task(subagent_type="ring-pmm-team:gtm-planner", model="opus", ...)  # REQUIRED
+Task(subagent_type="gtm-planner", model="opus", ...)  # REQUIRED
 ```
 
 **Rationale:** GTM planning requires Opus-level reasoning for synthesizing positioning, messaging, and market context into executable plans with appropriate resource allocation.

@@ -1,5 +1,5 @@
 ---
-name: ring-default:dispatching-parallel-agents
+name: dispatching-parallel-agents
 description: |
   Concurrent investigation pattern - dispatches multiple AI agents to investigate
   and fix independent problems simultaneously.

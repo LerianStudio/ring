@@ -1,5 +1,5 @@
 ---
-name: ring-default:root-cause-tracing
+name: root-cause-tracing
 description: |
   Backward call-chain tracing - systematically trace bugs from error location back
   through call stack to original trigger. Adds instrumentation when needed.
@@ -8,18 +8,18 @@ trigger: |
   - Error happens deep in execution (not at entry point)
   - Stack trace shows long call chain
   - Unclear where invalid data originated
-  - ring-default:systematic-debugging Phase 1 leads you here
+  - systematic-debugging Phase 1 leads you here
 
 skip_when: |
-  - Bug at entry point → use ring-default:systematic-debugging directly
-  - Haven't started investigation → use ring-default:systematic-debugging first
+  - Bug at entry point → use systematic-debugging directly
+  - Haven't started investigation → use systematic-debugging first
   - Root cause is obvious → just fix it
 
 sequence:
-  after: [ring-default:systematic-debugging]
+  after: [systematic-debugging]
 
 related:
-  complementary: [ring-default:systematic-debugging]
+  complementary: [systematic-debugging]
 ---
 
 # Root Cause Tracing

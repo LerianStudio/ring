@@ -1,5 +1,5 @@
 ---
-name: ring-tw-team:voice-and-tone
+name: voice-and-tone
 description: |
   Voice and tone guidelines for technical documentation. Ensures consistent,
   clear, and human writing across all documentation.
@@ -11,10 +11,10 @@ trigger: |
 
 skip_when: |
   - Only checking structure → use documentation-structure
-  - Only checking technical accuracy → use ring-tw-team:docs-reviewer agent
+  - Only checking technical accuracy → use docs-reviewer agent
 
 related:
-  complementary: [ring-tw-team:writing-functional-docs, ring-tw-team:writing-api-docs, ring-tw-team:documentation-review]
+  complementary: [writing-functional-docs, writing-api-docs, documentation-review]
 ---
 
 # Voice and Tone Guidelines

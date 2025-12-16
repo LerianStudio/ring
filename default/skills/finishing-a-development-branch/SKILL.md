@@ -1,5 +1,5 @@
 ---
-name: ring-default:finishing-a-development-branch
+name: finishing-a-development-branch
 description: |
   Branch completion workflow - guides merge/PR/cleanup decisions after implementation
   is verified complete.
@@ -15,7 +15,7 @@ skip_when: |
   - Already merged → proceed to next task
 
 sequence:
-  after: [ring-default:verification-before-completion, ring-default:requesting-code-review]
+  after: [verification-before-completion, requesting-code-review]
 ---
 
 # Finishing a Development Branch
