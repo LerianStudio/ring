@@ -127,7 +127,7 @@ See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.
 | Agent | Specializations | Use When |
 |-------|-----------------|----------|
 | **`ring-finance-team:financial-analyst`** | Ratio analysis, trend analysis, benchmarking, variance analysis, financial statement analysis | Financial health assessment, performance analysis, investment evaluation |
-| **`budget-planner`** | Budget creation, forecasting, variance analysis, rolling forecasts, zero-based budgeting | Annual budgets, departmental budgets, budget-to-actual analysis |
+| **`ring-finance-team:budget-planner`** | Budget creation, forecasting, variance analysis, rolling forecasts, zero-based budgeting | Annual budgets, departmental budgets, budget-to-actual analysis |
 | **`ring-finance-team:financial-modeler`** | DCF models, LBO models, merger models, scenario analysis, sensitivity analysis | Valuation, investment analysis, strategic planning, M&A |
 | **`ring-finance-team:treasury-specialist`** | Cash flow forecasting, liquidity management, working capital, FX exposure, debt management | Cash position, liquidity planning, treasury operations |
 | **`ring-finance-team:accounting-specialist`** | Journal entries, reconciliations, close procedures, GAAP/IFRS compliance, audit support | Month-end close, year-end close, accounting entries, compliance |

@@ -60,7 +60,7 @@ When modifying standards files (`dev-team/docs/standards/*.md`):
 | `typescript.md` | `ring-dev-team:backend-engineer-typescript`, `ring-dev-team:frontend-bff-engineer-typescript`, `ring-dev-team:qa-analyst` |
 | `frontend.md` | `ring-dev-team:frontend-engineer`, `ring-dev-team:frontend-designer` |
 | `devops.md` | `ring-dev-team:devops-engineer` |
-| `sre.md` | `sre` |
+| `sre.md` | `ring-dev-team:sre` |
 
 **Section Index Location:** `dev-team/skills/shared-patterns/standards-coverage-table.md` → "Agent → Standards Section Index"
 
@@ -74,7 +74,7 @@ When modifying standards files (`dev-team/docs/standards/*.md`):
 | `ring-dev-team:frontend-engineer` | frontend.md | See coverage table |
 | `ring-dev-team:frontend-designer` | frontend.md | See coverage table |
 | `ring-dev-team:devops-engineer` | devops.md | See coverage table |
-| `sre` | sre.md | See coverage table |
+| `ring-dev-team:sre` | sre.md | See coverage table |
 | `ring-dev-team:qa-analyst` | golang.md OR typescript.md | See coverage table |
 
 **⛔ If section counts in skills don't match this table → Update the skill.**

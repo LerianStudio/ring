@@ -123,7 +123,7 @@ See [shared-patterns/shared-pressure-resistance.md](../shared-patterns/shared-pr
 | **`ring-dev-team:frontend-bff-engineer-typescript`** | Next.js API Routes BFF, Clean/Hexagonal Architecture, DDD patterns, Inversify DI, repository pattern | BFF layer, Clean Architecture, DDD domains, API orchestration |
 | **`ring-dev-team:frontend-designer`** | Bold typography, color systems, animations, unexpected layouts, textures/gradients | Landing pages, portfolios, distinctive dashboards, design systems |
 | **`ring-dev-team:qa-analyst`** | Test strategy, Cypress/Playwright E2E, coverage analysis, API testing, performance | Test planning, E2E suites, coverage gaps, quality gates |
-| **`sre`** | Structured logging, tracing, health checks, observability | Logging validation, tracing setup, health endpoint verification |
+| **`ring-dev-team:sre`** | Structured logging, tracing, health checks, observability | Logging validation, tracing setup, health endpoint verification |
 
 **Dispatch template:**
 ```
@@ -217,7 +217,7 @@ All workflows converge to the 6-gate development cycle:
 |------|-------|----------|
 | **0: Implementation** | TDD: RED→GREEN→REFACTOR | `backend-engineer-*`, `ring-dev-team:frontend-bff-engineer-typescript` |
 | **1: DevOps** | Dockerfile, docker-compose, .env | `ring-dev-team:devops-engineer` |
-| **2: SRE** | Health checks, logging, tracing | `sre` |
+| **2: SRE** | Health checks, logging, tracing | `ring-dev-team:sre` |
 | **3: Testing** | Unit tests, coverage ≥85% | `ring-dev-team:qa-analyst` |
 | **4: Review** | 3 reviewers IN PARALLEL | `ring-default:code-reviewer`, `business-logic`, `security` |
 | **5: Validation** | User approval: APPROVED/REJECTED | User decision |

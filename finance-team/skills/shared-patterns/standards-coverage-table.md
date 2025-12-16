@@ -8,12 +8,12 @@ Each agent in ring-finance-team MUST verify the sections listed in this table.
 
 | Agent | Standards Sections to Verify |
 |-------|------------------------------|
-| `financial-analyst` | Data Accuracy, Calculation Verification, Ratio Analysis, Trend Analysis, Benchmarking |
-| `budget-planner` | Budget Structure, Assumption Documentation, Variance Analysis, Approval Workflow, Version Control |
-| `financial-modeler` | Model Structure, Assumption Registry, Sensitivity Analysis, Scenario Management, Validation Tests |
-| `treasury-specialist` | Cash Position, Liquidity Metrics, Forecast Accuracy, Investment Compliance, Risk Limits |
-| `accounting-specialist` | GAAP/IFRS Compliance, Journal Entry Standards, Reconciliation Requirements, Close Procedures, Audit Trail |
-| `metrics-analyst` | KPI Definitions, Data Lineage, Calculation Methodology, Visualization Standards, Anomaly Detection |
+| `ring-finance-team:financial-analyst` | Data Accuracy, Calculation Verification, Ratio Analysis, Trend Analysis, Benchmarking |
+| `ring-finance-team:budget-planner` | Budget Structure, Assumption Documentation, Variance Analysis, Approval Workflow, Version Control |
+| `ring-finance-team:financial-modeler` | Model Structure, Assumption Registry, Sensitivity Analysis, Scenario Management, Validation Tests |
+| `ring-finance-team:treasury-specialist` | Cash Position, Liquidity Metrics, Forecast Accuracy, Investment Compliance, Risk Limits |
+| `ring-finance-team:accounting-specialist` | GAAP/IFRS Compliance, Journal Entry Standards, Reconciliation Requirements, Close Procedures, Audit Trail |
+| `ring-finance-team:metrics-analyst` | KPI Definitions, Data Lineage, Calculation Methodology, Visualization Standards, Anomaly Detection |
 
 ---
 
