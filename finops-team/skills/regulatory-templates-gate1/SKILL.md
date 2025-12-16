@@ -27,7 +27,7 @@ sequence:
 
 **Prerequisites:**
 - Context from `ring-finops-team:regulatory-templates-setup`
-- Template base from `regulatory-templates-gate0`
+- Template base from `ring-finops-team:regulatory-templates-setup`
 
 **Output:** Mapping of placeholders to backend data sources
 
