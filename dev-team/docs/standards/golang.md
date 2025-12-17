@@ -19,19 +19,21 @@ This file defines the specific standards for Go development at Lerian Studio.
 | 4 | [Configuration Loading](#configuration-loading-mandatory) | Environment variable handling |
 | 5 | [Telemetry & Observability](#telemetry--observability-mandatory) | OpenTelemetry integration |
 | 6 | [Bootstrap Pattern](#bootstrap-pattern-mandatory) | Application initialization |
-| 7 | [Data Transformation](#data-transformation-toentityfromentity-mandatory) | ToEntity/FromEntity patterns |
-| 8 | [Error Codes Convention](#error-codes-convention-mandatory) | Service-prefixed error codes |
-| 9 | [Error Handling](#error-handling) | Error wrapping and checking |
-| 10 | [Function Design](#function-design-mandatory) | Single responsibility principle |
-| 11 | [Pagination Patterns](#pagination-patterns) | Cursor and page-based pagination |
-| 12 | [Testing Patterns](#testing-patterns) | Table-driven tests, edge cases |
-| 13 | [Logging Standards](#logging-standards) | Structured logging with lib-commons |
-| 14 | [Linting](#linting) | golangci-lint configuration |
-| 15 | [Architecture Patterns](#architecture-patterns) | Hexagonal architecture |
-| 16 | [Directory Structure](#directory-structure) | Project layout |
-| 17 | [Concurrency Patterns](#concurrency-patterns) | Goroutines, channels, errgroup |
-| 18 | [DDD Patterns](#ddd-patterns-go-implementation) | Entity, Value Object, Aggregate |
-| 19 | [RabbitMQ Worker Pattern](#rabbitmq-worker-pattern) | Async message processing |
+| 7 | [Access Manager Integration](#access-manager-integration-mandatory) | Authentication and authorization with lib-auth |
+| 8 | [License Manager Integration](#license-manager-integration-mandatory) | License validation with lib-license-go |
+| 9 | [Data Transformation](#data-transformation-toentityfromentity-mandatory) | ToEntity/FromEntity patterns |
+| 10 | [Error Codes Convention](#error-codes-convention-mandatory) | Service-prefixed error codes |
+| 11 | [Error Handling](#error-handling) | Error wrapping and checking |
+| 12 | [Function Design](#function-design-mandatory) | Single responsibility principle |
+| 13 | [Pagination Patterns](#pagination-patterns) | Cursor and page-based pagination |
+| 14 | [Testing Patterns](#testing-patterns) | Table-driven tests, edge cases |
+| 15 | [Logging Standards](#logging-standards) | Structured logging with lib-commons |
+| 16 | [Linting](#linting) | golangci-lint configuration |
+| 17 | [Architecture Patterns](#architecture-patterns) | Hexagonal architecture |
+| 18 | [Directory Structure](#directory-structure) | Project layout |
+| 19 | [Concurrency Patterns](#concurrency-patterns) | Goroutines, channels, errgroup |
+| 20 | [DDD Patterns](#ddd-patterns-go-implementation) | Entity, Value Object, Aggregate |
+| 21 | [RabbitMQ Worker Pattern](#rabbitmq-worker-pattern) | Async message processing |
 
 **Meta-sections (not checked by agents):**
 - [Standards Compliance Output Format](#standards-compliance-output-format) - Report format for dev-refactor
