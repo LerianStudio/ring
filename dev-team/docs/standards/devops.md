@@ -9,6 +9,23 @@ This file defines the specific standards for DevOps, SRE, and infrastructure.
 
 ---
 
+## Table of Contents
+
+| # | Section | Description |
+|---|---------|-------------|
+| 1 | [Cloud Provider](#cloud-provider) | AWS, GCP, Azure services |
+| 2 | [Infrastructure as Code](#infrastructure-as-code) | Terraform patterns and best practices |
+| 3 | [Containers](#containers) | Dockerfile, Docker Compose, .env |
+| 4 | [Helm](#helm) | Chart structure and configuration |
+| 5 | [Observability](#observability) | Logging and tracing standards |
+| 6 | [Security](#security) | Secrets management, network policies |
+| 7 | [Makefile Standards](#makefile-standards) | Required commands and patterns |
+
+**Meta-sections (not checked by agents):**
+- [Checklist](#checklist) - Self-verification before deploying
+
+---
+
 ## Cloud Provider
 
 | Provider | Primary Services |

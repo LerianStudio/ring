@@ -9,6 +9,36 @@ This file defines the specific standards for Go development at Lerian Studio.
 
 ---
 
+## Table of Contents
+
+| # | Section | Description |
+|---|---------|-------------|
+| 1 | [Version](#version) | Go version requirements |
+| 2 | [Core Dependency: lib-commons](#core-dependency-lib-commons-mandatory) | Required foundation library |
+| 3 | [Frameworks & Libraries](#frameworks--libraries) | Required packages and versions |
+| 4 | [Configuration Loading](#configuration-loading-mandatory) | Environment variable handling |
+| 5 | [Telemetry & Observability](#telemetry--observability-mandatory) | OpenTelemetry integration |
+| 6 | [Bootstrap Pattern](#bootstrap-pattern-mandatory) | Application initialization |
+| 7 | [Data Transformation](#data-transformation-toentityfromentity-mandatory) | ToEntity/FromEntity patterns |
+| 8 | [Error Codes Convention](#error-codes-convention-mandatory) | Service-prefixed error codes |
+| 9 | [Error Handling](#error-handling) | Error wrapping and checking |
+| 10 | [Function Design](#function-design-mandatory) | Single responsibility principle |
+| 11 | [Pagination Patterns](#pagination-patterns) | Cursor and page-based pagination |
+| 12 | [Testing Patterns](#testing-patterns) | Table-driven tests, edge cases |
+| 13 | [Logging Standards](#logging-standards) | Structured logging with lib-commons |
+| 14 | [Linting](#linting) | golangci-lint configuration |
+| 15 | [Architecture Patterns](#architecture-patterns) | Hexagonal architecture |
+| 16 | [Directory Structure](#directory-structure) | Project layout |
+| 17 | [Concurrency Patterns](#concurrency-patterns) | Goroutines, channels, errgroup |
+| 18 | [DDD Patterns](#ddd-patterns-go-implementation) | Entity, Value Object, Aggregate |
+| 19 | [RabbitMQ Worker Pattern](#rabbitmq-worker-pattern) | Async message processing |
+
+**Meta-sections (not checked by agents):**
+- [Standards Compliance Output Format](#standards-compliance-output-format) - Report format for dev-refactor
+- [Checklist](#checklist) - Self-verification before submitting code
+
+---
+
 ## Version
 
 - **Minimum**: Go 1.24

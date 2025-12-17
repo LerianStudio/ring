@@ -9,6 +9,22 @@ This file defines the specific standards for Site Reliability Engineering and ob
 
 ---
 
+## Table of Contents
+
+| # | Section | Description |
+|---|---------|-------------|
+| 1 | [Observability Stack](#observability-stack) | Logs, traces, APM tools |
+| 2 | [Logging Standards](#logging-standards) | Structured JSON format, log levels |
+| 3 | [Tracing Standards](#tracing-standards) | OpenTelemetry configuration |
+| 4 | [OpenTelemetry with lib-commons](#opentelemetry-with-lib-commons-mandatory-for-go) | Go service integration |
+| 5 | [Structured Logging with lib-common-js](#structured-logging-with-lib-common-js-mandatory-for-typescript) | TypeScript service integration |
+| 6 | [Health Checks](#health-checks) | Liveness and readiness probes |
+
+**Meta-sections (not checked by agents):**
+- [Checklist](#checklist) - Self-verification before deploying
+
+---
+
 ## Observability Stack
 
 | Component | Primary | Alternatives |

@@ -112,6 +112,23 @@ These rationalizations are ALWAYS wrong, regardless of context:
 | "Previous gate passed, this one will too" | Each gate is independent. No assumptions. | **Execute full gate requirements** |
 | "Small change, skip full process" | Size doesn't determine requirements. | **Follow complete process** |
 | "Already tested manually" | Manual testing ≠ gate compliance. | **Execute automated verification** |
+| "It's faster to do it directly" | Speed ≠ correct process. The dev-cycle exists for a reason. | **Follow dev-cycle gates. No shortcuts.** |
+| "These are simple changes" | Simplicity doesn't justify skipping gates. Simple bugs cause complex incidents. | **ALL gates mandatory regardless of perceived simplicity.** |
+| "I know this code well, skip validation" | Familiarity breeds blind spots. Gates catch what you miss. | **Execute ALL gates. No expertise exemption.** |
+| "Deadline is tight, skip non-critical gates" | No gate is "non-critical". Each catches different issues. | **ALL gates are mandatory. Negotiate deadline, not quality.** |
+| "This is just a hotfix" | Hotfixes are highest-risk changes. They need MORE scrutiny, not less. | **Full dev-cycle for ALL changes including hotfixes.** |
+
+### Refactor Gap Tracking
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "This divergence is too minor to track" | You don't decide what's minor. Standards do. | **Create FINDING-XXX** |
+| "Codebase pattern is acceptable alternative" | Alternative ≠ compliant. Ring standards are the baseline. | **Create FINDING-XXX** |
+| "Low severity means optional" | Low severity = low priority, NOT optional. | **Create FINDING-XXX** |
+| "Cosmetic differences don't count" | Cosmetic = standards compliance. They count. | **Create FINDING-XXX** |
+| "This would create too many findings" | Quantity is not your concern. Completeness is. | **Create ALL FINDING-XXX entries** |
+| "Team prefers current approach" | Preference ≠ compliance. Document the gap. | **Create FINDING-XXX** |
+| "Fixing this adds no value" | You don't assess value. Standards define value. | **Create FINDING-XXX** |
 
 ---
 

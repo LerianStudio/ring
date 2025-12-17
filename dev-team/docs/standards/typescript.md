@@ -9,6 +9,30 @@ This file defines the specific standards for TypeScript (backend) development.
 
 ---
 
+## Table of Contents
+
+| # | Section | Description |
+|---|---------|-------------|
+| 1 | [Version](#version) | TypeScript and Node.js versions |
+| 2 | [Strict Configuration](#strict-configuration-mandatory) | tsconfig.json requirements |
+| 3 | [Frameworks & Libraries](#frameworks--libraries) | Required packages |
+| 4 | [Type Safety Rules](#type-safety-rules) | Never use any, branded types |
+| 5 | [Zod Validation Patterns](#zod-validation-patterns) | Schema validation |
+| 6 | [Dependency Injection](#dependency-injection) | TSyringe patterns |
+| 7 | [AsyncLocalStorage for Context](#asynclocalstorage-for-context) | Request context propagation |
+| 8 | [Testing Patterns](#testing-patterns) | Type-safe mocks, fixtures |
+| 9 | [Error Handling](#error-handling) | Custom error classes |
+| 10 | [Function Design](#function-design-mandatory) | Single responsibility principle |
+| 11 | [DDD Patterns](#ddd-patterns-typescript-implementation) | Entity, Value Object, Aggregate |
+| 12 | [Naming Conventions](#naming-conventions) | Files, interfaces, types |
+| 13 | [Directory Structure](#directory-structure-backend) | Project layout |
+| 14 | [RabbitMQ Worker Pattern](#rabbitmq-worker-pattern) | Async message processing |
+
+**Meta-sections (not checked by agents):**
+- [Checklist](#checklist) - Self-verification before submitting code
+
+---
+
 ## Version
 
 - TypeScript 5.0+

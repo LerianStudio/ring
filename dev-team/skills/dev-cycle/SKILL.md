@@ -1065,6 +1065,8 @@ After completing all subtasks of a task:
 
 ## Execution Report
 
+Base metrics per [shared-patterns/output-execution-report.md](../shared-patterns/output-execution-report.md).
+
 | Metric | Value |
 |--------|-------|
 | Duration | Xh Xm Ys |

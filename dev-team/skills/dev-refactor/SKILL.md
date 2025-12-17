@@ -33,15 +33,11 @@ This is NOT optional. This is NOT subject to interpretation. This is a HARD RULE
 
 ### Anti-Rationalization: Mandatory Gap Principle
 
-| Rationalization | Why It's WRONG | Required Action |
-|-----------------|----------------|-----------------|
-| "This divergence is too minor to track" | You don't decide what's minor. Standards do. | **Create FINDING-XXX** |
-| "Codebase pattern is acceptable alternative" | Alternative ≠ compliant. Ring standards are the baseline. | **Create FINDING-XXX** |
-| "Low severity means optional" | Low severity = low priority, NOT optional. | **Create FINDING-XXX** |
-| "Cosmetic differences don't count" | Cosmetic = standards compliance. They count. | **Create FINDING-XXX** |
-| "This would create too many findings" | Quantity is not your concern. Completeness is. | **Create ALL FINDING-XXX entries** |
-| "Team prefers current approach" | Preference ≠ compliance. Document the gap. | **Create FINDING-XXX** |
-| "Fixing this adds no value" | You don't assess value. Standards define value. | **Create FINDING-XXX** |
+See [shared-patterns/shared-anti-rationalization.md](../shared-patterns/shared-anti-rationalization.md) for:
+- **Refactor Gap Tracking** section (mandatory gap principle rationalizations)
+- **Gate Execution** section (workflow skip rationalizations)
+- **TDD** section (test-first rationalizations)
+- **Universal** section (general anti-patterns)
 
 ### Verification Rule
 
@@ -942,20 +938,61 @@ docs/refactor/{timestamp}/
 
 **TodoWrite:** Mark "Handoff to dev-cycle" as `in_progress`
 
-**If user approved, use SlashCommand tool with tasks path:**
+**If user approved, use Skill tool to invoke dev-cycle directly:**
 
 ```yaml
-SlashCommand:
-  command: "/dev-cycle docs/refactor/{timestamp}/tasks.md"
+Skill tool:
+  skill: "dev-cycle"
 ```
 
+**⛔ CRITICAL: Pass tasks file path in context:**
+After invoking the skill, provide the tasks file location:
+- Tasks file: `docs/refactor/{timestamp}/tasks.md`
+
 Where `{timestamp}` is the same timestamp used in Step 9 artifacts.
+
+### Anti-Rationalization: Skill Invocation
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "SlashCommand is equivalent to Skill tool" | SlashCommand is a hint; Skill tool guarantees skill loading | **Use Skill tool, NOT SlashCommand** |
+| "User can run /dev-cycle manually" | Manual run risks skill not being loaded | **Invoke Skill tool directly** |
+| "dev-cycle will auto-discover tasks" | Explicit path ensures correct file is used | **Pass explicit tasks path** |
+| "User approved, I can skip dev-cycle" | Approval = permission to proceed, NOT skip execution | **Invoke Skill tool** |
+| "Tasks are saved, job is done" | Saved tasks without execution = incomplete workflow | **Invoke Skill tool** |
+
+**⛔ HARD GATE: You CANNOT complete dev-refactor without invoking `Skill tool: dev-cycle`.**
+
+If user approved execution, you MUST:
+1. Invoke `Skill tool: dev-cycle`
+2. Pass tasks file path: `docs/refactor/{timestamp}/tasks.md`
+3. Wait for dev-cycle to complete all 6 gates
+
+**Skipping this step = SKILL FAILURE.**
 
 dev-cycle executes each REFACTOR-XXX task through 6-gate process.
 
 **TodoWrite:** Mark "Handoff to dev-cycle" as `completed`
 
 ---
+
+## Execution Report
+
+Base metrics per [shared-patterns/output-execution-report.md](../shared-patterns/output-execution-report.md).
+
+| Metric | Value |
+|--------|-------|
+| Duration | Xm Ys |
+| Iterations | N |
+| Result | PASS/FAIL/PARTIAL |
+
+### Refactor-Specific Metrics
+| Metric | Value |
+|--------|-------|
+| Agents Dispatched | N |
+| Findings Generated | N |
+| Tasks Created | N |
+| Artifacts Location | docs/refactors/{date}/ |
 
 ## Output Schema
 

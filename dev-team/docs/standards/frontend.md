@@ -9,6 +9,29 @@ This file defines the specific standards for frontend development.
 
 ---
 
+## Table of Contents
+
+| # | Section | Description |
+|---|---------|-------------|
+| 1 | [Framework](#framework) | React 18+, Next.js 14+ |
+| 2 | [Libraries & Tools](#libraries--tools) | Core, state, forms, UI, styling, testing |
+| 3 | [State Management Patterns](#state-management-patterns) | TanStack Query, Zustand |
+| 4 | [Form Patterns](#form-patterns) | React Hook Form + Zod |
+| 5 | [Styling Standards](#styling-standards) | TailwindCSS, CSS variables |
+| 6 | [Typography Standards](#typography-standards) | Font selection and pairing |
+| 7 | [Animation Standards](#animation-standards) | CSS transitions, Framer Motion |
+| 8 | [Component Patterns](#component-patterns) | Compound components, error boundaries |
+| 9 | [Accessibility (a11y)](#accessibility-a11y) | WCAG 2.1 AA compliance |
+| 10 | [Performance](#performance) | Code splitting, image optimization |
+| 11 | [Directory Structure](#directory-structure) | Next.js App Router layout |
+| 12 | [FORBIDDEN Patterns](#forbidden-patterns) | Anti-patterns to avoid |
+| 13 | [Standards Compliance Categories](#standards-compliance-categories) | Categories for dev-refactor |
+
+**Meta-sections (not checked by agents):**
+- [Checklist](#checklist) - Self-verification before submitting code
+
+---
+
 ## Framework
 
 - React 18+ / Next.js 14+

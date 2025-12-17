@@ -412,6 +412,8 @@ TodoWrite tool:
 
 ## Execution Report
 
+Base metrics per [shared-patterns/output-execution-report.md](../shared-patterns/output-execution-report.md).
+
 | Metric | Value |
 |--------|-------|
 | Tasks Analyzed | N |

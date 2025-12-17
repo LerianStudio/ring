@@ -39,11 +39,39 @@ When creating or modifying ANY agent in `*/agents/*.md`:
 ### 5. Standards-Agent Synchronization (ALWAYS CHECK)
 When modifying standards files (`dev-team/docs/standards/*.md`):
 
-**⛔ THREE-FILE UPDATE RULE:**
+**⛔ FOUR-FILE UPDATE RULE:**
 1. Edit `dev-team/docs/standards/{file}.md` - Add your `## Section Name`
-2. Edit `dev-team/skills/shared-patterns/standards-coverage-table.md` - Add section to agent's index table
-3. Edit `dev-team/agents/{agent}.md` - Verify agent references coverage table (NOT inline categories)
-4. **All three files in same commit** - Never update one without the others
+2. **Update TOC** - Add section to the `## Table of Contents` at the top of the same file
+3. Edit `dev-team/skills/shared-patterns/standards-coverage-table.md` - Add section to agent's index table
+4. Edit `dev-team/agents/{agent}.md` - Verify agent references coverage table (NOT inline categories)
+5. **All files in same commit** - Never update one without the others
+
+**⛔ TOC MAINTENANCE RULE:**
+Every standards file has a `## Table of Contents` section that MUST stay in sync:
+- **Format:** `| # | [Section Name](#anchor-link) | Description |`
+- **Meta-sections** (Checklist, Standards Compliance) are listed separately below the table
+- **Anchor links** use lowercase with hyphens (e.g., `#error-handling-mandatory`)
+- **Section count in TOC** MUST match section count in `standards-coverage-table.md`
+
+**⛔ CHECKLIST: Adding/Removing a Section in Standards Files**
+```
+Before committing changes to dev-team/docs/standards/*.md:
+
+[ ] 1. Did you add/remove a `## Section` in the standards file?
+[ ] 2. Did you update the `## Table of Contents` in the SAME file?
+    - Add/remove row: `| N | [Section Name](#anchor) | Description |`
+    - Update numbering if needed
+[ ] 3. Did you update `dev-team/skills/shared-patterns/standards-coverage-table.md`?
+    - Find the agent's section index (e.g., "backend-engineer-golang → golang.md")
+    - Add/remove the section row
+[ ] 4. Do the section counts match?
+    - Count `## ` headers in standards file (excluding meta-sections)
+    - Count rows in TOC
+    - Count rows in standards-coverage-table.md for that agent
+    - ALL THREE must be equal
+
+If ANY checkbox is NO → Fix before committing.
+```
 
 **⛔ AGENT INLINE CATEGORIES ARE FORBIDDEN:**
 - ✅ Agent has "Sections to Check" referencing `standards-coverage-table.md`
@@ -226,7 +254,7 @@ AI models naturally attempt to be "helpful" by making autonomous decisions. This
 
 ---
 
-## Assertive Language Reference
+## Assertive Language Reference (MANDATORY)
 
 **Quick reference for prompt engineering:**
 
