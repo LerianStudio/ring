@@ -39,7 +39,14 @@ Use the AskUserQuestion tool to gather:
   - "Full (user + service-to-service)" - Both user and service auth
 - **Note:** For Go services requiring auth, reference `golang.md` → Access Manager Integration section during TRD creation (Gate 3) and Dependency Map (Gate 6)
 
-After getting the feature name and auth requirements, create the directory structure and run the 9-gate workflow:
+**Question 3:** "Is this a licensed product/plugin?"
+- Header: "License Requirements"
+- Options:
+  - "No" - Not a licensed product (open source, internal tool, etc.)
+  - "Yes" - Licensed product that requires License Manager integration
+- **Note:** For Go services requiring license validation, reference `golang.md` → License Manager Integration section during TRD creation (Gate 3) and Dependency Map (Gate 6)
+
+After getting the feature name, auth requirements, and license requirements, create the directory structure and run the 9-gate workflow:
 
 ```bash
 mkdir -p docs/pre-dev/<feature-name>

@@ -1316,6 +1316,264 @@ When disabled, `auth.Authorize()` middleware calls `next()` without validation.
 
 ---
 
+## License Manager Integration (MANDATORY)
+
+All licensed plugins/products **MUST** integrate with the License Manager system for license validation. Services use `lib-license-go` to validate licenses against the Lerian backend, with support for both global and multi-organization modes.
+
+### Architecture Overview
+
+```text
+┌─────────────────────────────────────────────────────────────────────┐
+│                       LICENSE MANAGER                               │
+├─────────────────────────────────────────────────────────────────────┤
+│  Lerian License Backend (AWS API Gateway)                           │
+│  - Validates license keys                                           │
+│  - Returns plugin entitlements                                      │
+│  - Supports global and per-organization licenses                    │
+└─────────────────────────────────────────────────────────────────────┘
+                                    ▲
+                                    │ HTTPS API
+                                    │
+┌───────────────────────────────────┴───────────────────────────────────┐
+│                           lib-license-go                              │
+│  (Go library - Fiber middleware + gRPC interceptors)                  │
+│  - Ristretto in-memory cache                                          │
+│  - Weekly background refresh                                          │
+│  - Startup validation (fail-fast)                                     │
+└───────────────────────────────────┬───────────────────────────────────┘
+                                    │ import
+                                    ▼
+┌───────────────────────────────────────────────────────────────────────┐
+│  Licensed Services (plugin-fees, reporter, etc.)                      │
+└───────────────────────────────────────────────────────────────────────┘
+```
+
+**Key Concepts:**
+- **Global Mode**: Single license key validates entire plugin (use `ORGANIZATION_IDS=global`)
+- **Multi-Org Mode**: Per-organization license validation via `X-Organization-Id` header
+- **Fail-Fast**: Service panics at startup if no valid license found
+
+### Required Import
+
+```go
+import (
+    libLicense "github.com/LerianStudio/lib-license-go/v2/middleware"
+)
+```
+
+### Required Environment Variables
+
+| Variable | Type | Description | Example |
+|----------|------|-------------|---------|
+| `LICENSE_KEY` | string | License key for this plugin | `lic_xxxxxxxxxxxx` |
+| `ORGANIZATION_IDS` | string | Comma-separated org IDs or "global" | `org1,org2` or `global` |
+
+### Configuration Struct
+
+```go
+// bootstrap/config.go
+type Config struct {
+    // ... other fields ...
+
+    // License Manager
+    LicenseKey      string `env:"LICENSE_KEY"`
+    OrganizationIDs string `env:"ORGANIZATION_IDS"`
+}
+```
+
+### Bootstrap Integration
+
+```go
+// bootstrap/config.go
+import (
+    libLicense "github.com/LerianStudio/lib-license-go/v2/middleware"
+)
+
+func InitServers() *Service {
+    cfg := &Config{}
+    if err := libCommons.SetConfigFromEnvVars(cfg); err != nil {
+        panic(err)
+    }
+
+    logger := libZap.InitializeLogger()
+
+    // ... telemetry, database initialization ...
+
+    // Initialize License Manager client
+    licenseClient := libLicense.NewLicenseClient(
+        constant.ApplicationName,  // e.g., "plugin-fees"
+        cfg.LicenseKey,
+        cfg.OrganizationIDs,
+        &logger,
+    )
+
+    // Pass license client to router and server
+    httpApp := httpin.NewRouter(logger, telemetry, auth, licenseClient, handlers...)
+    serverAPI := NewServer(cfg, httpApp, logger, telemetry, licenseClient)
+
+    // ... rest of initialization ...
+}
+```
+
+### Router Setup with License Middleware
+
+```go
+// adapters/http/in/routes.go
+import (
+    libHTTP "github.com/LerianStudio/lib-commons/v2/commons/net/http"
+    libLicense "github.com/LerianStudio/lib-license-go/v2/middleware"
+)
+
+func NewRoutes(lg log.Logger, tl *opentelemetry.Telemetry, handler *YourHandler, lc *libLicense.LicenseClient) *fiber.App {
+    f := fiber.New(fiber.Config{
+        DisableStartupMessage: true,
+        ErrorHandler: func(ctx *fiber.Ctx, err error) error {
+            return libHTTP.HandleFiberError(ctx, err)
+        },
+    })
+    tlMid := libHTTP.NewTelemetryMiddleware(tl)
+
+    // License middleware - applies GLOBALLY (must be early in chain)
+    f.Use(lc.Middleware())
+
+    // Other middleware
+    f.Use(tlMid.WithTelemetry(tl))
+    f.Use(cors.New())
+    f.Use(libHTTP.WithHTTPLogging(libHTTP.WithCustomLogger(lg)))
+
+    // Routes
+    v1 := f.Group("/v1")
+    v1.Post("/resources", handler.Create)
+    v1.Get("/resources", handler.List)
+
+    // Health and version (automatically skipped by license middleware)
+    f.Get("/health", libHTTP.Ping)
+    f.Get("/version", libHTTP.Version)
+
+    f.Use(tlMid.EndTracingSpans)
+
+    return f
+}
+```
+
+**Note:** License middleware should be applied early in the middleware chain. It automatically skips `/health`, `/version`, and `/swagger/` paths.
+
+### Server Integration with Graceful Shutdown
+
+```go
+// bootstrap/server.go
+import (
+    libCommonsLicense "github.com/LerianStudio/lib-commons/v2/commons/license"
+    libLicense "github.com/LerianStudio/lib-license-go/v2/middleware"
+)
+
+type Server struct {
+    app           *fiber.App
+    serverAddress string
+    license       *libCommonsLicense.ManagerShutdown
+    logger        libLog.Logger
+    telemetry     libOpentelemetry.Telemetry
+}
+
+func NewServer(cfg *Config, app *fiber.App, logger libLog.Logger, telemetry *libOpentelemetry.Telemetry, licenseClient *libLicense.LicenseClient) *Server {
+    return &Server{
+        app:           app,
+        serverAddress: cfg.ServerAddress,
+        license:       licenseClient.GetLicenseManagerShutdown(),
+        logger:        logger,
+        telemetry:     *telemetry,
+    }
+}
+
+func (s *Server) Run(l *libCommons.Launcher) error {
+    // License manager integrated into graceful shutdown
+    libCommonsServer.NewServerManager(s.license, &s.telemetry, s.logger).
+        WithHTTPServer(s.app, s.serverAddress).
+        StartWithGracefulShutdown()
+
+    return nil
+}
+```
+
+### Default Skip Paths
+
+The license middleware automatically skips validation for:
+
+| Path | Reason |
+|------|--------|
+| `/health` | Health checks must always respond |
+| `/version` | Version endpoint is public |
+| `/swagger/` | API documentation is public |
+
+### gRPC Integration (If Applicable)
+
+```go
+// For gRPC services
+import (
+    "google.golang.org/grpc"
+    libLicense "github.com/LerianStudio/lib-license-go/v2/middleware"
+)
+
+func NewGRPCServer(licenseClient *libLicense.LicenseClient) *grpc.Server {
+    server := grpc.NewServer(
+        grpc.UnaryInterceptor(licenseClient.UnaryServerInterceptor()),
+        grpc.StreamInterceptor(licenseClient.StreamServerInterceptor()),
+    )
+
+    // Register your services
+    pb.RegisterYourServiceServer(server, &yourServiceImpl{})
+
+    return server
+}
+```
+
+### Middleware Behavior
+
+| Mode | Startup | Per-Request |
+|------|---------|-------------|
+| Global (`ORGANIZATION_IDS=global`) | Validates license, panics if invalid | Skips validation, calls `next()` |
+| Multi-Org | Validates all orgs, panics if none valid | Validates `X-Organization-Id` header |
+
+### Error Codes
+
+| Code | HTTP | Description |
+|------|------|-------------|
+| `LCS-0001` | 500 | Internal server error during validation |
+| `LCS-0002` | 400 | No organization IDs configured |
+| `LCS-0003` | 403 | No valid licenses found for any organization |
+| `LCS-0010` | 400 | Missing `X-Organization-Id` header |
+| `LCS-0011` | 400 | Unknown organization ID |
+| `LCS-0012` | 403 | Failed to validate organization license |
+| `LCS-0013` | 403 | Organization license is invalid or expired |
+
+### What NOT to Do
+
+```go
+// FORBIDDEN: Hardcoded license keys
+licenseClient := libLicense.NewLicenseClient(appName, "hardcoded-key", orgIDs, &logger)  // NEVER
+
+// FORBIDDEN: Skipping license middleware on licensed routes
+f.Post("/v1/paid-feature", handler.Create)  // Missing lc.Middleware()
+
+// FORBIDDEN: Not integrating shutdown manager
+libCommonsServer.NewServerManager(nil, &s.telemetry, s.logger)  // Missing license shutdown
+
+// CORRECT: Always use environment variables and integrate shutdown
+licenseClient := libLicense.NewLicenseClient(appName, cfg.LicenseKey, cfg.OrganizationIDs, &logger)
+libCommonsServer.NewServerManager(s.license, &s.telemetry, s.logger)
+```
+
+### Testing with License Disabled
+
+For local development without license validation, you can omit the license client initialization or use a mock. The service will panic at startup if `LICENSE_KEY` is set but invalid.
+
+**Tip:** For development, either:
+1. Use a valid development license key
+2. Comment out the license middleware during local development
+3. Use the development license server: `IS_DEVELOPMENT=true`
+
+---
+
 ## Data Transformation: ToEntity/FromEntity (MANDATORY)
 
 All database models **MUST** implement transformation methods to/from domain entities.

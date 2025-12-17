@@ -234,20 +234,21 @@ These sections describe HOW to use the standards, not WHAT the standards are.
 | 4 | Configuration Loading (MANDATORY) | |
 | 5 | Telemetry & Observability (MANDATORY) | |
 | 6 | Bootstrap Pattern (MANDATORY) | |
-| 7 | Access Manager Integration (MANDATORY) | lib-auth, auth middleware, service-to-service auth |
-| 8 | Data Transformation: ToEntity/FromEntity (MANDATORY) | |
-| 9 | Error Codes Convention (MANDATORY) | |
-| 10 | Error Handling (MANDATORY) | |
-| 11 | Function Design (MANDATORY) | |
-| 12 | Pagination Patterns (MANDATORY) | |
-| 13 | Testing Patterns (MANDATORY) | |
-| 14 | Logging Standards (MANDATORY) | |
-| 15 | Linting (MANDATORY) | |
-| 16 | Architecture Patterns (MANDATORY) | |
-| 17 | Directory Structure (MANDATORY) | |
-| 18 | Concurrency Patterns (MANDATORY) | |
-| 19 | DDD Patterns (MANDATORY) | |
-| 20 | RabbitMQ Worker Pattern (MANDATORY) | |
+| 7 | Access Manager Integration (CONDITIONAL) | lib-auth, auth middleware, M2M auth - **Check if project has auth requirements** |
+| 8 | License Manager Integration (CONDITIONAL) | lib-license-go, global middleware, graceful shutdown - **Check if project is licensed** |
+| 9 | Data Transformation: ToEntity/FromEntity (MANDATORY) | |
+| 10 | Error Codes Convention (MANDATORY) | |
+| 11 | Error Handling (MANDATORY) | |
+| 12 | Function Design (MANDATORY) | |
+| 13 | Pagination Patterns (MANDATORY) | |
+| 14 | Testing Patterns (MANDATORY) | |
+| 15 | Logging Standards (MANDATORY) | |
+| 16 | Linting (MANDATORY) | |
+| 17 | Architecture Patterns (MANDATORY) | |
+| 18 | Directory Structure (MANDATORY) | |
+| 19 | Concurrency Patterns (MANDATORY) | |
+| 20 | DDD Patterns (MANDATORY) | |
+| 21 | RabbitMQ Worker Pattern (MANDATORY) | |
 
 ---
 

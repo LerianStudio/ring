@@ -199,6 +199,36 @@ If language cannot be auto-detected, use AskUserQuestion with tech stack options
 - Middleware is applied per-route, not globally
 - See `golang.md` → Access Manager Integration → Router Setup for patterns
 
+### Licensing Dependencies (Mandatory for Licensed Products)
+
+**If TRD specifies this is a licensed product/plugin, include these dependencies:**
+
+| Tech Stack | License Requirement | Mandatory Dependency | Reference |
+|------------|---------------------|---------------------|-----------|
+| Go Backend | Single-org (global) license | `github.com/LerianStudio/lib-license-go/v2` | `golang.md` → License Manager Integration |
+| Go Backend | Multi-org license | `github.com/LerianStudio/lib-license-go/v2` | `golang.md` → License Manager Integration |
+
+**For Go services, the dependency entry MUST include:**
+
+```markdown
+### Licensing
+
+**Package:** `github.com/LerianStudio/lib-license-go/v2/middleware@vX.Y.Z`
+**Purpose:** Integration with Lerian License Manager for product licensing
+**Rationale:** Standard licensing library for all Lerian licensed Go services
+**Environment Variables:** LICENSE_KEY, ORGANIZATION_IDS
+**Mode:** Global (ORGANIZATION_IDS=global) or Multi-org (comma-separated org IDs)
+**Reference:** See `golang.md` → License Manager Integration for implementation patterns
+```
+
+**CRITICAL:** Go services MUST use lib-license-go for licensing. Custom license validation is FORBIDDEN.
+
+**Implementation Requirement (from TRD):**
+- License middleware applied GLOBALLY: `f.Use(lc.Middleware())`
+- Middleware applied early in chain (first after Fiber creation)
+- Graceful shutdown MUST include: `licenseClient.GetLicenseManagerShutdown()`
+- See `golang.md` → License Manager Integration → Router Setup for patterns
+
 ## License & Cost Templates
 
 **License Summary:** Document count by type (MIT, Apache 2.0, BSD-3-Clause, Commercial), compliance actions (attribution file, legal notification, GPL verification)
