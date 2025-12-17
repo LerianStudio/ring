@@ -484,19 +484,21 @@ The Standards Compliance section exists to:
 | 4 | Configuration Loading (MANDATORY) | |
 | 5 | Telemetry & Observability (MANDATORY) | |
 | 6 | Bootstrap Pattern (MANDATORY) | |
-| 7 | Data Transformation: ToEntity/FromEntity (MANDATORY) | |
-| 8 | Error Codes Convention (MANDATORY) | |
-| 9 | Error Handling (MANDATORY) | |
-| 10 | Function Design (MANDATORY) | |
-| 11 | Pagination Patterns (MANDATORY) | |
-| 12 | Testing Patterns (MANDATORY) | |
-| 13 | Logging Standards (MANDATORY) | |
-| 14 | Linting (MANDATORY) | |
-| 15 | Architecture Patterns (MANDATORY) | |
-| 16 | Directory Structure (MANDATORY) | |
-| 17 | Concurrency Patterns (MANDATORY) | |
-| 18 | DDD Patterns (MANDATORY) | |
-| 19 | RabbitMQ Worker Pattern (MANDATORY) | |
+| 7 | Access Manager Integration (CONDITIONAL) | lib-auth, auth middleware, M2M auth - **if project has auth requirements** |
+| 8 | License Manager Integration (CONDITIONAL) | lib-license-go, global middleware, graceful shutdown - **if project is licensed** |
+| 9 | Data Transformation: ToEntity/FromEntity (MANDATORY) | |
+| 10 | Error Codes Convention (MANDATORY) | |
+| 11 | Error Handling (MANDATORY) | |
+| 12 | Function Design (MANDATORY) | |
+| 13 | Pagination Patterns (MANDATORY) | |
+| 14 | Testing Patterns (MANDATORY) | |
+| 15 | Logging Standards (MANDATORY) | |
+| 16 | Linting (MANDATORY) | |
+| 17 | Architecture Patterns (MANDATORY) | |
+| 18 | Directory Structure (MANDATORY) | |
+| 19 | Concurrency Patterns (MANDATORY) | |
+| 20 | DDD Patterns (MANDATORY) | |
+| 21 | RabbitMQ Worker Pattern (MANDATORY) | |
 
 **→ See [shared-patterns/standards-coverage-table.md](../skills/shared-patterns/standards-coverage-table.md) for:**
 - Output table format

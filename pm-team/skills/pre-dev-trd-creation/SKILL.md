@@ -180,6 +180,45 @@ If feature includes list/browse, decide during TRD:
 
 Document in TRD: `API Patterns → Pagination → Strategy + Rationale`
 
+## Authentication/Authorization Architecture (If Required)
+
+If feature requires authentication or authorization (as determined in Question 2 of pre-dev command):
+
+| Auth Type | TRD Description (Abstract) | Implementation Reference |
+|-----------|---------------------------|-------------------------|
+| User authentication only | "Token-based authentication with stateless validation" | For Go: `golang.md` → Access Manager Integration |
+| User + permissions | "Token-based authentication with role-based access control (RBAC)" | For Go: `golang.md` → Access Manager Integration |
+| Service-to-service | "Machine-to-machine authentication with client credentials" | For Go: `golang.md` → Access Manager Integration (GetApplicationToken) |
+| Full (user + S2S) | "Dual-layer authentication: user tokens for end-users, client credentials for services" | For Go: `golang.md` → Access Manager Integration |
+
+**Document in TRD:** `Security Architecture → Authentication/Authorization → Strategy + Implementation Reference`
+
+**Key Implementation Pattern (for TRD reference):**
+- Every protected endpoint requires middleware authorization
+- Pattern: `auth.Authorize(applicationName, resource, action)` on each route
+- Engineers will implement per-route protection following the referenced standard
+
+**Note for Go Services:** Lerian's Access Manager (plugin-auth + identity + lib-auth) is the standard authentication system. Reference `golang.md` → Access Manager Integration section in the TRD so engineers know where to find implementation patterns including route middleware protection.
+
+## License Manager Architecture (If Required)
+
+If feature is a licensed product/plugin (as determined in Question 3 of pre-dev command):
+
+| License Type | TRD Description (Abstract) | Implementation Reference |
+|--------------|---------------------------|-------------------------|
+| Single-org (global) | "Global license validation at service startup with fail-fast behavior" | For Go: `golang.md` → License Manager Integration |
+| Multi-org | "Per-request license validation with organization context" | For Go: `golang.md` → License Manager Integration |
+
+**Document in TRD:** `Security Architecture → Licensing → Strategy + Implementation Reference`
+
+**Key Architecture Pattern (for TRD reference):**
+- License validation as global middleware (applied early in chain)
+- Fail-fast on startup: service refuses to start without valid license
+- Graceful shutdown integration for license manager resources
+- Built-in skip paths for health/readiness endpoints
+
+**Note for Go Services:** Lerian's License Manager (lib-license-go) is the standard licensing system. Reference `golang.md` → License Manager Integration section in the TRD so engineers know where to find implementation patterns including global middleware and graceful shutdown.
+
 ## ADR Template
 
 ```markdown

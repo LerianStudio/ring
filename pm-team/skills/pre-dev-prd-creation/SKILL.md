@@ -78,6 +78,33 @@ Architecture diagrams or component design, technology choices (languages, framew
 | "PRDs can mention tech when it's a constraint" | PRDs mention capabilities needed. TRD maps capabilities to tech. |
 | "Context matters - this is for exec review" | Context doesn't override principles. Executives get abstracted version. |
 
+## Security Requirements Discovery (Business Level)
+
+**During PRD creation, identify if the feature requires access control:**
+
+| Business Question | If Yes → Document |
+|-------------------|-------------------|
+| Does this feature handle user-specific data? | "Users can only access their own [data type]" |
+| Are there different user roles with different permissions? | "Admins can [X], regular users can [Y]" |
+| Does this feature need to identify who performed an action? | "Audit trail required for [action type]" |
+| Does this integrate with other internal services? | "Service must authenticate to [service name]" |
+| Are there regulatory requirements (GDPR, PCI-DSS, HIPAA)? | "Must comply with [regulation] for [data type]" |
+
+**What to include in PRD:**
+- ✅ "Only authenticated users can access this feature"
+- ✅ "Users can only view/edit their own records"
+- ✅ "Admin approval required for [action]"
+- ✅ "Must track who performed each action"
+
+**What NOT to include in PRD:**
+- ❌ "Use JWT tokens" (technology choice → TRD)
+- ❌ "Integrate with Access Manager" (architecture → TRD)
+- ❌ "OAuth2 flow" (protocol choice → TRD)
+
+**Note:** The TRD (Gate 3) will translate these business requirements into authentication/authorization architecture patterns. For Go services, refer to `golang.md` → Access Manager Integration section during TRD creation.
+
+---
+
 ## Red Flags - STOP
 
 If you catch yourself writing or thinking any of these in a PRD, **STOP**:

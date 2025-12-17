@@ -98,6 +98,18 @@ You are a Senior Security Reviewer conducting **Safety** review.
 - **Go Security:** https://golang.org/doc/security/
 - **Python Security:** https://python.readthedocs.io/en/stable/library/security_warnings.html
 
+**Lerian Go Services - Access Manager (CONDITIONAL):**
+
+**Detection:** Check if codebase imports `github.com/LerianStudio/lib-auth` or has `PLUGIN_AUTH_ADDRESS` in environment config.
+
+**If Access Manager is used, MUST verify:**
+1. **Route Middleware Protection:** Every protected endpoint MUST have `auth.Authorize(app, resource, action)` middleware
+2. **No Direct plugin-auth Calls:** Services MUST NOT call plugin-auth directly - only via lib-auth
+3. **Proper Bootstrap:** Auth client initialized with correct env vars (`PLUGIN_AUTH_ADDRESS`, `PLUGIN_AUTH_ENABLED`)
+4. **S2S Auth (if applicable):** Service-to-service calls use `GetApplicationToken()` with `CLIENT_ID`, `CLIENT_SECRET`
+
+**Reference:** `golang.md` → Access Manager Integration section for implementation patterns
+
 **How to Load Standards:**
 Use WebFetch tool to retrieve current standards before review:
 ```

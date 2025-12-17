@@ -89,12 +89,27 @@ The skill defines all steps including: stack detection, codebase-explorer dispat
 
 ## Analysis Dimensions
 
-| Dimension | What's Checked |
-|-----------|----------------|
-| **Architecture** | DDD patterns, layer separation, dependency direction, directory structure |
-| **Code Quality** | Naming conventions, error handling, forbidden practices, security |
-| **Testing** | Coverage percentage, test patterns, naming, missing tests |
-| **DevOps** | Dockerfile, docker-compose, env management, Helm charts |
+| Dimension | What's Checked | Standards Reference |
+|-----------|----------------|---------------------|
+| **Architecture** | DDD patterns, layer separation, dependency direction, directory structure | `golang.md` § Architecture |
+| **Code Quality** | Naming conventions, error handling, forbidden practices, security | `golang.md` § Error Handling |
+| **Instrumentation** | Service method tracing, span naming, error classification, context propagation | `golang.md` § Distributed Tracing |
+| **Testing** | Coverage percentage, test patterns, naming, missing tests | `golang.md` § Testing |
+| **DevOps** | Dockerfile, docker-compose, env management, Helm charts | `golang.md` § DevOps |
+
+### Instrumentation Checklist (Quick Reference)
+
+When analyzing services for instrumentation compliance, verify:
+
+1. **Context extraction**: `libCommons.NewTrackingFromContext(ctx)` at method start
+2. **Child span creation**: `tracer.Start(ctx, "layer.entity.operation")` with proper naming
+3. **Span cleanup**: `defer span.End()` immediately after span creation
+4. **Error classification**:
+   - Business errors → `HandleSpanBusinessErrorEvent` (span stays OK)
+   - Technical errors → `HandleSpanError` (span marked ERROR)
+5. **Structured logging**: Use logger from context, not `log.Printf`
+
+**Full details and code templates**: See `docs/standards/golang.md` § "Distributed Tracing Architecture"
 
 ## Output
 
