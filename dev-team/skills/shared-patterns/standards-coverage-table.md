@@ -157,8 +157,8 @@ The Coverage Table ensures nothing is skipped. The Detailed Findings provide act
 ## Standards Coverage Table
 
 **Standards File:** golang.md (from WebFetch)
-**Total Sections Found:** 19
-**Table Rows:** 19 (MUST match)
+**Total Sections Found:** 21
+**Table Rows:** 21 (MUST match)
 
 | # | Section (from WebFetch) | Status | Evidence |
 |---|-------------------------|--------|----------|
@@ -168,23 +168,25 @@ The Coverage Table ensures nothing is skipped. The Detailed Findings provide act
 | 4 | Configuration Loading | ⚠️ | internal/config/config.go:12 |
 | 5 | Telemetry & Observability | ❌ | Not implemented |
 | 6 | Bootstrap Pattern | ✅ | cmd/server/main.go:15 |
-| 7 | Data Transformation | ✅ | internal/adapters/postgres/mapper.go:8 |
-| 8 | Error Codes Convention | ⚠️ | Uses generic codes |
-| 9 | Error Handling | ✅ | Consistent pattern |
-| 10 | Function Design | ✅ | Small functions, clear names |
-| 11 | Pagination Patterns | N/A | No list endpoints |
-| 12 | Testing Patterns | ❌ | No tests found |
-| 13 | Logging Standards | ⚠️ | Missing structured fields |
-| 14 | Linting | ✅ | .golangci.yml present |
-| 15 | Architecture Patterns | ✅ | Hexagonal structure |
-| 16 | Directory Structure | ✅ | Follows convention |
-| 17 | Concurrency Patterns | N/A | No concurrent code |
-| 18 | DDD Patterns | ✅ | Entities, Value Objects present |
-| 19 | RabbitMQ Worker Pattern | N/A | No message queue |
+| 7 | Access Manager Integration | ✅ | internal/middleware/auth.go:25 |
+| 8 | License Manager Integration | N/A | Not a licensed project |
+| 9 | Data Transformation | ✅ | internal/adapters/postgres/mapper.go:8 |
+| 10 | Error Codes Convention | ⚠️ | Uses generic codes |
+| 11 | Error Handling | ✅ | Consistent pattern |
+| 12 | Function Design | ✅ | Small functions, clear names |
+| 13 | Pagination Patterns | N/A | No list endpoints |
+| 14 | Testing Patterns | ❌ | No tests found |
+| 15 | Logging Standards | ⚠️ | Missing structured fields |
+| 16 | Linting | ✅ | .golangci.yml present |
+| 17 | Architecture Patterns | ✅ | Hexagonal structure |
+| 18 | Directory Structure | ✅ | Follows convention |
+| 19 | Concurrency Patterns | N/A | No concurrent code |
+| 20 | DDD Patterns | ✅ | Entities, Value Objects present |
+| 21 | RabbitMQ Worker Pattern | N/A | No message queue |
 
 **Completeness Verification:**
-- Sections in standards: 19
-- Rows in table: 19
+- Sections in standards: 21
+- Rows in table: 21
 - Status: ✅ Complete
 ```
 
