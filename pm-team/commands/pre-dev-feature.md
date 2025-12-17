@@ -29,7 +29,10 @@ Use the AskUserQuestion tool to gather:
 - This will be used for the directory name
 - Use kebab-case (e.g., "user-logout", "email-validation", "rate-limiting")
 
-**Question 2:** "Does this feature require authentication or authorization?"
+**Question 2 (CONDITIONAL):** "Does this feature require authentication or authorization?"
+- **Auto-detection:** Before asking, check if `go.mod` contains `github.com/LerianStudio/lib-auth`
+  - If **found** → Skip this question. Auth is already integrated at project level.
+  - If **not found** → Ask this question (new project or project without auth)
 - Header: "Auth Requirements"
 - Options:
   - "None" - No authentication needed
@@ -39,14 +42,19 @@ Use the AskUserQuestion tool to gather:
   - "Full (user + service-to-service)" - Both user and service auth
 - **Note:** For Go services requiring auth, reference `golang.md` → Access Manager Integration section during TRD creation (Gate 2)
 
-**Question 3:** "Is this a licensed product/plugin?"
+**Question 3 (CONDITIONAL):** "Is this a licensed product/plugin?"
+- **Auto-detection:** Before asking, check if `go.mod` contains `github.com/LerianStudio/lib-license-go`
+  - If **found** → Skip this question. Licensing is already integrated at project level.
+  - If **not found** → Ask this question (new project or project without licensing)
 - Header: "License Requirements"
 - Options:
   - "No" - Not a licensed product (open source, internal tool, etc.)
   - "Yes" - Licensed product that requires License Manager integration
 - **Note:** For Go services requiring license validation, reference `golang.md` → License Manager Integration section during TRD creation (Gate 2)
 
-After getting the feature name, auth requirements, and license requirements, create the directory structure and run the 4-gate workflow:
+**Why auto-detection?** Access Manager and License Manager are project-level infrastructure decisions, not feature-level. Once integrated, all features in the project inherit them.
+
+After getting the feature name (and auth/license requirements if applicable), create the directory structure and run the 4-gate workflow:
 
 ```bash
 mkdir -p docs/pre-dev/<feature-name>
