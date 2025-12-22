@@ -252,27 +252,33 @@ These sections describe HOW to use the standards, not WHAT the standards are.
 
 ---
 
-### typescript.md (Used by: backend-engineer-typescript, frontend-bff-engineer-typescript)
+### backend-engineer-typescript → typescript.md
 
 | # | Section to Check | Key Subsections |
 |---|------------------|-----------------|
-| 1 | Version (MANDATORY) | |
-| 2 | Strict Configuration (MANDATORY) | |
+| 1 | Version (MANDATORY) | TypeScript 5.0+, Node.js 20+ |
+| 2 | Strict Configuration (MANDATORY) | tsconfig.json strict mode |
 | 3 | Frameworks & Libraries (MANDATORY) | Express, Fastify, NestJS, Hono, tRPC, Prisma, Drizzle, TypeORM, Kysely, Zod, Yup, joi, class-validator, Vitest, Jest, Supertest, testcontainers |
-| 4 | Type Safety Rules (MANDATORY) | |
-| 5 | Zod Validation Patterns (MANDATORY) | |
-| 6 | Dependency Injection (MANDATORY) | |
-| 7 | AsyncLocalStorage for Context (MANDATORY) | |
-| 8 | Testing Patterns (MANDATORY) | |
-| 9 | Error Handling (MANDATORY) | |
-| 10 | Function Design (MANDATORY) | |
-| 11 | Naming Conventions (MANDATORY) | |
+| 4 | Type Safety Rules (MANDATORY) | No any, branded types, discriminated unions |
+| 5 | Zod Validation Patterns (MANDATORY) | Schema validation |
+| 6 | Dependency Injection (MANDATORY) | TSyringe patterns |
+| 7 | AsyncLocalStorage for Context (MANDATORY) | Request context propagation |
+| 8 | Testing Patterns (MANDATORY) | Type-safe mocks, fixtures, edge cases |
+| 9 | Error Handling (MANDATORY) | Custom error classes |
+| 10 | Function Design (MANDATORY) | Single responsibility |
+| 11 | Naming Conventions (MANDATORY) | Files, interfaces, types |
 | 12 | Directory Structure (MANDATORY) | Midaz pattern |
-| 13 | RabbitMQ Worker Pattern (MANDATORY) | |
+| 13 | RabbitMQ Worker Pattern (MANDATORY) | Async message processing |
 
 ---
 
-### frontend.md (Used by: frontend-engineer, frontend-designer)
+### frontend-bff-engineer-typescript → typescript.md
+
+**Same sections as backend-engineer-typescript (13 sections).** See above.
+
+---
+
+### frontend-engineer → frontend.md
 
 | # | Section to Check |
 |---|------------------|
@@ -289,6 +295,12 @@ These sections describe HOW to use the standards, not WHAT the standards are.
 | 11 | Directory Structure (MANDATORY) |
 | 12 | FORBIDDEN Patterns (MANDATORY) |
 | 13 | Standards Compliance Categories (MANDATORY) |
+
+---
+
+### frontend-designer → frontend.md
+
+**Same sections as frontend-engineer (13 sections).** See above.
 
 ---
 

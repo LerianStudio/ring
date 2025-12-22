@@ -1176,101 +1176,307 @@ See [shared-patterns/shared-orchestrator-principle.md](../shared-patterns/shared
 
 **REQUIRED SUB-SKILL:** Use dev-devops
 
+### ⛔ HARD GATE: Required Artifacts MUST Be Created
+
+**Gate 1 is a BLOCKING gate.** DevOps agent MUST create ALL required artifacts. If ANY artifact is missing:
+- You CANNOT proceed to Gate 2
+- You MUST re-dispatch to devops-engineer to create missing artifacts
+- You MUST verify ALL artifacts exist before proceeding
+
+### Required Artifacts
+
+**See [shared-patterns/standards-coverage-table.md](../skills/shared-patterns/standards-coverage-table.md) → "devops-engineer → devops.md" for ALL required sections.**
+
+**Key artifacts from devops.md:**
+- Containers (Dockerfile + Docker Compose)
+- Makefile Standards (ALL required commands)
+- Infrastructure as Code (if applicable)
+- Helm charts (if K8s deployment)
+
+### Step 3.1: Dispatch DevOps Agent
+
 ```text
 For current execution unit:
 
 1. Record gate start timestamp
-2. Check if unit requires DevOps work:
-   - Infrastructure changes?
-   - New service deployment?
+2. Dispatch DevOps agent (ALWAYS - not optional):
 
-3. If DevOps needed:
    Task tool:
      subagent_type: "devops-engineer"
+     model: "opus"
+     description: "Create/update DevOps artifacts for [unit_id]"
      prompt: |
-       Review and update infrastructure for: [unit_id]
+       ⛔ MANDATORY: Create ALL DevOps Artifacts for: [unit_id]
 
-       Implementation changes:
+       ## Implementation Summary from Gate 0:
        [implementation_artifacts]
 
-       Check:
-       - Dockerfile updates needed?
-       - docker-compose updates needed?
-       - Helm chart updates needed?
-       - Environment variables?
+       ## Standards Reference:
+       WebFetch: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/devops.md
+       
+       You MUST implement ALL sections from devops.md. See standards-coverage-table.md
+       for the complete list: devops-engineer → devops.md
 
-       Report: changes made, deployment notes.
+       ## Required Output:
 
-4. If DevOps not needed:
-   - Mark as "skipped" with reason
-   - agent_outputs.devops = null
+       ### Standards Coverage Table
+       | # | Section (from devops.md) | Status | Evidence |
+       |---|--------------------------|--------|----------|
+       | 1 | Containers | ✅/❌ | Dockerfile:[line], docker-compose.yml:[line] |
+       | 2 | Makefile Standards | ✅/❌ | Makefile:[line] |
+       | ... | ... | ... | ... |
 
-5. If DevOps executed:
+       ### Compliance Summary
+       - **ALL STANDARDS MET:** ✅ YES / ❌ NO
+       - **If NO, what's missing:** [list sections]
+
+       ### Verification Commands Executed:
+       - `docker build -t [service] .` → [result]
+       - `docker-compose config` → [result]
+       - `make` → [result]
+
+3. Parse agent output and verify Standards Coverage Table
+```
+
+### Step 3.2: Verify Standards Coverage Table (HARD GATE)
+
+```text
+4. Parse agent output for Standards Coverage Table:
+
+   IF "ALL STANDARDS MET: ✅ YES" AND all sections have ✅ or N/A:
+     → Verify files actually exist (Read tool for each artifact)
+     → If all files exist → Gate 1 PASSED. Proceed to Step 3.3.
+
+   IF ANY section has ❌:
+     → Gate 1 BLOCKED. Standards not met.
+     → Extract ❌ sections from Standards Coverage Table
+     → Re-dispatch to devops-engineer:
+
+     Task tool:
+       subagent_type: "devops-engineer"
+       model: "opus"
+       description: "Fix missing DevOps standards for [unit_id]"
+       prompt: |
+         ⛔ FIX REQUIRED - DevOps Standards Not Met
+
+         Your Standards Coverage Table shows these sections as ❌:
+         [list ❌ sections from table]
+
+         WebFetch the standards again:
+         https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/devops.md
+
+         Implement ALL missing sections.
+         Return updated Standards Coverage Table with ALL ✅ or N/A.
+
+     → After fix: Re-verify Standards Coverage Table
+     → Max 3 iterations, then STOP and escalate to user
+```
+
+### Step 3.3: Gate 1 Complete
+
+```text
+5. When all artifacts verified:
    - agent_outputs.devops = {
        agent: "devops-engineer",
-       output: "[full agent output for feedback analysis]",
+       output: "[full agent output]",
+       artifacts_created: ["Dockerfile", "docker-compose.yml", ".env.example", "Makefile"],
        timestamp: "[ISO timestamp]",
        duration_ms: [execution time]
      }
 
-6. Update state
+6. Update state:
+   - gate_progress.devops.status = "completed"
+   - gate_progress.devops.artifacts = [list of created files]
+
 7. **⛔ SAVE STATE TO FILE (MANDATORY):**
    Write tool → "docs/refactor/current-cycle.json"
-   See "State Persistence Rule" section.
 
 8. Proceed to Gate 2
 ```
+
+### Gate 1 Anti-Rationalization Table
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "Dockerfile exists, skip other artifacts" | ALL artifacts required. 1/4 ≠ complete. | **Create ALL artifacts** |
+| "docker-compose not needed locally" | docker-compose is MANDATORY for local dev. | **Create docker-compose.yml** |
+| "Makefile is optional" | Makefile is MANDATORY for standardized commands. | **Create Makefile** |
+| ".env.example can be added later" | .env.example documents required config NOW. | **Create .env.example** |
+| "Small service doesn't need all this" | Size is irrelevant. Standards apply uniformly. | **Create ALL artifacts** |
 
 ## Step 4: Gate 2 - SRE (Per Execution Unit)
 
 **REQUIRED SUB-SKILL:** Use dev-sre
 
+### ⛔ HARD GATE: Observability MUST Be Validated
+
+**Gate 2 is a BLOCKING gate.** SRE agent VALIDATES that observability was correctly implemented in Gate 0. If ANY observability requirement is missing:
+- You CANNOT proceed to Gate 3
+- You MUST dispatch fix to the IMPLEMENTATION agent (backend-engineer-golang, etc.) - NOT SRE
+- You MUST re-run SRE validation after fixes
+- You MUST repeat until ALL observability requirements pass
+
+**SRE validates. Implementation agents fix. SRE does NOT implement.**
+
+### Required Observability (from sre.md)
+
+**See [shared-patterns/standards-coverage-table.md](../skills/shared-patterns/standards-coverage-table.md) → "sre → sre.md" for ALL required sections.**
+
+### Step 4.1: Dispatch SRE Agent for Validation
+
 ```text
 For current execution unit:
 
 1. Record gate start timestamp
-2. Check if unit requires SRE observability:
-   - New service or API?
-   - External dependencies added?
-   - Performance-critical changes?
+2. Dispatch SRE agent (ALWAYS - validation is not optional):
 
-3. If SRE needed:
    Task tool:
      subagent_type: "sre"
+     model: "opus"
+     description: "Validate observability for [unit_id]"
      prompt: |
-       Validate observability for: [unit_id]
+       ⛔ VALIDATE Observability Implementation for: [unit_id]
 
-       Service Information:
-       - Language: [Go/TypeScript/Python]
+       ## Service Information:
+       - Language: [Go/TypeScript]
        - Service type: [API/Worker/Batch]
-       - External dependencies: [list]
-       - Implementation from Gate 0: [summary of what was implemented]
+       - Implementation agent: [agent that did Gate 0]
+       - Files from Gate 0: [list of implementation files]
 
-       Validation Requirements:
-       - Verify structured JSON logging with trace correlation
-       - Verify OpenTelemetry tracing (if external calls)
+       ## Standards Reference:
+       WebFetch: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/sre.md
+       
+       You MUST validate ALL sections from sre.md. See standards-coverage-table.md
+       for the complete list: sre → sre.md
 
-       Report: validation results with PASS/FAIL for each component (logging, tracing), issues found by severity, verification commands executed.
+       ## Your Role:
+       - VALIDATE that observability is implemented correctly
+       - Do NOT implement - only verify and report
+       - If issues found → Report them with severity and file:line
 
-4. If SRE not needed:
-   - Mark as "skipped" with reason
-   - agent_outputs.sre = null
+       ## Required Output:
 
-5. If SRE executed:
+       ### Standards Coverage Table (Validation Results)
+       | # | Section (from sre.md) | Status | Evidence |
+       |---|----------------------|--------|----------|
+       | 1 | Logging Standards | ✅/❌ | [file:line or "NOT FOUND"] |
+       | 2 | Tracing Standards | ✅/❌ | [file:line or "NOT FOUND"] |
+       | 3 | OpenTelemetry with lib-commons | ✅/❌ | [file:line or "NOT FOUND"] |
+       | 4 | Health Checks | ✅/❌ | [file:line or "NOT FOUND"] |
+       | ... | ... | ... | ... |
+
+       ### Issues Found (if any ❌)
+       For each ❌ section:
+       - **Section:** [name]
+       - **Severity:** CRITICAL/HIGH/MEDIUM
+       - **What's Missing:** [specific requirement not met]
+       - **Expected:** [what should exist per sre.md]
+       - **Fix Required By:** [implementation agent name]
+
+       ### Compliance Summary
+       - **ALL OBSERVABILITY VALIDATED:** ✅ YES / ❌ NO
+       - **If NO, sections failing:** [list]
+
+3. Parse agent output and check validation results
+```
+
+### Step 4.2: Handle Validation Results (HARD GATE)
+
+```text
+4. Parse SRE agent output for Standards Coverage Table:
+
+   IF "ALL OBSERVABILITY VALIDATED: ✅ YES" AND all sections have ✅ or N/A:
+     → Gate 2 PASSED. Proceed to Step 4.4.
+
+   IF ANY section has ❌:
+     → Gate 2 BLOCKED. Observability not implemented correctly.
+     → Extract ❌ sections and issues from SRE report
+     → Dispatch fix to IMPLEMENTATION agent (NOT SRE):
+```
+
+### Step 4.3: Dispatch Fix to Implementation Agent
+
+```text
+   ⛔ IMPORTANT: SRE validates. Implementation agents fix.
+   
+   Determine which agent implemented Gate 0:
+   - Go code → backend-engineer-golang
+   - TypeScript backend → backend-engineer-typescript
+   - React/Frontend → frontend-engineer
+
+   Task tool:
+     subagent_type: "[implementation agent from Gate 0]"
+     model: "opus"
+     description: "Fix observability issues for [unit_id]"
+     prompt: |
+       ⛔ FIX REQUIRED - Observability Not Implemented
+
+       SRE validation found these observability issues:
+
+       ## Issues to Fix (from SRE report):
+       [paste ❌ sections and issues from SRE output]
+
+       ## Standards Reference:
+       For Go: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang.md
+       For TS: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md
+       
+       Focus on:
+       - Telemetry & Observability section
+       - Logging Standards section
+       - Bootstrap Pattern (telemetry initialization)
+
+       ## Requirements:
+       1. Implement ALL missing observability per standards
+       2. For Go: lib-commons v2 telemetry, NewTrackingFromContext, spans
+       3. For TS: lib-common-js logging, structured JSON
+       4. Return Standards Coverage Table showing ALL observability ✅
+
+   → After fix: Re-dispatch SRE agent to validate again
+   → Increment metrics.sre_iterations
+   → Max 3 iterations, then STOP and escalate to user
+```
+
+### Step 4.4: Gate 2 Complete
+
+```text
+5. When all observability validated:
    - agent_outputs.sre = {
        agent: "sre",
-       output: "[full agent output for feedback analysis]",
+       output: "[full agent output]",
+       validation_result: "PASS",
+       iterations: [count],
        timestamp: "[ISO timestamp]",
        duration_ms: [execution time]
      }
 
-6. Update state
+6. Update state:
+   - gate_progress.sre.status = "completed"
+   - gate_progress.sre.observability_validated = true
+
 7. **⛔ SAVE STATE TO FILE (MANDATORY):**
    Write tool → "docs/refactor/current-cycle.json"
-   See "State Persistence Rule" section.
 
 8. Proceed to Gate 3
 ```
+
+### Gate 2 Anti-Rationalization Table
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "Observability can be added later" | Observability is v1 requirement. Debugging blind code is impossible. | **Fix NOW before Gate 3** |
+| "SRE should implement the fix" | SRE validates. Implementation agents implement. Role separation. | **Dispatch to implementation agent** |
+| "Only logging is missing, tracing optional" | ALL observability sections are MANDATORY per sre.md. | **Implement ALL sections** |
+| "Simple service doesn't need full observability" | Complexity is irrelevant. Standards apply uniformly. | **Implement ALL sections** |
+| "Tests pass, skip observability" | Tests ≠ observability. Different concerns. | **Validate observability separately** |
+| "lib-commons already handles it" | lib-commons provides tools. You must USE them correctly. | **Verify correct usage** |
+
+### Gate 2 Pressure Resistance
+
+| User Says | Your Response |
+|-----------|---------------|
+| "Skip SRE validation, we'll add observability later" | "Observability is MANDATORY for Gate 2. Without it, you cannot debug production issues. I'm dispatching SRE to validate now." |
+| "SRE found issues but let's continue" | "Gate 2 is a HARD GATE. I MUST dispatch fixes to [implementation agent] before proceeding. SRE validates, implementation fixes." |
+| "Just mark observability as N/A" | "Observability is ALWAYS applicable for services. N/A requires explicit technical reason. I'm dispatching validation now." |
 
 ## Step 5: Gate 3 - Testing (Per Execution Unit)
 
@@ -1334,6 +1540,16 @@ For current execution unit:
 
 **REQUIRED SUB-SKILL:** Use requesting-code-review
 
+### ⛔ HARD GATE: Issues MUST Be Fixed Before Proceeding
+
+**Gate 4 is a BLOCKING gate.** If reviewers find CRITICAL, HIGH, or MEDIUM severity issues:
+- You CANNOT proceed to Gate 5
+- You MUST dispatch fixes to the appropriate agent
+- You MUST re-run ALL 3 reviewers after fixes
+- You MUST repeat until ALL issues are resolved or max iterations reached
+
+### Step 6.1: Initial Review Dispatch
+
 ```text
 For current execution unit:
 
@@ -1365,34 +1581,265 @@ For current execution unit:
        code_reviewer: {
          agent: "code-reviewer",
          output: "[full output for feedback analysis]",
+         verdict: "PASS|FAIL",
+         issues: [{severity, description, file, line}],
          timestamp: "[ISO timestamp]"
        },
        business_logic_reviewer: {
          agent: "business-logic-reviewer",
          output: "[full output for feedback analysis]",
+         verdict: "PASS|FAIL",
+         issues: [{severity, description, file, line}],
          timestamp: "[ISO timestamp]"
        },
        security_reviewer: {
          agent: "security-reviewer",
          output: "[full output for feedback analysis]",
+         verdict: "PASS|FAIL",
+         issues: [{severity, description, file, line}],
          timestamp: "[ISO timestamp]"
        }
      }
-5. Aggregate findings by severity:
-   - Critical/High/Medium: Must fix
-   - Low: Add TODO(review): comment
-   - Cosmetic: Add FIXME(nitpick): comment
-
-6. If Critical/High/Medium issues found:
-   - Dispatch fix to implementation agent
-   - Re-run all 3 reviewers in parallel
-   - Increment metrics.review_iterations
-   - Repeat until clean (max 3 iterations)
-
-7. When all issues resolved:
-   - Update state
-   - Proceed to Gate 5
 ```
+
+### Step 6.2: Aggregate and Classify Issues
+
+```text
+5. Parse all reviewer outputs and aggregate issues by severity:
+
+   ┌─────────────────────────────────────────────────────────────────┐
+   │ SEVERITY CLASSIFICATION                                         │
+   ├─────────────────────────────────────────────────────────────────┤
+   │ CRITICAL: Security vulnerabilities, data loss, crashes          │
+   │           → MUST FIX. Cannot proceed. Auto-dispatch to agent.   │
+   │                                                                 │
+   │ HIGH:     Major bugs, incorrect business logic, performance     │
+   │           → MUST FIX. Cannot proceed. Auto-dispatch to agent.   │
+   │                                                                 │
+   │ MEDIUM:   Code quality, standards violations, edge cases        │
+   │           → MUST FIX. Cannot proceed. Auto-dispatch to agent.   │
+   │                                                                 │
+   │ LOW:      Best practices, minor improvements                    │
+   │           → Add TODO(review): comment. Can proceed.             │
+   │                                                                 │
+   │ COSMETIC: Style, formatting, naming nitpicks                    │
+   │           → Add FIXME(nitpick): comment. Can proceed.           │
+   └─────────────────────────────────────────────────────────────────┘
+
+6. Create aggregated issue list:
+   aggregated_issues = {
+     blocking: [  // CRITICAL + HIGH + MEDIUM
+       {severity, reviewer, description, file, line, suggested_fix}
+     ],
+     non_blocking: [  // LOW + COSMETIC
+       {severity, reviewer, description, file, line}
+     ]
+   }
+```
+
+### Step 6.3: Handle Non-Blocking Issues (LOW/COSMETIC)
+
+```text
+7. For each non-blocking issue, add inline comments:
+
+   LOW severity → Add TODO comment:
+   // TODO(review): [description] - [reviewer] on [date]
+
+   COSMETIC severity → Add FIXME comment:
+   // FIXME(nitpick): [description] - [reviewer] on [date]
+
+   These comments are added but DO NOT block progression.
+```
+
+### Step 6.4: Handle Blocking Issues (CRITICAL/HIGH/MEDIUM) - HARD GATE
+
+```text
+8. IF aggregated_issues.blocking is NOT empty:
+
+   ┌─────────────────────────────────────────────────────────────────┐
+   │ ⛔ GATE 4 BLOCKED - ISSUES MUST BE FIXED                        │
+   ├─────────────────────────────────────────────────────────────────┤
+   │                                                                 │
+   │ Found N blocking issues:                                        │
+   │   • CRITICAL: X issues                                          │
+   │   • HIGH: Y issues                                               │
+   │   • MEDIUM: Z issues                                            │
+   │                                                                 │
+   │ Dispatching fixes to appropriate agents...                      │
+   │                                                                 │
+   └─────────────────────────────────────────────────────────────────┘
+
+   a) Group issues by responsible agent (based on issue type):
+
+   ┌─────────────────────────────────────────────────────────────────┐
+   │ ISSUE-TO-AGENT ROUTING                                         │
+   ├─────────────────────────────────────────────────────────────────┤
+   │ Issue Type                    │ Agent                          │
+   │───────────────────────────────┼────────────────────────────────│
+   │ Go code issues                │ backend-engineer-golang        │
+   │ TypeScript backend issues     │ backend-engineer-typescript    │
+   │ React/Frontend issues         │ frontend-engineer              │
+   │ BFF issues                    │ frontend-bff-engineer-typescript│
+   │ Security vulnerabilities      │ Same as code type + sre        │
+   │ Business logic errors         │ Same as code type              │
+   │ Architecture issues           │ Same as code type              │
+   │ DevOps/Infra issues           │ devops-engineer                │
+   │ Observability issues          │ sre                            │
+   │ Test coverage issues          │ qa-analyst                     │
+   └─────────────────────────────────────────────────────────────────┘
+
+   b) Dispatch fix request to each responsible agent:
+
+   Task tool:
+     subagent_type: "[agent from routing table]"
+     model: "opus"
+     description: "Fix review issues for [unit_id]"
+     prompt: |
+       ⛔ FIX REQUIRED - Review Issues Found
+
+       You MUST fix the following issues identified by code reviewers.
+       Do NOT skip any issue. Do NOT defer any issue.
+
+       ## Context
+       - Unit ID: [unit_id]
+       - Unit Title: [title]
+       - Files Changed: [list of files from implementation]
+
+       ## Issues to Fix (BLOCKING - ALL MUST BE RESOLVED)
+
+       [For each issue assigned to this agent:]
+       ### Issue N: [severity] - [reviewer]
+       - **Description:** [description]
+       - **File:** [file]:[line]
+       - **Suggested Fix:** [suggested_fix if provided]
+
+       ## Requirements
+       1. Fix ALL issues listed above
+       2. Run tests after fixes to ensure no regressions
+       3. Report what was fixed and how
+
+       ## Output Format
+       For each issue:
+       - Issue: [description]
+       - Fix Applied: [what you did]
+       - File Changed: [file]:[lines]
+       - Test Verification: [test results]
+
+   c) Wait for all fix agents to complete
+
+   d) Store fix results in state:
+      agent_outputs.review.fix_iteration_N = {
+        issues_fixed: N,
+        agents_dispatched: [list],
+        timestamp: "[ISO timestamp]"
+      }
+```
+
+### Step 6.5: Re-Run ALL Reviewers After Fixes
+
+```text
+9. After ALL fixes are applied:
+
+   ⛔ MANDATORY: Re-run ALL 3 reviewers in parallel
+   (You CANNOT cherry-pick reviewers. ALL 3 must re-run.)
+
+   Increment: metrics.review_iterations += 1
+
+   Dispatch all 3 reviewers again (same as Step 6.1)
+   with updated HEAD_SHA reflecting the fixes.
+
+10. Parse results and check for remaining blocking issues:
+
+    IF aggregated_issues.blocking is empty:
+      → Gate 4 PASSED. Proceed to Step 6.6.
+
+    IF aggregated_issues.blocking is NOT empty:
+      → Check iteration count
+
+11. Iteration limit check:
+
+    IF metrics.review_iterations >= 3:
+      ┌─────────────────────────────────────────────────────────────────┐
+      │ ⛔ MAXIMUM REVIEW ITERATIONS REACHED                            │
+      ├─────────────────────────────────────────────────────────────────┤
+      │                                                                 │
+      │ After 3 fix attempts, blocking issues remain:                   │
+      │                                                                 │
+      │ [List remaining issues]                                         │
+      │                                                                 │
+      │ ACTION REQUIRED: Human intervention needed.                     │
+      │                                                                 │
+      │ Options:                                                        │
+      │   a) Review issues manually and provide guidance                │
+      │   b) Escalate to senior engineer                                │
+      │   c) Abort this unit and mark as blocked                        │
+      │                                                                 │
+      └─────────────────────────────────────────────────────────────────┘
+
+      Set status = "blocked"
+      Set gate_progress.review.status = "failed"
+      Set gate_progress.review.blocked_reason = "max_iterations"
+      Save state
+      STOP execution - require user decision
+
+    IF metrics.review_iterations < 3:
+      → Loop back to Step 6.4 (dispatch fixes again)
+```
+
+### Step 6.6: Gate 4 Complete
+
+```text
+12. When all blocking issues are resolved (aggregated_issues.blocking is empty):
+
+    Update state:
+    - gate_progress.review.status = "completed"
+    - gate_progress.review.completed_at = "[ISO timestamp]"
+    - gate_progress.review.total_iterations = metrics.review_iterations
+    - gate_progress.review.issues_fixed = [count]
+
+    Display:
+    ┌─────────────────────────────────────────────────────────────────┐
+    │ ✓ GATE 4 COMPLETE (Review)                                      │
+    ├─────────────────────────────────────────────────────────────────┤
+    │                                                                 │
+    │ All 3 reviewers: PASS                                           │
+    │ Review iterations: N                                            │
+    │ Issues fixed: X                                                 │
+    │ TODO comments added: Y (LOW severity)                           │
+    │ FIXME comments added: Z (COSMETIC)                              │
+    │                                                                 │
+    │ Proceeding to Gate 5 (Validation)...                            │
+    └─────────────────────────────────────────────────────────────────┘
+
+13. **⛔ SAVE STATE TO FILE (MANDATORY):**
+    Write tool → "docs/refactor/current-cycle.json"
+    See "State Persistence Rule" section.
+
+14. Proceed to Gate 5
+```
+
+### Gate 4 Anti-Rationalization Table
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "Only 1 MEDIUM issue, can proceed" | MEDIUM = MUST FIX. Quantity is irrelevant. | **Fix the issue, re-run all reviewers** |
+| "Issue is cosmetic, not really MEDIUM" | Reviewer decided severity. Accept their judgment. | **Fix the issue, re-run all reviewers** |
+| "Will fix in next sprint" | Deferred fixes = technical debt = production bugs. | **Fix NOW before Gate 5** |
+| "User approved, can skip fix" | User approval ≠ reviewer override. Fixes are mandatory. | **Fix the issue, re-run all reviewers** |
+| "Same issue keeps appearing, skip it" | Recurring issue = fix is wrong. Debug properly. | **Root cause analysis, then fix** |
+| "Only security reviewer found it" | One reviewer = valid finding. All findings matter. | **Fix the issue, re-run all reviewers** |
+| "Iteration limit reached, just proceed" | Limit = escalate, not bypass. Quality is non-negotiable. | **Escalate to user, do NOT proceed** |
+| "Tests pass, review issues don't matter" | Tests ≠ review. Different quality dimensions. | **Fix the issue, re-run all reviewers** |
+
+### Gate 4 Pressure Resistance
+
+| User Says | Your Response |
+|-----------|---------------|
+| "Just skip this MEDIUM issue" | "MEDIUM severity issues are blocking by definition. I MUST dispatch a fix to the appropriate agent before proceeding. This protects code quality." |
+| "I'll fix it later, let's continue" | "Gate 4 is a HARD GATE. All CRITICAL/HIGH/MEDIUM issues must be resolved NOW. I'm dispatching the fix to [agent] and will re-run reviewers after." |
+| "We're running out of time" | "Proceeding with known issues creates larger problems later. The fix dispatch is automated and typically takes 2-5 minutes. Quality gates exist to save time overall." |
+| "Override the gate, I approve" | "User approval cannot override reviewer findings. The gate ensures code quality. I'll dispatch the fix now." |
+| "It's just a style issue" | "If it's truly cosmetic, reviewers would mark it COSMETIC (non-blocking). MEDIUM means it affects maintainability or correctness. Fixing now." |
 
 ## Step 7: Gate 5 - Validation (Per Execution Unit)
 

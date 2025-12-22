@@ -79,27 +79,62 @@ Example failure output:
 4. Run the test
 5. **CAPTURE THE PASS OUTPUT** - this is MANDATORY
 6. Refactor if needed (keeping tests green)
-7. Commit
+7. **VERIFY STANDARDS COMPLIANCE** - Complete the checklist below
+8. Commit
 
-**RING STANDARDS REQUIREMENTS (MANDATORY):**
-- Follow architecture patterns from Ring Standards (Hexagonal, Clean Architecture, etc.)
-- Implement proper error handling (no panic, wrap errors with context)
-- Add structured JSON logging for all operations
-- Add OpenTelemetry tracing spans for external calls and key operations
-- Ensure trace_id propagation in all log entries
+**⛔ RING STANDARDS REQUIREMENTS (MANDATORY - ALL MUST BE IMPLEMENTED):**
+
+**You MUST WebFetch and implement ALL sections from Ring Standards for your language:**
+- **Go:** `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang.md`
+- **TypeScript:** `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md`
+
+**⛔ HARD GATE: You MUST implement ALL sections listed in [standards-coverage-table.md](../shared-patterns/standards-coverage-table.md).**
+
+- **Go projects:** See `backend-engineer-golang → golang.md` section index (20 sections)
+- **TypeScript projects:** See `backend-engineer-typescript → typescript.md` section index (13 sections)
+
+**You CANNOT skip ANY section. Mark N/A only with explicit justification.**
 
 **PROJECT-SPECIFIC (from PROJECT_RULES.md, if exists):**
 - Use internal libraries referenced in PROJECT_RULES.md
 - Follow project-specific naming conventions (if different from Ring Standards)
 - Use tech stack choices defined in PROJECT_RULES.md (database, frameworks, etc.)
 
-**REQUIRED OUTPUT:**
-- Implementation file path
-- **PASS OUTPUT** (copy/paste the actual test pass)
-- Files changed
-- Ring Standards followed: Y/N
-- Observability added (logging: Y/N, tracing: Y/N)
-- Commit SHA
+**⛔ REQUIRED OUTPUT (HARD GATE - ALL SECTIONS MANDATORY):**
+
+## Implementation Summary
+- Implementation file path: [path]
+- Files changed: [list]
+- Commit SHA: [sha]
+
+## Test Results
+**PASS OUTPUT** (copy/paste the actual test pass):
+```
+[paste actual output here]
+```
+
+## Standards Coverage Table
+
+**You MUST output a Standards Coverage Table per [shared-patterns/standards-coverage-table.md](../shared-patterns/standards-coverage-table.md).**
+
+**Format:**
+```
+| # | Section (from standards-coverage-table.md) | Status | Evidence |
+|---|-------------------------------------------|--------|----------|
+| 1 | [Section Name] | ✅/❌ | [file:line] |
+| ... | ... | ... | ... |
+```
+
+**Status Legend:**
+- ✅ Implemented - Code follows this standard (with file:line evidence)
+- ❌ Not Implemented - Missing or incorrect (BLOCKS proceeding)
+- N/A - Not applicable (with reason)
+
+## Compliance Summary
+- **ALL STANDARDS MET:** ✅ YES / ❌ NO
+- **If NO, what's missing:** [list missing items with section names]
+
+**⛔ IF "ALL STANDARDS MET" = NO → Implementation is INCOMPLETE. Fix before proceeding.**
 
 Example pass output:
 ```
@@ -124,7 +159,66 @@ IF failure_output is empty OR contains "PASS":
 IF pass_output is empty OR contains "FAIL":
   → Return to TDD-GREEN (retry implementation)
   → Max 3 retries, then STOP and report blocker
+
+IF "ALL STANDARDS MET" = NO:
+  → STOP. Cannot proceed to Gate 1.
+  → Re-dispatch to same agent with fix request:
+    "Fix missing standards: [list from compliance checklist]"
+  → Max 3 retries, then STOP and report blocker
 ```
+
+### Standards Compliance Verification (HARD GATE)
+
+**The orchestrator MUST verify the agent's Standards Coverage Table before proceeding:**
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  GATE 0 COMPLETION CHECK                                                    │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  1. Parse agent output for "## Standards Coverage Table"                    │
+│  2. Verify table has ALL sections from standards-coverage-table.md          │
+│  3. Check "ALL STANDARDS MET" value in Compliance Summary                   │
+│                                                                             │
+│  IF "ALL STANDARDS MET: ✅ YES" AND all sections have ✅ or N/A:            │
+│    → Gate 0 PASSED. Proceed to Gate 1 (DevOps)                              │
+│                                                                             │
+│  IF ANY section has ❌:                                                      │
+│    → Gate 0 BLOCKED. Standards not implemented.                             │
+│    → Extract ❌ sections from Standards Coverage Table                       │
+│    → Re-dispatch to SAME agent with fix request:                            │
+│                                                                             │
+│      Task tool:                                                             │
+│        subagent_type: "[same agent that did TDD-GREEN]"                     │
+│        model: "opus"                                                        │
+│        description: "Fix missing Ring Standards for [unit_id]"              │
+│        prompt: |                                                            │
+│          ⛔ FIX REQUIRED - Ring Standards Not Implemented                   │
+│                                                                             │
+│          Your Standards Coverage Table shows these sections as ❌:          │
+│          [list ❌ sections from table]                                       │
+│                                                                             │
+│          WebFetch the standards again:                                      │
+│          [URL for language-specific standards]                              │
+│                                                                             │
+│          Implement ALL missing sections.                                    │
+│          Return updated Standards Coverage Table with ALL ✅ or N/A.        │
+│                                                                             │
+│    → After fix: Re-verify Standards Coverage Table                          │
+│    → Max 3 iterations, then STOP and escalate to user                       │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Anti-Rationalization for Standards Compliance
+
+See [shared-patterns/standards-coverage-table.md](../shared-patterns/standards-coverage-table.md) for the complete anti-rationalization table.
+
+**Key rules:**
+- ALL sections from standards-coverage-table.md MUST be checked
+- ❌ on ANY section = BLOCKED (dispatch fix to same agent)
+- N/A requires explicit reason
+- Evidence (file:line) REQUIRED for all ✅ items
 
 ## Standards Priority Summary
 
