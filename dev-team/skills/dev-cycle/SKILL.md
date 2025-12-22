@@ -424,15 +424,13 @@ After each gate, the state file MUST reflect:
 │  └── NO → ASK: "Is this a LEGACY project (created without PM workflow)?"   │
 │       │                                                                     │
 │       ├── YES (legacy project) → LEGACY PROJECT ANALYSIS:                   │
-│       │   Step 1: Dispatch agents IN PARALLEL:                              │
-│       │     • codebase-explorer (technical: stack, patterns, features)      │
-│       │     • business-logic-reviewer (domain: entities, rules, workflows)  │
-│       │   Step 2: Ask 4 questions (what agents can't determine):            │
+│       │   Step 1: Dispatch codebase-explorer (technical info only)          │
+│       │   Step 2: Ask 3 questions (what agent can't determine):             │
 │       │     1. What do you need help with?                                  │
-│       │     2. Why was this project created?                                │
-│       │     3. Any business rules NOT visible in code?                      │
-│       │     4. Any specific technology not in dev-team standards?           │
-│       │   Step 3: Combine outputs → Generate PROJECT_RULES.md               │
+│       │     2. Any external APIs not visible in code?                       │
+│       │     3. Any specific technology not in Ring Standards?               │
+│       │   Step 3: Generate PROJECT_RULES.md (deduplicated from Ring)        │
+│       │   Note: Business rules belong in PRD, NOT in PROJECT_RULES          │
 │       │   → Proceed to Step 1                                               │
 │       │                                                                     │
 │       └── NO (new project) → ASK: "Do you have PRD, TRD, or Feature Map?"  │
@@ -499,11 +497,11 @@ Go to Step 0.2.1 (Legacy Project Analysis)
 
 Go to Step 0.3 (Check for PM Documents)
 
-### Step 0.2.1: Legacy Project Analysis (Agents + Questions)
+### Step 0.2.1: Legacy Project Analysis (Technical Only)
 
 #### Overview
 
-For legacy projects, combine automated analysis with targeted questions:
+For legacy projects, analyze codebase for TECHNICAL information only:
 
 ```text
 ┌─────────────────────────────────────────────────────────────────┐
@@ -511,25 +509,27 @@ For legacy projects, combine automated analysis with targeted questions:
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │ Since this is a legacy project, I'll analyze the codebase       │
-│ first, then ask a few questions about business context.         │
+│ for TECHNICAL information (not business rules).                 │
 │                                                                 │
-│ Step 1: Automated analysis (codebase-explorer + business-logic) │
-│ Step 2: Ask what only you know (business context, goals)        │
-│ Step 3: Generate PROJECT_RULES.md                               │
+│ Step 1: Automated analysis (codebase-explorer)                  │
+│ Step 2: Ask for project-specific tech not in Ring Standards     │
+│ Step 3: Generate PROJECT_RULES.md (deduplicated)                │
+│                                                                 │
+│ Note: Business rules belong in PRD/product docs, NOT here.      │
 │                                                                 │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
 #### Step 0.2.1a: Automated Codebase Analysis (MANDATORY)
 
-**⛔ You MUST use the Task tool to dispatch BOTH agents. This is NOT implicit.**
+**⛔ You MUST use the Task tool to dispatch codebase-explorer. This is NOT implicit.**
 
-#### Dispatch Agents
+#### Dispatch Agent
 
-Dispatch TWO agents in PARALLEL to analyze the legacy project:
+Dispatch codebase-explorer to analyze the legacy project for TECHNICAL information:
 
 ```text
-Action: Use Task tool with EXACTLY these parameters for EACH agent:
+Action: Use Task tool with EXACTLY these parameters:
 
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │  ⛔ If Task tool NOT used → Analysis does NOT happen → PROJECT_RULES.md INVALID │
@@ -585,60 +585,17 @@ Task tool:
     ### External Integrations
     [APIs, services detected]
 
-# Agent 2: Business Logic Reviewer - Domain Analysis
-Task tool:
-  subagent_type: "business-logic-reviewer"
-  model: "opus"
-  description: "Analyze legacy project domain for PROJECT_RULES.md"
-  prompt: |
-    Analyze this LEGACY codebase to extract business domain information for PROJECT_RULES.md.
-    
-    This is an existing project created without PM documentation.
-    Your job is to understand the business logic from the code.
-    
-    **IMPORTANT:** This is NOT a code review. Do NOT provide VERDICT or issues.
-    Focus on understanding what the business logic does.
-    
-    **Extract:**
-    1. **Business Domain:** What business problem does this appear to solve?
-    2. **Domain Terminology:** Key terms, entities, concepts used
-    3. **Business Rules:** Validation rules, calculations, constraints in code
-    4. **Domain Entities:** Main entities/models and relationships
-    5. **Business Workflows:** Key processes/flows implemented
-    6. **Constraints:** Business invariants, validation rules
-    
-    **Output format:**
-    ## Business Domain Analysis (Legacy Project)
-    
-    ### Inferred Business Domain
-    [What business this project serves based on code]
-    
-    ### Domain Terminology
-    | Term | Definition (inferred from code) |
-    |------|--------------------------------|
-    | [term] | [definition] |
-    
-    ### Business Rules Found
-    [List of explicit rules in code]
-    
-    ### Domain Entities
-    [Main entities and relationships]
-    
-    ### Business Workflows
-    [Key processes found in code]
-    
-    ### Business Constraints
-    [Validations, invariants found]
 ```
+
+**Note:** Business logic analysis is NOT needed for PROJECT_RULES.md. Business rules belong in PRD/product docs, not technical project rules.
 
 #### Verification (MANDATORY)
 
-After BOTH agents complete, confirm:
+After agent completes, confirm:
 - [ ] `codebase-explorer` returned "## Technical Analysis (Legacy Project)" section
-- [ ] `business-logic-reviewer` returned "## Business Domain Analysis (Legacy Project)" section
-- [ ] Both outputs contain non-empty content
+- [ ] Output contains non-empty content for: Tech Stack, External Integrations, Configuration
 
-**If either agent failed or returned empty output → Re-dispatch that agent. Cannot proceed without both analyses.**
+**If agent failed or returned empty output → Re-dispatch. Cannot proceed without technical analysis.**
 
 #### Step 0.2.1b: Supplementary Questions (Only What Agents Can't Determine)
 
@@ -664,9 +621,10 @@ Use AskUserQuestion for each:
 | # | Question | Why Agents Can't Determine This |
 |---|----------|--------------------------------|
 | 1 | **What do you need help with?** (Current task/feature/fix) | Future intent, not in code |
-| 2 | **Why was this project created?** (Business context, original problem) | Historical context, not in code |
-| 3 | **Any business rules NOT visible in code?** (Implicit rules, external constraints) | Undocumented requirements |
-| 4 | **Any specific technology not in dev-team standards?** (Custom libs, internal tools, proprietary tech) | Project-specific tech not in Ring standards |
+| 2 | **Any external APIs or services not visible in code?** (Third-party integrations planned) | Planned integrations, not yet in code |
+| 3 | **Any specific technology not in Ring Standards?** (Message broker, cache, etc.) | Project-specific tech not in Ring |
+
+**Note:** Business rules belong in PRD/product docs, NOT in PROJECT_RULES.md.
 
 #### Step 0.2.1c: Generate PROJECT_RULES.md
 
@@ -678,77 +636,70 @@ Create tool:
   content: |
     # Project Rules
     
+    > Ring Standards apply automatically. This file documents ONLY what Ring does NOT cover.
+    > For error handling, logging, testing, architecture, lib-commons → See Ring Standards (auto-loaded by agents)
     > Generated from legacy project analysis.
-    > Technical details extracted by codebase-explorer and business-logic-reviewer.
-    > Business context provided by developer.
-    > Update this file as the project evolves.
     
-    ## Project Overview
+    ## What Ring Standards Already Cover (DO NOT ADD HERE)
     
-    [From codebase-explorer: Project Overview]
+    The following are defined in Ring Standards and MUST NOT be duplicated:
+    - Error handling patterns (no panic, wrap errors)
+    - Logging standards (structured JSON, zerolog/zap)
+    - Testing patterns (table-driven tests, mocks)
+    - Architecture patterns (Hexagonal, Clean Architecture)
+    - Observability (OpenTelemetry, trace correlation)
+    - lib-commons usage and patterns
+    - API directory structure
     
-    ## Business Domain
+    ---
     
-    [From business-logic-reviewer: Inferred Business Domain]
-    [From User Question 2: Why was this project created?]
+    ## Tech Stack (Not in Ring Standards)
     
-    ## Current Development Goal
+    [From codebase-explorer: Technologies NOT covered by Ring Standards]
+    [e.g., specific message broker, specific cache, DB if not PostgreSQL]
     
-    [From User Question 1: What do you need help with?]
+    | Technology | Purpose | Notes |
+    |------------|---------|-------|
+    | [detected] | [purpose] | [notes] |
     
-    ## Technical Stack
+    ## Non-Standard Directory Structure
     
-    [From codebase-explorer: Technical Stack - full details]
+    [From codebase-explorer: Directories that deviate from Ring's standard API structure]
+    [e.g., workers/, consumers/, polling/]
     
-    ## Architecture Patterns
-    
-    [From codebase-explorer: Architecture Patterns]
-    
-    ## Existing Features
-    
-    [From codebase-explorer: Existing Features]
-    
-    ## Project Structure
-    
-    [From codebase-explorer: Project Structure]
-    
-    ## Domain Terminology
-    
-    [From business-logic-reviewer: Domain Terminology table]
-    
-    ## Business Rules
-    
-    ### From Code Analysis
-    [From business-logic-reviewer: Business Rules Found]
-    
-    ### Additional Rules (from developer)
-    [From User Question 3: Any business rules NOT visible in code?]
-    
-    ## Project-Specific Technology
-    
-    [From User Question 4: Any specific technology not in dev-team standards?]
-    
-    ## Domain Entities
-    
-    [From business-logic-reviewer: Domain Entities]
-    
-    ## Business Workflows
-    
-    [From business-logic-reviewer: Business Workflows]
+    | Directory | Purpose | Pattern |
+    |-----------|---------|---------|
+    | [detected] | [purpose] | [pattern] |
     
     ## External Integrations
     
-    [From codebase-explorer: External Integrations]
+    [From codebase-explorer: Third-party services specific to this project]
     
-    ## Configuration
+    | Service | Purpose | Docs |
+    |---------|---------|------|
+    | [detected] | [purpose] | [link] |
     
-    [From codebase-explorer: Configuration]
+    ## Environment Configuration
+    
+    [From codebase-explorer: Project-specific env vars NOT covered by Ring]
+    
+    | Variable | Purpose | Example |
+    |----------|---------|---------|
+    | [detected] | [purpose] | [example] |
+    
+    ## Domain Terminology
+    
+    [From codebase analysis: Technical names used in this codebase]
+    
+    | Term | Definition | Used In |
+    |------|------------|---------|
+    | [detected] | [definition] | [location] |
     
     ---
     
     *Generated: [ISO timestamp]*
-    *Source: Legacy project analysis (codebase-explorer + business-logic-reviewer + developer input)*
-    *Last Updated: [ISO timestamp]*
+    *Source: Legacy project analysis (codebase-explorer)*
+    *Ring Standards Version: [version from WebFetch]*
 ```
 
 #### Present to User
@@ -760,14 +711,16 @@ Create tool:
 │                                                                 │
 │ I analyzed your codebase using:                                 │
 │   • codebase-explorer (technical patterns, stack, structure)    │
-│   • business-logic-reviewer (domain, entities, rules)           │
 │                                                                 │
 │ Combined with your input on:                                    │
 │   • Current development goal                                    │
-│   • Business context                                            │
-│   • Additional business rules                                   │
+│   • External integrations                                       │
+│   • Project-specific technology                                 │
 │                                                                 │
 │ Generated: docs/PROJECT_RULES.md                                │
+│                                                                 │
+│ Note: Ring Standards (error handling, logging, testing, etc.)   │
+│ are NOT duplicated - agents load them automatically via WebFetch│
 │                                                                 │
 │ Please review the file and make any corrections needed.         │
 │                                                                 │
@@ -871,29 +824,28 @@ Read tool:
 
 #### Extract PROJECT_RULES.md Content from PM Documents
 
-| From PRD | Extract For PROJECT_RULES.md |
-|----------|------------------------------|
-| Problem statement | Project Overview |
-| User stories / Features | Business Domain context |
-| Domain terms, entities | Domain Terminology (Glossary) |
-| Business rules, constraints | Business Rules |
-| Acceptance criteria patterns | Validation rules |
+**⛔ DEDUPLICATION RULE:** Extract ONLY what Ring Standards do NOT cover.
 
-| From TRD | Extract For PROJECT_RULES.md |
-|----------|------------------------------|
-| Architecture decisions | Architecture Patterns |
-| Tech stack | Technical Stack |
-| Database design | Database Patterns |
-| API contracts | External Integrations |
-| Component structure | Project Structure |
+| From PRD | Extract For PROJECT_RULES.md | Note |
+|----------|------------------------------|------|
+| Domain terms, entities | Domain Terminology | Technical names only |
+| External service mentions | External Integrations | Third-party APIs |
+| ~~Business rules~~ | ~~N/A~~ | ❌ Stays in PRD, not PROJECT_RULES |
+| ~~Architecture~~ | ~~N/A~~ | ❌ Ring Standards covers this |
 
-| From Feature Map | Extract For PROJECT_RULES.md |
-|------------------|------------------------------|
-| Technology choices | Technical Stack (primary source) |
-| Feature groupings | Project Structure / Module organization |
-| Feature relationships | Domain Entities relationships |
-| Dependencies between features | Integration patterns |
-| Complexity indicators | Architecture decisions |
+| From TRD | Extract For PROJECT_RULES.md | Note |
+|----------|------------------------------|------|
+| Tech stack not in Ring | Tech Stack (Not in Ring) | Only non-standard tech |
+| External APIs | External Integrations | Third-party services |
+| Non-standard directories | Non-Standard Directory Structure | Workers, consumers, etc. |
+| ~~Architecture decisions~~ | ~~N/A~~ | ❌ Ring Standards covers this |
+| ~~Database patterns~~ | ~~N/A~~ | ❌ Ring Standards covers this |
+
+| From Feature Map | Extract For PROJECT_RULES.md | Note |
+|------------------|------------------------------|------|
+| Technology choices not in Ring | Tech Stack (Not in Ring) | Only if not in Ring |
+| External dependencies | External Integrations | Third-party services |
+| ~~Architecture~~ | ~~N/A~~ | ❌ Ring Standards covers this |
 
 #### Generate PROJECT_RULES.md
 
@@ -903,51 +855,67 @@ Create tool:
   content: |
     # Project Rules
     
-    > Auto-generated from PM documents (PRD/TRD/Feature Map).
-    > Review and update as needed.
+    > Ring Standards apply automatically. This file documents ONLY what Ring does NOT cover.
+    > For error handling, logging, testing, architecture, lib-commons → See Ring Standards (auto-loaded by agents)
+    > Generated from PM documents (PRD/TRD/Feature Map).
     
-    ## Project Overview
+    ## What Ring Standards Already Cover (DO NOT ADD HERE)
     
-    [From PRD: Problem statement, product vision]
+    The following are defined in Ring Standards and MUST NOT be duplicated:
+    - Error handling patterns (no panic, wrap errors)
+    - Logging standards (structured JSON, zerolog/zap)
+    - Testing patterns (table-driven tests, mocks)
+    - Architecture patterns (Hexagonal, Clean Architecture)
+    - Observability (OpenTelemetry, trace correlation)
+    - lib-commons usage and patterns
+    - API directory structure
     
-    ## Domain Terminology
+    ---
     
-    | Term | Definition |
-    |------|------------|
-    [From PRD: Domain entities, concepts mentioned]
-    [From Feature Map: Feature names and their relationships]
+    ## Tech Stack (Not in Ring Standards)
     
-    ## Business Rules
+    [From TRD/Feature Map: ONLY technologies NOT covered by Ring Standards]
     
-    [From PRD: Explicit business rules, constraints, validations]
+    | Technology | Purpose | Notes |
+    |------------|---------|-------|
+    | [detected] | [purpose] | [notes] |
     
-    ## Technical Stack
+    ## Non-Standard Directory Structure
     
-    [From Feature Map: Technology choices - PRIMARY SOURCE]
-    [From TRD: Languages, frameworks, databases - supplementary]
+    [From TRD: Directories that deviate from Ring's standard API structure]
     
-    ## Architecture Patterns
-    
-    [From TRD: Architecture decisions, patterns chosen]
-    [From Feature Map: Complexity indicators, feature dependencies]
-    
-    ## Project Structure
-    
-    [From Feature Map: Feature groupings - PRIMARY SOURCE]
-    [From TRD: Component/module organization]
-    
-    ## Database Patterns
-    
-    [From TRD: Database design, schema patterns]
+    | Directory | Purpose | Pattern |
+    |-----------|---------|---------|
+    | [detected] | [purpose] | [pattern] |
     
     ## External Integrations
     
-    [From TRD: APIs, external services, message queues]
-    [From Feature Map: Feature dependencies on external systems]
+    [From TRD/PRD: Third-party services specific to this project]
+    
+    | Service | Purpose | Docs |
+    |---------|---------|------|
+    | [detected] | [purpose] | [link] |
+    
+    ## Environment Configuration
+    
+    [From TRD: Project-specific env vars NOT covered by Ring]
+    
+    | Variable | Purpose | Example |
+    |----------|---------|---------|
+    | [detected] | [purpose] | [example] |
+    
+    ## Domain Terminology
+    
+    [From PRD: Technical names used in this codebase]
+    
+    | Term | Definition | Used In |
+    |------|------------|---------|
+    | [detected] | [definition] | [location] |
     
     ---
     
     *Generated from: [PRD path], [TRD path], [Feature Map path]*
+    *Ring Standards Version: [version from WebFetch]*
     *Generated: [ISO timestamp]*
 ```
 
@@ -957,10 +925,12 @@ If any section is empty or incomplete, ask supplementary questions:
 
 | Missing Section | Supplementary Question |
 |-----------------|------------------------|
-| Domain Terminology | "What are the main entities/concepts in your domain?" |
-| Business Rules | "What are the key business rules or constraints?" |
-| Architecture Patterns | "What architecture pattern will you follow?" |
-| External Integrations | "Are there any external systems to integrate with?" |
+| Tech Stack (Not in Ring) | "Any technology not covered by Ring Standards (message broker, cache, etc.)?" |
+| External Integrations | "Any third-party APIs or external services?" |
+| Domain Terminology | "What are the main entities/classes in this codebase?" |
+| Non-Standard Directories | "Any directories that don't follow standard API structure (workers, consumers)?" |
+
+**Note:** Do NOT ask about architecture, error handling, logging, testing - Ring Standards covers these.
 
 #### After Generation
 
@@ -1013,12 +983,12 @@ STOP EXECUTION. Do NOT proceed to Step 1.
 
 | User Says | Your Response |
 |-----------|---------------|
-| "Just skip this, I'll create PM docs later" | "PM documents are REQUIRED for new projects. Without them, agents cannot understand your project's domain, business rules, or technical requirements. Run `/pre-dev-full` or `/pre-dev-feature` first." |
+| "Just skip this, I'll create PM docs later" | "PM documents are REQUIRED for new projects. Without them, agents cannot understand your project's domain context or technical requirements. Run `/pre-dev-full` or `/pre-dev-feature` first." |
 | "I don't need formal documents" | "PM documents are the source of truth for PROJECT_RULES.md. Development cannot start without documented requirements." |
 | "This is just a quick prototype" | "Even prototypes need clear requirements. `/pre-dev-feature` takes ~30 minutes and prevents hours of rework." |
 | "I already explained what I want verbally" | "Verbal explanations cannot be used by agents. Requirements MUST be documented in PRD/TRD/Feature Map files." |
-| "It's a legacy project but skip the questions" | "The legacy analysis (agents + 4 questions) is the only way I can understand your project. It takes ~5 minutes and enables me to help you effectively." |
-| "I'll fill in PROJECT_RULES.md myself" | "That works! Create `docs/PROJECT_RULES.md` with at least: Project Overview, Technical Stack, and Business Domain. Then run `/dev-cycle` again." |
+| "It's a legacy project but skip the questions" | "The legacy analysis (codebase-explorer + 3 questions) is the only way I can understand your project. It takes ~5 minutes and enables me to help you effectively." |
+| "I'll fill in PROJECT_RULES.md myself" | "That works! Create `docs/PROJECT_RULES.md` with: Tech Stack (not in Ring), External Integrations, Domain Terminology. Do NOT duplicate Ring Standards content. Then run `/dev-cycle` again." |
 
 ---
 

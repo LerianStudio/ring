@@ -7,11 +7,20 @@ Canonical source for TDD dispatch prompts used by dev-cycle and dev-implementati
 **Before dispatching any TDD phase, the agent MUST load:**
 
 1. **Ring Standards** (MANDATORY) → Base technical patterns (architecture, error handling, logging, testing)
-2. **PROJECT_RULES.md** (COMPLEMENTARY) → Project-specific choices (which DB, internal libs, naming conventions)
+2. **PROJECT_RULES.md** (COMPLEMENTARY) → Project-specific info NOT in Ring Standards
 
-**Priority:** Ring Standards define HOW to implement. PROJECT_RULES.md defines WHAT the project uses.
+**Priority:** Ring Standards define HOW to implement. PROJECT_RULES.md defines project-specific context only.
 
 See [standards-workflow.md](./standards-workflow.md) for the complete loading process.
+
+### What Each Source Provides (NO OVERLAP)
+
+| Source | Provides | Examples |
+|--------|----------|----------|
+| **Ring Standards** | Technical patterns | Error handling, logging, testing, architecture, lib-commons, API structure |
+| **PROJECT_RULES.md** | Project-specific only | External APIs, non-standard dirs, domain terminology, tech not in Ring |
+
+**⛔ PROJECT_RULES.md MUST NOT duplicate Ring Standards content.**
 
 ## TDD-RED Phase Prompt Template
 
@@ -129,14 +138,24 @@ IF pass_output is empty OR contains "FAIL":
 | **Tracing** | Ring Standards | OpenTelemetry spans, trace_id propagation |
 | **Testing patterns** | Ring Standards | Table-driven tests, mocking |
 
-### PROJECT_RULES.md (COMPLEMENTARY - Project specifics NOT in Ring Standards)
+### PROJECT_RULES.md (COMPLEMENTARY - ONLY What Ring Does NOT Cover)
 
 | What | Source | Defines |
 |------|--------|---------|
-| **Tech stack choices** | PROJECT_RULES.md | Only if not in Ring Standards (e.g., specific DB, cache) |
-| **Internal libraries** | PROJECT_RULES.md | lib-commons, shared packages |
+| **Tech stack not in Ring** | PROJECT_RULES.md | Specific message broker, cache, DB if not PostgreSQL |
+| **Non-standard directories** | PROJECT_RULES.md | Workers, consumers, polling (not standard API structure) |
+| **External integrations** | PROJECT_RULES.md | Third-party APIs, webhooks, external services |
+| **Domain terminology** | PROJECT_RULES.md | Technical names of entities/classes in this codebase |
 
-**Priority:** Ring Standards > PROJECT_RULES.md (project can add, not remove standards)
+**⛔ PROJECT_RULES.md MUST NOT contain:**
+- Error handling patterns (Ring covers this)
+- Logging standards (Ring covers this)
+- Testing patterns (Ring covers this)
+- Architecture patterns (Ring covers this)
+- lib-commons usage (Ring covers this)
+- Business rules (belongs in PRD/product docs)
+
+**Priority:** Ring Standards > PROJECT_RULES.md (project adds context, not patterns)
 
 **Gate 0 implements standards + observability. Gate 2 (SRE) validates observability.**
 

@@ -8,9 +8,19 @@ All ops-team agents MUST follow this process before any operational work:
 
 ### Step 1: Load Project-Specific Standards
 
-1. Check for `PROJECT_RULES.md` in repository root
+1. Check for `docs/PROJECT_RULES.md` in repository
 2. Check for `ops/STANDARDS.md` or `operations/GUIDELINES.md`
 3. Check for `.ops-config.yaml` or similar configuration
+
+**⛔ DEDUPLICATION RULE:** PROJECT_RULES.md documents ONLY what Ring Standards do NOT cover.
+
+| Belongs in PROJECT_RULES.md | Does NOT Belong (Ring covers) |
+|-----------------------------|-------------------------------|
+| External integrations (third-party APIs) | Standard infrastructure patterns |
+| Non-standard directory structure | Logging/monitoring standards |
+| Project-specific env vars | Security baselines |
+| Domain terminology | Incident response procedures |
+| Tech stack not in Ring | Cost optimization patterns |
 
 ### Step 2: Load Ring Standards via WebFetch
 
@@ -41,32 +51,43 @@ Each agent has a specific WebFetch URL for Ring standards:
 
 ### If No PROJECT_RULES.md Exists
 
-**This is a HARD BLOCK for certain decisions:**
+**Offer to CREATE it with user input, following deduplication rules.**
+
+For operations work, certain decisions STILL require user input:
 
 | Decision Category | Action |
 |-------------------|--------|
-| Cloud provider | STOP. Ask user. |
-| Region/availability zone | STOP. Ask user. |
-| Cost budgets | STOP. Ask user. |
-| Security requirements | STOP. Ask user. |
-| Compliance frameworks | STOP. Ask user. |
+| Cloud provider | Ask user (not in Ring) |
+| Region/availability zone | Ask user (project-specific) |
+| Cost budgets | Ask user (project-specific) |
+| Compliance frameworks | Ask user (project-specific) |
 
-**Blocker Report Format:**
+**Creation Flow:**
+1. WebFetch Ring Standards FIRST (establishes what is covered)
+2. Analyze infrastructure for project-specific information
+3. Ask user ONLY for what cannot be detected
+4. Generate PROJECT_RULES.md with ONLY project-specific content
+
+**Response Format:**
 ```markdown
-## Blockers
+## PROJECT_RULES.md Not Found
 
-### Missing Project Standards
+I'll help create `docs/PROJECT_RULES.md` with ONLY project-specific information.
 
-| Decision | Options | Impact | Needed From |
-|----------|---------|--------|-------------|
-| [decision] | [option A, option B] | [impact of choice] | User |
+**Ring Standards already cover:**
+- Infrastructure patterns, logging/monitoring, security baselines
+- Incident response, cost optimization patterns
 
-**Cannot proceed without:**
-- [ ] [specific requirement]
-- [ ] [specific requirement]
+**I need to document (if applicable):**
+1. External integrations (third-party cloud services)
+2. Non-standard directories
+3. Project-specific environment variables
+4. Domain terminology
 
-Please provide guidance or create PROJECT_RULES.md with:
-- [required information]
+**Questions (only what I couldn't detect):**
+1. Which cloud provider(s)?
+2. Any compliance frameworks (SOC2, HIPAA, etc.)?
+3. Cost budget constraints?
 ```
 
 ### If Existing Infrastructure is Non-Compliant

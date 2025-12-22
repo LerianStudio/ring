@@ -10,7 +10,7 @@ All dev-team agents MUST follow this workflow before any work:
 ┌─────────────────────────────────────────────────────────────┐
 │  Step 1: Read PROJECT_RULES.md                              │
 │  ├─ Exists? → Continue to Step 2                            │
-│  └─ Missing? → HARD BLOCK (see Scenario 1)                  │
+│  └─ Missing? → Create PROJECT_RULES.md (see Scenario 1)     │
 ├─────────────────────────────────────────────────────────────┤
 │  Step 2: WebFetch Ring Standards                            │
 │  ├─ Success? → Continue to Step 3                           │
@@ -32,13 +32,24 @@ Read docs/PROJECT_RULES.md
 
 **MANDATORY:** Project-specific technical information that must always be considered. Cannot proceed without reading this file.
 
-**What PROJECT_RULES.md Contains:**
-- Project tech stack decisions
-- Team conventions and patterns
-- Architecture constraints
-- Brand guidelines (for frontend)
-- Database choices
-- Authentication approach
+### What PROJECT_RULES.md Contains (COMPLEMENTARY to Ring Standards)
+
+**⛔ DEDUPLICATION RULE:** PROJECT_RULES.md documents ONLY what Ring Standards do NOT cover.
+
+| Category | Belongs In | Examples |
+|----------|------------|----------|
+| **Tech stack not in Ring** | PROJECT_RULES.md | Specific message broker, specific cache, DB if not PostgreSQL |
+| **Non-standard directories** | PROJECT_RULES.md | Pooling workers, MessageBroker consumers, custom workers |
+| **External integrations** | PROJECT_RULES.md | Third-party APIs, webhooks, external services |
+| **Project-specific env vars** | PROJECT_RULES.md | Environment config not covered by Ring |
+| **Domain terminology** | PROJECT_RULES.md | Technical names of entities/classes in this codebase |
+| Error handling patterns | Ring Standards | ❌ Do NOT duplicate |
+| Logging standards | Ring Standards | ❌ Do NOT duplicate |
+| Testing patterns | Ring Standards | ❌ Do NOT duplicate |
+| Architecture patterns | Ring Standards | ❌ Do NOT duplicate |
+| lib-commons, shared packages | Ring Standards | ❌ Do NOT duplicate |
+| API directory structure | Ring Standards | ❌ Do NOT duplicate |
+| Business rules | Product docs (PRD) | ❌ Does NOT belong in PROJECT_RULES |
 
 ---
 
@@ -90,31 +101,158 @@ Read docs/PROJECT_RULES.md
 
 ## Scenario 1: PROJECT_RULES.md Does Not Exist
 
-**If `docs/PROJECT_RULES.md` does not exist → HARD BLOCK.**
+**If `docs/PROJECT_RULES.md` does not exist → Offer to CREATE it with user input.**
 
-**Action:** STOP immediately. Do NOT proceed with any work.
+**Action:** Guide user through PROJECT_RULES.md creation with automatic deduplication against Ring Standards.
 
-### Response Format
+### Creation Flow
 
-```markdown
-## Blockers
-- **HARD BLOCK:** `docs/PROJECT_RULES.md` does not exist
-- **Required Action:** User must create `docs/PROJECT_RULES.md` before any work can begin
-- **Reason:** Project standards define tech stack, architecture decisions, and conventions that AI cannot assume
-- **Status:** BLOCKED - Awaiting user to create PROJECT_RULES.md
-
-## Next Steps
-None. This agent cannot proceed until `docs/PROJECT_RULES.md` is created by the user.
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  Step 1: WebFetch Ring Standards FIRST                                      │
+│  ├─ Load standards for detected language (Go, TypeScript, etc.)             │
+│  └─ This establishes what is ALREADY covered                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Step 2: Analyze Codebase for Project-Specific Information                  │
+│  ├─ Detect tech stack not in Ring (message brokers, caches, etc.)           │
+│  ├─ Detect non-standard directories (workers, consumers, etc.)              │
+│  ├─ Detect external integrations (third-party APIs, webhooks)               │
+│  └─ Detect domain terminology (entity names, module names)                  │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Step 3: Ask User ONLY for What Cannot Be Detected                          │
+│  ├─ "Any external APIs or services not visible in code?"                    │
+│  ├─ "Any specific environment variables needed?"                            │
+│  └─ "Any planned tech not yet in codebase?"                                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  Step 4: Generate PROJECT_RULES.md (Deduplicated)                           │
+│  ├─ Header referencing Ring Standards                                       │
+│  ├─ ONLY project-specific sections                                          │
+│  └─ NO content that duplicates Ring Standards                               │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### You CANNOT
+### PROJECT_RULES.md Template (Deduplicated)
 
-- Offer to create PROJECT_RULES.md for the user
-- Suggest a template or default values
-- Proceed with any implementation/work
-- Make assumptions about project standards
+```markdown
+# Project Rules
 
-**The user MUST create this file themselves. This is non-negotiable.**
+> Ring Standards apply automatically. This file documents ONLY what Ring does NOT cover.
+> For error handling, logging, testing, architecture, lib-commons → See Ring Standards (auto-loaded by agents)
+
+## What Ring Standards Already Cover (DO NOT ADD HERE)
+
+The following are defined in Ring Standards and MUST NOT be duplicated:
+- Error handling patterns (no panic, wrap errors)
+- Logging standards (structured JSON, zerolog/zap)
+- Testing patterns (table-driven tests, mocks)
+- Architecture patterns (Hexagonal, Clean Architecture)
+- Observability (OpenTelemetry, trace correlation)
+- lib-commons usage and patterns
+- API directory structure
+
+---
+
+## Tech Stack (Not in Ring Standards)
+
+[ONLY technologies not covered by Ring Standards]
+
+| Technology | Purpose | Notes |
+|------------|---------|-------|
+| [e.g., NATS] | [Message broker] | [Specific config notes] |
+| [e.g., Valkey] | [Cache] | [If not Redis] |
+
+## Non-Standard Directory Structure
+
+[ONLY directories that deviate from Ring's standard API structure]
+
+| Directory | Purpose | Pattern |
+|-----------|---------|---------|
+| [e.g., `workers/`] | [Pooling workers] | [Not API, different pattern] |
+| [e.g., `consumers/`] | [Message consumers] | [Async processing] |
+
+## External Integrations
+
+[Third-party services specific to this project]
+
+| Service | Purpose | Docs |
+|---------|---------|------|
+| [e.g., Stripe] | [Payments] | [Link to integration docs] |
+| [e.g., SendGrid] | [Email] | [Link] |
+
+## Environment Configuration
+
+[Project-specific env vars NOT covered by Ring's standard config]
+
+| Variable | Purpose | Example |
+|----------|---------|---------|
+| [e.g., `STRIPE_API_KEY`] | [Payment processing] | [Format notes] |
+
+## Domain Terminology
+
+[Technical names used in this codebase]
+
+| Term | Definition | Used In |
+|------|------------|---------|
+| [e.g., `Ledger`] | [Financial record container] | [Models, services] |
+
+---
+
+*Generated: [ISO timestamp]*
+*Ring Standards Version: [version from WebFetch]*
+```
+
+### Deduplication Validation
+
+**Before saving PROJECT_RULES.md, validate NO duplication exists:**
+
+| If Content Mentions | Action |
+|---------------------|--------|
+| Error handling patterns | ❌ REMOVE - Ring Standards covers this |
+| Logging format/structure | ❌ REMOVE - Ring Standards covers this |
+| Testing patterns | ❌ REMOVE - Ring Standards covers this |
+| lib-commons | ❌ REMOVE - Ring Standards covers this |
+| Hexagonal/Clean Architecture | ❌ REMOVE - Ring Standards covers this |
+| OpenTelemetry/tracing | ❌ REMOVE - Ring Standards covers this |
+| Standard API directory structure | ❌ REMOVE - Ring Standards covers this |
+| Business rules | ❌ REMOVE - Belongs in PRD/product docs |
+
+### Response Format (When PROJECT_RULES.md Missing)
+
+```markdown
+## PROJECT_RULES.md Not Found
+
+I'll help you create `docs/PROJECT_RULES.md` with ONLY project-specific information.
+
+**Ring Standards already cover:**
+- Error handling, logging, testing patterns
+- Architecture (Hexagonal), observability (OpenTelemetry)
+- lib-commons usage, API structure
+
+**I need to document (if applicable):**
+1. Tech stack not in Ring (specific message broker, cache, etc.)
+2. Non-standard directories (workers, consumers, etc.)
+3. External integrations (third-party APIs)
+4. Project-specific environment variables
+5. Domain terminology (entity/module names)
+
+**Analyzing codebase...**
+[Analysis results]
+
+**Questions (only what I couldn't detect):**
+1. Any external APIs or services not visible in code?
+2. Any specific environment variables needed?
+3. Any planned technology not yet implemented?
+```
+
+### Anti-Rationalization for Creation
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "Include error handling section anyway" | Ring Standards covers this. Duplication causes drift. | **REMOVE from PROJECT_RULES.md** |
+| "Add lib-commons usage notes" | Ring Standards is the source of truth. | **REMOVE from PROJECT_RULES.md** |
+| "Document testing patterns here" | Ring Standards defines testing patterns. | **REMOVE from PROJECT_RULES.md** |
+| "Include business rules for context" | Business rules belong in PRD, not tech docs. | **REMOVE from PROJECT_RULES.md** |
+| "Better to have everything in one place" | Single source of truth prevents drift. Ring = patterns. | **Reference Ring, don't duplicate** |
 
 ---
 
