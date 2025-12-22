@@ -15,6 +15,11 @@ skip_when: |
   - Project has no Docker requirements
   - Only documentation changes
 
+NOT_skip_when: |
+  - "Application runs fine locally" → Docker ensures consistency across environments.
+  - "Docker is overkill" → Docker is baseline, not overkill.
+  - "We'll containerize before production" → Containerize NOW or never.
+
 sequence:
   after: [dev-implementation]
   before: [dev-sre]
@@ -22,16 +27,89 @@ sequence:
 related:
   complementary: [dev-implementation, dev-testing]
 
+input_schema:
+  required:
+    - name: unit_id
+      type: string
+      description: "Task or subtask identifier"
+    - name: language
+      type: string
+      enum: [go, typescript, python]
+      description: "Programming language of the implementation"
+    - name: service_type
+      type: string
+      enum: [api, worker, batch, cli]
+      description: "Type of service being containerized"
+    - name: implementation_files
+      type: array
+      items: string
+      description: "List of files from Gate 0 implementation"
+  optional:
+    - name: gate0_handoff
+      type: object
+      description: "Full handoff from Gate 0"
+    - name: new_dependencies
+      type: array
+      items: string
+      description: "New dependencies added in Gate 0"
+    - name: new_env_vars
+      type: array
+      items: string
+      description: "New environment variables needed"
+    - name: new_services
+      type: array
+      items: string
+      description: "New services needed (postgres, redis, etc.)"
+    - name: existing_dockerfile
+      type: boolean
+      default: false
+      description: "Whether Dockerfile already exists"
+    - name: existing_compose
+      type: boolean
+      default: false
+      description: "Whether docker-compose.yml already exists"
+
+output_schema:
+  format: markdown
+  required_sections:
+    - name: "DevOps Summary"
+      pattern: "^## DevOps Summary"
+      required: true
+    - name: "Files Changed"
+      pattern: "^## Files Changed"
+      required: true
+    - name: "Verification Results"
+      pattern: "^## Verification Results"
+      required: true
+    - name: "Handoff to Next Gate"
+      pattern: "^## Handoff to Next Gate"
+      required: true
+  metrics:
+    - name: result
+      type: enum
+      values: [PASS, FAIL, PARTIAL]
+    - name: dockerfile_action
+      type: enum
+      values: [CREATED, UPDATED, UNCHANGED]
+    - name: compose_action
+      type: enum
+      values: [CREATED, UPDATED, UNCHANGED]
+    - name: env_example_action
+      type: enum
+      values: [CREATED, UPDATED, UNCHANGED]
+    - name: services_configured
+      type: integer
+    - name: verification_passed
+      type: boolean
+
 verification:
   automated:
     - command: "docker-compose build"
       description: "Docker images build successfully"
       success_pattern: "Successfully built|successfully"
-      failure_pattern: "error|failed|Error"
     - command: "docker-compose up -d && sleep 10 && docker-compose ps"
       description: "All services start and are healthy"
       success_pattern: "Up|running|healthy"
-      failure_pattern: "Exit|exited|unhealthy"
     - command: "docker-compose logs app | head -5 | jq -e '.level'"
       description: "Structured JSON logging works"
       success_pattern: "info|debug|warn|error"
@@ -41,25 +119,37 @@ verification:
 
 examples:
   - name: "New Go service"
-    context: "Gate 0 completed Go API implementation"
+    input:
+      unit_id: "task-001"
+      language: "go"
+      service_type: "api"
+      implementation_files: ["cmd/api/main.go", "internal/handler/user.go"]
+      new_services: ["postgres", "redis"]
     expected_output: |
-      - Dockerfile with multi-stage build
-      - docker-compose.yml with app, postgres, redis
-      - .env.example with all variables documented
-      - docs/LOCAL_SETUP.md created
-  - name: "Add Redis to existing service"
-    context: "Implementation added caching, needs Redis"
-    expected_output: |
-      - docker-compose.yml updated with redis service
-      - .env.example updated with REDIS_URL
-      - Health check updated to verify Redis connection
+      ## DevOps Summary
+      **Status:** PASS
+      
+      ## Files Changed
+      | File | Action |
+      |------|--------|
+      | Dockerfile | Created |
+      | docker-compose.yml | Created |
+      | .env.example | Created |
+      
+      ## Verification Results
+      | Check | Status |
+      |-------|--------|
+      | Build | ✅ PASS |
+      | Services Start | ✅ PASS |
+      | Health Checks | ✅ PASS |
+      
+      ## Handoff to Next Gate
+      - Ready for Gate 2: YES
 ---
 
 # DevOps Setup (Gate 1)
 
 ## Overview
-
-See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.md) and [dev-team/docs/standards/devops.md](https://raw.githubusercontent.com/LerianStudio/ring/main/docs/standards/devops.md) for canonical DevOps requirements. This skill orchestrates Gate 1 execution.
 
 This skill configures the development and deployment infrastructure:
 - Creates or updates Dockerfile for the application
@@ -67,247 +157,326 @@ This skill configures the development and deployment infrastructure:
 - Documents environment variables in .env.example
 - Verifies the containerized application works
 
+## CRITICAL: Role Clarification
+
+**This skill ORCHESTRATES. DevOps Agent IMPLEMENTS.**
+
+| Who | Responsibility |
+|-----|----------------|
+| **This Skill** | Gather requirements, prepare prompts, validate outputs |
+| **DevOps Agent** | Create Dockerfile, docker-compose, .env.example, verify |
+
+---
+
+## Step 1: Validate Input
+
+```text
+REQUIRED INPUT (from dev-cycle orchestrator):
+- unit_id: [task/subtask being containerized]
+- language: [go|typescript|python]
+- service_type: [api|worker|batch|cli]
+- implementation_files: [files from Gate 0]
+
+OPTIONAL INPUT:
+- gate0_handoff: [full Gate 0 output]
+- new_dependencies: [deps added in Gate 0]
+- new_env_vars: [env vars needed]
+- new_services: [postgres, redis, etc.]
+- existing_dockerfile: [true/false]
+- existing_compose: [true/false]
+
+IF any REQUIRED input is missing:
+  → STOP and report: "Missing required input: [field]"
+  → Return to orchestrator with error
+```
+
+## Step 2: Analyze DevOps Requirements
+
+```text
+1. Check existing files:
+   - Dockerfile: [EXISTS/MISSING]
+   - docker-compose.yml: [EXISTS/MISSING]
+   - .env.example: [EXISTS/MISSING]
+
+2. Determine actions needed:
+   - Dockerfile: CREATE / UPDATE / NONE
+   - docker-compose.yml: CREATE / UPDATE / NONE
+   - .env.example: CREATE / UPDATE / NONE
+
+3. Identify services needed:
+   - From new_services input
+   - From language (Go → alpine base, TS → node base)
+   - From service_type (api → expose port, worker → no port)
+```
+
+## Step 3: Initialize DevOps State
+
+```text
+devops_state = {
+  unit_id: [from input],
+  dockerfile_action: "pending",
+  compose_action: "pending",
+  env_action: "pending",
+  services: [],
+  verification: {
+    build: null,
+    startup: null,
+    health: null
+  },
+  iterations: 0,
+  max_iterations: 3
+}
+```
+
+## Step 4: Dispatch DevOps Agent
+
+```yaml
+Task:
+  subagent_type: "devops-engineer"
+  model: "opus"
+  description: "Create/update DevOps artifacts for [unit_id]"
+  prompt: |
+    ⛔ MANDATORY: Create ALL DevOps Artifacts
+
+    ## Input Context
+    - **Unit ID:** [unit_id]
+    - **Language:** [language]
+    - **Service Type:** [service_type]
+    - **Implementation Files:** [implementation_files]
+    - **New Dependencies:** [new_dependencies or "None"]
+    - **New Environment Variables:** [new_env_vars or "None"]
+    - **New Services Needed:** [new_services or "None"]
+
+    ## Existing Files
+    - Dockerfile: [EXISTS/MISSING]
+    - docker-compose.yml: [EXISTS/MISSING]
+    - .env.example: [EXISTS/MISSING]
+
+    ## Standards Reference
+    WebFetch: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/devops.md
+
+    You MUST implement ALL sections from devops.md.
+
+    ## Requirements
+
+    ### Dockerfile
+    - Multi-stage build (builder → production)
+    - Non-root USER (appuser)
+    - Specific versions (NO :latest)
+    - HEALTHCHECK instruction
+    - Layer caching optimization
+
+    ### docker-compose.yml
+    - Version: 3.8
+    - App service with build context
+    - Database/cache services as needed
+    - Named volumes for persistence
+    - Health checks with depends_on conditions
+    - Network: app-network (bridge)
+
+    ### .env.example
+    - ALL variables with placeholders
+    - Comments explaining each
+    - Grouped by service
+    - Required vs optional marked
+
+    ## Required Output Format
+
+    ### Standards Coverage Table
+    | # | Section (from devops.md) | Status | Evidence |
+    |---|--------------------------|--------|----------|
+    | 1 | Containers | ✅/❌ | Dockerfile:[line] |
+    | 2 | Docker Compose | ✅/❌ | docker-compose.yml:[line] |
+    | 3 | Environment | ✅/❌ | .env.example:[line] |
+    | 4 | Health Checks | ✅/❌ | [file:line] |
+
+    ### Files Created/Updated
+    | File | Action | Key Changes |
+    |------|--------|-------------|
+    | Dockerfile | Created/Updated | [summary] |
+    | docker-compose.yml | Created/Updated | [summary] |
+    | .env.example | Created/Updated | [summary] |
+
+    ### Verification Commands
+    Execute these and report results:
+    1. `docker-compose build` → [PASS/FAIL]
+    2. `docker-compose up -d` → [PASS/FAIL]
+    3. `docker-compose ps` → [all healthy?]
+    4. `docker-compose logs app | head -5` → [JSON logs?]
+
+    ### Compliance Summary
+    - **ALL STANDARDS MET:** ✅ YES / ❌ NO
+    - **If NO, what's missing:** [list sections]
+```
+
+## Step 5: Validate Agent Output
+
+```text
+Parse agent output:
+
+1. Extract Standards Coverage Table
+2. Extract Files Created/Updated
+3. Extract Verification results
+
+IF "ALL STANDARDS MET: ✅ YES" AND all verifications PASS:
+  → devops_state.dockerfile_action = [from table]
+  → devops_state.compose_action = [from table]
+  → devops_state.env_action = [from table]
+  → devops_state.verification = {build: PASS, startup: PASS, health: PASS}
+  → Proceed to Step 7
+
+IF ANY section has ❌ OR any verification FAIL:
+  → devops_state.iterations += 1
+  → IF iterations >= max_iterations: Go to Step 8 (Escalate)
+  → Re-dispatch agent with specific failures
+```
+
+## Step 6: Re-Dispatch for Fixes (if needed)
+
+```yaml
+Task:
+  subagent_type: "devops-engineer"
+  model: "opus"
+  description: "Fix DevOps issues for [unit_id]"
+  prompt: |
+    ⛔ FIX REQUIRED - DevOps Standards Not Met
+
+    ## Issues Found
+    [list ❌ sections and FAIL verifications]
+
+    ## Standards Reference
+    WebFetch: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/devops.md
+
+    Fix ALL issues and re-run verification commands.
+    Return updated Standards Coverage Table with ALL ✅.
+```
+
+After fix → Go back to Step 5
+
+## Step 7: Prepare Success Output
+
+```text
+Generate skill output:
+
+## DevOps Summary
+**Status:** PASS
+**Unit ID:** [unit_id]
+**Iterations:** [devops_state.iterations]
+
+## Files Changed
+| File | Action | Summary |
+|------|--------|---------|
+| Dockerfile | [CREATED/UPDATED/UNCHANGED] | [summary] |
+| docker-compose.yml | [CREATED/UPDATED/UNCHANGED] | [summary] |
+| .env.example | [CREATED/UPDATED/UNCHANGED] | [summary] |
+
+## Services Configured
+| Service | Image | Port | Health Check |
+|---------|-------|------|--------------|
+| app | [built] | [port] | [healthcheck] |
+| [db] | [image] | [port] | [healthcheck] |
+| [cache] | [image] | [port] | [healthcheck] |
+
+## Verification Results
+| Check | Status | Output |
+|-------|--------|--------|
+| Build | ✅ PASS | Successfully built |
+| Startup | ✅ PASS | All services Up |
+| Health | ✅ PASS | All healthy |
+| Logging | ✅ PASS | JSON structured |
+
+## Handoff to Next Gate
+- DevOps status: COMPLETE
+- Services: [list]
+- Env vars: [count] documented
+- Verification: ALL PASS
+- Ready for Gate 2 (SRE): YES
+```
+
+## Step 8: Escalate - Max Iterations Reached
+
+```text
+Generate skill output:
+
+## DevOps Summary
+**Status:** FAIL
+**Unit ID:** [unit_id]
+**Iterations:** [max_iterations] (MAX REACHED)
+
+## Files Changed
+[list what was created/updated]
+
+## Issues Remaining
+[list unresolved issues]
+
+## Verification Results
+[list PASS/FAIL for each check]
+
+## Handoff to Next Gate
+- DevOps status: FAILED
+- Ready for Gate 2: NO
+- **Action Required:** User must manually resolve issues
+
+⛔ ESCALATION: Max iterations (3) reached. User intervention required.
+```
+
+---
+
 ## Pressure Resistance
 
 See [shared-patterns/shared-pressure-resistance.md](../shared-patterns/shared-pressure-resistance.md) for universal pressure scenarios.
 
-**Gate 1-specific note:** If the application can run in a container, it MUST be containerized. docker-compose ensures reproducibility.
+| User Says | Your Response |
+|-----------|---------------|
+| "Skip Docker, runs fine locally" | "Docker ensures consistency. Dispatching devops-engineer now." |
+| "Demo tomorrow, no time" | "Docker takes 30 min. Better than environment crash during demo." |
+| "We'll containerize later" | "Later = never. Containerizing now." |
 
-## Common Rationalizations - REJECTED
+## Anti-Rationalization Table
 
 See [shared-patterns/shared-anti-rationalization.md](../shared-patterns/shared-anti-rationalization.md) for universal anti-rationalizations.
 
-**Gate 1-specific rationalizations:**
-
-| Excuse | Reality |
-|--------|---------|
-| "Works fine locally" | Your machine ≠ production. Docker = consistency. |
-| "Docker is overkill for this" | Docker is baseline, not overkill. Complexity is hidden, not added. |
-| "Just need docker run" | docker-compose is reproducible. docker run is not documented. |
-| "Build system will handle Docker" | Build system uses your Dockerfile. No Dockerfile = no reproducible builds. |
-| "Works on demo machine" | Demo machine ≠ production. Docker ensures consistency. |
-| "Quick demo setup, proper later" | Quick setup becomes permanent. Proper setup now or never. |
-
-## Red Flags - STOP
-
-See [shared-patterns/shared-red-flags.md](../shared-patterns/shared-red-flags.md) for universal red flags.
-
-If you catch yourself thinking ANY of those patterns, STOP immediately. Proceed with containerization.
-
-## Modern Deployment Patterns
-
-**Different deployment targets still require containerization for development parity:**
-
-| Deployment Target | Development Requirement | Why |
-|-------------------|------------------------|-----|
-| **Traditional VM/Server** | Dockerfile + docker-compose | Standard containerization |
-| **Helm Deployment** | Dockerfile + docker-compose + Helm chart | Helm uses container images |
-| **AWS Lambda/Serverless** | Dockerfile OR SAM template | Local testing needs container |
-| **Vercel/Netlify** | Dockerfile for local dev | Platform builds ≠ local builds |
-| **Static Site (CDN)** | Optional (nginx container for parity) | Recommended but not required |
-
-### Serverless Applications
-
-**Lambda/Cloud Functions still need local containerization:**
-
-```yaml
-# For AWS Lambda - use SAM or serverless framework
-# sam local invoke uses Docker under the hood
-
-# docker-compose.yml for serverless local dev
-services:
-  lambda-local:
-    build: .
-    command: sam local start-api
-    ports:
-      - "3000:3000"
-    volumes:
-      - .:/var/task
-```
-
-**Serverless does NOT exempt from Gate 1. It changes the containerization approach.**
-
-### Platform-Managed Deployments (Vercel, Netlify, Railway)
-
-**Even when platform handles production containers:**
-
-| Platform Handles | You Still Need | Why |
-|------------------|----------------|-----|
-| Production build | Dockerfile for local | Parity between local and prod |
-| Scaling | docker-compose | Team onboarding consistency |
-| SSL/CDN | .env.example | Environment documentation |
-
-**Anti-Rationalization for Serverless/Platform:**
+### Gate 1-Specific Anti-Rationalizations
 
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
-| "Lambda doesn't need Docker" | SAM uses Docker locally. Container is hidden, not absent. | **Use SAM/serverless containers** |
-| "Vercel handles everything" | Vercel deploys. Local dev is YOUR problem. | **Dockerfile for local dev** |
-| "Platform builds from source" | Platform build ≠ your local. Parity matters. | **Match platform build locally** |
-| "Static site has no runtime" | Build process has runtime. Containerize the build. | **nginx or build container** |
+| "Works fine locally" | Your machine ≠ production | **Containerize for consistency** |
+| "Docker is overkill" | Docker is baseline, not overkill | **Create Dockerfile** |
+| "Just need docker run" | docker-compose is reproducible | **Use docker-compose** |
+| "Lambda doesn't need Docker" | SAM uses Docker locally | **Use SAM containers** |
 
-## Demo Pressure Handling
+---
 
-**Demos do NOT justify skipping containerization:**
+## Execution Report Format
 
-| Demo Scenario | Correct Response |
-|--------------|------------------|
-| "Demo tomorrow, no time for Docker" | Docker takes 30 min. 30 min now > environment crash during demo. |
-| "Demo machine already configured" | Demo machine config will be lost. Docker is documentation. |
-| "Just need to show it works" | Showing it works requires it to work. Docker ensures that. |
-| "Will containerize after demo" | After demo = never. Containerize now. |
+```markdown
+## DevOps Summary
+**Status:** [PASS|FAIL|PARTIAL]
+**Unit ID:** [unit_id]
+**Duration:** [Xm Ys]
+**Iterations:** [N]
 
-**Demo-specific guidance:**
-1. Use docker-compose for demo (consistent environment)
-2. Include `.env.demo` with demo-safe values
-3. Document demo-specific overrides
-4. Demo = test of deployment, not bypass of deployment
+## Files Changed
+| File | Action |
+|------|--------|
+| Dockerfile | [CREATED/UPDATED/UNCHANGED] |
+| docker-compose.yml | [CREATED/UPDATED/UNCHANGED] |
+| .env.example | [CREATED/UPDATED/UNCHANGED] |
 
-## Gate 1 Requirements
+## Services Configured
+| Service | Image | Port |
+|---------|-------|------|
+| [name] | [image] | [port] |
 
-**MANDATORY unless ALL skip_when conditions apply:**
-- All services MUST be containerized with Docker
-- docker-compose.yml REQUIRED for any app with:
-  - Database dependency
-  - Multiple services
-  - Environment variables
-  - External API calls
+## Verification Results
+| Check | Status |
+|-------|--------|
+| Build | ✅/❌ |
+| Startup | ✅/❌ |
+| Health | ✅/❌ |
+| Logging | ✅/❌ |
 
-**INVALID Skip Reasons:**
-- ❌ "Application runs fine locally without Docker"
-- ❌ "Docker adds complexity we don't need yet"
-- ❌ "We'll containerize before production"
-- ❌ "Just use docker run instead of compose"
-
-**VALID Skip Reasons:**
-- ✅ Only documentation changes (no code)
-- ✅ Library/SDK with no runtime component
-- ✅ Project explicitly documented as non-containerized (rare)
-
-## Prerequisites
-
-Before starting Gate 1:
-
-1. **Gate 0 Complete**: Code implementation is done
-2. **Environment Requirements**: List from Gate 0 handoff:
-   - New dependencies
-   - New environment variables
-   - New services needed
-3. **Existing Config**: Current Docker/compose files (if any)
-
-## Step 1: Analyze DevOps Requirements
-
-**From Gate 0:** New dependencies, env vars, services needed
-
-**Check existing:** Dockerfile (EXISTS/MISSING), docker-compose.yml (EXISTS/MISSING), .env.example (EXISTS/MISSING)
-
-**Determine actions:** Create/Update each file as needed based on gaps
-
-## Step 2: Dispatch DevOps Agent
-
-**MANDATORY:** `Task(subagent_type: "devops-engineer", model: "opus")`
-
-**Prompt includes:** Gate 0 handoff summary, existing config files, requirements for Dockerfile/compose/.env/docs
-
-| Component | Requirements |
-|-----------|-------------|
-| **Dockerfile** | Multi-stage build, non-root USER, specific versions (no :latest), health check, layer caching |
-| **docker-compose.yml** | App service, DB/cache services, volumes, networks, depends_on with health checks |
-| **.env.example** | All vars with placeholders, comments, grouped by service, marked required vs optional |
-| **docs/LOCAL_SETUP.md** | Prerequisites, setup steps, run commands, troubleshooting |
-
-**Agent returns:** Complete files + verification commands
-
-## Step 3: Create/Update Dockerfile
-
-**Pattern:** Multi-stage build → builder stage (deps first, then source) → production stage (non-root user, only artifacts)
-
-**Required elements:** `WORKDIR /app`, `USER appuser` (non-root), `EXPOSE {port}`, `HEALTHCHECK` (30s interval, 3s timeout)
-
-| Language | Builder | Runtime | Build Command | Notes |
-|----------|---------|---------|---------------|-------|
-| **Go** | `golang:1.21-alpine` | `alpine:3.19` | `CGO_ENABLED=0 go build` | Add ca-certificates, tzdata |
-| **TypeScript** | `node:20-alpine` | `node:20-alpine` | `npm ci && npm run build` | `npm ci --only=production` in prod |
-| **Python** | `python:3.11-slim` | `python:3.11-slim` | venv + `pip install` | Copy `/opt/venv` to prod |
-
-## Step 4: Create/Update docker-compose.yml
-
-**Version:** `3.8` | **Network:** `app-network` (bridge) | **Restart:** `unless-stopped`
-
-| Service | Image | Ports | Volumes | Healthcheck | Key Config |
-|---------|-------|-------|---------|-------------|------------|
-| **app** | Build from Dockerfile | `${APP_PORT:-8080}:8080` | `.:/app:ro` | - | `depends_on` with `condition: service_healthy` |
-| **db** | `postgres:15-alpine` | `${DB_PORT:-5432}:5432` | `postgres-data:/var/lib/postgresql/data` | `pg_isready -U $DB_USER` | POSTGRES_USER/PASSWORD/DB env vars |
-| **redis** | `redis:7-alpine` | `${REDIS_PORT:-6379}:6379` | `redis-data:/data` | `redis-cli ping` | 10s interval, 5s timeout, 5 retries |
-
-**Named volumes:** `postgres-data`, `redis-data`
-
-## Step 5: Create/Update .env.example
-
-**Format:** Grouped by service, comments explaining each, defaults shown with `:-` syntax
-
-| Group | Variables | Format/Notes |
-|-------|-----------|--------------|
-| **Application** | `APP_PORT=8080`, `APP_ENV=development`, `LOG_LEVEL=info` | Standard app config |
-| **Database** | `DATABASE_URL=postgres://user:pass@host:port/db` | Or individual: DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME |
-| **Redis** | `REDIS_URL=redis://redis:6379` | Connection string |
-| **Auth** | `JWT_SECRET=...`, `JWT_EXPIRATION=1h` | Generate secret: `openssl rand -hex 32` |
-| **External** | Commented placeholders | `# STRIPE_API_KEY=sk_test_...` |
-
-## Step 6: Create Local Setup Documentation
-
-Create `docs/LOCAL_SETUP.md` with these sections:
-
-| Section | Content |
-|---------|---------|
-| **Prerequisites** | Docker ≥24.0, Docker Compose ≥2.20, Make (optional) |
-| **Quick Start** | 1. Clone → 2. `cp .env.example .env` → 3. `docker-compose up -d` → 4. Verify `docker-compose ps` |
-| **Services** | Table: Service, URL, Description (App/DB/Cache) |
-| **Commands** | `up -d`, `down`, `build`, `logs -f`, `exec app [cmd]`, `exec db psql`, `exec redis redis-cli` |
-| **Troubleshooting** | Port in use (`lsof -i`), DB refused (check `ps`, `logs`), Permissions (`down -v`, `up -d`) |
-
-## Step 7: Verify Setup Works
-
-**Commands:** `docker-compose build` → `docker-compose up -d` → `docker-compose ps` → `docker-compose logs app | grep -i error`
-
-**Checklist:** Build succeeds ✓ | Services start ✓ | All healthy ✓ | No errors ✓ | DB connects ✓ | Redis connects ✓
-
-## Step 8: Prepare Handoff to Gate 2
-
-**Handoff format:** DevOps status (COMPLETE/PARTIAL) | Files changed (Dockerfile, compose, .env, docs) | Services configured (App:port, DB:type/port, Cache:type/port) | Env vars added | Verification results (build/startup/connectivity: PASS/FAIL) | Ready for testing: YES/NO
-
-## Common DevOps Patterns
-
-| Pattern | File | Key Config |
-|---------|------|------------|
-| **Multi-env** | `docker-compose.override.yml` (dev) / `.prod.yml` | `target: development/production`, volumes, memory limits |
-| **Migrations** | Separate service in compose | `command: ["./migrate", "up"]`, `depends_on: db: condition: service_healthy` |
-| **Hot Reload** | Override compose | Go: `air -c .air.toml`, Node: `npm run dev` with volume mounts |
-
-## Execution Report
-
-Base metrics per [shared-patterns/output-execution-report.md](../shared-patterns/output-execution-report.md).
-
-| Metric | Value |
-|--------|-------|
-| Duration | Xm Ys |
-| Iterations | N |
-| Result | PASS/FAIL/PARTIAL |
-
-### Details
-- dockerfile_action: CREATED/UPDATED/UNCHANGED
-- compose_action: CREATED/UPDATED/UNCHANGED
-- env_example_action: CREATED/UPDATED/UNCHANGED
-- services_configured: N
-- env_vars_documented: N
-- verification_passed: YES/NO
-
-### Issues Encountered
-- List any issues or "None"
-
-### Handoff to Next Gate
-- DevOps status (complete/partial)
-- Services configured and ports
-- New environment variables
-- Verification results
-- Ready for testing: YES/NO
+## Handoff to Next Gate
+- DevOps status: [COMPLETE|PARTIAL|FAILED]
+- Ready for Gate 2: [YES|NO]
+```
