@@ -31,8 +31,8 @@ When creating or modifying ANY agent in `*/agents/*.md`:
 7. **NEVER assume compliance** - VERIFY with evidence
 
 ### 4. Fully Qualified Names (ALWAYS)
-- ✅ `code-reviewer`
-- ✅ `backend-engineer-golang`
+- ✅ `ring-default:code-reviewer`
+- ✅ `ring-dev-team:backend-engineer-golang`
 - ❌ `code-reviewer` (missing plugin prefix)
 - ❌ `ring:code-reviewer` (ambiguous shorthand)
 
@@ -334,7 +334,7 @@ Ring is a comprehensive skills library and workflow system for AI agents that en
 
 **Active Plugins:**
 - **ring-default**: 22 core skills, 7 slash commands, 5 specialized agents
-- **ring-dev-team**: 10 development skills, 5 slash commands, 7 developer agents (Backend Go, Backend TypeScript, DevOps, Frontend TypeScript, Frontend Designer, QA, SRE)
+- **ring-dev-team**: 10 development skills, 5 slash commands, 9 developer agents (Backend Go, Backend TypeScript, DevOps, Frontend TypeScript, Frontend Designer, QA, SRE)
 - **ring-pm-team**: 10 product planning skills, 3 research agents, 2 slash commands
 - **ring-finops-team**: 6 regulatory skills, 2 FinOps agents
 - **ring-finance-team**: 8 financial operations skills, 6 finance agents, 3 slash commands (Financial Analyst, Budget Planner, Financial Modeler, Treasury Specialist, Accounting Specialist, Metrics Analyst)
@@ -346,7 +346,7 @@ Ring is a comprehensive skills library and workflow system for AI agents that en
 **Note:** Plugin versions are managed in `.claude-plugin/marketplace.json`
 
 **Total: 87 skills (22 + 10 + 10 + 6 + 8 + 8 + 8 + 8 + 7) across 9 plugins**
-**Total: 42 agents (5 + 7 + 3 + 2 + 6 + 5 + 6 + 5 + 3) across 9 plugins**
+**Total: 44 agents (5 + 9 + 3 + 2 + 6 + 5 + 6 + 5 + 3) across 9 plugins**
 
 The architecture uses markdown-based skill definitions with YAML frontmatter, auto-discovered at session start via hooks, and executed through Claude Code's native Skill/Task tools.
 
@@ -367,7 +367,7 @@ See [README.md](README.md#installation) or [docs/platforms/](docs/platforms/) fo
 | Plugin | Path | Contents |
 |--------|------|----------|
 | ring-default | `default/` | 22 skills, 5 agents, 7 commands |
-| ring-dev-team | `dev-team/` | 10 skills, 7 agents, 5 commands |
+| ring-dev-team | `dev-team/` | 10 skills, 9 agents, 5 commands |
 | ring-pm-team | `pm-team/` | 10 skills, 3 agents, 2 commands |
 | ring-finops-team | `finops-team/` | 6 skills, 2 agents |
 | ring-finance-team | `finance-team/` | 8 skills, 6 agents, 3 commands |
@@ -444,8 +444,8 @@ See [docs/WORKFLOWS.md](docs/WORKFLOWS.md) for detailed instructions.
 #### Agent/Skill/Command Invocation
 - **ALWAYS use fully qualified names**: `ring-{plugin}:{component}`
 - **Examples:**
-  - ✅ Correct: `code-reviewer`
-  - ✅ Correct: `backend-engineer-golang`
+  - ✅ Correct: `ring-default:code-reviewer`
+  - ✅ Correct: `ring-dev-team:backend-engineer-golang`
   - ❌ Wrong: `code-reviewer` (missing plugin prefix)
   - ❌ Wrong: `ring:code-reviewer` (ambiguous shorthand)
 - **Rationale:** Prevents ambiguity in multi-plugin environments
@@ -469,17 +469,17 @@ See [docs/AGENT_DESIGN.md](docs/AGENT_DESIGN.md) for complete schema definitions
 ## Compliance Rules
 
 ```bash
-# TDD compliance (default/skills/test-driven-development/SKILL.md:638)
+# TDD compliance (default/skills/test-driven-development/SKILL.md)
 - Test file must exist before implementation
 - Test must produce failure output (RED)
 - Only then write implementation (GREEN)
 
-# Review compliance (default/skills/requesting-code-review/SKILL.md:188)
+# Review compliance (default/skills/requesting-code-review/SKILL.md)
 - All 3 reviewers must pass
 - Critical findings = immediate fix required
 - Re-run all reviewers after fixes
 
-# Skill compliance (default/skills/using-ring/SKILL.md:222)
+# Skill compliance (default/skills/using-ring/SKILL.md)
 - Check for applicable skills before ANY task
 - If skill exists for task → MUST use it
 - Announce non-obvious skill usage
@@ -507,7 +507,7 @@ The system loads at SessionStart (from `default/` plugin):
 - Active plugins: 9 (`ring-default`, `ring-dev-team`, `ring-pm-team`, `ring-finops-team`, `ring-finance-team`, `ring-ops-team`, `ring-pmm-team`, `ring-pmo-team`, `ring-tw-team`)
 - Plugin versions: See `.claude-plugin/marketplace.json`
 - Core plugin: `default/` (22 skills, 5 agents, 7 commands)
-- Developer agents: `dev-team/` (10 skills, 7 agents, 5 commands)
+- Developer agents: `dev-team/` (10 skills, 9 agents, 5 commands)
 - Product planning: `pm-team/` (10 skills, 3 agents, 2 commands)
 - FinOps regulatory: `finops-team/` (6 skills, 2 agents)
 - Finance operations: `finance-team/` (8 skills, 6 agents, 3 commands)

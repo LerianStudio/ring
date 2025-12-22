@@ -16,7 +16,7 @@ Without Ring, AI assistants often:
 Ring solves this by:
 - **Enforcing proven workflows** - Test-driven development, systematic debugging, proper planning
 - **Providing 87 specialized skills** - Complete coverage from finance to operations (22 core + 10 dev-team + 10 product planning + 6 FinOps regulatory + 8 finance ops + 8 production ops + 8 product marketing + 8 PMO + 7 technical writing)
-- **42 specialized agents** - 5 review/planning + 7 developer + 3 product research + 2 FinOps regulatory + 6 finance + 5 operations + 6 product marketing + 5 PMO + 3 technical writing
+- **44 specialized agents** - 5 review/planning + 9 developer + 3 product research + 2 FinOps regulatory + 6 finance + 5 operations + 6 product marketing + 5 PMO + 3 technical writing
 - **Automating skill discovery** - Skills load automatically at session start
 - **Preventing common failures** - Built-in anti-patterns and mandatory checklists
 
@@ -38,6 +38,8 @@ Ring solves this by:
 - `frontend-designer` - Visual design specialist
 - `qa-analyst` - Quality assurance specialist
 - `sre` - Site reliability engineer
+- `frontend-engineer` - Senior Frontend Engineer (React/Next.js)
+- `prompt-quality-reviewer` - Agent Quality Analyst
 
 > **Standards Compliance:** All dev-team agents include a `## Standards Compliance` output section with conditional requirement:
 > - **Optional** when invoked directly or via `dev-cycle`
@@ -249,7 +251,7 @@ Run command → Paste output → Then claim
 No "should work" → Only "does work" with proof
 ```
 
-## 📚 All 55 Skills (Across 5 Plugins)
+## 📚 All 87 Skills (Across 9 Plugins)
 
 ### Core Skills (ring-default plugin - 22 skills)
 
@@ -333,7 +335,7 @@ No "should work" → Only "does work" with proof
 
 ## 🎮 Interactive Commands
 
-Ring provides 18 slash commands across 4 plugins for common workflows.
+Ring provides 31 slash commands across 8 plugins for common workflows.
 
 ### Core Workflows (ring-default)
 
@@ -344,6 +346,7 @@ Ring provides 18 slash commands across 4 plugins for common workflows.
 - `/write-plan [feature]` - Create detailed implementation plan with bite-sized tasks
 - `/execute-plan [path]` - Execute plan in batches with review checkpoints
 - `/lint [path]` - Run lint checks and dispatch parallel agents to fix all issues
+- `/explore-codebase [path]` - Deep codebase exploration using Opus-powered agent
 
 ### Product Planning (ring-pm-team)
 
@@ -431,9 +434,9 @@ Claude: Dispatching all 3 reviewers in parallel...
 ```
 ring/                                  # Monorepo root
 ├── .claude-plugin/
-│   └── marketplace.json              # Multi-plugin marketplace config (5 active plugins)
+│   └── marketplace.json              # Multi-plugin marketplace config (9 active plugins)
 ├── default/                          # Core Ring plugin (ring-default)
-│   ├── skills/                       # 21 core skills
+│   ├── skills/                       # 22 core skills
 │   │   ├── skill-name/
 │   │   │   └── SKILL.md             # Skill definition with frontmatter
 │   │   └── shared-patterns/         # Universal patterns (5 patterns)
@@ -448,7 +451,6 @@ ring/                                  # Monorepo root
 │   │   ├── security-reviewer.md    # Safety review (parallel)
 │   │   ├── write-plan.md           # Implementation planning
 │   │   └── codebase-explorer.md    # Deep architecture analysis (Opus)
-│   ├── lib/                        # Infrastructure utilities (9 scripts)
 │   └── docs/                       # Documentation
 ├── dev-team/                      # Developer Agents plugin (ring-dev-team)
 │   └── agents/                      # 7 specialized developer agents
@@ -475,8 +477,8 @@ ring/                                  # Monorepo root
 │   ├── agents/                      # 3 technical writing agents
 │   ├── commands/                    # 3 slash commands
 │   └── hooks/                       # SessionStart hook
-├── ops-team/                        # Team-specific skills (reserved)
-└── pmm-team/                        # Team-specific skills (reserved)
+├── ops-team/                        # Production operations (8 skills, 5 agents, 4 commands)
+└── pmm-team/                        # Product marketing (8 skills, 6 agents, 3 commands)
 ```
 
 ## 🤝 Contributing

@@ -1,6 +1,6 @@
 # Ring Marketplace Manual
 
-Quick reference guide for the Ring skills library and workflow system. This monorepo provides 9 plugins with 87 skills, 42 agents, and 30 slash commands for enforcing proven software engineering practices across the entire software delivery value chain.
+Quick reference guide for the Ring skills library and workflow system. This monorepo provides 9 plugins with 87 skills, 44 agents, and 31 slash commands for enforcing proven software engineering practices across the entire software delivery value chain.
 
 ---
 
@@ -14,8 +14,8 @@ Quick reference guide for the Ring skills library and workflow system. This mono
 │  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐      │
 │  │ ring-default  │  │ ring-dev-team │  │ ring-pm-team  │  │ ring-finops-  │      │
 │  │  Skills(22)   │  │  Skills(10)   │  │  Skills(10)   │  │  team(6)      │      │
-│  │  Agents(5)    │  │  Agents(7)    │  │  Agents(3)    │  │  Agents(2)    │      │
-│  │  Cmds(7)      │  │  Cmds(5)      │  │  Cmds(2)      │  │               │      │
+│  │  Agents(5)    │  │  Agents(9)    │  │  Agents(3)    │  │  Agents(2)    │      │
+│  │  Cmds(8)      │  │  Cmds(5)      │  │  Cmds(2)      │  │               │      │
 │  └───────────────┘  └───────────────┘  └───────────────┘  └───────────────┘      │
 │  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐      │
 │  │ ring-finance- │  │ ring-ops-team │  │ ring-pmm-team │  │ ring-pmo-team │      │
@@ -90,6 +90,7 @@ Plugin prefixes: ``, ``, ``, ``, ``, ``, ``, ``, ``.
 | Command | Use Case | Example |
 |---------|----------|---------|
 | `/brainstorm [topic]` | Interactive design refinement before coding | `/brainstorm user-authentication` |
+| `/explore-codebase [path]` | Autonomous two-phase codebase exploration | `/explore-codebase payment/` |
 | `/pre-dev-feature [name]` | Plan simple features (<2 days) – 3 gates | `/pre-dev-feature logout-button` |
 | `/pre-dev-full [name]` | Plan complex features (≥2 days) – 8 gates | `/pre-dev-full payment-system` |
 | `/worktree [branch-name]` | Create isolated git workspace | `/worktree auth-system` |
@@ -126,7 +127,7 @@ Plugin prefixes: ``, ``, ``, ``, ``, ``, ``, ``, ``.
 
 ## 💡 About Skills
 
-Skills (55) are workflows that Claude Code invokes automatically when it detects they're applicable. They handle testing, debugging, verification, planning, and code review enforcement. You don't call them directly – Claude Code uses them internally to enforce best practices.
+Skills (87) are workflows that Claude Code invokes automatically when it detects they're applicable. They handle testing, debugging, verification, planning, and code review enforcement. You don't call them directly – Claude Code uses them internally to enforce best practices.
 
 Examples: test-driven-development, systematic-debugging, requesting-code-review, verification-before-completion, etc.
 
@@ -222,6 +223,16 @@ For Brazilian financial compliance workflows:
 |-------|---------|---------|
 | `finops-analyzer` | Regulatory compliance analysis | Field mapping, BACEN/RFB validation (Gates 1-2) |
 | `finops-automation` | Template generation | Create .tpl files (Gate 3) |
+
+### Product Planning Research (ring-pm-team)
+
+For best practices research and repository analysis:
+
+| Agent | Purpose | Use For |
+|-------|---------|---------|
+| `best-practices-researcher` | Best practices research | Industry patterns, framework standards |
+| `framework-docs-researcher` | Framework documentation research | Official docs, API references, examples |
+| `repo-research-analyst` | Repository analysis | Codebase patterns, structure analysis |
 
 ### Technical Writing (ring-tw-team)
 

@@ -33,12 +33,22 @@ Ring operates on three core principles:
 │  │                          Ring Marketplace                                  │  │
 │  │  ┌──────────────────────┐  ┌──────────────────────┐                       │  │
 │  │  │ ring-default         │  │ ring-dev-team        │                       │  │
-│  │  │ Skills(21) Agents(5) │  │ Skills(10) Agents(7) │                       │  │
-│  │  │ Cmds(7) Hooks/Lib    │  │ Cmds(5)              │                       │  │
+│  │  │ Skills(22) Agents(5) │  │ Skills(10) Agents(9) │                       │  │
+│  │  │ Cmds(8) Hooks/Lib    │  │ Cmds(5)              │                       │  │
 │  │  └──────────────────────┘  └──────────────────────┘                       │  │
 │  │  ┌──────────────────────┐  ┌──────────────────────┐                       │  │
 │  │  │ ring-finops-team     │  │ ring-pm-team         │                       │  │
 │  │  │ Skills(6) Agents(2)  │  │ Skills(10) Cmds(2)   │                       │  │
+│  │  └──────────────────────┘  └──────────────────────┘                       │  │
+│  │  ┌──────────────────────┐  ┌──────────────────────┐                       │  │
+│  │  │ ring-finance-team    │  │ ring-ops-team        │                       │  │
+│  │  │ Skills(8) Agents(6)  │  │ Skills(8) Agents(5)  │                       │  │
+│  │  │ Cmds(3)              │  │ Cmds(4)              │                       │  │
+│  │  └──────────────────────┘  └──────────────────────┘                       │  │
+│  │  ┌──────────────────────┐  ┌──────────────────────┐                       │  │
+│  │  │ ring-pmm-team        │  │ ring-pmo-team        │                       │  │
+│  │  │ Skills(8) Agents(6)  │  │ Skills(8) Agents(5)  │                       │  │
+│  │  │ Cmds(3)              │  │ Cmds(3)              │                       │  │
 │  │  └──────────────────────┘  └──────────────────────┘                       │  │
 │  │  ┌──────────────────────┐                                                 │  │
 │  │  │ ring-tw-team         │                                                 │  │
@@ -58,11 +68,15 @@ Ring is organized as a monorepo marketplace with multiple plugin collections:
 ```
 ring/                                  # Monorepo root
 ├── .claude-plugin/
-│   └── marketplace.json              # Multi-plugin registry (5 active plugins)
+│   └── marketplace.json              # Multi-plugin registry (9 active plugins)
 ├── default/                          # Core plugin: ring-default
 ├── dev-team/                         # Developer agents: ring-dev-team
+├── finance-team/                     # Finance operations: ring-finance-team
 ├── finops-team/                      # FinOps & regulatory: ring-finops-team
+├── ops-team/                         # Production operations: ring-ops-team
 ├── pm-team/                          # Product planning: ring-pm-team
+├── pmm-team/                         # Product marketing: ring-pmm-team
+├── pmo-team/                         # Portfolio management: ring-pmo-team
 └── tw-team/                          # Technical writing: ring-tw-team
 ```
 
@@ -72,8 +86,8 @@ ring/                                  # Monorepo root
 
 | Plugin | Description | Components |
 |--------|-------------|------------|
-| **ring-default** | Core skills library | 22 skills, 5 agents, 7 commands |
-| **ring-dev-team** | Developer agents | 10 skills, 7 agents, 5 commands |
+| **ring-default** | Core skills library | 22 skills, 5 agents, 8 commands |
+| **ring-dev-team** | Developer agents | 10 skills, 9 agents, 5 commands |
 | **ring-pm-team** | Product planning workflows | 10 skills, 3 agents, 2 commands |
 | **ring-finops-team** | FinOps regulatory compliance | 6 skills, 2 agents |
 | **ring-finance-team** | Financial operations & analysis | 8 skills, 6 agents, 3 commands |
@@ -126,6 +140,8 @@ dev-team/agents/
 ├── devops-engineer.md             # DevOps infrastructure specialist
 ├── frontend-bff-engineer-typescript.md # BFF & React/Next.js frontend specialist
 ├── frontend-designer.md           # Visual design specialist
+├── frontend-engineer.md           # General frontend development
+├── prompt-quality-reviewer.md     # AI prompt quality review
 ├── qa-analyst.md                  # Quality assurance specialist
 └── sre.md                         # Site reliability engineer
 ```
@@ -216,10 +232,13 @@ All ring-dev-team agents include a `## Standards Compliance` section in their ou
 ```
 default/commands/
 ├── brainstorm.md       # /brainstorm - Socratic design refinement
-├── write-plan.md       # /write-plan - Implementation planning
-├── execute-plan.md     # /execute-plan - Batch execution
 ├── codereview.md       # /codereview - Parallel 3-reviewer dispatch
-└── worktree.md         # /worktree - Git worktree creation
+├── commit.md           # /commit - Git commit with trailers
+├── execute-plan.md     # /execute-plan - Batch execution
+├── explore-codebase.md # /explore-codebase - Deep architecture analysis
+├── lint.md             # /lint - Run linters and fix issues
+├── worktree.md         # /worktree - Git worktree creation
+└── write-plan.md       # /write-plan - Implementation planning
 
 pm-team/commands/
 ├── pre-dev-feature.md  # /pre-dev-feature - 3-gate workflow
@@ -295,6 +314,30 @@ default/hooks/
       "version": "...",
       "source": "./finops-team",
       "keywords": ["finops", "regulatory"]
+    },
+    {
+      "name": "ring-finance-team",
+      "version": "...",
+      "source": "./finance-team",
+      "keywords": ["finance", "operations", "budgeting"]
+    },
+    {
+      "name": "ring-ops-team",
+      "version": "...",
+      "source": "./ops-team",
+      "keywords": ["operations", "platform", "infrastructure"]
+    },
+    {
+      "name": "ring-pmm-team",
+      "version": "...",
+      "source": "./pmm-team",
+      "keywords": ["product-marketing", "gtm", "positioning"]
+    },
+    {
+      "name": "ring-pmo-team",
+      "version": "...",
+      "source": "./pmo-team",
+      "keywords": ["portfolio", "governance", "pmo"]
     },
     {
       "name": "ring-tw-team",
@@ -669,25 +712,36 @@ Ring's architecture is designed for:
 
 | Component | Count | Location |
 |-----------|-------|----------|
-| Active Plugins | 5 | `default/`, `dev-team/`, `finops-team/`, `pm-team/`, `tw-team/` |
-| Skills (ring-default) | 21 | `default/skills/` |
+| Active Plugins | 9 | All plugin directories |
+| Skills (ring-default) | 22 | `default/skills/` |
 | Skills (ring-dev-team) | 10 | `dev-team/skills/` |
+| Skills (ring-finance-team) | 8 | `finance-team/skills/` |
 | Skills (ring-finops-team) | 6 | `finops-team/skills/` |
+| Skills (ring-ops-team) | 8 | `ops-team/skills/` |
 | Skills (ring-pm-team) | 10 | `pm-team/skills/` |
+| Skills (ring-pmm-team) | 8 | `pmm-team/skills/` |
+| Skills (ring-pmo-team) | 8 | `pmo-team/skills/` |
 | Skills (ring-tw-team) | 7 | `tw-team/skills/` |
-| **Total Skills** | **54** | **All plugins** |
+| **Total Skills** | **87** | **All plugins** |
 | Agents (ring-default) | 5 | `default/agents/` |
-| Agents (ring-dev-team) | 7 | `dev-team/agents/` |
-| Agents (ring-pm-team) | 3 | `pm-team/agents/` |
+| Agents (ring-dev-team) | 9 | `dev-team/agents/` |
+| Agents (ring-finance-team) | 6 | `finance-team/agents/` |
 | Agents (ring-finops-team) | 2 | `finops-team/agents/` |
+| Agents (ring-ops-team) | 5 | `ops-team/agents/` |
+| Agents (ring-pm-team) | 3 | `pm-team/agents/` |
+| Agents (ring-pmm-team) | 6 | `pmm-team/agents/` |
+| Agents (ring-pmo-team) | 5 | `pmo-team/agents/` |
 | Agents (ring-tw-team) | 3 | `tw-team/agents/` |
-| **Total Agents** | **20** | **All plugins** |
-| Commands (ring-default) | 7 | `default/commands/` |
+| **Total Agents** | **44** | **All plugins** |
+| Commands (ring-default) | 8 | `default/commands/` |
 | Commands (ring-dev-team) | 5 | `dev-team/commands/` |
+| Commands (ring-finance-team) | 3 | `finance-team/commands/` |
+| Commands (ring-ops-team) | 4 | `ops-team/commands/` |
 | Commands (ring-pm-team) | 2 | `pm-team/commands/` |
+| Commands (ring-pmm-team) | 3 | `pmm-team/commands/` |
+| Commands (ring-pmo-team) | 3 | `pmo-team/commands/` |
 | Commands (ring-tw-team) | 3 | `tw-team/commands/` |
-| **Total Commands** | **17** | **All plugins** |
+| **Total Commands** | **31** | **All plugins** |
 | Hooks | Per plugin | `{plugin}/hooks/` |
-| Lib utilities | 9 | `default/lib/` |
 
 The system achieves these goals through clear component separation, structured workflows, automatic context management, and a modular marketplace architecture, creating a robust foundation for AI-assisted software development.
