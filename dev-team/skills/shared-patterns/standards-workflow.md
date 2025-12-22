@@ -136,19 +136,30 @@ Read docs/PROJECT_RULES.md
 ```markdown
 # Project Rules
 
-> Ring Standards apply automatically. This file documents ONLY what Ring does NOT cover.
-> For error handling, logging, testing, architecture, lib-commons → See Ring Standards (auto-loaded by agents)
+> ⛔ IMPORTANT: Ring Standards are NOT automatic. Agents MUST WebFetch them before implementation.
+> This file documents ONLY project-specific information not covered by Ring Standards.
+>
+> Ring Standards URLs:
+> - Go: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang.md
+> - TypeScript: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md
+> - Frontend: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/frontend.md
+> - DevOps: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/devops.md
+> - SRE: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/sre.md
 
-## What Ring Standards Already Cover (DO NOT ADD HERE)
+## What Ring Standards Cover (DO NOT DUPLICATE HERE)
 
-The following are defined in Ring Standards and MUST NOT be duplicated:
+The following are defined in Ring Standards and MUST NOT be duplicated in this file:
 - Error handling patterns (no panic, wrap errors)
-- Logging standards (structured JSON, zerolog/zap)
+- Logging standards (structured JSON via lib-commons)
 - Testing patterns (table-driven tests, mocks)
 - Architecture patterns (Hexagonal, Clean Architecture)
-- Observability (OpenTelemetry, trace correlation)
-- lib-commons usage and patterns
-- API directory structure
+- Observability (OpenTelemetry via lib-commons)
+- lib-commons / lib-common-js usage and patterns
+- API directory structure (Midaz pattern)
+- Database connections (PostgreSQL, MongoDB, Redis via lib-commons)
+- Bootstrap pattern (config.go, service.go, server.go)
+
+**Agents MUST WebFetch Ring Standards and output Standards Coverage Table.**
 
 ---
 

@@ -855,20 +855,28 @@ Create tool:
   content: |
     # Project Rules
     
-    > Ring Standards apply automatically. This file documents ONLY what Ring does NOT cover.
-    > For error handling, logging, testing, architecture, lib-commons → See Ring Standards (auto-loaded by agents)
+    > ⛔ IMPORTANT: Ring Standards are NOT automatic. Agents MUST WebFetch them before implementation.
+    > This file documents ONLY project-specific information not covered by Ring Standards.
     > Generated from PM documents (PRD/TRD/Feature Map).
+    >
+    > Ring Standards URLs:
+    > - Go: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang.md
+    > - TypeScript: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md
     
-    ## What Ring Standards Already Cover (DO NOT ADD HERE)
+    ## What Ring Standards Cover (DO NOT DUPLICATE HERE)
     
-    The following are defined in Ring Standards and MUST NOT be duplicated:
+    The following are defined in Ring Standards and MUST NOT be duplicated in this file:
     - Error handling patterns (no panic, wrap errors)
-    - Logging standards (structured JSON, zerolog/zap)
+    - Logging standards (structured JSON via lib-commons)
     - Testing patterns (table-driven tests, mocks)
     - Architecture patterns (Hexagonal, Clean Architecture)
-    - Observability (OpenTelemetry, trace correlation)
-    - lib-commons usage and patterns
-    - API directory structure
+    - Observability (OpenTelemetry via lib-commons)
+    - lib-commons / lib-common-js usage and patterns
+    - API directory structure (Midaz pattern)
+    - Database connections (PostgreSQL, MongoDB, Redis via lib-commons)
+    - Bootstrap pattern (config.go, service.go, server.go)
+    
+    **Agents MUST WebFetch Ring Standards and output Standards Coverage Table.**
     
     ---
     
@@ -1152,7 +1160,96 @@ See [shared-patterns/shared-orchestrator-principle.md](../shared-patterns/shared
    └─────────────────────────────────────────────────┘
    ```
 
-7. **⛔ SAVE STATE TO FILE (MANDATORY):**
+7. **Proceed to Step 2.3 (Standards Compliance Verification)**
+
+### Step 2.3: Standards Compliance Verification (HARD GATE)
+
+**PREREQUISITE:** `gate_progress.implementation.tdd_green.status == "completed"`
+
+**Purpose:** Verify implementation follows ALL standards defined in agent's standards file.
+
+See [shared-patterns/template-tdd-prompts.md](../shared-patterns/template-tdd-prompts.md) → "Orchestrator Enforcement" section for full verification process.
+
+**Process:**
+
+1. **Parse TDD-GREEN agent output for "## Standards Coverage Table"**
+   ```
+   IF "## Standards Coverage Table" NOT FOUND in agent output:
+     → Output INCOMPLETE
+     → Re-dispatch to SAME agent with prompt:
+       "Your output is missing Standards Coverage Table. 
+        WebFetch your standards and output table per standards-coverage-table.md"
+   ```
+
+2. **Parse "ALL STANDARDS MET:" value from "## Compliance Summary"**
+   ```
+   IF "ALL STANDARDS MET:" NOT FOUND:
+     → Output INCOMPLETE
+     → Re-dispatch agent (same as above)
+   ```
+
+3. **Verify compliance:**
+   ```
+   IF "ALL STANDARDS MET: ✅ YES" AND all sections ✅ or N/A:
+     → Gate 0 PASSED
+     → Continue to step 4
+   
+   IF "ALL STANDARDS MET: ❌ NO" OR ANY section has ❌:
+     → Gate 0 BLOCKED
+     → Extract ❌ sections from Standards Coverage Table
+     → Re-dispatch to SAME agent:
+     
+     Task tool:
+       subagent_type: "[same agent from TDD-GREEN]"
+       model: "opus"
+       description: "Fix missing Ring Standards for [unit_id]"
+       prompt: |
+         ⛔ STANDARDS NOT MET - Fix Required
+         
+         Your Standards Coverage Table shows these sections as ❌:
+         [list ❌ sections extracted from table]
+         
+         WebFetch your standards file:
+         [URL for agent's standards - golang.md, typescript.md, etc.]
+         
+         Implement ALL missing sections.
+         Return updated Standards Coverage Table with ALL ✅ or N/A.
+     
+     → After fix: Re-verify (go back to step 1)
+     → Max 3 iterations, then STOP and escalate to user
+   ```
+
+4. **Update state:**
+   ```json
+   gate_progress.implementation = {
+     "status": "completed",
+     "tdd_red": {...},
+     "tdd_green": {...},
+     "standards_verified": true,
+     "standards_compliance_iterations": [count],
+     "standards_coverage": {
+       "total_sections": [N],
+       "compliant": [N],
+       "not_applicable": [N],
+       "non_compliant": 0
+     }
+   }
+   ```
+
+5. **Display to user:**
+   ```
+   ┌─────────────────────────────────────────────────┐
+   │ ✓ GATE 0 COMPLETE                              │
+   ├─────────────────────────────────────────────────┤
+   │ TDD-RED:   [test_file] - FAIL captured ✓       │
+   │ TDD-GREEN: [impl_file] - PASS verified ✓       │
+   │ STANDARDS: [N]/[N] sections compliant ✓        │
+   │                                                 │
+   │ Proceeding to Gate 1 (DevOps)...               │
+   └─────────────────────────────────────────────────┘
+   ```
+
+6. **⛔ SAVE STATE TO FILE (MANDATORY):**
    ```yaml
    Write tool:
      file_path: "docs/refactor/current-cycle.json"
@@ -1160,7 +1257,18 @@ See [shared-patterns/shared-orchestrator-principle.md](../shared-patterns/shared
    ```
    See "State Persistence Rule" section. State MUST be written to file after Gate 0.
 
-8. Proceed to Gate 1
+7. **Proceed to Gate 1**
+
+### Standards Compliance Anti-Rationalization
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "Agent said implementation is complete" | Agent completion ≠ Standards compliance. Verify table. | **Parse and verify Standards Coverage Table** |
+| "Table wasn't in agent output" | Missing table = Incomplete output = Re-dispatch | **Re-dispatch agent to output table** |
+| "Only 1-2 sections are ❌" | ANY ❌ = BLOCKED. Count is irrelevant. | **Re-dispatch to fix ALL ❌ sections** |
+| "lib-commons is the main thing" | ALL sections are equally required. No prioritization. | **Verify ALL sections from standards-coverage-table.md** |
+| "Agent knows the standards" | Knowledge ≠ implementation. Evidence required. | **Check file:line evidence in table** |
+| "Standards verification is slow" | Verification prevents rework. 30 seconds vs hours. | **Always verify before proceeding** |
 
 ### TDD Sub-Phase Anti-Rationalization
 

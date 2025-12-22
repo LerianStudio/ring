@@ -220,6 +220,91 @@ See [shared-patterns/standards-coverage-table.md](../shared-patterns/standards-c
 - N/A requires explicit reason
 - Evidence (file:line) REQUIRED for all ✅ items
 
+---
+
+## ⛔ Orchestrator Enforcement (HARD GATE)
+
+**This section defines what the ORCHESTRATOR (dev-cycle, dev-implementation) MUST do after receiving agent output.**
+
+### Verification Process
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│  ORCHESTRATOR: STANDARDS COMPLIANCE VERIFICATION                            │
+│                                                                             │
+│  After EVERY agent implementation output (TDD-GREEN, DevOps, SRE, etc.):   │
+│                                                                             │
+│  1. SEARCH for "## Standards Coverage Table" in agent output                │
+│     └─ NOT FOUND → Output INCOMPLETE → Re-dispatch agent                    │
+│                                                                             │
+│  2. SEARCH for "ALL STANDARDS MET:" in agent output                         │
+│     └─ NOT FOUND → Output INCOMPLETE → Re-dispatch agent                    │
+│                                                                             │
+│  3. CHECK value of "ALL STANDARDS MET:"                                     │
+│     ├─ "✅ YES" → PASSED → Proceed to next gate                             │
+│     └─ "❌ NO" → BLOCKED → Extract ❌ sections → Re-dispatch agent          │
+│                                                                             │
+│  4. If re-dispatch needed, use this prompt:                                 │
+│                                                                             │
+│     Task tool:                                                              │
+│       subagent_type: "[same agent]"                                         │
+│       model: "opus"                                                         │
+│       prompt: |                                                             │
+│         ⛔ STANDARDS NOT MET - Fix Required                                 │
+│                                                                             │
+│         Your Standards Coverage Table shows these sections as ❌:           │
+│         [list ❌ sections extracted from table]                              │
+│                                                                             │
+│         WebFetch your standards file:                                       │
+│         [URL for agent's standards file]                                    │
+│                                                                             │
+│         Implement ALL missing sections.                                     │
+│         Return updated Standards Coverage Table with ALL ✅ or N/A.         │
+│                                                                             │
+│  5. Max 3 re-dispatch iterations, then STOP and escalate to user            │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### Verification Applies To ALL Gates
+
+| Gate | Agent | Orchestrator Verifies |
+|------|-------|----------------------|
+| Gate 0 (Implementation) | backend-engineer-*, frontend-* | Standards Coverage Table from TDD-GREEN |
+| Gate 1 (DevOps) | devops-engineer | Standards Coverage Table from artifacts |
+| Gate 2 (SRE) | sre | Standards Coverage Table from validation |
+| Gate 3 (Testing) | qa-analyst | Standards Coverage Table from test analysis |
+
+### State Update After Verification
+
+```json
+{
+  "gate_progress": {
+    "[gate_name]": {
+      "status": "completed",
+      "standards_verified": true,
+      "standards_coverage": {
+        "total_sections": 20,
+        "compliant": 18,
+        "not_applicable": 2,
+        "non_compliant": 0
+      }
+    }
+  }
+}
+```
+
+### Anti-Rationalization for Orchestrator
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "Agent said it's complete" | Agent completion ≠ Standards compliance. Verify table. | **Parse and verify Standards Coverage Table** |
+| "Table wasn't in output" | Missing table = Incomplete output = BLOCKED | **Re-dispatch agent** |
+| "Only 1-2 sections are ❌" | ANY ❌ = BLOCKED. Count is irrelevant. | **Re-dispatch to fix ALL ❌** |
+| "Agent knows the standards" | Knowledge ≠ implementation. Verify evidence. | **Check file:line evidence in table** |
+| "Verification is slow" | Verification prevents rework. 30 seconds now vs hours later. | **Always verify** |
+| "Trust the agent" | Trust but verify. Standards Coverage Table IS the verification. | **Parse the table** |
+
 ## Standards Priority Summary
 
 ### Ring Standards (MANDATORY - Base patterns)

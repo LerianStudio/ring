@@ -2,7 +2,43 @@
 
 Canonical source for Standards Compliance detection logic used by all dev-team agents.
 
-## Trigger Conditions (ANY activates Standards Compliance output)
+---
+
+## ⛔ CRITICAL: Standards Compliance is ALWAYS Required for Implementation
+
+**Standards Compliance is NOT optional. It is MANDATORY for ALL implementation agents.**
+
+| Context | Standards Compliance | Rationale |
+|---------|---------------------|-----------|
+| **Implementation (TDD-GREEN)** | **ALWAYS REQUIRED** | Agent MUST output Standards Coverage Table |
+| **Analysis (MODE: ANALYSIS ONLY)** | **ALWAYS REQUIRED** | Agent MUST output Standards Coverage Table + Findings |
+| **Validation (SRE, QA)** | **ALWAYS REQUIRED** | Agent MUST verify against standards |
+
+**There is NO context where an implementation agent can skip Standards Compliance.**
+
+---
+
+## Trigger Conditions
+
+### ALWAYS Required (Implementation Context)
+
+**These agents MUST ALWAYS output Standards Coverage Table:**
+
+| Agent | Standards File | When |
+|-------|---------------|------|
+| `backend-engineer-golang` | golang.md | ANY implementation task |
+| `backend-engineer-typescript` | typescript.md | ANY implementation task |
+| `frontend-bff-engineer-typescript` | typescript.md | ANY implementation task |
+| `frontend-engineer` | frontend.md | ANY implementation task |
+| `devops-engineer` | devops.md | ANY artifact creation |
+| `sre` | sre.md | ANY validation task |
+| `qa-analyst` | golang.md/typescript.md | ANY testing task |
+
+**⛔ HARD GATE:** If agent does NOT output Standards Coverage Table → Output is INCOMPLETE → Orchestrator MUST re-dispatch.
+
+### Additional Triggers (Analysis Context)
+
+These patterns trigger **detailed findings** in addition to Standards Coverage Table:
 
 | Detection Pattern | Examples |
 |------------------|----------|
@@ -15,9 +51,15 @@ Canonical source for Standards Compliance detection logic used by all dev-team a
 ## Detection Logic
 
 ```python
-def should_include_standards_compliance(prompt: str, context: dict) -> bool:
-    # Exact and case-insensitive matches
-    patterns = [
+def get_standards_compliance_mode(prompt: str, context: dict) -> str:
+    """
+    Returns:
+    - "FULL": Standards Coverage Table + Detailed Findings (analysis mode)
+    - "TABLE_ONLY": Standards Coverage Table only (implementation mode)
+    - "TABLE_ONLY" is the MINIMUM - never returns "NONE"
+    """
+    # Analysis mode patterns
+    analysis_patterns = [
         "mode: analysis only",
         "analysis mode",
         "analysis-only",
@@ -28,20 +70,21 @@ def should_include_standards_compliance(prompt: str, context: dict) -> bool:
     ]
     prompt_lower = prompt.lower()
 
-    # Check patterns
-    if any(p in prompt_lower for p in patterns):
-        return True
+    # Check for analysis mode
+    if any(p in prompt_lower for p in analysis_patterns):
+        return "FULL"
 
     # Check invocation context
     if context.get("invocation_source") == "dev-refactor":
-        return True
+        return "FULL"
 
-    return False
+    # Default: TABLE_ONLY (Standards Coverage Table is ALWAYS required)
+    return "TABLE_ONLY"
 ```
 
 ## When Uncertain
 
-If detection is ambiguous, INCLUDE Standards Compliance section. Better to over-report than under-report.
+If detection is ambiguous, output FULL compliance (table + findings). Better to over-report than under-report.
 
 ## When Mode is Detected, Agent MUST
 
@@ -185,18 +228,19 @@ See [shared-anti-rationalization.md](shared-anti-rationalization.md) for univers
 Agents should include:
 
 ```markdown
-## Standards Compliance (AUTO-TRIGGERED)
+## Standards Compliance (ALWAYS REQUIRED)
 
 See [shared-patterns/standards-compliance-detection.md](../skills/shared-patterns/standards-compliance-detection.md) for:
-- Detection logic and trigger conditions
-- MANDATORY output table format
-- Standards Coverage Table requirements
-- Finding output format with quotes
+- Standards Compliance is MANDATORY for ALL implementation agents
+- MANDATORY output table format (Standards Coverage Table)
+- Additional findings format for analysis mode
 - Anti-rationalization rules
 
 **Agent-Specific Standards:**
 - WebFetch URL: `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/{file}.md`
-- Example sections: [list agent-specific sections to check]
+- Sections to check: See [standards-coverage-table.md](../skills/shared-patterns/standards-coverage-table.md)
 
-**If `**MODE: ANALYSIS ONLY**` is NOT detected:** Standards Compliance output is optional.
+**⛔ Standards Coverage Table is ALWAYS required. No exceptions.**
+- Implementation mode: Output Standards Coverage Table
+- Analysis mode: Output Standards Coverage Table + Detailed Findings
 ```
