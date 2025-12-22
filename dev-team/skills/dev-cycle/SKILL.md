@@ -1301,78 +1301,117 @@ See [shared-patterns/template-tdd-prompts.md](../shared-patterns/template-tdd-pr
 
 **Process:**
 
-1. **Parse TDD-GREEN agent output for "## Standards Coverage Table"**
-   ```text
-   IF "## Standards Coverage Table" NOT FOUND in agent output:
-     → Output INCOMPLETE
-     → Re-dispatch to SAME agent with prompt:
-       "Your output is missing Standards Coverage Table. 
-        WebFetch your standards and output table per standards-coverage-table.md"
-   ```
+### Step 2.3.1: Initialize Iteration Counter
 
-2. **Parse "ALL STANDARDS MET:" value from "## Compliance Summary"**
-   ```text
-   IF "ALL STANDARDS MET:" NOT FOUND:
-     → Output INCOMPLETE
-     → Re-dispatch agent (same as above)
-   ```
+```text
+Set standards_compliance_iterations = 0
+Set MAX_ITERATIONS = 3
+```
 
-3. **Verify compliance:**
-   ```text
-   IF "ALL STANDARDS MET: ✅ YES" AND all sections ✅ or N/A:
-     → Gate 0 PASSED
-     → Continue to step 4
-   
-   IF "ALL STANDARDS MET: ❌ NO" OR ANY section has ❌:
-     → Gate 0 BLOCKED
-     → Extract ❌ sections from Standards Coverage Table
-     → Re-dispatch to SAME agent:
+### Step 2.3.2: Verification Loop
+
+```text
+LOOP while standards_compliance_iterations < MAX_ITERATIONS:
+  
+  1. INCREMENT counter FIRST (before any verification):
+     standards_compliance_iterations += 1
+  
+  2. PARSE agent output for "## Standards Coverage Table":
+     IF NOT FOUND:
+       → Output INCOMPLETE
+       → Log: "Iteration [N]: Standards Coverage Table missing"
+       → Re-dispatch agent (see Step 2.3.3)
+       → CONTINUE loop
+  
+  3. PARSE "ALL STANDARDS MET:" value:
+     IF NOT FOUND:
+       → Output INCOMPLETE
+       → Log: "Iteration [N]: Compliance Summary missing"
+       → Re-dispatch agent (see Step 2.3.3)
+       → CONTINUE loop
+  
+  4. COUNT sections from Standards Coverage Table:
+     total_sections = count all rows
+     compliant = count rows with ✅
+     not_applicable = count rows with N/A
+     non_compliant = count rows with ❌
+  
+  5. VERIFY compliance:
+     IF "ALL STANDARDS MET: ✅ YES" AND non_compliant == 0:
+       → Gate 0 PASSED
+       → BREAK loop (proceed to Step 2.3.4)
      
-     Task tool:
-       subagent_type: "[same agent from TDD-GREEN]"
-       model: "opus"
-       description: "Fix missing Ring Standards for [unit_id]"
-       prompt: |
-         ⛔ STANDARDS NOT MET - Fix Required
-         
-         Your Standards Coverage Table shows these sections as ❌:
-         [list ❌ sections extracted from table]
-         
-         WebFetch your standards file:
-         [URL for agent's standards - golang.md, typescript.md, etc.]
-         
-         Implement ALL missing sections.
-         Return updated Standards Coverage Table with ALL ✅ or N/A.
-     
-     → After fix: Re-verify (go back to step 1)
-     → Max 3 iterations, then STOP and escalate to user
-   ```
+     IF "ALL STANDARDS MET: ❌ NO" OR non_compliant > 0:
+       → Gate 0 BLOCKED
+       → Extract ❌ sections
+       → Log: "Iteration [N]: [non_compliant] sections non-compliant"
+       → Re-dispatch agent (see Step 2.3.3)
+       → CONTINUE loop
 
-4. **Update state:**
-   ```json
-   gate_progress.implementation = {
-     "status": "completed",
-     "tdd_red": {...},
-     "tdd_green": {...},
-     "standards_verified": true,
-     "standards_compliance_iterations": [count],
-     "standards_coverage": {
-       "total_sections": [N],
-       "compliant": [N],
-       "not_applicable": [N],
-       "non_compliant": 0
-     }
-   }
-   ```
+END LOOP
+
+IF standards_compliance_iterations >= MAX_ITERATIONS AND non_compliant > 0:
+  → HARD BLOCK
+  → Update state with failure info
+  → Report to user: "Standards compliance failed after 3 attempts"
+  → STOP execution
+```
+
+### Step 2.3.3: Re-dispatch Agent for Compliance Fix
+
+```yaml
+Task tool:
+  subagent_type: "[same agent from TDD-GREEN]"
+  model: "opus"
+  description: "Fix missing Ring Standards for [unit_id] (attempt [N]/3)"
+  prompt: |
+    ⛔ STANDARDS NOT MET - Fix Required (Attempt [standards_compliance_iterations] of 3)
+    
+    Your Standards Coverage Table shows these sections as ❌:
+    [list ❌ sections extracted from table]
+    
+    WebFetch your standards file:
+    [URL for agent's standards - golang.md, typescript.md, etc.]
+    
+    Implement ALL missing sections.
+    Return updated Standards Coverage Table with ALL ✅ or N/A.
+    
+    Previous attempt summary:
+    - Total sections: [total_sections]
+    - Compliant: [compliant]
+    - Not applicable: [not_applicable]
+    - Non-compliant: [non_compliant]
+```
+
+### Step 2.3.4: Update State with Compliance Metrics
+
+```json
+gate_progress.implementation = {
+  "status": "completed",
+  "tdd_red": {...},
+  "tdd_green": {...},
+  "standards_verified": true,
+  "standards_compliance_iterations": [final count - e.g., 1, 2, or 3],
+  "standards_coverage": {
+    "total_sections": [N - from final successful verification],
+    "compliant": [N - sections with ✅],
+    "not_applicable": [N - sections with N/A],
+    "non_compliant": 0
+  }
+}
+```
+
+**Note:** `non_compliant` MUST be 0 when gate passes. If non-zero after 3 iterations, gate is BLOCKED.
 
 5. **Display to user:**
-   ```
+   ```text
    ┌─────────────────────────────────────────────────┐
    │ ✓ GATE 0 COMPLETE                              │
    ├─────────────────────────────────────────────────┤
    │ TDD-RED:   [test_file] - FAIL captured ✓       │
    │ TDD-GREEN: [impl_file] - PASS verified ✓       │
    │ STANDARDS: [N]/[N] sections compliant ✓        │
+   │ ITERATIONS: [standards_compliance_iterations]   │
    │                                                 │
    │ Proceeding to Gate 1 (DevOps)...               │
    └─────────────────────────────────────────────────┘
