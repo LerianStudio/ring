@@ -468,6 +468,8 @@ Generate skill output:
 
 ## Pressure Resistance
 
+See [dev-team/skills/shared-patterns/shared-pressure-resistance.md](../../dev-team/skills/shared-patterns/shared-pressure-resistance.md) for universal pressure scenarios.
+
 | User Says | Your Response |
 |-----------|---------------|
 | "Skip review, code is simple" | "Simple code can have security issues. Dispatching all 3 reviewers." |
@@ -476,12 +478,18 @@ Generate skill output:
 
 ## Anti-Rationalization Table
 
+See [dev-team/skills/shared-patterns/shared-anti-rationalization.md](../../dev-team/skills/shared-patterns/shared-anti-rationalization.md) for universal anti-rationalizations.
+
+### Gate 4-Specific Anti-Rationalizations
+
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
 | "Run reviewers one at a time" | Sequential = slow. Parallel = 3x faster. | **Dispatch all 3 in single message** |
 | "Skip security for internal code" | Internal code can have vulnerabilities. | **Include security-reviewer** |
 | "Critical issue is false positive" | Prove it with evidence, don't assume. | **Fix or provide evidence** |
 | "Low issues don't need TODO" | TODOs ensure issues aren't forgotten. | **Add TODO comments** |
+| "2 of 3 reviewers passed" | Gate 4 requires ALL 3. 2/3 = 0/3. | **Re-run ALL 3 reviewers** |
+| "MEDIUM is not blocking" | MEDIUM = MUST FIX. Same as CRITICAL/HIGH. | **Fix MEDIUM issues NOW** |
 
 ---
 
