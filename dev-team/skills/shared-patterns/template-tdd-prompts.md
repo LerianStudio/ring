@@ -2,21 +2,38 @@
 
 Canonical source for TDD dispatch prompts used by dev-cycle and dev-implementation skills.
 
+## Standards Loading (MANDATORY - Before TDD)
+
+**Before dispatching any TDD phase, the agent MUST load:**
+
+1. **Ring Standards** (MANDATORY) → Base technical patterns (architecture, error handling, logging, testing)
+2. **PROJECT_RULES.md** (COMPLEMENTARY) → Project-specific choices (which DB, internal libs, naming conventions)
+
+**Priority:** Ring Standards define HOW to implement. PROJECT_RULES.md defines WHAT the project uses.
+
+See [standards-workflow.md](./standards-workflow.md) for the complete loading process.
+
 ## TDD-RED Phase Prompt Template
 
 ```
 **TDD-RED PHASE ONLY** for: [unit_id] - [title]
 
-Requirements:
+**MANDATORY:** WebFetch Ring Standards for your language FIRST (see standards-workflow.md)
+
+**Requirements:**
 [requirements from task/subtask file]
 
-Acceptance Criteria:
+**Acceptance Criteria:**
 [acceptance_criteria]
 
+**PROJECT CONTEXT (if PROJECT_RULES.md exists):**
+[Insert relevant project-specific info: tech stack, internal libs, conventions]
+
 **INSTRUCTIONS (TDD-RED):**
-1. Write a failing test that captures the expected behavior
-2. Run the test
-3. **CAPTURE THE FAILURE OUTPUT** - this is MANDATORY
+1. Follow Ring Standards for test structure and patterns
+2. Write a failing test that captures the expected behavior
+3. Run the test
+4. **CAPTURE THE FAILURE OUTPUT** - this is MANDATORY
 
 **STOP AFTER RED PHASE.** Do NOT write implementation code.
 
@@ -37,26 +54,41 @@ Example failure output:
 ```
 **TDD-GREEN PHASE** for: [unit_id] - [title]
 
+**MANDATORY:** WebFetch Ring Standards for your language FIRST (see standards-workflow.md)
+
 **CONTEXT FROM TDD-RED:**
 - Test file: [tdd_red.test_file]
 - Failure output: [tdd_red.failure_output]
 
-**INSTRUCTIONS (TDD-GREEN):**
-1. Write MINIMAL code to make the test pass
-2. Run the test
-3. **CAPTURE THE PASS OUTPUT** - this is MANDATORY
-4. Refactor if needed (keeping tests green)
-5. Commit
+**PROJECT CONTEXT (if PROJECT_RULES.md exists):**
+[Insert relevant project-specific info: tech stack, internal libs, conventions]
 
-**OBSERVABILITY REQUIREMENTS (implement as part of the code):**
-- Add structured JSON logging for all operations (info for success, error for failures)
+**INSTRUCTIONS (TDD-GREEN):**
+1. Follow Ring Standards for architecture, error handling, and patterns
+2. Write MINIMAL code to make the test pass
+3. Apply project-specific conventions from PROJECT_RULES.md (if exists)
+4. Run the test
+5. **CAPTURE THE PASS OUTPUT** - this is MANDATORY
+6. Refactor if needed (keeping tests green)
+7. Commit
+
+**RING STANDARDS REQUIREMENTS (MANDATORY):**
+- Follow architecture patterns from Ring Standards (Hexagonal, Clean Architecture, etc.)
+- Implement proper error handling (no panic, wrap errors with context)
+- Add structured JSON logging for all operations
 - Add OpenTelemetry tracing spans for external calls and key operations
 - Ensure trace_id propagation in all log entries
+
+**PROJECT-SPECIFIC (from PROJECT_RULES.md, if exists):**
+- Use internal libraries referenced in PROJECT_RULES.md
+- Follow project naming conventions
+- Place files per project directory structure
 
 **REQUIRED OUTPUT:**
 - Implementation file path
 - **PASS OUTPUT** (copy/paste the actual test pass)
 - Files changed
+- Ring Standards followed: Y/N
 - Observability added (logging: Y/N, tracing: Y/N)
 - Commit SHA
 
@@ -85,16 +117,30 @@ IF pass_output is empty OR contains "FAIL":
   → Max 3 retries, then STOP and report blocker
 ```
 
-## Observability Requirements Summary
+## Standards Priority Summary
 
-Backend agents MUST implement observability as part of the code:
+### Ring Standards (MANDATORY - Base patterns)
 
-| Component | Go Libraries | TypeScript Libraries |
-|-----------|--------------|---------------------|
-| **Logging** | `zerolog` or `zap` | `pino` or `winston` |
-| **Tracing** | `go.opentelemetry.io/otel` | `@opentelemetry/sdk-node` |
+| What | Source | Defines |
+|------|--------|---------|
+| **Architecture patterns** | Ring Standards | Hexagonal, Clean Architecture, DDD |
+| **Error handling** | Ring Standards | No panic, wrap with context |
+| **Logging** | Ring Standards | Structured JSON (zerolog/zap or pino/winston) |
+| **Tracing** | Ring Standards | OpenTelemetry spans, trace_id propagation |
+| **Testing patterns** | Ring Standards | Table-driven tests, mocking |
 
-**Gate 0 implements observability. Gate 2 (SRE) validates it.**
+### PROJECT_RULES.md (COMPLEMENTARY - Project specifics)
+
+| What | Source | Defines |
+|------|--------|---------|
+| **Tech stack choices** | PROJECT_RULES.md | Which DB, which framework |
+| **Internal libraries** | PROJECT_RULES.md | lib-commons, shared packages |
+| **Directory structure** | PROJECT_RULES.md | Project-specific layout |
+| **Naming conventions** | PROJECT_RULES.md | Project-specific patterns |
+
+**Priority:** Ring Standards > PROJECT_RULES.md (project can add, not remove standards)
+
+**Gate 0 implements standards + observability. Gate 2 (SRE) validates observability.**
 
 ## How to Use
 
