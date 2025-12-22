@@ -10,9 +10,6 @@ trigger: |
   - Gate 1 (DevOps) setup complete
   - Service needs observability validation (logging, tracing)
 
-skip_when: |
-  - No service implementation (documentation only)
-
 NOT_skip_when: |
   - "Task says observability not required" → AI cannot self-exempt. ALL services need observability.
   - "Pure frontend" → If it calls ANY API, backend needs observability. Frontend-only = static HTML.

@@ -9,10 +9,9 @@ trigger: |
   - Implementation and tests complete
   - Need user sign-off on acceptance criteria
 
-skip_when: |
-  - Review not passed -> complete Gate 4 first
-  - Already validated and approved -> proceed to completion
-  - No acceptance criteria defined -> request criteria first
+NOT_skip_when: |
+  - "Already validated" → Each iteration needs fresh validation.
+  - "User will validate manually" → Gate 5 IS user validation. Cannot skip.
 
 sequence:
   after: [dev-review]

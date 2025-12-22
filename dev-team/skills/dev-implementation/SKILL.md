@@ -10,10 +10,6 @@ trigger: |
   - Tasks loaded at initialization
   - Ready to write code
 
-skip_when: |
-  - Tasks not loaded (initialization incomplete)
-  - Implementation already complete for this task
-
 NOT_skip_when: |
   - "Code already exists" → DELETE it. TDD is test-first.
   - "Simple feature" → Simple ≠ exempt. TDD for all.

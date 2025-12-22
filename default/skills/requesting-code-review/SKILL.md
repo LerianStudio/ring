@@ -10,11 +10,6 @@ trigger: |
   - Before merge to main branch
   - After fixing complex bug
 
-skip_when: |
-  - Trivial change (<20 lines, no logic change) → verify manually
-  - Still in development → finish implementation first
-  - Already reviewed and no changes since → proceed
-
 NOT_skip_when: |
   - "Code is simple" → Simple code can have security issues. Review required.
   - "Just refactoring" → Refactoring may expose vulnerabilities. Review required.

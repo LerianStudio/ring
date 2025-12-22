@@ -9,11 +9,6 @@ trigger: |
   - Task has acceptance criteria requiring test coverage
   - Need to verify implementation meets requirements
 
-skip_when: |
-  - No acceptance criteria defined -> request criteria first
-  - Implementation not started -> complete Gate 0 first
-  - Already has full test coverage verified -> proceed to review
-
 NOT_skip_when: |
   - "Manual testing validates all criteria" → Manual tests are not executable. Gate 3 requires unit tests.
   - "Integration tests are better" → Gate 3 scope is unit tests only.

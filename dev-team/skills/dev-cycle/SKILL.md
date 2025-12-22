@@ -10,10 +10,10 @@ trigger: |
   - Resuming an interrupted development cycle (--resume flag)
   - Need structured, gate-based task execution with quality checkpoints
 
-skip_when: |
-  - Already in a specific gate skill -> let that gate complete
-  - Need to plan tasks first -> use writing-plans or pre-dev-full
-  - Human explicitly requests manual implementation (non-AI workflow)
+prerequisite: |
+  - Tasks file exists with structured subtasks
+  - Not already in a specific gate skill execution
+  - Human has not explicitly requested manual workflow
 
 NOT_skip_when: |
   - "Task is simple" → Simple ≠ risk-free. Execute gates.

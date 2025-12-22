@@ -9,10 +9,6 @@ trigger: |
   - Implementation ready for review
   - Before validation gate
 
-skip_when: |
-  - Tests not passing -> complete Gate 3 first
-  - Already reviewed with no changes since -> proceed to validation
-
 NOT_skip_when: |
   - "Trivial change" → Security issues fit in 1 line. ALL changes require review. No exceptions.
   - "Only N lines" → Line count is irrelevant. AI doesn't negotiate. Review ALL changes.

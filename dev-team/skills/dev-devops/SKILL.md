@@ -10,11 +10,6 @@ trigger: |
   - Implementation complete from Gate 0
   - Need containerization or environment setup
 
-skip_when: |
-  - No code implementation exists (need Gate 0 first)
-  - Project has no Docker requirements
-  - Only documentation changes
-
 NOT_skip_when: |
   - "Application runs fine locally" → Docker ensures consistency across environments.
   - "Docker is overkill" → Docker is baseline, not overkill.
