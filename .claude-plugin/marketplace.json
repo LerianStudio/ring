@@ -30,7 +30,7 @@
     {
       "name": "ring-dev-team",
       "description": "7 specialized developer agents + 10 development skills + 5 slash commands: 6-gate development cycle (implementation->devops->SRE->testing->review->validation), integrated with PM team output. Go/TypeScript Backend specialists, DevOps Engineer, Frontend TypeScript specialist, Frontend Designer, QA Analyst, and SRE. Complete development team coverage with TDD, observability, and security best practices.",
-      "version": "0.36.1",
+      "version": "0.36.2",
       "source": "./dev-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/dev-team",
       "repository": "https://github.com/lerianstudio/ring/tree/dev-team",
@@ -143,7 +143,7 @@
     {
       "name": "ring-ops-team",
       "description": "Production operations and platform engineering specialists. 5 operations agents (platform-engineer, incident-responder, cloud-cost-optimizer, infrastructure-architect, security-operations) + 8 skills + 4 commands. Complete production operations covering incident response, capacity planning, cost optimization, disaster recovery, security audits, platform onboarding, and infrastructure migrations.",
-      "version": "0.2.3",
+      "version": "0.2.4",
       "source": "./ops-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/ops-team",
       "repository": "https://github.com/lerianstudio/ring/tree/ops-team",
@@ -210,5 +210,5 @@
       ]
     }
   ],
-  "version": "0.150.0"
+  "version": "0.151.0"
 }
