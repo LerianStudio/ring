@@ -672,7 +672,13 @@ The following testing standards MUST be followed when designing and implementing
 
 ### Test-Driven Development (TDD)
 
-When TDD is enabled in project PROJECT_RULES.md, follow the RED-GREEN-REFACTOR cycle:
+**TDD is MANDATORY when invoked by dev-cycle (Gate 0 and Gate 3).**
+
+**Standards Priority:**
+1. **Ring Standards** (MANDATORY) → TDD patterns, test structure, assertions
+2. **PROJECT_RULES.md** (COMPLEMENTARY) → Project-specific test conventions
+
+**→ For TDD prompt templates and requirements, see [shared-patterns/template-tdd-prompts.md](../skills/shared-patterns/template-tdd-prompts.md)**
 
 #### The TDD Cycle
 
@@ -689,18 +695,15 @@ When TDD is enabled in project PROJECT_RULES.md, follow the RED-GREEN-REFACTOR c
 3. **Only then write implementation (GREEN)**
 4. **Refactor while keeping tests green**
 
-#### When to Apply TDD
+#### When TDD is Required
 
-**Always use TDD for:**
-- Business logic and domain rules
-- Complex algorithms
+**TDD is MANDATORY (via dev-cycle) for:**
+- All features going through Gate 0 (Implementation)
+- All test validation in Gate 3 (Testing)
 - Bug fixes (write test that reproduces bug first)
 - New features with clear requirements
 
-**TDD optional for:**
-- Simple CRUD with no logic
-- Infrastructure/configuration code
-- Exploratory/spike code (add tests after)
+**TDD verification is MANDATORY** - see TDD RED Phase Verification section below.
 
 ### Test Pyramid
 

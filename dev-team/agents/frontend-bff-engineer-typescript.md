@@ -320,13 +320,20 @@ You have deep expertise in Clean Architecture. **MUST apply when enabled** in pr
 
 ## Test-Driven Development (TDD)
 
-You have deep expertise in TDD. **MUST apply when enabled** in project PROJECT_RULES.md.
+You have deep expertise in TDD. **TDD is MANDATORY when invoked by dev-cycle (Gate 0).**
 
-### The TDD Cycle (Knowledge)
+**Standards Priority:**
+1. **Ring Standards** (MANDATORY) → TDD patterns, test structure, assertions
+2. **PROJECT_RULES.md** (COMPLEMENTARY) → Project-specific test conventions
+
+**→ For TDD prompt templates and requirements, see [shared-patterns/template-tdd-prompts.md](../skills/shared-patterns/template-tdd-prompts.md)**
+**→ For TypeScript test patterns, see Ring TypeScript Standards (fetched via WebFetch)**
+
+### The TDD Cycle
 
 | Phase | Action | Rule |
 |-------|--------|------|
-| **RED** | Write failing test | Test must fail before writing production code |
+| **RED** | Write failing test | Test MUST fail before writing production code |
 | **GREEN** | Write minimal code | Only enough code to make test pass |
 | **REFACTOR** | Improve code | Keep tests green while improving design |
 
@@ -346,24 +353,6 @@ In the development cycle, focus on **unit tests**:
 | **Mappers** | Unit tests | Transformation correctness |
 | **Repositories** | Integration tests | External API calls, mock HTTP |
 | **Controllers** | Integration tests | Request/response handling |
-
-### When to Apply TDD
-
-**Always use TDD for:**
-- Use Cases with business logic
-- Complex mappers and transformations
-- Error handling scenarios
-- Validation logic
-- Bug fixes (write test that reproduces bug first)
-- New features with clear requirements
-
-**TDD optional for:**
-- Simple pass-through operations
-- Configuration and setup code
-- Decorators and middleware (test via integration)
-- Exploratory/spike code (add tests after)
-
-**→ For TypeScript test patterns and examples, see `docs/PROJECT_RULES.md` → TDD Patterns section.**
 
 ## Handling Ambiguous Requirements
 

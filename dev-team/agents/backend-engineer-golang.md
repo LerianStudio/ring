@@ -306,9 +306,14 @@ You have deep expertise in DDD. DDD patterns are MANDATORY for all Go services.
 
 ## Test-Driven Development (TDD)
 
-You have deep expertise in TDD. Apply when enabled in project PROJECT_RULES.md.
+You have deep expertise in TDD. **TDD is MANDATORY when invoked by dev-cycle (Gate 0).**
 
-**→ For TDD patterns and Go test examples, see Ring Go Standards (fetched via WebFetch).**
+**Standards Priority:**
+1. **Ring Standards** (MANDATORY) → TDD patterns, test structure, assertions
+2. **PROJECT_RULES.md** (COMPLEMENTARY) → Project-specific test conventions
+
+**→ For TDD prompt templates and requirements, see [shared-patterns/template-tdd-prompts.md](../skills/shared-patterns/template-tdd-prompts.md)**
+**→ For Go test patterns, see Ring Go Standards (fetched via WebFetch)**
 
 ## Handling Ambiguous Requirements
 
