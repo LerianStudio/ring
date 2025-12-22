@@ -5,10 +5,22 @@
 set -euo pipefail
 
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
-STATE_FILE="${PROJECT_DIR}/docs/refactor/current-cycle.json"
+
+# Check for state file in either location (feature or refactor)
+STATE_FILE_CYCLE="${PROJECT_DIR}/docs/dev-cycle/current-cycle.json"
+STATE_FILE_REFACTOR="${PROJECT_DIR}/docs/dev-refactor/current-cycle.json"
+
+# Determine which state file to use
+if [ -f "$STATE_FILE_CYCLE" ]; then
+  STATE_FILE="$STATE_FILE_CYCLE"
+elif [ -f "$STATE_FILE_REFACTOR" ]; then
+  STATE_FILE="$STATE_FILE_REFACTOR"
+else
+  STATE_FILE=""
+fi
 
 # Check if state file exists
-if [ ! -f "$STATE_FILE" ]; then
+if [ -z "$STATE_FILE" ] || [ ! -f "$STATE_FILE" ]; then
   cat <<EOF
 {
   "hookSpecificOutput": {

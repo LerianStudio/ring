@@ -24,7 +24,7 @@ verification:
     - command: "go test ./... 2>&1 | grep -c PASS"
       description: "All tests pass"
       success_pattern: "[1-9][0-9]*"
-    - command: "cat docs/refactor/current-cycle.json | jq '.gates[4].verdict'"
+    - command: "cat docs/dev-cycle/current-cycle.json 2>/dev/null || cat docs/dev-refactor/current-cycle.json | jq '.gates[4].verdict'"
       description: "Review gate passed"
       success_pattern: "PASS"
   manual:

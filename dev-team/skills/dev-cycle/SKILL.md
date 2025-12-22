@@ -29,10 +29,10 @@ related:
 
 verification:
   automated:
-    - command: "test -f docs/refactor/current-cycle.json"
-      description: "State file exists"
+    - command: "test -f docs/dev-cycle/current-cycle.json || test -f docs/dev-refactor/current-cycle.json"
+      description: "State file exists (dev-cycle or dev-refactor)"
       success_pattern: "exit 0"
-    - command: "cat docs/refactor/current-cycle.json | jq '.current_gate'"
+    - command: "cat docs/dev-cycle/current-cycle.json 2>/dev/null || cat docs/dev-refactor/current-cycle.json | jq '.current_gate'"
       description: "Current gate is valid"
       success_pattern: "[0-5]"
   manual:
@@ -95,8 +95,8 @@ See [shared-patterns/shared-orchestrator-principle.md](../shared-patterns/shared
 
 | Action | Tool | Purpose |
 |--------|------|---------|
-| Read task files | `Read` | Load task definitions from `docs/pre-dev/*/tasks.md` |
-| Read state files | `Read` | Load/verify `docs/refactor/current-cycle.json` |
+| Read task files | `Read` | Load task definitions from `docs/pre-dev/*/tasks.md` or `docs/refactor/*/tasks.md` |
+| Read state files | `Read` | Load/verify `docs/dev-cycle/current-cycle.json` or `docs/dev-refactor/current-cycle.json` |
 | Read PROJECT_RULES.md | `Read` | Load project-specific rules |
 | Write state files | `Write` | Persist cycle state to JSON |
 | Track progress | `TodoWrite` | Maintain task list |
@@ -131,9 +131,9 @@ This is NOT negotiable:
 │  CORRECT WORKFLOW ORDER                                         │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
-│  1. Load task file (Read docs/pre-dev/*/tasks.md)              │
+│  1. Load task file (Read docs/pre-dev/*/tasks.md or docs/refactor/*/tasks.md) │
 │  2. Ask execution mode (AskUserQuestion)                        │
-│  3. Check/Load state (Read docs/refactor/current-cycle.json)   │
+│  3. Determine state path + Check/Load state (see State Path Selection) │
 │  4. WebFetch Ring Standards                                     │
 │  5. ⛔ DISPATCH SPECIALIST AGENT ← Immediate after standards   │
 │  6. Wait for agent completion                                   │
@@ -380,7 +380,29 @@ Day 4: Production incident from Day 1 code
 
 ## State Management
 
-State is persisted to `docs/refactor/current-cycle.json`:
+### State Path Selection (MANDATORY)
+
+The state file path depends on the **source of tasks**:
+
+| Task Source | State Path | Use Case |
+|-------------|------------|----------|
+| `docs/refactor/*/tasks.md` | `docs/dev-refactor/current-cycle.json` | Refactoring existing code |
+| `docs/pre-dev/*/tasks.md` | `docs/dev-cycle/current-cycle.json` | New feature development |
+| Any other path | `docs/dev-cycle/current-cycle.json` | Default for manual tasks |
+
+**Detection Logic:**
+```text
+IF source_file contains "docs/refactor/" THEN
+  state_path = "docs/dev-refactor/current-cycle.json"
+ELSE
+  state_path = "docs/dev-cycle/current-cycle.json"
+```
+
+**Store state_path in the state object itself** so resume knows where to look.
+
+### State File Structure
+
+State is persisted to `{state_path}` (either `docs/dev-cycle/current-cycle.json` or `docs/dev-refactor/current-cycle.json`):
 
 ```json
 {
@@ -389,6 +411,8 @@ State is persisted to `docs/refactor/current-cycle.json`:
   "started_at": "ISO timestamp",
   "updated_at": "ISO timestamp",
   "source_file": "path/to/tasks.md",
+  "state_path": "docs/dev-cycle/current-cycle.json | docs/dev-refactor/current-cycle.json",
+  "cycle_type": "feature | refactor",
   "execution_mode": "manual_per_subtask|manual_per_task|automatic",
   "status": "in_progress|completed|failed|paused|paused_for_approval|paused_for_testing|paused_for_task_approval|paused_for_integration_testing",
   "feedback_loop_completed": false,
@@ -494,12 +518,12 @@ state.updated_at = "[ISO timestamp]"
 
 # Step 2: Write to file (MANDATORY - use Write tool)
 Write tool:
-  file_path: "docs/refactor/current-cycle.json"
+  file_path: [state.state_path]  # Use state_path from state object
   content: [full JSON state]
 
 # Step 3: Verify persistence (MANDATORY - use Read tool)
 Read tool:
-  file_path: "docs/refactor/current-cycle.json"
+  file_path: [state.state_path]  # Use state_path from state object
 # Confirm current_gate and gate_progress match expected values
 ```
 
@@ -1137,18 +1161,25 @@ STOP EXECUTION. Do NOT proceed to Step 1.
 
 1. **Detect input:** File → Load directly | Directory → Load tasks.md + discover subtasks/
 2. **Build order:** Read tasks, check for subtasks (ST-XXX-01, 02...) or TDD autonomous mode
-3. **Initialize state:** Generate cycle_id, create `docs/refactor/current-cycle.json`, set indices to 0
-4. **Display plan:** "Loaded X tasks with Y subtasks"
-5. **ASK EXECUTION MODE (MANDATORY - AskUserQuestion):**
+3. **Determine state path:**
+   - IF source_file contains `docs/refactor/` → `state_path = "docs/dev-refactor/current-cycle.json"`, `cycle_type = "refactor"`
+   - ELSE → `state_path = "docs/dev-cycle/current-cycle.json"`, `cycle_type = "feature"`
+4. **Initialize state:** Generate cycle_id, create state file at `{state_path}`, set indices to 0
+5. **Display plan:** "Loaded X tasks with Y subtasks"
+6. **ASK EXECUTION MODE (MANDATORY - AskUserQuestion):**
    - Options: (a) Manual per subtask (b) Manual per task (c) Automatic
    - **Do NOT skip:** User hints ≠ mode selection. Only explicit a/b/c is valid.
-6. **Start:** Display mode, proceed to Gate 0
+7. **Start:** Display mode, proceed to Gate 0
 
 ### Resume Cycle (--resume flag)
 
-1. Load `docs/refactor/current-cycle.json`, validate
-2. Display: cycle started, tasks completed/total, current task/subtask/gate, paused reason
-3. **Handle paused states:**
+1. **Find existing state file:**
+   - Check `docs/dev-cycle/current-cycle.json` first
+   - If not found, check `docs/dev-refactor/current-cycle.json`
+   - If neither exists → Error: "No cycle to resume"
+2. Load found state file, validate (state_path is stored in the state object)
+3. Display: cycle started, tasks completed/total, current task/subtask/gate, paused reason
+4. **Handle paused states:**
 
 | Status | Action |
 |--------|--------|
@@ -1420,7 +1451,7 @@ gate_progress.implementation = {
 6. **⛔ SAVE STATE TO FILE (MANDATORY):**
    ```yaml
    Write tool:
-     file_path: "docs/refactor/current-cycle.json"
+     file_path: [state.state_path]  # "docs/dev-cycle/current-cycle.json" or "docs/dev-refactor/current-cycle.json"
      content: [full updated state JSON]
    ```
    See "State Persistence Rule" section. State MUST be written to file after Gate 0.
@@ -1538,7 +1569,7 @@ devops_input = {
      → If "ESCALATION" in output: STOP and report to user
 
 4. **⛔ SAVE STATE TO FILE (MANDATORY):**
-   Write tool → "docs/refactor/current-cycle.json"
+   Write tool → [state.state_path]
 ```
 
 ### Step 3.3: Gate 1 Complete
@@ -1648,7 +1679,7 @@ sre_input = {
      → If "ESCALATION" in output: STOP and report to user
 
 4. **⛔ SAVE STATE TO FILE (MANDATORY):**
-   Write tool → "docs/refactor/current-cycle.json"
+   Write tool → [state.state_path]
 ```
 
 ### Step 4.3: Gate 2 Complete
@@ -1759,7 +1790,7 @@ testing_input = {
      → If "ESCALATION" in output: STOP and report to user
 
 4. **⛔ SAVE STATE TO FILE (MANDATORY):**
-   Write tool → "docs/refactor/current-cycle.json"
+   Write tool → [state.state_path]
 ```
 
 ### Step 5.3: Gate 3 Complete
@@ -1871,7 +1902,7 @@ review_input = {
      → If "ESCALATION" in output: STOP and report to user
 
 4. **⛔ SAVE STATE TO FILE (MANDATORY):**
-   Write tool → "docs/refactor/current-cycle.json"
+   Write tool → [state.state_path]
 ```
 
 ### Step 6.3: Gate 4 Complete
@@ -2193,4 +2224,4 @@ Base metrics per [shared-patterns/output-execution-report.md](../shared-patterns
 | Validation | - | pending |
 
 ### State File Location
-`docs/refactor/current-cycle.json`
+`docs/dev-cycle/current-cycle.json` (feature) or `docs/dev-refactor/current-cycle.json` (refactor)

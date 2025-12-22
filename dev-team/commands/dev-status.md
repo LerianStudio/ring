@@ -44,7 +44,7 @@ Metrics (completed tasks):
   Average Assertiveness: 89%
   Total Duration: 1h 45m
 
-State file: docs/refactor/current-cycle.json
+State file: docs/dev-cycle/current-cycle.json (or docs/dev-refactor/current-cycle.json)
 ```
 
 ## When No Cycle is Running
@@ -71,4 +71,4 @@ Or resume an interrupted cycle:
 
 Now checking cycle status...
 
-Read state from: `docs/refactor/current-cycle.json`
+Read state from: `docs/dev-cycle/current-cycle.json` or `docs/dev-refactor/current-cycle.json`
