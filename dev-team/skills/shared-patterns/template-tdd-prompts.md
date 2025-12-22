@@ -72,6 +72,14 @@ Example failure output:
 **PROJECT CONTEXT (if PROJECT_RULES.md exists):**
 [Insert relevant project-specific info: tech stack, internal libs, conventions]
 
+## ⛔ CRITICAL: ALL Ring Standards Apply from Task 1 (NO DEFERRAL)
+
+**See [shared-anti-rationalization.md](./shared-anti-rationalization.md) → "Standards Deferral Anti-Rationalizations" section.**
+
+**Summary:** Ring Standards are NOT phased. They apply IMMEDIATELY to EVERY task. PM defines WHAT, Ring Standards define HOW.
+
+**⛔ HARD GATE:** If you output "DEFERRED" regarding ANY Ring Standard → Implementation is INCOMPLETE. Fix before proceeding.
+
 **INSTRUCTIONS (TDD-GREEN):**
 1. Follow Ring Standards for architecture, error handling, and patterns
 2. Write MINIMAL code to make the test pass

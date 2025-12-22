@@ -6,6 +6,27 @@ AI models naturally attempt to be "helpful" by making autonomous decisions. This
 
 ---
 
+## ⛔ Standards Deferral Anti-Rationalizations (CRITICAL)
+
+**Ring Standards apply from Task 1. DEFERRED = FAILED. No exceptions.**
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "PM plan says X is for later tasks" | PM defines WHAT to build, not HOW. Ring Standards define HOW. | **Implement ALL standards NOW** |
+| "Task 1 is just initial setup" | Setup WITH standards = correct setup. Without = wrong from Day 1. | **Implement ALL standards NOW** |
+| "Basic implementation is sufficient initially" | "Basic" is not compliant. Full standards or fail. | **Implement ALL standards NOW** |
+| "DEFERRED to later tasks as per plan" | DEFERRED = FAILED. Standards are not deferrable. | **Implement ALL standards NOW** |
+| "Task dependency graph shows standards later" | Dependency graph is for features, NOT for standards. Standards are prerequisites. | **Implement ALL standards NOW** |
+| "This standard doesn't apply to Task 1 scope" | ALL standards apply to ALL tasks. Scope is irrelevant. | **Implement ALL standards NOW** |
+| "Will add observability/testing/error-handling later" | Later = never. Retrofitting is 10x harder. | **Implement ALL standards NOW** |
+| "MVP doesn't need full standards" | MVP with standards = correct MVP. Without = technical debt from Day 1. | **Implement ALL standards NOW** |
+
+**⛔ HARD GATE:** If your output contains "DEFERRED" regarding ANY Ring Standard → Implementation is INCOMPLETE. Fix before proceeding.
+
+**⛔ SEVERITY:** Any agent outputting "DEFERRED" for a Ring Standard = CRITICAL FAILURE = Return to previous gate.
+
+---
+
 ## Universal Anti-Rationalizations
 
 These rationalizations are ALWAYS wrong, regardless of context:

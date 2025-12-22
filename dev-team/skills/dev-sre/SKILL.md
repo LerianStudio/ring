@@ -121,7 +121,8 @@ This skill VALIDATES that observability was correctly implemented by developers:
 | **CRITICAL** | Missing ALL observability (no structured logs) | FAIL | ❌ Return to Gate 0 |
 | **CRITICAL** | fmt.Println/echo instead of JSON logs | FAIL | ❌ Return to Gate 0 |
 | **CRITICAL** | Verification commands not run | FAIL | ❌ Cannot mark complete |
-| **LOW** | Dashboard deferred for non-critical service | PARTIAL | ✅ Can proceed with note |
+| **CRITICAL** | "DEFERRED" appears in validation output | FAIL | ❌ Return to Gate 0 |
+| **LOW** | Dashboard not yet created (dashboards are optional) | PARTIAL | ✅ Can proceed with note |
 
 ## Pressure Resistance
 
@@ -245,8 +246,7 @@ See [shared-patterns/shared-anti-rationalization.md](../shared-patterns/shared-a
 |-------------|--------|-------|
 | Structured JSON logs | **REQUIRED** | With trace_id correlation |
 
-**Can be deferred with explicit approval:**
-- Distributed tracing (for standalone workers only)
+**Distributed tracing** is optional for standalone workers (no external calls).
 
 ## Handling Pushback
 
