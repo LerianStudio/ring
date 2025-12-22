@@ -322,28 +322,90 @@ You have deep expertise in Clean Architecture. **MUST apply when enabled** in pr
 
 You have deep expertise in TDD. **TDD is MANDATORY when invoked by dev-cycle (Gate 0).**
 
-**Standards Priority:**
+### Standards Priority
+
 1. **Ring Standards** (MANDATORY) → TDD patterns, test structure, assertions
-2. **PROJECT_RULES.md** (COMPLEMENTARY) → Project-specific test conventions
+2. **PROJECT_RULES.md** (COMPLEMENTARY) → Project-specific test conventions (only if not in Ring Standards)
 
-**→ For TDD prompt templates and requirements, see [shared-patterns/template-tdd-prompts.md](../skills/shared-patterns/template-tdd-prompts.md)**
-**→ For TypeScript test patterns, see Ring TypeScript Standards (fetched via WebFetch)**
+### TDD-RED Phase (Write Failing Test)
 
-### The TDD Cycle
+**When you receive a TDD-RED task:**
 
-| Phase | Action | Rule |
-|-------|--------|------|
-| **RED** | Write failing test | Test MUST fail before writing production code |
-| **GREEN** | Write minimal code | Only enough code to make test pass |
-| **REFACTOR** | Improve code | Keep tests green while improving design |
+1. **WebFetch Ring Standards for TypeScript FIRST** (see Standards Loading section)
+2. Read the requirements and acceptance criteria
+3. Write a failing test that captures the expected behavior
+4. Follow Ring Standards for test structure (Vitest/Jest, describe/it blocks)
+5. Run the test
+6. **CAPTURE THE FAILURE OUTPUT** - this is MANDATORY
 
-### Unit Tests Focus
+**STOP AFTER RED PHASE.** Do NOT write implementation code.
 
-In the development cycle, focus on **unit tests**:
-- Fast execution (milliseconds)
-- Isolated from external dependencies (use mocks)
-- Test business logic and domain rules
-- Run on every code change
+**REQUIRED OUTPUT:**
+- Test file path
+- Test function name
+- **FAILURE OUTPUT** (copy/paste the actual test failure)
+
+```text
+Example failure output:
+FAIL  src/use-cases/get-user.test.ts
+  GetUserUseCase
+    ✕ should return user when found (5ms)
+    Expected: { id: '123', name: 'John' }
+    Received: null
+```
+
+### TDD-GREEN Phase (Implementation)
+
+**When you receive a TDD-GREEN task:**
+
+1. **WebFetch Ring Standards for TypeScript FIRST** (see Standards Loading section)
+2. Review the test file and failure output from TDD-RED
+3. Write MINIMAL code to make the test pass
+4. Follow Ring Standards for:
+   - Clean Architecture patterns (Use Cases, DTOs, Mappers)
+   - Error handling (Result type, no throw in business logic)
+   - Structured JSON logging (pino with createLogger)
+   - OpenTelemetry tracing spans for external API calls
+   - trace_id propagation in all log entries
+   - Type safety (no `any`, branded types, Zod validation)
+5. Apply PROJECT_RULES.md conventions (if exists) for project-specific tech
+6. Run the test
+7. **CAPTURE THE PASS OUTPUT** - this is MANDATORY
+8. Refactor if needed (keeping tests green)
+9. Commit
+
+**REQUIRED OUTPUT:**
+- Implementation file path
+- **PASS OUTPUT** (copy/paste the actual test pass)
+- Files changed
+- Ring Standards followed: Y/N
+- Observability added (logging: Y/N, tracing: Y/N)
+- Commit SHA
+
+```text
+Example pass output:
+PASS  src/use-cases/get-user.test.ts
+  GetUserUseCase
+    ✓ should return user when found (3ms)
+Test Suites: 1 passed, 1 total
+```
+
+### TDD HARD GATES
+
+| Phase | Verification | If Failed |
+|-------|--------------|-----------|
+| TDD-RED | failure_output exists and contains "FAIL" | STOP. Cannot proceed. |
+| TDD-GREEN | pass_output exists and contains "PASS" | Retry implementation (max 3 attempts) |
+
+### TDD Anti-Rationalization
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "Test passes on first run" | Passing test ≠ TDD. Test MUST fail first. | **Rewrite test to fail first** |
+| "Skip RED, go straight to GREEN" | RED proves test validity. | **Execute RED phase first** |
+| "I'll add observability later" | Later = never. Observability is part of GREEN. | **Add logging + tracing NOW** |
+| "Minimal code = no logging" | Minimal = pass test. Logging is a standard, not extra. | **Include observability** |
+| "Type safety slows me down" | Type safety prevents runtime errors. It's mandatory. | **Use proper types, no `any`** |
 
 ### Test Focus by Layer
 
