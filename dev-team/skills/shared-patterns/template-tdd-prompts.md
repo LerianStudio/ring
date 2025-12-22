@@ -81,8 +81,8 @@ Example failure output:
 
 **PROJECT-SPECIFIC (from PROJECT_RULES.md, if exists):**
 - Use internal libraries referenced in PROJECT_RULES.md
-- Follow project naming conventions
-- Place files per project directory structure
+- Follow project-specific naming conventions (if different from Ring Standards)
+- Use tech stack choices defined in PROJECT_RULES.md (database, frameworks, etc.)
 
 **REQUIRED OUTPUT:**
 - Implementation file path
@@ -129,14 +129,14 @@ IF pass_output is empty OR contains "FAIL":
 | **Tracing** | Ring Standards | OpenTelemetry spans, trace_id propagation |
 | **Testing patterns** | Ring Standards | Table-driven tests, mocking |
 
-### PROJECT_RULES.md (COMPLEMENTARY - Project specifics)
+### PROJECT_RULES.md (COMPLEMENTARY - Project specifics NOT in Ring Standards)
 
 | What | Source | Defines |
 |------|--------|---------|
-| **Tech stack choices** | PROJECT_RULES.md | Which DB, which framework |
+| **Tech stack choices** | PROJECT_RULES.md | Which DB, which framework, which cache |
 | **Internal libraries** | PROJECT_RULES.md | lib-commons, shared packages |
-| **Directory structure** | PROJECT_RULES.md | Project-specific layout |
-| **Naming conventions** | PROJECT_RULES.md | Project-specific patterns |
+| **Project-specific conventions** | PROJECT_RULES.md | Naming patterns if different from Ring Standards |
+| **Domain terminology** | PROJECT_RULES.md | Business terms, entity names |
 
 **Priority:** Ring Standards > PROJECT_RULES.md (project can add, not remove standards)
 
