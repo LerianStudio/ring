@@ -674,26 +674,92 @@ The following testing standards MUST be followed when designing and implementing
 
 **TDD is MANDATORY when invoked by dev-cycle (Gate 0 and Gate 3).**
 
-**Standards Priority:**
+#### Standards Priority
+
 1. **Ring Standards** (MANDATORY) → TDD patterns, test structure, assertions
-2. **PROJECT_RULES.md** (COMPLEMENTARY) → Project-specific test conventions
+2. **PROJECT_RULES.md** (COMPLEMENTARY) → Project-specific test conventions (only if not in Ring Standards)
 
-**→ For TDD prompt templates and requirements, see [shared-patterns/template-tdd-prompts.md](../skills/shared-patterns/template-tdd-prompts.md)**
+#### TDD-RED Phase (Write Failing Test)
 
-#### The TDD Cycle
+**When you receive a TDD-RED task:**
 
-| Phase | Action | Rule |
-|-------|--------|------|
-| **RED** | Write failing test | Test must fail before writing production code |
-| **GREEN** | Write minimal code | Only enough code to make test pass |
-| **REFACTOR** | Improve code | Keep tests green while improving design |
+1. **Load Ring Standards FIRST (MANDATORY):**
+   ```
+   # For Go projects:
+   WebFetch: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang.md
+   Prompt: "Extract all Go coding standards, patterns, and requirements"
+   
+   # For TypeScript projects:
+   WebFetch: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md
+   Prompt: "Extract all TypeScript coding standards, patterns, and requirements"
+   ```
+2. Read the requirements and acceptance criteria
+3. Write a failing test following Ring Standards:
+   - Directory structure (where to place test files)
+   - Test naming convention
+   - Test patterns (table-driven for Go, describe/it for TypeScript)
+4. Run the test
+5. **CAPTURE THE FAILURE OUTPUT** - this is MANDATORY
 
-#### TDD Compliance Rules
+**STOP AFTER RED PHASE.** Do NOT write implementation code.
 
-1. **Test file must exist before implementation**
-2. **Test must produce failure output (RED)**
-3. **Only then write implementation (GREEN)**
-4. **Refactor while keeping tests green**
+**REQUIRED OUTPUT:**
+- Test file path
+- Test function name
+- **FAILURE OUTPUT** (copy/paste the actual test failure)
+
+#### TDD-GREEN Phase (Implementation)
+
+**When you receive a TDD-GREEN task:**
+
+1. **Load Ring Standards FIRST (MANDATORY):**
+   ```
+   # For Go projects:
+   WebFetch: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang.md
+   Prompt: "Extract all Go coding standards, patterns, and requirements"
+   
+   # For TypeScript projects:
+   WebFetch: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md
+   Prompt: "Extract all TypeScript coding standards, patterns, and requirements"
+   ```
+2. Review the test file and failure output from TDD-RED
+3. Write MINIMAL code to make the test pass
+4. **Follow Ring Standards for ALL of these (MANDATORY):**
+   - **Directory structure** (where to place files)
+   - **Architecture patterns** (Hexagonal/Clean Architecture, DDD)
+   - **Error handling** (no panic for Go, Result type for TypeScript)
+   - **Structured JSON logging** (with trace correlation)
+   - **OpenTelemetry tracing** (spans for external calls, trace_id propagation)
+   - **Testing patterns** (table-driven for Go, describe/it for TypeScript)
+5. Apply PROJECT_RULES.md (if exists) for tech stack choices not in Ring Standards
+6. Run the test
+7. **CAPTURE THE PASS OUTPUT** - this is MANDATORY
+8. Refactor if needed (keeping tests green)
+9. Commit
+
+**REQUIRED OUTPUT:**
+- Implementation file path
+- **PASS OUTPUT** (copy/paste the actual test pass)
+- Files changed
+- Ring Standards followed: Y/N
+- Observability added (logging: Y/N, tracing: Y/N)
+- Commit SHA
+
+#### TDD HARD GATES
+
+| Phase | Verification | If Failed |
+|-------|--------------|-----------|
+| TDD-RED | failure_output exists and contains "FAIL" | STOP. Cannot proceed. |
+| TDD-GREEN | pass_output exists and contains "PASS" | Retry implementation (max 3 attempts) |
+
+#### TDD Anti-Rationalization
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "Test passes on first run" | Passing test ≠ TDD. Test MUST fail first. | **Rewrite test to fail first** |
+| "Skip RED, go straight to GREEN" | RED proves test validity. | **Execute RED phase first** |
+| "I'll add observability later" | Later = never. Observability is part of GREEN. | **Add logging + tracing NOW** |
+| "Minimal code = no logging" | Minimal = pass test. Logging is a standard, not extra. | **Include observability** |
 
 #### When TDD is Required
 
