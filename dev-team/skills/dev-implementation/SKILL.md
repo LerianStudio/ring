@@ -362,30 +362,38 @@ Task:
 
     ### Language-Specific Patterns (MANDATORY)
 
-    **⛔ DO NOT duplicate code patterns here. Agent MUST WebFetch standards.**
+    **⛔ HARD GATE: Agent MUST WebFetch standards file BEFORE writing ANY code.**
 
-    | Language | Standards File | Key Sections |
-    |----------|----------------|--------------|
-    | **Go** | `golang.md` | "Telemetry & Observability", "Child Spans", "Context Propagation" |
-    | **TypeScript** | `typescript.md` | "Observability", "Telemetry Patterns", "Context Propagation" |
+    | Language | Standards File | REQUIRED Sections to WebFetch |
+    |----------|----------------|-------------------------------|
+    | **Go** | `golang.md` | "Telemetry & Observability (MANDATORY)", "Child Spans", "Context Propagation", "Anti-Patterns" |
+    | **TypeScript** | `typescript.md` | "Observability", "Telemetry Patterns", "Context Propagation", "Anti-Patterns" |
 
-    **Agent WebFetches standards and follows patterns defined there.**
+    **⛔ NON-NEGOTIABLE: Agent MUST implement EXACTLY the patterns from standards. NO deviations. NO shortcuts.**
 
-    ### ⛔ FORBIDDEN Patterns
+    | Requirement | Enforcement |
+    |-------------|-------------|
+    | WebFetch standards file | MANDATORY before implementation |
+    | Follow exact patterns | REQUIRED - copy structure from standards |
+    | Output Standards Coverage Table | REQUIRED - with file:line evidence |
+    | 90%+ instrumentation coverage | HARD GATE - implementation REJECTED if below |
+
+    ### ⛔ FORBIDDEN Patterns (HARD BLOCK)
     
-    See standards files for complete forbidden/required patterns:
-    - **Go:** `golang.md` → "Anti-Patterns" table
-    - **TypeScript:** `typescript.md` → "Anti-Patterns" table
+    **Agent MUST WebFetch standards and check Anti-Patterns table. Violations = REJECTED.**
 
-    Key forbidden patterns (details in standards):
-    - Direct OTel imports (use lib-commons wrappers)
-    - Direct framework responses (use lib wrapper methods)
-    - Functions without spans
-    - Logging without context correlation
+    - **Go:** `golang.md` → "Anti-Patterns" table - MUST check ALL rows
+    - **TypeScript:** `typescript.md` → "Anti-Patterns" table - MUST check ALL rows
 
-    ### Verification Checklist
+    **If agent uses ANY forbidden pattern → Implementation is INVALID. Start over.**
+
+    ### Verification (MANDATORY)
     
-    Agent MUST verify against Standards Coverage Table (see `standards-coverage-table.md`).
+    **Agent MUST output Standards Coverage Table per `standards-coverage-table.md`.**
+    
+    - ALL sections MUST show ✅ or N/A
+    - ANY ❌ = Implementation REJECTED
+    - Missing table = Implementation INCOMPLETE
 
     ## Required Output Format
 

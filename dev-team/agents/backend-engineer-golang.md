@@ -394,20 +394,23 @@ ok      myapp/auth    0.015s
 
 **⛔ CRITICAL: Code instrumentation is NOT optional. Every function you write MUST be instrumented.**
 
-**See golang.md standards for:**
-- "Telemetry & Observability (MANDATORY)" section - complete patterns
-- "Distributed Tracing Architecture" - how traces propagate
-- "Child Spans" - required pattern for every function
-- "Context Propagation" - InjectHTTPContext, InjectGRPCContext
+**⛔ MANDATORY: You MUST WebFetch golang.md standards and follow the exact patterns defined there.**
 
-**Key requirements (details in standards):**
-- 90%+ function coverage with spans
-- Every handler/service/repository MUST have child span
-- Use `libCommons.NewTrackingFromContext(ctx)` to extract logger/tracer
-- Use `HandleSpanError` / `HandleSpanBusinessErrorEvent` for errors
-- Propagate trace context to external calls
+| Action | Requirement |
+|--------|-------------|
+| **WebFetch** | `golang.md` → "Telemetry & Observability (MANDATORY)" section |
+| **Read** | Complete patterns for spans, logging, error handling |
+| **Implement** | EXACTLY as defined in standards - NO deviations |
+| **Verify** | Output Standards Coverage Table with evidence |
 
-**If ANY instrumentation is missing → Implementation is INCOMPLETE.**
+**NON-NEGOTIABLE requirements from standards:**
+- 90%+ function coverage with spans - REQUIRED
+- Every handler/service/repository MUST have child span - NO EXCEPTIONS
+- MUST use `libCommons.NewTrackingFromContext(ctx)` - FORBIDDEN to create new tracers
+- MUST use `HandleSpanError` / `HandleSpanBusinessErrorEvent` - FORBIDDEN to ignore span errors
+- MUST propagate trace context to external calls - FORBIDDEN to break trace chain
+
+**⛔ HARD GATE: If ANY instrumentation is missing → Implementation is REJECTED. You CANNOT proceed.**
 
 ### TDD Anti-Rationalization
 
