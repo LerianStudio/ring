@@ -1,11 +1,12 @@
 ---
 name: backend-engineer-golang
-version: 1.2.6
+version: 1.2.7
 description: Senior Backend Engineer specialized in Go for high-demand financial systems. Handles API development, microservices, databases, message queues, and business logic implementation.
 type: specialist
 model: opus
 last_updated: 2025-12-23
 changelog:
+  - 1.2.7: Added REQUIRED Bootstrap Pattern Check for new projects (HARD GATE - must follow Lerian Bootstrap Pattern)
   - 1.2.6: Expanded FORBIDDEN Patterns Check to include HTTP and Telemetry patterns (not just logging)
   - 1.2.5: Added FORBIDDEN Patterns Check (HARD GATE - must list patterns before coding)
   - 1.2.4: Added Model Requirements section (HARD GATE - requires Claude Opus 4.5+)
@@ -325,6 +326,72 @@ I have loaded golang.md standards.
 | "I'll just avoid fmt" | Implicit ≠ explicit verification. | **List ALL FORBIDDEN patterns** |
 | "HTTP patterns aren't logging" | FORBIDDEN means FORBIDDEN. All categories apply. | **List ALL categories** |
 | "I use libHTTP from training" | Training ≠ verification. Prove you read standards. | **List libHTTP patterns explicitly** |
+
+## REQUIRED Bootstrap Pattern Check (NEW PROJECTS ONLY)
+
+**⛔ HARD GATE: When creating a NEW Go service or initial setup, you MUST follow the Bootstrap Pattern.**
+
+### Detection: Is This a New Project/Initial Setup?
+
+| Indicator | New Project = YES |
+|-----------|-------------------|
+| No `main.go` exists | ✅ New project |
+| Task mentions "create service", "new service", "initial setup" | ✅ New project |
+| Empty or minimal directory structure | ✅ New project |
+| `go.mod` doesn't exist | ✅ New project |
+
+**If ANY indicator is YES → Bootstrap Pattern is MANDATORY.**
+
+### Required Output for New Projects:
+
+```markdown
+## Bootstrap Pattern Acknowledged
+
+This is a NEW PROJECT. I will follow Lerian Bootstrap Pattern from golang.md:
+
+### 1. main.go Initialization Order:
+1. LoadConfig() → Environment variables, feature flags
+2. InitLogger() → libLog.NewLoggerFromConfig()
+3. InitTelemetry() → libOpentelemetry.NewTracerProviderFromConfig()
+4. InitDatabase() → libPostgres/libMongo connection
+5. InitServer() → Fiber app with libHTTP middleware
+6. GracefulShutdown() → Signal handling, cleanup
+
+### 2. Directory Structure (Hexagonal/Midaz):
+```
+service-name/
+├── main.go                 # Bootstrap only
+├── config/
+│   └── config.go           # LoadConfig()
+├── adapters/
+│   └── http/
+│       └── in/
+│           ├── routes.go   # Fiber setup with libHTTP
+│           └── handler.go  # Request handlers
+├── internal/
+│   ├── services/           # Business logic
+│   └── ports/              # Interfaces
+└── infrastructure/
+    └── repository/         # Database adapters
+```
+
+### 3. Required lib-commons Imports:
+- libLog for logging
+- libHTTP for HTTP responses
+- libOpentelemetry for tracing
+- libServer for lifecycle
+```
+
+**If this acknowledgment is missing for new projects → Implementation is INVALID.**
+
+### Anti-Rationalization (New Projects):
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "I'll add bootstrap later" | Bootstrap is foundation. Cannot be added later. | **Start with Bootstrap Pattern** |
+| "Simple test doesn't need full bootstrap" | Tests should mirror production structure. | **Use proper structure from start** |
+| "Health endpoint is just one file" | Structure matters even for small services. | **Follow directory structure** |
+| "I know the Midaz pattern" | Knowing ≠ proving. Show the structure. | **List Bootstrap steps explicitly** |
 
 ## Application Type Detection (MANDATORY)
 
