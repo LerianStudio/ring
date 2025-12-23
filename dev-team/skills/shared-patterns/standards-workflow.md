@@ -55,6 +55,8 @@ Read docs/PROJECT_RULES.md
 
 ## Step 2: WebFetch Ring Standards (HARD GATE)
 
+**⛔ CRITICAL: You CANNOT proceed without successfully loading standards.**
+
 **MANDATORY ACTION:** You MUST use the WebFetch tool NOW.
 
 | Parameter | Value |
@@ -64,7 +66,35 @@ Read docs/PROJECT_RULES.md
 
 **Execute this WebFetch before proceeding.** Do NOT continue until standards are loaded and understood.
 
-**If WebFetch fails → STOP and report blocker. Cannot proceed without Ring standards.**
+### If WebFetch Fails → STOP IMMEDIATELY
+
+**You CANNOT proceed. You CANNOT use "cached knowledge". You CANNOT assume patterns.**
+
+```markdown
+## Blocker
+
+**Status:** BLOCKED - Cannot load standards
+**Reason:** WebFetch failed for [standards_file].md
+**URL Attempted:** [url]
+**Error:** [error message or "timeout"]
+
+**Required Action:**
+1. Retry WebFetch (max 2 retries)
+2. If still fails → Report to orchestrator
+3. User must resolve network/access issue
+
+**I CANNOT proceed without standards. Inline patterns are FORBIDDEN.**
+```
+
+### Why This Is Non-Negotiable
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "I know the patterns from training" | Training data may be outdated. Standards evolve. | **MUST WebFetch current standards** |
+| "I'll use general best practices" | General ≠ Lerian standards. Compliance requires specifics. | **MUST WebFetch current standards** |
+| "WebFetch is slow, I'll skip it" | Speed ≠ correctness. Wrong patterns = rework. | **MUST WebFetch, wait for result** |
+| "I'll add the patterns I remember" | Memory ≠ source of truth. Standards file is authoritative. | **MUST WebFetch current standards** |
+| "Standards haven't changed recently" | You don't know this. Always fetch latest. | **MUST WebFetch current standards** |
 
 ### Agent-Specific WebFetch URLs
 
