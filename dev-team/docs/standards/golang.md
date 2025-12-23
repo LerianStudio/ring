@@ -505,6 +505,17 @@ headers := libOpentelemetry.PrepareQueueHeaders(ctx, map[string]any{
 
 | Anti-Pattern | Problem | Correct Pattern |
 |--------------|---------|-----------------|
+| `import "go.opentelemetry.io/otel"` | Direct OTel usage bypasses lib-commons wrappers | Use `libCommons.NewTrackingFromContext(ctx)` |
+| `import "go.opentelemetry.io/otel/trace"` | Direct tracer access without lib-commons | Use `libOpentelemetry` package from lib-commons |
+| `otel.Tracer("name")` | Creates standalone tracer, no context integration | Use tracer from `NewTrackingFromContext(ctx)` |
+| `trace.SpanFromContext(ctx)` | Raw OTel API, inconsistent with lib-commons | Use `libCommons.NewTrackingFromContext(ctx)` |
+| `c.JSON(status, data)` | Direct Fiber response, no standard format | Use `libHTTP.OK(c, data)` or `libHTTP.Created(c, data)` |
+| `c.Status(code).JSON(err)` | Inconsistent error responses | Use `libHTTP.WithError(c, err)` |
+| Custom error handler | Inconsistent error format across services | Use `libHTTP.HandleFiberError` in fiber.Config |
+| Manual pagination logic | Reinvents cursor/offset pagination | Use `libHTTP.Pagination`, `libHTTP.CursorPagination` |
+| `c.SendString()` / `c.Send()` | No standard response wrapper | Use `libHTTP.OK()`, `libHTTP.Created()`, `libHTTP.NoContent()` |
+| Custom logging middleware | Inconsistent request logging | Use `libHTTP.WithHTTPLogging(libHTTP.WithCustomLogger(lg))` |
+| Manual telemetry middleware | Missing trace context injection | Use `libHTTP.NewTelemetryMiddleware(tl).WithTelemetry(tl)` |
 | `log.Printf("[Service] msg")` | No trace correlation, no structured logging | `logger.Infof("msg")` from context |
 | No span in service method | Operation not traceable | Always create child span |
 | `return err` without span handling | Error not attributed to trace | Call `HandleSpanError` or `HandleSpanBusinessErrorEvent` |
@@ -513,6 +524,10 @@ headers := libOpentelemetry.PrepareQueueHeaders(ctx, map[string]any{
 | Using `_` to ignore tracer | No tracing capability | Extract and use tracer from context |
 | Calling downstream without ctx | Trace chain breaks | Pass ctx to all downstream calls |
 | Not injecting trace context for outgoing HTTP/gRPC | Remote traces disconnected | Use `InjectHTTPContext` / `InjectGRPCContext` |
+
+> **⛔ CRITICAL:** Direct imports of `go.opentelemetry.io/otel`, `go.opentelemetry.io/otel/trace`, `go.opentelemetry.io/otel/attribute`, or `go.opentelemetry.io/otel/codes` are **FORBIDDEN** in application code. All telemetry MUST go through lib-commons wrappers (`libCommons`, `libOpentelemetry`). The only exception is if lib-commons doesn't provide a required OTel feature - in that case, open an issue to add it to lib-commons.
+
+> **⛔ CRITICAL:** Direct Fiber response methods (`c.JSON()`, `c.Status().JSON()`, `c.SendString()`) are **FORBIDDEN**. All HTTP responses MUST use `libHTTP` wrappers (`libHTTP.OK()`, `libHTTP.Created()`, `libHTTP.WithError()`, etc.) to ensure consistent response format, proper error handling, and telemetry integration across all Lerian services.
 
 ### 1. Bootstrap Initialization
 
@@ -2766,6 +2781,8 @@ Before submitting Go code, verify:
 - [ ] Configuration loaded via `SetConfigFromEnvVars`
 - [ ] Telemetry initialized and middleware configured
 - [ ] Logger/tracer recovered from context via `NewTrackingFromContext`
+- [ ] **No direct imports of `go.opentelemetry.io/otel/*` packages** (use lib-commons wrappers)
+- [ ] **No direct Fiber responses** (`c.JSON()`, `c.Send()`) - use `libHTTP.OK()`, `libHTTP.WithError()`
 - [ ] All errors are checked and wrapped with context
 - [ ] Error codes use service prefix (e.g., PLT-0001)
 - [ ] No `panic()` outside of `main.go` or `InitServers`
