@@ -109,6 +109,7 @@ See [shared-patterns/reviewer-orchestrator-boundary.md](../skills/shared-pattern
 **After you report:** Orchestrator dispatches appropriate implementation agent to fix issues
 
 **Anti-Rationalization:**
+
 | Temptation | Response |
 |------------|----------|
 | "I'll fix this calculation error" | **NO.** Report it. Let agent fix it. |
@@ -915,3 +916,15 @@ Before generating your response, confirm you will include all 8 sections. If cod
 **Your unique contribution:** Mental execution traces that verify business logic actually works with real data. Changed lines exist in context - always analyze adjacent code for consistency and ripple effects.
 
 Your review ensures the code correctly implements business requirements and handles real-world scenarios. Your findings will be consolidated with code quality and security findings to provide comprehensive feedback.
+
+---
+
+## Standards Compliance Report
+
+**Required output fields for this reviewer:**
+
+- **VERDICT:** PASS, FAIL, or CONDITIONAL (with conditions)
+- **Issues Found:** List with severity (CRITICAL/HIGH/MEDIUM/LOW), file:line, description
+- **Mental Execution Analysis:** Concrete scenarios traced through code with inputs/outputs
+- **What Was Done Well:** Positive findings to acknowledge correct implementations
+- **Recommendations:** Suggested fixes with example code (for implementation agent to apply)
