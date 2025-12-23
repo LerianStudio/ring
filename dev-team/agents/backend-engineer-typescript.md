@@ -365,7 +365,7 @@ See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-
 
 | Standards File | Sections to Load | Anchor |
 |----------------|------------------|--------|
-| typescript.md | Type Safety Rules | #type-safety-rules |
+| typescript.md | Type Safety | #type-safety |
 
 **Process:**
 1. WebFetch `typescript.md` (URL in Standards Loading section above)
@@ -401,7 +401,7 @@ See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-
 
 | Standards File | Section to Load | Anchor |
 |----------------|-----------------|--------|
-| typescript.md | Directory Structure (Backend) | #directory-structure-backend |
+| typescript.md | Directory Structure | #directory-structure |
 | typescript.md | Zod Validation Patterns | #zod-validation-patterns |
 | typescript.md | Error Handling | #error-handling |
 | typescript.md | Dependency Injection | #dependency-injection |

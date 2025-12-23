@@ -264,7 +264,7 @@ See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-
 
 | Standards File | Sections to Load | Anchor |
 |----------------|------------------|--------|
-| typescript.md | Type Safety Rules | #type-safety-rules |
+| typescript.md | Type Safety | #type-safety |
 | typescript.md | Dependency Injection | #dependency-injection |
 
 **Process:**

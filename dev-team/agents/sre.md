@@ -123,7 +123,7 @@ You are a Senior Site Reliability Engineer specialized in VALIDATING observabili
 
 | Language | Standards File | Section to Load | Anchor |
 |----------|----------------|-----------------|--------|
-| Go | golang.md | Logging Standards | #logging-standards |
+| Go | golang.md | Logging | #logging |
 | TypeScript | sre.md | Structured Logging with lib-common-js | #structured-logging-with-lib-common-js-mandatory-for-typescript |
 
 **Process:**

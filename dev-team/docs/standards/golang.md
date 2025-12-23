@@ -16,9 +16,9 @@ This file defines the specific standards for Go development at Lerian Studio.
 | 1 | [Version](#version) | Go version requirements |
 | 2 | [Core Dependency: lib-commons](#core-dependency-lib-commons-mandatory) | Required foundation library |
 | 3 | [Frameworks & Libraries](#frameworks--libraries) | Required packages and versions |
-| 4 | [Configuration Loading](#configuration-loading-mandatory) | Environment variable handling |
-| 5 | [Telemetry & Observability](#telemetry--observability-mandatory) | OpenTelemetry integration |
-| 6 | [Bootstrap Pattern](#bootstrap-pattern-mandatory) | Application initialization |
+| 4 | [Configuration](#configuration) | Environment variable handling |
+| 5 | [Observability](#observability) | OpenTelemetry integration |
+| 6 | [Bootstrap](#bootstrap) | Application initialization |
 | 7 | [Access Manager Integration](#access-manager-integration-mandatory) | Authentication and authorization with lib-auth |
 | 8 | [License Manager Integration](#license-manager-integration-mandatory) | License validation with lib-license-go |
 | 9 | [Data Transformation](#data-transformation-toentityfromentity-mandatory) | ToEntity/FromEntity patterns |
@@ -26,8 +26,8 @@ This file defines the specific standards for Go development at Lerian Studio.
 | 11 | [Error Handling](#error-handling) | Error wrapping and checking |
 | 12 | [Function Design](#function-design-mandatory) | Single responsibility principle |
 | 13 | [Pagination Patterns](#pagination-patterns) | Cursor and page-based pagination |
-| 14 | [Testing Patterns](#testing-patterns) | Table-driven tests, edge cases |
-| 15 | [Logging Standards](#logging-standards) | Structured logging with lib-commons |
+| 14 | [Testing](#testing) | Table-driven tests, edge cases |
+| 15 | [Logging](#logging) | Structured logging with lib-commons |
 | 16 | [Linting](#linting) | golangci-lint configuration |
 | 17 | [Architecture Patterns](#architecture-patterns) | Hexagonal architecture |
 | 18 | [Directory Structure](#directory-structure) | Project layout (Lerian pattern) |
@@ -130,7 +130,7 @@ import (
 
 ---
 
-## Configuration Loading (MANDATORY)
+## Configuration
 
 All services **MUST** use `libCommons.SetConfigFromEnvVars` for configuration loading.
 
@@ -265,7 +265,7 @@ type Config struct {
 
 ---
 
-## Telemetry & Observability (MANDATORY)
+## Observability
 
 All services **MUST** integrate OpenTelemetry using lib-commons.
 
@@ -714,7 +714,7 @@ func (s *Server) Run(l *libCommons.Launcher) error {
 
 ---
 
-## Bootstrap Pattern (MANDATORY)
+## Bootstrap
 
 All services **MUST** follow the bootstrap pattern for initialization. The bootstrap package is the single point of application assembly where all dependencies are wired together.
 
@@ -2154,7 +2154,7 @@ Use when: Client needs total count for pagination UI (showing "Page 1 of 10")
 
 ---
 
-## Testing Patterns
+## Testing
 
 ### Table-Driven Tests (MANDATORY)
 
@@ -2262,7 +2262,7 @@ func TestUserService_CreateUser(t *testing.T) {
 
 ---
 
-## Logging Standards
+## Logging
 
 **HARD GATE:** All Go services MUST use lib-commons structured logging. Unstructured logging is FORBIDDEN.
 

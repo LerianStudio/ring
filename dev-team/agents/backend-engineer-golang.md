@@ -282,8 +282,8 @@ See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-
 
 | Standards File | Sections to Load | Anchor |
 |----------------|------------------|--------|
-| golang.md | Logging Standards | #logging-standards |
-| golang.md | Telemetry & Observability | #telemetry-observability-mandatory |
+| golang.md | Logging | #logging |
+| golang.md | Observability | #observability |
 
 **Process:**
 1. WebFetch `golang.md` (URL in Standards Loading section above)
@@ -323,7 +323,7 @@ See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-
 
 | Standards File | Section to Load | Anchor |
 |----------------|-----------------|--------|
-| golang.md | Bootstrap Pattern (MANDATORY) | #bootstrap-pattern-mandatory |
+| golang.md | Bootstrap | #bootstrap |
 | golang.md | Directory Structure | #directory-structure |
 
 ### Detection: Is This a New Project/Initial Setup?

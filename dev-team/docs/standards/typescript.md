@@ -16,15 +16,15 @@ This file defines the specific standards for TypeScript (backend) development.
 | 1 | [Version](#version) | TypeScript and Node.js versions |
 | 2 | [Strict Configuration](#strict-configuration-mandatory) | tsconfig.json requirements |
 | 3 | [Frameworks & Libraries](#frameworks--libraries) | Required packages |
-| 4 | [Type Safety Rules](#type-safety-rules) | Never use any, branded types |
+| 4 | [Type Safety](#type-safety) | Never use any, branded types |
 | 5 | [Zod Validation Patterns](#zod-validation-patterns) | Schema validation |
 | 6 | [Dependency Injection](#dependency-injection) | TSyringe patterns |
 | 7 | [AsyncLocalStorage for Context](#asynclocalstorage-for-context) | Request context propagation |
-| 8 | [Testing Patterns](#testing-patterns) | Type-safe mocks, fixtures |
+| 8 | [Testing](#testing) | Type-safe mocks, fixtures |
 | 9 | [Error Handling](#error-handling) | Custom error classes |
 | 10 | [Function Design](#function-design-mandatory) | Single responsibility principle |
 | 11 | [Naming Conventions](#naming-conventions) | Files, interfaces, types |
-| 12 | [Directory Structure](#directory-structure-backend) | Project layout (Lerian pattern) |
+| 12 | [Directory Structure](#directory-structure) | Project layout (Lerian pattern) |
 | 13 | [RabbitMQ Worker Pattern](#rabbitmq-worker-pattern) | Async message processing |
 
 **Meta-sections (not checked by agents):**
@@ -100,7 +100,7 @@ This file defines the specific standards for TypeScript (backend) development.
 
 ---
 
-## Type Safety Rules
+## Type Safety
 
 ### NEVER use `any`
 
@@ -370,7 +370,7 @@ async function processOrder(orderId: string) {
 
 ---
 
-## Testing Patterns
+## Testing
 
 ### Type-Safe Mocks
 
@@ -633,7 +633,7 @@ function applyDiscount(total: number, couponCode?: string): number {
 
 ---
 
-## Directory Structure (Backend)
+## Directory Structure
 
 The directory structure follows the **Lerian pattern** - a simplified hexagonal architecture without explicit DDD folders.
 

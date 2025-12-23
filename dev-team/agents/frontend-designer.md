@@ -883,8 +883,8 @@ See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-
 
 | Standards File | Sections to Load | Anchor |
 |----------------|------------------|--------|
-| frontend.md | FORBIDDEN Patterns | #forbidden-patterns |
-| frontend.md | Accessibility (a11y) | #accessibility-a11y |
+| frontend.md | Forbidden Patterns | #forbidden-patterns |
+| frontend.md | Accessibility | #accessibility |
 | frontend.md | Styling Standards | #styling-standards |
 
 **Process:**

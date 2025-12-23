@@ -227,48 +227,48 @@ These sections describe HOW to use the standards, not WHAT the standards are.
 
 ### backend-engineer-golang → golang.md
 
-| # | Section to Check | Key Subsections |
-|---|------------------|-----------------|
-| 1 | Version (MANDATORY) | Go 1.24+ |
-| 2 | Core Dependency: lib-commons (MANDATORY) | |
-| 3 | Frameworks & Libraries (MANDATORY) | lib-commons v2, Fiber v2, pgx/v5, OpenTelemetry, zap, testify, mockery, mongo-driver, go-redis/v9, validator/v10, gRPC-Go, sqlc, GORM |
-| 4 | Configuration Loading (MANDATORY) | |
-| 5 | Telemetry & Observability (MANDATORY) | |
-| 6 | Bootstrap Pattern (MANDATORY) | |
-| 7 | Access Manager Integration (CONDITIONAL) | lib-auth, auth middleware, M2M auth - **Check if project has auth requirements** |
-| 8 | License Manager Integration (CONDITIONAL) | lib-license-go, global middleware, graceful shutdown - **Check if project is licensed** |
-| 9 | Data Transformation: ToEntity/FromEntity (MANDATORY) | |
-| 10 | Error Codes Convention (MANDATORY) | |
-| 11 | Error Handling (MANDATORY) | |
-| 12 | Function Design (MANDATORY) | |
-| 13 | Pagination Patterns (MANDATORY) | |
-| 14 | Testing Patterns (MANDATORY) | |
-| 15 | Logging Standards (MANDATORY) | |
-| 16 | Linting (MANDATORY) | |
-| 17 | Architecture Patterns (MANDATORY) | |
-| 18 | Directory Structure (MANDATORY) | Lerian pattern |
-| 19 | Concurrency Patterns (MANDATORY) | |
-| 20 | RabbitMQ Worker Pattern (MANDATORY) | |
+| # | Section to Check | Anchor | Key Subsections |
+|---|------------------|--------|-----------------|
+| 1 | Version | `#version` | Go 1.24+ |
+| 2 | Core Dependency: lib-commons | `#core-dependency-lib-commons-mandatory` | |
+| 3 | Frameworks & Libraries | `#frameworks--libraries` | lib-commons v2, Fiber v2, pgx/v5, OpenTelemetry, zap, testify, mockery |
+| 4 | Configuration | `#configuration` | Environment variable handling |
+| 5 | Observability | `#observability` | OpenTelemetry integration |
+| 6 | Bootstrap | `#bootstrap` | Application initialization |
+| 7 | Access Manager Integration | `#access-manager-integration-mandatory` | **CONDITIONAL** - Check if project has auth |
+| 8 | License Manager Integration | `#license-manager-integration-mandatory` | **CONDITIONAL** - Check if project is licensed |
+| 9 | Data Transformation | `#data-transformation-toentityfromentity-mandatory` | ToEntity/FromEntity patterns |
+| 10 | Error Codes Convention | `#error-codes-convention-mandatory` | Service-prefixed codes |
+| 11 | Error Handling | `#error-handling` | Error wrapping and checking |
+| 12 | Function Design | `#function-design-mandatory` | Single responsibility |
+| 13 | Pagination Patterns | `#pagination-patterns` | Cursor and page-based |
+| 14 | Testing | `#testing` | Table-driven tests, edge cases |
+| 15 | Logging | `#logging` | Structured logging with lib-commons |
+| 16 | Linting | `#linting` | golangci-lint configuration |
+| 17 | Architecture Patterns | `#architecture-patterns` | Hexagonal architecture |
+| 18 | Directory Structure | `#directory-structure` | Lerian pattern |
+| 19 | Concurrency Patterns | `#concurrency-patterns` | Goroutines, channels, errgroup |
+| 20 | RabbitMQ Worker Pattern | `#rabbitmq-worker-pattern` | Async message processing |
 
 ---
 
 ### backend-engineer-typescript → typescript.md
 
-| # | Section to Check | Key Subsections |
-|---|------------------|-----------------|
-| 1 | Version (MANDATORY) | TypeScript 5.0+, Node.js 20+ |
-| 2 | Strict Configuration (MANDATORY) | tsconfig.json strict mode |
-| 3 | Frameworks & Libraries (MANDATORY) | Express, Fastify, NestJS, Hono, tRPC, Prisma, Drizzle, TypeORM, Kysely, Zod, Yup, joi, class-validator, Vitest, Jest, Supertest, testcontainers |
-| 4 | Type Safety Rules (MANDATORY) | No any, branded types, discriminated unions |
-| 5 | Zod Validation Patterns (MANDATORY) | Schema validation |
-| 6 | Dependency Injection (MANDATORY) | TSyringe patterns |
-| 7 | AsyncLocalStorage for Context (MANDATORY) | Request context propagation |
-| 8 | Testing Patterns (MANDATORY) | Type-safe mocks, fixtures, edge cases |
-| 9 | Error Handling (MANDATORY) | Custom error classes |
-| 10 | Function Design (MANDATORY) | Single responsibility |
-| 11 | Naming Conventions (MANDATORY) | Files, interfaces, types |
-| 12 | Directory Structure (MANDATORY) | Lerian pattern |
-| 13 | RabbitMQ Worker Pattern (MANDATORY) | Async message processing |
+| # | Section to Check | Anchor | Key Subsections |
+|---|------------------|--------|-----------------|
+| 1 | Version | `#version` | TypeScript 5.0+, Node.js 20+ |
+| 2 | Strict Configuration | `#strict-configuration-mandatory` | tsconfig.json strict mode |
+| 3 | Frameworks & Libraries | `#frameworks--libraries` | Express, Fastify, NestJS, Prisma, Zod, Vitest |
+| 4 | Type Safety | `#type-safety` | No any, branded types, discriminated unions |
+| 5 | Zod Validation Patterns | `#zod-validation-patterns` | Schema validation |
+| 6 | Dependency Injection | `#dependency-injection` | TSyringe patterns |
+| 7 | AsyncLocalStorage for Context | `#asynclocalstorage-for-context` | Request context propagation |
+| 8 | Testing | `#testing` | Type-safe mocks, fixtures, edge cases |
+| 9 | Error Handling | `#error-handling` | Custom error classes |
+| 10 | Function Design | `#function-design-mandatory` | Single responsibility |
+| 11 | Naming Conventions | `#naming-conventions` | Files, interfaces, types |
+| 12 | Directory Structure | `#directory-structure` | Lerian pattern |
+| 13 | RabbitMQ Worker Pattern | `#rabbitmq-worker-pattern` | Async message processing |
 
 ---
 
@@ -280,21 +280,21 @@ These sections describe HOW to use the standards, not WHAT the standards are.
 
 ### frontend-engineer → frontend.md
 
-| # | Section to Check |
-|---|------------------|
-| 1 | Framework (MANDATORY) |
-| 2 | Libraries & Tools (MANDATORY) |
-| 3 | State Management Patterns (MANDATORY) |
-| 4 | Form Patterns (MANDATORY) |
-| 5 | Styling Standards (MANDATORY) |
-| 6 | Typography Standards (MANDATORY) |
-| 7 | Animation Standards (MANDATORY) |
-| 8 | Component Patterns (MANDATORY) |
-| 9 | Accessibility (a11y) (MANDATORY) |
-| 10 | Performance (MANDATORY) |
-| 11 | Directory Structure (MANDATORY) |
-| 12 | FORBIDDEN Patterns (MANDATORY) |
-| 13 | Standards Compliance Categories (MANDATORY) |
+| # | Section to Check | Anchor |
+|---|------------------|--------|
+| 1 | Framework | `#framework` |
+| 2 | Libraries & Tools | `#libraries--tools` |
+| 3 | State Management Patterns | `#state-management-patterns` |
+| 4 | Form Patterns | `#form-patterns` |
+| 5 | Styling Standards | `#styling-standards` |
+| 6 | Typography Standards | `#typography-standards` |
+| 7 | Animation Standards | `#animation-standards` |
+| 8 | Component Patterns | `#component-patterns` |
+| 9 | Accessibility | `#accessibility` |
+| 10 | Performance | `#performance` |
+| 11 | Directory Structure | `#directory-structure` |
+| 12 | Forbidden Patterns | `#forbidden-patterns` |
+| 13 | Standards Compliance Categories | `#standards-compliance-categories` |
 
 ---
 
@@ -324,14 +324,14 @@ These sections describe HOW to use the standards, not WHAT the standards are.
 
 ### sre → sre.md
 
-| # | Section to Check |
-|---|------------------|
-| 1 | Observability Stack (MANDATORY) |
-| 2 | Logging Standards (MANDATORY) |
-| 3 | Tracing Standards (MANDATORY) |
-| 4 | OpenTelemetry with lib-commons (MANDATORY) |
-| 5 | Structured Logging with lib-common-js (MANDATORY) |
-| 6 | Health Checks (MANDATORY) |
+| # | Section to Check | Anchor |
+|---|------------------|--------|
+| 1 | Observability | `#observability` |
+| 2 | Logging | `#logging` |
+| 3 | Tracing | `#tracing` |
+| 4 | OpenTelemetry with lib-commons | `#opentelemetry-with-lib-commons-mandatory-for-go` |
+| 5 | Structured Logging with lib-common-js | `#structured-logging-with-lib-common-js-mandatory-for-typescript` |
+| 6 | Health Checks | `#health-checks` |
 
 ---
 

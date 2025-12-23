@@ -21,10 +21,10 @@ This file defines the specific standards for frontend development.
 | 6 | [Typography Standards](#typography-standards) | Font selection and pairing |
 | 7 | [Animation Standards](#animation-standards) | CSS transitions, Framer Motion |
 | 8 | [Component Patterns](#component-patterns) | Compound components, error boundaries |
-| 9 | [Accessibility (a11y)](#accessibility-a11y) | WCAG 2.1 AA compliance |
+| 9 | [Accessibility](#accessibility) | WCAG 2.1 AA compliance |
 | 10 | [Performance](#performance) | Code splitting, image optimization |
 | 11 | [Directory Structure](#directory-structure) | Next.js App Router layout |
-| 12 | [FORBIDDEN Patterns](#forbidden-patterns) | Anti-patterns to avoid |
+| 12 | [Forbidden Patterns](#forbidden-patterns) | Anti-patterns to avoid |
 | 13 | [Standards Compliance Categories](#standards-compliance-categories) | Categories for dev-refactor |
 
 **Meta-sections (not checked by agents):**
@@ -508,7 +508,7 @@ class ErrorBoundary extends Component<Props, State> {
 
 ---
 
-## Accessibility (a11y)
+## Accessibility
 
 ### Required Practices
 
@@ -649,7 +649,7 @@ const handleClick = useCallback((id: string) => {
 
 ---
 
-## FORBIDDEN Patterns
+## Forbidden Patterns
 
 **The following patterns are NEVER allowed. Agents MUST refuse to implement these:**
 

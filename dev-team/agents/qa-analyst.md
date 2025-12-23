@@ -416,8 +416,8 @@ See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-
 
 | Language | Standards File | Section to Load | Anchor |
 |----------|----------------|-----------------|--------|
-| Go | golang.md | Testing Patterns | #testing-patterns |
-| TypeScript | typescript.md | Testing Patterns | #testing-patterns |
+| Go | golang.md | Testing | #testing |
+| TypeScript | typescript.md | Testing | #testing |
 
 **Process:**
 1. Detect project language (Go or TypeScript)
