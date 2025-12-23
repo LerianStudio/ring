@@ -345,23 +345,94 @@ Task:
     ## Your Task
     1. Write MINIMAL code to make the test pass
     2. Follow ALL Ring Standards (logging, tracing, error handling)
-    3. Instrument code with OpenTelemetry spans (90%+ coverage required)
+    3. **Instrument ALL code with telemetry** (100% of handlers, services, repositories)
     4. Run the test and capture the PASS output
 
-    ## Instrumentation Requirements (MANDATORY)
-    Every function MUST have:
+    ## ⛔ MANDATORY: Telemetry Instrumentation (NON-NEGOTIABLE)
+
+    **EVERY function that does work MUST be instrumented with telemetry.**
+    This is NOT optional. This is NOT "nice to have". This is REQUIRED.
+
+    ### What "Instrumented" Means
+    1. **Extract logger/tracer from context** (NOT create new ones)
+    2. **Create a child span** for the operation
+    3. **Defer span.End()** immediately
+    4. **Use structured logging** correlated with trace
+    5. **Handle errors with span attribution** (business vs technical)
+
+    ### Language-Specific Patterns (MANDATORY)
+
+    **Go - Use lib-commons wrappers (NEVER raw go.opentelemetry.io/otel):**
     ```go
-    // Go pattern
-    logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)
-    ctx, span := tracer.Start(ctx, "layer.operation_name")
-    defer span.End()
+    func (s *Service) DoSomething(ctx context.Context, req *Request) (*Response, error) {
+        // 1. Extract from context (MANDATORY - first line of every method)
+        logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)
+        
+        // 2. Create child span (MANDATORY)
+        ctx, span := tracer.Start(ctx, "service.do_something")
+        defer span.End()  // 3. ALWAYS defer immediately
+        
+        // 4. Structured logging (correlated with trace)
+        logger.Infof("Processing request: id=%s", req.ID)
+        
+        // 5. Pass ctx downstream (trace propagation)
+        result, err := s.repo.Create(ctx, entity)
+        if err != nil {
+            // 6. Error attribution (business vs technical)
+            libOpentelemetry.HandleSpanError(&span, "Repository failed", err)
+            return nil, err
+        }
+        return result, nil
+    }
     ```
 
+    **TypeScript - Use lib-commons-js wrappers:**
     ```typescript
-    // TypeScript pattern
-    const span = tracer.startSpan('layer.operation_name');
-    try { /* work */ } finally { span.end(); }
+    async doSomething(ctx: Context, req: Request): Promise<Response> {
+        // 1. Extract from context
+        const { logger, tracer } = getTrackingFromContext(ctx);
+        
+        // 2. Create child span
+        const span = tracer.startSpan('service.do_something');
+        try {
+            // 3. Structured logging
+            logger.info('Processing request', { id: req.id });
+            
+            // 4. Pass context downstream
+            const result = await this.repo.create(ctx, entity);
+            return result;
+        } catch (error) {
+            // 5. Error attribution
+            span.recordException(error);
+            span.setStatus({ code: SpanStatusCode.ERROR });
+            throw error;
+        } finally {
+            span.end();  // ALWAYS end span
+        }
+    }
     ```
+
+    ### ⛔ FORBIDDEN Patterns (Agent MUST NOT use these)
+    - `import "go.opentelemetry.io/otel"` → Use `libCommons`, `libOpentelemetry`
+    - `otel.Tracer("name")` → Use `tracer` from `NewTrackingFromContext(ctx)`
+    - `c.JSON(status, data)` → Use `libHTTP.OK(c, data)`
+    - `log.Printf()` → Use `logger.Infof()` from context
+    - Functions without spans → EVERY function needs a span
+
+    ### Span Naming Convention
+    | Layer | Pattern | Examples |
+    |-------|---------|----------|
+    | Handler | `handler.{resource}.{action}` | `handler.tenant.create` |
+    | Service | `service.{domain}.{operation}` | `service.tenant.create` |
+    | Repository | `repository.{entity}.{operation}` | `repository.tenant.find_by_id` |
+
+    ### Verification Checklist (Agent MUST verify before completing)
+    - [ ] Every handler has `NewTrackingFromContext` + span
+    - [ ] Every service method has `NewTrackingFromContext` + span
+    - [ ] Every repository method has `NewTrackingFromContext` + span
+    - [ ] NO direct imports of `go.opentelemetry.io/otel/*`
+    - [ ] NO direct Fiber responses (`c.JSON`, `c.Send`)
+    - [ ] All errors use `HandleSpanError` or `HandleSpanBusinessErrorEvent`
 
     ## Required Output Format
 
@@ -490,6 +561,10 @@ See [shared-patterns/shared-anti-rationalization.md](../shared-patterns/shared-a
 | "I'll add observability later" | Later = never. Observability is part of GREEN. | **Add logging + tracing NOW** |
 | "Minimal code = no logging" | Minimal = pass test. Logging is a standard, not extra. | **Include observability** |
 | "DEFERRED to later tasks" | DEFERRED = FAILED. Standards are not deferrable. | **Implement ALL standards NOW** |
+| "Using raw OTel is fine" | lib-commons wrappers are MANDATORY for consistency | **Use libCommons.NewTrackingFromContext** |
+| "c.JSON() works the same" | Direct Fiber breaks response standardization | **Use libHTTP.OK(), libHTTP.WithError()** |
+| "This function is too simple for spans" | Simple ≠ exempt. ALL functions need spans. | **Add span to EVERY function** |
+| "Telemetry adds overhead" | Observability is non-negotiable for production | **Instrument 100% of code paths** |
 
 ## Agent Selection Guide
 
