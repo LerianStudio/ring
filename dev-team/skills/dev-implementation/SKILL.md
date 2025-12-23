@@ -362,77 +362,30 @@ Task:
 
     ### Language-Specific Patterns (MANDATORY)
 
-    **Go - Use lib-commons wrappers (NEVER raw go.opentelemetry.io/otel):**
-    ```go
-    func (s *Service) DoSomething(ctx context.Context, req *Request) (*Response, error) {
-        // 1. Extract from context (MANDATORY - first line of every method)
-        logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)
-        
-        // 2. Create child span (MANDATORY)
-        ctx, span := tracer.Start(ctx, "service.do_something")
-        defer span.End()  // 3. ALWAYS defer immediately
-        
-        // 4. Structured logging (correlated with trace)
-        logger.Infof("Processing request: id=%s", req.ID)
-        
-        // 5. Pass ctx downstream (trace propagation)
-        result, err := s.repo.Create(ctx, entity)
-        if err != nil {
-            // 6. Error attribution (business vs technical)
-            libOpentelemetry.HandleSpanError(&span, "Repository failed", err)
-            return nil, err
-        }
-        return result, nil
-    }
-    ```
+    **⛔ DO NOT duplicate code patterns here. Agent MUST WebFetch standards.**
 
-    **TypeScript - Use lib-commons-js wrappers:**
-    ```typescript
-    async doSomething(ctx: Context, req: Request): Promise<Response> {
-        // 1. Extract from context
-        const { logger, tracer } = getTrackingFromContext(ctx);
-        
-        // 2. Create child span
-        const span = tracer.startSpan('service.do_something');
-        try {
-            // 3. Structured logging
-            logger.info('Processing request', { id: req.id });
-            
-            // 4. Pass context downstream
-            const result = await this.repo.create(ctx, entity);
-            return result;
-        } catch (error) {
-            // 5. Error attribution
-            span.recordException(error);
-            span.setStatus({ code: SpanStatusCode.ERROR });
-            throw error;
-        } finally {
-            span.end();  // ALWAYS end span
-        }
-    }
-    ```
+    | Language | Standards File | Key Sections |
+    |----------|----------------|--------------|
+    | **Go** | `golang.md` | "Telemetry & Observability", "Child Spans", "Context Propagation" |
+    | **TypeScript** | `typescript.md` | "Observability", "Telemetry Patterns", "Context Propagation" |
 
-    ### ⛔ FORBIDDEN Patterns (Agent MUST NOT use these)
-    - `import "go.opentelemetry.io/otel"` → Use `libCommons`, `libOpentelemetry`
-    - `otel.Tracer("name")` → Use `tracer` from `NewTrackingFromContext(ctx)`
-    - `c.JSON(status, data)` → Use `libHTTP.OK(c, data)`
-    - `log.Printf()` → Use `logger.Infof()` from context
-    - Functions without spans → EVERY function needs a span
+    **Agent WebFetches standards and follows patterns defined there.**
 
-    ### Span Naming Convention
-    | Layer | Pattern | Examples |
-    |-------|---------|----------|
-    | Handler | `handler.{resource}.{action}` | `handler.tenant.create` |
-    | Service | `service.{domain}.{operation}` | `service.tenant.create` |
-    | Repository | `repository.{entity}.{operation}` | `repository.tenant.find_by_id` |
+    ### ⛔ FORBIDDEN Patterns
+    
+    See standards files for complete forbidden/required patterns:
+    - **Go:** `golang.md` → "Anti-Patterns" table
+    - **TypeScript:** `typescript.md` → "Anti-Patterns" table
 
-    ### Verification Checklist (Agent MUST verify before completing)
-    - [ ] Every handler has `NewTrackingFromContext` + span
-    - [ ] Every service method has `NewTrackingFromContext` + span
-    - [ ] Every repository method has `NewTrackingFromContext` + span
-    - [ ] NO direct imports of `go.opentelemetry.io/otel/*`
-    - [ ] NO direct Fiber responses (`c.JSON`, `c.Send`)
-    - [ ] All errors use `HandleSpanError` or `HandleSpanBusinessErrorEvent`
+    Key forbidden patterns (details in standards):
+    - Direct OTel imports (use lib-commons wrappers)
+    - Direct framework responses (use lib wrapper methods)
+    - Functions without spans
+    - Logging without context correlation
+
+    ### Verification Checklist
+    
+    Agent MUST verify against Standards Coverage Table (see `standards-coverage-table.md`).
 
     ## Required Output Format
 

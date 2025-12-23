@@ -394,97 +394,20 @@ ok      myapp/auth    0.015s
 
 **⛔ CRITICAL: Code instrumentation is NOT optional. Every function you write MUST be instrumented.**
 
-OpenTelemetry instrumentation is part of writing code, NOT a separate task. When you implement a function, you MUST include spans.
+**See golang.md standards for:**
+- "Telemetry & Observability (MANDATORY)" section - complete patterns
+- "Distributed Tracing Architecture" - how traces propagate
+- "Child Spans" - required pattern for every function
+- "Context Propagation" - InjectHTTPContext, InjectGRPCContext
 
-### What "Instrumentation" Means
+**Key requirements (details in standards):**
+- 90%+ function coverage with spans
+- Every handler/service/repository MUST have child span
+- Use `libCommons.NewTrackingFromContext(ctx)` to extract logger/tracer
+- Use `HandleSpanError` / `HandleSpanBusinessErrorEvent` for errors
+- Propagate trace context to external calls
 
-Instrumentation = Adding OpenTelemetry spans to track the execution of your code. This is NOT just installing the library - you MUST add spans to every function.
-
-### Required Pattern (EVERY Function)
-
-```go
-func (s *MyService) DoSomething(ctx context.Context, req *Request) (*Response, error) {
-    // MANDATORY: Extract logger and tracer from context
-    logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)
-    
-    // MANDATORY: Create child span for this operation
-    ctx, span := tracer.Start(ctx, "service.my_service.do_something")
-    defer span.End()
-    
-    // MANDATORY: Use structured logger (automatically correlated with trace)
-    logger.Infof("Processing request: id=%s", req.ID)
-    
-    // Your implementation...
-    result, err := s.repo.Create(ctx, entity)
-    if err != nil {
-        // MANDATORY: Handle span errors appropriately
-        if errors.Is(err, ErrNotFound) {
-            libOpentelemetry.HandleSpanBusinessErrorEvent(&span, "Entity not found", err)
-        } else {
-            libOpentelemetry.HandleSpanError(&span, "Repository create failed", err)
-        }
-        return nil, err
-    }
-    
-    return result, nil
-}
-```
-
-### Coverage Requirements
-
-| Layer | Required | Pattern |
-|-------|----------|---------|
-| **Handlers** | 100% | `tracer.Start(ctx, "handler.{name}")` |
-| **Services** | 100% | `tracer.Start(ctx, "service.{domain}.{operation}")` |
-| **Repositories** | 100% | `tracer.Start(ctx, "postgres.{operation}")` or `"mongo.{operation}"` |
-| **External HTTP** | 100% | `libOpentelemetry.InjectHTTPContext(&req.Header, ctx)` |
-| **External gRPC** | 100% | `libOpentelemetry.InjectGRPCContext(ctx)` |
-| **Queue Publish** | 100% | `libOpentelemetry.PrepareQueueHeaders(ctx, headers)` |
-
-**Minimum Total Coverage: 90%+ of functions MUST have instrumentation.**
-
-### Span Naming Convention
-
-| Layer | Pattern | Example |
-|-------|---------|---------|
-| Handler | `handler.{operation}` | `handler.create_tenant` |
-| Service | `service.{domain}.{operation}` | `service.tenant.create` |
-| Repository | `{db}.{operation}` | `postgres.find_all`, `mongo.insert` |
-| External Call | `external.{service}.{operation}` | `external.payment.process` |
-
-### Error Handling in Spans
-
-| Error Type | Handler | Span Status |
-|------------|---------|-------------|
-| **Business Error** (validation, not found) | `HandleSpanBusinessErrorEvent` | OK (expected) |
-| **Technical Error** (DB, network) | `HandleSpanError` | ERROR (unexpected) |
-
-### Anti-Rationalization for Instrumentation
-
-| Rationalization | Why It's WRONG | Required Action |
-|-----------------|----------------|-----------------|
-| "I'll add instrumentation later" | Later = never. Instrumentation is part of implementation. | **Add spans NOW while writing code** |
-| "Small function doesn't need span" | Size is irrelevant. ALL functions need spans. | **Add span to EVERY function** |
-| "Middleware handles tracing" | Middleware creates root span only. Child spans are YOUR responsibility. | **Add child spans in ALL layers** |
-| "Just installing OpenTelemetry is enough" | Installation ≠ Instrumentation. Library alone does nothing. | **Add spans to code** |
-| "Only external calls need tracing" | Internal operations need tracing for debugging. | **Instrument ALL layers** |
-| "Tests don't need instrumentation" | Tests validate production code. Production code MUST be instrumented. | **Implementation code needs spans** |
-
-### TDD-GREEN Instrumentation Checklist
-
-Before marking TDD-GREEN complete, verify:
-
-- [ ] Every handler has `tracer.Start(ctx, "handler.{name}")`
-- [ ] Every service method has `tracer.Start(ctx, "service.{domain}.{operation}")`
-- [ ] Every repository method has `tracer.Start(ctx, "{db}.{operation}")`
-- [ ] Every span has `defer span.End()`
-- [ ] Business errors use `HandleSpanBusinessErrorEvent`
-- [ ] Technical errors use `HandleSpanError`
-- [ ] External HTTP calls use `InjectHTTPContext`
-- [ ] External gRPC calls use `InjectGRPCContext`
-- [ ] Queue operations propagate trace context
-
-**If ANY checkbox is NO → Implementation is INCOMPLETE. Add instrumentation before proceeding.**
+**If ANY instrumentation is missing → Implementation is INCOMPLETE.**
 
 ### TDD Anti-Rationalization
 
