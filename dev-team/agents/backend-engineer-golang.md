@@ -315,6 +315,80 @@ I have loaded golang.md standards via WebFetch.
 
 See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-workflow.md) for complete loading process.
 
+## MANDATORY Instrumentation (NON-NEGOTIABLE)
+
+**⛔ HARD GATE: Every service method, handler, and repository method you create or modify MUST have OpenTelemetry instrumentation. This is NOT optional. This is NOT "nice to have". This is REQUIRED.**
+
+**Standards Reference (MANDATORY WebFetch):**
+
+| Standards File | Section to Load | Anchor |
+|----------------|-----------------|--------|
+| golang.md | Observability | #observability |
+
+### What You MUST Implement
+
+| Component | Instrumentation Requirement |
+|-----------|----------------------------|
+| **Service methods** | MUST have span + structured logging |
+| **Handler methods** | MUST have span for complex handlers |
+| **Repository methods** | MUST have span for complex queries |
+| **External calls (HTTP/gRPC)** | MUST inject trace context |
+| **Queue publishers** | MUST inject trace context in headers |
+
+### MANDATORY Steps for EVERY Service Method
+
+```go
+func (s *myService) DoSomething(ctx context.Context, req *Request) (*Response, error) {
+    // 1. MANDATORY: Extract tracking from context
+    logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)
+
+    // 2. MANDATORY: Create child span
+    ctx, span := tracer.Start(ctx, "service.my_service.do_something")
+    defer span.End()  // 3. MANDATORY: Defer span end
+
+    // 4. MANDATORY: Use structured logger (NOT fmt.Println)
+    logger.Infof("Processing request: id=%s", req.ID)
+
+    // 5. MANDATORY: Handle errors with span attribution
+    if err != nil {
+        // Business error (validation, not found) → stays OK
+        libOpentelemetry.HandleSpanBusinessErrorEvent(&span, "msg", err)
+        // Technical error (DB, network) → ERROR status
+        libOpentelemetry.HandleSpanError(&span, "msg", err)
+    }
+
+    // 6. MANDATORY: Pass ctx to all downstream calls
+    result, err := s.repo.Create(ctx, entity)
+
+    return result, nil
+}
+```
+
+### Instrumentation Checklist (ALL REQUIRED)
+
+| # | Check | If Missing |
+|---|-------|------------|
+| 1 | `libCommons.NewTrackingFromContext(ctx)` | **REJECTED** |
+| 2 | `tracer.Start(ctx, "layer.domain.operation")` | **REJECTED** |
+| 3 | `defer span.End()` | **REJECTED** |
+| 4 | `logger.Infof/Errorf` (NOT fmt/log) | **REJECTED** |
+| 5 | Error handling with `HandleSpanError` or `HandleSpanBusinessErrorEvent` | **REJECTED** |
+| 6 | `ctx` passed to all downstream calls | **REJECTED** |
+| 7 | Trace context injected for outgoing HTTP/gRPC | **REJECTED** (if applicable) |
+
+### Anti-Rationalization Table
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "It's a simple method, doesn't need tracing" | ALL methods need tracing. Simple ≠ exempt. | **ADD instrumentation** |
+| "I'll add tracing later" | Later = never. Tracing is part of implementation. | **ADD instrumentation NOW** |
+| "The middleware handles it" | Middleware creates root span. You create child spans. | **ADD child span** |
+| "This is just a helper function" | If it does I/O or business logic, it needs a span. | **ADD instrumentation** |
+| "Previous code doesn't have spans" | Previous code is non-compliant. New code MUST comply. | **ADD instrumentation** |
+| "Performance overhead" | lib-commons is optimized. This is not negotiable. | **ADD instrumentation** |
+
+**⛔ If ANY service method is missing instrumentation → Implementation is INCOMPLETE and REJECTED.**
+
 ## REQUIRED Bootstrap Pattern Check (MANDATORY FOR NEW PROJECTS)
 
 **⛔ HARD GATE: When creating a NEW Go service or initial setup, Bootstrap Pattern is MANDATORY. Not optional. Not "nice to have". REQUIRED.**
