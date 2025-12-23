@@ -2285,7 +2285,7 @@ Add to `.golangci.yml` or run manually before commit:
 
 ```bash
 # MUST pass with zero matches before commit
-grep -rn "fmt.Println\|fmt.Printf\|log.Println\|log.Printf\|log.Fatal" --include="*.go" ./internal ./cmd
+grep -rn "fmt.Println\|fmt.Printf\|log.Println\|log.Printf\|log.Fatal\|println(" --include="*.go" ./internal ./cmd
 # Expected output: (nothing - no matches)
 ```
 
