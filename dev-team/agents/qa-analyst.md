@@ -412,42 +412,39 @@ See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-
 
 **⛔ HARD GATE: You MUST execute this check BEFORE writing any test.**
 
-1. WebFetch language-specific standards (Go or TypeScript)
-2. Find section "FORBIDDEN Test Patterns" in the fetched content
-3. **LIST the patterns you found** (proves you read them)
-4. If you cannot list them → STOP, WebFetch failed or section not found
+**Standards Reference (MANDATORY WebFetch):**
 
-**Required Output BEFORE writing tests:**
+| Language | Standards File | Section to Load | Anchor |
+|----------|----------------|-----------------|--------|
+| Go | golang.md | Testing Patterns | #testing-patterns |
+| TypeScript | typescript.md | Testing Patterns | #testing-patterns |
 
-```
+**Process:**
+1. Detect project language (Go or TypeScript)
+2. WebFetch the appropriate standards file
+3. Find "Testing Patterns" section → Extract FORBIDDEN test patterns
+4. **LIST ALL patterns you found** (proves you read the standards)
+5. If you cannot list them → STOP, WebFetch failed
+
+**Required Output Format:**
+
+```markdown
 ## FORBIDDEN Test Patterns Acknowledged
 
-I have loaded [golang.md|typescript.md] standards. FORBIDDEN test patterns:
-- Tests without assertions ❌
-- Skipped tests (.skip, .todo) in coverage ❌
-- Shared mutable state between tests ❌
-- Tests depending on execution order ❌
-- Mocking implementation details ❌
-- Missing edge case coverage ❌
+I have loaded [golang.md|typescript.md] standards via WebFetch.
 
-I will use instead:
-- Every test has explicit assertions ✅
-- No skipped tests or exclude from coverage ✅
-- Independent test fixtures ✅
-- Isolated test execution ✅
-- Mock interfaces, not implementations ✅
-- Edge cases for every AC ✅
+### From "Testing Patterns" section:
+[LIST all FORBIDDEN test patterns found in the standards file]
+
+### Correct Alternatives (from standards):
+[LIST the correct testing patterns from the standards file]
 ```
 
-**If this acknowledgment is missing from your output → Tests are INVALID.**
+**⛔ CRITICAL: Do NOT hardcode patterns. Extract them from WebFetch result.**
 
-**Anti-Rationalization:**
+**If this acknowledgment is missing → Tests are INVALID.**
 
-| Rationalization | Why It's WRONG | Required Action |
-|-----------------|----------------|-----------------|
-| "I know the FORBIDDEN patterns" | Knowing ≠ proving. List them. | **List patterns from WebFetch** |
-| "Acknowledgment is bureaucracy" | Acknowledgment proves compliance. | **Include acknowledgment** |
-| "I'll just add assertions" | Implicit ≠ explicit verification. | **List ALL FORBIDDEN patterns** |
+See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-workflow.md) for complete loading process.
 
 ## Handling Ambiguous Requirements
 

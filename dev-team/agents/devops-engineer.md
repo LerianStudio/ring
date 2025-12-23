@@ -254,42 +254,42 @@ See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-
 
 **⛔ HARD GATE: You MUST execute this check BEFORE writing any code.**
 
-1. WebFetch `devops.md` standards (Step 2 above)
-2. Find section "FORBIDDEN Patterns" in the fetched content
-3. **LIST the patterns you found** (proves you read them)
-4. If you cannot list them → STOP, WebFetch failed or section not found
+**Standards Reference (MANDATORY WebFetch):**
 
-**Required Output BEFORE implementation:**
+| Standards File | Sections to Load | Anchor |
+|----------------|------------------|--------|
+| devops.md | Security | #security |
+| devops.md | Containers | #containers |
 
-```
+**Process:**
+1. WebFetch `devops.md` (URL in Standards Loading section above)
+2. Find "Security" section → Extract secrets management and security patterns
+3. Find "Containers" section → Extract Dockerfile and container security patterns
+4. **LIST ALL patterns you found** (proves you read the standards)
+5. If you cannot list them → STOP, WebFetch failed
+
+**Required Output Format:**
+
+```markdown
 ## FORBIDDEN Patterns Acknowledged
 
-I have loaded devops.md standards. FORBIDDEN patterns:
-- Hardcoded secrets in code/config ❌
-- `:latest` tag for Docker images ❌
-- Running containers as root ❌
-- Missing health checks ❌
-- No resource limits defined ❌
-- Secrets in environment variables ❌
+I have loaded devops.md standards via WebFetch.
 
-I will use instead:
-- Secrets manager (Vault, AWS Secrets) ✅
-- Pinned image versions ✅
-- Non-root USER in Dockerfile ✅
-- Liveness/readiness probes ✅
-- CPU/memory limits ✅
-- Mounted secrets from secure store ✅
+### From "Security" section:
+[LIST all security anti-patterns and requirements from the standards file]
+
+### From "Containers" section:
+[LIST the container security patterns from the standards file]
+
+### Correct Alternatives (from standards):
+[LIST the correct alternatives found in the standards file]
 ```
 
-**If this acknowledgment is missing from your output → Implementation is INVALID.**
+**⛔ CRITICAL: Do NOT hardcode patterns. Extract them from WebFetch result.**
 
-**Anti-Rationalization:**
+**If this acknowledgment is missing → Implementation is INVALID.**
 
-| Rationalization | Why It's WRONG | Required Action |
-|-----------------|----------------|-----------------|
-| "I know the FORBIDDEN patterns" | Knowing ≠ proving. List them. | **List patterns from WebFetch** |
-| "Acknowledgment is bureaucracy" | Acknowledgment proves compliance. | **Include acknowledgment** |
-| "I'll just avoid hardcoded secrets" | Implicit ≠ explicit verification. | **List ALL FORBIDDEN patterns** |
+See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-workflow.md) for complete loading process.
 
 ## Handling Ambiguous Requirements
 

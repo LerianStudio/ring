@@ -260,42 +260,42 @@ See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-
 
 **⛔ HARD GATE: You MUST execute this check BEFORE writing any code.**
 
-1. WebFetch `typescript.md` standards (Step 2 above)
-2. Find section "FORBIDDEN Patterns" in the fetched content
-3. **LIST the patterns you found** (proves you read them)
-4. If you cannot list them → STOP, WebFetch failed or section not found
+**Standards Reference (MANDATORY WebFetch):**
 
-**Required Output BEFORE implementation:**
+| Standards File | Sections to Load | Anchor |
+|----------------|------------------|--------|
+| typescript.md | Type Safety Rules | #type-safety-rules |
+| typescript.md | Dependency Injection | #dependency-injection |
+
+**Process:**
+1. WebFetch `typescript.md` (URL in Standards Loading section above)
+2. Find "Type Safety Rules" section → Extract FORBIDDEN patterns
+3. Find "Dependency Injection" section → Extract DI requirements
+4. **LIST ALL patterns you found** (proves you read the standards)
+5. If you cannot list them → STOP, WebFetch failed
+
+**Required Output Format:**
 
 ```markdown
 ## FORBIDDEN Patterns Acknowledged
 
-I have loaded typescript.md standards. FORBIDDEN patterns:
-- `any` type ❌
-- `// @ts-ignore` ❌
-- `// @ts-nocheck` ❌
-- `console.log()` for production ❌
-- Untyped function parameters ❌
-- `as` type assertion without validation ❌
-- Direct instantiation (no DI) ❌
+I have loaded typescript.md standards via WebFetch.
 
-I will use instead:
-- Explicit types or `unknown` with type guards ✅
-- Zod schemas for runtime validation ✅
-- Structured logger via @lerianstudio/lib-commons-js ✅
-- Inversify DI for dependencies ✅
-- Result type for error handling ✅
+### From "Type Safety Rules" section:
+[LIST all FORBIDDEN patterns found in the standards file]
+
+### From "Dependency Injection" section:
+[LIST the DI patterns and anti-patterns from the standards file]
+
+### Correct Alternatives (from standards):
+[LIST the correct alternatives found in the standards file]
 ```
 
-**If this acknowledgment is missing from your output → Implementation is INVALID.**
+**⛔ CRITICAL: Do NOT hardcode patterns. Extract them from WebFetch result.**
 
-**Anti-Rationalization:**
+**If this acknowledgment is missing → Implementation is INVALID.**
 
-| Rationalization | Why It's WRONG | Required Action |
-|-----------------|----------------|-----------------|
-| "I know the FORBIDDEN patterns" | Knowing ≠ proving. List them. | **List patterns from WebFetch** |
-| "Acknowledgment is bureaucracy" | Acknowledgment proves compliance. | **Include acknowledgment** |
-| "I'll just avoid any" | Implicit ≠ explicit verification. | **List ALL FORBIDDEN patterns** |
+See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-workflow.md) for complete loading process.
 
 ## Architecture Patterns
 

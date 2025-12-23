@@ -879,42 +879,47 @@ See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-
 
 **⛔ HARD GATE: You MUST execute this check BEFORE writing any specification.**
 
-1. WebFetch `frontend.md` standards (Step 2 above)
-2. Find section "FORBIDDEN Design Patterns" in the fetched content
-3. **LIST the patterns you found** (proves you read them)
-4. If you cannot list them → STOP, WebFetch failed or section not found
+**Standards Reference (MANDATORY WebFetch):**
 
-**Required Output BEFORE specification:**
+| Standards File | Sections to Load | Anchor |
+|----------------|------------------|--------|
+| frontend.md | FORBIDDEN Patterns | #forbidden-patterns |
+| frontend.md | Accessibility (a11y) | #accessibility-a11y |
+| frontend.md | Styling Standards | #styling-standards |
 
-```
+**Process:**
+1. WebFetch `frontend.md` (URL in Standards Loading section above)
+2. Find "FORBIDDEN Patterns" section → Extract design anti-patterns
+3. Find "Accessibility (a11y)" section → Extract a11y requirements
+4. Find "Styling Standards" section → Extract styling requirements
+5. **LIST ALL patterns you found** (proves you read the standards)
+6. If you cannot list them → STOP, WebFetch failed
+
+**Required Output Format:**
+
+```markdown
 ## FORBIDDEN Patterns Acknowledged
 
-I have loaded frontend.md standards. FORBIDDEN design patterns:
-- Generic fonts (Inter, Roboto, System UI) ❌
-- Missing dark mode when specified ❌
-- Missing accessibility (WCAG AA) ❌
-- Inline styles instead of design tokens ❌
-- Non-responsive layouts ❌
-- Missing loading/error states ❌
+I have loaded frontend.md standards via WebFetch.
 
-I will specify instead:
-- Distinctive brand fonts ✅
-- Dark/light mode with proper tokens ✅
-- WCAG AA compliant specifications ✅
-- Design system tokens only ✅
-- Mobile-first responsive design ✅
-- Complete interaction states ✅
+### From "FORBIDDEN Patterns" section:
+[LIST all FORBIDDEN design patterns found in the standards file]
+
+### From "Accessibility (a11y)" section:
+[LIST the a11y requirements from the standards file]
+
+### From "Styling Standards" section:
+[LIST the styling requirements from the standards file]
+
+### Correct Alternatives (from standards):
+[LIST the correct alternatives found in the standards file]
 ```
 
-**If this acknowledgment is missing from your output → Specification is INVALID.**
+**⛔ CRITICAL: Do NOT hardcode patterns. Extract them from WebFetch result.**
 
-**Anti-Rationalization:**
+**If this acknowledgment is missing → Specification is INVALID.**
 
-| Rationalization | Why It's WRONG | Required Action |
-|-----------------|----------------|-----------------|
-| "I know the FORBIDDEN patterns" | Knowing ≠ proving. List them. | **List patterns from WebFetch** |
-| "Acknowledgment is bureaucracy" | Acknowledgment proves compliance. | **Include acknowledgment** |
-| "I'll just avoid generic fonts" | Implicit ≠ explicit verification. | **List ALL FORBIDDEN patterns** |
+See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-workflow.md) for complete loading process.
 
 ## Anti-Patterns (NEVER Do These)
 

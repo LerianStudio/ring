@@ -361,44 +361,50 @@ See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-
 
 **⛔ HARD GATE: You MUST execute this check BEFORE writing any code.**
 
-1. WebFetch `typescript.md` standards (Step 2 above)
-2. Find section "FORBIDDEN Patterns" in the fetched content
-3. **LIST the patterns you found** (proves you read them)
-4. If you cannot list them → STOP, WebFetch failed or section not found
+**Standards Reference (MANDATORY WebFetch):**
 
-**Required Output BEFORE implementation:**
+| Standards File | Sections to Load | Anchor |
+|----------------|------------------|--------|
+| typescript.md | Type Safety Rules | #type-safety-rules |
 
-```
+**Process:**
+1. WebFetch `typescript.md` (URL in Standards Loading section above)
+2. Find "Type Safety Rules" section → Extract FORBIDDEN patterns
+3. **LIST ALL patterns you found** (proves you read the standards)
+4. If you cannot list them → STOP, WebFetch failed
+
+**Required Output Format:**
+
+```markdown
 ## FORBIDDEN Patterns Acknowledged
 
-I have loaded typescript.md standards. FORBIDDEN patterns:
-- `any` type ❌
-- `// @ts-ignore` ❌
-- `// @ts-nocheck` ❌
-- `console.log()` for production ❌
-- Untyped function parameters ❌
-- `as` type assertion without validation ❌
+I have loaded typescript.md standards via WebFetch.
 
-I will use instead:
-- Explicit types or `unknown` with type guards ✅
-- Zod schemas for runtime validation ✅
-- Structured logger (pino/winston) ✅
-- Proper error handling with Result type ✅
+### From "Type Safety Rules" section:
+[LIST all FORBIDDEN patterns found in the standards file]
+
+### Correct Alternatives (from standards):
+[LIST the correct alternatives found in the standards file]
 ```
 
-**If this acknowledgment is missing from your output → Implementation is INVALID.**
+**⛔ CRITICAL: Do NOT hardcode patterns. Extract them from WebFetch result.**
 
-**Anti-Rationalization:**
+**If this acknowledgment is missing → Implementation is INVALID.**
 
-| Rationalization | Why It's WRONG | Required Action |
-|-----------------|----------------|-----------------|
-| "I know the FORBIDDEN patterns" | Knowing ≠ proving. List them. | **List patterns from WebFetch** |
-| "Acknowledgment is bureaucracy" | Acknowledgment proves compliance. | **Include acknowledgment** |
-| "I'll just avoid any" | Implicit ≠ explicit verification. | **List ALL FORBIDDEN patterns** |
+See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-workflow.md) for complete loading process.
 
 ## REQUIRED Bootstrap Pattern Check (MANDATORY FOR NEW PROJECTS)
 
 **⛔ HARD GATE: When creating a NEW TypeScript service or initial setup, Bootstrap Pattern is MANDATORY. Not optional. Not "nice to have". REQUIRED.**
+
+**Standards Reference (MANDATORY WebFetch):**
+
+| Standards File | Section to Load | Anchor |
+|----------------|-----------------|--------|
+| typescript.md | Directory Structure (Backend) | #directory-structure-backend |
+| typescript.md | Zod Validation Patterns | #zod-validation-patterns |
+| typescript.md | Error Handling | #error-handling |
+| typescript.md | Dependency Injection | #dependency-injection |
 
 ### Detection: Is This a New Project/Initial Setup?
 
@@ -416,63 +422,28 @@ I will use instead:
 ```markdown
 ## Bootstrap Pattern Acknowledged (MANDATORY)
 
-This is a NEW PROJECT. Bootstrap Pattern is MANDATORY. I will follow Lerian Bootstrap Pattern from typescript.md:
+This is a NEW PROJECT. Bootstrap Pattern is MANDATORY.
 
-### 1. src/index.ts Initialization Order:
-1. loadConfig() → Environment variables (dotenv, envalid)
-2. createLogger() → Pino/Winston structured logger
-3. initTelemetry() → OpenTelemetry setup
-4. createDatabase() → Prisma/Drizzle connection
-5. createServer() → Express/Fastify/NestJS app
-6. gracefulShutdown() → Signal handling, cleanup
+I have loaded typescript.md standards via WebFetch.
 
-### 2. Directory Structure (Clean Architecture):
-```
-service-name/
-├── src/
-│   ├── index.ts            # Bootstrap only
-│   ├── config/
-│   │   └── index.ts        # loadConfig(), env validation
-│   ├── infrastructure/
-│   │   ├── http/
-│   │   │   ├── server.ts   # Express/Fastify setup
-│   │   │   └── routes/     # Route handlers
-│   │   ├── database/
-│   │   │   └── client.ts   # Prisma/Drizzle client
-│   │   └── logger/
-│   │       └── index.ts    # createLogger()
-│   ├── domain/
-│   │   ├── entities/       # Domain types/interfaces
-│   │   └── errors/         # AppError, domain errors
-│   ├── application/
-│   │   ├── services/       # Business logic
-│   │   └── use-cases/      # Application use cases
-│   └── shared/
-│       ├── types/          # Branded types, Result type
-│       └── validation/     # Zod schemas
-├── tests/
-├── package.json
-└── tsconfig.json
+### From "Directory Structure (Backend)" section:
+[LIST the directory structure from the standards file]
+
+### From "Zod Validation Patterns" section:
+[LIST the validation patterns from the standards file]
+
+### From "Error Handling" section:
+[LIST the error handling patterns from the standards file]
+
+### From "Dependency Injection" section:
+[LIST the DI patterns from the standards file]
 ```
 
-### 3. MANDATORY Patterns:
-- Zod for runtime validation at boundaries (REQUIRED)
-- Result type for error handling (REQUIRED)
-- Dependency Injection (constructor injection) (REQUIRED)
-- Branded types for domain IDs (REQUIRED)
-```
+**⛔ CRITICAL: Do NOT hardcode patterns. Extract them from WebFetch result.**
 
 **⛔ If this acknowledgment is missing for new projects → Implementation is INVALID and REJECTED.**
 
-### Anti-Rationalization (New Projects):
-
-| Rationalization | Why It's WRONG | Required Action |
-|-----------------|----------------|-----------------|
-| "I'll add bootstrap later" | Bootstrap is foundation. Cannot be added later. | **Start with Bootstrap Pattern** |
-| "Simple test doesn't need full bootstrap" | Tests should mirror production structure. | **Use proper structure from start** |
-| "Health endpoint is just one file" | Structure matters even for small services. | **Follow directory structure** |
-| "I know the Clean Architecture" | Knowing ≠ proving. Show the structure. | **List Bootstrap steps explicitly** |
-| "NestJS has its own structure" | Lerian standards supplement framework defaults. | **Follow Lerian patterns within NestJS** |
+See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-workflow.md) for complete loading process.
 
 ### TypeScript Standards Verification (HARD GATE)
 

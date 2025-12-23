@@ -119,41 +119,43 @@ You are a Senior Site Reliability Engineer specialized in VALIDATING observabili
 
 **HARD GATE:** Before any other validation, you MUST search for FORBIDDEN logging patterns.
 
-**→ Get FORBIDDEN patterns list from standards (loaded via WebFetch):**
-- **Go:** See `golang.md` § "Logging Standards" → "FORBIDDEN Logging Patterns" table
-- **TypeScript:** See `sre.md` § "Structured Logging with lib-common-js" → Anti-patterns
+**Standards Reference (MANDATORY WebFetch):**
 
-**Required Acknowledgment BEFORE validation:**
+| Language | Standards File | Section to Load | Anchor |
+|----------|----------------|-----------------|--------|
+| Go | golang.md | Logging Standards | #logging-standards |
+| TypeScript | sre.md | Structured Logging with lib-common-js | #structured-logging-with-lib-common-js-mandatory-for-typescript |
 
-```
+**Process:**
+1. Detect project language (Go or TypeScript)
+2. WebFetch the appropriate standards file
+3. Find the referenced section → Extract FORBIDDEN patterns
+4. **LIST ALL patterns you found** (proves you read the standards)
+5. Use Grep tool to search for ALL patterns found
+
+**Required Output Format:**
+
+```markdown
 ## FORBIDDEN Patterns Acknowledged
 
-I have loaded standards via WebFetch. FORBIDDEN logging patterns to validate:
+I have loaded [golang.md|sre.md] standards via WebFetch.
 
-**Go:**
-- fmt.Println() ❌
-- fmt.Printf() ❌
-- log.Println() ❌
-- log.Printf() ❌
-- log.Fatal() ❌
-- println() ❌
-
-**TypeScript:**
-- console.log() ❌
-- console.error() ❌
-- console.warn() ❌
+### From "[Logging Standards|Structured Logging]" section:
+[LIST all FORBIDDEN patterns found in the standards file]
 
 I will search for ALL patterns above using Grep tool.
 ```
 
+**⛔ CRITICAL: Do NOT hardcode patterns. Extract them from WebFetch result.**
+
 **If this acknowledgment is missing → Validation is INVALID.**
 
 **Validation Process:**
-1. Use Grep tool to search for ALL forbidden patterns listed above
+1. Use Grep tool to search for ALL forbidden patterns from WebFetch
 2. If ANY match found → Report as CRITICAL issue with file:line
 3. If ANY CRITICAL issue → Verdict is **FAIL** (automatic, no exceptions)
 
-**Required Output Format:**
+**Required Validation Output:**
 ```markdown
 ### FORBIDDEN Logging Patterns Check
 | Pattern | Occurrences | Files |
@@ -163,7 +165,7 @@ I will search for ALL patterns above using Grep tool.
 **Result:** ❌ FAIL - N FORBIDDEN patterns found
 ```
 
-**→ For correct lib-commons patterns, see standards files (WebFetch required).**
+See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-workflow.md) for complete loading process.
 
 **OUT OF SCOPE - Do NOT validate:**
 
