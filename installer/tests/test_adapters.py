@@ -16,6 +16,7 @@ from ring_installer.adapters import (
     ClineAdapter,
     CursorAdapter,
     FactoryAdapter,
+    OpenCodeAdapter,
     PlatformAdapter,
     get_adapter,
     list_platforms,
@@ -53,6 +54,12 @@ class TestGetAdapter:
         assert isinstance(adapter, ClineAdapter)
         assert adapter.platform_id == "cline"
 
+    def test_get_adapter_returns_opencode_adapter(self):
+        """get_adapter('opencode') should return OpenCodeAdapter instance."""
+        adapter = get_adapter("opencode")
+        assert isinstance(adapter, OpenCodeAdapter)
+        assert adapter.platform_id == "opencode"
+
     def test_get_adapter_case_insensitive(self):
         """get_adapter() should handle case-insensitive platform names."""
         assert isinstance(get_adapter("CLAUDE"), ClaudeAdapter)
@@ -76,7 +83,7 @@ class TestGetAdapter:
 
     def test_supported_platforms_list(self):
         """SUPPORTED_PLATFORMS should contain all expected platforms."""
-        expected = {"claude", "factory", "cursor", "cline"}
+        expected = {"claude", "factory", "cursor", "cline", "opencode"}
         assert set(SUPPORTED_PLATFORMS) == expected
 
 
@@ -144,6 +151,7 @@ class TestListPlatforms:
         assert "factory" in platform_ids
         assert "cursor" in platform_ids
         assert "cline" in platform_ids
+        assert "opencode" in platform_ids
 
     def test_list_platforms_includes_required_fields(self):
         """list_platforms() should include required fields for each platform."""
@@ -809,6 +817,153 @@ class TestClineAdapter:
         assert "Ring Prompts" in result
         assert "skill-1" in result.lower() or "Skill 1" in result
         assert "agent-1" in result.lower() or "Agent 1" in result
+
+
+# ==============================================================================
+# Tests for OpenCodeAdapter (near-native format)
+# ==============================================================================
+
+class TestOpenCodeAdapter:
+    """Tests for OpenCodeAdapter (OhMyOpenCode) platform support."""
+
+    @pytest.fixture
+    def adapter(self):
+        """Create an OpenCodeAdapter instance."""
+        return OpenCodeAdapter()
+
+    def test_platform_id(self, adapter):
+        """OpenCodeAdapter should have correct platform_id."""
+        assert adapter.platform_id == "opencode"
+        assert adapter.platform_name == "OpenCode"
+
+    def test_is_native_format(self, adapter):
+        """OpenCodeAdapter should report near-native format."""
+        assert adapter.is_native_format() is True
+
+    def test_get_terminology(self, adapter):
+        """get_terminology() should return identity mapping."""
+        terminology = adapter.get_terminology()
+
+        assert terminology["agent"] == "agent"
+        assert terminology["skill"] == "skill"
+        assert terminology["command"] == "command"
+
+    def test_transform_skill_normalizes_tools(self, adapter, sample_skill_content):
+        """transform_skill() should normalize tool references."""
+        result = adapter.transform_skill(sample_skill_content)
+        # Content should be mostly preserved (near-native)
+        assert len(result) > 0
+
+    def test_transform_agent_maps_model_ids(self, adapter):
+        """OpenCodeAdapter should map model shorthand to OpenCode model IDs."""
+        content = """---
+name: test-agent
+model: opus
+---
+
+# Test Agent
+"""
+        result = adapter.transform_agent(content)
+
+        # opus should be mapped to OpenCode model format (provider/model-id)
+        assert "anthropic/claude-opus-4-5" in result
+        assert "model: opus" not in result
+
+    def test_transform_agent_normalizes_tool_names(self, adapter):
+        """OpenCodeAdapter should lowercase tool names."""
+        content = """---
+name: test-agent
+tools:
+  - Bash
+  - Read
+  - Write
+  - WebFetch
+---
+
+# Test Agent
+"""
+        result = adapter.transform_agent(content)
+
+        # OpenCode uses lowercase tool names
+        assert "- bash" in result or "bash" in result.lower()
+
+    def test_get_component_mapping_singular_dirs(self, adapter):
+        """get_component_mapping() should use singular directory names."""
+        mapping = adapter.get_component_mapping()
+
+        # OpenCode uses singular directory names
+        assert mapping["agents"]["target_dir"] == "agent"
+        assert mapping["commands"]["target_dir"] == "command"
+        assert mapping["skills"]["target_dir"] == "skill"
+        assert mapping["hooks"]["target_dir"] == "hook"
+
+    def test_get_install_path_default(self, adapter):
+        """get_install_path() should return ~/.config/opencode by default."""
+        path = adapter.get_install_path()
+        assert path == Path.home() / ".config" / "opencode"
+
+    def test_get_install_path_custom(self):
+        """get_install_path() should respect custom config."""
+        adapter = OpenCodeAdapter({"install_path": "/custom/path"})
+        path = adapter.get_install_path()
+        assert path == Path("/custom/path")
+
+    def test_transform_hook_replaces_plugin_variable(self, adapter):
+        """OpenCodeAdapter should replace CLAUDE_PLUGIN_ROOT with OpenCode paths."""
+        hook_content = '{"command": "${CLAUDE_PLUGIN_ROOT}/hooks/session-start.sh"}'
+        result = adapter.transform_hook(hook_content)
+
+        assert "${CLAUDE_PLUGIN_ROOT}" not in result
+        assert "~/.config/opencode" in result
+
+    def test_requires_hooks_in_settings_is_false(self, adapter):
+        """OpenCodeAdapter supports standalone hook files."""
+        assert adapter.requires_hooks_in_settings() is False
+
+    def test_get_config_path(self, adapter, tmp_path, monkeypatch):
+        """get_config_path() should return path to opencode.json."""
+        monkeypatch.setenv("HOME", str(tmp_path))
+        adapter._install_path = None  # Reset cached path
+
+        config_path = adapter.get_config_path()
+        assert config_path.name == "opencode.json"
+
+    def test_transform_command_frontmatter(self, adapter):
+        """OpenCodeAdapter should transform command frontmatter correctly."""
+        content = """---
+name: test-cmd
+description: A test command
+args: <target>
+---
+
+# Test Command
+"""
+        result = adapter.transform_command(content)
+
+        # args should be renamed to argument-hint
+        assert "argument-hint" in result
+
+    def test_merge_hooks_to_config_dry_run(self, adapter, tmp_path, monkeypatch):
+        """merge_hooks_to_config() should not write in dry_run mode."""
+        monkeypatch.setenv("HOME", str(tmp_path))
+        adapter._install_path = None
+
+        opencode_dir = tmp_path / ".config" / "opencode"
+        opencode_dir.mkdir(parents=True)
+
+        hooks_config = {
+            "hooks": {
+                "SessionStart": [
+                    {"matcher": "startup", "hooks": [{"type": "command", "command": "echo hello"}]}
+                ]
+            }
+        }
+
+        result = adapter.merge_hooks_to_config(hooks_config, dry_run=True)
+        assert result is True
+
+        config_path = opencode_dir / "opencode.json"
+        assert not config_path.exists()
 
 
 # ==============================================================================

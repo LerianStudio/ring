@@ -17,6 +17,7 @@ from ring_installer.adapters.claude import ClaudeAdapter
 from ring_installer.adapters.cline import ClineAdapter
 from ring_installer.adapters.cursor import CursorAdapter
 from ring_installer.adapters.factory import FactoryAdapter
+from ring_installer.adapters.opencode import OpenCodeAdapter
 
 # TypeVar for adapter type hints
 AdapterT = TypeVar("AdapterT", bound=PlatformAdapter)
@@ -36,11 +37,12 @@ class PlatformID:
     FACTORY = "factory"
     CURSOR = "cursor"
     CLINE = "cline"
+    OPENCODE = "opencode"
 
     @classmethod
     def all(cls) -> list[str]:
         """Return all platform identifiers."""
-        return [cls.CLAUDE, cls.FACTORY, cls.CURSOR, cls.CLINE]
+        return [cls.CLAUDE, cls.FACTORY, cls.CURSOR, cls.CLINE, cls.OPENCODE]
 
     @classmethod
     def is_valid(cls, platform: str) -> bool:
@@ -53,6 +55,7 @@ ADAPTER_REGISTRY: Dict[str, Type[PlatformAdapter]] = {
     PlatformID.FACTORY: FactoryAdapter,
     PlatformID.CURSOR: CursorAdapter,
     PlatformID.CLINE: ClineAdapter,
+    PlatformID.OPENCODE: OpenCodeAdapter,
 }
 
 # List of supported platform identifiers
@@ -148,6 +151,7 @@ __all__ = [
     "FactoryAdapter",
     "CursorAdapter",
     "ClineAdapter",
+    "OpenCodeAdapter",
     # Registry and utilities
     "ADAPTER_REGISTRY",
     "SUPPORTED_PLATFORMS",

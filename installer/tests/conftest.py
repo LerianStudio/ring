@@ -392,6 +392,20 @@ def cline_adapter_config() -> Dict[str, Any]:
     }
 
 
+@pytest.fixture
+def opencode_adapter_config() -> Dict[str, Any]:
+    """
+    Return configuration for OpenCode adapter.
+
+    Returns:
+        OpenCode adapter configuration dictionary.
+    """
+    return {
+        "install_path": "~/.config/opencode",
+        "native": True
+    }
+
+
 # ==============================================================================
 # Transformer Fixtures
 # ==============================================================================
@@ -439,7 +453,8 @@ def mock_platform_detection():
     with patch("ring_installer.utils.platform_detect._detect_claude") as mock_claude, \
          patch("ring_installer.utils.platform_detect._detect_factory") as mock_factory, \
          patch("ring_installer.utils.platform_detect._detect_cursor") as mock_cursor, \
-         patch("ring_installer.utils.platform_detect._detect_cline") as mock_cline:
+         patch("ring_installer.utils.platform_detect._detect_cline") as mock_cline, \
+         patch("ring_installer.utils.platform_detect._detect_opencode") as mock_opencode:
 
         from ring_installer.utils.platform_detect import PlatformInfo
 
@@ -464,12 +479,18 @@ def mock_platform_detection():
             name="Cline",
             installed=False
         )
+        mock_opencode.return_value = PlatformInfo(
+            platform_id="opencode",
+            name="OpenCode",
+            installed=False
+        )
 
         yield {
             "claude": mock_claude,
             "factory": mock_factory,
             "cursor": mock_cursor,
-            "cline": mock_cline
+            "cline": mock_cline,
+            "opencode": mock_opencode
         }
 
 

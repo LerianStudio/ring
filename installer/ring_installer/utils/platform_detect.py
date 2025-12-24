@@ -125,6 +125,7 @@ def _detect_platform(platform_id: str) -> PlatformInfo:
         "factory": _detect_factory,
         "cursor": _detect_cursor,
         "cline": _detect_cline,
+        "opencode": _detect_opencode,
     }
 
     detector = detectors.get(platform_id.lower())
@@ -388,7 +389,6 @@ def _detect_cline() -> PlatformInfo:
     - ~/.cline directory (or CLINE_CONFIG_PATH env var)
     - Cline VS Code extension
     """
-    # Allow environment variable override for config path
     env_path = os.environ.get("CLINE_CONFIG_PATH")
     if env_path:
         config_path = _validate_env_path("CLINE_CONFIG_PATH", env_path, Path.home() / ".cline")
@@ -401,13 +401,11 @@ def _detect_cline() -> PlatformInfo:
         installed=False
     )
 
-    # Check config directory
     if config_path.exists():
         info.config_path = config_path
         info.install_path = config_path
         info.installed = True
 
-    # Check for VS Code extension
     extension_info = _find_vscode_extension("saoudrizwan.claude-dev")
     if extension_info:
         info.installed = True
@@ -416,6 +414,22 @@ def _detect_cline() -> PlatformInfo:
         info.details["extension_id"] = "saoudrizwan.claude-dev"
 
     return info
+
+
+def _detect_opencode() -> PlatformInfo:
+    """
+    Detect OpenCode installation.
+
+    Checks for:
+    - ~/.config/opencode directory (or OPENCODE_CONFIG_PATH env var)
+    - opencode binary in PATH
+    """
+    return _detect_generic_cli_platform(
+        platform_id="opencode",
+        name="OpenCode",
+        config_dir_name=".config/opencode",
+        binary_name="opencode",
+    )
 
 
 def _get_cursor_app_paths() -> List[Path]:

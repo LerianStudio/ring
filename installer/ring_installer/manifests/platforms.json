@@ -163,6 +163,49 @@
         "skill": "prompt",
         "command": "prompt"
       }
+    },
+    "opencode": {
+      "name": "OpenCode",
+      "description": "OpenCode (OhMyOpenCode) AI agent platform",
+      "install_path": "~/.config/opencode",
+      "components": {
+        "agents": {
+          "source_dir": "agents",
+          "target_dir": "agent",
+          "file_extension": ".md",
+          "transform": "opencode_agent"
+        },
+        "commands": {
+          "source_dir": "commands",
+          "target_dir": "command",
+          "file_extension": ".md",
+          "transform": "opencode_command"
+        },
+        "skills": {
+          "source_dir": "skills",
+          "target_dir": "skill",
+          "file_extension": ".md",
+          "transform": "opencode_skill"
+        },
+        "hooks": {
+          "source_dir": "hooks",
+          "target_dir": "hook",
+          "file_extension": [".json", ".sh", ".py"],
+          "transform": "opencode_hook"
+        }
+      },
+      "config_file": "opencode.json",
+      "detection": {
+        "config_path": "~/.config/opencode",
+        "binary_name": "opencode",
+        "version_command": "opencode --version"
+      },
+      "native_format": true,
+      "terminology": {
+        "agent": "agent",
+        "skill": "skill",
+        "command": "command"
+      }
     }
   },
   "component_types": ["agents", "commands", "skills", "hooks"],
