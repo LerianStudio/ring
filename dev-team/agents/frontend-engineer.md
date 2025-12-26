@@ -201,22 +201,22 @@ See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-
 
 **Process:**
 1. WebFetch `frontend.md` (URL in Standards Loading section above)
-2. Find "FORBIDDEN Patterns" section → Extract all forbidden patterns
-3. Find "Accessibility (a11y)" section → Extract a11y requirements
+2. Find "Forbidden Patterns" section → Extract all forbidden patterns
+3. Find "Accessibility" section → Extract a11y requirements
 4. **LIST ALL patterns you found** (proves you read the standards)
 5. If you cannot list them → STOP, WebFetch failed
 
-**Required Output Format:**
+**Output Format (MANDATORY):**
 
 ```markdown
 ## FORBIDDEN Patterns Acknowledged
 
 I have loaded frontend.md standards via WebFetch.
 
-### From "FORBIDDEN Patterns" section:
+### From "Forbidden Patterns" section:
 [LIST all FORBIDDEN patterns found in the standards file]
 
-### From "Accessibility (a11y)" section:
+### From "Accessibility" section:
 [LIST the a11y requirements from the standards file]
 
 ### Correct Alternatives (from standards):
@@ -864,10 +864,10 @@ When invoked from the `dev-refactor` skill with a codebase-report.md, you MUST p
 | 6 | Typography Standards (MANDATORY) |
 | 7 | Animation Standards (MANDATORY) |
 | 8 | Component Patterns (MANDATORY) |
-| 9 | Accessibility (a11y) (MANDATORY) |
+| 9 | Accessibility (MANDATORY) |
 | 10 | Performance (MANDATORY) |
 | 11 | Directory Structure (MANDATORY) |
-| 12 | FORBIDDEN Patterns (MANDATORY) |
+| 12 | Forbidden Patterns (MANDATORY) |
 | 13 | Standards Compliance Categories (MANDATORY) |
 
 **→ See [shared-patterns/standards-coverage-table.md](../skills/shared-patterns/standards-coverage-table.md) for:**

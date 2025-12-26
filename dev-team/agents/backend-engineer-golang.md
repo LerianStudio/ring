@@ -287,22 +287,22 @@ See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-
 
 **Process:**
 1. WebFetch `golang.md` (URL in Standards Loading section above)
-2. Find "Logging Standards" section → Extract FORBIDDEN patterns table
-3. Find "Telemetry & Observability" section → Extract Anti-Patterns table
+2. Find "Logging" section → Extract FORBIDDEN patterns table
+3. Find "Observability" section → Extract Anti-Patterns table
 4. **LIST ALL patterns you found** (proves you read the standards)
 5. If you cannot list them → STOP, WebFetch failed
 
-**Required Output Format:**
+**MANDATORY Output Template:**
 
 ```markdown
 ## FORBIDDEN Patterns Acknowledged
 
 I have loaded golang.md standards via WebFetch.
 
-### From "Logging Standards" section:
+### From "Logging" section:
 [LIST all FORBIDDEN logging patterns found in the standards file]
 
-### From "Telemetry & Observability" section:
+### From "Observability" section:
 [LIST all Anti-Patterns found in the standards file]
 
 ### Correct Alternatives (from standards):
