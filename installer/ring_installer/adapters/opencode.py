@@ -13,7 +13,7 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from ring_installer.adapters.base import PlatformAdapter
 
@@ -123,10 +123,39 @@ class OpenCodeAdapter(PlatformAdapter):
             frontmatter = self._transform_agent_frontmatter(frontmatter)
 
         body = self._normalize_tool_references(body)
+        body = self._strip_model_requirement_section(body)
 
         if frontmatter:
             return self.create_frontmatter(frontmatter) + "\n" + body
         return body
+
+    def _strip_model_requirement_section(self, body: str) -> str:
+        """
+        Remove Claude-specific model requirement sections from agent body.
+
+        Ring agents include self-verification sections that check if the model
+        is Claude Opus 4.5+. These sections cause agents to refuse execution
+        on non-Claude models. Since OpenCode supports multiple providers,
+        we strip these sections to allow model flexibility.
+
+        Args:
+            body: The agent markdown body
+
+        Returns:
+            Body with model requirement sections removed
+        """
+        # Pattern matches the entire Model Requirement section including:
+        # - The warning header (## ⚠️ Model Requirement...)
+        # - The self-verification instructions
+        # - The orchestrator requirement code block
+        # - The trailing horizontal rule (---) separator
+        pattern = r'## ⚠️ Model Requirement[^\n]*\n.*?\n---\n'
+        result = re.sub(pattern, '', body, flags=re.DOTALL)
+
+        # Clean up any resulting double blank lines
+        result = re.sub(r'\n{3,}', '\n\n', result)
+
+        return result.strip() + '\n'
 
     def transform_command(self, command_content: str, metadata: Optional[Dict[str, Any]] = None) -> str:
         """
@@ -321,7 +350,8 @@ class OpenCodeAdapter(PlatformAdapter):
             elif agent_type == "primary" and "mode" not in result:
                 result["mode"] = "primary"
 
-        for field in ["version", "last_updated", "changelog", "output_schema"]:
+        # Remove Ring-specific fields not supported by OpenCode
+        for field in ["version", "last_updated", "changelog", "output_schema", "color", "type"]:
             result.pop(field, None)
 
         return result
@@ -375,15 +405,15 @@ class OpenCodeAdapter(PlatformAdapter):
             return normalized
 
         if isinstance(tools, list):
-            normalized_list: List[str] = []
+            # OpenCode requires tools as object with boolean values, not array
+            normalized_obj: Dict[str, Any] = {}
             for tool in tools:
                 if isinstance(tool, str):
                     mapped = self._OPENCODE_TOOL_NAME_MAP.get(tool, tool.lower())
-                    if mapped not in normalized_list:
-                        normalized_list.append(mapped)
+                    normalized_obj[mapped] = True
                 else:
-                    normalized_list.append(tool)
-            return normalized_list
+                    normalized_obj[str(tool)] = True
+            return normalized_obj
 
         return tools
 
