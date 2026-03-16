@@ -2805,9 +2805,9 @@ func (p *ProducerRepository) Publish(ctx context.Context, exchange, routingKey s
 
 ```go
 type QueueMessage struct {
-    OrganizationID uuid.UUID   `json:"organization_id"`
-    LedgerID       uuid.UUID   `json:"ledger_id"`
-    AuditID        uuid.UUID   `json:"audit_id"`
+    OrganizationID uuid.UUID   `json:"organizationId"`
+    LedgerID       uuid.UUID   `json:"ledgerId"`
+    AuditID        uuid.UUID   `json:"auditId"`
     Data           []QueueData `json:"data"`
 }
 

@@ -2992,9 +2992,9 @@ Audit naming conventions across the codebase for production readiness.
 // Go struct with correct naming conventions
 type Account struct {
     ID          uuid.UUID `json:"id" gorm:"column:id"`
-    DisplayName string    `json:"display_name" gorm:"column:display_name"`  // camelCase JSON, snake_case DB
-    AccountType string    `json:"account_type" gorm:"column:account_type"`
-    CreatedAt   time.Time `json:"created_at" gorm:"column:created_at"`
+    DisplayName string    `json:"displayName" gorm:"column:display_name"`  // camelCase JSON, snake_case DB
+    AccountType string    `json:"accountType" gorm:"column:account_type"`
+    CreatedAt   time.Time `json:"createdAt" gorm:"column:created_at"`
 }
 
 // Query parameters use snake_case
@@ -3014,9 +3014,9 @@ type Account struct {
 // BAD: Inconsistent JSON naming
 type Account struct {
     ID          uuid.UUID `json:"id"`
-    DisplayName string    `json:"displayName"`    // camelCase instead of snake_case
-    AccountType string    `json:"account_type"`   // snake_case — inconsistent with above!
-    CreatedAt   time.Time `json:"CreatedAt"`      // PascalCase — wrong!
+    DisplayName string    `json:"display_name"`   // snake_case — WRONG for JSON body
+    AccountType string    `json:"account_type"`   // snake_case — WRONG for JSON body
+    CreatedAt   time.Time `json:"CreatedAt"`      // PascalCase — WRONG
 }
 
 // BAD: Mixed naming in query params
@@ -3025,7 +3025,7 @@ type Account struct {
 
 **Check Against Ring Standards For:**
 1. snake_case for database column names in migrations and GORM tags
-2. snake_case for JSON response body fields (json:"field_name")
+2. camelCase for JSON response body fields (json:"fieldName")
 3. snake_case for query parameters
 4. PascalCase for Go exported types and functions
 5. camelCase for Go unexported fields and variables
@@ -3043,7 +3043,7 @@ type Account struct {
 
 ### Summary
 - JSON fields audited: X
-- Using snake_case JSON: Y/X
+- Using camelCase JSON: Y/X
 - DB columns using snake_case: Y/Z
 - Query params using snake_case: Y/Z
 - Naming convention violations: N
