@@ -1,61 +1,60 @@
 ---
-name: ring:dev-refactor-frontend
+name: dev-refactor-frontend
 description: |
   Analyzes frontend codebase against Ring standards and generates refactoring tasks
   for ring:dev-cycle-frontend. Dispatches frontend-specific agents in ANALYSIS mode.
-
-trigger: |
-  - User wants to refactor existing frontend project to follow standards
-  - Legacy React/Next.js codebase needs modernization
-  - Frontend project audit requested
-
-skip_when: |
-  - Greenfield project -> Use /ring:pre-dev-* instead
-  - Single file fix -> Use ring:dev-cycle-frontend directly
-  - Backend-only project -> Use ring:dev-refactor instead
-
-sequence:
-  before: [ring:dev-cycle-frontend]
-
-related:
-  complementary: [ring:dev-refactor, ring:dev-cycle-frontend, ring:using-dev-team]
-
-input_schema:
-  required: []
-  optional:
+metadata:
+  input_schema:
+    required: []
+    optional:
     - name: project_path
       type: string
-      description: "Path to frontend project root (default: current directory)"
+      description: 'Path to frontend project root (default: current directory)'
     - name: prompt
       type: string
-      description: "Direct instruction for refactoring focus"
+      description: Direct instruction for refactoring focus
     - name: standards_path
       type: string
-      description: "Custom standards file path (default: Ring standards via WebFetch)"
+      description: 'Custom standards file path (default: Ring standards via WebFetch)'
     - name: analyze_only
       type: boolean
-      description: "Generate report without executing ring:dev-cycle-frontend"
+      description: Generate report without executing ring:dev-cycle-frontend
     - name: critical_only
       type: boolean
-      description: "Limit execution to Critical and High severity (analysis still tracks all)"
+      description: Limit execution to Critical and High severity (analysis still tracks all)
     - name: dry_run
       type: boolean
-      description: "Show what would be analyzed without executing"
-
-output_schema:
-  format: markdown
-  artifacts:
-    - name: "codebase-report.md"
-      description: "Codebase analysis from ring:codebase-explorer"
-    - name: "reports/{agent-name}-report.md"
-      description: "Individual agent analysis reports"
-    - name: "findings.md"
-      description: "All findings mapped from agent reports"
-    - name: "tasks.md"
-      description: "1:1 mapped REFACTOR-XXX tasks from findings"
-    - name: "change-report.html"
-      description: "Visual HTML change report from ring:visual-explainer"
-  traceability: "Ring Standard -> Agent Report -> FINDING-XXX -> REFACTOR-XXX -> Implementation"
+      description: Show what would be analyzed without executing
+  output_schema:
+    format: markdown
+    artifacts:
+    - name: codebase-report.md
+      description: Codebase analysis from ring:codebase-explorer
+    - name: reports/{agent-name}-report.md
+      description: Individual agent analysis reports
+    - name: findings.md
+      description: All findings mapped from agent reports
+    - name: tasks.md
+      description: 1:1 mapped REFACTOR-XXX tasks from findings
+    - name: change-report.html
+      description: Visual HTML change report from ring:visual-explainer
+    traceability: Ring Standard -> Agent Report -> FINDING-XXX -> REFACTOR-XXX -> Implementation
+  related:
+    complementary:
+    - ring:dev-refactor
+    - ring:dev-cycle-frontend
+    - ring:using-dev-team
+  sequence:
+    before:
+    - ring:dev-cycle-frontend
+  skip_when: |
+    - Greenfield project -> Use /ring:pre-dev-* instead
+    - Single file fix -> Use ring:dev-cycle-frontend directly
+    - Backend-only project -> Use ring:dev-refactor instead
+  trigger: |
+    - User wants to refactor existing frontend project to follow standards
+    - Legacy React/Next.js codebase needs modernization
+    - Frontend project audit requested
 ---
 
 # Dev Refactor Frontend Skill

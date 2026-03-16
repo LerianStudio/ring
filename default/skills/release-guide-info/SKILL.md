@@ -1,81 +1,92 @@
 ---
-name: ring:release-guide-info
-version: 1.2.0
+name: release-guide-info
 description: |
   Generate Ops Update Guide from Git Diff. Produces internal Operations-facing
   update/migration guides based on git diff analysis. Supports STRICT_NO_TOUCH (default)
   and TEMP_CLONE_FOR_FRESH_REFS modes. Includes tag auto-detection and commit log analysis.
-
-trigger: |
-  - Preparing to release a new version
-  - Need to document what changed between refs
-  - Creating operational update guide
-  - Communicating version updates to Ops team
-  - "Generate ops guide from main to HEAD"
-  - "Generate release guide for <version>"
-
-skip_when: |
-  - No git repository available
-  - Single file change (too small for formal guide)
-  - Customer-facing release notes only (use simpler template)
-
-input_schema:
-  BASE_REF:
-    type: string
-    required: true
-    description: Starting point (branch, tag, or SHA)
-    examples: ["main", "release/v3.4.x", "v1.0.0"]
-  TARGET_REF:
-    type: string
-    required: true
-    description: Ending point (branch, tag, or SHA)
-    examples: ["HEAD", "feature/foo", "v1.1.0"]
-  VERSION:
-    type: string
-    required: false
-    description: Version number for the release (auto-detected from tags if not provided)
-    examples: ["v2.0.0", "1.5.0", "2025.01"]
-  LANGUAGE:
-    type: enum
-    required: false
-    default: "en"
-    values: ["en", "pt-br", "both"]
-    description: Output language(s) for the guide
-  MODE:
-    type: enum
-    required: false
-    default: "STRICT_NO_TOUCH"
-    values: ["STRICT_NO_TOUCH", "TEMP_CLONE_FOR_FRESH_REFS"]
-    description: Git execution mode
-
-output_schema:
-  files:
-    type: array
-    description: List of generated guide files
-    items:
-      path: string
-      language: string
-  summary:
-    type: object
-    description: Quick summary of changes
-    properties:
-      features: number
-      bug_fixes: number
-      improvements: number
-      breaking_changes: number
-  version:
-    type: string
-    description: Version number (provided or auto-detected)
-  refs:
-    type: object
-    properties:
-      base: string
-      target: string
-      base_sha: string
-      target_sha: string
-
-related:
-  complementary: [finishing-a-development-branch]
+metadata:
+  input_schema:
+    BASE_REF:
+      type: string
+      required: true
+      description: Starting point (branch, tag, or SHA)
+      examples:
+      - main
+      - release/v3.4.x
+      - v1.0.0
+    TARGET_REF:
+      type: string
+      required: true
+      description: Ending point (branch, tag, or SHA)
+      examples:
+      - HEAD
+      - feature/foo
+      - v1.1.0
+    VERSION:
+      type: string
+      required: false
+      description: Version number for the release (auto-detected from tags if not provided)
+      examples:
+      - v2.0.0
+      - 1.5.0
+      - '2025.01'
+    LANGUAGE:
+      type: enum
+      required: false
+      default: en
+      values:
+      - en
+      - pt-br
+      - both
+      description: Output language(s) for the guide
+    MODE:
+      type: enum
+      required: false
+      default: STRICT_NO_TOUCH
+      values:
+      - STRICT_NO_TOUCH
+      - TEMP_CLONE_FOR_FRESH_REFS
+      description: Git execution mode
+  output_schema:
+    files:
+      type: array
+      description: List of generated guide files
+      items:
+        path: string
+        language: string
+    summary:
+      type: object
+      description: Quick summary of changes
+      properties:
+        features: number
+        bug_fixes: number
+        improvements: number
+        breaking_changes: number
+    version:
+      type: string
+      description: Version number (provided or auto-detected)
+    refs:
+      type: object
+      properties:
+        base: string
+        target: string
+        base_sha: string
+        target_sha: string
+  related:
+    complementary:
+    - finishing-a-development-branch
+  skip_when: |
+    - No git repository available
+    - Single file change (too small for formal guide)
+    - Customer-facing release notes only (use simpler template)
+  trigger: |
+    - Preparing to release a new version
+    - Need to document what changed between refs
+    - Creating operational update guide
+    - Communicating version updates to Ops team
+    - "Generate ops guide from main to HEAD"
+    - "Generate release guide for <version>"
+  version: 1.2.0
 ---
 
 # Release Guide Info — Ops Update Guide Generator

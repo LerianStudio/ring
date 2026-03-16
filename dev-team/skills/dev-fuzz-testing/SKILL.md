@@ -1,5 +1,5 @@
 ---
-name: ring:dev-fuzz-testing
+name: dev-fuzz-testing
 title: Development cycle fuzz testing (Gate 4)
 category: development-cycle
 tier: 1

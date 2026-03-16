@@ -1,53 +1,54 @@
 ---
-name: ring:dev-migrate-v4
+name: dev-migrate-v4
 description: |
   Analyzes a Go service using lib-commons v2/v3 and generates a visual migration
   report showing every change needed to upgrade to lib-commons v4. Produces an
   interactive HTML page (via ring:visual-explainer) and optionally generates
   refactoring tasks for ring:dev-cycle.
-trigger: |
-  - User wants to migrate a Go service from lib-commons v2 or v3 to v4
-  - User asks about lib-commons version upgrade
-  - User wants to see what needs to change for v4
-  - User runs /ring:migrate-v4
-
-skip_when: |
-  - Project already uses lib-commons/v4 → Report compliance status only
-  - Project is not Go → Not applicable
-  - Project does not use lib-commons → Not applicable
-
-prerequisite: |
-  - Go project with go.mod containing lib-commons/v2 or lib-commons/v3
-  - docs/PROJECT_RULES.md exists (recommended but not blocking)
-
-sequence:
-  after: [ring:dev-cycle]
-
-related:
-  complementary: [ring:dev-cycle, ring:dev-refactor, ring:codebase-explorer, ring:visual-explainer, ring:backend-engineer-golang]
-
-verification:
-  automated:
-    - command: "grep 'lib-commons/v4' go.mod"
-      description: "go.mod declares lib-commons v4"
-      success_pattern: "v4"
-    - command: "grep -rn 'lib-commons/v2\\|lib-commons/v3' --include='*.go' . | grep -v indirect | wc -l"
-      description: "Zero v2/v3 direct imports remain"
-      success_pattern: "^0$"
-
-examples:
-  - name: "Analyze and show visual report"
-    invocation: "/ring:migrate-v4"
-    expected_flow: "Scan → Map → Visual HTML report opened in browser"
-  - name: "Generate tasks for dev-cycle"
-    invocation: "/ring:migrate-v4 --tasks"
-    expected_flow: "Scan → Map → Visual report → migration-v4-tasks.md saved"
-  - name: "Full automatic migration"
-    invocation: "/ring:migrate-v4 --execute"
-    expected_flow: "Scan → Map → Visual report → tasks.md → ring:dev-cycle dispatched through all 10 gates"
-  - name: "Specific repository path"
-    invocation: "/ring:migrate-v4 /path/to/service --execute"
-    expected_flow: "Same as above but targets specific path"
+metadata:
+  examples:
+  - name: Analyze and show visual report
+    invocation: /ring:migrate-v4
+    expected_flow: Scan → Map → Visual HTML report opened in browser
+  - name: Generate tasks for dev-cycle
+    invocation: /ring:migrate-v4 --tasks
+    expected_flow: Scan → Map → Visual report → migration-v4-tasks.md saved
+  - name: Full automatic migration
+    invocation: /ring:migrate-v4 --execute
+    expected_flow: Scan → Map → Visual report → tasks.md → ring:dev-cycle dispatched through all 10 gates
+  - name: Specific repository path
+    invocation: /ring:migrate-v4 /path/to/service --execute
+    expected_flow: Same as above but targets specific path
+  prerequisite: |
+    - Go project with go.mod containing lib-commons/v2 or lib-commons/v3
+    - docs/PROJECT_RULES.md exists (recommended but not blocking)
+  related:
+    complementary:
+    - ring:dev-cycle
+    - ring:dev-refactor
+    - ring:codebase-explorer
+    - ring:visual-explainer
+    - ring:backend-engineer-golang
+  sequence:
+    after:
+    - ring:dev-cycle
+  skip_when: |
+    - Project already uses lib-commons/v4 → Report compliance status only
+    - Project is not Go → Not applicable
+    - Project does not use lib-commons → Not applicable
+  trigger: |
+    - User wants to migrate a Go service from lib-commons v2 or v3 to v4
+    - User asks about lib-commons version upgrade
+    - User wants to see what needs to change for v4
+    - User runs /ring:migrate-v4
+  verification:
+    automated:
+    - command: grep 'lib-commons/v4' go.mod
+      description: go.mod declares lib-commons v4
+      success_pattern: v4
+    - command: grep -rn 'lib-commons/v2\|lib-commons/v3' --include='*.go' . | grep -v indirect | wc -l
+      description: Zero v2/v3 direct imports remain
+      success_pattern: ^0$
 ---
 
 # Dev Migrate v4

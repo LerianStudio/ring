@@ -1,20 +1,21 @@
 ---
-name: ring:voice-and-tone
+name: voice-and-tone
 description: |
   Voice and tone guidelines for technical documentation. Ensures consistent,
   clear, and human writing across all documentation.
-
-trigger: |
-  - Need to check voice and tone compliance
-  - Writing new documentation
-  - Reviewing existing documentation for style
-
-skip_when: |
-  - Only checking structure → use documentation-structure
-  - Only checking technical accuracy → use docs-reviewer agent
-
-related:
-  complementary: [writing-functional-docs, writing-api-docs, documentation-review]
+metadata:
+  related:
+    complementary:
+    - writing-functional-docs
+    - writing-api-docs
+    - documentation-review
+  skip_when: |
+    - Only checking structure → use documentation-structure
+    - Only checking technical accuracy → use docs-reviewer agent
+  trigger: |
+    - Need to check voice and tone compliance
+    - Writing new documentation
+    - Reviewing existing documentation for style
 ---
 
 # Voice and Tone Guidelines

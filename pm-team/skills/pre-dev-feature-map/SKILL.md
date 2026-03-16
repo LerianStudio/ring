@@ -1,23 +1,23 @@
 ---
-name: ring:pre-dev-feature-map
+name: pre-dev-feature-map
 description: |
   Gate 2: Feature relationship map - visualizes feature landscape, groupings,
   and interactions at business level before technical architecture.
-
-trigger: |
-  - PRD passed Gate 1 validation
-  - Multiple features with complex interactions
-  - Need to understand feature scope and relationships
-  - Large Track workflow (2+ day features)
-
-skip_when: |
-  - Small Track workflow (<2 days) → skip to TRD
-  - Single simple feature → TRD directly
-  - PRD not validated → complete Gate 1 first
-
-sequence:
-  after: [ring:pre-dev-prd-creation]
-  before: [ring:pre-dev-trd-creation]
+metadata:
+  sequence:
+    after:
+    - ring:pre-dev-prd-creation
+    before:
+    - ring:pre-dev-trd-creation
+  skip_when: |
+    - Small Track workflow (<2 days) → skip to TRD
+    - Single simple feature → TRD directly
+    - PRD not validated → complete Gate 1 first
+  trigger: |
+    - PRD passed Gate 1 validation
+    - Multiple features with complex interactions
+    - Need to understand feature scope and relationships
+    - Large Track workflow (2+ day features)
 ---
 
 # Feature Map Creation - Understanding the Feature Landscape

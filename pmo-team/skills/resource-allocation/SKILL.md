@@ -1,22 +1,22 @@
 ---
-name: ring:resource-allocation
+name: resource-allocation
 description: |
   Resource capacity planning and allocation skill for managing people and skills
   across multiple projects. Identifies conflicts, gaps, and optimization opportunities.
-
-trigger: |
-  - Need to allocate resources to projects
-  - Capacity planning for upcoming work
-  - Resource conflict resolution
-  - Skills gap analysis
-
-skip_when: |
-  - Single project staffing → use ring-pm-team
-  - Cost analysis → use ring-finops-team
-  - Project status → use project-health-check
-
-related:
-  complementary: [portfolio-planning, risk-management]
+metadata:
+  related:
+    complementary:
+    - portfolio-planning
+    - risk-management
+  skip_when: |
+    - Single project staffing → use ring-pm-team
+    - Cost analysis → use ring-finops-team
+    - Project status → use project-health-check
+  trigger: |
+    - Need to allocate resources to projects
+    - Capacity planning for upcoming work
+    - Resource conflict resolution
+    - Skills gap analysis
 ---
 
 # Resource Allocation Skill

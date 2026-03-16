@@ -1,5 +1,5 @@
 ---
-name: ring:dev-implementation
+name: dev-implementation
 description: |
   Gate 0 of the development cycle. Executes code implementation using the appropriate
   specialized agent based on task content and project language. Handles TDD workflow

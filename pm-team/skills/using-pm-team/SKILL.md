@@ -1,18 +1,17 @@
 ---
-name: ring:using-pm-team
+name: using-pm-team
 description: |
   12 pre-dev workflow skills + 4 research agents organized into Small Track (4 gates, <2 days) and
   Large Track (9 gates, 2+ days) for systematic feature planning with research-first approach.
-
-trigger: |
-  - Starting any feature implementation
-  - Need systematic planning before coding
-  - User requests "plan a feature"
-
-skip_when: |
-  - Quick exploratory work → ring:brainstorming may suffice
-  - Bug fix with known solution → direct implementation
-  - Trivial change (<1 hour) → skip formal planning
+metadata:
+  skip_when: |-
+    - Quick exploratory work → ring:brainstorming may suffice
+    - Bug fix with known solution → direct implementation
+    - Trivial change (<1 hour) → skip formal planning
+  trigger: |
+    - Starting any feature implementation
+    - Need systematic planning before coding
+    - User requests "plan a feature"
 ---
 
 # Using Ring Team-Product: Pre-Dev Workflow & Delivery Tracking

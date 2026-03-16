@@ -1,13 +1,9 @@
 ---
-name: ring:git-commit
+name: git-commit
 description: Smart commit organization with atomic grouping, conventional commits, and trailer management
-user_invocable: false
-allowed-tools:
-  - Bash
-  - Read
-  - Glob
-  - Grep
-  - AskUserQuestion
+allowed-tools: Bash, Read, Glob, Grep, AskUserQuestion
+metadata:
+  user_invocable: false
 ---
 
 Analyze changes, group them into coherent atomic commits, and create signed commits following repository conventions. This skill transforms a messy working directory into a clean, logical commit history.

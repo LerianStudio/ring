@@ -1,25 +1,27 @@
 ---
-name: ring:writing-plans
+name: writing-plans
 description: |
   Creates comprehensive implementation plans with exact file paths, complete code
   examples, and verification steps for engineers with zero codebase context.
-
-trigger: |
-  - Design phase complete (brainstorming/PRD/TRD validated)
-  - Need to create executable task breakdown
-  - Creating work for other engineers or AI agents
-
-skip_when: |
-  - Design not validated → use brainstorming first
-  - Requirements still unclear → use ring:pre-dev-prd-creation first
-  - Already have a plan → use ring:executing-plans
-
-sequence:
-  after: [brainstorming, ring:pre-dev-trd-creation]
-  before: [ring:executing-plans, ring:subagent-driven-development]
-
-related:
-  similar: [brainstorming]
+metadata:
+  related:
+    similar:
+    - brainstorming
+  sequence:
+    after:
+    - brainstorming
+    - ring:pre-dev-trd-creation
+    before:
+    - ring:executing-plans
+    - ring:subagent-driven-development
+  skip_when: |
+    - Design not validated → use brainstorming first
+    - Requirements still unclear → use ring:pre-dev-prd-creation first
+    - Already have a plan → use ring:executing-plans
+  trigger: |
+    - Design phase complete (brainstorming/PRD/TRD validated)
+    - Need to create executable task breakdown
+    - Creating work for other engineers or AI agents
 ---
 
 # Writing Plans

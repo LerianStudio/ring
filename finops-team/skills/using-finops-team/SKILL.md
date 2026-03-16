@@ -1,30 +1,27 @@
 ---
-name: ring:using-finops-team
+name: using-finops-team
 description: |
   3 FinOps agents: 2 for Brazilian financial regulatory compliance (BACEN, RFB,
   Open Banking), 1 for infrastructure cost estimation when onboarding customers.
   Supports any regulatory template via open intake system.
-
-dependencies:
+metadata:
+  dependencies:
   - ring:finops-analyzer
   - ring:finops-automation
   - ring:infrastructure-cost-estimator
   - ring:regulatory-templates
-
-role: guide
-
-trigger: |
-  - Brazilian regulatory reporting (BACEN, RFB)
-  - Financial compliance requirements
-  - Open Banking specifications
-  - Template generation for Reporter platform
-  - Infrastructure cost estimation for new customers
-  - AWS capacity planning and pricing
-
-skip_when: |
-  - Non-Brazilian regulations → use appropriate resources
-  - Non-AWS infrastructure → adapt formulas
-  - One-time cost question → direct calculation
+  role: guide
+  skip_when: |-
+    - Non-Brazilian regulations → use appropriate resources
+    - Non-AWS infrastructure → adapt formulas
+    - One-time cost question → direct calculation
+  trigger: |
+    - Brazilian regulatory reporting (BACEN, RFB)
+    - Financial compliance requirements
+    - Open Banking specifications
+    - Template generation for Reporter platform
+    - Infrastructure cost estimation for new customers
+    - AWS capacity planning and pricing
 ---
 
 # Using Ring FinOps & Regulatory Agents

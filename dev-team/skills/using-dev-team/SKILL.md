@@ -1,25 +1,24 @@
 ---
-name: ring:using-dev-team
+name: using-dev-team
 description: |
   9 specialist developer agents for backend (Go/TypeScript), DevOps, frontend,
   design, UI implementation, QA (backend + frontend), and SRE. Dispatch when you need deep technology expertise.
-
-trigger: |
-  - Need deep expertise for specific technology (Go, TypeScript)
-  - Building infrastructure/CI-CD → ring:devops-engineer
-  - Frontend with design focus → ring:frontend-designer
-  - Frontend from product-designer specs → ring:ui-engineer
-  - Backend test strategy → ring:qa-analyst
-  - Frontend test strategy → ring:qa-analyst-frontend
-  - Reliability/monitoring → ring:sre
-
-skip_when: |
-  - General code review → use default plugin reviewers
-  - Planning/design → use brainstorming
-  - Debugging → use ring:systematic-debugging
-
-related:
-  similar: [ring:using-ring]
+metadata:
+  related:
+    similar:
+    - ring:using-ring
+  skip_when: |
+    - General code review → use default plugin reviewers
+    - Planning/design → use brainstorming
+    - Debugging → use ring:systematic-debugging
+  trigger: |
+    - Need deep expertise for specific technology (Go, TypeScript)
+    - Building infrastructure/CI-CD → ring:devops-engineer
+    - Frontend with design focus → ring:frontend-designer
+    - Frontend from product-designer specs → ring:ui-engineer
+    - Backend test strategy → ring:qa-analyst
+    - Frontend test strategy → ring:qa-analyst-frontend
+    - Reliability/monitoring → ring:sre
 ---
 
 # Using Ring Developer Specialists

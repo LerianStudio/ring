@@ -1,22 +1,21 @@
 ---
-name: ring:infrastructure-cost-estimation
-version: 6.0.0
+name: infrastructure-cost-estimation
 description: |
   Orchestrates infrastructure cost estimation with tier-based or custom TPS sizing.
   Offers pre-configured tiers (Starter/Growth/Business/Enterprise) or custom TPS input.
   Skill discovers components, asks shared/dedicated for EACH, selects environment(s),
   reads actual Helm chart configs, then dispatches agent for accurate calculations.
-
-trigger: |
-  - "How much will this cost on AWS?"
-  - "Estimate infrastructure for [repo]"
-  - "What should we charge the customer?"
-  - "Is this deal profitable?"
-  - Adding new customer to platform
-
-skip_when: |
-  - No docker-compose in repo → manual estimation needed
-  - Non-AWS target → adapt pricing
+metadata:
+  skip_when: |-
+    - No docker-compose in repo → manual estimation needed
+    - Non-AWS target → adapt pricing
+  trigger: |
+    - "How much will this cost on AWS?"
+    - "Estimate infrastructure for [repo]"
+    - "What should we charge the customer?"
+    - "Is this deal profitable?"
+    - Adding new customer to platform
+  version: 6.0.0
 ---
 
 # Infrastructure Cost Estimation

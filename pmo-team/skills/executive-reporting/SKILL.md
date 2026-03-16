@@ -1,22 +1,22 @@
 ---
-name: ring:executive-reporting
+name: executive-reporting
 description: |
   Executive communication and reporting skill for creating dashboards, status summaries,
   and board packages. Focuses on actionable insights for leadership.
-
-trigger: |
-  - Need executive status update
-  - Board meeting preparation
-  - Portfolio dashboard creation
-  - Stakeholder escalation report
-
-skip_when: |
-  - Detailed project analysis → use project-health-check
-  - Technical documentation → use ring-tw-team
-  - Financial deep dive → use ring-finops-team
-
-related:
-  complementary: [portfolio-planning, project-health-check]
+metadata:
+  related:
+    complementary:
+    - portfolio-planning
+    - project-health-check
+  skip_when: |
+    - Detailed project analysis → use project-health-check
+    - Technical documentation → use ring-tw-team
+    - Financial deep dive → use ring-finops-team
+  trigger: |
+    - Need executive status update
+    - Board meeting preparation
+    - Portfolio dashboard creation
+    - Stakeholder escalation report
 ---
 
 # Executive Reporting Skill

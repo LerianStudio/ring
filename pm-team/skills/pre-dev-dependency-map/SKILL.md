@@ -1,24 +1,24 @@
 ---
-name: ring:pre-dev-dependency-map
+name: pre-dev-dependency-map
 description: |
   Gate 6: Technology choices document - explicit, versioned, validated technology
   selections with justifications. Large Track only. HARD BLOCK: Must load Ring Standards
   and PROJECT_RULES.md before proceeding.
-
-trigger: |
-  - Data Model passed Gate 5 validation
-  - About to select specific technologies
-  - Tempted to write "@latest" or "newest version"
-  - Large Track workflow (2+ day features)
-
-skip_when: |
-  - Small Track workflow → skip to Task Breakdown
-  - Technologies already locked → skip to Task Breakdown
-  - Data Model not validated → complete Gate 5 first
-
-sequence:
-  after: [ring:pre-dev-data-model]
-  before: [ring:pre-dev-task-breakdown]
+metadata:
+  sequence:
+    after:
+    - ring:pre-dev-data-model
+    before:
+    - ring:pre-dev-task-breakdown
+  skip_when: |
+    - Small Track workflow → skip to Task Breakdown
+    - Technologies already locked → skip to Task Breakdown
+    - Data Model not validated → complete Gate 5 first
+  trigger: |
+    - Data Model passed Gate 5 validation
+    - About to select specific technologies
+    - Tempted to write "@latest" or "newest version"
+    - Large Track workflow (2+ day features)
 ---
 
 # Dependency Map - Explicit Technology Choices

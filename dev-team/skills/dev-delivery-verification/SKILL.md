@@ -1,76 +1,64 @@
 ---
-name: ring:dev-delivery-verification
-version: 1.0.0
+name: dev-delivery-verification
 description: |
   Delivery Verification Gate — verifies that what was requested is actually delivered
   as reachable, integrated code. Not quality review (Gate 8), not test verification
   (Gate 9) — this gate answers: "Is every requirement from the original task actually
   functioning in the running application?" Applies to ANY task type: features, refactors,
   fixes, infrastructure, API endpoints, middleware, business logic, integrations.
-
-trigger: |
-  - After Gate 0 (implementation) completes, before advancing to Gate 1
-  - After any refactoring task claims completion
-  - When code is generated/scaffolded and needs integration verification
-
-NOT_skip_when: |
-  - "Code compiles" → Compilation ≠ integration. Dead code compiles.
-  - "Tests pass" → Unit tests on isolated structs pass without wiring.
-  - "It's just a struct/interface" → Structs that aren't instantiated are dead code.
-  - "Wire will happen in next task" → Each task must deliver complete, reachable code.
-  - "Time pressure" → Unwired code is worse than no code — it creates false confidence.
-  - "It's a simple task" → Simple tasks still need verification. Partial delivery is not delivery.
-
-sequence:
-  after: [ring:dev-implementation]
-  before: [ring:dev-devops]
-
-related:
-  complementary: [ring:dev-cycle, ring:dev-implementation, ring:verification-before-completion, ring:requesting-code-review]
-
-input_schema:
-  required:
+metadata:
+  NOT_skip_when: |
+    - "Code compiles" → Compilation ≠ integration. Dead code compiles.
+    - "Tests pass" → Unit tests on isolated structs pass without wiring.
+    - "It's just a struct/interface" → Structs that aren't instantiated are dead code.
+    - "Wire will happen in next task" → Each task must deliver complete, reachable code.
+    - "Time pressure" → Unwired code is worse than no code — it creates false confidence.
+    - "It's a simple task" → Simple tasks still need verification. Partial delivery is not delivery.
+  input_schema:
+    required:
     - name: unit_id
       type: string
-      description: "Task or subtask identifier being verified"
+      description: Task or subtask identifier being verified
     - name: requirements
       type: string
-      description: "Original task requirements or acceptance criteria"
+      description: Original task requirements or acceptance criteria
     - name: files_changed
       type: array
       items: string
-      description: "List of files created or modified by Gate 0"
-  optional:
+      description: List of files created or modified by Gate 0
+    optional:
     - name: gate0_handoff
       type: object
-      description: "Full handoff from Gate 0 implementation"
-
-output_schema:
-  format: markdown
-  required_sections:
-    - name: "Delivery Verification Summary"
-      pattern: "^## Delivery Verification Summary"
+      description: Full handoff from Gate 0 implementation
+  output_schema:
+    format: markdown
+    required_sections:
+    - name: Delivery Verification Summary
+      pattern: ^## Delivery Verification Summary
       required: true
-    - name: "Requirement Coverage Matrix"
-      pattern: "^## Requirement Coverage Matrix"
+    - name: Requirement Coverage Matrix
+      pattern: ^## Requirement Coverage Matrix
       required: true
-    - name: "Integration Verification"
-      pattern: "^## Integration Verification"
+    - name: Integration Verification
+      pattern: ^## Integration Verification
       required: true
-    - name: "Dead Code Detection"
-      pattern: "^## Dead Code Detection"
+    - name: Dead Code Detection
+      pattern: ^## Dead Code Detection
       required: true
-    - name: "Verdict"
-      pattern: "^## Verdict"
+    - name: Verdict
+      pattern: ^## Verdict
       required: true
-    - name: "Return to Gate 0"
-      pattern: "^## Return to Gate 0"
+    - name: Return to Gate 0
+      pattern: ^## Return to Gate 0
       required: true
-      description: "Mandatory when verdict is PARTIAL or FAIL. Lists specific undelivered requirements with fix instructions for Gate 0."
-  metrics:
+      description: Mandatory when verdict is PARTIAL or FAIL. Lists specific undelivered requirements with fix instructions for Gate 0.
+    metrics:
     - name: result
       type: enum
-      values: [PASS, FAIL, PARTIAL]
+      values:
+      - PASS
+      - FAIL
+      - PARTIAL
     - name: requirements_total
       type: integer
     - name: requirements_delivered
@@ -81,7 +69,23 @@ output_schema:
       type: integer
     - name: remediation_items
       type: integer
-      description: "Number of fix instructions returned to Gate 0 (0 when PASS)"
+      description: Number of fix instructions returned to Gate 0 (0 when PASS)
+  related:
+    complementary:
+    - ring:dev-cycle
+    - ring:dev-implementation
+    - ring:verification-before-completion
+    - ring:requesting-code-review
+  sequence:
+    after:
+    - ring:dev-implementation
+    before:
+    - ring:dev-devops
+  trigger: |
+    - After Gate 0 (implementation) completes, before advancing to Gate 1
+    - After any refactoring task claims completion
+    - When code is generated/scaffolded and needs integration verification
+  version: 1.0.0
 ---
 
 # Delivery Verification Gate

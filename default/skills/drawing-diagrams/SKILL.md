@@ -1,9 +1,12 @@
 ---
 name: drawing-diagrams
-description: Generate Mermaid diagrams from context and open them in mermaid.live in the browser. Use when the user asks for a diagram, visualization, flowchart, sequence diagram, ER diagram, or any visual representation of code, architecture, or processes. Produces lightweight, shareable mermaid.live URLs that open in the browser for interactive editing.
+description: Generate Mermaid diagrams from context and open them in mermaid.live in the browser. Use when the user asks for a diagram, visualization, flowchart, sequence diagram, ER diagram, or any visual
+  representation of code, architecture, or processes. Produces lightweight, shareable mermaid.live URLs that open in the browser for interactive editing.
 license: MIT
 compatibility: Requires Python 3 (standard library only) and a browser. Uses `open` on macOS; Linux users need `xdg-open`.
-skip_when: The user needs a rich, branded, or styled HTML visualization (use ring:visual-explainer instead). This skill produces shareable mermaid.live URLs; visual-explainer produces self-contained Lerian-branded HTML files.
+metadata:
+  skip_when: The user needs a rich, branded, or styled HTML visualization (use ring:visual-explainer instead). This skill produces shareable mermaid.live URLs; visual-explainer produces self-contained Lerian-branded
+    HTML files.
 ---
 
 # Mermaid Live Diagram Generator

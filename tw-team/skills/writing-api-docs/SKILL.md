@@ -1,26 +1,27 @@
 ---
-name: ring:writing-api-docs
+name: writing-api-docs
 description: |
   Patterns and structure for writing API reference documentation including
   endpoint descriptions, request/response schemas, and error documentation.
-
-trigger: |
-  - Documenting REST API endpoints
-  - Writing request/response examples
-  - Documenting error codes
-  - Creating API field descriptions
-
-skip_when: |
-  - Writing conceptual guides → use writing-functional-docs
-  - Reviewing documentation → use documentation-review
-  - Writing code → use dev-team agents
-
-sequence:
-  before: [documentation-review]
-
-related:
-  similar: [writing-functional-docs]
-  complementary: [api-field-descriptions, documentation-structure]
+metadata:
+  related:
+    similar:
+    - writing-functional-docs
+    complementary:
+    - api-field-descriptions
+    - documentation-structure
+  sequence:
+    before:
+    - documentation-review
+  skip_when: |
+    - Writing conceptual guides → use writing-functional-docs
+    - Reviewing documentation → use documentation-review
+    - Writing code → use dev-team agents
+  trigger: |
+    - Documenting REST API endpoints
+    - Writing request/response examples
+    - Documenting error codes
+    - Creating API field descriptions
 ---
 
 # Writing API Reference Documentation

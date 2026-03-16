@@ -1,26 +1,27 @@
 ---
-name: ring:writing-functional-docs
+name: writing-functional-docs
 description: |
   Patterns and structure for writing functional documentation including guides,
   conceptual explanations, tutorials, and best practices documentation.
-
-trigger: |
-  - Writing a new guide or tutorial
-  - Creating conceptual documentation
-  - Documenting best practices
-  - Writing "how to" content
-
-skip_when: |
-  - Writing API reference → use writing-api-docs
-  - Reviewing documentation → use documentation-review
-  - Writing code → use dev-team agents
-
-sequence:
-  before: [documentation-review]
-
-related:
-  similar: [writing-api-docs]
-  complementary: [voice-and-tone, documentation-structure]
+metadata:
+  related:
+    similar:
+    - writing-api-docs
+    complementary:
+    - voice-and-tone
+    - documentation-structure
+  sequence:
+    before:
+    - documentation-review
+  skip_when: |
+    - Writing API reference → use writing-api-docs
+    - Reviewing documentation → use documentation-review
+    - Writing code → use dev-team agents
+  trigger: |
+    - Writing a new guide or tutorial
+    - Creating conceptual documentation
+    - Documenting best practices
+    - Writing "how to" content
 ---
 
 # Writing Functional Documentation

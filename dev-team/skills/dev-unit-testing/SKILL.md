@@ -1,5 +1,5 @@
 ---
-name: ring:dev-unit-testing
+name: dev-unit-testing
 description: |
   Gate 3 of development cycle - ensures unit test coverage meets threshold (85%+)
   for all acceptance criteria using TDD methodology.

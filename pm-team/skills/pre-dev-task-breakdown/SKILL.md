@@ -1,23 +1,25 @@
 ---
-name: ring:pre-dev-task-breakdown
+name: pre-dev-task-breakdown
 description: |
   Gate 7: Implementation tasks - value-driven decomposition into working increments
   that deliver measurable user value.
-
-trigger: |
-  - PRD passed Gate 1 (required)
-  - TRD passed Gate 3 (required)
-  - All Large Track gates passed (if applicable)
-  - Ready to create sprint/iteration tasks
-
-skip_when: |
-  - PRD or TRD not validated → complete earlier gates
-  - Tasks already exist → proceed to Subtask Creation
-  - Trivial change → direct implementation
-
-sequence:
-  after: [ring:pre-dev-trd-creation, ring:pre-dev-dependency-map]
-  before: [ring:pre-dev-subtask-creation, ring:executing-plans]
+metadata:
+  sequence:
+    after:
+    - ring:pre-dev-trd-creation
+    - ring:pre-dev-dependency-map
+    before:
+    - ring:pre-dev-subtask-creation
+    - ring:executing-plans
+  skip_when: |
+    - PRD or TRD not validated → complete earlier gates
+    - Tasks already exist → proceed to Subtask Creation
+    - Trivial change → direct implementation
+  trigger: |
+    - PRD passed Gate 1 (required)
+    - TRD passed Gate 3 (required)
+    - All Large Track gates passed (if applicable)
+    - Ready to create sprint/iteration tasks
 ---
 
 # Task Breakdown - Value-Driven Decomposition

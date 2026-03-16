@@ -1,77 +1,80 @@
 ---
-name: ring:dev-cycle
+name: dev-cycle
 description: |
   Main orchestrator for the 10-gate development cycle system. Loads tasks/subtasks
   from PM team output and executes through implementation → devops → SRE → unit testing → fuzz testing → property testing → integration testing (write) → chaos testing (write) → review → validation
   gates (Gates 0-9), with state persistence and metrics collection.
   Gates 6-7 (integration/chaos) write and update test code per unit but only execute tests at end of cycle (deferred execution).
   Multi-tenant dual-mode is implemented during Gate 0 and verified at Gate 0.5G (no separate post-cycle step).
-
-trigger: |
-  - Starting a new development cycle with a task file
-  - Resuming an interrupted development cycle (--resume flag)
-  - Need structured, gate-based task execution with quality checkpoints
-
-prerequisite: |
-  - Tasks file exists with structured subtasks
-  - Not already in a specific gate skill execution
-  - Human has not explicitly requested manual workflow
-
-NOT_skip_when: |
-  - "Task is simple" → Simple ≠ risk-free. Execute gates.
-  - "Tests already pass" → Tests ≠ review. Different concerns.
-  - "Time pressure" → Pressure ≠ permission. Document and proceed.
-  - "Already did N gates" → Sunk cost is irrelevant. Complete all gates.
-
-sequence:
-  before: [ring:dev-feedback-loop]
-
-related:
-  complementary: [ring:dev-implementation, ring:dev-devops, ring:dev-sre, ring:dev-unit-testing, ring:requesting-code-review, ring:dev-validation, ring:dev-feedback-loop, ring:dev-delivery-verification]
-
-verification:
-  automated:
-    - command: "test -f docs/ring:dev-cycle/current-cycle.json || test -f docs/ring:dev-refactor/current-cycle.json"
-      description: "State file exists (ring:dev-cycle or ring:dev-refactor)"
-      success_pattern: "exit 0"
-    - command: "cat docs/ring:dev-cycle/current-cycle.json 2>/dev/null || cat docs/ring:dev-refactor/current-cycle.json | jq '.current_gate'"
-      description: "Current gate is valid"
-      success_pattern: '[0-5]|0\.5'
-  manual:
-    - "All gates for current task show PASS in state file"
-    - "No tasks have status 'blocked' for more than 3 iterations"
-
-examples:
-  - name: "New feature from PM workflow"
-    invocation: "/ring:dev-cycle docs/pre-dev/auth/tasks.md"
+metadata:
+  NOT_skip_when: |
+    - "Task is simple" → Simple ≠ risk-free. Execute gates.
+    - "Tests already pass" → Tests ≠ review. Different concerns.
+    - "Time pressure" → Pressure ≠ permission. Document and proceed.
+    - "Already did N gates" → Sunk cost is irrelevant. Complete all gates.
+  examples:
+  - name: New feature from PM workflow
+    invocation: /ring:dev-cycle docs/pre-dev/auth/tasks.md
     expected_flow: |
       1. Load tasks with subtasks from tasks.md
       2. Ask user for checkpoint mode (per-task/per-gate/continuous)
       3. Execute Gate 0→0.5→1→2→3→4→5→6→7→8→9 for each task sequentially
       4. Generate feedback report after completion
-  - name: "Resume interrupted cycle"
-    invocation: "/ring:dev-cycle --resume"
-    expected_state: "Continues from last saved gate in current-cycle.json"
-  - name: "Execute with per-gate checkpoints"
-    invocation: "/ring:dev-cycle tasks.md --checkpoint per-gate"
+  - name: Resume interrupted cycle
+    invocation: /ring:dev-cycle --resume
+    expected_state: Continues from last saved gate in current-cycle.json
+  - name: Execute with per-gate checkpoints
+    invocation: /ring:dev-cycle tasks.md --checkpoint per-gate
     expected_flow: |
       1. Execute Gate 0, pause for approval
       2. User approves, execute Gate 1, pause
       3. Continue until all 11 gates complete
-  - name: "Execute with custom context for agents"
-    invocation: "/ring:dev-cycle tasks.md \"Focus on error handling. Use existing UserRepository.\""
+  - name: Execute with custom context for agents
+    invocation: /ring:dev-cycle tasks.md "Focus on error handling. Use existing UserRepository."
     expected_flow: |
       1. Load tasks and store custom_prompt in state
       2. All agent dispatches include custom instructions as context
       3. Custom context visible in execution report
-  - name: "Instructions-only mode (no tasks file)"
-    invocation: "/ring:dev-cycle \"Add webhook notification support for account status changes\""
-    expected_flow: |
+  - name: Instructions-only mode (no tasks file)
+    invocation: /ring:dev-cycle "Add webhook notification support for account status changes"
+    expected_flow: |-
       1. Detect prompt-only mode (no task file provided)
       2. Dispatch ring:codebase-explorer to analyze project
       3. Generate tasks internally from prompt + codebase analysis
       4. Present generated tasks for user confirmation
       5. Execute Gate 0→0.5→1→2→3→4→5→6→7→8→9 for each generated task
+  prerequisite: |
+    - Tasks file exists with structured subtasks
+    - Not already in a specific gate skill execution
+    - Human has not explicitly requested manual workflow
+  related:
+    complementary:
+    - ring:dev-implementation
+    - ring:dev-devops
+    - ring:dev-sre
+    - ring:dev-unit-testing
+    - ring:requesting-code-review
+    - ring:dev-validation
+    - ring:dev-feedback-loop
+    - ring:dev-delivery-verification
+  sequence:
+    before:
+    - ring:dev-feedback-loop
+  trigger: |
+    - Starting a new development cycle with a task file
+    - Resuming an interrupted development cycle (--resume flag)
+    - Need structured, gate-based task execution with quality checkpoints
+  verification:
+    automated:
+    - command: test -f docs/ring:dev-cycle/current-cycle.json || test -f docs/ring:dev-refactor/current-cycle.json
+      description: State file exists (ring:dev-cycle or ring:dev-refactor)
+      success_pattern: exit 0
+    - command: cat docs/ring:dev-cycle/current-cycle.json 2>/dev/null || cat docs/ring:dev-refactor/current-cycle.json | jq '.current_gate'
+      description: Current gate is valid
+      success_pattern: '[0-5]|0\.5'
+    manual:
+    - All gates for current task show PASS in state file
+    - No tasks have status 'blocked' for more than 3 iterations
 ---
 
 # Development Cycle Orchestrator

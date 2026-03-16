@@ -1,8 +1,5 @@
 ---
-name: ring:dev-service-discovery
-slug: dev-service-discovery
-version: 1.2.0
-type: skill
+name: dev-service-discovery
 description: |
   Scans the current Go project and identifies the Service → Module → Resource
   hierarchy for dispatch layer registration. Detects service name and type,
@@ -17,35 +14,14 @@ description: |
 
   Also detects database names per module, cross-references them across modules
   to find shared databases, and flags them for single-provision in dispatch layer.
-
-trigger: |
-  - User wants to know what to provision in dispatch layer for a service
-  - User asks "what services/modules/resources does this project have?"
-  - User needs to register a service in the dispatch layer catalog
-  - Before running ring:dev-multi-tenant on a new service
-  - User asks about MongoDB indexes in a project
-
-prerequisite: |
-  - Go project with go.mod in the current working directory
-
-NOT_skip_when: |
-  - "Service is simple, I can see the structure" → Detection must be evidence-based, not assumed.
-  - "Already know the modules" → Knowledge ≠ verified. Run the scan.
-
-related:
-  complementary: [ring:dev-multi-tenant, ring:dev-devops, ring:exploring-codebase]
-
-output_schema:
-  format: html
-  required_sections:
-    - name: "Service Discovery Report"
-      pattern: "^## Service Discovery Report"
-      required: true
-
-examples:
-  - name: "Scan current project"
-    invocation: "/ring:dev-service-discovery"
-    expected_flow: |
+metadata:
+  NOT_skip_when: |
+    - "Service is simple, I can see the structure" → Detection must be evidence-based, not assumed.
+    - "Already know the modules" → Knowledge ≠ verified. Run the scan.
+  examples:
+  - name: Scan current project
+    invocation: /ring:dev-service-discovery
+    expected_flow: |-
       1. Detect service identity (ApplicationName, type)
       2. Detect modules (WithModule calls, component structure)
       3. Detect resources per module (PostgreSQL, MongoDB, RabbitMQ)
@@ -54,6 +30,28 @@ examples:
       6. Detect MongoDB indexes (in-code + scripts)
       7. Generate visual HTML report with shared database warnings
       8. Open in browser for review
+  output_schema:
+    format: html
+    required_sections:
+    - name: Service Discovery Report
+      pattern: ^## Service Discovery Report
+      required: true
+  prerequisite: |
+    - Go project with go.mod in the current working directory
+  related:
+    complementary:
+    - ring:dev-multi-tenant
+    - ring:dev-devops
+    - ring:exploring-codebase
+  slug: dev-service-discovery
+  trigger: |
+    - User wants to know what to provision in dispatch layer for a service
+    - User asks "what services/modules/resources does this project have?"
+    - User needs to register a service in the dispatch layer catalog
+    - Before running ring:dev-multi-tenant on a new service
+    - User asks about MongoDB indexes in a project
+  type: skill
+  version: 1.2.0
 ---
 
 # Service Discovery for Tenant-Manager

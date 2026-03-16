@@ -1,29 +1,30 @@
 ---
-name: ring:interviewing-user
+name: interviewing-user
 description: |
   Proactive requirements gathering - systematically interviews the user to uncover
   ambiguities, preferences, and constraints BEFORE implementation begins.
-
-trigger: |
-  - User invokes /ring:interview-me command
-  - Claude detects significant ambiguity in requirements
-  - Multiple valid implementation paths exist with no clear winner
-  - User says "interview me", "ask me questions", "clarify with me"
-  - Task involves architecture decisions without clear direction
-
-skip_when: |
-  - Requirements are already crystal clear
-  - User has provided detailed specifications
-  - Following an existing plan with explicit instructions
-  - Doubt can be resolved via doubt-triggered-questions (single question)
-
-sequence:
-  before: [brainstorming, ring:writing-plans]
-  after: []
-
-related:
-  similar: [brainstorming]
-  uses: [doubt-triggered-questions]
+metadata:
+  related:
+    similar:
+    - brainstorming
+    uses:
+    - doubt-triggered-questions
+  sequence:
+    before:
+    - brainstorming
+    - ring:writing-plans
+    after: []
+  skip_when: |
+    - Requirements are already crystal clear
+    - User has provided detailed specifications
+    - Following an existing plan with explicit instructions
+    - Doubt can be resolved via doubt-triggered-questions (single question)
+  trigger: |
+    - User invokes /ring:interview-me command
+    - Claude detects significant ambiguity in requirements
+    - Multiple valid implementation paths exist with no clear winner
+    - User says "interview me", "ask me questions", "clarify with me"
+    - Task involves architecture decisions without clear direction
 ---
 
 # Interviewing User for Requirements

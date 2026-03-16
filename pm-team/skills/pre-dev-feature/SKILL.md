@@ -1,47 +1,39 @@
 ---
-name: ring:pre-dev-feature
+name: pre-dev-feature
 description: |
   Lightweight 5-gate pre-dev workflow for small features (<2 days).
   Orchestrates topology discovery, research, PRD with UX validation,
   design validation, TRD, task breakdown, and delivery planning
   in a sequential gated process with human approval at each gate.
-
-trigger: |
-  - Feature takes <2 days to implement
-  - Uses existing architecture patterns
-  - Doesn't add new external dependencies
-  - Doesn't create new data models/entities
-  - Doesn't require multi-service integration
-  - Can be completed by a single developer
-
-skip_when: |
-  - Feature is complex (>=2 days) - use ring:pre-dev-full instead
-  - Adds new dependencies, data models, or architecture patterns
-
-sequence:
-  before: [ring:write-plan, ring:dev-cycle]
-
-related:
-  complementary: [ring:pre-dev-full, ring:write-plan, ring:worktree]
-  skills_orchestrated:
+allowed-tools: Skill, Read, Write, Glob, Grep, Bash, Agent, AskUserQuestion
+metadata:
+  related:
+    complementary:
+    - ring:pre-dev-full
+    - ring:write-plan
+    - ring:worktree
+    skills_orchestrated:
     - ring:pre-dev-research
     - ring:pre-dev-prd-creation
     - ring:pre-dev-design-validation
     - ring:pre-dev-trd-creation
     - ring:pre-dev-task-breakdown
     - ring:pre-dev-delivery-planning
-
-user_invocable: false
-
-allowed-tools:
-  - Skill
-  - Read
-  - Write
-  - Glob
-  - Grep
-  - Bash
-  - Agent
-  - AskUserQuestion
+  sequence:
+    before:
+    - ring:write-plan
+    - ring:dev-cycle
+  skip_when: |
+    - Feature is complex (>=2 days) - use ring:pre-dev-full instead
+    - Adds new dependencies, data models, or architecture patterns
+  trigger: |
+    - Feature takes <2 days to implement
+    - Uses existing architecture patterns
+    - Doesn't add new external dependencies
+    - Doesn't create new data models/entities
+    - Doesn't require multi-service integration
+    - Can be completed by a single developer
+  user_invocable: false
 ---
 
 # Small Track Pre-Dev Workflow (5 Gates)

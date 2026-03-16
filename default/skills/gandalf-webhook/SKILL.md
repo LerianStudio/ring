@@ -1,11 +1,9 @@
 ---
-name: ring:gandalf-webhook
+name: gandalf-webhook
 description: Send tasks to Gandalf (AI team member) via webhook and get responses back. Publish to Alfarrábio, send Slack notifications, ask for business context, and more.
-user_invocable: true
-allowed-tools:
-  - Bash
-  - Read
-  - Write
+allowed-tools: Bash, Read, Write
+metadata:
+  user_invocable: true
 ---
 
 # Gandalf Webhook

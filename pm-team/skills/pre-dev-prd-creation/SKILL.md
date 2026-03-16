@@ -1,22 +1,22 @@
 ---
-name: ring:pre-dev-prd-creation
+name: pre-dev-prd-creation
 description: |
   Gate 1: Business requirements document - defines WHAT/WHY before HOW.
   Creates PRD with problem definition, user stories, success metrics.
-
-trigger: |
-  - Starting new product or major feature
-  - User asks to "plan", "design", or "architect"
-  - About to write code without documented requirements
-  - Asked to create PRD or requirements document
-
-skip_when: |
-  - PRD already exists and validated → proceed to Gate 2
-  - Pure technical task without business impact → TRD directly
-  - Bug fix → systematic-debugging
-
-sequence:
-  before: [ring:pre-dev-feature-map, ring:pre-dev-trd-creation]
+metadata:
+  sequence:
+    before:
+    - ring:pre-dev-feature-map
+    - ring:pre-dev-trd-creation
+  skip_when: |
+    - PRD already exists and validated → proceed to Gate 2
+    - Pure technical task without business impact → TRD directly
+    - Bug fix → systematic-debugging
+  trigger: |
+    - Starting new product or major feature
+    - User asks to "plan", "design", or "architect"
+    - About to write code without documented requirements
+    - Asked to create PRD or requirements document
 ---
 
 # PRD Creation - Business Before Technical

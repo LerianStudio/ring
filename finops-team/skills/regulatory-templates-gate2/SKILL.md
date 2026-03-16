@@ -1,20 +1,20 @@
 ---
-name: ring:regulatory-templates-gate2
+name: regulatory-templates-gate2
 description: |
   Gate 2 sub-skill - validates uncertain mappings from Gate 1 and confirms
   all field specifications through testing.
-
-trigger: |
-  - Gate 1 PASSED
-  - Need to validate mappings before template generation
-
-skip_when: |
-  - Gate 1 not passed → complete Gate 1 first
-  - Gate 2 already passed → proceed to Gate 3
-
-sequence:
-  after: [regulatory-templates-gate1]
-  before: [regulatory-templates-gate3]
+metadata:
+  sequence:
+    after:
+    - regulatory-templates-gate1
+    before:
+    - regulatory-templates-gate3
+  skip_when: |
+    - Gate 1 not passed → complete Gate 1 first
+    - Gate 2 already passed → proceed to Gate 3
+  trigger: |
+    - Gate 1 PASSED
+    - Need to validate mappings before template generation
 ---
 
 # Regulatory Templates - Gate 2: Technical Validation

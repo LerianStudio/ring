@@ -1,8 +1,5 @@
 ---
-name: ring:dev-multi-tenant
-slug: dev-multi-tenant
-version: 2.0.0
-type: skill
+name: dev-multi-tenant
 description: |
   Multi-tenant development cycle orchestrator following Ring Standards.
   Auto-detects the service stack (PostgreSQL, MongoDB, Redis, RabbitMQ, S3)
@@ -14,95 +11,17 @@ description: |
   MUST update lib-commons v3 first; lib-auth v2 depends on it. Both are required dependencies.
   Each gate dispatches ring:backend-engineer-golang with context and section references.
   The agent loads multi-tenant.md via WebFetch and has all code examples.
-
-trigger: |
-  - User requests multi-tenant implementation for a Go service
-  - User asks to add tenant isolation to an existing service
-  - Task mentions "multi-tenant", "tenant isolation", "dispatch layer", "postgres.Manager", "MultiPoolMiddleware"
-
-prerequisite: |
-  - Go service with existing single-tenant functionality
-
-NOT_skip_when: |
-  - "organization_id already exists" → organization_id is NOT multi-tenant. tenantId via JWT is required.
-  - "Just need to connect the wiring" → Multi-tenant requires lib-commons v3 dispatch layer sub-packages.
-  - "lib-commons v3 upgrade is too risky" → REQUIRES lib-commons v3 dispatch layer sub-packages. No v3 = no multi-tenant.
-  - "Service already has multi-tenant" → Existence ≠ compliance. MUST replace non-standard implementations with Ring canonical model.
-  - "Multi-tenant is already done" → Every gate verifies compliance. MUST fix non-compliant code — it is wrong, not done.
-
-sequence:
-  after: [ring:dev-devops]
-
-related:
-  complementary: [ring:dev-cycle, ring:dev-implementation, ring:dev-devops, ring:dev-unit-testing, ring:requesting-code-review, ring:dev-validation]
-
-input_schema:
-  description: |
-    When invoked from ring:dev-cycle (post-cycle step), receives structured handoff context.
-    When invoked standalone (direct user request), these fields are auto-detected in Gate 0.
-  fields:
-    - name: execution_mode
-      type: string
-      enum: ["FULL", "SCOPED"]
-      description: "FULL = complete 12-gate cycle. SCOPED = only adapt new files (when existing MT is compliant)."
-      required: false
-      default: "FULL"
-    - name: files_changed
-      type: array
-      items: string
-      description: "File paths changed during dev-cycle (only in SCOPED mode). Used to limit Gate 5 scope."
-      required: false
-    - name: multi_tenant_exists
-      type: boolean
-      description: "Whether multi-tenant code was detected by dev-cycle Step 1.5."
-      required: false
-    - name: multi_tenant_compliant
-      type: boolean
-      description: "Whether existing MT code passed compliance audit in dev-cycle Step 1.5."
-      required: false
-    - name: detected_dependencies
-      type: object
-      properties:
-        postgresql: boolean
-        mongodb: boolean
-        redis: boolean
-        rabbitmq: boolean
-        s3: boolean
-      description: "Stack detection from dev-cycle. Each key indicates whether that technology was detected."
-      required: false
-    - name: skip_gates
-      type: array
-      items: string
-      description: "Gate identifiers to skip (e.g., '0', '1.5', '5.5'). Set by dev-cycle based on execution_mode."
-      required: false
-
-output_schema:
-  format: markdown
-  required_sections:
-    - name: "Multi-Tenant Cycle Summary"
-      pattern: "^## Multi-Tenant Cycle Summary"
-      required: true
-    - name: "Stack Detection"
-      pattern: "^## Stack Detection"
-      required: true
-    - name: "Gate Results"
-      pattern: "^## Gate Results"
-      required: true
-    - name: "Verification"
-      pattern: "^## Verification"
-      required: true
-  metrics:
-    - name: gates_passed
-      type: integer
-    - name: gates_failed
-      type: integer
-    - name: total_files_changed
-      type: integer
-
-examples:
-  - name: "Add multi-tenant to a service"
-    invocation: "/ring:dev-multi-tenant"
-    expected_flow: |
+metadata:
+  NOT_skip_when: |
+    - "organization_id already exists" → organization_id is NOT multi-tenant. tenantId via JWT is required.
+    - "Just need to connect the wiring" → Multi-tenant requires lib-commons v3 dispatch layer sub-packages.
+    - "lib-commons v3 upgrade is too risky" → REQUIRES lib-commons v3 dispatch layer sub-packages. No v3 = no multi-tenant.
+    - "Service already has multi-tenant" → Existence ≠ compliance. MUST replace non-standard implementations with Ring canonical model.
+    - "Multi-tenant is already done" → Every gate verifies compliance. MUST fix non-compliant code — it is wrong, not done.
+  examples:
+  - name: Add multi-tenant to a service
+    invocation: /ring:dev-multi-tenant
+    expected_flow: |-
       1. Gate 0: Auto-detect stack + service type (plugin vs product)
       2. Gate 1: Analyze codebase (build implementation roadmap)
       3. Gate 1.5: Visual implementation preview (HTML report for developer approval)
@@ -114,6 +33,89 @@ examples:
       9. Gate 9: Code review
       10. Gate 10: User validation
       11. Gate 11: Activation guide
+  input_schema:
+    description: |
+      When invoked from ring:dev-cycle (post-cycle step), receives structured handoff context.
+      When invoked standalone (direct user request), these fields are auto-detected in Gate 0.
+    fields:
+    - name: execution_mode
+      type: string
+      enum:
+      - FULL
+      - SCOPED
+      description: FULL = complete 12-gate cycle. SCOPED = only adapt new files (when existing MT is compliant).
+      required: false
+      default: FULL
+    - name: files_changed
+      type: array
+      items: string
+      description: File paths changed during dev-cycle (only in SCOPED mode). Used to limit Gate 5 scope.
+      required: false
+    - name: multi_tenant_exists
+      type: boolean
+      description: Whether multi-tenant code was detected by dev-cycle Step 1.5.
+      required: false
+    - name: multi_tenant_compliant
+      type: boolean
+      description: Whether existing MT code passed compliance audit in dev-cycle Step 1.5.
+      required: false
+    - name: detected_dependencies
+      type: object
+      properties:
+        postgresql: boolean
+        mongodb: boolean
+        redis: boolean
+        rabbitmq: boolean
+        s3: boolean
+      description: Stack detection from dev-cycle. Each key indicates whether that technology was detected.
+      required: false
+    - name: skip_gates
+      type: array
+      items: string
+      description: Gate identifiers to skip (e.g., '0', '1.5', '5.5'). Set by dev-cycle based on execution_mode.
+      required: false
+  output_schema:
+    format: markdown
+    required_sections:
+    - name: Multi-Tenant Cycle Summary
+      pattern: ^## Multi-Tenant Cycle Summary
+      required: true
+    - name: Stack Detection
+      pattern: ^## Stack Detection
+      required: true
+    - name: Gate Results
+      pattern: ^## Gate Results
+      required: true
+    - name: Verification
+      pattern: ^## Verification
+      required: true
+    metrics:
+    - name: gates_passed
+      type: integer
+    - name: gates_failed
+      type: integer
+    - name: total_files_changed
+      type: integer
+  prerequisite: |
+    - Go service with existing single-tenant functionality
+  related:
+    complementary:
+    - ring:dev-cycle
+    - ring:dev-implementation
+    - ring:dev-devops
+    - ring:dev-unit-testing
+    - ring:requesting-code-review
+    - ring:dev-validation
+  sequence:
+    after:
+    - ring:dev-devops
+  slug: dev-multi-tenant
+  trigger: |
+    - User requests multi-tenant implementation for a Go service
+    - User asks to add tenant isolation to an existing service
+    - Task mentions "multi-tenant", "tenant isolation", "dispatch layer", "postgres.Manager", "MultiPoolMiddleware"
+  type: skill
+  version: 2.0.0
 ---
 
 # Multi-Tenant Development Cycle

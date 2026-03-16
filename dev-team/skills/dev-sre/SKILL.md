@@ -1,5 +1,5 @@
 ---
-name: ring:dev-sre
+name: dev-sre
 description: |
   Gate 2 of the development cycle. VALIDATES that observability was correctly implemented
   by developers. Does not implement observability code - only validates it.

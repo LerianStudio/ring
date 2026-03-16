@@ -1,5 +1,5 @@
 ---
-name: ring:dev-integration-testing
+name: dev-integration-testing
 title: Development cycle integration testing (Gate 6)
 category: development-cycle
 tier: 1

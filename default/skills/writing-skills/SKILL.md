@@ -1,20 +1,19 @@
 ---
-name: ring:writing-skills
+name: writing-skills
 description: |
   TDD for process documentation - write test cases (pressure scenarios), watch
   baseline fail, write skill, iterate until bulletproof against rationalization.
-
-trigger: |
-  - Creating a new skill
-  - Editing an existing skill
-  - Skill needs to resist rationalization under pressure
-
-skip_when: |
-  - Writing pure reference skill (API docs) → no rules to test
-  - Skill has no compliance costs → no rationalization risk
-
-related:
-  complementary: [testing-skills-with-subagents]
+metadata:
+  related:
+    complementary:
+    - testing-skills-with-subagents
+  skip_when: |
+    - Writing pure reference skill (API docs) → no rules to test
+    - Skill has no compliance costs → no rationalization risk
+  trigger: |
+    - Creating a new skill
+    - Editing an existing skill
+    - Skill needs to resist rationalization under pressure
 ---
 
 # Writing Skills

@@ -1,22 +1,21 @@
 ---
-name: ring:systematic-debugging
+name: systematic-debugging
 description: |
   Four-phase debugging framework - root cause investigation, pattern analysis,
   hypothesis testing, implementation. Ensures understanding before attempting fixes.
-
-trigger: |
-  - Bug reported or test failure observed
-  - Unexpected behavior or error message
-  - Root cause unknown
-  - Previous fix attempt didn't work
-
-skip_when: |
-  - Root cause already known → just fix it
-  - Error deep in call stack, need to trace backward → use root-cause-tracing
-  - Issue obviously caused by your last change → quick verification first
-
-related:
-  complementary: [root-cause-tracing]
+metadata:
+  related:
+    complementary:
+    - root-cause-tracing
+  skip_when: |
+    - Root cause already known → just fix it
+    - Error deep in call stack, need to trace backward → use root-cause-tracing
+    - Issue obviously caused by your last change → quick verification first
+  trigger: |
+    - Bug reported or test failure observed
+    - Unexpected behavior or error message
+    - Root cause unknown
+    - Previous fix attempt didn't work
 ---
 
 # Systematic Debugging

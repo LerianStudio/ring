@@ -1,5 +1,5 @@
 ---
-name: ring:dev-property-testing
+name: dev-property-testing
 title: Development cycle property-based testing (Gate 5)
 category: development-cycle
 tier: 1

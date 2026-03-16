@@ -1,23 +1,23 @@
 ---
-name: ring:using-tw-team
+name: using-tw-team
 description: |
   Technical writing specialists for functional and API documentation. Dispatch when
   you need to create guides, conceptual docs, or API references following established
   documentation standards.
-
-trigger: |
-  - Need to write functional documentation (guides, conceptual docs, tutorials)
-  - Need to write API reference documentation
-  - Need to review existing documentation quality
-  - Writing or updating product documentation
-
-skip_when: |
-  - Writing code → use dev-team agents
-  - Writing plans → use pm-team agents
-  - General code review → use default plugin reviewers
-
-related:
-  similar: [ring:using-ring, ring:using-dev-team]
+metadata:
+  related:
+    similar:
+    - ring:using-ring
+    - ring:using-dev-team
+  skip_when: |
+    - Writing code → use dev-team agents
+    - Writing plans → use pm-team agents
+    - General code review → use default plugin reviewers
+  trigger: |
+    - Need to write functional documentation (guides, conceptual docs, tutorials)
+    - Need to write API reference documentation
+    - Need to review existing documentation quality
+    - Writing or updating product documentation
 ---
 
 # Using Ring Technical Writing Specialists

@@ -1,22 +1,22 @@
 ---
-name: ring:project-health-check
+name: project-health-check
 description: |
   Individual project health assessment skill for evaluating project status across
   multiple dimensions. Provides early warning of troubled projects.
-
-trigger: |
-  - Need to assess single project health
-  - Project showing warning signs
-  - Milestone review required
-  - Stakeholder escalation received
-
-skip_when: |
-  - Portfolio-level view → use portfolio-planning
-  - Resource-only issue → use resource-allocation
-  - Risk-only analysis → use risk-management
-
-related:
-  complementary: [portfolio-planning, risk-management]
+metadata:
+  related:
+    complementary:
+    - portfolio-planning
+    - risk-management
+  skip_when: |
+    - Portfolio-level view → use portfolio-planning
+    - Resource-only issue → use resource-allocation
+    - Risk-only analysis → use risk-management
+  trigger: |
+    - Need to assess single project health
+    - Project showing warning signs
+    - Milestone review required
+    - Stakeholder escalation received
 ---
 
 # Project Health Check Skill

@@ -1,5 +1,5 @@
 ---
-name: ring:dev-frontend-visual
+name: dev-frontend-visual
 title: Frontend development cycle visual/snapshot testing (Gate 4)
 category: development-cycle-frontend
 tier: 1

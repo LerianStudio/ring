@@ -1,23 +1,25 @@
 ---
-name: ring:portfolio-planning
+name: portfolio-planning
 description: |
   Strategic portfolio planning skill for multi-project coordination, capacity assessment,
   and portfolio optimization. Provides framework for portfolio-level decision making.
-
-trigger: |
-  - Need to assess portfolio health
-  - Planning portfolio for next quarter/year
-  - Evaluating new project against portfolio
-  - Rebalancing portfolio priorities
-
-skip_when: |
-  - Single project planning → use ring:pre-dev-feature
-  - Immediate status report → use executive-reporting
-  - Resource-only analysis → use resource-allocation
-
-related:
-  similar: [ring:pre-dev-feature]
-  complementary: [resource-allocation, risk-management, executive-reporting]
+metadata:
+  related:
+    similar:
+    - ring:pre-dev-feature
+    complementary:
+    - resource-allocation
+    - risk-management
+    - executive-reporting
+  skip_when: |
+    - Single project planning → use ring:pre-dev-feature
+    - Immediate status report → use executive-reporting
+    - Resource-only analysis → use resource-allocation
+  trigger: |
+    - Need to assess portfolio health
+    - Planning portfolio for next quarter/year
+    - Evaluating new project against portfolio
+    - Rebalancing portfolio priorities
 ---
 
 # Portfolio Planning Skill

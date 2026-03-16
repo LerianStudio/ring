@@ -1,24 +1,24 @@
 ---
-name: ring:executing-plans
+name: executing-plans
 description: |
   Controlled plan execution with human review checkpoints - loads plan, executes
   in batches, pauses for feedback. Supports one-go (autonomous) or batch modes.
-
-trigger: |
-  - Have a plan file ready to execute
-  - Want human review between task batches
-  - Need structured checkpoints during implementation
-
-skip_when: |
-  - Same session with independent tasks → use ring:subagent-driven-development
-  - No plan exists → use ring:writing-plans first
-  - Plan needs revision → use ring:brainstorming first
-
-sequence:
-  after: [ring:writing-plans, ring:pre-dev-task-breakdown]
-
-related:
-  similar: [ring:subagent-driven-development]
+metadata:
+  related:
+    similar:
+    - ring:subagent-driven-development
+  sequence:
+    after:
+    - ring:writing-plans
+    - ring:pre-dev-task-breakdown
+  skip_when: |
+    - Same session with independent tasks → use ring:subagent-driven-development
+    - No plan exists → use ring:writing-plans first
+    - Plan needs revision → use ring:brainstorming first
+  trigger: |
+    - Have a plan file ready to execute
+    - Want human review between task batches
+    - Need structured checkpoints during implementation
 ---
 
 # Executing Plans

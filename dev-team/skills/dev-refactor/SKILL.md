@@ -1,14 +1,14 @@
 ---
-name: ring:dev-refactor
+name: dev-refactor
 description: Analyzes backend codebase (Go/TypeScript) against standards and generates refactoring tasks for ring:dev-cycle. For frontend projects, use ring:dev-refactor-frontend instead.
-trigger: |
-  - User wants to refactor existing project to follow standards
-  - Legacy codebase needs modernization
-  - Project audit requested
-
-skip_when: |
-  - Greenfield project → Use /pre-dev-* instead
-  - Single file fix → Use ring:dev-cycle directly
+metadata:
+  skip_when: |-
+    - Greenfield project → Use /pre-dev-* instead
+    - Single file fix → Use ring:dev-cycle directly
+  trigger: |
+    - User wants to refactor existing project to follow standards
+    - Legacy codebase needs modernization
+    - Project audit requested
 ---
 
 # Dev Refactor Skill

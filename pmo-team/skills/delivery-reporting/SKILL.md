@@ -4,20 +4,20 @@ description: |
   Delivery reporting skill for creating visual executive presentations of squad deliveries
   (engineering, product, design). Analyzes Git repositories to extract business value from
   technical changes and generates HTML slide presentations with customizable visual identity.
-
-trigger: |
-  - Need squad delivery report (eng + product + design)
-  - Showcase releases and features to executives
-  - Quarterly/monthly delivery summary
-  - Client/stakeholder delivery showcase
-
-skip_when: |
-  - Portfolio/project status → use executive-reporting
-  - Risk/resource analysis → use risk-management/resource-allocation
-  - Technical documentation → use ring-tw-team
-
-related:
-  complementary: [executive-reporting, portfolio-planning]
+metadata:
+  related:
+    complementary:
+    - executive-reporting
+    - portfolio-planning
+  skip_when: |
+    - Portfolio/project status → use executive-reporting
+    - Risk/resource analysis → use risk-management/resource-allocation
+    - Technical documentation → use ring-tw-team
+  trigger: |
+    - Need squad delivery report (eng + product + design)
+    - Showcase releases and features to executives
+    - Quarterly/monthly delivery summary
+    - Client/stakeholder delivery showcase
 ---
 
 # Delivery Reporting Skill

@@ -1,5 +1,5 @@
 ---
-name: ring:dev-chaos-testing
+name: dev-chaos-testing
 title: Development cycle chaos testing (Gate 7)
 category: development-cycle
 tier: 1

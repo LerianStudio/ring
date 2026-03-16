@@ -1,29 +1,18 @@
 ---
-name: ring:pre-dev-full
+name: pre-dev-full
 description: |
   Complete 10-gate pre-dev workflow for large features (>=2 days).
   Orchestrates topology discovery, research, PRD, feature map, design validation,
   TRD, API design, data model, dependency map, task breakdown, subtask creation,
   and delivery planning in a sequential gated process with human approval at each gate.
-
-trigger: |
-  - Feature takes >=2 days to implement
-  - Adds new external dependencies (APIs, databases, libraries)
-  - Creates new data models or entities
-  - Requires multi-service integration
-  - Uses new architecture patterns
-  - Requires team collaboration
-
-skip_when: |
-  - Feature is simple (<2 days, existing patterns) - use ring:pre-dev-feature instead
-  - No new dependencies, data models, or architecture patterns needed
-
-sequence:
-  before: [ring:write-plan, ring:dev-cycle]
-
-related:
-  complementary: [ring:pre-dev-feature, ring:write-plan, ring:worktree]
-  skills_orchestrated:
+allowed-tools: Skill, Read, Write, Glob, Grep, Bash, Agent, AskUserQuestion
+metadata:
+  related:
+    complementary:
+    - ring:pre-dev-feature
+    - ring:write-plan
+    - ring:worktree
+    skills_orchestrated:
     - ring:pre-dev-research
     - ring:pre-dev-prd-creation
     - ring:pre-dev-feature-map
@@ -35,18 +24,21 @@ related:
     - ring:pre-dev-task-breakdown
     - ring:pre-dev-subtask-creation
     - ring:pre-dev-delivery-planning
-
-user_invocable: false
-
-allowed-tools:
-  - Skill
-  - Read
-  - Write
-  - Glob
-  - Grep
-  - Bash
-  - Agent
-  - AskUserQuestion
+  sequence:
+    before:
+    - ring:write-plan
+    - ring:dev-cycle
+  skip_when: |
+    - Feature is simple (<2 days, existing patterns) - use ring:pre-dev-feature instead
+    - No new dependencies, data models, or architecture patterns needed
+  trigger: |
+    - Feature takes >=2 days to implement
+    - Adds new external dependencies (APIs, databases, libraries)
+    - Creates new data models or entities
+    - Requires multi-service integration
+    - Uses new architecture patterns
+    - Requires team collaboration
+  user_invocable: false
 ---
 
 # Full Track Pre-Dev Workflow (10 Gates)

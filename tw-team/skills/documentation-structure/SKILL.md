@@ -1,21 +1,21 @@
 ---
-name: ring:documentation-structure
+name: documentation-structure
 description: |
   Patterns for organizing and structuring documentation including hierarchy,
   navigation, and information architecture.
-
-trigger: |
-  - Planning documentation structure
-  - Organizing content hierarchy
-  - Deciding how to split content across pages
-  - Creating navigation patterns
-
-skip_when: |
-  - Writing content → use writing-functional-docs or writing-api-docs
-  - Checking voice → use voice-and-tone
-
-related:
-  complementary: [writing-functional-docs, writing-api-docs]
+metadata:
+  related:
+    complementary:
+    - writing-functional-docs
+    - writing-api-docs
+  skip_when: |
+    - Writing content → use writing-functional-docs or writing-api-docs
+    - Checking voice → use voice-and-tone
+  trigger: |
+    - Planning documentation structure
+    - Organizing content hierarchy
+    - Deciding how to split content across pages
+    - Creating navigation patterns
 ---
 
 # Documentation Structure

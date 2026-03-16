@@ -1,5 +1,5 @@
 ---
-name: ring:dev-frontend-e2e
+name: dev-frontend-e2e
 title: Frontend development cycle E2E testing (Gate 5)
 category: development-cycle-frontend
 tier: 1

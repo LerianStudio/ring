@@ -1,23 +1,23 @@
 ---
-name: ring:pre-dev-data-model
+name: pre-dev-data-model
 description: |
   Gate 5: Data structures document - defines entities, relationships, and ownership
   before database technology selection. Large Track only.
-
-trigger: |
-  - API Design passed Gate 4 validation
-  - System stores persistent data
-  - Multiple entities with relationships
-  - Large Track workflow (2+ day features)
-
-skip_when: |
-  - Small Track workflow → skip to Task Breakdown
-  - No persistent data → skip to Dependency Map
-  - API Design not validated → complete Gate 4 first
-
-sequence:
-  after: [ring:pre-dev-api-design]
-  before: [ring:pre-dev-dependency-map]
+metadata:
+  sequence:
+    after:
+    - ring:pre-dev-api-design
+    before:
+    - ring:pre-dev-dependency-map
+  skip_when: |
+    - Small Track workflow → skip to Task Breakdown
+    - No persistent data → skip to Dependency Map
+    - API Design not validated → complete Gate 4 first
+  trigger: |
+    - API Design passed Gate 4 validation
+    - System stores persistent data
+    - Multiple entities with relationships
+    - Large Track workflow (2+ day features)
 ---
 
 # Data Modeling - Defining Data Structures

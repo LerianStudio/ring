@@ -1,66 +1,49 @@
 ---
-name: ring:dev-goroutine-leak-testing
-type: testing
-author: ring-dev-team
-version: 0.1.0
-description: |
-  Goroutine leak detection skill - detects goroutine usage in Go code, runs goleak 
-  to identify memory leaks, and dispatches ring:backend-engineer-golang to fix leaks
-  and create regression tests using the goleak framework.
-
-trigger: |
-  - Code contains goroutine patterns (go func(), go methodCall())
-  - After unit testing gate or during code review
-  - Suspected memory leak in production
-  - Need to verify goroutine-heavy code doesn't leak
-
-NOT_skip_when: |
-  - "Unit tests cover this" → Unit tests don't detect goroutine leaks. goleak does.
-  - "Goroutine will exit eventually" → Eventually = memory leak = OOM crash.
-  - "Process restart cleans it" → Restart = downtime. Prevent leaks instead.
-
-sequence:
-  after: [ring:dev-unit-testing]
-  before: [ring:requesting-code-review]
-
-related:
-  complementary: [ring:qa-analyst, ring:backend-engineer-golang]
-  dispatches: [ring:backend-engineer-golang]
-
-input_schema:
-  required:
+name: dev-goroutine-leak-testing
+description: "Goroutine leak detection skill - detects goroutine usage in Go code, runs goleak \nto identify memory leaks, and dispatches ring:backend-engineer-golang to fix leaks\nand create regression\
+  \ tests using the goleak framework.\n"
+metadata:
+  NOT_skip_when: |
+    - "Unit tests cover this" → Unit tests don't detect goroutine leaks. goleak does.
+    - "Goroutine will exit eventually" → Eventually = memory leak = OOM crash.
+    - "Process restart cleans it" → Restart = downtime. Prevent leaks instead.
+  author: ring-dev-team
+  input_schema:
+    required:
     - name: target_path
       type: string
-      description: "Path to Go package or directory to analyze"
-  optional:
+      description: Path to Go package or directory to analyze
+    optional:
     - name: exclude_patterns
       type: array
       items: string
-      description: "Patterns to exclude from analysis (e.g., vendor/, mocks/)"
+      description: Patterns to exclude from analysis (e.g., vendor/, mocks/)
     - name: known_safe_goroutines
       type: array
       items: string
-      description: "Function signatures known to be safe (external libs)"
-
-output_schema:
-  format: markdown
-  required_sections:
-    - name: "Goroutine Detection Summary"
-      pattern: "^## Goroutine Detection Summary"
+      description: Function signatures known to be safe (external libs)
+  output_schema:
+    format: markdown
+    required_sections:
+    - name: Goroutine Detection Summary
+      pattern: ^## Goroutine Detection Summary
       required: true
-    - name: "goleak Coverage"
-      pattern: "^## goleak Coverage"
+    - name: goleak Coverage
+      pattern: ^## goleak Coverage
       required: true
-    - name: "Leak Findings"
-      pattern: "^## Leak Findings"
+    - name: Leak Findings
+      pattern: ^## Leak Findings
       required: true
-    - name: "Required Actions"
-      pattern: "^## Required Actions"
+    - name: Required Actions
+      pattern: ^## Required Actions
       required: true
-  metrics:
+    metrics:
     - name: result
       type: enum
-      values: [PASS, FAIL, NEEDS_ACTION]
+      values:
+      - PASS
+      - FAIL
+      - NEEDS_ACTION
     - name: goroutine_files
       type: integer
     - name: packages_with_goleak
@@ -69,6 +52,24 @@ output_schema:
       type: integer
     - name: leaks_detected
       type: integer
+  related:
+    complementary:
+    - ring:qa-analyst
+    - ring:backend-engineer-golang
+    dispatches:
+    - ring:backend-engineer-golang
+  sequence:
+    after:
+    - ring:dev-unit-testing
+    before:
+    - ring:requesting-code-review
+  trigger: |
+    - Code contains goroutine patterns (go func(), go methodCall())
+    - After unit testing gate or during code review
+    - Suspected memory leak in production
+    - Need to verify goroutine-heavy code doesn't leak
+  type: testing
+  version: 0.1.0
 ---
 
 # Goroutine Leak Testing Skill

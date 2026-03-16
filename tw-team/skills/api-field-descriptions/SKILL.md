@@ -1,20 +1,19 @@
 ---
-name: ring:api-field-descriptions
+name: api-field-descriptions
 description: |
   Patterns for writing clear, consistent API field descriptions including
   types, constraints, examples, and edge cases.
-
-trigger: |
-  - Writing API field documentation
-  - Documenting request/response schemas
-  - Creating data model documentation
-
-skip_when: |
-  - Writing conceptual docs → use writing-functional-docs
-  - Full API endpoint docs → use writing-api-docs
-
-related:
-  complementary: [writing-api-docs]
+metadata:
+  related:
+    complementary:
+    - writing-api-docs
+  skip_when: |
+    - Writing conceptual docs → use writing-functional-docs
+    - Full API endpoint docs → use writing-api-docs
+  trigger: |
+    - Writing API field documentation
+    - Documenting request/response schemas
+    - Creating data model documentation
 ---
 
 # API Field Descriptions

@@ -1,21 +1,20 @@
 ---
-name: ring:testing-anti-patterns
+name: testing-anti-patterns
 description: |
   Test quality guard - prevents testing mock behavior, production pollution with
   test-only methods, and mocking without understanding dependencies.
-
-trigger: |
-  - Reviewing or modifying existing tests
-  - Adding mocks to tests
-  - Tempted to add test-only methods to production code
-  - Tests passing but seem to test the wrong things
-
-skip_when: |
-  - Writing new tests via TDD → TDD prevents these patterns
-  - Pure unit tests without mocks → check other quality concerns
-
-related:
-  complementary: [ring:test-driven-development]
+metadata:
+  related:
+    complementary:
+    - ring:test-driven-development
+  skip_when: |
+    - Writing new tests via TDD → TDD prevents these patterns
+    - Pure unit tests without mocks → check other quality concerns
+  trigger: |
+    - Reviewing or modifying existing tests
+    - Adding mocks to tests
+    - Tempted to add test-only methods to production code
+    - Tests passing but seem to test the wrong things
 ---
 
 # Testing Anti-Patterns

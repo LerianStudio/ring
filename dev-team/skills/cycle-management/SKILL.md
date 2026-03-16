@@ -1,14 +1,9 @@
 ---
-name: ring:cycle-management
+name: cycle-management
 description: Development cycle state management — status reporting and cycle cancellation
-user_invocable: false
-allowed-tools:
-  - Read
-  - Write
-  - Bash
-  - Glob
-  - Grep
-  - AskUserQuestion
+allowed-tools: Read, Write, Bash, Glob, Grep, AskUserQuestion
+metadata:
+  user_invocable: false
 ---
 
 # Cycle Management

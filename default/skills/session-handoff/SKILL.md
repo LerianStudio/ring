@@ -1,14 +1,9 @@
 ---
-name: ring:session-handoff
+name: session-handoff
 description: Create handoff documents capturing session state for seamless context-clear and resume
-user_invocable: false
-allowed-tools:
-  - EnterPlanMode
-  - ExitPlanMode
-  - Write
-  - Bash
-  - Read
-  - Glob
+allowed-tools: EnterPlanMode, ExitPlanMode, Write, Bash, Read, Glob
+metadata:
+  user_invocable: false
 ---
 
 # Session Handoff Skill

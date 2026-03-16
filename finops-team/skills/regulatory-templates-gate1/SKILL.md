@@ -1,26 +1,24 @@
 ---
-name: ring:regulatory-templates-gate1
+name: regulatory-templates-gate1
 description: |
   Gate 1 sub-skill - performs regulatory compliance analysis, field mapping,
   batch approval by confidence level, and auto-saves dictionary after approval.
   Supports both pre-defined templates (dictionary exists) and new templates (any spec).
-
-dependencies:
+metadata:
+  dependencies:
   - ring:finops-analyzer
-
-role: regulatory-analyst
-
-trigger: |
-  - regulatory-templates-setup completed
-  - Need to analyze regulatory specification and map fields
-
-skip_when: |
-  - Setup not complete → run setup first
-  - Gate 1 already passed → proceed to Gate 2
-
-sequence:
-  after: [regulatory-templates-setup]
-  before: [regulatory-templates-gate2]
+  role: regulatory-analyst
+  sequence:
+    after:
+    - regulatory-templates-setup
+    before:
+    - regulatory-templates-gate2
+  skip_when: |
+    - Setup not complete → run setup first
+    - Gate 1 already passed → proceed to Gate 2
+  trigger: |
+    - regulatory-templates-setup completed
+    - Need to analyze regulatory specification and map fields
 ---
 
 # Regulatory Templates - Gate 1: Placeholder Mapping (Post Gate 0)

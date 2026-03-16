@@ -1,22 +1,23 @@
 ---
-name: ring:using-git-worktrees
+name: using-git-worktrees
 description: |
   Isolated workspace creation - creates git worktrees with smart directory selection
   and safety verification for parallel feature development.
-
-trigger: |
-  - Starting feature that needs isolation from main workspace
-  - Before executing implementation plan
-  - Working on multiple features simultaneously
-
-skip_when: |
-  - Quick fix in current branch → stay in place
-  - Already in isolated worktree for this feature → continue
-  - Repository doesn't use worktrees → use standard branch workflow
-
-sequence:
-  after: [brainstorming]
-  before: [ring:writing-plans, ring:executing-plans]
+metadata:
+  sequence:
+    after:
+    - brainstorming
+    before:
+    - ring:writing-plans
+    - ring:executing-plans
+  skip_when: |
+    - Quick fix in current branch → stay in place
+    - Already in isolated worktree for this feature → continue
+    - Repository doesn't use worktrees → use standard branch workflow
+  trigger: |
+    - Starting feature that needs isolation from main workspace
+    - Before executing implementation plan
+    - Working on multiple features simultaneously
 ---
 
 # Using Git Worktrees

@@ -1,25 +1,28 @@
 ---
-name: ring:pre-dev-trd-creation
+name: pre-dev-trd-creation
 description: |
   Gate 3: Technical architecture document - defines HOW/WHERE with technology-agnostic
   patterns before concrete implementation choices.
-
-trigger: |
-  - PRD passed Gate 1 (required)
-  - Feature Map passed Gate 2 (if Large Track)
-  - Design Validation passed Gate 1.5/2.5 (if feature has UI)
-  - About to design technical architecture
-  - Tempted to specify "PostgreSQL" instead of "Relational Database"
-
-skip_when: |
-  - PRD not validated → complete Gate 1 first
-  - Design Validation not passed (for UI features) → complete Gate 1.5/2.5 first
-  - Architecture already documented → proceed to API Design
-  - Pure business requirement change → update PRD
-
-sequence:
-  after: [ring:pre-dev-prd-creation, ring:pre-dev-feature-map, ring:pre-dev-design-validation]
-  before: [ring:pre-dev-api-design, ring:pre-dev-task-breakdown]
+metadata:
+  sequence:
+    after:
+    - ring:pre-dev-prd-creation
+    - ring:pre-dev-feature-map
+    - ring:pre-dev-design-validation
+    before:
+    - ring:pre-dev-api-design
+    - ring:pre-dev-task-breakdown
+  skip_when: |
+    - PRD not validated → complete Gate 1 first
+    - Design Validation not passed (for UI features) → complete Gate 1.5/2.5 first
+    - Architecture already documented → proceed to API Design
+    - Pure business requirement change → update PRD
+  trigger: |
+    - PRD passed Gate 1 (required)
+    - Feature Map passed Gate 2 (if Large Track)
+    - Design Validation passed Gate 1.5/2.5 (if feature has UI)
+    - About to design technical architecture
+    - Tempted to specify "PostgreSQL" instead of "Relational Database"
 ---
 
 # TRD Creation - Architecture Before Implementation

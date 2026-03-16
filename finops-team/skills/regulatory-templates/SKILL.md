@@ -1,33 +1,30 @@
 ---
-name: ring:regulatory-templates
+name: regulatory-templates
 description: |
   5-stage regulatory template orchestrator - manages setup, Gate 1 (analysis + auto-save),
   Gate 2 (validation), Gate 3 (generation), optional Test Gate, optional Contribution Gate.
   Supports any regulatory template (BACEN, RFB, CVM, SUSEP, COAF, or other).
-
-dependencies:
+metadata:
+  dependencies:
   - ring:regulatory-templates-setup
   - ring:regulatory-templates-gate1
   - ring:regulatory-templates-gate2
   - ring:regulatory-templates-gate3
   - ring:finops-analyzer
   - ring:finops-automation
-
-role: orchestrator
-
-trigger: |
-  - Creating BACEN CADOCs (4010, 4016, 4111, or any other)
-  - Mapping e-Financeira, DIMP, APIX templates
-  - Full automation from analysis to template creation
-  - Creating any new regulatory template not yet in registry
-
-skip_when: |
-  - Non-Brazilian regulations → not applicable
-  - Analysis-only without template → use finops-analyzer directly
-  - Template already exists, just needs updates → modify directly
-
-sequence:
-  before: [regulatory-templates-setup]
+  role: orchestrator
+  sequence:
+    before:
+    - regulatory-templates-setup
+  skip_when: |
+    - Non-Brazilian regulations → not applicable
+    - Analysis-only without template → use finops-analyzer directly
+    - Template already exists, just needs updates → modify directly
+  trigger: |
+    - Creating BACEN CADOCs (4010, 4016, 4111, or any other)
+    - Mapping e-Financeira, DIMP, APIX templates
+    - Full automation from analysis to template creation
+    - Creating any new regulatory template not yet in registry
 ---
 
 # Regulatory Templates - Orchestrator

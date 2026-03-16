@@ -1,24 +1,24 @@
 ---
-name: ring:using-pmo-team
+name: using-pmo-team
 description: |
   6 specialist PMO agents for portfolio management, resource planning, governance,
   risk analysis, executive reporting, and delivery reporting. Dispatch when you need portfolio-level oversight.
-
-trigger: |
-  - Need portfolio-level view across multiple projects
-  - Resource capacity planning across teams
-  - Project governance and gate reviews
-  - Risk management at portfolio level
-  - Executive reporting and dashboards
-
-skip_when: |
-  - Single feature planning → use ring-pm-team
-  - Code implementation → use ring-dev-team
-  - Code review → use ring-default reviewers
-  - Technical writing → use ring-tw-team
-
-related:
-  similar: [ring:using-ring, ring:using-pm-team]
+metadata:
+  related:
+    similar:
+    - ring:using-ring
+    - ring:using-pm-team
+  skip_when: |
+    - Single feature planning → use ring-pm-team
+    - Code implementation → use ring-dev-team
+    - Code review → use ring-default reviewers
+    - Technical writing → use ring-tw-team
+  trigger: |
+    - Need portfolio-level view across multiple projects
+    - Resource capacity planning across teams
+    - Project governance and gate reviews
+    - Risk management at portfolio level
+    - Executive reporting and dashboards
 ---
 
 # Using Ring PMO Team

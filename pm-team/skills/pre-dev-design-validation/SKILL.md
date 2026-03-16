@@ -1,24 +1,25 @@
 ---
-name: ring:pre-dev-design-validation
+name: pre-dev-design-validation
 description: |
   Gate 1.5/2.5: Design Validation - verifies UX specifications are complete
   before proceeding to technical architecture. Checklist-based validation
   that prevents incomplete designs from reaching implementation.
-
-trigger: |
-  - After PRD + UX criteria created (Gate 1)
-  - After Feature Map + UX Design created (Gate 2, Large track)
-  - Before starting TRD (Gate 3)
-  - User asks to "validate design" or "check if design is complete"
-
-skip_when: |
-  - Feature is backend-only with no UI
-  - Pure API/infrastructure task
-  - Bug fix with no UX changes
-
-sequence:
-  after: [ring:pre-dev-prd-creation, ring:pre-dev-feature-map]
-  before: [ring:pre-dev-trd-creation]
+metadata:
+  sequence:
+    after:
+    - ring:pre-dev-prd-creation
+    - ring:pre-dev-feature-map
+    before:
+    - ring:pre-dev-trd-creation
+  skip_when: |
+    - Feature is backend-only with no UI
+    - Pure API/infrastructure task
+    - Bug fix with no UX changes
+  trigger: |
+    - After PRD + UX criteria created (Gate 1)
+    - After Feature Map + UX Design created (Gate 2, Large track)
+    - Before starting TRD (Gate 3)
+    - User asks to "validate design" or "check if design is complete"
 ---
 
 # Design Validation Gate

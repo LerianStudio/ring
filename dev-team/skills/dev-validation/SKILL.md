@@ -1,54 +1,51 @@
 ---
-name: ring:dev-validation
+name: dev-validation
 description: |
   Development cycle validation gate (Gate 5) - validates all acceptance criteria are met
   and requires explicit user approval before completion.
-
-trigger: |
-  - After review gate passes (Gate 4)
-  - Implementation and tests complete
-  - Need user sign-off on acceptance criteria
-
-NOT_skip_when: |
-  - "Already validated" → Each iteration needs fresh validation.
-  - "User will validate manually" → Gate 5 IS user validation. Cannot skip.
-
-sequence:
-  after: [ring:requesting-code-review]
-
-related:
-  complementary: [verification-before-completion]
-
-verification:
-  automated:
-    - command: "go test ./... 2>&1 | grep -c PASS"
-      description: "All tests pass"
-      success_pattern: "[1-9][0-9]*"
-    - command: "cat docs/ring:dev-cycle/current-cycle.json 2>/dev/null || cat docs/ring:dev-refactor/current-cycle.json | jq '.gates[4].verdict'"
-      description: "Review gate passed"
-      success_pattern: "PASS"
-  manual:
-    - "User has provided explicit APPROVED or REJECTED decision"
-    - "All acceptance criteria have verified evidence"
-    - "Validation checklist presented to user"
-
-examples:
-  - name: "Successful validation"
-    context: "4 acceptance criteria, all tests pass"
+metadata:
+  NOT_skip_when: |
+    - "Already validated" → Each iteration needs fresh validation.
+    - "User will validate manually" → Gate 5 IS user validation. Cannot skip.
+  examples:
+  - name: Successful validation
+    context: 4 acceptance criteria, all tests pass
     expected_flow: |
       1. Gather evidence for each criterion
       2. Build validation checklist with evidence types
       3. Present to user with APPROVED/REJECTED options
       4. User selects APPROVED
       5. Document approval, proceed to feedback loop
-  - name: "Validation rejection"
-    context: "AC-3 not met (response time too slow)"
-    expected_flow: |
+  - name: Validation rejection
+    context: AC-3 not met (response time too slow)
+    expected_flow: |-
       1. Present validation checklist
       2. User identifies AC-3 failure
       3. User selects REJECTED with reason
       4. Create remediation task
       5. Return to Gate 0 for fixes
+  related:
+    complementary:
+    - verification-before-completion
+  sequence:
+    after:
+    - ring:requesting-code-review
+  trigger: |
+    - After review gate passes (Gate 4)
+    - Implementation and tests complete
+    - Need user sign-off on acceptance criteria
+  verification:
+    automated:
+    - command: go test ./... 2>&1 | grep -c PASS
+      description: All tests pass
+      success_pattern: '[1-9][0-9]*'
+    - command: cat docs/ring:dev-cycle/current-cycle.json 2>/dev/null || cat docs/ring:dev-refactor/current-cycle.json | jq '.gates[4].verdict'
+      description: Review gate passed
+      success_pattern: PASS
+    manual:
+    - User has provided explicit APPROVED or REJECTED decision
+    - All acceptance criteria have verified evidence
+    - Validation checklist presented to user
 ---
 
 # Dev Validation (Gate 5)

@@ -1,32 +1,35 @@
 ---
-name: ring:exploring-codebase
+name: exploring-codebase
 description: |
   Autonomous two-phase codebase exploration - first discovers natural perspectives
   (layers, components, boundaries), then dispatches adaptive deep-dive explorers
   based on what was discovered. Synthesizes findings into actionable insights.
+metadata:
+  related:
+    similar:
+    - dispatching-parallel-agents
+    - systematic-debugging
+    sequence_after:
+    - brainstorming
+    sequence_before:
+    - ring:writing-plans
+    - ring:executing-plans
+  skip_when: |
+    - Pure reference lookup (function signature, type definition)
+    - Checking if specific file exists (yes/no question)
+    - Reading error message from known file location
 
-trigger: |
-  - Need to understand how a feature/system works across the codebase
-  - Starting work on unfamiliar codebase or component
-  - Planning changes that span multiple layers/components
-  - User asks "how does X work?" for non-trivial X
-  - Need architecture understanding before implementation
-
-skip_when: |
-  - Pure reference lookup (function signature, type definition)
-  - Checking if specific file exists (yes/no question)
-  - Reading error message from known file location
-
-  WARNING: These are NOT valid skip reasons:
-  - "I already know the architecture" → Prior knowledge is incomplete
-  - "Simple question about location" → Location without context is incomplete
-  - "Production emergency, no time" → High stakes demand MORE rigor
-  - "Colleague told me structure" → High-level ≠ implementation details
-
-related:
-  similar: [dispatching-parallel-agents, systematic-debugging]
-  sequence_after: [brainstorming]
-  sequence_before: [ring:writing-plans, ring:executing-plans]
+    WARNING: These are NOT valid skip reasons:
+    - "I already know the architecture" → Prior knowledge is incomplete
+    - "Simple question about location" → Location without context is incomplete
+    - "Production emergency, no time" → High stakes demand MORE rigor
+    - "Colleague told me structure" → High-level ≠ implementation details
+  trigger: |
+    - Need to understand how a feature/system works across the codebase
+    - Starting work on unfamiliar codebase or component
+    - Planning changes that span multiple layers/components
+    - User asks "how does X work?" for non-trivial X
+    - Need architecture understanding before implementation
 ---
 
 # Autonomous Two-Phase Codebase Exploration

@@ -1,22 +1,22 @@
 ---
-name: ring:pmo-retrospective
+name: pmo-retrospective
 description: |
   Portfolio retrospective skill for capturing lessons learned, process improvements,
   and organizational learning across completed projects.
-
-trigger: |
-  - Project closure requiring retrospective
-  - Portfolio period review (quarterly/annual)
-  - Process improvement initiative
-  - Pattern of issues recurring
-
-skip_when: |
-  - Sprint retrospective → team-level, not PMO
-  - Technical post-mortem → use ring-dev-team
-  - Single incident analysis → handle in project scope
-
-related:
-  complementary: [portfolio-planning, project-health-check]
+metadata:
+  related:
+    complementary:
+    - portfolio-planning
+    - project-health-check
+  skip_when: |
+    - Sprint retrospective → team-level, not PMO
+    - Technical post-mortem → use ring-dev-team
+    - Single incident analysis → handle in project scope
+  trigger: |
+    - Project closure requiring retrospective
+    - Portfolio period review (quarterly/annual)
+    - Process improvement initiative
+    - Pattern of issues recurring
 ---
 
 # PMO Retrospective Skill

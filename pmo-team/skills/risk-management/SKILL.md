@@ -1,22 +1,22 @@
 ---
-name: ring:risk-management
+name: risk-management
 description: |
   Portfolio-level risk management skill for identifying, assessing, and mitigating
   risks across multiple projects. Maintains RAID logs and tracks risk responses.
-
-trigger: |
-  - Need portfolio risk assessment
-  - Creating or updating RAID log
-  - Risk response planning
-  - Risk correlation analysis
-
-skip_when: |
-  - Single project risk → handle in project scope
-  - Financial risk only → use ring-finops-team
-  - Technical risk in code → use ring:qa-analyst
-
-related:
-  complementary: [portfolio-planning, project-health-check]
+metadata:
+  related:
+    complementary:
+    - portfolio-planning
+    - project-health-check
+  skip_when: |
+    - Single project risk → handle in project scope
+    - Financial risk only → use ring-finops-team
+    - Technical risk in code → use ring:qa-analyst
+  trigger: |
+    - Need portfolio risk assessment
+    - Creating or updating RAID log
+    - Risk response planning
+    - Risk correlation analysis
 ---
 
 # Risk Management Skill

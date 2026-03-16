@@ -1,23 +1,23 @@
 ---
-name: ring:pre-dev-api-design
+name: pre-dev-api-design
 description: |
   Gate 4: API contracts document - defines component interfaces and data contracts
   before protocol/technology selection. Large Track only.
-
-trigger: |
-  - TRD passed Gate 3 validation
-  - System has multiple components that need to integrate
-  - Building APIs (internal or external)
-  - Large Track workflow (2+ day features)
-
-skip_when: |
-  - Small Track workflow → skip to Task Breakdown
-  - Single component system → skip to Data Model
-  - TRD not validated → complete Gate 3 first
-
-sequence:
-  after: [ring:pre-dev-trd-creation]
-  before: [ring:pre-dev-data-model]
+metadata:
+  sequence:
+    after:
+    - ring:pre-dev-trd-creation
+    before:
+    - ring:pre-dev-data-model
+  skip_when: |
+    - Small Track workflow → skip to Task Breakdown
+    - Single component system → skip to Data Model
+    - TRD not validated → complete Gate 3 first
+  trigger: |
+    - TRD passed Gate 3 validation
+    - System has multiple components that need to integrate
+    - Building APIs (internal or external)
+    - Large Track workflow (2+ day features)
 ---
 
 # API/Contract Design - Defining Component Interfaces

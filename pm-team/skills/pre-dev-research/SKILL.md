@@ -1,43 +1,50 @@
 ---
-name: ring:pre-dev-research
+name: pre-dev-research
 description: |
   Gate 0 research phase for pre-dev workflow. Dispatches 4 parallel research agents
   to gather codebase patterns, external best practices, framework documentation,
   and UX/product research BEFORE creating PRD/TRD. Outputs research.md with
   file:line references and user research findings.
-
-trigger: |
-  - Before any pre-dev workflow (Gate 0)
-  - When planning new features or modifications
-  - Invoked by /ring:pre-dev-full and /ring:pre-dev-feature
-
-skip_when: |
-  - Trivial changes that don't need planning
-  - Research already completed (research.md exists and is recent)
-
-sequence:
-  before: [ring:pre-dev-prd-creation, ring:pre-dev-feature-map]
-
-related:
-  complementary: [ring:pre-dev-prd-creation, ring:pre-dev-trd-creation]
-
-research_modes:
-  greenfield:
-    description: "New feature with no existing patterns to follow"
-    primary_agents: [ring:best-practices-researcher, ring:framework-docs-researcher, ring:product-designer]
-    focus: "External best practices, framework patterns, and user problem validation"
-
-  modification:
-    description: "Changing or extending existing functionality"
-    primary_agents: [ring:repo-research-analyst]
-    secondary_agents: [ring:product-designer]
-    focus: "Existing codebase patterns and conventions, UX impact assessment"
-
-  integration:
-    description: "Connecting systems or adding external dependencies"
-    primary_agents: [ring:framework-docs-researcher, ring:best-practices-researcher, ring:repo-research-analyst]
-    secondary_agents: [ring:product-designer]
-    focus: "API documentation, integration patterns, and user experience considerations"
+metadata:
+  related:
+    complementary:
+    - ring:pre-dev-prd-creation
+    - ring:pre-dev-trd-creation
+  research_modes:
+    greenfield:
+      description: New feature with no existing patterns to follow
+      primary_agents:
+      - ring:best-practices-researcher
+      - ring:framework-docs-researcher
+      - ring:product-designer
+      focus: External best practices, framework patterns, and user problem validation
+    modification:
+      description: Changing or extending existing functionality
+      primary_agents:
+      - ring:repo-research-analyst
+      secondary_agents:
+      - ring:product-designer
+      focus: Existing codebase patterns and conventions, UX impact assessment
+    integration:
+      description: Connecting systems or adding external dependencies
+      primary_agents:
+      - ring:framework-docs-researcher
+      - ring:best-practices-researcher
+      - ring:repo-research-analyst
+      secondary_agents:
+      - ring:product-designer
+      focus: API documentation, integration patterns, and user experience considerations
+  sequence:
+    before:
+    - ring:pre-dev-prd-creation
+    - ring:pre-dev-feature-map
+  skip_when: |
+    - Trivial changes that don't need planning
+    - Research already completed (research.md exists and is recent)
+  trigger: |
+    - Before any pre-dev workflow (Gate 0)
+    - When planning new features or modifications
+    - Invoked by /ring:pre-dev-full and /ring:pre-dev-feature
 ---
 
 # Pre-Dev Research Skill (Gate 0)

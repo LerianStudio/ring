@@ -1,22 +1,22 @@
 ---
-name: ring:dependency-mapping
+name: dependency-mapping
 description: |
   Cross-project dependency mapping and analysis skill for identifying, tracking,
   and managing dependencies across portfolio projects.
-
-trigger: |
-  - Need to map project dependencies
-  - Dependency conflict identified
-  - Planning new project with dependencies
-  - Critical path analysis needed
-
-skip_when: |
-  - Single project internal dependencies → handle in project scope
-  - Resource dependencies only → use resource-allocation
-  - Risk from dependencies → use risk-management
-
-related:
-  complementary: [portfolio-planning, risk-management]
+metadata:
+  related:
+    complementary:
+    - portfolio-planning
+    - risk-management
+  skip_when: |
+    - Single project internal dependencies → handle in project scope
+    - Resource dependencies only → use resource-allocation
+    - Risk from dependencies → use risk-management
+  trigger: |
+    - Need to map project dependencies
+    - Dependency conflict identified
+    - Planning new project with dependencies
+    - Critical path analysis needed
 ---
 
 # Dependency Mapping Skill

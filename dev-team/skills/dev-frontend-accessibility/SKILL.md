@@ -1,5 +1,5 @@
 ---
-name: ring:dev-frontend-accessibility
+name: dev-frontend-accessibility
 title: Frontend development cycle accessibility testing (Gate 2)
 category: development-cycle-frontend
 tier: 1

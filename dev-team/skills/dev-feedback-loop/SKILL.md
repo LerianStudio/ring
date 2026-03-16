@@ -1,29 +1,28 @@
 ---
-name: ring:dev-feedback-loop
+name: dev-feedback-loop
 description: |
   Development cycle feedback system - calculates assertiveness scores, analyzes prompt
   quality for all agents executed, aggregates cycle metrics, performs root cause analysis
   on failures, and generates improvement reports to docs/feedbacks/cycle-{date}/.
-
-trigger: |
-  - After task completion (any gate outcome)
-  - After validation approval or rejection
-  - At end of development cycle
-  - When assertiveness drops below threshold
-
-skip_when: |
-  - Task still in progress -> wait for completion
-  - Feedback already recorded for this task -> proceed
-
-NOT_skip_when: |
-  - "Exploratory/spike work" → all work produces learnings. Track metrics for spikes too.
-  - "Just experimenting" → Experiments need metrics to measure success. No exceptions.
-
-sequence:
-  after: [ring:dev-validation]
-
-related:
-  complementary: [ring:dev-cycle, ring:dev-validation]
+metadata:
+  NOT_skip_when: |
+    - "Exploratory/spike work" → all work produces learnings. Track metrics for spikes too.
+    - "Just experimenting" → Experiments need metrics to measure success. No exceptions.
+  related:
+    complementary:
+    - ring:dev-cycle
+    - ring:dev-validation
+  sequence:
+    after:
+    - ring:dev-validation
+  skip_when: |
+    - Task still in progress -> wait for completion
+    - Feedback already recorded for this task -> proceed
+  trigger: |
+    - After task completion (any gate outcome)
+    - After validation approval or rejection
+    - At end of development cycle
+    - When assertiveness drops below threshold
 ---
 
 # Dev Feedback Loop

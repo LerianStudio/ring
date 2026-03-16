@@ -1,41 +1,13 @@
 ---
-name: ring:dev-cycle-frontend
+name: dev-cycle-frontend
 description: |
   Frontend development cycle orchestrator with 9 gates. Loads tasks from PM team output
   or backend handoff and executes through implementation → devops → accessibility →
   unit testing → visual testing → E2E testing → performance testing → review → validation.
-
-trigger: |
-  - Starting a new frontend development cycle with a task file
-  - Resuming an interrupted frontend development cycle (--resume flag)
-  - After backend dev cycle completes (consuming handoff)
-
-prerequisite: |
-  - Tasks file exists with structured subtasks
-  - Not already in a specific gate skill execution
-
-skip_when: |
-  - "Task is simple" → Simple ≠ risk-free. Execute gates.
-  - "Tests already pass" → Tests ≠ review. Different concerns.
-  - "Backend already tested this" → Frontend has different quality concerns.
-
-sequence:
-  before: [ring:dev-feedback-loop]
-
-related:
-  complementary: [ring:dev-frontend-accessibility, ring:dev-unit-testing, ring:dev-frontend-visual, ring:dev-frontend-e2e, ring:dev-frontend-performance, ring:requesting-code-review, ring:dev-validation, ring:dev-feedback-loop]
-
-verification:
-  automated:
-    - command: "test -f docs/ring:dev-cycle-frontend/current-cycle.json"
-      description: "State file exists"
-      success_pattern: "exit 0"
-  manual:
-    - "All gates for current task show PASS in state file"
-
-examples:
-  - name: "New frontend from backend handoff"
-    invocation: "/ring:dev-cycle-frontend docs/pre-dev/auth/tasks-frontend.md"
+metadata:
+  examples:
+  - name: New frontend from backend handoff
+    invocation: /ring:dev-cycle-frontend docs/pre-dev/auth/tasks-frontend.md
     expected_flow: |
       1. Load tasks with subtasks
       2. Detect UI library mode (sindarian-ui or fallback)
@@ -43,10 +15,41 @@ examples:
       4. Ask user for execution mode
       5. Execute Gate 0→1→2→3→4→5→6→7→8 for each task
       6. Generate feedback report
-  - name: "Resume interrupted frontend cycle"
-    invocation: "/ring:dev-cycle-frontend --resume"
-  - name: "Direct prompt mode"
-    invocation: "/ring:dev-cycle-frontend Implement dashboard with transaction list and charts"
+  - name: Resume interrupted frontend cycle
+    invocation: /ring:dev-cycle-frontend --resume
+  - name: Direct prompt mode
+    invocation: /ring:dev-cycle-frontend Implement dashboard with transaction list and charts
+  prerequisite: |
+    - Tasks file exists with structured subtasks
+    - Not already in a specific gate skill execution
+  related:
+    complementary:
+    - ring:dev-frontend-accessibility
+    - ring:dev-unit-testing
+    - ring:dev-frontend-visual
+    - ring:dev-frontend-e2e
+    - ring:dev-frontend-performance
+    - ring:requesting-code-review
+    - ring:dev-validation
+    - ring:dev-feedback-loop
+  sequence:
+    before:
+    - ring:dev-feedback-loop
+  skip_when: |
+    - "Task is simple" → Simple ≠ risk-free. Execute gates.
+    - "Tests already pass" → Tests ≠ review. Different concerns.
+    - "Backend already tested this" → Frontend has different quality concerns.
+  trigger: |
+    - Starting a new frontend development cycle with a task file
+    - Resuming an interrupted frontend development cycle (--resume flag)
+    - After backend dev cycle completes (consuming handoff)
+  verification:
+    automated:
+    - command: test -f docs/ring:dev-cycle-frontend/current-cycle.json
+      description: State file exists
+      success_pattern: exit 0
+    manual:
+    - All gates for current task show PASS in state file
 ---
 
 # Frontend Development Cycle Orchestrator

@@ -1,25 +1,25 @@
 ---
-name: ring:brainstorming
+name: brainstorming
 description: |
   Socratic design refinement - transforms rough ideas into validated designs through
   structured questioning, alternative exploration, and incremental validation.
-
-trigger: |
-  - New feature or product idea (requirements unclear)
-  - User says "plan", "design", or "architect" something
-  - Multiple approaches seem possible
-  - Design hasn't been validated by user
-
-skip_when: |
-  - Design already complete and validated → use ring:writing-plans
-  - Have detailed plan ready to execute → use ring:executing-plans
-  - Just need task breakdown from existing design → use ring:writing-plans
-
-sequence:
-  before: [ring:writing-plans, ring:using-git-worktrees]
-
-related:
-  similar: [ring:writing-plans]
+metadata:
+  related:
+    similar:
+    - ring:writing-plans
+  sequence:
+    before:
+    - ring:writing-plans
+    - ring:using-git-worktrees
+  skip_when: |
+    - Design already complete and validated → use ring:writing-plans
+    - Have detailed plan ready to execute → use ring:executing-plans
+    - Just need task breakdown from existing design → use ring:writing-plans
+  trigger: |
+    - New feature or product idea (requirements unclear)
+    - User says "plan", "design", or "architect" something
+    - Multiple approaches seem possible
+    - Design hasn't been validated by user
 ---
 
 # Brainstorming Ideas Into Designs

@@ -1,71 +1,64 @@
 ---
-name: ring:test-driven-development
+name: test-driven-development
 description: |
   RED-GREEN-REFACTOR implementation methodology - write failing test first,
   minimal implementation to pass, then refactor. Ensures tests verify behavior.
-
-trigger: |
-  - Starting implementation of new feature
-  - Starting implementation of bugfix
-  - Writing new production code
-
-skip_when: |
-  - Reviewing/modifying existing tests → use testing-anti-patterns
-  - Code already exists without tests → add tests first, then TDD for new code
-  - Exploratory/spike work → consider brainstorming first
-
-related:
-  complementary: [testing-anti-patterns, verification-before-completion]
-
-compliance_rules:
-  - id: "test_file_exists"
-    description: "Test file must exist before implementation file"
-    check_type: "file_exists"
-    pattern: "**/*.test.{ts,js,go,py}"
-    severity: "blocking"
-    failure_message: "No test file found. Write test first (RED phase)."
-
-  - id: "test_must_fail_first"
-    description: "Test must produce failure output before implementation"
-    check_type: "command_output_contains"
-    command: "npm test 2>&1 || pytest 2>&1 || go test ./... 2>&1"
-    pattern: "FAIL|Error|failed"
-    severity: "blocking"
-    failure_message: "Test does not fail. Write a failing test first (RED phase)."
-prerequisites:
-  - name: "test_framework_installed"
-    check: "npm list jest 2>/dev/null || npm list vitest 2>/dev/null || which pytest 2>/dev/null || go list ./... 2>&1 | grep -q testing"
-    failure_message: "No test framework found. Install jest/vitest (JS), pytest (Python), or use Go's built-in testing."
-    severity: "blocking"
-
-  - name: "can_run_tests"
-    check: "npm test -- --version 2>/dev/null || pytest --version 2>/dev/null || go test -v 2>&1 | grep -q 'testing:'"
-    failure_message: "Cannot run tests. Fix test configuration."
-    severity: "warning"
-composition:
-  works_well_with:
-    - skill: "ring:systematic-debugging"
-      when: "test reveals unexpected behavior or bug"
-      transition: "Pause TDD at current phase, use systematic-debugging to find root cause, return to TDD after fix"
-
-    - skill: "ring:verification-before-completion"
-      when: "before marking test suite or feature complete"
-      transition: "Run verification to ensure all tests pass, return to TDD if issues found"
-
-    - skill: "ring:requesting-code-review"
-      when: "after completing RED-GREEN-REFACTOR cycle for feature"
-      transition: "Request review before merging, address feedback, mark complete"
-
-  conflicts_with: []
-
-  typical_workflow: |
-    1. Write failing test (RED)
-    2. If test reveals unexpected behavior → switch to systematic-debugging
-    3. Fix root cause
-    4. Return to TDD: minimal implementation (GREEN)
-    5. Refactor (REFACTOR)
-    6. Run verification-before-completion
-    7. Request code review
+metadata:
+  compliance_rules:
+  - id: test_file_exists
+    description: Test file must exist before implementation file
+    check_type: file_exists
+    pattern: '**/*.test.{ts,js,go,py}'
+    severity: blocking
+    failure_message: No test file found. Write test first (RED phase).
+  - id: test_must_fail_first
+    description: Test must produce failure output before implementation
+    check_type: command_output_contains
+    command: npm test 2>&1 || pytest 2>&1 || go test ./... 2>&1
+    pattern: FAIL|Error|failed
+    severity: blocking
+    failure_message: Test does not fail. Write a failing test first (RED phase).
+  composition:
+    works_well_with:
+    - skill: ring:systematic-debugging
+      when: test reveals unexpected behavior or bug
+      transition: Pause TDD at current phase, use systematic-debugging to find root cause, return to TDD after fix
+    - skill: ring:verification-before-completion
+      when: before marking test suite or feature complete
+      transition: Run verification to ensure all tests pass, return to TDD if issues found
+    - skill: ring:requesting-code-review
+      when: after completing RED-GREEN-REFACTOR cycle for feature
+      transition: Request review before merging, address feedback, mark complete
+    conflicts_with: []
+    typical_workflow: |-
+      1. Write failing test (RED)
+      2. If test reveals unexpected behavior → switch to systematic-debugging
+      3. Fix root cause
+      4. Return to TDD: minimal implementation (GREEN)
+      5. Refactor (REFACTOR)
+      6. Run verification-before-completion
+      7. Request code review
+  prerequisites:
+  - name: test_framework_installed
+    check: npm list jest 2>/dev/null || npm list vitest 2>/dev/null || which pytest 2>/dev/null || go list ./... 2>&1 | grep -q testing
+    failure_message: No test framework found. Install jest/vitest (JS), pytest (Python), or use Go's built-in testing.
+    severity: blocking
+  - name: can_run_tests
+    check: npm test -- --version 2>/dev/null || pytest --version 2>/dev/null || go test -v 2>&1 | grep -q 'testing:'
+    failure_message: Cannot run tests. Fix test configuration.
+    severity: warning
+  related:
+    complementary:
+    - testing-anti-patterns
+    - verification-before-completion
+  skip_when: |
+    - Reviewing/modifying existing tests → use testing-anti-patterns
+    - Code already exists without tests → add tests first, then TDD for new code
+    - Exploratory/spike work → consider brainstorming first
+  trigger: |
+    - Starting implementation of new feature
+    - Starting implementation of bugfix
+    - Writing new production code
 ---
 
 # Test-Driven Development (TDD)

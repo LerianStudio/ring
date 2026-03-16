@@ -1,91 +1,96 @@
 ---
-name: ring:dev-helm
+name: dev-helm
 description: |
   Mandatory skill for creating and maintaining Helm charts following Lerian conventions.
   Enforces standardized chart structure, values organization, template patterns,
   security defaults, and dependency management.
-
-trigger: |
-  - Creating a new Helm chart for any Lerian service
-  - Modifying an existing Helm chart (adding components, dependencies, templates)
-  - Reviewing a Helm chart PR for convention compliance
-  - Migrating a docker-compose setup to Helm
-
-NOT_skip_when: |
-  - "It's a simple chart, I don't need all that" → Every chart grows. Structure prevents debt.
-  - "I'll add security later" → Security is foundational, not an afterthought.
-  - "The defaults are fine" → Lerian has specific conventions that MUST be followed.
-  - "I'll just copy another chart" → Copying without understanding introduces drift. Use this skill.
-
-skip_when: |
-  - Modifying only application code (no chart changes)
-  - Working on non-Helm deployment (docker-compose only) → Use ring:dev-devops
-
-sequence:
-  after: [ring:dev-devops]
-  before: [ring:dev-sre]
-
-dependencies: [ring:dev-devops]
-role: orchestrator
-
-related:
-  complementary: [ring:dev-devops, ring:dev-sre, ring:dev-implementation]
-  similar: [ring:dev-devops]
-
-input_schema:
-  required:
+metadata:
+  NOT_skip_when: |
+    - "It's a simple chart, I don't need all that" → Every chart grows. Structure prevents debt.
+    - "I'll add security later" → Security is foundational, not an afterthought.
+    - "The defaults are fine" → Lerian has specific conventions that MUST be followed.
+    - "I'll just copy another chart" → Copying without understanding introduces drift. Use this skill.
+  dependencies:
+  - ring:dev-devops
+  input_schema:
+    required:
     - name: service_name
       type: string
-      description: "Name of the service (e.g., reporter, tracer, plugin-fees)"
+      description: Name of the service (e.g., reporter, tracer, plugin-fees)
     - name: chart_type
       type: string
-      enum: [single, multi-component, umbrella]
-      description: "Chart architecture type"
+      enum:
+      - single
+      - multi-component
+      - umbrella
+      description: Chart architecture type
     - name: components
       type: array
       items: string
-      description: "List of components (e.g., [manager, worker] or [pix, inbound, outbound])"
-  optional:
+      description: List of components (e.g., [manager, worker] or [pix, inbound, outbound])
+    optional:
     - name: dependencies
       type: array
       items: string
-      description: "Infrastructure dependencies (postgresql, mongodb, rabbitmq, valkey, keda)"
+      description: Infrastructure dependencies (postgresql, mongodb, rabbitmq, valkey, keda)
     - name: has_worker
       type: boolean
-      description: "Whether the service has a background worker (ScaledJob/Deployment)"
+      description: Whether the service has a background worker (ScaledJob/Deployment)
       default: false
     - name: namespace
       type: string
-      description: "Target Kubernetes namespace"
-
-output_schema:
-  format: markdown
-  required_sections:
-    - name: "Chart Structure"
-      pattern: "^## Chart Structure"
+      description: Target Kubernetes namespace
+  output_schema:
+    format: markdown
+    required_sections:
+    - name: Chart Structure
+      pattern: ^## Chart Structure
       required: true
-    - name: "Validation Results"
-      pattern: "^## Validation Results"
+    - name: Validation Results
+      pattern: ^## Validation Results
       required: true
-  metrics:
+    metrics:
     - name: compliance_status
       type: enum
-      values: [PASS, FAIL, PARTIAL]
+      values:
+      - PASS
+      - FAIL
+      - PARTIAL
     - name: files_created
       type: integer
-
-verification:
-  automated:
-    - command: "helm lint ."
-      description: "Helm linter passes"
-      success_pattern: "0 chart\\(s\\) failed"
-    - command: "helm template test . 2>&1 | head -5"
-      description: "Template renders without errors"
-      success_pattern: '^(apiVersion|-{3})'
-  manual:
-    - "All values.yaml fields follow Lerian naming conventions"
-    - "Secrets do not contain real credentials"
-    - "Health check paths match application endpoints"
+  related:
+    complementary:
+    - ring:dev-devops
+    - ring:dev-sre
+    - ring:dev-implementation
+    similar:
+    - ring:dev-devops
+  role: orchestrator
+  sequence:
+    after:
+    - ring:dev-devops
+    before:
+    - ring:dev-sre
+  skip_when: |
+    - Modifying only application code (no chart changes)
+    - Working on non-Helm deployment (docker-compose only) → Use ring:dev-devops
+  trigger: |
+    - Creating a new Helm chart for any Lerian service
+    - Modifying an existing Helm chart (adding components, dependencies, templates)
+    - Reviewing a Helm chart PR for convention compliance
+    - Migrating a docker-compose setup to Helm
+  verification:
+    automated:
+    - command: helm lint .
+      description: Helm linter passes
+      success_pattern: 0 chart\(s\) failed
+    - command: helm template test . 2>&1 | head -5
+      description: Template renders without errors
+      success_pattern: ^(apiVersion|-{3})
+    manual:
+    - All values.yaml fields follow Lerian naming conventions
+    - Secrets do not contain real credentials
+    - Health check paths match application endpoints
 ---
 
 # Helm Chart Creation & Maintenance (Lerian Conventions)

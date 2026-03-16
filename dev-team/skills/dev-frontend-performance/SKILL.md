@@ -1,5 +1,5 @@
 ---
-name: ring:dev-frontend-performance
+name: dev-frontend-performance
 title: Frontend development cycle performance testing (Gate 6)
 category: development-cycle-frontend
 tier: 1
