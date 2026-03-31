@@ -1858,6 +1858,40 @@ func ValidateBusinessError(err *BusinessError, entityType string, args ...any) e
 }
 ```
 
+### BusinessError vs ErrorResponse (Wire Format)
+
+**BusinessError** (defined above) is the **domain-level** error type used internally within Go code. Its `Code` field is a **string** (e.g., `"PLT-0001"`).
+
+However, the **wire format** sent to API clients is **ErrorResponse** from lib-commons (`chttp`), which has a different structure:
+
+```go
+// lib-commons ErrorResponse (actual wire format sent to clients)
+type ErrorResponse struct {
+    Code    int    `json:"code"`    // HTTP status code (e.g., 400, 404, 500)
+    Title   string `json:"title"`   // Short error title (e.g., "Bad Request")
+    Message string `json:"message"` // Detailed error message
+}
+```
+
+**How the translation works:** When a handler calls `chttp.WithError(c, err)` or `chttp.RenderError(c, err)`, lib-commons inspects the error. If it's a `BusinessError`, it maps the business error code to the appropriate HTTP status and constructs an `ErrorResponse`:
+
+| Layer | Type | `code` field | Example |
+|-------|------|-------------|---------|
+| Domain (internal) | `BusinessError` | `string` (service prefix) | `"PLT-0001"` |
+| Wire (API response) | `ErrorResponse` | `int` (HTTP status) | `400` |
+
+**Example flow:**
+
+```go
+// In handler: pass BusinessError to chttp
+return chttp.WithError(c, ErrInvalidInput) // BusinessError{Code: "PLT-0001", ...}
+
+// chttp translates to wire format → client receives:
+// { "code": 400, "title": "Bad Request", "message": "Invalid input provided" }
+```
+
+**Key takeaway:** When writing Go services, define errors as `BusinessError` with string codes. The `chttp` layer handles translation to the `ErrorResponse` wire format automatically. Do not manually construct `ErrorResponse` in application code.
+
 ---
 
 ## Error Handling

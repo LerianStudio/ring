@@ -79,7 +79,7 @@ AskUserQuestion({
 | **Data type formats** | How to represent dates, IDs, amounts | ISO8601, UUID v4, Decimal(10,2) |
 | **Validation patterns** | Regex, constraints, rules | Email RFC 5322, phone E.164 |
 | **Error code naming** | Organizational error conventions | `EMAIL_ALREADY_EXISTS` vs `DuplicateEmail` |
-| **Pagination fields** | Standard query/response pagination | `page`, `pageSize`, `totalCount` |
+| **Pagination fields** | Standard query/response pagination | `items`, `limit`, `next_cursor`, `prev_cursor` (cursor) or `items`, `page`, `limit` (page-based) |
 
 ---
 
@@ -143,11 +143,20 @@ Context: {API layer / Database layer / etc}
 
 ## Pagination Standards (if applicable)
 
+### Cursor-Based (preferred for high-volume)
 | Field | Type | Description | Default |
 |-------|------|-------------|---------|
+| items | array | Result set for the current page | - |
+| limit | integer | Items per page (max 100) | 10 |
+| next_cursor | string | Opaque cursor to fetch the next page | - |
+| prev_cursor | string | Opaque cursor to fetch the previous page | - |
+
+### Page-Based (for low-volume entities)
+| Field | Type | Description | Default |
+|-------|------|-------------|---------|
+| items | array | Result set for the current page | - |
 | page | integer | 1-indexed page number | 1 |
-| pageSize | integer | Items per page (max 100) | 20 |
-| totalCount | integer | Total items across all pages | - |
+| limit | integer | Items per page (max 100) | 10 |
 
 ## Cross-Layer Mapping (optional)
 

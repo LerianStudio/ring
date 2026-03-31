@@ -74,7 +74,7 @@ MUST extract these elements if present:
 | **Data type formats** | How to represent dates, IDs, amounts | ISO8601, UUID v4, Decimal(10,2) |
 | **Validation patterns** | Regex, constraints, rules | Email RFC 5322, phone E.164 |
 | **Standard error codes** | Organizational error naming | `EMAIL_ALREADY_EXISTS` vs `DuplicateEmail` |
-| **Pagination fields** | Standard query/response pagination | `page`, `pageSize`, `totalCount` |
+| **Pagination fields** | Standard query/response pagination | `items`, `limit`, `next_cursor`, `prev_cursor` (cursor) or `items`, `page`, `limit` (page-based) |
 
 **3. Save extracted standards:**
 
@@ -113,11 +113,21 @@ Extracted: {timestamp}
 | Phone | E.164 format | "+5511987654321" |
 
 ## Pagination Standards
+
+### Cursor-Based (preferred for high-volume)
 | Field | Type | Description |
 |-------|------|-------------|
+| items | array | Result set for the current page |
+| limit | integer | Items per page (max 100) |
+| next_cursor | string | Opaque cursor to fetch the next page |
+| prev_cursor | string | Opaque cursor to fetch the previous page |
+
+### Page-Based (for low-volume entities)
+| Field | Type | Description |
+|-------|------|-------------|
+| items | array | Result set for the current page |
 | page | integer | 1-indexed page number |
-| pageSize | integer | Items per page (max 100) |
-| totalCount | integer | Total items across all pages |
+| limit | integer | Items per page (max 100) |
 ```
 
 **4. Apply throughout Gate 4:**
