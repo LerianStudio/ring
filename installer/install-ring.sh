@@ -25,16 +25,42 @@ else
     GREEN="" YELLOW="" BLUE="" RED="" RESET=""
 fi
 
-# Detect Python
+# Detect Python (requires 3.10+ for dataclass slots=True)
 detect_python() {
-    if command -v python3 &>/dev/null; then
-        echo "python3"
-    elif command -v python &>/dev/null; then
-        # Verify it's Python 3
-        if python --version 2>&1 | grep -q "Python 3"; then
-            echo "python"
-        fi
+    local VENV_PY="$SCRIPT_DIR/.venv/bin/python"
+    local MIN_MAJOR=3 MIN_MINOR=10
+
+    _py_ok() {
+        local ver
+        ver=$("$1" -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')" 2>/dev/null) || return 1
+        local major minor
+        major=${ver%%.*}; minor=${ver##*.}
+        [[ $major -ge $MIN_MAJOR && $minor -ge $MIN_MINOR ]]
+    }
+
+    # 1. Persistent venv (created once, survives across runs)
+    if [[ -x "$VENV_PY" ]] && _py_ok "$VENV_PY"; then
+        echo "$VENV_PY"; return
     fi
+
+    # 2. Homebrew / newer system python3
+    for candidate in python3 python3.14 python3.13 python3.12 python3.11 python3.10 python; do
+        if command -v "$candidate" &>/dev/null && _py_ok "$candidate"; then
+            echo "$candidate"; return
+        fi
+    done
+
+    # 3. Bootstrap a venv from the best available Python 3.10+
+    for candidate in /opt/homebrew/bin/python3.14 /opt/homebrew/bin/python3.13 /opt/homebrew/bin/python3.12 /opt/homebrew/bin/python3.11 /opt/homebrew/bin/python3.10 /usr/local/bin/python3; do
+        if [[ -x "$candidate" ]] && _py_ok "$candidate"; then
+            echo "${YELLOW:-}Bootstrapping venv with $candidate (system python < 3.10)…${RESET:-}" >&2
+            "$candidate" -m venv "$SCRIPT_DIR/.venv" && \
+                "$VENV_PY" -m pip install -q PyYAML 2>/dev/null
+            if [[ -x "$VENV_PY" ]] && _py_ok "$VENV_PY"; then
+                echo "$VENV_PY"; return
+            fi
+        fi
+    done
 }
 
 PYTHON_CMD=$(detect_python)
@@ -182,7 +208,7 @@ if [[ "$dry_run" =~ ^[Yy]$ ]]; then
     echo ""
     echo "${YELLOW}=== Dry Run ===${RESET}"
     cd "$RING_ROOT"
-    "$PYTHON_CMD" -m installer.ring_installer install --platforms "$PLATFORMS" --dry-run "${EXTRA_ARGS[@]}"
+    "$PYTHON_CMD" -m installer.ring_installer install --platforms "$PLATFORMS" --dry-run "${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}"
     echo ""
     read -p "Proceed with actual installation? (Y/n): " proceed
     if [[ "$proceed" =~ ^[Nn]$ ]]; then
@@ -195,7 +221,7 @@ fi
 echo ""
 echo "${GREEN}=== Installing ===${RESET}"
 cd "$RING_ROOT"
-"$PYTHON_CMD" -m installer.ring_installer install --platforms "$PLATFORMS" "${EXTRA_ARGS[@]}"
+"$PYTHON_CMD" -m installer.ring_installer install --platforms "$PLATFORMS" "${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}"
 
 echo ""
 echo "${GREEN}================================================${RESET}"

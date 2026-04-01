@@ -615,7 +615,7 @@ https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards
 | Seed corpus        | N/A                       | MANDATORY: minimum 5 entries per fuzz test  |
 | Input bounding     | N/A                       | MANDATORY: length limits to prevent OOM     |
 | Duration           | Fast (ms)                 | 30s minimum per fuzz function               |
-| Pass criteria      | Coverage + all pass       | No panics + no crashes during fuzz duration |
+| Pass criteria      | Coverage + all pass       | No panics + no log.Fatal + no crashes during fuzz duration |
 
 ### Fuzz Test Quality Gate
 
@@ -626,6 +626,7 @@ https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards
 | Seed categories    | Valid, empty, boundary, unicode, security      | All 5 categories represented       |
 | Input bounding     | Length check before processing                 | All fuzz functions bound input     |
 | No panics          | `go test -fuzz=. -fuzztime=30s`                | 0 panics during fuzz run           |
+| No log.Fatal       | `grep -rn "log.Fatal\|Must[A-Z]" --include="*.go" \| grep -v "regexp\.MustCompile"` | 0 results |
 | No flaky tests     | Run 3x consecutively                           | All pass each time                 |
 
 ### Output Format (Fuzz Mode)
@@ -668,6 +669,7 @@ _No precedence conflicts. Following Ring Standards._
 | Seed categories   | PASS   | All 5 categories represented       |
 | Input bounding    | PASS   | Length limits in all fuzz functions |
 | No panics         | PASS   | 0 panics during 30s fuzz run       |
+| No log.Fatal      | PASS   | 0 log.Fatal/Must* in source (regexp.MustCompile excluded) |
 
 ## Next Steps
 

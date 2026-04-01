@@ -91,8 +91,11 @@ libOpentelemetry.HandleSpanError(&span, "Connection failed", err)
 // ❌ FORBIDDEN: log.Fatal (breaks graceful shutdown)
 log.Fatal("Cannot start without config")
 
-// ✅ REQUIRED: panic in bootstrap only (caught by recovery middleware)
+// ❌ FORBIDDEN: panic (crashes process, skips cleanup)
 panic(fmt.Errorf("cannot start without config: %w", err))
+
+// ✅ REQUIRED: return error (caller decides how to handle)
+return nil, fmt.Errorf("cannot start without config: %w", err)
 ```
 
 ### What not to Log (Sensitive Data)

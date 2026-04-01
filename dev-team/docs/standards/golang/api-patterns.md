@@ -28,7 +28,7 @@ This module covers API naming conventions, pagination patterns, HTTP status code
 | Layer                          | Format     | Example                                    |
 | ------------------------------ | ---------- | ------------------------------------------ |
 | **JSON response fields**       | camelCase  | `userId`, `createdAt`, `accountBalance`    |
-| **Pagination response fields** | camelCase  | `nextCursor`, `prevCursor`, `hasMore`      |
+| **Pagination response fields** | snake_case | `next_cursor`, `prev_cursor` (exception — matches Core one `Pagination` struct json tags) |
 | **Query parameters**           | snake_case | `sort_order`, `start_date`, `end_date`     |
 | **Go structs**                 | PascalCase | `UserID`, `CreatedAt`, `AccountBalance`    |
 | **Database columns**           | snake_case | `user_id`, `created_at`, `account_balance` |
@@ -103,13 +103,12 @@ GET /v1/transactions?cursor=xyz&limit=10&sortOrder=asc&startDate=2024-01-01
 #### Response Body - Pagination Fields (camelCase)
 
 ```go
-// ✅ CORRECT: Pagination response fields use camelCase
+// ✅ CORRECT: Pagination cursor fields use snake_case (exception — matches Core one Pagination struct json tags)
 type PaginatedResponse struct {
     Items      []interface{} `json:"items"`
     Limit      int           `json:"limit"`
-    NextCursor string        `json:"nextCursor,omitempty"`
-    PrevCursor string        `json:"prevCursor,omitempty"`
-    HasMore    bool          `json:"hasMore"`
+    NextCursor string        `json:"next_cursor,omitempty"`
+    PrevCursor string        `json:"prev_cursor,omitempty"`
 }
 ```
 
@@ -130,7 +129,7 @@ type UserResponse struct {
 #### Complete List Response Example
 
 ```go
-// ✅ CORRECT: Full pattern - all response fields use camelCase
+// ✅ CORRECT: Data fields camelCase; pagination cursors snake_case (exception — matches Core one code)
 type UserListResponse struct {
     // Data fields - camelCase
     Items []struct {
@@ -140,11 +139,10 @@ type UserListResponse struct {
         CreatedAt string `json:"createdAt"`      // camelCase
     } `json:"items"`
 
-    // Pagination fields - camelCase
+    // Pagination cursor fields - snake_case (exception: matches Core one Pagination struct json tags)
     Limit      int    `json:"limit"`
-    NextCursor string `json:"nextCursor,omitempty"`
-    PrevCursor string `json:"prevCursor,omitempty"`
-    HasMore    bool   `json:"hasMore"`
+    NextCursor string `json:"next_cursor,omitempty"`
+    PrevCursor string `json:"prev_cursor,omitempty"`
 }
 ```
 
@@ -169,29 +167,31 @@ type UserListResponse struct {
 | Date filters     | `start_date`, `end_date` | `startDate`, `endDate` |
 | All query params | `snake_case`             | `camelCase`            |
 
-**Response Fields (camelCase) - Including Pagination:**
+**Response Fields — Note on Pagination Cursor Exception:**
 
-| Concept             | ✅ Correct (camelCase)                | ❌ Wrong (snake_case)        |
-| ------------------- | ------------------------------------- | ---------------------------- |
-| Pagination cursors  | `nextCursor`, `prevCursor`, `hasMore` | `next_cursor`, `prev_cursor` |
-| All response fields | `camelCase`                           | `snake_case`                 |
+| Concept                   | ✅ Correct                                              | ❌ Wrong                                            |
+| ------------------------- | ------------------------------------------------------- | --------------------------------------------------- |
+| Pagination cursors        | `next_cursor`, `prev_cursor` (snake_case — matches Core one `Pagination` struct) | `nextCursor`, `prevCursor`, `hasMore` |
+| All other response fields | `camelCase`                                             | `snake_case`                                        |
 
 ### Detection Commands
 
 ```bash
-# Find snake_case in JSON response tags (should return 0 matches)
-grep -rn 'json:"[a-z]*_[a-z]*' --include="*.go" ./internal
+# Find snake_case in JSON response tags for non-pagination fields (should return 0 matches)
+grep -rn 'json:"[a-z]*_[a-z]*' --include="*.go" ./internal | grep -v 'next_cursor\|prev_cursor'
 
 # Check for common violations in body fields (these should NEVER be snake_case)
 grep -rn 'json:"created_at\|json:"updated_at\|json:"deleted_at' --include="*.go" ./internal
 grep -rn 'json:"first_name\|json:"last_name\|json:"legal_name' --include="*.go" ./internal
-grep -rn 'json:"next_cursor\|json:"prev_cursor' --include="*.go" ./internal  # Should be camelCase
 
 # Verify query params ARE snake_case (check query tags)
 grep -rn 'query:"[a-zA-Z]*[A-Z]' --include="*.go" ./internal  # Should return 0 (no camelCase in query tags)
 
-# Verify pagination response fields ARE camelCase
-grep -rn 'json:"nextCursor\|json:"prevCursor\|json:"hasMore' --include="*.go" ./internal
+# Verify pagination cursor fields ARE snake_case (matches Core one Pagination struct)
+grep -rn 'json:"next_cursor\|json:"prev_cursor' --include="*.go" ./internal
+
+# Verify no legacy camelCase cursor fields remain
+grep -rn 'json:"nextCursor\|json:"prevCursor\|json:"hasMore\|json:"has_more' --include="*.go" ./internal  # Should return 0
 ```
 
 ### Anti-Rationalization Table
@@ -204,7 +204,7 @@ grep -rn 'json:"nextCursor\|json:"prevCursor\|json:"hasMore' --include="*.go" ./
 | "OpenAPI spec shows snake_case"         | Fix the struct tag, regenerate spec.                                            | **Fix source, run generate-docs**    |
 | "Query params should match body fields" | No. Query params = snake_case, body = camelCase. Different rules.               | **Follow location-based convention** |
 | "startDate is cleaner than start_date"  | Core one standard uses snake_case for query params. Follow the standard.           | **Use snake_case for query params**  |
-| "Why two different conventions?"        | Industry pattern: URLs use snake_case, JSON uses camelCase. Core one follows this. | **Accept the dual convention**       |
+| "Why two different conventions?"        | URLs use snake_case, JSON uses camelCase — with one exception: pagination cursor fields (`next_cursor`, `prev_cursor`) are snake_case in responses because that's what the Core one `Pagination` struct uses. | **Accept the dual convention and the cursor exception** |
 
 ---
 
@@ -272,12 +272,13 @@ func ValidateParameters(queries map[string]string) (*QueryHeader, error)
 
 ```go
 // Pagination — unified response envelope
+// NOTE: cursor fields use snake_case json tags — this matches the actual Core one Pagination struct
 type Pagination struct {
-    Items     any    `json:"items"`
-    Limit     int    `json:"limit"`
-    Page      int    `json:"page,omitempty"`                  // Offset mode
-    NextCursor string `json:"nextCursor,omitempty"`           // Cursor mode
-    PrevCursor string `json:"prevCursor,omitempty"`           // Cursor mode
+    Items      any    `json:"items"`
+    Limit      int    `json:"limit"`
+    Page       int    `json:"page,omitempty"`        // Offset mode
+    NextCursor string `json:"next_cursor,omitempty"` // Cursor mode
+    PrevCursor string `json:"prev_cursor,omitempty"` // Cursor mode
 }
 
 // SetItems — sets the items collection
@@ -496,18 +497,18 @@ func (r *Repository) FindAll(ctx context.Context, filter libHTTP.QueryHeader) ([
 {
   "items": [...],
   "limit": 10,
-  "nextCursor": "eyJpZCI6Ii4uLiIsInBvaW50c19uZXh0Ijp0cnVlfQ==",
-  "prevCursor": "eyJpZCI6Ii4uLiIsInBvaW50c19uZXh0IjpmYWxzZX0="
+  "next_cursor": "eyJpZCI6Ii4uLiIsInBvaW50c19uZXh0Ijp0cnVlfQ==",
+  "prev_cursor": "eyJpZCI6Ii4uLiIsInBvaW50c19uZXh0IjpmYWxzZX0="
 }
 ```
 
-**Backward pagination:** client sends `prevCursor` value as the `cursor` query param. The `PointsNext: false` flag causes `ApplyCursorPagination` to reverse the query direction, and `PaginateRecords` reverses the result set back to the expected order.
+**Backward pagination:** client sends `prev_cursor` value as the `cursor` query param. The `PointsNext: false` flag causes `ApplyCursorPagination` to reverse the query direction, and `PaginateRecords` reverses the result set back to the expected order.
 
 ### Shared Utilities from lib-commons
 
 | Utility | Package | Purpose |
 |---------|---------|---------|
-| `Pagination` struct | `lib-commons/commons/postgres` | Unified response envelope with `page` (omitempty) + `nextCursor`/`prevCursor` (omitempty) |
+| `Pagination` struct | `lib-commons/commons/postgres` | Unified response envelope with `page` (omitempty) + `next_cursor`/`prev_cursor` (omitempty, snake_case) |
 | `QueryHeader` struct | `pkg/net/http` | Unified query parsing with both `Page` and `Cursor` fields |
 | `ValidateParameters` | `pkg/net/http` | Parses query params, enforces `MAX_PAGINATION_LIMIT` |
 | `Cursor` struct | `lib-commons/commons/net/http` | Cursor encoding (ID + direction) |
@@ -793,7 +794,7 @@ grep -rn "func.*Handler.*GetAll\|func.*Handler.*List" internal/adapters/http --i
 | Mixing both strategies in the same endpoint | Each endpoint MUST use one strategy consistently |
 | Missing `MAX_PAGINATION_LIMIT` enforcement | MUST use `ValidateParameters` which enforces the limit |
 | Offset on high-volume tables (>100K rows) without justification | Use cursor for transaction-class entities |
-| Returning `page` and `nextCursor` in the same response | `omitempty` tags handle this — don't override |
+| Returning `page` and `next_cursor` in the same response | `omitempty` tags handle this — don't override |
 | Hardcoding limit values instead of using `ValidateParameters` | Centralized validation prevents inconsistencies |
 
 ### Anti-Rationalization Table

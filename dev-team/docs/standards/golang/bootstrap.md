@@ -364,11 +364,10 @@ headers := libOpentelemetry.PrepareQueueHeaders(ctx, map[string]any{
 
 ```go
 // bootstrap/config.go
-func InitServers() *Service {
+func InitServers() (*Service, error) {
     cfg := &Config{}
     if err := libCommons.SetConfigFromEnvVars(cfg); err != nil {
-        // bootstrap-only: panic is acceptable in main/init; NEVER use panic in business logic
-        panic(err)
+        return nil, fmt.Errorf("failed to load config: %w", err)
     }
 
     // Initialize logger FIRST (zap package for initialization in bootstrap)
@@ -662,13 +661,12 @@ type Config struct {
 
 // InitServers initializes all application components and returns a Service ready to run.
 // This is the single point of dependency injection for the entire application.
-func InitServers() *Service {
+func InitServers() (*Service, error) {
     // 1. LOAD CONFIGURATION
     // All environment variables are loaded into the Config struct
     cfg := &Config{}
     if err := libCommons.SetConfigFromEnvVars(cfg); err != nil {
-        // bootstrap-only: panic is acceptable in main/init; NEVER use panic in business logic
-        panic(err)
+        return nil, fmt.Errorf("failed to load config: %w", err)
     }
 
     // 2. INITIALIZE LOGGER
@@ -791,7 +789,7 @@ func InitServers() *Service {
 - `InitServers()` is the only place where dependencies are wired together
 - Order matters: config → logger → telemetry → databases → repositories → services → handlers → router → server
 - All database connections use lib-commons packages
-- The function returns a `*Service` that is ready to run
+- The function returns a `(*Service, error)` — callers MUST handle the error before calling `Run()`
 
 ---
 
@@ -907,10 +905,20 @@ The main.go file should be minimal, delegating to bootstrap.
 ```go
 package main
 
-import "github.com/LerianStudio/your-service/internal/bootstrap"
+import (
+    "fmt"
+    "os"
+
+    "github.com/LerianStudio/your-service/internal/bootstrap"
+)
 
 func main() {
-    bootstrap.InitServers().Run()
+    svc, err := bootstrap.InitServers()
+    if err != nil {
+        fmt.Fprintf(os.Stderr, "failed to start: %v\n", err)
+        os.Exit(1)
+    }
+    svc.Run()
 }
 ```
 

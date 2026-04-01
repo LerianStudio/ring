@@ -50,6 +50,99 @@ logger = logging.getLogger(__name__)
 MAX_FILE_SIZE = 10 * 1024 * 1024
 
 
+def _build_codex_skill_name_map(
+    components: Dict[str, Dict[str, List[Path]]]
+) -> tuple[Dict[tuple[str, str, str], str], Dict[str, str]]:
+    """
+    Build stable Codex skill names for Ring components.
+
+    Returns:
+        name_map:
+            (plugin_name, component_type, logical_name) -> codex skill name
+        alias_map:
+            original ring shorthand name -> codex skill name for globally-unique
+            component names only. Ambiguous names are omitted to avoid bad rewrites.
+    """
+    import re
+
+    def sanitize(value: str) -> str:
+        value = value.lower().replace(":", "-")
+        value = re.sub(r"[^a-z0-9._-]+", "-", value)
+        value = re.sub(r"-{2,}", "-", value)
+        return value.strip("-")
+
+    entries: List[tuple[str, str, str]] = []
+    for plugin_name, plugin_components in components.items():
+        for component_type, files in plugin_components.items():
+            if component_type != "skills":
+                continue
+            for source_file in files:
+                logical_name = source_file.parent.name
+                entries.append((plugin_name, component_type, logical_name))
+
+    preferred_counts: Dict[tuple[str, str], int] = {}
+    for plugin_name, component_type, logical_name in entries:
+        preferred_name = sanitize(f"ring-{plugin_name}-{logical_name}")
+        preferred_counts[(component_type, preferred_name)] = (
+            preferred_counts.get((component_type, preferred_name), 0) + 1
+        )
+
+    name_map: Dict[tuple[str, str, str], str] = {}
+    alias_candidates: Dict[str, List[str]] = {}
+
+    for plugin_name, component_type, logical_name in entries:
+        preferred_name = sanitize(f"ring-{plugin_name}-{logical_name}")
+        if preferred_counts[(component_type, preferred_name)] == 1:
+            generated_name = preferred_name
+        else:
+            singular = component_type[:-1]
+            generated_name = sanitize(f"ring-{plugin_name}-{singular}-{logical_name}")
+
+        key = (plugin_name, component_type, logical_name)
+        name_map[key] = generated_name
+        alias_candidates.setdefault(logical_name, []).append(generated_name)
+
+    alias_map = {
+        logical_name: generated_names[0]
+        for logical_name, generated_names in alias_candidates.items()
+        if len(set(generated_names)) == 1
+    }
+
+    return name_map, alias_map
+
+
+def _discover_codex_support_dirs(
+    ring_path: Path,
+    plugin_names: Optional[List[str]] = None,
+    exclude_plugins: Optional[List[str]] = None,
+) -> Dict[str, List[Path]]:
+    """Discover support directories that Codex-installed skills reference."""
+    support_dirs: Dict[str, List[Path]] = {}
+    components = discover_ring_components(ring_path, plugin_names=plugin_names, exclude_plugins=exclude_plugins)
+
+    for plugin_name in components:
+        plugin_path = ring_path / plugin_name
+        dirs: List[Path] = []
+
+        docs_dir = plugin_path / "docs"
+        if docs_dir.exists():
+            dirs.append(docs_dir)
+
+        shared_patterns_dir = plugin_path / "skills" / "shared-patterns"
+        if shared_patterns_dir.exists():
+            dirs.append(shared_patterns_dir)
+
+        skills_dir = plugin_path / "skills"
+        if skills_dir.exists():
+            for references_dir in skills_dir.glob("*/references"):
+                if references_dir.is_dir():
+                    dirs.append(references_dir)
+
+        support_dirs[plugin_name] = dirs
+
+    return support_dirs
+
+
 class InstallStatus(Enum):
     """Status of an installation operation."""
 
@@ -557,6 +650,11 @@ def install(
     components = discover_ring_components(
         source_path, plugin_names=options.plugin_names, exclude_plugins=options.exclude_plugins
     )
+    codex_support_dirs = _discover_codex_support_dirs(
+        source_path,
+        plugin_names=options.plugin_names,
+        exclude_plugins=options.exclude_plugins,
+    )
 
     # Calculate total work
     total_components = sum(
@@ -574,6 +672,11 @@ def install(
         adapter = get_adapter(target.platform, manifest.get("platforms", {}).get(target.platform))
         install_path = target.path or adapter.get_install_path()
         component_mapping = adapter.get_component_mapping()
+        codex_name_map: Dict[tuple[str, str, str], str] = {}
+        codex_alias_map: Dict[str, str] = {}
+
+        if adapter.platform_id == "codex":
+            codex_name_map, codex_alias_map = _build_codex_skill_name_map(components)
 
         # --- Link mode setup ---
         # When link=True, write transformed files to .ring-build/<platform>/ inside the
@@ -639,7 +742,11 @@ def install(
                         )
 
                     # Determine target filename
-                    if component_type == "skills":
+                    if adapter.platform_id == "codex" and component_type == "skills":
+                        logical_name = source_file.parent.name
+                        codex_name = codex_name_map[(plugin_name, component_type, logical_name)]
+                        target_file = target_dir / codex_name / "SKILL.md"
+                    elif component_type == "skills":
                         # Skills use their directory name.
                         # Factory expects: ~/.factory/skills/<name>/SKILL.md
                         skill_name = source_file.parent.name
@@ -726,7 +833,13 @@ def install(
                             "name": metadata_name,
                             "source_path": str(source_file),
                             "plugin": plugin_name,
+                            "component_type": component_type[:-1],
                         }
+                        if adapter.platform_id == "codex":
+                            metadata["codex_name"] = codex_name_map[
+                                (plugin_name, component_type, metadata_name)
+                            ]
+                            metadata["codex_alias_map"] = codex_alias_map
 
                         if component_type == "agents":
                             transformed = adapter.transform_agent(content, metadata)
@@ -851,6 +964,36 @@ def install(
                 result.warnings.append(
                     f"Rolled back partial install for {target.platform} after failures"
                 )
+
+        if adapter.platform_id == "codex":
+            codex_support_root = write_base / "ring"
+            for plugin_name, support_dirs in codex_support_dirs.items():
+                plugin_source_root = source_path / plugin_name
+                for support_dir in support_dirs:
+                    relative_dir = support_dir.relative_to(plugin_source_root)
+                    target_support_dir = codex_support_root / plugin_name / relative_dir
+
+                    if options.dry_run:
+                        result.warnings.append(
+                            f"[DRY RUN] Would install support dir {support_dir} -> {target_support_dir}"
+                        )
+                        continue
+
+                    try:
+                        ensure_directory(target_support_dir.parent)
+                        if target_support_dir.exists():
+                            safe_remove(target_support_dir, missing_ok=True)
+                        shutil.copytree(support_dir, target_support_dir)
+                        result.warnings.append(
+                            f"Installed Codex support dir {support_dir} -> {target_support_dir}"
+                        )
+                    except Exception as e:
+                        result.add_failure(
+                            support_dir,
+                            target_support_dir,
+                            f"Support directory install failed: {e}",
+                            exc_info=e,
+                        )
 
     result.finalize()
     return result
@@ -1086,6 +1229,10 @@ def update_with_diff(
         adapter = get_adapter(target.platform, manifest.get("platforms", {}).get(target.platform))
         install_path = target.path or adapter.get_install_path()
         component_mapping = adapter.get_component_mapping()
+        codex_name_map: Dict[tuple[str, str, str], str] = {}
+
+        if adapter.platform_id == "codex":
+            codex_name_map, _ = _build_codex_skill_name_map(components)
 
         # Load existing manifest
         existing_manifest = InstallManifest.load(get_manifest_path(install_path))
@@ -1131,7 +1278,11 @@ def update_with_diff(
                         )
 
                     # Determine target path
-                    if component_type == "skills":
+                    if adapter.platform_id == "codex" and component_type == "skills":
+                        logical_name = source_file.parent.name
+                        codex_name = codex_name_map[(plugin_name, component_type, logical_name)]
+                        target_file = target_dir / codex_name / "SKILL.md"
+                    elif component_type == "skills":
                         skill_name = source_file.parent.name
                         if adapter.platform_id == "factory":
                             target_file = target_dir / skill_name / "SKILL.md"

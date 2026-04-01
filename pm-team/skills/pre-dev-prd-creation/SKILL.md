@@ -106,6 +106,105 @@ Architecture diagrams or component design, technology choices (languages, framew
 
 ---
 
+## Operational Dashboard Discovery (Business Level)
+
+**During PRD creation, assess whether the feature/product requires business dashboard endpoints.**
+
+Not every product needs dashboard endpoints. The deciding factor is whether a human operator or business manager will need aggregated visibility to make decisions.
+
+### When to Ask
+
+This discovery MUST be triggered when:
+- Defining a new product or major feature
+- The feature involves data that accumulates over time (transactions, events, operations)
+- The feature is operated by end-users (not purely infrastructure)
+
+### Discovery Question
+
+Use AskUserQuestion tool:
+
+**Question:** "Will an operator or business manager need a consolidated view of this feature's data to make decisions (e.g., volumes, statuses, error rates, trends)?"
+- Header: "Operational Dashboard"
+- multiSelect: false
+- Options:
+  - "Yes - Business dashboard needed" (description: "Operators need aggregated metrics, trends, and status overviews to manage this feature day-to-day")
+  - "No - Infrastructure/backend only" (description: "This feature runs silently — monitoring is handled by observability tooling, not business dashboards")
+  - "Not sure - Needs discussion" (description: "Flag for product/business review before deciding")
+
+### If "Yes" Selected
+
+**Document in PRD under a "Dashboard Requirements" section:**
+
+| Question | Document |
+|----------|----------|
+| Who is the primary dashboard consumer? | Persona: operator, manager, compliance officer, etc. |
+| What decisions does the dashboard support? | "Is this healthy?", "Where are bottlenecks?", "Are we meeting SLAs?" |
+| What key metrics need visibility? | Volumes, rates, distributions, trends, aging |
+| What is the expected refresh cadence? | Real-time, near real-time, periodic |
+
+**Example PRD section:**
+```markdown
+## Dashboard Requirements
+
+**Consumer:** Operations manager
+**Decisions supported:** Health monitoring, SLA compliance, exception triage
+**Key metrics:**
+- Total volume processed (by period)
+- Distribution by status (success/pending/failed)
+- Error rate trends
+- Aging of unresolved items
+**Refresh:** Near real-time (< 5 min lag)
+```
+
+This section cascades into Feature Map (Gate 2) for UI components and API Design (Gate 4) for dashboard data endpoints.
+
+### If "No" Selected
+
+Document explicitly in PRD scope:
+```markdown
+## Out of Scope
+- Business dashboard endpoints (infrastructure product — monitoring via observability stack)
+```
+
+This prevents the question from resurfacing in later gates.
+
+### If "Not Sure" Selected
+
+Flag as open question in PRD:
+```markdown
+## Open Questions
+- [ ] Dashboard requirements TBD — needs product/business review before Gate 2
+```
+
+**STOP Gate 1 validation for this item** until resolved.
+
+### Guidance: When Dashboards Make Sense
+
+| Product Type | Dashboard? | Rationale |
+|-------------|-----------|-----------|
+| Core ledger / transaction engine | Yes | Operators need volume, status, health visibility |
+| Reconciliation / matching | Yes | Exception management requires aggregated view |
+| Risk / fraud analysis | Yes | Monitoring product by nature — alerts, scores, trends |
+| Regulatory reporting | Yes | Compliance needs deadline tracking, coverage, delivery status |
+| Payment rails (PIX, SWIFT, etc.) | Yes | High volume + SLA requirements = operational visibility |
+| Billing / fees | Yes | Revenue data needs consolidated view |
+| Workflow orchestration | Maybe | Depends on volume and operational complexity |
+| Data ingestion | No | Backend plumbing — health is infra/o11y concern |
+| Auth / identity | No | Infrastructure — login metrics are o11y, not business dashboard |
+| Tenant management | No | Admin/platform tooling, not end-user operated |
+
+### Rationalization Table
+
+| Excuse | Reality |
+|--------|---------|
+| "We'll add dashboards later" | Later = never, or expensive rework. Decide now. |
+| "Every product needs a dashboard" | Infrastructure products don't. Forcing it creates noise. |
+| "Observability covers it" | O11y ≠ business dashboard. Grafana for SREs ≠ console for operators. |
+| "Dashboard is a frontend concern" | Dashboard data endpoints are backend. Decide scope here. |
+| "It's obvious this needs a dashboard" | Obvious to you ≠ documented. Ask and record the decision. |
+
+---
+
 ## Red Flags - STOP
 
 If you catch yourself writing or thinking any of these in a PRD, **STOP**:

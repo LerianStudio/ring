@@ -11,6 +11,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from ring_installer.core import _build_codex_skill_name_map, _discover_codex_support_dirs
+
 # ==============================================================================
 # InstallStatus Tests
 # ==============================================================================
@@ -87,7 +89,7 @@ class TestInstallTarget:
         assert "~" not in str(target.path)
         assert target.path.is_absolute()
 
-    @pytest.mark.parametrize("platform", ["claude", "factory", "cursor", "cline"])
+    @pytest.mark.parametrize("platform", ["claude", "codex", "factory", "cursor", "cline"])
     def test_accepts_all_supported_platforms(self, platform):
         """InstallTarget should accept all supported platform identifiers."""
         from ring_installer.core import InstallTarget
@@ -95,6 +97,46 @@ class TestInstallTarget:
         target = InstallTarget(platform=platform)
 
         assert target.platform == platform
+
+
+class TestCodexSkillNameMap:
+    """Tests Codex package naming and alias generation."""
+
+    def test_generates_namespaced_names_and_aliases(self, tmp_ring_root):
+        components = {
+            "default": {
+                "skills": [tmp_ring_root / "default" / "skills" / "sample-skill" / "SKILL.md"],
+                "agents": [tmp_ring_root / "default" / "agents" / "sample-agent.md"],
+                "commands": [tmp_ring_root / "default" / "commands" / "sample-command.md"],
+                "hooks": [],
+            }
+        }
+
+        name_map, alias_map = _build_codex_skill_name_map(components)
+
+        assert name_map[("default", "skills", "sample-skill")] == "ring-default-sample-skill"
+        assert alias_map["sample-skill"] == "ring-default-sample-skill"
+
+
+class TestCodexSupportDiscovery:
+    """Tests discovery of Codex support directories."""
+
+    def test_discovers_docs_and_shared_patterns(self, tmp_ring_root):
+        default_plugin = tmp_ring_root / "default"
+        (default_plugin / "docs").mkdir(exist_ok=True)
+        (default_plugin / "docs" / "guide.md").write_text("guide", encoding="utf-8")
+        shared_patterns = default_plugin / "skills" / "shared-patterns"
+        shared_patterns.mkdir(exist_ok=True)
+        (shared_patterns / "pattern.md").write_text("pattern", encoding="utf-8")
+        references = default_plugin / "skills" / "sample-skill" / "references"
+        references.mkdir(exist_ok=True)
+        (references / "note.md").write_text("note", encoding="utf-8")
+
+        support_dirs = _discover_codex_support_dirs(tmp_ring_root)
+
+        assert default_plugin / "docs" in support_dirs["default"]
+        assert shared_patterns in support_dirs["default"]
+        assert references in support_dirs["default"]
 
 
 # ==============================================================================

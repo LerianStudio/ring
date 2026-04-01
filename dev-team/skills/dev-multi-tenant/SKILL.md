@@ -3,12 +3,15 @@ name: dev-multi-tenant
 description: |
   Multi-tenant development cycle orchestrator following Ring Standards.
   Auto-detects the service stack (PostgreSQL, MongoDB, Redis, RabbitMQ, S3)
-  and service type (plugin vs product),
+  and whether the service has targetServices declared,
   then executes a gate-based implementation using tenantId from JWT
-  for database-per-tenant isolation via lib-commons v3 dispatch layer sub-packages (postgres.Manager, mongo.Manager).
-  For plugins: includes mandatory M2M credential retrieval from AWS Secrets Manager
-  via lib-commons v3 secretsmanager package (per-tenant authentication with product APIs).
-  MUST update lib-commons v3 first; lib-auth v2 depends on it. Both are required dependencies.
+  for database-per-tenant isolation via lib-commons v4 dispatch layer sub-packages (postgres.Manager, mongo.Manager).
+  Uses event-driven tenant discovery (Redis Pub/Sub via EventListener, TenantCache, TenantLoader)
+  instead of polling-based discovery.
+  TenantMiddleware with WithPG/WithMB variadic options handles both single-module and multi-module services.
+  For services with targetServices: includes mandatory M2M credential retrieval from AWS Secrets Manager
+  via lib-commons v4 secretsmanager package (per-tenant authentication with target service APIs).
+  MUST update lib-commons v4 first; lib-auth v2 depends on it. Both are required dependencies.
   Each gate dispatches ring:backend-engineer-golang with context and section references.
   The agent loads multi-tenant.md via WebFetch and has all code examples.
 metadata:
@@ -152,7 +155,7 @@ Multi-tenant isolation is 100% based on `tenantId` from JWT → dispatch layer m
 
 ### MANDATORY: Canonical Environment Variables
 
-See [multi-tenant.md § Environment Variables](../../docs/standards/golang/multi-tenant.md#environment-variables) for the complete table of 8 canonical `MULTI_TENANT_*` env vars with descriptions, defaults, and required status.
+See [multi-tenant.md § Environment Variables](../../docs/standards/golang/multi-tenant.md#environment-variables) for the complete table of 13 canonical `MULTI_TENANT_*` env vars with descriptions, defaults, and required status.
 
 MUST NOT use any other names (e.g., `TENANT_MANAGER_ADDRESS` is WRONG — the correct name is `MULTI_TENANT_URL`).
 
@@ -186,16 +189,16 @@ Agents must use these exact import paths. Include this table in every gate dispa
 
 | Alias | Import Path | Purpose |
 |-------|-------------|---------|
-| `client` | `github.com/LerianStudio/lib-commons/v3/commons/dispatch layer/client` | Tenant Manager HTTP client with circuit breaker |
-| `core` | `github.com/LerianStudio/lib-commons/v3/commons/dispatch layer/core` | Context helpers, resolvers, errors, types |
-| `tmmiddleware` | `github.com/LerianStudio/lib-commons/v3/commons/dispatch layer/middleware` | TenantMiddleware, MultiPoolMiddleware, ConsumerTrigger |
-| `tmpostgres` | `github.com/LerianStudio/lib-commons/v3/commons/dispatch layer/postgres` | PostgresManager (per-tenant PG pools) |
-| `tmmongo` | `github.com/LerianStudio/lib-commons/v3/commons/dispatch layer/mongo` | MongoManager (per-tenant Mongo pools) |
-| `tmrabbitmq` | `github.com/LerianStudio/lib-commons/v3/commons/dispatch layer/rabbitmq` | RabbitMQ Manager (per-tenant vhosts) |
-| `tmconsumer` | `github.com/LerianStudio/lib-commons/v3/commons/dispatch layer/consumer` | MultiTenantConsumer (lazy mode) |
-| `valkey` | `github.com/LerianStudio/lib-commons/v3/commons/dispatch layer/valkey` | Redis key prefixing (GetKeyFromContext) |
-| `s3` | `github.com/LerianStudio/lib-commons/v3/commons/dispatch layer/s3` | S3 key prefixing (GetObjectStorageKeyForTenant) |
-| `secretsmanager` | `github.com/LerianStudio/lib-commons/v3/commons/secretsmanager` | M2M credential retrieval (plugin only) |
+| `client` | `github.com/LerianStudio/lib-commons/v4/commons/dispatch layer/client` | Tenant Manager HTTP client with circuit breaker |
+| `tmcore` | `github.com/LerianStudio/lib-commons/v4/commons/dispatch layer/core` | Context helpers, resolvers, errors, types |
+| `tmmiddleware` | `github.com/LerianStudio/lib-commons/v4/commons/dispatch layer/middleware` | TenantMiddleware (with WithPG/WithMB options) |
+| `tmpostgres` | `github.com/LerianStudio/lib-commons/v4/commons/dispatch layer/postgres` | PostgresManager (per-tenant PG pools) |
+| `tmmongo` | `github.com/LerianStudio/lib-commons/v4/commons/dispatch layer/mongo` | MongoManager (per-tenant Mongo pools) |
+| `tmrabbitmq` | `github.com/LerianStudio/lib-commons/v4/commons/dispatch layer/rabbitmq` | RabbitMQ Manager (per-tenant vhosts) |
+| `tmconsumer` | `github.com/LerianStudio/lib-commons/v4/commons/dispatch layer/consumer` | MultiTenantConsumer (on-demand initialization) |
+| `valkey` | `github.com/LerianStudio/lib-commons/v4/commons/dispatch layer/valkey` | Redis key prefixing (GetKeyContext) |
+| `s3` | `github.com/LerianStudio/lib-commons/v4/commons/dispatch layer/s3` | S3 key prefixing (GetS3KeyStorageContext) |
+| `secretsmanager` | `github.com/LerianStudio/lib-commons/v4/commons/secretsmanager` | M2M credential retrieval (services with targetServices) |
 
 **⛔ HARD GATE:** Agent must not use v2 import paths or invent sub-package paths. If WebFetch truncates, this table is the authoritative reference.
 
@@ -208,7 +211,7 @@ The Tenant Manager determines the isolation mode per tenant. Agents MUST handle 
 | `isolated` (default) | Separate DB per tenant | Default `public` | None | Strong isolation, recommended |
 | `schema` | Shared DB | Schema per tenant | `options=-csearch_path="{schema}"` | Cost optimization |
 
-The agent does not choose the mode — lib-commons `postgres.Manager` reads `TenantConfig.IsolationMode` from the Tenant Manager API and resolves the connection accordingly. The agent's responsibility is to use `core.ResolvePostgres`/`core.ResolveModuleDB` which handles both modes transparently.
+The agent does not choose the mode — lib-commons `postgres.Manager` reads `TenantConfig.IsolationMode` from the Tenant Manager API and resolves the connection accordingly. The agent's responsibility is to use `tmcore.GetPGContext(ctx)` / `tmcore.GetPGContext(ctx, module)` which handles both modes transparently.
 
 ### ConnectionSettings Override
 
@@ -251,8 +254,8 @@ MUST report all severities. CRITICAL: STOP immediately (security breach). HIGH: 
 |-----------|---------|----------|
 | "It already has multi-tenant, skip this gate" | COMPLIANCE_BYPASS | "Existence ≠ compliance. MUST run compliance audit. If it doesn't match the Ring canonical model exactly, it is non-compliant and MUST be replaced." |
 | "Multi-tenant is done, just review it" | COMPLIANCE_BYPASS | "CANNOT skip gates. Every gate verifies compliance OR implements. Non-standard implementations are not 'done' — they are wrong." |
-| "Our custom approach works the same way" | COMPLIANCE_BYPASS | "Working ≠ compliant. Only lib-commons v3 dispatch layer sub-packages are valid. Custom implementations create drift and block upgrades." |
-| "Skip the lib-commons upgrade" | QUALITY_BYPASS | "CANNOT proceed without lib-commons v3. Tenant-manager sub-packages do not exist in v2." |
+| "Our custom approach works the same way" | COMPLIANCE_BYPASS | "Working ≠ compliant. Only lib-commons v4 dispatch layer sub-packages are valid. Custom implementations create drift and block upgrades." |
+| "Skip the lib-commons upgrade" | QUALITY_BYPASS | "CANNOT proceed without lib-commons v4. Tenant-manager sub-packages do not exist in v2." |
 | "Just do the happy path, skip backward compat" | SCOPE_REDUCTION | "Backward compatibility is NON-NEGOTIABLE. Single-tenant deployments depend on it." |
 | "organization_id is our tenant identifier" | AUTHORITY_OVERRIDE | "STOP. organization_id is NOT multi-tenant. tenantId from JWT is the only mechanism." |
 | "Skip code review, we tested it" | QUALITY_BYPASS | "MANDATORY: 7 reviewers. One security mistake = cross-tenant data leak." |
@@ -260,7 +263,7 @@ MUST report all severities. CRITICAL: STOP immediately (security breach). HIGH: 
 | "I'll make a quick edit directly" | CODE_BYPASS | "FORBIDDEN: All code changes go through ring:backend-engineer-golang. Dispatch the agent." |
 | "It's just one line, no need for an agent" | CODE_BYPASS | "FORBIDDEN: Even single-line changes MUST be dispatched. Agent ensures standards compliance." |
 | "Agent is slow, I'll edit faster" | CODE_BYPASS | "FORBIDDEN: Speed is not a justification. Agent applies TDD and standards checks." |
-| "This plugin doesn't need Secret Manager" | SCOPE_REDUCTION | "If it's a plugin with MULTI_TENANT_ENABLED=true that calls product APIs, M2M via Secret Manager is MANDATORY." |
+| "This service doesn't need Secret Manager" | SCOPE_REDUCTION | "If it has targetServices declared and MULTI_TENANT_ENABLED=true, M2M via Secret Manager is MANDATORY." |
 | "We can use env vars for M2M credentials" | SECURITY_BYPASS | "Env vars are shared across tenants. M2M credentials are PER-TENANT. MUST use Secrets Manager." |
 | "Caching M2M credentials is optional" | QUALITY_BYPASS | "Every request to AWS adds ~50-100ms latency + cost. Caching is MANDATORY from day one." |
 
@@ -273,11 +276,11 @@ MUST report all severities. CRITICAL: STOP immediately (security breach). HIGH: 
 | 0 | Stack Detection + Compliance Audit | Always | Orchestrator |
 | 1 | Codebase Analysis (multi-tenant focus) | Always | ring:codebase-explorer |
 | 1.5 | Implementation Preview (visual report) | Always | Orchestrator (ring:visual-explainer) |
-| 2 | lib-commons v3 + lib-auth v2 Upgrade | Skip only if `go.mod` contains `lib-commons/v3` AND `lib-auth/v2` (verified via grep) | ring:backend-engineer-golang |
+| 2 | lib-commons v4 + lib-auth v2 Upgrade | Skip only if `go.mod` contains `lib-commons/v4` AND `lib-auth/v2` (verified via grep) | ring:backend-engineer-golang |
 | 3 | Multi-Tenant Configuration | Always — verify compliance or implement/fix | ring:backend-engineer-golang |
-| 4 | Tenant Middleware (TenantMiddleware or MultiPoolMiddleware) | Always — verify compliance or implement/fix | ring:backend-engineer-golang |
+| 4 | Tenant Middleware (TenantMiddleware with WithPG/WithMB) | Always — verify compliance or implement/fix | ring:backend-engineer-golang |
 | 5 | Repository Adaptation | Always per detected DB/storage — verify compliance or implement/fix | ring:backend-engineer-golang |
-| 5.5 | M2M Secret Manager (Plugin Auth) | Skip if NOT a plugin | ring:backend-engineer-golang |
+| 5.5 | M2M Secret Manager (if service has targetServices) | Skip if has_m2m = false | ring:backend-engineer-golang |
 | 6 | RabbitMQ Multi-Tenant | Skip if no RabbitMQ | ring:backend-engineer-golang |
 | 7 | Metrics & Backward Compat | Always | ring:backend-engineer-golang |
 | 8 | Tests | Always | ring:backend-engineer-golang |
@@ -302,7 +305,7 @@ VALIDATE input:
 3. If execution_mode == "FULL":
    - Core gates always execute (0, 1, 1.5, 2, 3, 4, 5, 7, 8, 9)
    - Conditional gates may be in skip_gates based on stack detection:
-     - "5.5" may be skipped if service is NOT a plugin
+     - "5.5" may be skipped if service has no targetServices (has_m2m = false)
      - "6" may be skipped if RabbitMQ was NOT detected
      - "10", "11" may be skipped when invoked from dev-cycle
    - skip_gates MUST NOT contain core gates (0-5, 7-9)
@@ -350,14 +353,13 @@ DETECT (run in parallel):
 6. S3/Object Storage:    grep -rn "s3\|ObjectStorage\|PutObject\|GetObject\|Upload.*storage\|Download.*storage" internal/ pkg/ go.mod
 7. Existing multi-tenant:
    - Config:     grep -rn "MULTI_TENANT_ENABLED" internal/
-   - Middleware: grep -rn "dispatch layer/middleware\|WithTenantDB\|MultiPoolMiddleware" internal/
-   - Context:    grep -rn "dispatch layer/core\|ResolveMongo\|ResolvePostgres\|ResolveModuleDB" internal/
-   - S3 keys:    grep -rn "dispatch layer/s3\|GetObjectStorageKeyForTenant" internal/
+   - Middleware: grep -rn "dispatch layer/middleware\|WithTenantDB\|WithPG\|WithMB" internal/
+   - Context:    grep -rn "dispatch layer/core\|GetPGContext\|GetMBContext" internal/
+   - S3 keys:    grep -rn "dispatch layer/s3\|GetS3KeyStorageContext" internal/
    - RMQ:        grep -rn "X-Tenant-ID" internal/
-8. Service type (plugin vs product):
-   - Plugin:     grep -rn "plugin-\|Plugin" go.mod cmd/ internal/bootstrap/
+8. Cross-service API calls (M2M detection):
    - M2M client: grep -rn "client_credentials\|M2M\|secretsmanager\|GetM2MCredentials" internal/ pkg/
-   - Product API calls: grep -rn "ledger.*client\|midaz.*client\|product.*client" internal/
+   - Service API calls: grep -rn "ledger.*client\|midaz.*client\|product.*client\|plugin.*client" internal/
 ```
 
 ### Phase 2: Compliance Audit (MANDATORY if any multi-tenant code detected)
@@ -371,41 +373,66 @@ NOTE: A1 is a NEGATIVE check (presence of wrong names = NON-COMPLIANT).
       A2-A8 are POSITIVE checks (absence of canonical patterns = NON-COMPLIANT).
 
 A1. Config compliance:
-    - grep -rn "TENANT_MANAGER_ADDRESS\|TENANT_URL\|TENANT_MANAGER_URL" internal/
-    - (any match = NON-COMPLIANT config var names → Gate 3 MUST fix)
+    - Extract all MULTI_TENANT_* env tags from the project's Config struct
+    - Compare against the 14 canonical ENVs defined in multi-tenant.md § Environment Variables:
+      `MULTI_TENANT_ENABLED`, `MULTI_TENANT_URL`, `MULTI_TENANT_REDIS_HOST`, `MULTI_TENANT_REDIS_PORT`, `MULTI_TENANT_REDIS_PASSWORD`, `MULTI_TENANT_REDIS_TLS`, `MULTI_TENANT_MAX_TENANT_POOLS`, `MULTI_TENANT_IDLE_TIMEOUT_SEC`, `MULTI_TENANT_TIMEOUT`, `MULTI_TENANT_CIRCUIT_BREAKER_THRESHOLD`, `MULTI_TENANT_CIRCUIT_BREAKER_TIMEOUT_SEC`, `MULTI_TENANT_SERVICE_API_KEY`, `MULTI_TENANT_CACHE_TTL_SEC`, `MULTI_TENANT_CONNECTIONS_CHECK_INTERVAL_SEC`
+    - Any ENV not in this list = NON-COMPLIANT → Gate 3 MUST remove or rename to canonical name
+    - Any canonical ENV missing from Config struct = NON-COMPLIANT → Gate 3 MUST add
 
-A2. Middleware compliance:
-    - grep -rn "tmmiddleware.NewTenantMiddleware\|tmmiddleware.NewMultiPoolMiddleware" internal/
-    - (no match but other tenant middleware exists = NON-COMPLIANT → Gate 4 MUST fix)
+A2. Tenant ID context compliance:
+    - MUST match: grep -rn "ContextWithTenantID\|GetTenantIDContext" internal/
+    - NON-COMPLIANT if found: grep -rn "SetTenantIDInContext\|GetTenantIDFromContext\|core\.GetTenantID(" internal/
+    - (any old tenant ID function = NON-COMPLIANT → Gate 4 MUST fix)
 
-A3. Repository compliance:
-    - grep -rn "core.ResolvePostgres\|core.ResolveMongo\|core.ResolveModuleDB" internal/
-    - (repositories use static connections or custom pool lookup = NON-COMPLIANT → Gate 5 MUST fix)
+A3. Middleware compliance:
+    - MUST match: grep -rn "tmmiddleware.NewTenantMiddleware" internal/
+    - MUST match: grep -rn "WithPG\|WithMB" internal/
+    - NON-COMPLIANT if found: grep -rn "WithPostgresManager\|WithMongoManager\|WithModule\|NewMultiPoolMiddleware\|DualPoolMiddleware" internal/
+    - (any old middleware pattern = NON-COMPLIANT → Gate 4 MUST fix)
 
-A4. Redis compliance (if Redis detected):
-    - grep -rn "valkey.GetKeyFromContext" internal/
-    - (Redis operations without GetKeyFromContext = NON-COMPLIANT → Gate 5 MUST fix)
+A4. Repository compliance:
+    - MUST match: grep -rn "tmcore.GetPGContext\|tmcore.GetMBContext" internal/
+    - NON-COMPLIANT if found: grep -rn "GetPGConnectionFromContext\|GetPGConnectionContext\|GetMongoFromContext\|GetMongoContext\|GetModulePostgresForTenant\|ResolvePostgres\|ResolveMongo\|ResolveModuleDB\|GetPostgresForTenant\|GetMongoForTenant" internal/
+    - (any old context getter = NON-COMPLIANT → Gate 5 MUST fix)
 
-A5. S3 compliance (if S3 detected):
-    - grep -rn "s3.GetObjectStorageKeyForTenant" internal/
-    - (S3 operations without GetObjectStorageKeyForTenant = NON-COMPLIANT → Gate 5 MUST fix)
+A5. Redis compliance (if Redis detected):
+    - MUST match: grep -rn "valkey.GetKeyContext" internal/
+    - NON-COMPLIANT if found: grep -rn "GetKeyFromContext" internal/
+    - (old key function = NON-COMPLIANT → Gate 5 MUST fix)
 
-A6. RabbitMQ compliance (if RabbitMQ detected):
+A6. S3 compliance (if S3 detected):
+    - grep -rn "s3.GetS3KeyStorageContext" internal/
+    - (S3 operations without GetS3KeyStorageContext = NON-COMPLIANT → Gate 5 MUST fix)
+
+A7. RabbitMQ compliance (if RabbitMQ detected):
     - grep -rn "tmrabbitmq.NewManager\|tmrabbitmq.Manager" internal/
     - (RabbitMQ multi-tenant without tmrabbitmq.Manager = NON-COMPLIANT → Gate 6 MUST fix)
 
-A7. Circuit breaker compliance:
+A8. Circuit breaker compliance:
     - grep -rn "WithCircuitBreaker" internal/
     - (Tenant Manager client without circuit breaker = NON-COMPLIANT → Gate 4 MUST fix)
 
-A8. Backward compatibility compliance:
+A9. Backward compatibility compliance:
     - grep -rn "TestMultiTenant_BackwardCompatibility" internal/
     - (no backward compat test = NON-COMPLIANT → Gate 7 MUST fix)
 
-A9. Service API key compliance:
+A10. Service API key compliance:
     - grep -rn "MULTI_TENANT_SERVICE_API_KEY" internal/
     - grep -rn "WithServiceAPIKey" internal/
     - (MULTI_TENANT_SERVICE_API_KEY missing from config OR WithServiceAPIKey not called on client = NON-COMPLIANT → Gate 3/4 MUST fix)
+
+A11. Connections revalidation compliance (PostgreSQL only):
+    - grep -rn "WithConnectionsCheckInterval" internal/
+    - (no match = NON-COMPLIANT → Gate 4 MUST fix — pgManager MUST be created with WithConnectionsCheckInterval)
+
+A12. Event-driven discovery compliance:
+    - MUST match: grep -rn "tmredis.NewTenantPubSubRedisClient" internal/
+    - NON-COMPLIANT if found: grep -rn "libRedis\.Config.*MultiTenantRedis\|libRedis\.New.*MultiTenantRedis" internal/
+    - (manual Redis client setup for Pub/Sub = NON-COMPLIANT → MUST use tmredis.NewTenantPubSubRedisClient)
+    - MUST match: grep -rn "tmevent.NewTenantEventListener" internal/
+    - (no event listener = NON-COMPLIANT → MUST wire NewTenantEventListener with Pub/Sub Redis client)
+    - MUST match: grep -rn "MULTI_TENANT_REDIS_TLS" .env.example
+    - (MULTI_TENANT_REDIS_TLS missing from .env.example = NON-COMPLIANT → MUST declare all 14 canonical envs)
 ```
 
 **Output format for compliance audit:**
@@ -423,6 +450,7 @@ COMPLIANCE AUDIT RESULTS:
 | Circuit breaker | COMPLIANT / NON-COMPLIANT | {grep results} | Gate 4: SKIP / MUST FIX |
 | Backward compat test | COMPLIANT / NON-COMPLIANT | {grep results} | Gate 7: SKIP / MUST FIX |
 | Service API key | COMPLIANT / NON-COMPLIANT | {grep results} | Gate 3/4: SKIP / MUST FIX |
+| Settings revalidation | COMPLIANT / NON-COMPLIANT | {grep results} | Gate 4: SKIP / MUST FIX |
 ```
 
 **HARD GATE: A gate can only be marked as SKIP when ALL its compliance checks are COMPLIANT with evidence. One NON-COMPLIANT row → gate MUST execute.**
@@ -447,17 +475,21 @@ N3. Custom pool managers:
     (any match outside lib-commons = NON-CANONICAL → MUST be removed)
 ```
 
-**If non-canonical files are found:** report them in the compliance audit as `NON-CANONICAL FILES DETECTED`. The implementing agent MUST remove these files and replace their functionality with the canonical lib-commons v3 sub-packages during the appropriate gate.
+**If non-canonical files are found:** report them in the compliance audit as `NON-CANONICAL FILES DETECTED`. The implementing agent MUST remove these files and replace their functionality with the canonical lib-commons v4 sub-packages during the appropriate gate.
 
-**Service type classification:**
+**M2M classification (targetServices detection):**
 
-| Signal | Classification |
-|--------|---------------|
-| Module name contains `plugin-` (in go.mod) | **Plugin** → Gate 5.5 MANDATORY |
-| Service calls product APIs (ledger, midaz, etc.) | **Plugin** → Gate 5.5 MANDATORY |
-| No product API calls, serves own data | **Product** → Gate 5.5 SKIP |
+MUST ask the user: "Does this service call any other service APIs per tenant (plugin or product)? If yes, list the target services (e.g., ledger, plugin-fees)."
 
-MUST confirm with user: "Is this service a **plugin** (calls product APIs like ledger/midaz) or a **product** (serves its own data)?"
+The answer produces two output fields:
+- `has_m2m: bool` — whether the service has targetServices
+- `target_services: []string` — list of target service names
+
+| User Answer | `has_m2m` | `target_services` | Gate 5.5 |
+|-------------|-----------|-------------------|----------|
+| "Yes, it calls ledger and plugin-fees" | `true` | `["ledger", "plugin-fees"]` | MANDATORY |
+| "Yes, it calls midaz" | `true` | `["midaz"]` | MANDATORY |
+| "No, it does not call other services" | `false` | `[]` | SKIP |
 
 MUST confirm: user explicitly approves detection results before proceeding.
 
@@ -483,10 +515,10 @@ MUST confirm: user explicitly approves detection results before proceeding.
 > 4. **Middleware chain**: What middleware exists and in what order? Where would TenantMiddleware fit (after auth, before handlers)?
 > 5. **Config struct**: Where is the Config struct? What fields exist? Where is it loaded? Identify exact location for MULTI_TENANT_ENABLED vars.
 > 6. **RabbitMQ** (if detected): Where are producers? Where are consumers? How are messages published? Where would X-Tenant-ID header be injected? Are producer and consumer in the SAME process or SEPARATE components? Is there already a config split? Are there dual constructors? Is there a RabbitMQManager pool? Does the service struct have both consumer types?
-> 7. **Redis** (if detected): Where are Redis operations? Any Lua scripts? Where would GetKeyFromContext be needed?
+> 7. **Redis** (if detected): Where are Redis operations? Any Lua scripts? Where would GetKeyContext be needed?
 > 8. **S3/Object Storage** (if detected): Where are Upload/Download/Delete operations? How are object keys constructed? List every file:line that builds an S3 key. What bucket env var is used?
-> 9. **Existing multi-tenant code**: Any dispatch layer sub-package imports (`dispatch layer/core`, `dispatch layer/middleware`, `dispatch layer/postgres`, etc.)? TenantMiddleware or MultiPoolMiddleware? `core.ResolvePostgres`/`core.ResolveMongo`/`core.ResolveModuleDB`/`s3.GetObjectStorageKeyForTenant` calls? MULTI_TENANT_ENABLED config? (NOTE: organization_id is NOT related to multi-tenant — ignore it completely)
-> 10. **M2M / Plugin authentication** (if service is a plugin): Does the service call product APIs (ledger, midaz, CRM)? How does it authenticate today (static token, env var, hardcoded)? Where is the HTTP client that calls the product? Is there an existing M2M or `client_credentials` flow? Any `secretsmanager` imports? List every file:line where product API calls are made and where authentication credentials are injected.
+> 9. **Existing multi-tenant code**: Any dispatch layer sub-package imports (`dispatch layer/core`, `dispatch layer/middleware`, `dispatch layer/postgres`, etc.)? TenantMiddleware with WithPG/WithMB? `tmcore.GetPGContext`/`tmcore.GetMBContext`/`s3.GetS3KeyStorageContext` calls? EventListener/TenantCache/TenantLoader? MULTI_TENANT_ENABLED config? (NOTE: organization_id is NOT related to multi-tenant — ignore it completely)
+> 10. **M2M / Service authentication** (if service has targetServices): Does the service call other service APIs (ledger, midaz, plugin-fees)? How does it authenticate today (static token, env var, hardcoded)? Where is the HTTP client that calls the target service? Is there an existing M2M or `client_credentials` flow? Any `secretsmanager` imports? List every file:line where target service API calls are made and where authentication credentials are injected.
 >
 > OUTPUT FORMAT: Structured report with file:line references for every point above.
 > DO NOT write code. Analysis only.
@@ -522,27 +554,45 @@ The HTML page MUST include these sections:
 
 ### 2. Target Architecture (After)
 - Mermaid diagram showing the multi-tenant request flow (JWT → middleware → tenant pool → handler)
-- Which middleware will be used: `TenantMiddleware` (single-module) or `MultiPoolMiddleware` (multi-module)
-- How repositories will get DB connections (context-based: `core.ResolvePostgres(ctx, fallback)`)
+- Which middleware will be used: `TenantMiddleware` with unnamed `WithPG`/`WithMB` (single-module) or named `WithPG(mgr, "module")`/`WithMB(mgr, "module")` (multi-module)
+- How repositories will get DB connections (context-based: `tmcore.GetPGContext(ctx)` / `tmcore.GetPGContext(ctx, module)`)
 
 ### 3. Change Map (per gate)
 Table with columns: Gate, File, Current Code, New Code, Lines Changed. One row per file that will be modified. Example:
 
 | Gate | File | What Changes | Impact |
 |------|------|-------------|--------|
-| 2 | `go.mod` | lib-commons v2 → v3 + lib-auth v2, import paths | All files |
-| 3 | `config.go` | Add the 8 canonical MULTI_TENANT_* env vars (see "Canonical Environment Variables" table above) to Config struct | ~20 lines added |
-| 4 | `config.go` | Add TenantMiddleware/MultiPoolMiddleware setup | ~30 lines added |
+| 2 | `go.mod` | lib-commons v2 → v4 + lib-auth v2, import paths | All files |
+| 3 | `config.go` | Add the 13 canonical MULTI_TENANT_* env vars to Config struct (exact fields below) | ~20 lines added |
+| 4 | `config.go` | Add TenantMiddleware with WithPG/WithMB setup | ~30 lines added |
+
+**Canonical Config struct fields (Gate 3 — use these exact names):**
+```go
+MultiTenantEnabled                  bool   `env:"MULTI_TENANT_ENABLED"`
+MultiTenantURL                      string `env:"MULTI_TENANT_URL"`
+MultiTenantRedisHost                string `env:"MULTI_TENANT_REDIS_HOST"`
+MultiTenantRedisPort                string `env:"MULTI_TENANT_REDIS_PORT"`
+MultiTenantRedisPassword            string `env:"MULTI_TENANT_REDIS_PASSWORD"`
+MultiTenantRedisTLS                 bool   `env:"MULTI_TENANT_REDIS_TLS"`
+MultiTenantMaxTenantPools           int    `env:"MULTI_TENANT_MAX_TENANT_POOLS"`
+MultiTenantIdleTimeoutSec           int    `env:"MULTI_TENANT_IDLE_TIMEOUT_SEC"`
+MultiTenantTimeout                  int    `env:"MULTI_TENANT_TIMEOUT" default:"30"`
+MultiTenantCircuitBreakerThreshold  int    `env:"MULTI_TENANT_CIRCUIT_BREAKER_THRESHOLD"`
+MultiTenantCircuitBreakerTimeoutSec int    `env:"MULTI_TENANT_CIRCUIT_BREAKER_TIMEOUT_SEC"`
+MultiTenantServiceAPIKey            string `env:"MULTI_TENANT_SERVICE_API_KEY"`
+MultiTenantCacheTTLSec              int    `env:"MULTI_TENANT_CACHE_TTL_SEC" default:"120"`
+MultiTenantConnectionsCheckIntervalSec int `env:"MULTI_TENANT_CONNECTIONS_CHECK_INTERVAL_SEC"`
+```
 | 4 | `routes.go` | Register middleware in Fiber chain | ~5 lines added |
-| 5 | `organization.postgresql.go` | `c.connection.GetDB()` → `core.ResolveModuleDB(ctx, module, r.connection)` | ~3 lines per method |
-| 5 | `metadata.mongodb.go` | Static mongo → `core.ResolveMongo(ctx, r.connection, r.dbName)` | ~2 lines per method |
-| 5 | `consumer.redis.go` | Key prefixing with `valkey.GetKeyFromContext(ctx, key)` | ~1 line per operation |
-| 5 | `storage.go` | S3 key prefixing with `s3.GetObjectStorageKeyForTenant(ctx, key)` | ~1 line per operation |
-| 5.5 | `m2m/provider.go` | New file: M2MCredentialProvider with credential caching (plugin only) | ~80 lines |
-| 5.5 | `config.go` | Add M2M_TARGET_SERVICE, cache TTL, AWS_REGION env vars (plugin only) | ~10 lines added |
-| 5.5 | `bootstrap.go` | Conditional M2M wiring when multi-tenant + plugin (plugin only) | ~20 lines added |
+| 5 | `organization.postgresql.go` | `c.connection.GetDB()` → `tmcore.GetPGContext(ctx, module)` with fallback to `r.connection` | ~3 lines per method |
+| 5 | `metadata.mongodb.go` | Static mongo → `tmcore.GetMBContext(ctx, module)` or `tmcore.GetMBContext(ctx)` with fallback | ~2 lines per method |
+| 5 | `consumer.redis.go` | Key prefixing with `valkey.GetKeyContext(ctx, key)` | ~1 line per operation |
+| 5 | `storage.go` | S3 key prefixing with `s3.GetS3KeyStorageContext(ctx, key)` | ~1 line per operation |
+| 5.5 | `m2m/provider.go` | New file: M2MCredentialProvider with credential caching (if service has targetServices) | ~80 lines |
+| 5.5 | `config.go` | Add M2M_TARGET_SERVICE, cache TTL, AWS_REGION env vars (if service has targetServices) | ~10 lines added |
+| 5.5 | `bootstrap.go` | Conditional M2M wiring when multi-tenant + targetServices (if service has targetServices) | ~20 lines added |
 | 6 | `producer.rabbitmq.go` | Dual constructor (single-tenant + multi-tenant) | ~20 lines added |
-| 6 | `rabbitmq.server.go` | MultiTenantConsumer setup with lazy mode | ~40 lines added |
+| 6 | `rabbitmq.server.go` | MultiTenantConsumer setup with on-demand initialization | ~40 lines added |
 | 7 | `config.go` | Backward compat validation | ~10 lines added |
 
 **MANDATORY: Below the summary table, show per-file code diff panels for every file that will be modified.**
@@ -564,18 +614,27 @@ func (r *OrganizationPostgreSQLRepository) Create(ctx context.Context, org *Orga
 
 // AFTER: organization.postgresql.go
 func (r *OrganizationPostgreSQLRepository) Create(ctx context.Context, org *Organization) error {
-    db, err := core.ResolveModuleDB(ctx, "organization", r.connection)
+    db, err := r.getDB(ctx)
     if err != nil {
-        return fmt.Errorf("getting tenant db for organization: %w", err)
+        return err
     }
     result := db.Model(&OrganizationPostgreSQLModel{}).Create(toModel(org))
     // ...
+}
+
+// Repository-scoped helper (add once per repository file):
+func (r *OrganizationPostgreSQLRepository) getDB(ctx context.Context) (*gorm.DB, error) {
+    db := tmcore.GetPGContext(ctx, "organization")
+    if db == nil {
+        return nil, fmt.Errorf("tenant postgres connection missing from context for module organization")
+    }
+    return db, nil
 }
 ```
 
 The developer MUST be able to see the exact code that will be implemented to approve it. High-level descriptions alone are not sufficient for approval.
 
-**When many files have identical changes** (e.g., 10+ repository files all changing `r.connection.GetDB()` to `core.ResolvePostgres(ctx, r.connection)`): show one representative diff panel, then list the remaining files with "Same pattern applied to: [file list]."
+**When many files have identical changes** (e.g., 10+ repository files all changing `r.connection.GetDB()` to a `getDB(ctx)` helper wrapping `tmcore.GetPGContext(ctx, module)` with nil-check): show one representative diff panel including the helper, then list the remaining files with "Same pattern applied to: [file list]."
 
 ### 4. Backward Compatibility Analysis
 
@@ -620,19 +679,19 @@ The developer MUST understand that:
 Table showing what gets added to go.mod and which sub-packages are imported:
 - `dispatch layer/core` — types, errors, context helpers
 - `dispatch layer/client` — Tenant Manager HTTP client
-- `dispatch layer/middleware` — TenantMiddleware or MultiPoolMiddleware
+- `dispatch layer/middleware` — TenantMiddleware with WithPG/WithMB
 - `dispatch layer/postgres` — PostgresManager (if PG detected)
 - `dispatch layer/mongo` — MongoManager (if Mongo detected)
 - etc.
 
 ### 6. Environment Variables
-The exact 8 canonical env vars from the "Canonical Environment Variables" table in [multi-tenant.md](../../docs/standards/golang/multi-tenant.md#environment-variables). MUST NOT use alternative names. MUST NOT duplicate the list inline — reference the canonical table.
+The exact 13 canonical env vars from the "Canonical Environment Variables" table in [multi-tenant.md](../../docs/standards/golang/multi-tenant.md#environment-variables). MUST NOT use alternative names. MUST NOT duplicate the list inline — reference the canonical table.
 
 ### 7. Risk Assessment
 Table with: Risk, Mitigation, Verification. Examples:
 - Single-tenant regression → Backward compat gate (Gate 7) → `MULTI_TENANT_ENABLED=false go test ./...`
 - Cross-tenant data leak → Context-based isolation → Tenant isolation integration tests (Gate 8)
-- Startup performance → Lazy consumer mode → `consumer.Run(ctx)` returns in <1s
+- Startup performance → On-demand consumer initialization → `consumer.Run(ctx)` returns in <1s
 
 ### 8. Retro Compatibility Guarantee
 
@@ -663,24 +722,24 @@ HARD GATE: Developer MUST explicitly approve the implementation preview before a
 
 ---
 
-## Gate 2: lib-commons v3 + lib-auth v2 Upgrade
+## Gate 2: lib-commons v4 + lib-auth v2 Upgrade
 
-**SKIP only if:** `go.mod` contains `lib-commons/v3` AND `lib-auth/v2` (verified via grep, not assumed). If the service uses lib-commons v2 or lib-auth v1, this gate is MANDATORY.
+**SKIP only if:** `go.mod` contains `lib-commons/v4` AND `lib-auth/v2` (verified via grep, not assumed). If the service uses lib-commons v2 or v3, or lib-auth v1, this gate is MANDATORY.
 
 **Dispatch `ring:backend-engineer-golang` with context:**
 
-> TASK: Upgrade lib-commons to v3 first, then update lib-auth to v2 (lib-auth v2 depends on lib-commons v3).
-> For both libraries, fetch the latest tag (may be beta/rc in dev).
-> Check latest tags: `git ls-remote --tags https://github.com/LerianStudio/lib-commons.git | tail -5` and `git ls-remote --tags https://github.com/LerianStudio/lib-auth.git | tail -5`
+> TASK: Upgrade lib-commons to v4, then update lib-auth to v2 (lib-auth v2 depends on lib-commons v4).
+> For both libraries, fetch the latest tag (v4 is currently in beta — use latest beta until stable is released).
+> Check latest tags: `git ls-remote --tags https://github.com/LerianStudio/lib-commons.git | grep "v4" | sort -V | tail -1` and `git ls-remote --tags https://github.com/LerianStudio/lib-auth.git | tail -5`
 > Run in order:
-> 1. `go get github.com/LerianStudio/lib-commons/v3@{latest-tag}`
+> 1. `go get github.com/LerianStudio/lib-commons/v4@{latest-v4-tag}`
 > 2. `go get github.com/LerianStudio/lib-auth/v2@{latest-tag}`
-> Update go.mod and all import paths from v2 to v3 for lib-commons.
+> Update go.mod and all import paths to v4 for lib-commons (from v2 or v3).
 > Follow multi-tenant.md section "Required lib-commons Version".
 > DO NOT implement multi-tenant code yet — only upgrade the dependencies.
 > Verify: go build ./... and go test ./... MUST pass.
 
-**Verification:** `grep "lib-commons/v3" go.mod` + `grep "lib-auth/v2" go.mod` + `go build ./...` + `go test ./...`
+**Verification:** `grep "lib-commons/v4" go.mod` + `grep "lib-auth/v2" go.mod` + `go build ./...` + `go test ./...`
 
 <block_condition>
 HARD GATE: MUST pass build and tests before proceeding.
@@ -690,49 +749,55 @@ HARD GATE: MUST pass build and tests before proceeding.
 
 ## Gate 3: Multi-Tenant Configuration
 
-**Always executes.** If config already has `MULTI_TENANT_ENABLED`, this gate VERIFIES that all 8 canonical env vars are present with correct names, types, and defaults where applicable. Non-compliant config (wrong names like `TENANT_MANAGER_ADDRESS`, missing vars, wrong defaults) MUST be fixed. Compliance audit from Gate 0 determines whether this is implement or fix.
+**Always executes.** If config already has `MULTI_TENANT_ENABLED`, this gate VERIFIES that all 13 canonical env vars are present with correct names, types, and defaults where applicable. Non-compliant config (wrong names like `TENANT_MANAGER_ADDRESS`, missing vars, wrong defaults) MUST be fixed. Compliance audit from Gate 0 determines whether this is implement or fix.
 
 **Dispatch `ring:backend-engineer-golang` with context from Gate 1 analysis:**
 
-> TASK: Verify and ensure all 8 canonical multi-tenant environment variables exist in the Config struct with correct names and defaults. If any are missing, misnamed, or have wrong defaults — fix them.
+> TASK: Verify and ensure all 13 canonical multi-tenant environment variables exist in the Config struct with correct names and defaults. If any are missing, misnamed, or have wrong defaults — fix them.
 > CONTEXT FROM GATE 1: {Config struct location and current fields from analysis report}
 > Follow multi-tenant.md sections "Environment Variables", "Configuration", and "Conditional Initialization".
 >
 > The EXACT env vars to add (no alternatives allowed):
 > - MULTI_TENANT_ENABLED (bool, default false)
 > - MULTI_TENANT_URL (string, required when enabled)
-> - MULTI_TENANT_ENVIRONMENT (string, default "staging", only if RabbitMQ)
+> - MULTI_TENANT_REDIS_HOST (string, required when enabled — Redis host for Pub/Sub event-driven tenant discovery)
+> - MULTI_TENANT_REDIS_PORT (string, default "6379" — Redis port for Pub/Sub)
+> - MULTI_TENANT_REDIS_PASSWORD (string, optional — Redis password for Pub/Sub)
+> - MULTI_TENANT_REDIS_TLS (bool, default false — Enable TLS for Pub/Sub Redis connection)
 > - MULTI_TENANT_MAX_TENANT_POOLS (int, default 100)
 > - MULTI_TENANT_IDLE_TIMEOUT_SEC (int, default 300)
+> - MULTI_TENANT_TIMEOUT (int, default 30 — HTTP client timeout for dispatch layer API calls, passed to tmclient.WithTimeout)
 > - MULTI_TENANT_CIRCUIT_BREAKER_THRESHOLD (int, default 5)
 > - MULTI_TENANT_CIRCUIT_BREAKER_TIMEOUT_SEC (int, default 30)
 > - MULTI_TENANT_SERVICE_API_KEY (string, required — API key for dispatch layer /settings endpoint)
+> - MULTI_TENANT_CACHE_TTL_SEC (int, default 120 — in-memory cache TTL for tenant config)
+> - MULTI_TENANT_CONNECTIONS_CHECK_INTERVAL_SEC (int, default 30 — pgManager async settings revalidation interval via WithConnectionsCheckInterval)
 >
 > MUST NOT use alternative names (e.g., TENANT_MANAGER_ADDRESS, TENANT_MANAGER_URL are WRONG).
 > Add conditional log: "Multi-tenant mode enabled" vs "Running in SINGLE-TENANT MODE".
 > DO NOT implement TenantMiddleware yet — only configuration.
 
-**Verification:** `grep "MULTI_TENANT_ENABLED" internal/bootstrap/config.go` + `grep "MULTI_TENANT_SERVICE_API_KEY" internal/bootstrap/config.go` + `go build ./...`
+**Verification:** `grep "MULTI_TENANT_ENABLED" internal/bootstrap/config.go` + `grep "MULTI_TENANT_SERVICE_API_KEY" internal/bootstrap/config.go` + `grep "MULTI_TENANT_CONNECTIONS_CHECK_INTERVAL_SEC" internal/bootstrap/config.go` + `grep "MULTI_TENANT_CACHE_TTL_SEC" internal/bootstrap/config.go` + `go build ./...`
 
-**HARD GATE: `.env.example` compliance.** If the project has a `.env.example` file, MUST verify it includes `MULTI_TENANT_SERVICE_API_KEY`. If missing, add it.
+**HARD GATE: `.env.example` compliance.** If the project has a `.env.example` file, MUST verify it includes `MULTI_TENANT_SERVICE_API_KEY`, `MULTI_TENANT_CONNECTIONS_CHECK_INTERVAL_SEC`, and `MULTI_TENANT_CACHE_TTL_SEC`. If missing, add them.
 
 ---
 
 ## Gate 4: TenantMiddleware (Core)
 
-**Always executes.** If middleware already exists, this gate VERIFIES it uses the canonical lib-commons v3 dispatch layer sub-packages (`tmmiddleware.NewTenantMiddleware` or `tmmiddleware.NewMultiPoolMiddleware`). Custom middleware, inline JWT parsing, or any non-lib-commons implementation is NON-COMPLIANT and MUST be replaced. Compliance audit from Gate 0 determines whether this is implement or fix.
+**Always executes.** If middleware already exists, this gate VERIFIES it uses the canonical lib-commons v4 dispatch layer sub-packages (`tmmiddleware.NewTenantMiddleware` with `WithPG`/`WithMB` options). Custom middleware, inline JWT parsing, or any non-lib-commons implementation is NON-COMPLIANT and MUST be replaced. Compliance audit from Gate 0 determines whether this is implement or fix.
 
 **This is the CORE gate. Without compliant TenantMiddleware, there is no tenant isolation.**
 
 **Dispatch `ring:backend-engineer-golang` with context from Gate 1 analysis:**
 
-> TASK: Implement tenant middleware using lib-commons/v3 dispatch layer sub-packages.
+> TASK: Implement tenant middleware using lib-commons/v4 dispatch layer sub-packages.
 > DETECTED DATABASES: {postgresql: Y/N, mongodb: Y/N} (from Gate 0)
 > SERVICE ARCHITECTURE: {single-module OR multi-module} (from Gate 1)
 > CONTEXT FROM GATE 1: {Bootstrap location, middleware chain insertion point, service init from analysis report}
 >
-> **For single-module services:** Follow multi-tenant.md § "Generic TenantMiddleware (Standard Pattern)" for imports, constructor, and options.
-> **For multi-module services:** Follow multi-tenant.md § "Multi-module middleware (MultiPoolMiddleware)" for WithRoute/WithDefaultRoute pattern.
+> **For single-module services:** Follow multi-tenant.md § "Generic TenantMiddleware (Standard Pattern)" for imports, constructor, and WithPG/WithMB options.
+> **For multi-module services:** Follow multi-tenant.md § "Multi-module middleware (TenantMiddleware with multi-module)" for named WithPG(mgr, "module")/WithMB(mgr, "module") pattern.
 > **For sub-package import aliases:** See multi-tenant.md § sub-package import table.
 >
 > Follow multi-tenant.md § "JWT Tenant Extraction" for tenantId claim handling.
@@ -745,9 +810,11 @@ HARD GATE: MUST pass build and tests before proceeding.
 >
 > **Service API Key Authentication (MANDATORY):** The Tenant Manager HTTP client MUST be configured with `client.WithServiceAPIKey(cfg.MultiTenantServiceAPIKey)` so that `X-API-Key` header is sent in requests to the `/settings` endpoint. Follow multi-tenant.md § "Service Authentication (MANDATORY)".
 >
-> **IF RabbitMQ DETECTED:** Follow multi-tenant.md § "ConsumerTrigger interface" for the wiring pattern.
+> **IF RabbitMQ DETECTED:** Follow multi-tenant.md § "Multi-Tenant Message Queue Consumers" for the consumer wiring pattern.
+>
+> **Settings Revalidation (PostgreSQL only):** pgManager handles settings revalidation internally via `WithConnectionsCheckInterval`. Pass this option when creating the PostgreSQL manager. MongoDB is excluded because the Go driver does not support pool resize after creation.
 
-**Verification:** `grep "tmmiddleware.NewTenantMiddleware\|tmmiddleware.NewMultiPoolMiddleware" internal/bootstrap/` + `grep "WithServiceAPIKey" internal/bootstrap/` + `go build ./...`
+**Verification:** `grep "tmmiddleware.NewTenantMiddleware" internal/bootstrap/` + `grep "WithPG\|WithMB" internal/bootstrap/` + `grep "WithServiceAPIKey" internal/bootstrap/` + `grep "WithConnectionsCheckInterval" internal/bootstrap/` + `go build ./...`
 
 <block_condition>
 HARD GATE: CANNOT proceed without TenantMiddleware.
@@ -757,7 +824,7 @@ HARD GATE: CANNOT proceed without TenantMiddleware.
 
 ## Gate 5: Repository Adaptation
 
-**Always executes per detected DB/storage.** If repositories already use context-based connections, this gate VERIFIES they use the canonical lib-commons v3 functions (`core.ResolvePostgres`, `core.ResolveMongo`, `core.ResolveModuleDB`, `valkey.GetKeyFromContext`, `s3.GetObjectStorageKeyForTenant`). Custom pool lookups, manual DB switching, or any non-lib-commons resolution is NON-COMPLIANT and MUST be replaced. Compliance audit from Gate 0 determines whether this is implement or fix.
+**Always executes per detected DB/storage.** If repositories already use context-based connections, this gate VERIFIES they use the canonical lib-commons v4 functions (`tmcore.GetPGContext`, `tmcore.GetMBContext`, `valkey.GetKeyContext`, `s3.GetS3KeyStorageContext`). Custom pool lookups, manual DB switching, or any non-lib-commons resolution is NON-COMPLIANT and MUST be replaced. Compliance audit from Gate 0 determines whether this is implement or fix.
 
 **Dispatch `ring:backend-engineer-golang` with context from Gate 1 analysis:**
 
@@ -773,29 +840,29 @@ HARD GATE: CANNOT proceed without TenantMiddleware.
 >
 > MUST work in both modes: multi-tenant (prefixed keys / context connections) and single-tenant (unchanged keys / default connections).
 
-**Verification:** grep for `core.ResolvePostgres` / `core.ResolveMongo` / `core.ResolveModuleDB` (multi-module) / `valkey.GetKeyFromContext` / `s3.GetObjectStorageKeyForTenant` in `internal/` + `go build ./...`
+**Verification:** grep for `tmcore.GetPGContext` / `tmcore.GetMBContext` / `valkey.GetKeyContext` / `s3.GetS3KeyStorageContext` in `internal/` + `go build ./...`
 
 ---
 
-## Gate 5.5: M2M Secret Manager (Plugin Auth)
+## Gate 5.5: M2M Secret Manager (if service has targetServices)
 
-**SKIP IF:** service is NOT a plugin (i.e., it is a product or infrastructure service).
+**SKIP IF:** has_m2m = false (user answered no targets in Gate 0).
 
-**This gate is MANDATORY for plugins** that need to authenticate with product APIs (e.g., ledger, midaz) in multi-tenant mode. Each tenant has its own M2M credentials stored in AWS Secrets Manager.
+**This gate is MANDATORY for any service with targetServices declared** that needs to authenticate with target service APIs (e.g., ledger, midaz, plugin-fees) in multi-tenant mode. Each tenant has its own M2M credentials stored in AWS Secrets Manager.
 
 **Dispatch `ring:backend-engineer-golang` with context from Gate 0/1 analysis:**
 
 > TASK: Implement M2M credential retrieval from AWS Secrets Manager with per-tenant caching.
-> SERVICE TYPE: Plugin (confirmed in Gate 0)
-> APPLICATION NAME: {ApplicationName constant from codebase, e.g., "plugin-pix"}
-> TARGET SERVICE: {product the plugin calls, e.g., "ledger", "midaz"}
+> HAS_M2M: true (confirmed in Gate 0)
+> APPLICATION NAME: {ApplicationName constant from codebase, e.g., "plugin-pix", "midaz"}
+> TARGET SERVICES: {target services from Gate 0, e.g., "ledger", "plugin-fees"}
 >
-> Follow multi-tenant.md section "M2M Credentials via Secret Manager (Plugin-Only)" for all implementation patterns.
+> Follow multi-tenant.md section "M2M Credentials via Secret Manager" for all implementation patterns.
 >
 > **What to implement:**
 >
-> 1. **M2M Authenticator struct** with credential caching (`sync.Map`) and token caching.
->    Use `secretsmanager.GetM2MCredentials()` from `github.com/LerianStudio/lib-commons/v3/commons/secretsmanager`.
+> 1. **M2M Authenticator struct** with two-level credential caching (clientId/clientSecret only — token acquisition is handled by Plugin Access Manager).
+>    Use `secretsmanager.GetM2MCredentials()` from `github.com/LerianStudio/lib-commons/v4/commons/secretsmanager`.
 >    The function signature is:
 >    ```go
 >    secretsmanager.GetM2MCredentials(ctx, smClient, env, tenantOrgID, applicationName, targetService) (*M2MCredentials, error)
@@ -803,16 +870,24 @@ HARD GATE: CANNOT proceed without TenantMiddleware.
 >    It returns `*M2MCredentials{ClientID, ClientSecret}` fetched from path:
 >    `tenants/{env}/{tenantOrgID}/{applicationName}/m2m/{targetService}/credentials`
 >
-> 2. **Credential cache** with configurable TTL (default 300s). MUST NOT hit AWS on every request.
+> 2. **Two-level credential cache** (see multi-tenant.md § "Credential Caching"):
+>    - **L1:** In-memory (`sync.Map`), fixed 30s TTL
+>    - **L2:** Redis/Valkey (distributed), TTL defined by each service
+>    - **Fallback:** If Redis not available, L1-only mode (auto-detected)
+>    - **Cache-bust on 401:** Call `InvalidateCredentials()` when token exchange returns 401
+>    MUST NOT hit AWS on every request.
 >
 > 3. **Bootstrap wiring** — conditional on `cfg.MultiTenantEnabled`:
 >    ```go
 >    if cfg.MultiTenantEnabled {
 >        awsCfg, _ := awsconfig.LoadDefaultConfig(ctx)
 >        smClient := awssm.NewFromConfig(awsCfg)
->        m2mProvider := m2m.NewM2MCredentialProvider(smClient, cfg.MultiTenantEnvironment,
+>        // redisConn is the lib-commons Redis connection (already initialized in bootstrap)
+>        // Pass nil if Redis is not available — falls back to L1-only (in-memory)
+>        m2mProvider := m2m.NewM2MCredentialProvider(smClient, cfg.EnvName,
 >            constant.ApplicationName, cfg.M2MTargetService,
->            time.Duration(cfg.M2MCredentialCacheTTLSec)*time.Second)
+>            time.Duration(cfg.M2MCredentialCacheTTLSec)*time.Second,
+>            redisConn) // *libRedis.Connection from lib-commons
 >        productClient = product.NewClient(cfg.ProductURL, m2mProvider)
 >    } else {
 >        productClient = product.NewClient(cfg.ProductURL, nil) // single-tenant: static auth
@@ -820,25 +895,31 @@ HARD GATE: CANNOT proceed without TenantMiddleware.
 >    ```
 >
 > 4. **Config env vars** — add to Config struct:
->    - `M2M_TARGET_SERVICE` (string, required for plugins)
->    - `M2M_CREDENTIAL_CACHE_TTL_SEC` (int, default 300)
->    - `AWS_REGION` (string, required for plugins)
+>    - `M2M_TARGET_SERVICE` (string, required for services with targetServices)
+>    - `AWS_REGION` (string, required for services with targetServices)
 >
-> 6. **Error handling** using sentinel errors from lib-commons:
+> 5. **Error handling** using sentinel errors from lib-commons:
 >    - `secretsmanager.ErrM2MCredentialsNotFound` → tenant not provisioned
 >    - `secretsmanager.ErrM2MVaultAccessDenied` → IAM issue, alert ops
 >    - `secretsmanager.ErrM2MInvalidCredentials` → secret malformed, alert ops
 >
+> 6. **M2M metrics** (MANDATORY — 6 counters/histograms):
+>    - `m2m_credential_l1_cache_hits`, `m2m_credential_l2_cache_hits`, `m2m_credential_cache_misses`
+>    - `m2m_credential_fetch_errors`, `m2m_credential_fetch_duration_seconds`
+>    - `m2m_credential_invalidations`
+>    Labels: `tenant_org_id`, `target_service`, `environment`
+>
 > **SECURITY:**
 > - MUST NOT log clientId or clientSecret values
 > - MUST NOT store credentials in environment variables (fetch from Secrets Manager at runtime)
-> - MUST cache locally to avoid per-request AWS API calls
+> - MUST use two-level cache (L1 in-memory + L2 Redis) for cross-pod consistency
 > - MUST handle credential rotation via cache TTL expiry
+> - MUST invalidate on 401 to propagate cache-bust across all pods
 
 **Verification:** `grep "secretsmanager.GetM2MCredentials\|M2MAuthenticator\|NewM2MAuthenticator" internal/` + `go build ./...`
 
 <block_condition>
-HARD GATE: If service is a plugin and MULTI_TENANT_ENABLED=true, M2M Secret Manager integration is NON-NEGOTIABLE. The plugin cannot authenticate with product APIs without it.
+HARD GATE: If service has targetServices and MULTI_TENANT_ENABLED=true, M2M Secret Manager integration is NON-NEGOTIABLE. The service cannot authenticate with target service APIs without it.
 </block_condition>
 
 ---
@@ -865,7 +946,7 @@ MANDATORY: RabbitMQ multi-tenant requires **TWO complementary layers** — both 
 > **Layer 1 — Vhost Isolation (MANDATORY):**
 > - MUST use `tmrabbitmq.Manager` for per-tenant vhost connections with LRU eviction
 > - MUST call `tmrabbitmq.Manager.GetChannel(ctx, tenantID)` for tenant-specific channel (Producer)
-> - MUST use `tmconsumer.MultiTenantConsumer` with lazy initialization — no startup connections (Consumer)
+> - MUST use `tmconsumer.MultiTenantConsumer` with on-demand initialization — no startup connections (Consumer)
 > - MUST branch on `cfg.MultiTenantEnabled` in bootstrap (CONFIG SPLIT with dual constructors)
 > - MUST keep existing single-tenant code path untouched
 >
@@ -879,8 +960,7 @@ MANDATORY: RabbitMQ multi-tenant requires **TWO complementary layers** — both 
 >
 > Follow multi-tenant.md sections:
 > - "RabbitMQ Multi-Tenant Producer" for dual constructor pattern with both layers
-> - "Multi-Tenant Message Queue Consumers (Lazy Mode)" for lazy initialization
-> - "ConsumerTrigger Interface" for the trigger wiring
+> - "Multi-Tenant Message Queue Consumers" for on-demand consumer initialization
 >
 > Gate-specific constraints:
 > 1. MANDATORY: CONFIG SPLIT — branch on `cfg.MultiTenantEnabled` for both producer and consumer in bootstrap
@@ -890,7 +970,7 @@ MANDATORY: RabbitMQ multi-tenant requires **TWO complementary layers** — both 
 > 5. MUST implement both layers together — one without the other is non-compliant
 
 **Verification:**
-1. `grep "tmrabbitmq.Manager\|NewProducerMultiTenant\|EnsureConsumerStarted\|tmmiddleware.ConsumerTrigger" internal/` + `go build ./...`
+1. `grep "tmrabbitmq.Manager\|NewProducerMultiTenant\|tmconsumer.NewMultiTenantConsumer" internal/` + `go build ./...`
 2. **Vhost isolation (Layer 1):** `grep -rn "tmrabbitmq.NewManager\|tmrabbitmq.Manager" internal/` MUST return results.
 3. **X-Tenant-ID header (Layer 2):** `grep -rn "X-Tenant-ID" internal/` MUST return results in both producer AND consumer.
 4. **Shared connection rejection:** If RabbitMQ multi-tenant uses a shared connection with only `X-Tenant-ID` headers (no `tmrabbitmq.Manager`), this gate FAILS.
@@ -933,6 +1013,14 @@ Both layers MUST be implemented together. MUST NOT connect directly to RabbitMQ 
 >
 > All 4 metrics are MANDATORY. When MULTI_TENANT_ENABLED=false, metrics MUST use no-op implementations (zero overhead).
 >
+> **For services with targetServices (Gate 5.5 completed):** These 6 additional M2M metrics are also MANDATORY:
+> - `m2m_credential_l1_cache_hits` (Counter) — L1 in-memory cache hits
+> - `m2m_credential_l2_cache_hits` (Counter) — L2 distributed cache hits
+> - `m2m_credential_cache_misses` (Counter) — Full cache miss, fetching from AWS
+> - `m2m_credential_fetch_errors` (Counter) — AWS Secrets Manager call failed
+> - `m2m_credential_fetch_duration_seconds` (Histogram) — Latency of AWS requests
+> - `m2m_credential_invalidations` (Counter) — Cache-bust on auth failure (401)
+>
 > BACKWARD COMPATIBILITY IS NON-NEGOTIABLE:
 > - MUST start without any MULTI_TENANT_* env vars
 > - MUST start without Tenant Manager running
@@ -971,13 +1059,13 @@ HARD GATE: Backward compatibility MUST pass.
 MUST include this context in ALL 7 reviewer dispatches:
 
 > **MULTI-TENANT REVIEW CONTEXT:**
-> - Multi-tenant isolation is based on `tenantId` from JWT → dispatch layer middleware (TenantMiddleware or MultiPoolMiddleware) → database-per-tenant.
+> - Multi-tenant isolation is based on `tenantId` from JWT → dispatch layer middleware (TenantMiddleware with WithPG/WithMB) → database-per-tenant.
 > - `organization_id` is NOT a tenant identifier. It is a business filter within the tenant's database. A single tenant can have multiple organizations. Do NOT flag organization_id as a multi-tenant issue.
 > - Backward compatibility is required: when `MULTI_TENANT_ENABLED=false`, the service MUST work exactly as before (single-tenant mode, no tenant context needed).
 
 | Reviewer | Focus |
 |----------|-------|
-| ring:code-reviewer | Architecture, lib-commons v3 usage, TenantMiddleware/MultiPoolMiddleware placement, sub-package usage |
+| ring:code-reviewer | Architecture, lib-commons v4 usage, TenantMiddleware with WithPG/WithMB placement, sub-package usage |
 | ring:business-logic-reviewer | Tenant context propagation via tenantId (NOT organization_id) |
 | ring:security-reviewer | Cross-tenant DB isolation, JWT tenantId validation, no data leaks between tenant databases |
 | ring:test-reviewer | Coverage, isolation tests between two tenants, backward compat tests |
@@ -996,13 +1084,13 @@ MUST approve: present checklist for explicit user approval.
 ```markdown
 ## Multi-Tenant Implementation Complete
 
-- [ ] lib-commons v3
+- [ ] lib-commons v4
 - [ ] MULTI_TENANT_ENABLED config
-- [ ] Tenant middleware (TenantMiddleware or MultiPoolMiddleware for multi-module services)
+- [ ] Tenant middleware (TenantMiddleware with WithPG/WithMB)
 - [ ] Repositories use context-based connections
 - [ ] S3 keys prefixed with tenantId (if applicable)
 - [ ] RabbitMQ X-Tenant-ID (if applicable)
-- [ ] M2M Secret Manager with credential + token caching (if plugin)
+- [ ] M2M Secret Manager with credential + token caching (if service has targetServices)
 - [ ] Backward compat (MULTI_TENANT_ENABLED=false works)
 - [ ] Tests pass
 - [ ] Code review passed
@@ -1020,7 +1108,7 @@ The file is built from Gate 0 (stack) and Gate 1 (analysis). See [multi-tenant.m
 
 The guide MUST include:
 1. **Components table**: Component name, Service const, Module const, Resources, what was adapted
-2. **Environment variables**: the 8 canonical MULTI_TENANT_* vars (MULTI_TENANT_ENABLED, MULTI_TENANT_URL, MULTI_TENANT_ENVIRONMENT, MULTI_TENANT_MAX_TENANT_POOLS, MULTI_TENANT_IDLE_TIMEOUT_SEC, MULTI_TENANT_CIRCUIT_BREAKER_THRESHOLD, MULTI_TENANT_CIRCUIT_BREAKER_TIMEOUT_SEC, MULTI_TENANT_SERVICE_API_KEY) with required/default/description
+2. **Environment variables**: the 14 canonical MULTI_TENANT_* vars (MULTI_TENANT_ENABLED, MULTI_TENANT_URL, MULTI_TENANT_REDIS_HOST, MULTI_TENANT_REDIS_PORT, MULTI_TENANT_REDIS_PASSWORD, MULTI_TENANT_REDIS_TLS, MULTI_TENANT_MAX_TENANT_POOLS, MULTI_TENANT_IDLE_TIMEOUT_SEC, MULTI_TENANT_TIMEOUT, MULTI_TENANT_CIRCUIT_BREAKER_THRESHOLD, MULTI_TENANT_CIRCUIT_BREAKER_TIMEOUT_SEC, MULTI_TENANT_SERVICE_API_KEY, MULTI_TENANT_CACHE_TTL_SEC, MULTI_TENANT_CONNECTIONS_CHECK_INTERVAL_SEC) with required/default/description
 3. **M2M environment variables (plugin only)**: If the service is a plugin, include M2M_TARGET_SERVICE, M2M_CREDENTIAL_CACHE_TTL_SEC, AWS_REGION
 4. **How to activate**: set envs + start alongside Tenant Manager (+ AWS credentials for plugins)
 5. **How to verify**: check logs, test with JWT tenantId (+ verify M2M credential retrieval for plugins)
@@ -1055,15 +1143,15 @@ See [multi-tenant.md](../../docs/standards/golang/multi-tenant.md) for the canon
 |-----------------|----------------|-----------------|
 | "Service already has multi-tenant code" | Existence ≠ compliance. Code that doesn't follow the Ring canonical model is WRONG and must be replaced. | **STOP. Run compliance audit (Gate 0 Phase 2). Fix every NON-COMPLIANT component.** |
 | "Multi-tenant is already implemented, just needs tweaks" | Partial or non-standard implementation is not "almost done" — it is non-compliant. Every component must match the canonical model exactly. | **STOP. Execute every gate. Verify or fix each one.** |
-| "Skipping this gate because something similar exists" | "Similar" is not "compliant". Only exact matches to lib-commons v3 dispatch layer sub-packages are valid. | **STOP. Verify with grep evidence. If it doesn't match the canonical pattern → gate MUST execute.** |
+| "Skipping this gate because something similar exists" | "Similar" is not "compliant". Only exact matches to lib-commons v4 dispatch layer sub-packages are valid. | **STOP. Verify with grep evidence. If it doesn't match the canonical pattern → gate MUST execute.** |
 | "The current approach works fine, no need to change" | Working ≠ compliant. A custom solution that works today creates drift, blocks upgrades, and prevents standardized tooling. | **STOP. Replace with canonical implementation.** |
-| "We have a custom tenant package that handles this" | Custom packages are non-canonical. Only lib-commons v3 dispatch layer sub-packages are valid. Custom files MUST be removed. | **STOP. Remove custom files. Use lib-commons v3 sub-packages.** |
+| "We have a custom tenant package that handles this" | Custom packages are non-canonical. Only lib-commons v4 dispatch layer sub-packages are valid. Custom files MUST be removed. | **STOP. Remove custom files. Use lib-commons v4 sub-packages.** |
 | "This extra file just wraps lib-commons" | Wrappers add indirection that breaks compliance verification and creates maintenance burden. MUST use lib-commons directly. | **STOP. Remove wrapper. Call lib-commons directly from bootstrap/adapters.** |
 | "Agent says out of scope" | Skill defines scope, not agent. | **Re-dispatch with gate context** |
 | "Skip tests" | Gate 8 proves isolation works. | **MANDATORY** |
 | "Skip review" | Security implications. One mistake = data leak. | **MANDATORY** |
-| "Using TENANT_MANAGER_ADDRESS instead" | Non-standard name. Only the 8 canonical MULTI_TENANT_* vars are valid. | **STOP. Use MULTI_TENANT_URL** |
+| "Using TENANT_MANAGER_ADDRESS instead" | Non-standard name. Only the 13 canonical MULTI_TENANT_* vars are valid. | **STOP. Use MULTI_TENANT_URL** |
 | "The service already uses a different env name" | Legacy names are non-compliant. Rename to canonical names. | **Replace with canonical env vars** |
-| "Plugin doesn't need Secret Manager for M2M" | If multi-tenant is active, each tenant has different credentials. Env vars can't hold per-tenant secrets. | **MUST use Secret Manager for per-tenant M2M** |
+| "Service doesn't need Secret Manager for M2M" | If multi-tenant is active and the service has targetServices, each tenant has different credentials. Env vars can't hold per-tenant secrets. | **MUST use Secret Manager for per-tenant M2M** |
 | "We'll add M2M caching later" | Without caching, every request hits AWS (~50-100ms + cost). This is a production blocker. | **MUST implement caching from day one** |
 | "Hardcoded credentials work for now" | Hardcoded creds don't scale across tenants and are a security risk. | **MUST fetch from Secrets Manager per tenant** |

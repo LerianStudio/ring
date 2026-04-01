@@ -23,6 +23,7 @@ from ring_installer.adapters import (
     list_platforms,
     register_adapter,
 )
+from ring_installer.adapters.codex import CodexAdapter as ImportedCodexAdapter
 
 # ==============================================================================
 # Tests for get_adapter() factory function
@@ -171,6 +172,74 @@ class TestListPlatforms:
             assert "native_format" in platform
             assert "terminology" in platform
             assert "components" in platform
+
+
+class TestCodexAdapter:
+    """Tests for Codex skill packaging behavior."""
+
+    @pytest.fixture
+    def adapter(self):
+        return CodexAdapter()
+
+    def test_adapter_is_exported_from_module(self):
+        assert ImportedCodexAdapter is CodexAdapter
+
+    def test_platform_id(self, adapter):
+        assert adapter.platform_id == "codex"
+        assert adapter.platform_name == "Codex"
+
+    def test_is_not_native_format(self, adapter):
+        assert adapter.is_native_format() is False
+
+    def test_component_mapping_only_uses_skills_directory(self, adapter):
+        mapping = adapter.get_component_mapping()
+        assert set(mapping) == {"skills"}
+        assert mapping["skills"]["target_dir"] == "skills"
+
+    def test_requires_flat_components(self, adapter):
+        assert adapter.requires_flat_components("skills") is False
+        assert adapter.requires_flat_components("hooks") is False
+
+    def test_get_flat_filename_returns_generated_name(self, adapter):
+        result = adapter.get_flat_filename("sample-agent.md", "agent", "default")
+        assert result == "ring-default-sample-agent"
+
+    def test_transform_skill_rewrites_frontmatter_and_references(self, adapter, sample_skill_content):
+        result = adapter.transform_skill(
+            sample_skill_content,
+            {
+                "name": "sample-skill",
+                "plugin": "default",
+                "component_type": "skill",
+                "codex_name": "ring-default-sample-skill",
+                "codex_alias_map": {"sample-agent": "ring-default-sample-agent"},
+            },
+        )
+        assert "name: ring-default-sample-skill" in result
+        assert "ring-platform: codex" in result
+        assert "ring-default-sample-agent" in result
+        assert "ring:sample-agent" not in result
+
+    def test_transform_agent_is_passthrough(self, adapter, sample_agent_content):
+        result = adapter.transform_agent(sample_agent_content)
+        assert result == sample_agent_content
+
+    def test_transform_command_is_passthrough(self, adapter, sample_command_content):
+        result = adapter.transform_command(sample_command_content)
+        assert result == sample_command_content
+
+    def test_transform_agent_rewrites_support_paths(self, adapter, sample_agent_content):
+        result = adapter.transform_agent(
+            sample_agent_content,
+            {
+                "name": "sample-agent",
+                "plugin": "dev-team",
+                "component_type": "agent",
+                "codex_name": "ring-dev-team-sample-agent",
+                "codex_alias_map": {},
+            },
+        )
+        assert "../../ring/dev-team/skills/shared-patterns/" in result or "../skills/shared-patterns/" not in result
 
 
 # ==============================================================================

@@ -68,7 +68,7 @@ The dispatch layer has three entities that must be registered before provisionin
 2. **Module** — a logical grouping within the service (e.g., "onboarding", "transaction"). Each module gets its own database pool per tenant.
 3. **Resource** — infrastructure a module needs: `postgresql`, `mongodb`, or `rabbitmq`. Each resource gets provisioned per tenant per module.
 
-Redis is **not** a dispatch layer resource — it uses key prefixing via `GetKeyFromContext` and does not need registration.
+Redis is **not** a dispatch layer resource — it uses key prefixing via `GetKeyContext` and does not need registration.
 
 ---
 
@@ -534,7 +534,7 @@ Linux: xdg-open docs/service-discovery.html
 |-----------------|----------------|-----------------|
 | "I already know the modules" | Knowledge ≠ evidence. The scan catches things you miss. | **Run the scan** |
 | "This service is simple, just one module" | Simple services may still have multiple resource types. | **Run the scan** |
-| "Redis should be included as a resource" | Redis uses key prefixing (`GetKeyFromContext`), not per-tenant provisioning. It is not a dispatch layer resource. | **Exclude Redis from resources** |
+| "Redis should be included as a resource" | Redis uses key prefixing (`GetKeyContext`), not per-tenant provisioning. It is not a dispatch layer resource. | **Exclude Redis from resources** |
 | "The report doesn't need to be visual" | Visual reports are for human decision-making. A JSON dump is not actionable. | **Generate HTML via ring:visual-explainer** |
 | "WithModule not found, so no modules" | Fall back to component structure or ApplicationName. A service always has at least one module. | **Use Strategy B or C** |
 | "No index scripts needed, EnsureIndexes handles it" | In-code indexes run at app startup — but only if the app has connected. Scripts are needed for pre-provisioning, CI/CD, and dedicated tenant databases where the app hasn't booted yet. | **Generate scripts for all in-code indexes** |

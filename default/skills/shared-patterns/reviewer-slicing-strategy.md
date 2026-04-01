@@ -1,6 +1,6 @@
 # Review Slicing Strategy
 
-**Version:** 1.0.0
+**Version:** 2.0.0
 **Applies to:** ring:requesting-code-review, ring:codereview command, ring:review-slicer agent
 
 ---
@@ -13,21 +13,58 @@ Large PRs that touch multiple themes (API handlers + infrastructure + migrations
 
 Slicing solves this by giving each reviewer a focused, thematic subset of the diff. Same total coverage, dramatically better depth per file.
 
+**Note:** The adaptive slicer v2 evaluates whether context pollution is actually present, rather than assuming it from file count alone.
+
 ---
 
 ## When We Slice
 
-The `ring:review-slicer` agent applies a deterministic heuristic:
+The `ring:review-slicer` agent uses **three-phase adaptive reasoning** instead of rigid threshold tables:
+
+### Phase 1: Volume Assessment (Hard Guardrails)
 
 | Condition | Decision | Rationale |
 |-----------|----------|-----------|
-| < 8 files | Never slice | Small PR. Full-diff review is optimal. Slicing adds ~5s overhead for zero benefit. |
-| 8-14 files within 2 or fewer top-level directories | Don't slice | Focused PR. Single theme likely. Reviewers handle this volume well. |
-| 15+ files | Slice | Large PR. Context pollution risk outweighs slicer overhead. |
-| 8+ files spanning 3+ top-level directories | Slice | Multi-themed. Even moderate file counts pollute context when themes diverge. |
-| 30+ files | Always slice | Unconditional. No PR of this size benefits from full-diff review. |
+| < 5 files | **Never slice** | Unconditional. Full-diff review is optimal. Slicing overhead has zero benefit at this volume. |
+| 40+ files | **Always slice** | Unconditional. No PR of this size benefits from full-diff review regardless of cohesion. |
+| 5-39 files | **Proceed to Phase 2** | Volume alone is insufficient to decide. Cohesion analysis required. |
 
-**The heuristic is intentionally conservative.** False negatives (not slicing when we should) are cheaper than false positives (slicing focused PRs adds overhead). The 8-file floor ensures zero overhead for the vast majority of PRs.
+### Phase 2: Cohesion Analysis (5-39 files)
+
+For changesets in the adaptive range, the slicer evaluates **semantic cohesion** across six dimensions:
+
+| Dimension | What It Measures | High Cohesion Signal |
+|-----------|-----------------|---------------------|
+| Package groupings | How many distinct packages/modules are touched | Files concentrated in 1-2 packages |
+| Import relationships | Whether changed files import each other | Dense import graph among changed files |
+| Naming patterns | Shared prefixes, suffixes, domain terms | Files share naming conventions (e.g., `order_*.go`) |
+| Directory proximity | How close files are in the directory tree | Files clustered in adjacent directories |
+| Functional relationships | Whether files collaborate on the same feature | Handler + service + repository for one entity |
+| Diff concentration | Whether changes are spread thin or focused | Most hunks modify related logic |
+
+### Phase 3: Cost-Benefit Judgment
+
+The slicer makes a final decision based on whether slicing would **improve or degrade** review quality for the specific changeset:
+
+- **High cohesion** → Don't slice. Splitting a cohesive changeset fractures context that reviewers need together.
+- **Low cohesion** → Slice. Multiple unrelated themes benefit from focused review passes.
+- **Mixed cohesion** → Slice, grouping cohesive files together into slices.
+
+**Key insight:** File count is a volume signal, not a quality signal. Cohesion determines whether slicing helps. A 25-file PR touching one feature across handler/service/repo/test layers is best reviewed whole. A 12-file PR touching auth, billing, and migrations benefits from slicing.
+
+---
+
+## Enhanced Inputs
+
+The adaptive slicer v2 receives enriched inputs that enable cohesion-based reasoning beyond simple file lists:
+
+| Input | Format | Purpose |
+|-------|--------|---------|
+| `package_map` | `{ "pkg/order": ["order.go", "order_test.go"], ... }` | Files grouped by Go package or TS module. Reveals package-level concentration. |
+| `import_hints` | `{ "handler.go": ["service.go", "model.go"], ... }` | Adjacency list showing which changed files import each other. Reveals functional coupling. |
+| `change_summary` | `{ "handler.go": ["func CreateOrder", "func UpdateOrder"], ... }` | Per-file hunk headers for semantic context. Reveals what each file actually changes. |
+
+These inputs allow the slicer to assess cohesion structurally rather than relying on directory heuristics or file count alone. When `import_hints` show dense cross-references among changed files, that is a strong signal to keep them together. When `package_map` reveals 5+ unrelated packages with no shared imports, that is a strong signal to slice.
 
 ---
 
@@ -113,7 +150,9 @@ Dedup removes noise, not signal. Two different reviewers catching the same issue
 | **3 slices** (40-file PR) | 21 | ~13 files each | 21 x (FULL/3) ~ 7 x FULL | Deep (focused context per slice) |
 | **5 slices** (40-file PR) | 35 | ~8 files each | 35 x (FULL/5) ~ 7 x FULL | Deepest (most focused) |
 
-**Key insight:** Total tokens processed is approximately constant. We're redistributing the same work into focused chunks, not adding work. The overhead is the slicer agent call itself (~5 seconds, minimal tokens) and the dedup pass (string matching, negligible).
+**Key insight:** Total tokens processed is approximately constant. We're redistributing the same work into focused chunks, not adding work.
+
+**Slicer overhead (v2):** The adaptive slicer uses a **Sonnet-class model** for reasoning capability (upgraded from Flash/Haiku). Latency target is **< 15 seconds** (up from < 5s in v1). This is justified because the slicer runs **once per review**, and its decision shapes **7 x N downstream reviewer calls**. A better slice/no-slice decision at 15s saves far more than 10s of slicer time when it prevents unnecessary sliced dispatches or avoids context pollution in full-diff mode. Token cost per slicer call is slightly higher, but potentially fewer unnecessary sliced dispatches save downstream tokens when full-diff is actually optimal.
 
 ---
 
@@ -154,7 +193,9 @@ The consolidation step (Step 4 of the review skill) merges all slice results bef
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
 | "Route only relevant reviewers per slice" | Unexpected findings > efficiency. All 7, all slices. | **Dispatch all 7 on every slice** |
-| "Skip slicing, reviewers can handle large diffs" | Context pollution degrades quality non-linearly | **Apply heuristic. 15+ = slice.** |
+| "Skip slicing, reviewers can handle large diffs" | Context pollution degrades quality non-linearly | **Apply adaptive slicer. Respect hard guardrails and cohesion analysis.** |
 | "Slice into 8 themes for maximum focus" | > 5 slices = overhead exceeds benefit | **Merge to stay within 2-5** |
 | "Separate tests into their own slice" | Reviewers need code + tests together | **Co-locate tests with production code** |
 | "Dedup removes too many findings" | Dedup removes duplicates, not unique findings | **Dedup by file:line + similarity only** |
+| "Cohesion analysis takes too long, just count files" | Volume-only decisions are the old model. Cohesion analysis is mandatory for the 5-39 file range. | **MUST run cohesion analysis for adaptive range. Hard guardrails handle extremes.** |
+| "Import hints aren't available, skip cohesion" | Missing inputs degrade analysis but do not eliminate it. | **Fall back to conservative mode: favor no-slice for medium counts, slice for high counts. MUST note degraded analysis in reasoning.** |

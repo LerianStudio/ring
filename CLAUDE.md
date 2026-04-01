@@ -30,7 +30,7 @@ When creating or modifying any agent in `*/agents/*.md`:
 2. **MUST NOT run reviewers sequentially** - dispatch in parallel
 3. **MUST NOT skip TDD's RED phase** - Test must fail before implementation
 4. **MUST NOT ignore skill when applicable** - "Simple task" is not an excuse
-5. **MUST NOT use panic() in Go** - Error handling required
+5. **ZERO PANIC POLICY** - `panic()`, `log.Fatal()`, and `Must*` helpers are FORBIDDEN everywhere (including bootstrap/init). Return `(T, error)` instead. Only exception: `regexp.MustCompile()` with compile-time constants.
 6. **MUST NOT commit manually** - use `/ring:commit` command
 7. **MUST NOT assume compliance** - VERIFY with evidence
 
@@ -418,8 +418,8 @@ Ring is a comprehensive skills library and workflow system for AI agents that en
 
 **Active Plugins:**
 
-- **ring-default**: 21 core skills, 14 slash commands, 10 specialized agents
-- **ring-dev-team**: 24 development skills, 8 slash commands, 11 developer agents (Backend Go, Backend TypeScript, DevOps, Frontend TypeScript, Frontend Designer, Frontend Engineer, QA Backend, QA Frontend, SRE, UI Engineer, Prompt Quality Reviewer)
+- **ring-default**: 22 core skills, 14 slash commands, 10 specialized agents
+- **ring-dev-team**: 29 development skills, 9 slash commands, 12 developer agents (Backend Go, Backend TypeScript, DevOps, Frontend TypeScript, Frontend Designer, Frontend Engineer, Helm, QA Backend, QA Frontend, SRE, UI Engineer, Prompt Quality Reviewer)
 - **ring-pm-team**: 15 product management skills, 4 research agents, 3 slash commands (includes delivery planning + status tracking + Product Designer)
 - **ring-pmo-team**: 9 PMO skills, 4 slash commands, 6 PMO agents (Portfolio Manager, Resource Planner, Risk Analyst, Governance Specialist, Executive Reporter, Delivery Reporter)
 - **ring-finops-team**: 7 regulatory skills, 3 FinOps agents (Analyzer, Automation, Infrastructure Cost Estimator)
@@ -427,9 +427,9 @@ Ring is a comprehensive skills library and workflow system for AI agents that en
 
 **Note:** Plugin versions are managed in `.claude-plugin/marketplace.json`
 
-**Total: 83 skills (21 + 24 + 15 + 9 + 7 + 7) across 6 plugins**
-**Total: 37 agents (10 + 11 + 4 + 6 + 3 + 3) across 6 plugins**
-**Total: 32 commands (14 + 8 + 3 + 4 + 0 + 3) across 6 plugins**
+**Total: 89 skills (22 + 29 + 15 + 9 + 7 + 7) across 6 plugins**
+**Total: 38 agents (10 + 12 + 4 + 6 + 3 + 3) across 6 plugins**
+**Total: 33 commands (14 + 9 + 3 + 4 + 0 + 3) across 6 plugins**
 
 The architecture uses markdown-based skill definitions with YAML frontmatter, auto-discovered at session start via hooks, and executed through Claude Code's native Skill/Task tools.
 
@@ -449,8 +449,8 @@ See [README.md](README.md#installation) for detailed installation instructions.
 
 | Plugin           | Path           | Contents                         |
 | ---------------- | -------------- | -------------------------------- |
-| ring-default     | `default/`     | 21 skills, 10 agents, 14 commands |
-| ring-dev-team    | `dev-team/`    | 24 skills, 11 agents, 8 commands |
+| ring-default     | `default/`     | 22 skills, 10 agents, 14 commands |
+| ring-dev-team    | `dev-team/`    | 29 skills, 12 agents, 9 commands |
 | ring-pm-team     | `pm-team/`     | 15 skills, 4 agents, 3 commands  |
 | ring-pmo-team    | `pmo-team/`    | 9 skills, 6 agents, 4 commands   |
 | ring-finops-team | `finops-team/` | 7 skills, 3 agents               |
@@ -589,8 +589,8 @@ The system loads at SessionStart (from `default/` plugin):
 - Repository: Monorepo marketplace with multiple plugin collections
 - Active plugins: 6 (`ring-default`, `ring-dev-team`, `ring-pm-team`, `ring-pmo-team`, `ring-finops-team`, `ring-tw-team`)
 - Plugin versions: See `.claude-plugin/marketplace.json`
-- Core plugin: `default/` (21 skills, 10 agents, 14 commands)
-- Developer agents: `dev-team/` (24 skills, 11 agents, 8 commands)
+- Core plugin: `default/` (22 skills, 10 agents, 14 commands)
+- Developer agents: `dev-team/` (29 skills, 12 agents, 9 commands)
 - Product planning: `pm-team/` (15 skills, 4 agents, 3 commands)
 - PMO specialists: `pmo-team/` (9 skills, 6 agents, 4 commands)
 - FinOps regulatory: `finops-team/` (7 skills, 3 agents)

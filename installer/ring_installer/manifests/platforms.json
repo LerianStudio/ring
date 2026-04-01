@@ -44,29 +44,11 @@
       "description": "OpenAI Codex CLI agent",
       "install_path": "~/.codex",
       "components": {
-        "agents": {
-          "source_dir": "agents",
-          "target_dir": "agents",
-          "file_extension": ".md",
-          "transform": "passthrough"
-        },
-        "commands": {
-          "source_dir": "commands",
-          "target_dir": "commands",
-          "file_extension": ".md",
-          "transform": "passthrough"
-        },
         "skills": {
           "source_dir": "skills",
           "target_dir": "skills",
           "file_extension": ".md",
-          "transform": "passthrough"
-        },
-        "hooks": {
-          "source_dir": "hooks",
-          "target_dir": "hooks",
-          "file_extension": [".json", ".sh", ".py"],
-          "transform": "passthrough"
+          "transform": "codex_skill"
         }
       },
       "config_file": "config.toml",
@@ -75,7 +57,7 @@
         "binary_name": "codex",
         "version_command": "codex --version"
       },
-      "native_format": true
+      "native_format": false
     },
     "factory": {
       "name": "Factory AI",

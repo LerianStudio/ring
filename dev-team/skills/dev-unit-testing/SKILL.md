@@ -264,7 +264,7 @@ Task:
 
     ### Multi-Tenant Dual-Mode Testing (Go backend only)
 
-    Every repository/service test that accesses a resource (PostgreSQL, MongoDB, Redis, S3, RabbitMQ) must verify BOTH modes. The resolvers in lib-commons v3 work transparently — the same code path handles both modes. Tests verify this contract.
+    Every repository/service test that accesses a resource (PostgreSQL, MongoDB, Redis, S3, RabbitMQ) must verify BOTH modes. The resolvers in lib-commons v4 work transparently — the same code path handles both modes. Tests verify this contract.
 
     **Required pattern:** Add dual-mode sub-tests for any test that touches a resource:
 

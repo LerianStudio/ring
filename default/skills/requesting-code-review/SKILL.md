@@ -345,11 +345,11 @@ preanalysis_state = {
 }
 ```
 
-## Step 2.7: Review Slicing (Thematic Grouping for Large PRs)
+## Step 2.7: Review Slicing (Adaptive Cohesion-Based Analysis)
 
 **See [shared-patterns/reviewer-slicing-strategy.md](../shared-patterns/reviewer-slicing-strategy.md) for full rationale, cost analysis, and dedup strategy.**
 
-This step decides whether the PR should be sliced into thematic groups for focused review. For small/focused PRs, this adds ~5 seconds and changes nothing. For large multi-themed PRs, it dramatically improves review depth.
+Run the review slicer to evaluate semantic cohesion and determine optimal review strategy. For small/focused PRs, this adds ~5 seconds and changes nothing. For large multi-themed PRs, it dramatically improves review depth by using package structure, import relationships, and function-level change context to produce semantically meaningful slices.
 
 **Skip Override:** The `skip_slicing` parameter allows bypassing this step. When skipped, the standard full-diff flow is used regardless of PR size.
 
@@ -360,26 +360,66 @@ IF skip_slicing == true:
   → Skip to Step 3
 ```
 
-### Step 2.7.1: Collect File List and Diff Stats
+### Step 2.7.1: Collect Inputs for Adaptive Slicer
 
 ```bash
-# Collect changed file list
+# 1. Collect changed file list
 FILE_LIST=$(git diff --name-only $BASE_SHA $HEAD_SHA)
 
-# Collect diff stats (insertions/deletions per file)
+# 2. Collect diff stats (insertions/deletions per file)
 DIFF_STATS=$(git diff --stat $BASE_SHA $HEAD_SHA)
+
+# 3. Build PACKAGE_MAP — group changed files by Go package or TS module
+#    For Go files:  group by directory (each directory = one Go package)
+#    For TS files:  group by nearest package.json or src/ subdirectory
+#    Result: JSON object mapping package/module path → list of files
+#    Example: { "internal/ledger": ["handler.go", "service.go", "repository.go"], "cmd/api": ["main.go"] }
+#    Implementation: pure string operation on FILE_LIST paths — no file content reading needed.
+PACKAGE_MAP={}
+for file in $FILE_LIST; do
+  dir=$(dirname "$file")
+  basename=$(basename "$file")
+  # Append basename to the dir key in the JSON map
+  # (pseudo-code — actual implementation uses jq or language-level JSON builder)
+done
+
+# 4. Build IMPORT_HINTS — lightweight cross-reference of imports between changed files
+#    For each changed file, grep its import/require lines and match against other changed file paths.
+#    Go:  grep for import paths matching directories of other changed files
+#    TS:  grep for import/require paths matching other changed files
+#    Result: JSON adjacency list mapping file → list of other changed files it references
+#    Example: { "internal/ledger/handler.go": ["internal/ledger/service.go"],
+#               "internal/ledger/service.go": ["internal/ledger/repository.go"] }
+#    Implementation: scan only import lines (not full source) for each file in FILE_LIST.
+IMPORT_HINTS={}
+for file in $FILE_LIST; do
+  # Go: grep '^import' or inside import block, match against dirs of other changed files
+  # TS: grep 'from ["\x27]' or 'require(["\x27]', match against other changed file paths
+  imports=$(grep -E '^\s*(import |from |require\()' "$file" 2>/dev/null || true)
+  # Match extracted paths against FILE_LIST entries to build adjacency
+done
+
+# 5. Build CHANGE_SUMMARY — hunk headers showing what functions/sections changed
+#    Extract diff @@ hunk headers which contain function/method context.
+#    Result: per-file summary of which functions were touched.
+#    Example:
+#      internal/ledger/handler.go: func CreateLedger, func UpdateLedger
+#      internal/ledger/service.go: func validateLedger
+CHANGE_SUMMARY=$(git diff $BASE_SHA $HEAD_SHA -U0 --diff-filter=d | \
+  grep -E '^(diff --git|@@)' | \
+  sed -n '/^diff --git/{s|diff --git a/\(.*\) b/.*|\1:|;h;d}; /^@@/{s/.*@@\s*//;H;x;s/\n/ /;p}')
 ```
+
+**Graceful input collection:** If PACKAGE_MAP, IMPORT_HINTS, or CHANGE_SUMMARY collection fails (e.g., binary files, unusual repo structure, permission errors), log a warning and continue with whatever inputs succeeded. These enriched inputs improve slicer accuracy but are NOT required — the slicer has its own fallback logic for missing signals.
 
 ### Step 2.7.2: Dispatch Review Slicer Agent
 
 ```yaml
 Task:
   subagent_type: "ring:review-slicer"
-  description: "Classify PR files for review slicing"
+  description: "Evaluate PR cohesion and decide review slicing"
   prompt: |
     ## Review Slicing Request
-
-    Decide whether this PR should be sliced into thematic groups for review.
 
     ## Changed Files
     ```
@@ -391,15 +431,30 @@ Task:
     [DIFF_STATS]
     ```
 
+    ## Package Map
+    ```json
+    [PACKAGE_MAP as JSON]
+    ```
+
+    ## Import Hints
+    ```json
+    [IMPORT_HINTS as JSON]
+    ```
+
+    ## Change Summary
+    ```
+    [CHANGE_SUMMARY]
+    ```
+
     ## Mithril Context (if available)
-    [IF preanalysis_state.success == true:]
-    [Brief summary of Mithril findings — file-level, not full content]
+    [IF preanalysis_state.success == true: brief summary]
     [ELSE:]
     _No pre-analysis context available._
 
     ## Instructions
-    Apply the slicing heuristic and return structured JSON.
-    See your agent prompt for heuristic thresholds and grouping strategy.
+    Evaluate semantic cohesion using all available signals.
+    Apply three-phase reasoning (volume → cohesion → cost-benefit).
+    Return structured JSON with your decision and detailed reasoning.
 ```
 
 ### Step 2.7.3: Parse Slicer Response and Update State
@@ -446,13 +501,20 @@ IF slicer_response.shouldSlice == true:
   → Continue to Step 3 (Sliced Dispatch variant)
 ```
 
-### Step 2.7.4: Slicer Failure Handling
+### Step 2.7.4: Slicer Failure Handling and Graceful Degradation
 
 ```text
 IF slicer agent fails (timeout, error, malformed JSON):
   → Log warning: "Review slicer failed: [error]. Falling back to full-diff review."
   → review_state.slicing.enabled = false
   → Continue to Step 3 as-is (graceful degradation, not a blocker)
+
+NOTE: Input collection failures are NOT blockers.
+  - If PACKAGE_MAP collection fails → dispatch slicer without it (slicer uses file paths as fallback)
+  - If IMPORT_HINTS collection fails → dispatch slicer without it (slicer infers from naming conventions)
+  - If CHANGE_SUMMARY collection fails → dispatch slicer without it (slicer relies on diff stats)
+  - The slicer has its own internal fallback logic for missing signals.
+  - MUST always include FILE_LIST and DIFF_STATS (these are the minimum required inputs).
 ```
 
 ---

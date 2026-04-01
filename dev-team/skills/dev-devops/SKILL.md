@@ -290,7 +290,6 @@ Task:
       # Multi-tenant configuration (MANDATORY)
       MULTI_TENANT_ENABLED=false
       MULTI_TENANT_URL=
-      MULTI_TENANT_ENVIRONMENT=staging
       ```
 
     ## Required Output Format

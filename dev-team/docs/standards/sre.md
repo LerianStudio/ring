@@ -300,11 +300,10 @@ import (
 
 ```go
 // bootstrap/config.go
-func InitServers() *Service {
+func InitServers() (*Service, error) {
     cfg := &Config{}
     if err := libCommons.SetConfigFromEnvVars(cfg); err != nil {
-        // bootstrap-only: panic is acceptable in main/init; NEVER use panic in business logic
-        panic(err)
+        return nil, fmt.Errorf("failed to load config: %w", err)
     }
 
     // Initialize logger FIRST (zap package for initialization in bootstrap)

@@ -13,7 +13,7 @@
 
 ## Overview
 
-Ring is a **Claude Code plugin marketplace** that provides a comprehensive skills library and workflow system with **6 active plugins** (83 skills, 37 agents, 32 commands). It extends Claude Code's capabilities through structured, reusable patterns that enforce proven software engineering practices across the software delivery value chain: Product Planning → Development → Documentation.
+Ring is a **Claude Code plugin marketplace** that provides a comprehensive skills library and workflow system with **6 active plugins** (89 skills, 38 agents, 33 commands). It extends Claude Code's capabilities through structured, reusable patterns that enforce proven software engineering practices across the software delivery value chain: Product Planning → Development → Documentation.
 
 ### Architecture Philosophy
 
@@ -33,8 +33,8 @@ Ring operates on three core principles:
 │  │                          Ring Marketplace                                  │  │
 │  │  ┌──────────────────────┐  ┌──────────────────────┐                       │  │
 │  │  │ ring-default         │  │ ring-dev-team        │                       │  │
-│  │  │ Skills(21) Agents(10)│  │ Skills(24) Agents(11)│                       │  │
-│  │  │ Cmds(14) Hooks/Lib   │  │ Cmds(8)              │                       │  │
+│  │  │ Skills(22) Agents(10)│  │ Skills(29) Agents(12)│                       │  │
+│  │  │ Cmds(14) Hooks/Lib   │  │ Cmds(9)              │                       │  │
 │  │  └──────────────────────┘  └──────────────────────┘                       │  │
 │  │  ┌──────────────────────┐  ┌──────────────────────┐                       │  │
 │  │  │ ring-pm-team         │  │ ring-tw-team         │                       │  │
@@ -74,8 +74,8 @@ _Versions managed in `.claude-plugin/marketplace.json`_
 
 | Plugin               | Description                          | Components                       |
 | -------------------- | ------------------------------------ | -------------------------------- |
-| **ring-default**     | Core skills library                  | 21 skills, 10 agents, 14 commands |
-| **ring-dev-team**    | Developer agents                     | 24 skills, 11 agents, 8 commands |
+| **ring-default**     | Core skills library                  | 22 skills, 10 agents, 14 commands |
+| **ring-dev-team**    | Developer agents                     | 29 skills, 12 agents, 9 commands |
 | **ring-finops-team** | FinOps regulatory compliance         | 7 skills, 3 agents               |
 | **ring-pm-team**     | Product planning workflows           | 15 skills, 4 agents, 3 commands  |
 | **ring-pmo-team**    | PMO portfolio management specialists | 9 skills, 6 agents, 4 commands   |
@@ -137,6 +137,7 @@ dev-team/agents/
 ├── frontend-bff-engineer-typescript.md # BFF specialist (`ring:frontend-bff-engineer-typescript`)
 ├── frontend-designer.md               # Visual design specialist (`ring:frontend-designer`)
 ├── frontend-engineer.md               # Frontend engineer (`ring:frontend-engineer`)
+├── helm-engineer.md                   # Helm chart specialist (`ring:helm-engineer`)
 ├── prompt-quality-reviewer.md         # Prompt quality specialist (`ring:prompt-quality-reviewer`)
 ├── qa-analyst.md                      # Backend QA specialist (`ring:qa-analyst`)
 ├── qa-analyst-frontend.md             # Frontend QA specialist (`ring:qa-analyst-frontend`)
@@ -285,7 +286,8 @@ dev-team/commands/
 ├── dev-refactor-frontend.md # /ring:dev-refactor-frontend - Frontend standards refactor
 ├── dev-report.md           # /ring:dev-report - Development reporting
 ├── dev-service-discovery.md # /ring:dev-service-discovery - Service hierarchy scan
-└── dev-status.md           # /ring:dev-status - Development status
+├── dev-status.md           # /ring:dev-status - Development status
+└── migrate-v4.md           # /ring:migrate-v4 - V4 migration
 
 tw-team/commands/
 ├── review-docs.md          # /ring:review-docs - Documentation review
@@ -808,26 +810,26 @@ _Component counts reflect current state; plugin versions managed in `.claude-plu
 | Component                 | Count      | Location               |
 | ------------------------- | ---------- | ---------------------- |
 | Active Plugins            | 6          | All plugin directories |
-| Skills (ring-default)     | 21         | `default/skills/`      |
-| Skills (ring-dev-team)    | 24         | `dev-team/skills/`     |
+| Skills (ring-default)     | 22         | `default/skills/`      |
+| Skills (ring-dev-team)    | 29         | `dev-team/skills/`     |
 | Skills (ring-finops-team) | 7          | `finops-team/skills/`  |
 | Skills (ring-pm-team)     | 15         | `pm-team/skills/`      |
 | Skills (ring-pmo-team)    | 9          | `pmo-team/skills/`     |
 | Skills (ring-tw-team)     | 7          | `tw-team/skills/`      |
-| **Total Skills**          | **83**     | **All plugins**        |
+| **Total Skills**          | **89**     | **All plugins**        |
 | Agents (ring-default)     | 10         | `default/agents/`      |
-| Agents (ring-dev-team)    | 11         | `dev-team/agents/`     |
+| Agents (ring-dev-team)    | 12         | `dev-team/agents/`     |
 | Agents (ring-finops-team) | 3          | `finops-team/agents/`  |
 | Agents (ring-pm-team)     | 4          | `pm-team/agents/`      |
 | Agents (ring-pmo-team)    | 6          | `pmo-team/agents/`     |
 | Agents (ring-tw-team)     | 3          | `tw-team/agents/`      |
-| **Total Agents**          | **37**     | **All plugins**        |
+| **Total Agents**          | **38**     | **All plugins**        |
 | Commands (ring-default)   | 14         | `default/commands/`    |
-| Commands (ring-dev-team)  | 8          | `dev-team/commands/`   |
+| Commands (ring-dev-team)  | 9          | `dev-team/commands/`   |
 | Commands (ring-pm-team)   | 3          | `pm-team/commands/`    |
 | Commands (ring-pmo-team)  | 4          | `pmo-team/commands/`   |
 | Commands (ring-tw-team)   | 3          | `tw-team/commands/`    |
-| **Total Commands**        | **32**     | **All plugins**        |
+| **Total Commands**        | **33**     | **All plugins**        |
 | Hooks                     | Per plugin | `{plugin}/hooks/`      |
 
 The system achieves these goals through clear component separation, structured workflows, automatic context management, and a modular marketplace architecture, creating a robust foundation for AI-assisted software development.

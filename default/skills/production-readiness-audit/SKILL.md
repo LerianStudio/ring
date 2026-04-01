@@ -68,7 +68,7 @@ Use this skill when:
 | 41 | **Data Encryption at Rest** | Field-level encryption, key management, password hashing, encrypted backups |
 | 43 | **Rate Limiting** | Three-tier strategy (Global/Export/Dispatch), Redis-backed storage, key generation, production safety |
 | 44 | **CORS Configuration** | Origin validation, middleware ordering, production wildcard prohibition, Helmet integration |
-| 33 | **Multi-Tenant Patterns** *(CONDITIONAL)* | Tenant Manager, DualPoolMiddleware, JWT tenantId, module-specific connections |
+| 33 | **Multi-Tenant Patterns** *(CONDITIONAL)* | Tenant Manager, TenantMiddleware with WithPG/WithMB, JWT tenantId, module-specific connections |
 
 ### Category C: Operational Readiness (7 dimensions)
 
@@ -2997,9 +2997,9 @@ Audit naming conventions across the codebase for production readiness.
 // Go struct with correct naming conventions
 type Account struct {
     ID          uuid.UUID `json:"id" gorm:"column:id"`
-    DisplayName string    `json:"display_name" gorm:"column:display_name"`  // camelCase JSON, snake_case DB
-    AccountType string    `json:"account_type" gorm:"column:account_type"`
-    CreatedAt   time.Time `json:"created_at" gorm:"column:created_at"`
+    DisplayName string    `json:"displayName" gorm:"column:display_name"`  // camelCase JSON, snake_case DB
+    AccountType string    `json:"accountType" gorm:"column:account_type"`
+    CreatedAt   time.Time `json:"createdAt" gorm:"column:created_at"`
 }
 
 // Query parameters use snake_case
@@ -3019,8 +3019,8 @@ type Account struct {
 // BAD: Inconsistent JSON naming
 type Account struct {
     ID          uuid.UUID `json:"id"`
-    DisplayName string    `json:"displayName"`    // camelCase instead of snake_case
-    AccountType string    `json:"account_type"`   // snake_case — inconsistent with above!
+    DisplayName string    `json:"display_name"`   // snake_case in JSON — wrong! Use camelCase
+    AccountType string    `json:"account_type"`   // snake_case in JSON — wrong! Use camelCase
     CreatedAt   time.Time `json:"CreatedAt"`      // PascalCase — wrong!
 }
 
@@ -3030,7 +3030,7 @@ type Account struct {
 
 **Check Against Ring Standards For:**
 1. snake_case for database column names in migrations and GORM tags
-2. snake_case for JSON response body fields (json:"field_name")
+2. camelCase for JSON response body fields (json:"fieldName")
 3. snake_case for query parameters
 4. PascalCase for Go exported types and functions
 5. camelCase for Go unexported fields and variables
@@ -3048,14 +3048,14 @@ type Account struct {
 
 ### Summary
 - JSON fields audited: X
-- Using snake_case JSON: Y/X
+- Using camelCase JSON: Y/X
 - DB columns using snake_case: Y/Z
 - Query params using snake_case: Y/Z
 - Naming convention violations: N
 
 ### Issues by Convention
 #### JSON Naming
-[file:line] - Field "displayName" should be "display_name"
+[file:line] - Field "display_name" should be "displayName"
 
 #### Database Naming
 [file:line] - Column "displayName" should be "display_name"
@@ -3446,30 +3446,24 @@ If multi-tenant IS detected, audit multi-tenant architecture patterns for produc
 
 **Reference Implementation (GOOD):**
 ```go
-// DualPoolMiddleware routes to correct tenant connection pool per module
-type DualPoolMiddleware struct {
-    onboardingPool       *tenantmanager.TenantConnectionManager
-    transactionPool      *tenantmanager.TenantConnectionManager
-    onboardingMongoPool  *tenantmanager.MongoManager
-    transactionMongoPool *tenantmanager.MongoManager
-}
-
-// Path-based pool selection
-func (m *DualPoolMiddleware) selectPool(path string) *tenantmanager.TenantConnectionManager {
-    if m.isTransactionPath(path) {
-        return m.transactionPool
-    }
-    return m.onboardingPool
-}
+// TenantMiddleware with multi-module WithPG/WithMB options
+ttMiddleware := tmmiddleware.NewTenantMiddleware(
+    tmmiddleware.WithPG(pgOnboardingManager, constant.ModuleOnboarding),
+    tmmiddleware.WithPG(pgTransactionManager, constant.ModuleTransaction),
+    tmmiddleware.WithMB(mbOnboardingManager, constant.ModuleOnboarding),
+    tmmiddleware.WithMB(mbTransactionManager, constant.ModuleTransaction),
+    tmmiddleware.WithTenantCache(tenantCache),
+    tmmiddleware.WithTenantLoader(tenantClient),
+)
 
 // Module-specific connection from context
-db, err := tenantmanager.ResolveModuleDB(ctx, constant.ModuleOnboarding, r.connection)
+db := tmcore.GetPGContext(ctx, constant.ModuleOnboarding)
 
 // Entity-scoped query — ALWAYS filter by organization_id + ledger_id
 func (r *Repo) Find(ctx context.Context, orgID, ledgerID, id uuid.UUID) (*Entity, error) {
-    db, err := tenantmanager.ResolveModuleDB(ctx, constant.ModuleTransaction, r.connection)
-    if err != nil {
-        return nil, err
+    db := tmcore.GetPGContext(ctx, constant.ModuleTransaction)
+    if db == nil {
+        return nil, fmt.Errorf("tenant postgres connection missing from context for module %s", constant.ModuleTransaction)
     }
     find := squirrel.Select(columnList...).
         From(r.tableName).
@@ -3485,7 +3479,7 @@ func (r *Repo) Find(ctx context.Context, orgID, ledgerID, id uuid.UUID) (*Entity
 ```go
 // BAD: Query without entity scoping — intra-tenant IDOR!
 func (r *Repo) FindByID(ctx context.Context, id uuid.UUID) (*Entity, error) {
-    db, _ := tenantmanager.ResolveModuleDB(ctx, constant.ModuleTransaction, r.connection)
+    db := tmcore.GetPGContext(ctx, constant.ModuleTransaction)
     return db.QueryRowContext(ctx, "SELECT * FROM entities WHERE id = $1", id)
 }
 
@@ -3494,26 +3488,32 @@ func GetTenantID(c *fiber.Ctx) string {
     return c.Get("X-Tenant-ID")  // User-controlled!
 }
 
-// BAD: Using ResolvePostgres in multi-module service — must use ResolveModuleDB
-db, err := tenantmanager.ResolvePostgres(ctx, r.connection)  // WRONG: use ResolveModuleDB(ctx, module, fallback)
+// BAD: Using GetPGContext without module in multi-module service — must use GetPGContext with module name
+db := tmcore.GetPGContext(ctx)  // WRONG: use GetPGContext(ctx, module) for multi-module services
 ```
 
 **Check Against Ring Standards For:**
 1. (HARD GATE) Tenant ID extracted from JWT claims (not user-controlled headers/params) per multi-tenant.md
 2. (HARD GATE) All database queries include entity scoping (organization_id + ledger_id)
-3. (HARD GATE) DualPoolMiddleware injects tenant into request context with module-specific connections
-4. TenantConnectionManager with dual-pool (onboarding + transaction) architecture
-5. Database-per-tenant isolation (separate databases per tenant via TenantConnectionManager)
-6. Tenant-scoped cache keys (Redis keys include tenant prefix via GetKeyFromContext)
+3. (HARD GATE) TenantMiddleware with WithPG/WithMB injects tenant into request context with module-specific connections
+4. Connection managers with multi-module (onboarding + transaction) architecture
+5. Database-per-tenant isolation (separate databases per tenant via connection managers)
+6. Tenant-scoped cache keys (Redis keys include tenant prefix via GetKeyContext)
 7. No cross-tenant data leakage in list/search operations
 8. Cross-module connection injection (both modules in context)
 9. ErrManagerClosed handling (503 SERVICE_UNAVAILABLE)
+10. EventListener configured (Redis Pub/Sub subscription for tenant lifecycle events)
+11. TenantCache + TenantLoader wired to TenantMiddleware
+12. OnTenantAdded callback: invalidates cache + starts consumer for new tenant
+13. OnTenantRemoved callback: stops consumer + closes connections + invalidates cache
+14. StopConsumer called before CloseConnection on tenant removal (ordering matters)
 
 **Severity Ratings:**
 - CRITICAL: Queries without entity scoping — intra-tenant IDOR (HARD GATE violation per Ring standards)
 - CRITICAL: Tenant ID from user-controlled input (HARD GATE violation)
-- CRITICAL: Missing DualPoolMiddleware (HARD GATE violation)
-- HIGH: No TenantConnectionManager for connection management
+- CRITICAL: Missing TenantMiddleware with WithPG/WithMB (HARD GATE violation)
+- CRITICAL: Using deprecated functions (WithPostgresManager, WithMongoManager, WithModule, GetMongoFromContext, GetKeyFromContext, GetPGConnectionFromContext, GetPGConnectionContext, GetMongoContext, ResolvePostgres, ResolveMongo, ResolveModuleDB, SetTenantIDInContext, GetPostgresForTenant, GetMongoForTenant, ContextWithPGConnection, ContextWithMongo, ContextWithModulePGConnection, GetModulePostgresForTenant, MultiPoolMiddleware, DualPoolMiddleware, SettingsWatcher, NewSettingsWatcher) — NON-COMPLIANT, MUST migrate to current API
+- HIGH: No connection managers for multi-tenant pool management
 - HIGH: Cache keys not tenant-scoped
 - HIGH: Missing cross-module connection injection
 - MEDIUM: Inconsistent tenant extraction across modules
@@ -3527,9 +3527,9 @@ db, err := tenantmanager.ResolvePostgres(ctx, r.connection)  // WRONG: use Resol
 ### Summary
 - Multi-tenant detection: Yes/No/N/A
 - Tenant extraction: JWT / Header / Missing
-- DualPoolMiddleware: Yes/No
+- TenantMiddleware (WithPG/WithMB): Yes/No
 - Tenant Manager: Yes/No
-- Dual-pool architecture: Yes/No
+- Multi-module architecture: Yes/No
 - Module-specific connections: Yes/No
 - Queries with entity scoping: X/Y
 

@@ -387,19 +387,17 @@ type Config struct {
 
 ```go
 // bootstrap/config.go
-func InitServers() *Service {
+func InitServers() (*Service, error) {
     cfg := &Config{}
 
     // Load all environment variables into config struct
     if err := libCommons.SetConfigFromEnvVars(cfg); err != nil {
-        // bootstrap-only: panic is acceptable in main/init; NEVER use panic in business logic
-        panic(err)
+        return nil, fmt.Errorf("failed to load config: %w", err)
     }
 
     // Validate required fields
     if cfg.PrimaryDBHost == "" || cfg.PrimaryDBName == "" {
-        // bootstrap-only: panic is acceptable in main/init; NEVER use panic in business logic
-        panic("DB_HOST and DB_NAME must be configured")
+        return nil, fmt.Errorf("DB_HOST and DB_NAME must be configured")
     }
 
     // Continue with initialization...

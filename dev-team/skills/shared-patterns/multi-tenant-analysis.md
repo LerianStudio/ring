@@ -12,18 +12,18 @@ See [multi-tenant.md § Canonical Model Compliance](../../docs/standards/golang/
 2. **Detection:** Check if any multi-tenant code exists (`MULTI_TENANT_ENABLED`, `dispatch layer` in go.mod, `TenantMiddleware`)
 3. **If multi-tenant code exists → run compliance audit:**
    - Config vars: MUST use the 7 canonical `MULTI_TENANT_*` names (not `TENANT_MANAGER_ADDRESS`, `TENANT_URL`, etc.)
-   - Middleware: MUST use `tmmiddleware.NewTenantMiddleware` or `tmmiddleware.NewMultiPoolMiddleware` from lib-commons v3
+   - Middleware: MUST use `tmmiddleware.NewTenantMiddleware` with `WithPG`/`WithMB` options from lib-commons v4
    - Route ordering: Auth MUST run before tenant middleware — per-route via `WhenEnabled` (not global `app.Use`)
-   - Repositories: MUST use `core.ResolvePostgres`/`core.ResolveMongo`/`core.ResolveModuleDB` (not static connections)
-   - Redis: MUST use `valkey.GetKeyFromContext` for every key operation (including Lua script KEYS[]/ARGV[])
-   - S3: MUST use `s3.GetObjectStorageKeyForTenant` for every object key
+   - Repositories: MUST use `tmcore.GetPGContext`/`tmcore.GetMBContext` (not static connections)
+   - Redis: MUST use `valkey.GetKeyContext` for every key operation (including Lua script KEYS[]/ARGV[])
+   - S3: MUST use `s3.GetS3KeyStorageContext` for every object key
    - RabbitMQ: MUST use `tmrabbitmq.Manager` (Layer 1 — vhost isolation) + `X-Tenant-ID` header (Layer 2 — audit)
    - Circuit breaker: MUST have `client.WithCircuitBreaker` on Tenant Manager client
    - Backward compat: MUST have `TestMultiTenant_BackwardCompatibility` test
    - Non-canonical files: MUST NOT have custom tenant packages (`internal/tenant/`, `pkg/multitenancy/`, custom middleware). See [dev-multi-tenant SKILL.md § Phase 3](../dev-multi-tenant/SKILL.md#phase-3-non-canonical-file-detection-mandatory) for specific grep commands.
    - Each non-compliant item → ISSUE-XXX with severity based on impact
 4. **If multi-tenant code is MISSING entirely** → ISSUE-XXX (CRITICAL): "Service does not support multi-tenant mode. MUST run ring:dev-multi-tenant."
-5. **If non-compliant** → ISSUE-XXX per component: "Multi-tenant [component] is non-compliant. MUST be replaced with canonical lib-commons v3 pattern."
+5. **If non-compliant** → ISSUE-XXX per component: "Multi-tenant [component] is non-compliant. MUST be replaced with canonical lib-commons v4 pattern."
 6. **Backward compatibility:** Service MUST work with `MULTI_TENANT_ENABLED=false` (default) and without any `MULTI_TENANT_*` env vars
 
 ## Performance & Operational Readiness

@@ -1825,10 +1825,12 @@ const (
 var (
     ErrInvalidInput = &BusinessError{
         Code:    ErrCodeInvalidInput,
+        Title:   "Bad Request",
         Message: "Invalid input provided",
     }
     ErrNotFound = &BusinessError{
         Code:    ErrCodeNotFound,
+        Title:   "Not Found",
         Message: "Resource not found",
     }
 )
@@ -1840,6 +1842,7 @@ var (
 // pkg/errors.go
 type BusinessError struct {
     Code    string `json:"code"`
+    Title   string `json:"title"`
     Message string `json:"message"`
     Details any    `json:"details,omitempty"`
 }
@@ -2805,9 +2808,9 @@ func (p *ProducerRepository) Publish(ctx context.Context, exchange, routingKey s
 
 ```go
 type QueueMessage struct {
-    OrganizationID uuid.UUID   `json:"organization_id"`
-    LedgerID       uuid.UUID   `json:"ledger_id"`
-    AuditID        uuid.UUID   `json:"audit_id"`
+    OrganizationID uuid.UUID   `json:"organizationId"`
+    LedgerID       uuid.UUID   `json:"ledgerId"`
+    AuditID        uuid.UUID   `json:"auditId"`
     Data           []QueueData `json:"data"`
 }
 

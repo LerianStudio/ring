@@ -54,16 +54,53 @@ fi
 
 ---
 
-### Step 0.5: Review Slicing (Thematic Grouping for Large PRs)
+### Step 0.5: Review Slicing (Adaptive Cohesion-Based Grouping for Large PRs)
 
 **See [shared-patterns/reviewer-slicing-strategy.md](../skills/shared-patterns/reviewer-slicing-strategy.md) for full rationale.**
 
-After Mithril completes, determine whether the PR should be sliced into thematic groups for focused review. This reuses the same logic as `ring:requesting-code-review` Step 2.7.
+After Mithril completes, determine whether the PR should be sliced into thematic groups for focused review. The slicer evaluates semantic cohesion between changed files — files that belong to the same package, import each other, or modify related functions are grouped together rather than split apart. This reuses the same logic as `ring:requesting-code-review` Step 2.7.
+
+⚠️ **SYNC NOTE:** This enhanced input collection logic is shared with `default/skills/requesting-code-review/SKILL.md` (Step 2.7). If you change the inputs or collection approach, update both locations.
+
+**Collect slicer inputs:**
 
 ```bash
 # Reuse BASE_REF from Step 0 (already computed as git merge-base HEAD main)
+
+# 1. FILE_LIST — flat list of changed file paths
 FILE_LIST=$(git diff --name-only "$BASE_REF" HEAD)
+
+# 2. DIFF_STATS — per-file insertion/deletion counts
 DIFF_STATS=$(git diff --stat "$BASE_REF" HEAD)
+
+# 3. PACKAGE_MAP — group changed files by Go package (directory) or TS module
+#    Simple string operation: group file paths by their parent directory.
+#    Example: { "internal/ledger": ["handler.go", "service.go"], "cmd/api": ["main.go"] }
+PACKAGE_MAP=$(git diff --name-only "$BASE_REF" HEAD | while read -r f; do
+  dir=$(dirname "$f")
+  base=$(basename "$f")
+  echo "$dir|$base"
+done | sort)
+
+# 4. IMPORT_HINTS — lightweight cross-reference between changed files
+#    For each changed file, grep its import statements to find references
+#    to other changed files' packages/paths.
+#    Example: { "handler.go": ["service.go"], "service.go": ["repository.go"] }
+IMPORT_HINTS=""
+for f in $(git diff --name-only "$BASE_REF" HEAD); do
+  if [[ -f "$f" ]]; then
+    imports=$(grep -E '^import |^\t"' "$f" 2>/dev/null || true)
+    if [[ -n "$imports" ]]; then
+      IMPORT_HINTS="${IMPORT_HINTS}${f}:
+${imports}
+"
+    fi
+  fi
+done
+
+# 5. CHANGE_SUMMARY — extract hunk headers showing modified functions/methods
+#    Example: handler.go: func CreateLedger, func UpdateLedger
+CHANGE_SUMMARY=$(git diff "$BASE_REF" HEAD | grep -E '^@@.*@@' | sed 's/^@@ .* @@//' || true)
 ```
 
 **Dispatch the slicer agent:**
@@ -71,11 +108,13 @@ DIFF_STATS=$(git diff --stat "$BASE_REF" HEAD)
 ```
 Task tool (ring:review-slicer):
   subagent_type: "ring:review-slicer"
-  description: "Classify PR files for review slicing"
+  description: "Classify PR files for adaptive cohesion-based review slicing"
   prompt: |
     ## Review Slicing Request
 
     Decide whether this PR should be sliced into thematic groups for review.
+    Evaluate semantic cohesion: files that share a package, import each other,
+    or modify related functions should stay together.
 
     ## Changed Files
     [FILE_LIST]
@@ -83,8 +122,22 @@ Task tool (ring:review-slicer):
     ## Diff Stats
     [DIFF_STATS]
 
-    Apply the slicing heuristic and return structured JSON.
+    ## Package Map
+    [PACKAGE_MAP]
+
+    ## Import Hints (cross-references between changed files)
+    [IMPORT_HINTS]
+
+    ## Change Summary (modified functions/methods)
+    [CHANGE_SUMMARY]
+
+    ## Mithril Context
+    [MITHRIL_CONTEXT — from docs/codereview/ if available]
+
+    Evaluate cohesion signals and return structured JSON.
 ```
+
+**Graceful degradation:** If enhanced input collection (IMPORT_HINTS, PACKAGE_MAP, CHANGE_SUMMARY) fails for any reason, dispatch the slicer with the available inputs only (FILE_LIST and DIFF_STATS at minimum). The slicer handles missing signals gracefully — it will fall back to file-count and directory-based heuristics when cohesion signals are absent.
 
 **Parse the slicer response:**
 

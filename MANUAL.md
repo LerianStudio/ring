@@ -1,6 +1,6 @@
 # Ring Marketplace Manual
 
-Quick reference guide for the Ring skills library and workflow system. This monorepo provides 6 plugins with 83 skills, 37 agents, and 32 slash commands for enforcing proven software engineering practices across the entire software delivery value chain.
+Quick reference guide for the Ring skills library and workflow system. This monorepo provides 6 plugins with 89 skills, 38 agents, and 33 slash commands for enforcing proven software engineering practices across the entire software delivery value chain.
 
 ---
 
@@ -13,9 +13,9 @@ Quick reference guide for the Ring skills library and workflow system. This mono
 │                                                                                    │
 │  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐      │
 │  │ ring-default  │  │ ring-dev-team │  │ ring-pm-team  │  │ring-finops-   │      │
-│  │  Skills(21)   │  │  Skills(24)   │  │  Skills(15)   │  │  team         │      │
-│  │  Agents(10)   │  │  Agents(11)   │  │  Agents(4)    │  │  Skills(7)    │      │
-│  │  Cmds(14)     │  │  Cmds(8)      │  │  Cmds(3)      │  │  Agents(3)    │      │
+│  │  Skills(22)   │  │  Skills(29)   │  │  Skills(15)   │  │  team         │      │
+│  │  Agents(10)   │  │  Agents(12)   │  │  Agents(4)    │  │  Skills(7)    │      │
+│  │  Cmds(14)     │  │  Cmds(9)      │  │  Cmds(3)      │  │  Agents(3)    │      │
 │  └───────────────┘  └───────────────┘  └───────────────┘  └───────────────┘      │
 │  ┌───────────────┐  ┌───────────────┐                                            │
 │  │ ring-tw-team  │  │ ring-pmo-team │                                            │
@@ -122,6 +122,7 @@ Commands are invoked directly: `/command-name`.
 | `/ring:dev-status`          | Show current gate progress         | `/ring:dev-status`                      |
 | `/ring:dev-report`          | Generate development cycle report  | `/ring:dev-report`                      |
 | `/ring:dev-cancel`          | Cancel active development cycle    | `/ring:dev-cancel`                      |
+| `/ring:migrate-v4 [path]`  | Analyze Go service for lib-commons v4 migration | `/ring:migrate-v4 src/`        |
 
 ### Technical Writing (Documentation)
 
@@ -144,7 +145,7 @@ Commands are invoked directly: `/command-name`.
 
 ## 💡 About Skills
 
-Skills (83) are workflows that Claude Code invokes automatically when it detects they're applicable. They handle testing, debugging, verification, planning, and code review enforcement. You don't call them directly - Claude Code uses them internally to enforce best practices.
+Skills (89) are workflows that Claude Code invokes automatically when it detects they're applicable. They handle testing, debugging, verification, planning, and code review enforcement. You don't call them directly - Claude Code uses them internally to enforce best practices.
 
 Examples: ring:test-driven-development, ring:systematic-debugging, ring:requesting-code-review, ring:verification-before-completion, ring:production-readiness-audit (44-dimension audit, up to 10 explorers per batch, incremental report 0-430, max 440 with multi-tenant; see [default/skills/production-readiness-audit/SKILL.md](default/skills/production-readiness-audit/SKILL.md)), etc.
 
@@ -214,6 +215,7 @@ Use when you need expert depth in specific domains:
 | `ring:frontend-bff-engineer-typescript` | BFF & React/Next.js frontend | Next.js API Routes, Clean Architecture, DDD, React |
 | `ring:frontend-designer`                | Visual design & aesthetics   | Typography, motion, CSS, distinctive UI            |
 | `ring:frontend-engineer`                | General frontend development | React, TypeScript, CSS, component architecture     |
+| `ring:helm-engineer`                    | Helm chart specialist        | Helm charts, Kubernetes, Lerian conventions        |
 | `ring:prompt-quality-reviewer`          | AI prompt quality review     | Prompt engineering, clarity, effectiveness         |
 | `ring:qa-analyst`                       | Quality assurance            | Test strategy, automation, coverage                |
 | `ring:qa-analyst-frontend`              | Frontend QA specialist       | Accessibility, visual regression, E2E, performance |
@@ -370,6 +372,7 @@ These enforce quality standards:
 | React/Next.js frontend & BFF      | `ring:frontend-bff-engineer-typescript`     |
 | General frontend development      | `ring:frontend-engineer`                    |
 | Visual design & aesthetics        | `ring:frontend-designer`                    |
+| Helm charts & Kubernetes          | `ring:helm-engineer`                        |
 | UI component development          | `ring:ui-engineer`                          |
 | AI prompt quality review          | `ring:prompt-quality-reviewer`              |
 | Backend quality assurance          | `ring:qa-analyst`                           |
@@ -399,7 +402,7 @@ These enforce quality standards:
 ### Session Startup
 
 1. SessionStart hook runs automatically
-2. All 83 skills are auto-discovered and available
+2. All 89 skills are auto-discovered and available
 3. `ring:using-ring` workflow is activated (skill checking is now mandatory)
 
 ### Agent Dispatching

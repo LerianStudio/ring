@@ -96,11 +96,10 @@ type Config struct {
 
 ```go
 // bootstrap/config.go
-func InitServers() *Service {
+func InitServers() (*Service, error) {
     cfg := &Config{}
     if err := libCommons.SetConfigFromEnvVars(cfg); err != nil {
-        // bootstrap-only: panic is acceptable in main/init; NEVER use panic in business logic
-        panic(err)
+        return nil, fmt.Errorf("failed to load config: %w", err)
     }
 
     logger := libZap.InitializeLogger()
@@ -330,7 +329,7 @@ All licensed plugins/products **MUST** integrate with the License Manager system
 **Key Concepts:**
 - **Global Mode**: Single license key validates entire plugin (use `ORGANIZATION_IDS=global`)
 - **Multi-Org Mode**: Per-organization license validation via `X-Organization-Id` header
-- **Fail-Fast**: Service panics at startup if no valid license found
+- **Fail-Fast**: Service returns error at startup if no valid license found (caller decides termination)
 
 ### Required Import
 
@@ -368,11 +367,10 @@ import (
     libLicense "github.com/LerianStudio/lib-license-go/v2/middleware"
 )
 
-func InitServers() *Service {
+func InitServers() (*Service, error) {
     cfg := &Config{}
     if err := libCommons.SetConfigFromEnvVars(cfg); err != nil {
-        // bootstrap-only: panic is acceptable in main/init; NEVER use panic in business logic
-        panic(err)
+        return nil, fmt.Errorf("failed to load config: %w", err)
     }
 
     logger := libZap.InitializeLogger()
@@ -510,8 +508,8 @@ func NewGRPCServer(licenseClient *libLicense.LicenseClient) *grpc.Server {
 
 | Mode | Startup | Per-Request |
 |------|---------|-------------|
-| Global (`ORGANIZATION_IDS=global`) | Validates license, panics if invalid | Skips validation, calls `next()` |
-| Multi-Org | Validates all orgs, panics if none valid | Validates `X-Organization-Id` header |
+| Global (`ORGANIZATION_IDS=global`) | Validates license, returns error if invalid | Skips validation, calls `next()` |
+| Multi-Org | Validates all orgs, returns error if none valid | Validates `X-Organization-Id` header |
 
 ### Error Codes
 
@@ -544,7 +542,7 @@ libCommonsServer.NewServerManager(s.license, &s.telemetry, s.logger)
 
 ### Testing with License Disabled
 
-For local development without license validation, you can omit the license client initialization or use a mock. The service will panic at startup if `LICENSE_KEY` is set but invalid.
+For local development without license validation, you can omit the license client initialization or use a mock. The service will return an error at startup if `LICENSE_KEY` is set but invalid (the caller decides whether to terminate).
 
 **Tip:** For development, either:
 1. Use a valid development license key

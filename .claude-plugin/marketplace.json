@@ -9,7 +9,7 @@
     {
       "name": "ring-default",
       "description": "Core skills library for the Lerian Team: TDD, debugging, collaboration patterns, and proven techniques. Features parallel 7-reviewer code review system, systematic debugging, and workflow orchestration. 21 essential skills for software engineering excellence.",
-      "version": "1.19.0",
+      "version": "1.20.1",
       "source": "./default",
       "homepage": "https://github.com/lerianstudio/ring/tree/default",
       "repository": "https://github.com/lerianstudio/ring/tree/default",
@@ -30,7 +30,7 @@
     {
       "name": "ring-dev-team",
       "description": "11 specialized developer agents + 24 development skills + 8 slash commands: Backend 10-gate dev cycle + Frontend 9-gate dev cycle (accessibility, visual, E2E, performance) + Frontend refactoring + delivery verification + service discovery + cycle management. Go/TypeScript Backend specialists, DevOps Engineer, Frontend TypeScript specialist, Frontend Designer, QA Backend Analyst, QA Frontend Analyst, and SRE. Complete development team coverage with TDD, observability, and security best practices.",
-      "version": "1.38.3",
+      "version": "1.48.0",
       "source": "./dev-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/dev-team",
       "repository": "https://github.com/lerianstudio/ring/tree/dev-team",
@@ -59,7 +59,7 @@
     {
       "name": "ring-pm-team",
       "description": "Product team workflow: 15 skills + 4 research agents. Pre-dev planning with 5-gate (small features) and 10-gate (large features) orchestrators, delivery roadmap generation, plus delivery status tracking for evidence-based progress reporting. Includes parallel research agents, specialized code analysis, and Product Designer.",
-      "version": "0.20.1",
+      "version": "0.22.0",
       "source": "./pm-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/pm-team",
       "repository": "https://github.com/lerianstudio/ring/tree/pm-team",
@@ -81,7 +81,7 @@
     {
       "name": "ring-pmo-team",
       "description": "PMO (Project Management Office) specialists for portfolio-level oversight: 6 agents (portfolio-manager, resource-planner, risk-analyst, governance-specialist, executive-reporter, delivery-reporter), 9 skills for portfolio planning, resource allocation, risk management, executive reporting, and squad delivery reporting. Complements ring-pm-team (single feature) with portfolio-level coordination.",
-      "version": "0.5.4",
+      "version": "0.7.0",
       "source": "./pmo-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/pmo-team",
       "repository": "https://github.com/lerianstudio/ring/tree/pmo-team",
@@ -136,5 +136,5 @@
       ]
     }
   ],
-  "version": "0.294.0"
+  "version": "0.313.0"
 }

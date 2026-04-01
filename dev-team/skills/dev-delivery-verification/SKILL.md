@@ -564,7 +564,7 @@ fi
 #### G. Multi-Tenant Dual-Mode Verification (Go backend only)
 **Reference:** [multi-tenant.md](../../docs/standards/golang/multi-tenant.md), [dev-multi-tenant SKILL.md § Sub-Package Import Reference](../dev-multi-tenant/SKILL.md)
 
-This check only applies to Go backend services. It verifies that all resource access uses lib-commons v3 resolvers (which work transparently in both single-tenant and multi-tenant mode).
+This check only applies to Go backend services. It verifies that all resource access uses lib-commons v4 resolvers (which work transparently in both single-tenant and multi-tenant mode).
 
 ```bash
 # Step G.1: Detect if this is a Go project
@@ -581,7 +581,7 @@ pg_direct=$(grep -rn "\.GetDB()" internal/ pkg/ --include="*.go" 2>/dev/null \
   | grep -v "// deprecated\|// legacy\|// TODO" \
   | grep -v "core\.Resolve\|tmpostgres\|Manager")
 if [ -n "$pg_direct" ]; then
-  echo "⛔ BLOCKING: Direct .GetDB() calls found — must use core.ResolvePostgres(ctx, r.connection)"
+  echo "⛔ BLOCKING: Direct .GetDB() calls found — must use tmcore.GetPGContext(ctx, module) or tmcore.GetPGContext(ctx)"
   echo "$pg_direct"
   blocking=1
 fi
@@ -591,30 +591,30 @@ mongo_direct=$(grep -rn "\.GetDatabase()\|\.Database()" internal/ pkg/ --include
   | grep -v "_test.go" \
   | grep -v "core\.Resolve\|tmmongo\|Manager")
 if [ -n "$mongo_direct" ]; then
-  echo "⛔ BLOCKING: Direct MongoDB access found — must use core.ResolveMongo(ctx, r.mongoConn)"
+  echo "⛔ BLOCKING: Direct MongoDB access found — must use tmcore.GetMBContext(ctx, module) or tmcore.GetMBContext(ctx)"
   echo "$mongo_direct"
   blocking=1
 fi
 
-# Step G.4: Check Redis/Valkey — keys must use GetKeyFromContext
+# Step G.4: Check Redis/Valkey — keys must use GetKeyContext
 redis_hardcoded=$(grep -rn '\.Set\(\s*"[^"]*"\s*,' internal/ pkg/ --include="*.go" 2>/dev/null \
   | grep -v "_test.go" \
-  | grep -v "GetKeyFromContext\|valkey\.")
+  | grep -v "GetKeyContext\|valkey\.")
 redis_hardcoded2=$(grep -rn '\.Get\(\s*"[^"]*"\s*[,)]' internal/ pkg/ --include="*.go" 2>/dev/null \
   | grep -v "_test.go" \
-  | grep -v "GetKeyFromContext\|valkey\.\|Getenv\|flag\.")
+  | grep -v "GetKeyContext\|valkey\.\|Getenv\|flag\.")
 if [ -n "$redis_hardcoded" ] || [ -n "$redis_hardcoded2" ]; then
-  echo "⚠️ WARNING: Possible hardcoded Redis keys — verify valkey.GetKeyFromContext is used"
+  echo "⚠️ WARNING: Possible hardcoded Redis keys — verify valkey.GetKeyContext is used"
   echo "$redis_hardcoded"
   echo "$redis_hardcoded2"
 fi
 
-# Step G.5: Check S3 — keys must use GetObjectStorageKeyForTenant
+# Step G.5: Check S3 — keys must use GetS3KeyStorageContext
 s3_hardcoded=$(grep -rn 'PutObject\|GetObject\|DeleteObject' internal/ pkg/ --include="*.go" 2>/dev/null \
   | grep -v "_test.go" \
-  | grep -v "GetObjectStorageKeyForTenant\|s3\.")
+  | grep -v "GetS3KeyStorageContext\|s3\.")
 if [ -n "$s3_hardcoded" ]; then
-  echo "⚠️ WARNING: Possible hardcoded S3 keys — verify s3.GetObjectStorageKeyForTenant is used"
+  echo "⚠️ WARNING: Possible hardcoded S3 keys — verify s3.GetS3KeyStorageContext is used"
   echo "$s3_hardcoded"
 fi
 
@@ -631,7 +631,7 @@ if grep -rq "rabbitmq\|amqp" go.mod 2>/dev/null; then
 fi
 
 # Step G.7: Check route registration — tenant middleware must use WhenEnabled
-if grep -rq "TenantMiddleware\|MultiPoolMiddleware" internal/ pkg/ --include="*.go" 2>/dev/null; then
+if grep -rq "TenantMiddleware\|WithPG\|WithMB" internal/ pkg/ --include="*.go" 2>/dev/null; then
   global_use=$(grep -rn "app\.Use.*[Tt]enant\|app\.Use.*[Mm]ulti[Pp]ool" internal/ pkg/ --include="*.go" 2>/dev/null \
     | grep -v "_test.go")
   if [ -n "$global_use" ]; then

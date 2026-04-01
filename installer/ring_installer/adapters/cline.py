@@ -129,7 +129,7 @@ class ClineAdapter(PlatformAdapter):
         # Extract metadata
         name = frontmatter.get("name", metadata.get("name", "Untitled Agent") if metadata else "Untitled Agent")
         description = frontmatter.get("description", "")
-        model = frontmatter.get("model", "")
+        model = frontmatter.get("model", "") or "inherit"
 
         # Create prompt header with metadata comment
         prompt_parts.append(f"<!-- Prompt: {name} -->")

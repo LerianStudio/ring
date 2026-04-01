@@ -400,11 +400,13 @@ Define typed contracts between BFF layer and Frontend components.
 | param2 | number | No | Description |
 
 **Response Contract:**
+
+Response fields are returned flat (no `data` envelope wrapper). Follow the flat response pattern used by `libHTTP.OK()` and `libHTTP.Created()`.
+
 | Field | Type | Nullable | Description |
 |-------|------|----------|-------------|
-| data | object | No | Main response data |
-| data.id | string | No | Entity identifier |
-| data.name | string | No | Display name |
+| id | string | No | Entity identifier |
+| name | string | No | Display name |
 
 **Error Contract:**
 | Error Code | Condition | Frontend Handling |

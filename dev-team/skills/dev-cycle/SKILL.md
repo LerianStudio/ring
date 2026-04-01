@@ -1785,7 +1785,7 @@ detected_dependencies = []
 ### ⛔ MANDATORY: Multi-Tenant Detection & Compliance Audit
 
 <cannot_skip>
-MANDATORY: Multi-tenant dual-mode applies to all Go services (no exceptions). Gate 0 implements dual-mode from the start using lib-commons v3 resolvers. Gate 0.5G verifies compliance. This detection captures the CURRENT state of the codebase for context.
+MANDATORY: Multi-tenant dual-mode applies to all Go services (no exceptions). Gate 0 implements dual-mode from the start using lib-commons v4 resolvers. Gate 0.5G verifies compliance. This detection captures the CURRENT state of the codebase for context.
 
 See [multi-tenant.md](../../docs/standards/golang/multi-tenant.md) for the canonical model and [dev-delivery-verification](../dev-delivery-verification/SKILL.md) Step 3.5G for the verification checks.
 </cannot_skip>
@@ -1799,14 +1799,14 @@ See [multi-tenant.md](../../docs/standards/golang/multi-tenant.md) for the canon
      // Phase 1: Detection
      - Grep tool: pattern "MULTI_TENANT_ENABLED" in internal/ --include="*.go" → multi_tenant_exists = true
      - Grep tool: pattern "dispatch layer" in go.mod → multi_tenant_exists = true
-     - Grep tool: pattern "TenantMiddleware\|MultiPoolMiddleware" in internal/ --include="*.go" → multi_tenant_exists = true
+     - Grep tool: pattern "TenantMiddleware\|WithPG\|WithMB" in internal/ --include="*.go" → multi_tenant_exists = true
 
      // Phase 2: Compliance audit (only if multi_tenant_exists = true)
      if multi_tenant_exists:
        compliance_checks = {}
        - Grep: "TENANT_MANAGER_ADDRESS\|TENANT_URL\|TENANT_MANAGER_URL" in internal/ → if match: compliance_checks.config = "NON-COMPLIANT"
-       - Grep: "tmmiddleware.NewTenantMiddleware\|tmmiddleware.NewMultiPoolMiddleware" in internal/ → if no match: compliance_checks.middleware = "NON-COMPLIANT"
-       - Grep: "core.ResolvePostgres\|core.ResolveMongo\|core.ResolveModuleDB" in internal/ → if no match: compliance_checks.repositories = "NON-COMPLIANT"
+       - Grep: "tmmiddleware.NewTenantMiddleware" in internal/ → if no match: compliance_checks.middleware = "NON-COMPLIANT"
+       - Grep: "tmcore.GetPGContext\|tmcore.GetMBContext" in internal/ → if no match: compliance_checks.repositories = "NON-COMPLIANT"
        - Grep: "WithCircuitBreaker" in internal/ → if no match: compliance_checks.circuit_breaker = "NON-COMPLIANT"
        - Grep: "TestMultiTenant_BackwardCompatibility" in internal/ → if no match: compliance_checks.backward_compat = "NON-COMPLIANT"
 
@@ -1860,6 +1860,19 @@ See [shared-patterns/shared-orchestrator-principle.md](../shared-patterns/shared
 
 **⛔ FORBIDDEN: Executing TDD-RED/GREEN logic directly from this step.**
 MUST invoke the ring:dev-implementation skill via the Skill tool; it handles all TDD phases, agent selection, agent dispatch, standards verification, and fix iteration.
+
+### ⛔ Post-Generation Panic Check (MANDATORY)
+
+After ring:dev-implementation completes, verify generated code:
+
+| Check | Command | Expected | If Found |
+|-------|---------|----------|----------|
+| No panic() | `grep -rn "panic(" --include="*.go" --exclude="*_test.go"` | 0 results | Return to Gate 0 with fix instructions |
+| No log.Fatal() | `grep -rn "log.Fatal" --include="*.go"` | 0 results | Return to Gate 0 with fix instructions |
+| No Must* helpers | `grep -rn "Must[A-Z]" --include="*.go" \| grep -v "regexp\.MustCompile"` | 0 results | Return to Gate 0 with fix instructions |
+| No os.Exit() | `grep -rn "os.Exit" --include="*.go" --exclude="main.go"` | 0 results | Return to Gate 0 with fix instructions |
+
+**If any check fails: DO NOT proceed to Gate 0.5. Return to Gate 0 with specific fix instructions.**
 
 ### ⛔ File Size Enforcement (MANDATORY — All Gates)
 
@@ -2075,7 +2088,7 @@ implementation_input = {
 
 ## Step 3: Gate 1 - DevOps (Per Execution Unit)
 
-**REQUIRED SUB-SKILL:** Use ring:dev-devops
+**REQUIRED SUB-SKILLS:** Use ring:dev-devops, then ring:dev-docker-security (audit)
 
 ### ⛔ HARD GATE: Required Artifacts MUST Be Created
 
@@ -2163,6 +2176,34 @@ devops_input = {
      → If "ESCALATION" in output: STOP and report to user
 
 4. **MANDATORY: ⛔ Save state to file — Write tool → [state.state_path]**
+```
+
+### Step 3.2.1: Docker Security Audit
+
+```text
+After ring:dev-devops PASSES, run Docker Hub Health Score compliance audit
+on the created/updated Dockerfile:
+
+   Skill("ring:dev-docker-security") with input:
+     dockerfile_path: [extract from devops "## Files Changed" table, or default to "Dockerfile"]
+     language: devops_input.language
+     service_type: devops_input.service_type
+     mode: "audit"
+
+   The skill validates:
+   - Non-root USER directive
+   - Minimal base image (distroless/alpine)
+   - No AGPL v3 license risk
+   - Supply chain attestations in pipeline
+   - Audit checklist compliance
+
+   if skill output contains "Result: PASS":
+     → Proceed to Step 3.3.
+
+   if skill output contains "Result: FAIL":
+     → Re-dispatch ring:devops-engineer with the failing policies
+     → Re-run ring:dev-docker-security audit
+     → Max 3 total attempts (2 retries). If still FAIL: STOP and report to user
 ```
 
 ### Step 3.3: Gate 1 Complete

@@ -1,23 +1,12 @@
-"""Platform adapters for Ring installer.
+"""Platform adapters for Ring installer."""
 
-This module provides adapters for transforming Ring components to various
-AI platform formats.
-
-Supported Platforms:
-- Claude Code: Native Ring format (passthrough)
-- Codex: Native Ring format (passthrough)
-- Factory AI: Agents -> Droids transformation
-- Cursor: Skills -> Skills, Agents -> Agents, Commands -> Commands
-- Cline: All components -> Prompts
-"""
-
-import os
 from pathlib import Path
 from typing import Dict, Optional, Type, TypeVar
 
 from ring_installer.adapters.base import PlatformAdapter
 from ring_installer.adapters.claude import ClaudeAdapter
 from ring_installer.adapters.cline import ClineAdapter
+from ring_installer.adapters.codex import CodexAdapter
 from ring_installer.adapters.cursor import CursorAdapter
 from ring_installer.adapters.factory import FactoryAdapter
 from ring_installer.adapters.opencode import OpenCodeAdapter
@@ -52,37 +41,6 @@ class PlatformID:
     def is_valid(cls, platform: str) -> bool:
         """Check if a platform identifier is valid."""
         return platform.lower() in cls.all()
-
-
-class CodexAdapter(ClaudeAdapter):
-    """
-    Platform adapter for OpenAI Codex CLI.
-
-    Codex uses the Ring/Claude Code format with a different install root:
-    - Install path: ~/.codex (user) or .codex (project)
-    """
-
-    platform_id = "codex"
-    platform_name = "Codex"
-
-    def get_install_path(self) -> Path:
-        """Get the installation path for Codex."""
-        if self._install_path is None:
-            env_path = Path(self.config.get("install_path", "~/.codex")).expanduser()
-            override = os.environ.get("CODEX_CONFIG_PATH")
-            if override:
-                candidate = Path(override).expanduser().resolve()
-                home = Path.home().resolve()
-                try:
-                    candidate.relative_to(home)
-                    env_path = candidate
-                except ValueError:
-                    import logging
-                    logging.getLogger(__name__).warning(
-                        "CODEX_CONFIG_PATH=%s ignored: path must be under home", override
-                    )
-            self._install_path = env_path
-        return self._install_path
 
 # Registry of supported platforms and their adapters
 ADAPTER_REGISTRY: Dict[str, Type[PlatformAdapter]] = {

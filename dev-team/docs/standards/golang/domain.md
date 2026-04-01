@@ -317,20 +317,23 @@ return nil, nil // SUSPICIOUS - check if error is possible
 
 ## Exit/Fatal Location Rules (MANDATORY)
 
-**HARD GATE:** `panic()`, `log.Fatal()`, and `os.Exit()` MUST only be used in strictly defined locations. Using them in business logic is FORBIDDEN.
+**⛔ HARD GATE — ZERO PANIC POLICY:** `panic()` and `log.Fatal()` are FORBIDDEN in all code. `os.Exit()` is allowed only inside `main()` as a last resort after proper error handling.
 
 ### panic() Detection Checklist (MANDATORY)
 
-**MUST scan entire codebase for `panic()` calls. Every occurrence MUST be justified or removed.**
+**MUST scan entire codebase for `panic()` calls. Every occurrence MUST be removed.**
 
-| Location | Allowed? | Reason |
-|----------|----------|--------|
-| `main()` initialization | Conditional | Only if unrecoverable (e.g., missing critical config) |
-| Test helpers (`t.Fatal`) | Yes | Tests are allowed to panic |
-| Goroutine recovery (`defer recover()`) | Yes | Recovery wrapper pattern |
-| Business logic / services | **FORBIDDEN** | MUST return error instead |
-| HTTP handlers | **FORBIDDEN** | MUST return error response |
-| Repository / adapter layer | **FORBIDDEN** | MUST return error instead |
+| Location | panic() | log.Fatal() | os.Exit() | Required Pattern |
+|----------|---------|-------------|-----------|-----------------|
+| `main()` | **FORBIDDEN** | **FORBIDDEN** | Allowed (last resort) | `if err != nil { os.Exit(1) }` |
+| Bootstrap / `InitServers()` | **FORBIDDEN** | **FORBIDDEN** | **FORBIDDEN** | Return `(*Service, error)` |
+| Test helpers | Use `t.Fatal()` | Use `t.Fatal()` | **FORBIDDEN** | `t.Fatal()` only |
+| Business logic | **FORBIDDEN** | **FORBIDDEN** | **FORBIDDEN** | Return error |
+| HTTP handlers | **FORBIDDEN** | **FORBIDDEN** | **FORBIDDEN** | Return error response |
+| Repository / adapter | **FORBIDDEN** | **FORBIDDEN** | **FORBIDDEN** | Return error |
+| Must* helpers | **FORBIDDEN** | — | — | Return `(T, error)` instead |
+
+**Only exception:** `regexp.MustCompile()` with compile-time constant strings.
 
 **Detection Commands:**
 
@@ -344,23 +347,24 @@ grep -rn "panic(" --include="*.go" .
 
 ### log.Fatal() Location Rules (MANDATORY)
 
-`log.Fatal()` calls `os.Exit(1)` internally, bypassing deferred functions. It MUST only appear in `main()` or initialization code.
+`log.Fatal()` calls `os.Exit(1)` internally, bypassing deferred functions. It is **FORBIDDEN** everywhere.
 
 | Location | Allowed? | Reason |
 |----------|----------|--------|
-| `main()` before server start | Yes | Application cannot start |
-| `init()` functions | Conditional | Only for truly fatal config issues |
+| `main()` before server start | **FORBIDDEN** | Use `os.Exit(1)` after cleanup instead |
+| `init()` functions | **FORBIDDEN** | Avoid fallible startup in `init()`; move to explicit bootstrap functions that return `error` |
 | Service/handler/repo code | **FORBIDDEN** | MUST return error to caller |
 | Goroutines | **FORBIDDEN** | Kills entire process, skips defer |
 
 **Correct Pattern:**
 
 ```go
-// ✅ ALLOWED: main() initialization failure
+// ✅ ALLOWED: main() exits after error from bootstrap
 func main() {
-    cfg, err := config.Load()
+    svc, err := bootstrap.InitServers()
     if err != nil {
-        log.Fatal("failed to load config: ", err)
+        fmt.Fprintf(os.Stderr, "failed to start: %v\n", err)
+        os.Exit(1)
     }
     // ... start server
 }
@@ -410,10 +414,12 @@ grep -rn "os.Exit" --include="*.go" --exclude="main.go" --exclude="*_test.go" .
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
 | "panic simplifies error handling" | panic crashes the process. Errors are recoverable, panics are not. | **Return error instead** |
-| "log.Fatal ensures we notice failures" | log.Fatal skips deferred cleanup (DB connections, file handles). | **Return error to caller** |
+| "log.Fatal ensures we notice failures" | log.Fatal calls os.Exit(1), skipping all deferred cleanup (DB connections, telemetry flush). | **Return error to caller** |
 | "It's only called during startup" | If it's not in main(), a future refactor may call it at runtime. | **Move to main() or return error** |
 | "The goroutine recovery will catch it" | Recovery only works in the same goroutine. Cross-goroutine panics kill the process. | **Return error instead** |
 | "This error should never happen" | "Should never" ≠ "will never". Handle it gracefully. | **Return error with context** |
+| "panic is ok in bootstrap/init" | panic() crashes without cleanup. Bootstrap errors are recoverable by the caller. | **Return error, let main() decide** |
+| "Must* helper is a Go convention" | Must* hides errors behind panic. Lerian services must be recoverable at all layers. | **Return (T, error), never Must\*** |
 
 ---
 

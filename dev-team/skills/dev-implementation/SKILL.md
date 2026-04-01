@@ -397,36 +397,36 @@ Task:
     ### TypeScript
     URL: `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md`
     
-    Multi-Tenant: Implement DUAL-MODE from the start. Use lib-commons v3 resolvers for ALL resources.
+    Multi-Tenant: Implement DUAL-MODE from the start. Use lib-commons v4 resolvers for ALL resources.
     WebFetch: `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/multi-tenant.md`
     
     ## ⛔ Multi-Tenant Dual-Mode Implementation (Go backend only — skip for TypeScript/Frontend)
     
     **Applies only when `language == "go"`.** TypeScript and frontend projects have different patterns.
     
-    All Go backend code must work in BOTH modes from the start. The lib-commons v3 resolvers handle both transparently — in single-tenant mode they return the default connection, in multi-tenant mode they resolve per-tenant. There is NO post-cycle adaptation step.
+    All Go backend code must work in BOTH modes from the start. The lib-commons v4 resolvers handle both transparently — in single-tenant mode they return the default connection, in multi-tenant mode they resolve per-tenant. There is NO post-cycle adaptation step.
     
     ### Sub-Package Import Reference
     
     | Alias | Import Path | Purpose |
     |-------|-------------|---------|
-    | `core` | `github.com/LerianStudio/lib-commons/v3/commons/dispatch layer/core` | Resolvers, context helpers, types |
-    | `tmmiddleware` | `github.com/LerianStudio/lib-commons/v3/commons/dispatch layer/middleware` | TenantMiddleware, WhenEnabled |
-    | `tmpostgres` | `github.com/LerianStudio/lib-commons/v3/commons/dispatch layer/postgres` | PostgresManager |
-    | `tmmongo` | `github.com/LerianStudio/lib-commons/v3/commons/dispatch layer/mongo` | MongoManager |
-    | `tmrabbitmq` | `github.com/LerianStudio/lib-commons/v3/commons/dispatch layer/rabbitmq` | RabbitMQ Manager (vhost isolation) |
-    | `valkey` | `github.com/LerianStudio/lib-commons/v3/commons/dispatch layer/valkey` | Redis key prefixing |
-    | `s3` | `github.com/LerianStudio/lib-commons/v3/commons/dispatch layer/s3` | S3 key prefixing |
+    | `tmcore` | `github.com/LerianStudio/lib-commons/v4/commons/dispatch layer/core` | Resolvers, context helpers, types |
+    | `tmmiddleware` | `github.com/LerianStudio/lib-commons/v4/commons/dispatch layer/middleware` | TenantMiddleware, WhenEnabled |
+    | `tmpostgres` | `github.com/LerianStudio/lib-commons/v4/commons/dispatch layer/postgres` | PostgresManager |
+    | `tmmongo` | `github.com/LerianStudio/lib-commons/v4/commons/dispatch layer/mongo` | MongoManager |
+    | `tmrabbitmq` | `github.com/LerianStudio/lib-commons/v4/commons/dispatch layer/rabbitmq` | RabbitMQ Manager (vhost isolation) |
+    | `valkey` | `github.com/LerianStudio/lib-commons/v4/commons/dispatch layer/valkey` | Redis key prefixing |
+    | `s3` | `github.com/LerianStudio/lib-commons/v4/commons/dispatch layer/s3` | S3 key prefixing |
     
     ### Resource Resolver Rules (ALL resources the service uses)
     
     | Resource | Single-Tenant Pattern (WRONG) | Dual-Mode Pattern (CORRECT) |
     |----------|-------------------------------|------------------------------|
-    | **PostgreSQL** | `r.connection.GetDB()` | `core.ResolvePostgres(ctx, r.connection)` |
-    | **PostgreSQL (multi-module)** | `r.connection.GetDB()` | `core.ResolveModuleDB(ctx, r.connection, "module")` |
-    | **MongoDB** | `r.mongoConn.GetDatabase()` | `core.ResolveMongo(ctx, r.mongoConn)` |
-    | **Redis/Valkey** | `redis.Set("key", val)` | `redis.Set(valkey.GetKeyFromContext(ctx, "key"), val)` |
-    | **S3** | `s3.PutObject("path/obj")` | `s3.PutObject(s3.GetObjectStorageKeyForTenant(ctx, "path/obj"))` |
+    | **PostgreSQL** | `r.connection.GetDB()` | `tmcore.GetPGContext(ctx)` with fallback to `r.connection` |
+    | **PostgreSQL (multi-module)** | `r.connection.GetDB()` | `tmcore.GetPGContext(ctx, module)` with fallback to `r.connection` |
+    | **MongoDB** | `r.mongoConn.GetDatabase()` | `tmcore.GetMBContext(ctx)` or `tmcore.GetMBContext(ctx, module)` with fallback |
+    | **Redis/Valkey** | `redis.Set("key", val)` | `redis.Set(valkey.GetKeyContext(ctx, "key"), val)` |
+    | **S3** | `s3.PutObject("path/obj")` | `s3.PutObject(s3.GetS3KeyStorageContext(ctx, "path/obj"))` |
     | **RabbitMQ** | `channel.Publish(exchange, ...)` | Use `tmrabbitmq.Manager` for vhost isolation + set `X-Tenant-ID` header |
     
     ### Route Registration with WhenEnabled
@@ -450,8 +450,8 @@ Task:
     
     The agent must verify before completing Gate 0:
     - No direct `r.connection.GetDB()` or `r.mongoConn.GetDatabase()` — must use resolvers
-    - No hardcoded Redis keys — must use `valkey.GetKeyFromContext`
-    - No hardcoded S3 keys — must use `s3.GetObjectStorageKeyForTenant`
+    - No hardcoded Redis keys — must use `valkey.GetKeyContext`
+    - No hardcoded S3 keys — must use `s3.GetS3KeyStorageContext`
     - No global DB singletons — connections injected via constructor
     - All methods accept `ctx context.Context` as first parameter
     - Routes use `WhenEnabled()` for tenant middleware (not global `app.Use`)
@@ -766,6 +766,19 @@ See [shared-patterns/shared-anti-rationalization.md](../shared-patterns/shared-a
 | "c.JSON() works the same" | Direct Fiber breaks response standardization | **Use libHTTP.OK(), libHTTP.WithError()** |
 | "This function is too simple for spans" | Simple ≠ exempt. all functions need spans. | **Add span to every function** |
 | "Telemetry adds overhead" | Observability is non-negotiable for production | **Instrument 100% of code paths** |
+
+### ⛔ Post-Generation Panic Check (MANDATORY)
+
+Before delivering ANY generated code, run these checks:
+
+| Check | Command | Expected | If Found |
+|-------|---------|----------|----------|
+| No panic() | `grep -rn "panic(" --include="*.go" --exclude="*_test.go"` | 0 results | Rewrite to return error |
+| No log.Fatal() | `grep -rn "log.Fatal" --include="*.go"` | 0 results | Rewrite to return error |
+| No Must* helpers | `grep -rn "Must[A-Z]" --include="*.go" \| grep -v "regexp\.MustCompile"` | 0 results | Rewrite to return (T, error) |
+| No os.Exit() | `grep -rn "os.Exit" --include="*.go" --exclude="main.go"` | 0 results | Move to main() or return error |
+
+**If any check fails: DO NOT deliver. Fix first.**
 
 ## Agent Selection Guide
 

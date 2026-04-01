@@ -1,5 +1,247 @@
 # Ring-pm-team Changelog
 
+## [0.21.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.21.1)
+
+- Fixes:
+  - Enforced zero panic policy across all standards and agents to improve system stability and reliability.
+
+Contributors: @jeff, @jefferson.comff
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.21.0...ring-pm-team@0.21.1)
+
+---
+
+## [0.21.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.21.1)
+
+- Fixes:
+  - Enforced zero panic policy across all standards and agents to enhance stability and reliability. (#277)
+
+Contributors: @jeff, @jefferson.comff
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.21.0...ring-pm-team@0.21.1)
+
+---
+
+## [0.21.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.21.1)
+
+- Fixes:
+  - Enforced zero panic policy across all standards and agents to improve stability and reliability.
+
+Contributors: @jeff, @jefferson.comff
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.21.0...ring-pm-team@0.21.1)
+
+---
+
+## [0.21.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.21.1)
+
+- Fixes:
+  - Enforced zero panic policy across all standards and agents to enhance system stability and reliability.
+
+Contributors: @jeff, @jefferson.comff
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.21.0...ring-pm-team@0.21.1)
+
+---
+
+## [0.21.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.21.1)
+
+- Fixes:
+  - Enforced zero panic policy across all standards and agents to improve system stability and reliability.
+
+Contributors: @jeff, @jefferson.comff
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.21.0...ring-pm-team@0.21.1)
+
+---
+
+## [0.21.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.21.1)
+
+- Fixes:
+  - Enforced zero panic policy across all standards and agents to improve system stability and reliability.
+
+Contributors: @jeff, @jefferson.comff
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.21.0...ring-pm-team@0.21.1)
+
+---
+
+## [0.21.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.21.1)
+
+- Fixes:
+  - Enforced zero panic policy across all standards and agents to enhance stability and reliability. (#277)
+
+Contributors: @jeff, @jefferson.comff
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.21.0...ring-pm-team@0.21.1)
+
+---
+
+## [0.21.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.21.1)
+
+- Fixes:
+  - Enforced zero panic policy across all standards and agents to improve system stability and reliability. (#277)
+
+Contributors: @jeff, @jefferson.comff
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.21.0...ring-pm-team@0.21.1)
+
+---
+
+## [0.21.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.21.1)
+
+- Fixes:
+  - Enforced zero panic policy across all standards and agents to improve stability and reliability.
+
+Contributors: @jeff, @jefferson.comff
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.21.0...ring-pm-team@0.21.1)
+
+---
+
+## [0.21.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.21.1)
+
+- Fixes:
+  - Enforced zero panic policy across all standards and agents to improve system stability and reliability.
+
+Contributors: @jeff, @jefferson.comff
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.21.0...ring-pm-team@0.21.1)
+
+---
+
+## [0.21.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.21.1)
+
+- Fixes:
+  - Enforced zero panic policy across all standards and agents to enhance stability and reliability.
+
+Contributors: @jeff, @jefferson.comff
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.21.0...ring-pm-team@0.21.1)
+
+---
+
+## [0.21.0](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.21.0)
+
+- **Features**
+  - Moved `lerian-map-management` skill from `pmo-team` to `pm-team`.
+
+Contributors: @gandalf
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.2...ring-pm-team@0.21.0)
+
+---
+
+## [0.20.2](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.20.2)
+
+- Fixes:
+  - Removed data envelope from BFF Response Contract template.
+
+Contributors: @gandalf,
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.1...ring-pm-team@0.20.2)
+
+---
+
+## [0.20.2](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.20.2)
+
+- Fixes:
+  - Removed data envelope from BFF Response Contract template
+
+Contributors: @gandalf
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.1...ring-pm-team@0.20.2)
+
+---
+
+## [0.20.2](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.20.2)
+
+- Fixes:
+  - Removed data envelope from BFF Response Contract template.
+
+Contributors: @gandalf,
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.1...ring-pm-team@0.20.2)
+
+---
+
+## [0.20.2](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.20.2)
+
+- Fixes:
+  - Removed data envelope from BFF Response Contract template.
+
+Contributors: @gandalf,
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.1...ring-pm-team@0.20.2)
+
+---
+
+## [0.20.2](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.20.2)
+
+- Fixes:
+  - Removed data envelope from BFF Response Contract template.
+
+Contributors: @gandalf,
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.1...ring-pm-team@0.20.2)
+
+---
+
+## [0.20.2](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.20.2)
+
+- Fixes:
+  - Removed data envelope from BFF Response Contract template.
+
+Contributors: @gandalf,
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.1...ring-pm-team@0.20.2)
+
+---
+
+## [0.20.2](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.20.2)
+
+- Fixes:
+  - Removed data envelope from BFF Response Contract template.
+
+Contributors: @gandalf,
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.1...ring-pm-team@0.20.2)
+
+---
+
+## [0.20.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.20.1)
+
+- Fixes:
+  - Added bootstrap-only comments to `panic()` examples to adhere to standards.
+
+Contributors: @gandalf,
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.0...ring-pm-team@0.20.1)
+
+---
+
+## [0.20.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.20.1)
+
+- **Fixes:**
+  - Added bootstrap-only comments to `panic()` examples to enhance code clarity and maintainability.
+
+Contributors: @gandalf,
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.0...ring-pm-team@0.20.1)
+
+---
+
+## [0.20.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.20.1)
+
+- Fixes:
+  - Added bootstrap-only comments to `panic()` examples to align with standards.
+
+Contributors: @gandalf
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.0...ring-pm-team@0.20.1)
+
+---
+
 ## [0.20.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.20.1)
 
 - Fixes:

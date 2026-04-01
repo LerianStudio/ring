@@ -6,7 +6,7 @@
 
 **Proven engineering practices, enforced through skills.**
 
-Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **6 active plugins** and **83 skills** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
+Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **6 active plugins** and **89 skills** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
 
 ## ✨ Why Ring?
 
@@ -21,8 +21,8 @@ Without Ring, AI assistants often:
 Ring solves this by:
 
 - **Enforcing proven workflows** - Test-driven development, systematic debugging, proper planning
-- **Providing 83 specialized skills** (21 core + 24 dev-team + 15 product planning + 7 FinOps regulatory + 7 technical writing + 9 PMO)
-- **37 specialized agents** - 10 review/planning + 11 developer + 4 product research + 3 FinOps regulatory + 3 technical writing + 6 PMO
+- **Providing 89 specialized skills** (22 core + 29 dev-team + 15 product planning + 7 FinOps regulatory + 7 technical writing + 9 PMO)
+- **38 specialized agents** - 10 review/planning + 12 developer + 4 product research + 3 FinOps regulatory + 3 technical writing + 6 PMO
 - **Automating skill discovery** - Skills load automatically at session start
 - **Preventing common failures** - Built-in anti-patterns and mandatory checklists
 
@@ -55,6 +55,7 @@ Ring solves this by:
 - `ring:qa-analyst-frontend` - Frontend QA specialist (accessibility, visual, E2E, performance)
 - `ring:sre` - Site reliability engineer (monitoring, alerting, SLOs)
 - `ring:ui-engineer` - UI component specialist (design systems, accessibility)
+- `ring:helm-engineer` - Helm chart specialist (chart structure, security, Lerian conventions)
 
 > **Standards Compliance:** All dev-team agents include a `## Standards Compliance` output section with conditional requirement:
 >
@@ -241,7 +242,7 @@ When you start a new Claude Code session with Ring installed, you'll see:
 - ring:test-driven-development (RED-GREEN-REFACTOR cycle)
 - ring:systematic-debugging (4-phase root cause analysis)
 - ring:verification-before-completion (Evidence before claims)
-... and 76 more skills
+... and 85 more skills
 ```
 
 ## 🎯 Core Skills
@@ -280,9 +281,9 @@ Run command → Paste output → Then claim
 No "should work" → Only "does work" with proof
 ```
 
-## 📚 All 83 Skills (Across 6 Plugins)
+## 📚 All 89 Skills (Across 6 Plugins)
 
-### Core Skills (ring-default plugin - 21 skills)
+### Core Skills (ring-default plugin - 22 skills)
 
 **Testing & Debugging (4):**
 
@@ -308,6 +309,10 @@ No "should work" → Only "does work" with proof
 - `ring:testing-skills-with-subagents` - Skill validation
 - `ring:testing-agents-with-subagents` - Subagent-specific testing
 
+**Integration (1):**
+
+- `ring:gandalf-webhook` - Send tasks to Gandalf (AI team member) via webhook for Slack, Google Workspace, and Jira interactions
+
 **Session & Learning (5):**
 
 - `ring:exploring-codebase` - Two-phase codebase exploration
@@ -320,7 +325,7 @@ No "should work" → Only "does work" with proof
 
 - `ring:production-readiness-audit` - 44-dimension production readiness audit; runs explorers in batches of up to 10, appends incrementally to a single report; output: scored report (0-430, max 440 with multi-tenant) with severity ratings. See [default/skills/production-readiness-audit/SKILL.md](default/skills/production-readiness-audit/SKILL.md) for invocation and implementation details.
 
-### Developer Skills (ring-dev-team plugin - 24 skills)
+### Developer Skills (ring-dev-team plugin - 29 skills)
 
 **Orchestration & Refactoring (6):**
 
@@ -331,12 +336,14 @@ No "should work" → Only "does work" with proof
 - `ring:dev-refactor-frontend` - Frontend standards analysis and task generation
 - `ring:cycle-management` - Development cycle state management (status reporting and cancellation)
 
-**Backend Gate Skills (6):**
+**Backend Gate Skills (8):**
 
 - `ring:dev-implementation` - Gate 0: TDD implementation
 - `ring:dev-delivery-verification` - Gate 0.5: Delivery verification (ensures requested features are reachable)
 - `ring:dev-multi-tenant` - Multi-tenant adaptation (database-per-tenant isolation, integrated into Gate 0)
 - `ring:dev-devops` - Gate 1: DevOps setup (Docker, compose)
+- `ring:dev-docker-security` - Docker image security audit for Docker Hub Health Score grade A
+- `ring:dev-helm` - Helm chart creation and maintenance following Lerian conventions
 - `ring:dev-sre` - Gate 2: Observability validation
 - `ring:dev-service-discovery` - Service/module/resource hierarchy scanner for dispatch layer
 
@@ -350,6 +357,12 @@ No "should work" → Only "does work" with proof
 - `ring:dev-goroutine-leak-testing` - Goroutine leak detection and regression testing
 - `ring:dev-validation` - Gate 9: User approval
 - `ring:dev-feedback-loop` - Assertiveness scoring and metrics
+
+**Migration & Reference (3):**
+
+- `ring:using-lib-commons` - Comprehensive reference for lib-commons v4 (Lerian's shared Go library with 30+ packages)
+- `ring:dev-migrate-v4` - Analyze Go service for lib-commons v2/v3 patterns and generate visual migration report
+- `ring:systemplane-migration` - Migrate Lerian Go services from .env/YAML config to systemplane (database-backed hot-reloadable config)
 
 **Frontend Gate Skills (4):**
 
@@ -430,7 +443,7 @@ No "should work" → Only "does work" with proof
 
 ## 🎮 Interactive Commands
 
-Ring provides 32 slash commands across 5 plugins for common workflows.
+Ring provides 33 slash commands across 5 plugins for common workflows.
 
 ### Core Workflows (ring-default)
 
@@ -465,6 +478,7 @@ Ring provides 32 slash commands across 5 plugins for common workflows.
 - `/ring:dev-status` - Show current gate progress
 - `/ring:dev-report` - Generate development cycle report
 - `/ring:dev-cancel` - Cancel active development cycle
+- `/ring:migrate-v4 [path]` - Analyze Go service for lib-commons v4 migration and generate visual report
 
 ### Technical Writing (ring-tw-team)
 
@@ -558,7 +572,7 @@ ring/                                  # Monorepo root
 ├── .claude-plugin/
 │   └── marketplace.json              # Multi-plugin marketplace config (6 active plugins)
 ├── default/                          # Core Ring plugin (ring-default)
-│   ├── skills/                       # 21 core skills
+│   ├── skills/                       # 22 core skills
 │   │   ├── skill-name/
 │   │   │   └── SKILL.md             # Skill definition with frontmatter
 │   │   └── shared-patterns/         # Universal patterns (15 patterns)
@@ -579,14 +593,15 @@ ring/                                  # Monorepo root
 │   │   ├── write-plan.md                # Implementation planning (`ring:write-plan`)
 │   │   └── codebase-explorer.md         # Deep architecture analysis (`ring:codebase-explorer`)
 │   └── docs/                       # Documentation
-├── dev-team/                      # Developer Agents plugin (ring-dev-team) - 24 skills, 11 agents, 8 commands
-│   └── agents/                      # 11 specialized developer agents
+├── dev-team/                      # Developer Agents plugin (ring-dev-team) - 29 skills, 12 agents, 9 commands
+│   └── agents/                      # 12 specialized developer agents
 │       ├── backend-engineer-golang.md       # Go backend specialist (`ring:backend-engineer-golang`)
 │       ├── backend-engineer-typescript.md   # TypeScript/Node.js backend specialist (`ring:backend-engineer-typescript`)
 │       ├── devops-engineer.md               # DevOps infrastructure (`ring:devops-engineer`)
 │       ├── frontend-bff-engineer-typescript.md # BFF & React/Next.js specialist (`ring:frontend-bff-engineer-typescript`)
 │       ├── frontend-designer.md             # Visual design specialist (`ring:frontend-designer`)
 │       ├── frontend-engineer.md             # Frontend engineer (`ring:frontend-engineer`)
+│       ├── helm-engineer.md                 # Helm chart specialist (`ring:helm-engineer`)
 │       ├── prompt-quality-reviewer.md       # Agent quality reviewer (`ring:prompt-quality-reviewer`)
 │       ├── qa-analyst.md                    # Backend QA specialist (`ring:qa-analyst`)
 │       ├── qa-analyst-frontend.md           # Frontend QA specialist (`ring:qa-analyst-frontend`)

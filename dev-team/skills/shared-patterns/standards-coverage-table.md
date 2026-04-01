@@ -308,6 +308,7 @@ These sections describe HOW to use the standards, not WHAT the standards are.
 | 51 | Rate Limiting | security.md | `#rate-limiting-mandatory` | **Three-tier strategy (MANDATORY)**: Global/Export/Dispatch, **Trusted Proxy (MANDATORY)**: EnableTrustedProxyCheck + TrustedProxies (Fiber v2) / TrustProxy + TrustProxyConfig (Fiber v3) for real client IP, Redis-backed storage (in-memory fallback on Redis outage), key priority (UserID > TenantID+IP > IP), **production force-enable (MANDATORY)**, Retry-After header, detection commands |
 | 52 | CORS Configuration | security.md | `#cors-configuration-mandatory` | **Configuration-driven (MANDATORY)**, production validation (no wildcard, no empty), middleware ordering (before Helmet), Helmet integration, detection commands |
 | 53 | Service Authentication | multi-tenant.md | `#service-authentication-mandatory` | **MANDATORY: API key authentication for dispatch layer /settings endpoint.** `MULTI_TENANT_SERVICE_API_KEY` env var, `client.WithServiceAPIKey()`, `X-API-Key` header, key rotation via service catalog |
+| 54 | Settings Revalidation | multi-tenant.md | N/A (pgManager internal) | **pgManager handles internally via `WithConnectionsCheckInterval`.** No separate watcher needed. Pass option when creating PostgreSQL manager. Detects maxOpenConns/maxIdleConns/statementTimeout changes |
 
 **Module Loading Guide:**
 
