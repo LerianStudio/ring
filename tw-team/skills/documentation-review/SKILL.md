@@ -6,15 +6,15 @@ description: |
 metadata:
   related:
     complementary:
-    - voice-and-tone
-    - documentation-structure
+    - ring:voice-and-tone
+    - ring:documentation-structure
   sequence:
     after:
-    - writing-functional-docs
-    - writing-api-docs
+    - ring:writing-functional-docs
+    - ring:writing-api-docs
   skip_when: |
-    - Writing new documentation → use writing-functional-docs or writing-api-docs
-    - Only checking voice → use voice-and-tone
+    - Writing new documentation → use ring:writing-functional-docs or ring:writing-api-docs
+    - Only checking voice → use ring:voice-and-tone
   trigger: |
     - Reviewing draft documentation
     - Pre-publication quality check

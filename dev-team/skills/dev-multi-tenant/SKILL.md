@@ -15,7 +15,7 @@ description: |
   Each gate dispatches ring:backend-engineer-golang with context and section references.
   The agent loads multi-tenant.md via WebFetch and has all code examples.
 metadata:
-  NOT_skip_when: |
+  anti_patterns: |
     - "organization_id already exists" → organization_id is NOT multi-tenant. tenantId via JWT is required.
     - "Just need to connect the wiring" → Multi-tenant requires lib-commons v3 dispatch layer sub-packages.
     - "lib-commons v3 upgrade is too risky" → REQUIRES lib-commons v3 dispatch layer sub-packages. No v3 = no multi-tenant.

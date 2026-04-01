@@ -1,14 +1,14 @@
 ---
-name: regulatory-templates-gate2
+name: ring:regulatory-templates-gate2
 description: |
   Gate 2 sub-skill - validates uncertain mappings from Gate 1 and confirms
   all field specifications through testing.
 metadata:
   sequence:
     after:
-    - regulatory-templates-gate1
+    - ring:regulatory-templates-gate1
     before:
-    - regulatory-templates-gate3
+    - ring:regulatory-templates-gate3
   skip_when: |
     - Gate 1 not passed → complete Gate 1 first
     - Gate 2 already passed → proceed to Gate 3

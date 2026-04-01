@@ -17,7 +17,7 @@ NOT_skip_when: |
 
 sequence:
   after: [ring:dev-implementation]
-  before: [ring:dev-ring:sre]
+  before: [ring:dev-sre]
 
 related:
   complementary: [ring:dev-implementation, ring:dev-unit-testing]

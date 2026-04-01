@@ -9,8 +9,8 @@ metadata:
     - portfolio-planning
     - risk-management
   skip_when: |
-    - Single project staffing → use ring-pm-team
-    - Cost analysis → use ring-finops-team
+    - Single project staffing → use ring:pm-team
+    - Cost analysis → use ring:finops-team
     - Project status → use project-health-check
   trigger: |
     - Need to allocate resources to projects

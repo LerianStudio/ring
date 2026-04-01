@@ -6,8 +6,8 @@ description: |
 metadata:
   related:
     complementary:
-    - portfolio-planning
-    - risk-management
+    - ring:portfolio-planning
+    - ring:risk-management
   skip_when: |
     - Portfolio-level view → use portfolio-planning
     - Resource-only issue → use resource-allocation

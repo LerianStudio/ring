@@ -69,9 +69,9 @@ metadata:
     - command: test -f docs/ring:dev-cycle/current-cycle.json || test -f docs/ring:dev-refactor/current-cycle.json
       description: State file exists (ring:dev-cycle or ring:dev-refactor)
       success_pattern: exit 0
-    - command: cat docs/ring:dev-cycle/current-cycle.json 2>/dev/null || cat docs/ring:dev-refactor/current-cycle.json | jq '.current_gate'
+    - command: (cat docs/ring:dev-cycle/current-cycle.json 2>/dev/null || cat docs/ring:dev-refactor/current-cycle.json 2>/dev/null) | jq '.current_gate'
       description: Current gate is valid
-      success_pattern: '[0-5]|0\.5'
+      success_pattern: '^(?:[0-9]|0\.5)$'
     manual:
     - All gates for current task show PASS in state file
     - No tasks have status 'blocked' for more than 3 iterations

@@ -1,5 +1,5 @@
 ---
-name: regulatory-templates-setup
+name: ring:regulatory-templates-setup
 description: |
   Initial setup sub-skill - handles template selection and context initialization
   for the 5-stage regulatory workflow. Supports any regulatory template (pre-defined
@@ -9,9 +9,9 @@ metadata:
   role: setup
   sequence:
     after:
-    - regulatory-templates
+    - ring:regulatory-templates
     before:
-    - regulatory-templates-gate1
+    - ring:regulatory-templates-gate1
   skip_when: |
     - Not in regulatory-templates workflow
     - Setup already completed for current template

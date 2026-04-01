@@ -8,16 +8,16 @@ description: |
 metadata:
   examples:
   - name: Analyze and show visual report
-    invocation: /ring:migrate-v4
+    invocation: /ring:dev-migrate-v4
     expected_flow: Scan → Map → Visual HTML report opened in browser
   - name: Generate tasks for dev-cycle
-    invocation: /ring:migrate-v4 --tasks
+    invocation: /ring:dev-migrate-v4 --tasks
     expected_flow: Scan → Map → Visual report → migration-v4-tasks.md saved
   - name: Full automatic migration
-    invocation: /ring:migrate-v4 --execute
+    invocation: /ring:dev-migrate-v4 --execute
     expected_flow: Scan → Map → Visual report → tasks.md → ring:dev-cycle dispatched through all 10 gates
   - name: Specific repository path
-    invocation: /ring:migrate-v4 /path/to/service --execute
+    invocation: /ring:dev-migrate-v4 /path/to/service --execute
     expected_flow: Same as above but targets specific path
   prerequisite: |
     - Go project with go.mod containing lib-commons/v2 or lib-commons/v3
@@ -40,7 +40,7 @@ metadata:
     - User wants to migrate a Go service from lib-commons v2 or v3 to v4
     - User asks about lib-commons version upgrade
     - User wants to see what needs to change for v4
-    - User runs /ring:migrate-v4
+    - User runs /ring:dev-migrate-v4
   verification:
     automated:
     - command: grep 'lib-commons/v4' go.mod

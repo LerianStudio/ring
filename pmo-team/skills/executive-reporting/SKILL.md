@@ -10,8 +10,8 @@ metadata:
     - project-health-check
   skip_when: |
     - Detailed project analysis → use project-health-check
-    - Technical documentation → use ring-tw-team
-    - Financial deep dive → use ring-finops-team
+    - Technical documentation → use ring:tw-team
+    - Financial deep dive → use ring:finops-team
   trigger: |
     - Need executive status update
     - Board meeting preparation

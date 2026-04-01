@@ -49,8 +49,8 @@ metadata:
     severity: warning
   related:
     complementary:
-    - testing-anti-patterns
-    - verification-before-completion
+    - ring:testing-anti-patterns
+    - ring:verification-before-completion
   skip_when: |
     - Reviewing/modifying existing tests → use testing-anti-patterns
     - Code already exists without tests → add tests first, then TDD for new code

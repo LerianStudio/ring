@@ -1,5 +1,5 @@
 ---
-name: regulatory-templates-gate1
+name: ring:regulatory-templates-gate1
 description: |
   Gate 1 sub-skill - performs regulatory compliance analysis, field mapping,
   batch approval by confidence level, and auto-saves dictionary after approval.
@@ -10,9 +10,9 @@ metadata:
   role: regulatory-analyst
   sequence:
     after:
-    - regulatory-templates-setup
+    - ring:regulatory-templates-setup
     before:
-    - regulatory-templates-gate2
+    - ring:regulatory-templates-gate2
   skip_when: |
     - Setup not complete → run setup first
     - Gate 1 already passed → proceed to Gate 2

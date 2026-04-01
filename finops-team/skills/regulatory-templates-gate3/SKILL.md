@@ -1,12 +1,12 @@
 ---
-name: regulatory-templates-gate3
+name: ring:regulatory-templates-gate3
 description: |
   Gate 3 sub-skill - generates complete .tpl template file with all validated
   mappings from Gates 1-2.
 metadata:
   sequence:
     after:
-    - regulatory-templates-gate2
+    - ring:regulatory-templates-gate2
   skip_when: |
     - Gate 2 not passed → complete Gate 2 first
     - Template already generated → verify or regenerate

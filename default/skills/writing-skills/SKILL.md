@@ -6,7 +6,7 @@ description: |
 metadata:
   related:
     complementary:
-    - testing-skills-with-subagents
+    - ring:testing-skills-with-subagents
   skip_when: |
     - Writing pure reference skill (API docs) → no rules to test
     - Skill has no compliance costs → no rationalization risk

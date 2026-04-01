@@ -5,7 +5,7 @@ description: |
   Enforces standardized chart structure, values organization, template patterns,
   security defaults, and dependency management.
 metadata:
-  NOT_skip_when: |
+  anti_patterns: |
     - "It's a simple chart, I don't need all that" → Every chart grows. Structure prevents debt.
     - "I'll add security later" → Security is foundational, not an afterthought.
     - "The defaults are fine" → Lerian has specific conventions that MUST be followed.

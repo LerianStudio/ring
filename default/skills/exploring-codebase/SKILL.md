@@ -7,11 +7,12 @@ description: |
 metadata:
   related:
     similar:
-    - dispatching-parallel-agents
-    - systematic-debugging
-    sequence_after:
-    - brainstorming
-    sequence_before:
+    - ring:dispatching-parallel-agents
+    - ring:systematic-debugging
+  sequence:
+    after:
+    - ring:brainstorming
+    before:
     - ring:writing-plans
     - ring:executing-plans
   skip_when: |

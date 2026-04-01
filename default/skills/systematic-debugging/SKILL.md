@@ -6,7 +6,7 @@ description: |
 metadata:
   related:
     complementary:
-    - root-cause-tracing
+    - ring:root-cause-tracing
   skip_when: |
     - Root cause already known → just fix it
     - Error deep in call stack, need to trace backward → use root-cause-tracing

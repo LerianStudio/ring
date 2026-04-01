@@ -6,12 +6,12 @@ description: |
 metadata:
   related:
     similar:
-    - brainstorming
+    - ring:brainstorming
     uses:
-    - doubt-triggered-questions
+    - ring:doubt-triggered-questions
   sequence:
     before:
-    - brainstorming
+    - ring:brainstorming
     - ring:writing-plans
     after: []
   skip_when: |

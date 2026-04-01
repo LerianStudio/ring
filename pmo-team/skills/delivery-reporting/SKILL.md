@@ -12,7 +12,7 @@ metadata:
   skip_when: |
     - Portfolio/project status → use executive-reporting
     - Risk/resource analysis → use risk-management/resource-allocation
-    - Technical documentation → use ring-tw-team
+    - Technical documentation → use ring:tw-team
   trigger: |
     - Need squad delivery report (eng + product + design)
     - Showcase releases and features to executives

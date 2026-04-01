@@ -6,16 +6,16 @@ description: |
 metadata:
   related:
     similar:
-    - writing-functional-docs
+    - ring:writing-functional-docs
     complementary:
-    - api-field-descriptions
-    - documentation-structure
+    - ring:api-field-descriptions
+    - ring:documentation-structure
   sequence:
     before:
-    - documentation-review
+    - ring:documentation-review
   skip_when: |
-    - Writing conceptual guides → use writing-functional-docs
-    - Reviewing documentation → use documentation-review
+    - Writing conceptual guides → use ring:writing-functional-docs
+    - Reviewing documentation → use ring:documentation-review
     - Writing code → use dev-team agents
   trigger: |
     - Documenting REST API endpoints

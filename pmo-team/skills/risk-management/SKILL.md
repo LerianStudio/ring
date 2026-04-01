@@ -10,7 +10,7 @@ metadata:
     - project-health-check
   skip_when: |
     - Single project risk → handle in project scope
-    - Financial risk only → use ring-finops-team
+    - Financial risk only → use ring:finops-team
     - Technical risk in code → use ring:qa-analyst
   trigger: |
     - Need portfolio risk assessment

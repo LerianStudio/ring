@@ -6,11 +6,11 @@ description: |
 metadata:
   related:
     complementary:
-    - writing-functional-docs
-    - writing-api-docs
-    - documentation-review
+    - ring:writing-functional-docs
+    - ring:writing-api-docs
+    - ring:documentation-review
   skip_when: |
-    - Only checking structure → use documentation-structure
+    - Only checking structure → use ring:documentation-structure
     - Only checking technical accuracy → use docs-reviewer agent
   trigger: |
     - Need to check voice and tone compliance

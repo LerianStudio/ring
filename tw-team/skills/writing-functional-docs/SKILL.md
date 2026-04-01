@@ -6,16 +6,16 @@ description: |
 metadata:
   related:
     similar:
-    - writing-api-docs
+    - ring:writing-api-docs
     complementary:
-    - voice-and-tone
-    - documentation-structure
+    - ring:voice-and-tone
+    - ring:documentation-structure
   sequence:
     before:
-    - documentation-review
+    - ring:documentation-review
   skip_when: |
-    - Writing API reference → use writing-api-docs
-    - Reviewing documentation → use documentation-review
+    - Writing API reference → use ring:writing-api-docs
+    - Reviewing documentation → use ring:documentation-review
     - Writing code → use dev-team agents
   trigger: |
     - Writing a new guide or tutorial

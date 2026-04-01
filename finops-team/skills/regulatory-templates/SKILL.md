@@ -1,5 +1,5 @@
 ---
-name: regulatory-templates
+name: ring:regulatory-templates
 description: |
   5-stage regulatory template orchestrator - manages setup, Gate 1 (analysis + auto-save),
   Gate 2 (validation), Gate 3 (generation), optional Test Gate, optional Contribution Gate.
@@ -15,7 +15,7 @@ metadata:
   role: orchestrator
   sequence:
     before:
-    - regulatory-templates-setup
+    - ring:regulatory-templates-setup
   skip_when: |
     - Non-Brazilian regulations → not applicable
     - Analysis-only without template → use finops-analyzer directly

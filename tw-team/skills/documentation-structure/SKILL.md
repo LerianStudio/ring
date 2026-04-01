@@ -6,11 +6,11 @@ description: |
 metadata:
   related:
     complementary:
-    - writing-functional-docs
-    - writing-api-docs
+    - ring:writing-functional-docs
+    - ring:writing-api-docs
   skip_when: |
-    - Writing content → use writing-functional-docs or writing-api-docs
-    - Checking voice → use voice-and-tone
+    - Writing content → use ring:writing-functional-docs or ring:writing-api-docs
+    - Checking voice → use ring:voice-and-tone
   trigger: |
     - Planning documentation structure
     - Organizing content hierarchy
