@@ -1,18 +1,10 @@
 ---
 name: ring:production-readiness-audit
+title: Production Readiness Audit
+category: operations
+tier: advanced
 description: Comprehensive Ring-standards-aligned 44-dimension production readiness audit. Detects project stack, loads Ring standards via WebFetch, and runs in batches of 10 explorers appending incrementally to a single report file. Categories - Structure (pagination, errors, routes, bootstrap, runtime, core deps, naming, domain modeling, nil-safety, api-versioning, resource-leaks), Security (auth, IDOR, SQL, validation, secret-scanning, data-encryption, multi-tenant, rate-limiting, cors), Operations (telemetry, health, config, connections, logging, resilience, graceful-degradation), Quality (idempotency, docs, debt, testing, dependencies, performance, concurrency, migrations, linting, caching), Infrastructure (containers, hardening, cicd, async, makefile, license). Produces scored report (0-430, max 440 with multi-tenant) with severity ratings and standards cross-reference.
-
-trigger: |
-  - Preparing a service for production deployment
-  - Conducting periodic security or quality review of a codebase
-  - Onboarding to assess codebase health and maturity
-  - Evaluating technical debt before a major release
-  - Validating compliance with Ring engineering standards
-
-skip_when: |
-  - Project is a prototype or throwaway proof-of-concept not heading to production
-  - Codebase is a library or SDK with no deployable service component
-  - User only needs a single-dimension check (use targeted review instead)
+allowed-tools: Task, Read, Glob, Grep, Write, TodoWrite, WebFetch
 ---
 
 # Production Readiness Audit
@@ -71,7 +63,7 @@ Use this skill when:
 | 41 | **Data Encryption at Rest** | Field-level encryption, key management, password hashing, encrypted backups |
 | 43 | **Rate Limiting** | Three-tier strategy (Global/Export/Dispatch), Redis-backed storage, key generation, production safety |
 | 44 | **CORS Configuration** | Origin validation, middleware ordering, production wildcard prohibition, Helmet integration |
-| 33 | **Multi-Tenant Patterns** *(CONDITIONAL)* | Tenant Manager, TenantMiddleware with WithPG/WithMB, JWT tenantId, module-specific connections |
+| 33 | **Multi-Tenant Patterns** *(CONDITIONAL)* | Tenant Manager, DualPoolMiddleware, JWT tenantId, module-specific connections |
 
 ### Category C: Operational Readiness (7 dimensions)
 
@@ -3433,40 +3425,79 @@ check: ## Run all checks (lint + test + cover)
 ```prompt
 CONDITIONAL: Only run this agent if MULTI_TENANT=true was detected during stack detection. If the project does not use multi-tenancy (no tenant config, no pool manager, no tenant middleware), SKIP this agent entirely and report: "Dimension 33 skipped — single-tenant project (no multi-tenant indicators detected)."
 
-If multi-tenant IS detected, audit multi-tenant architecture patterns for production readiness.
+If multi-tenant IS detected, audit multi-tenant architecture patterns for production readiness against the COMPLETE canonical model defined in multi-tenant.md.
 
 **Detected Stack:** {DETECTED_STACK}
 
 **Ring Standards (Source of Truth):**
 ---BEGIN STANDARDS---
-{INJECTED: Section 23 from multi-tenant.md}
+{INJECTED: Full multi-tenant.md standard}
 ---END STANDARDS---
 
 **Search Patterns:**
 - Files: `**/tenant*.go`, `**/pool*.go`, `**/middleware*.go`, `**/context*.go`
 - Keywords: `tenantID`, `TenantManager`, `TenantContext`, `schema`, `search_path`
 - Also search: `**/jwt*.go`, `**/auth*.go` for tenant extraction
+- Config files: `**/config.go`, `**/bootstrap/*.go` for env var declarations
+- Routes: `**/routes.go`, `**/router*.go` for middleware ordering
+- Redis: `**/redis*.go`, `**/*redis*` for key prefixing (including Lua scripts)
+- S3/Storage: `**/storage*.go`, `**/s3*.go` for object key prefixing
+- RabbitMQ: `**/rabbitmq*.go`, `**/producer*.go`, `**/consumer*.go` for isolation layers
+- Tests: `**/*_test.go` for backward compatibility test
+- Non-canonical: `**/tenant/`, `**/multitenancy/`, custom resolvers/middleware outside canonical paths
+- go.mod: lib-commons version, lib-auth version
+- M2M: `**/m2m*.go`, `**/credential*.go`, `**/secret*.go` for M2M credential handling
 
 **Reference Implementation (GOOD):**
 ```go
-// TenantMiddleware with multi-module WithPG/WithMB options
-ttMiddleware := tmmiddleware.NewTenantMiddleware(
-    tmmiddleware.WithPG(pgOnboardingManager, constant.ModuleOnboarding),
-    tmmiddleware.WithPG(pgTransactionManager, constant.ModuleTransaction),
-    tmmiddleware.WithMB(mbOnboardingManager, constant.ModuleOnboarding),
-    tmmiddleware.WithMB(mbTransactionManager, constant.ModuleTransaction),
-    tmmiddleware.WithTenantCache(tenantCache),
-    tmmiddleware.WithTenantLoader(tenantClient),
+// Canonical env vars in config.go (8 MANDATORY)
+MultiTenantEnabled                 bool   `env:"MULTI_TENANT_ENABLED" default:"false"`
+MultiTenantURL                     string `env:"MULTI_TENANT_URL"`
+MultiTenantEnvironment             string `env:"MULTI_TENANT_ENVIRONMENT" default:"staging"`
+MultiTenantMaxTenantPools          int    `env:"MULTI_TENANT_MAX_TENANT_POOLS" default:"100"`
+MultiTenantIdleTimeoutSec          int    `env:"MULTI_TENANT_IDLE_TIMEOUT_SEC" default:"300"`
+MultiTenantCircuitBreakerThreshold int    `env:"MULTI_TENANT_CIRCUIT_BREAKER_THRESHOLD" default:"5"`
+MultiTenantCircuitBreakerTimeoutSec int   `env:"MULTI_TENANT_CIRCUIT_BREAKER_TIMEOUT_SEC" default:"30"`
+MultiTenantServiceAPIKey           string `env:"MULTI_TENANT_SERVICE_API_KEY"`
+
+// TenantMiddleware or MultiPoolMiddleware from lib-commons v4
+import tmmiddleware "github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/middleware"
+
+// Per-route auth-before-tenant ordering (MANDATORY)
+// Auth validates JWT BEFORE tenant middleware calls Tenant Manager API
+f.Get("/v1/organizations/:id", auth.Authorize(...), WhenEnabled(ttHandler), handler)
+
+// Circuit breaker on Tenant Manager client (MANDATORY)
+clientOpts = append(clientOpts,
+    client.WithCircuitBreaker(cfg.MultiTenantCircuitBreakerThreshold, timeout),
+    client.WithServiceAPIKey(cfg.MultiTenantServiceAPIKey),
 )
 
 // Module-specific connection from context
-db := tmcore.GetPGContext(ctx, constant.ModuleOnboarding)
+db, err := core.ResolveModuleDB(ctx, constant.ModuleOnboarding, r.connection)
+// Single-module alternative:
+db, err := core.ResolvePostgres(ctx, r.connection)
+// MongoDB:
+db, err := core.ResolveMongo(ctx, r.connection, r.dbName)
 
-// Entity-scoped query — ALWAYS filter by organization_id + ledger_id
+// Redis key prefixing — ALL operations including Lua scripts
+key := valkey.GetKeyFromContext(ctx, "cache-key")
+// Lua scripts: prefix ALL KEYS[] and ARGV[] before execution
+prefixedKey := valkey.GetKeyFromContext(ctx, transactionKey)
+result, err := script.Run(ctx, rds, []string{prefixedKey}, finalArgs...).Result()
+
+// S3 key prefixing — ALL object operations
+key := s3.GetObjectStorageKeyForTenant(ctx, originalKey)
+
+// RabbitMQ: Layer 1 (vhost isolation) + Layer 2 (X-Tenant-ID header)
+ch, err := tmrabbitmq.Manager.GetChannel(ctx, tenantID) // Layer 1: vhost
+headers["X-Tenant-ID"] = tenantID                        // Layer 2: audit header
+
+// Entity-scoped query — tenantId→database routing + organization_id+ledger_id within database
 func (r *Repo) Find(ctx context.Context, orgID, ledgerID, id uuid.UUID) (*Entity, error) {
-    db := tmcore.GetPGContext(ctx, constant.ModuleTransaction)
-    if db == nil {
-        return nil, fmt.Errorf("tenant postgres connection missing from context for module %s", constant.ModuleTransaction)
+    db, err := core.ResolveModuleDB(ctx, constant.ModuleTransaction, r.connection)
+    if err != nil {
+        return nil, err
     }
     find := squirrel.Select(columnList...).
         From(r.tableName).
@@ -3476,13 +3507,41 @@ func (r *Repo) Find(ctx context.Context, orgID, ledgerID, id uuid.UUID) (*Entity
         PlaceholderFormat(squirrel.Dollar)
     // ...
 }
+
+// Error handling with sentinel errors
+case errors.Is(err, core.ErrTenantNotFound):     // → 404
+case errors.Is(err, core.ErrManagerClosed):       // → 503
+case errors.Is(err, core.ErrServiceNotConfigured): // → 503
+case core.IsTenantNotProvisionedError(err):       // → 422
+case errors.Is(err, core.ErrCircuitBreakerOpen):  // → 503
+
+// Backward compatibility test (MANDATORY)
+func TestMultiTenant_BackwardCompatibility(t *testing.T) {
+    if h.IsMultiTenantEnabled() {
+        t.Skip("Skipping backward compatibility test - multi-tenant mode is enabled")
+    }
+    // Create resources WITHOUT tenant context — MUST work in single-tenant mode
+}
+
+// Mandatory metrics (no-op in single-tenant mode)
+// tenant_connections_total, tenant_connection_pool_size,
+// tenant_config_cache_hits, tenant_consumers_active, tenant_messages_processed_total
+
+// M2M credentials (ONLY if service has targetServices)
+// L1 (sync.Map, 30s) → L2 (Redis, 300s) → AWS Secrets Manager
+// Cache-bust on 401: delete L2 → delete L1 → re-fetch
+m2mProvider = m2m.NewM2MCredentialProvider(redisConn, awsClient, logger, metrics)
 ```
 
 **Reference Implementation (BAD):**
 ```go
+// BAD: Non-canonical env var names
+TenantManagerURL string `env:"TENANT_MANAGER_URL"`     // WRONG: must be MULTI_TENANT_URL
+TenantEnabled    bool   `env:"TENANT_ENABLED"`          // WRONG: must be MULTI_TENANT_ENABLED
+
 // BAD: Query without entity scoping — intra-tenant IDOR!
 func (r *Repo) FindByID(ctx context.Context, id uuid.UUID) (*Entity, error) {
-    db := tmcore.GetPGContext(ctx, constant.ModuleTransaction)
+    db, _ := core.ResolveModuleDB(ctx, constant.ModuleTransaction, r.connection)
     return db.QueryRowContext(ctx, "SELECT * FROM entities WHERE id = $1", id)
 }
 
@@ -3491,37 +3550,117 @@ func GetTenantID(c *fiber.Ctx) string {
     return c.Get("X-Tenant-ID")  // User-controlled!
 }
 
-// BAD: Using GetPGContext without module in multi-module service — must use GetPGContext with module name
-db := tmcore.GetPGContext(ctx)  // WRONG: use GetPGContext(ctx, module) for multi-module services
+// BAD: Global middleware (bypasses auth-first ordering)
+app.Use(tenantMiddleware)  // WRONG: must use per-route WhenEnabled composition
+
+// BAD: Using ResolvePostgres in multi-module service
+db, err := core.ResolvePostgres(ctx, r.connection)  // WRONG: use ResolveModuleDB(ctx, module, fallback)
+
+// BAD: Missing circuit breaker on Tenant Manager client
+tmClient := client.New(cfg.MultiTenantURL)  // WRONG: must use WithCircuitBreaker + WithServiceAPIKey
+
+// BAD: Unprefixed Redis key in multi-tenant mode
+rds.Set(ctx, "cache-key", value, ttl)  // WRONG: must use valkey.GetKeyFromContext(ctx, "cache-key")
+
+// BAD: Unprefixed S3 key in multi-tenant mode
+s3Client.PutObject(ctx, "bucket", "object-key", body)  // WRONG: must use s3.GetObjectStorageKeyForTenant
+
+// BAD: Non-canonical custom files (MUST be removed)
+// internal/tenant/resolver.go          ← FORBIDDEN
+// internal/middleware/tenant_middleware.go ← FORBIDDEN
+// pkg/multitenancy/pool.go             ← FORBIDDEN
+
+// BAD: lib-commons v2/v3 imports
+import tenantmanager "github.com/LerianStudio/lib-commons/v2/..."  // WRONG: must be v4
+
+// BAD: RabbitMQ with only X-Tenant-ID header (no vhost isolation)
+headers["X-Tenant-ID"] = tenantID  // Audit only, NOT isolation — must also use tmrabbitmq.Manager
 ```
 
 **Check Against Ring Standards For:**
+
+HARD GATES (Score = 0 if any fails):
 1. (HARD GATE) Tenant ID extracted from JWT claims (not user-controlled headers/params) per multi-tenant.md
-2. (HARD GATE) All database queries include entity scoping (organization_id + ledger_id)
-3. (HARD GATE) TenantMiddleware with WithPG/WithMB injects tenant into request context with module-specific connections
-4. Connection managers with multi-module (onboarding + transaction) architecture
-5. Database-per-tenant isolation (separate databases per tenant via connection managers)
-6. Tenant-scoped cache keys (Redis keys include tenant prefix via GetKeyContext)
-7. No cross-tenant data leakage in list/search operations
-8. Cross-module connection injection (both modules in context)
-9. ErrManagerClosed handling (503 SERVICE_UNAVAILABLE)
-10. EventListener configured (Redis Pub/Sub subscription for tenant lifecycle events)
-11. TenantCache + TenantLoader wired to TenantMiddleware
-12. OnTenantAdded callback: invalidates cache + starts consumer for new tenant
-13. OnTenantRemoved callback: stops consumer + closes connections + invalidates cache
-14. StopConsumer called before CloseConnection on tenant removal (ordering matters)
+2. (HARD GATE) All database queries include entity scoping (organization_id + ledger_id) within tenant database
+3. (HARD GATE) TenantMiddleware or MultiPoolMiddleware from lib-commons v4 injects tenant into request context
+4. (HARD GATE) No non-canonical files detected (custom tenant resolvers, manual pool managers, wrapper middleware outside canonical file map MUST NOT exist)
+5. (HARD GATE) lib-commons v4 (not v2/v3) for all tenant-manager sub-package imports
+
+Canonical Environment Variables:
+6. All 8 canonical env var names present with exact names: MULTI_TENANT_ENABLED, MULTI_TENANT_URL, MULTI_TENANT_ENVIRONMENT, MULTI_TENANT_MAX_TENANT_POOLS, MULTI_TENANT_IDLE_TIMEOUT_SEC, MULTI_TENANT_CIRCUIT_BREAKER_THRESHOLD, MULTI_TENANT_CIRCUIT_BREAKER_TIMEOUT_SEC, MULTI_TENANT_SERVICE_API_KEY
+7. No non-canonical env var names for tenant configuration (e.g., TENANT_MANAGER_URL, TENANT_ENABLED are violations)
+
+Middleware & Routing:
+8. Auth-before-tenant ordering: auth.Authorize() MUST run before WhenEnabled(ttHandler) on every route (SECURITY CRITICAL)
+9. Per-route composition via WhenEnabled helper (not global app.Use(tenantMiddleware))
+10. Correct middleware type: TenantMiddleware for single-module, MultiPoolMiddleware for multi-module services
+
+Connection Management:
+11. TenantConnectionManager (PostgresManager/MongoManager) for database-per-tenant isolation
+12. Correct resolution function: core.ResolvePostgres (single-module) or core.ResolveModuleDB (multi-module) or core.ResolveMongo (MongoDB)
+13. Cross-module connection injection (both modules in context for multi-module services)
+
+Client Configuration:
+14. Circuit breaker configured on Tenant Manager HTTP client (client.WithCircuitBreaker)
+15. Service API key authentication configured (client.WithServiceAPIKey)
+
+Data Isolation:
+16. Tenant-scoped Redis cache keys via valkey.GetKeyFromContext for ALL operations (including Lua script KEYS[] and ARGV[])
+17. Tenant-scoped S3 object keys via s3.GetObjectStorageKeyForTenant for ALL operations
+18. No cross-tenant data leakage in list/search operations
+
+RabbitMQ (if detected):
+19. Layer 1: vhost isolation via tmrabbitmq.Manager.GetChannel
+20. Layer 2: X-Tenant-ID header injection on all messages (both layers MANDATORY)
+21. Multi-tenant consumer via tmconsumer.MultiTenantConsumer (on-demand initialization)
+
+Error Handling:
+22. Sentinel error mapping: ErrTenantNotFound→404, ErrManagerClosed→503, ErrServiceNotConfigured→503, IsTenantNotProvisionedError→422, ErrCircuitBreakerOpen→503
+23. ErrTenantContextRequired in repositories when tenant context is missing
+
+Backward Compatibility:
+24. Service works with MULTI_TENANT_ENABLED=false (default) — no MULTI_TENANT_* vars required
+25. TestMultiTenant_BackwardCompatibility test exists and validates single-tenant mode
+26. Service starts without Tenant Manager running
+
+Metrics:
+27. All 5 core metrics present: tenant_connections_total, tenant_connection_pool_size, tenant_config_cache_hits, tenant_consumers_active, tenant_messages_processed_total
+28. Metrics are no-op in single-tenant mode (zero overhead)
+
+Graceful Shutdown:
+29. Connection managers closed during shutdown (manager.Close() in shutdown hooks)
+
+M2M Credentials (CONDITIONAL — only if service has targetServices):
+30. M2M credential provider with two-level cache: L1 (sync.Map, 30s) → L2 (Redis) → AWS Secrets Manager
+31. Cache-bust on 401: invalidate L2 → L1 → re-fetch
+32. 6 M2M metrics: m2m_credential_l1_cache_hits, m2m_credential_l2_cache_hits, m2m_credential_cache_misses, m2m_credential_fetch_errors, m2m_credential_fetch_duration_seconds, m2m_credential_invalidations
+33. Credentials MUST NOT be logged or stored in environment variables
+34. Redis key for credentials uses valkey.GetKeyFromContext with pattern: tenant:{tenantOrgID}:m2m:{targetService}:credentials
 
 **Severity Ratings:**
 - CRITICAL: Queries without entity scoping — intra-tenant IDOR (HARD GATE violation per Ring standards)
 - CRITICAL: Tenant ID from user-controlled input (HARD GATE violation)
-- CRITICAL: Missing TenantMiddleware with WithPG/WithMB (HARD GATE violation)
-- CRITICAL: Using deprecated functions (WithPostgresManager, WithMongoManager, WithModule, GetMongoFromContext, GetKeyFromContext, GetPGConnectionFromContext, GetPGConnectionContext, GetMongoContext, ResolvePostgres, ResolveMongo, ResolveModuleDB, SetTenantIDInContext, GetPostgresForTenant, GetMongoForTenant, ContextWithPGConnection, ContextWithMongo, ContextWithModulePGConnection, GetModulePostgresForTenant, MultiPoolMiddleware, DualPoolMiddleware, SettingsWatcher, NewSettingsWatcher) — NON-COMPLIANT, MUST migrate to current API
-- HIGH: No connection managers for multi-tenant pool management
-- HIGH: Cache keys not tenant-scoped
+- CRITICAL: Missing TenantMiddleware/MultiPoolMiddleware from lib-commons v4 (HARD GATE violation)
+- CRITICAL: Non-canonical files detected — custom tenant resolvers/middleware/pool managers (HARD GATE violation)
+- CRITICAL: lib-commons v2/v3 imports instead of v4 (HARD GATE violation)
+- CRITICAL: Auth-after-tenant ordering — JWT not validated before Tenant Manager API call (security vulnerability)
+- CRITICAL: Global app.Use(tenantMiddleware) instead of per-route WhenEnabled composition (bypasses auth ordering)
+- HIGH: Non-canonical env var names (e.g., TENANT_MANAGER_URL instead of MULTI_TENANT_URL)
+- HIGH: Missing circuit breaker on Tenant Manager client (cascading failure risk across all tenants)
+- HIGH: Missing service API key authentication (Tenant Manager calls unauthenticated)
+- HIGH: No TenantConnectionManager for connection management
+- HIGH: Cache keys not tenant-scoped (Redis or S3)
 - HIGH: Missing cross-module connection injection
+- HIGH: Missing backward compatibility test (TestMultiTenant_BackwardCompatibility)
+- HIGH: RabbitMQ missing vhost isolation (Layer 2 header alone is NOT compliant)
+- HIGH: M2M credentials logged or stored in env vars (if targetServices detected)
 - MEDIUM: Inconsistent tenant extraction across modules
-- MEDIUM: Missing ErrManagerClosed handling
+- MEDIUM: Missing sentinel error handling (ErrManagerClosed, ErrCircuitBreakerOpen, etc.)
+- MEDIUM: Missing graceful shutdown of connection managers
+- MEDIUM: Metrics not present or not no-op in single-tenant mode
+- MEDIUM: Redis Lua script keys not prefixed with valkey.GetKeyFromContext
 - LOW: Missing tenant validation in non-critical paths
+- LOW: Missing optional env vars (MULTI_TENANT_CACHE_TTL_SEC, MULTI_TENANT_SETTINGS_CHECK_INTERVAL_SEC)
 
 **Output Format:**
 ```
@@ -3529,14 +3668,37 @@ db := tmcore.GetPGContext(ctx)  // WRONG: use GetPGContext(ctx, module) for mult
 
 ### Summary
 - Multi-tenant detection: Yes/No/N/A
+- lib-commons version: v4 / v3 / v2 / Missing
 - Tenant extraction: JWT / Header / Missing
-- TenantMiddleware (WithPG/WithMB): Yes/No
-- Tenant Manager: Yes/No
-- Multi-module architecture: Yes/No
-- Module-specific connections: Yes/No
-- Queries with entity scoping: X/Y
+- Middleware type: TenantMiddleware / MultiPoolMiddleware / Custom / Missing
+- Auth-before-tenant ordering: Yes / No / Inconsistent
+- Route composition: Per-route WhenEnabled / Global app.Use / Mixed
+- Canonical env vars: X/8 present with correct names
+- Non-canonical env vars detected: [list or "None"]
+- Non-canonical files detected: [list or "None"]
+- Circuit breaker on TM client: Yes / No
+- Service API key configured: Yes / No
+- Connection resolution: ResolveModuleDB / ResolvePostgres / ResolveMongo / Custom / Missing
+- Entity scoping in queries: X/Y queries compliant
+- Redis key prefixing: Yes / Partial / No (Lua scripts: Yes/No)
+- S3 key prefixing: Yes / No / N/A
+- RabbitMQ isolation: Both layers / Header only / Missing / N/A
+- Backward compatibility test: Yes / No
+- Backward compatibility mode: Works without MT vars / Requires MT vars
+- Mandatory metrics: X/5 present (no-op in ST: Yes/No)
+- Graceful shutdown: Manager.Close() called / Missing
+- M2M credentials: Compliant / Non-compliant / N/A (no targetServices)
+
+### HARD GATE Violations
+[file:line] - Description (HARD GATE: Score = 0)
 
 ### Critical Issues
+[file:line] - Description
+
+### High Issues
+[file:line] - Description
+
+### Medium Issues
 [file:line] - Description
 
 ### Recommendations
@@ -6518,9 +6680,9 @@ Write: docs/audits/production-readiness-{YYYY-MM-DDTHH:MM:SS}.md
 
 **MANDATORY: Generate a visual HTML dashboard from the audit results.**
 
-Invokes `Skill("ring:visualize")` to produce a self-contained HTML page showing the production readiness score and findings visually. The markdown report is exhaustive (thousands of lines) — the HTML dashboard provides an executive overview that opens in the browser.
+Invokes `Skill("ring:visual-explainer")` to produce a self-contained HTML page showing the production readiness score and findings visually. The markdown report is exhaustive (thousands of lines) — the HTML dashboard provides an executive overview that opens in the browser.
 
-**Read templates first:** Read `default/skills/visualize/templates/code-diff.html` for severity badges and KPI card patterns, AND read `default/skills/visualize/templates/data-table.html` for table/heatmap patterns. Combine patterns for an audit dashboard layout. Also read `default/skills/visualize/references/responsive-nav.md` for section navigation (7 sections require sidebar TOC).
+**Read templates first:** Read `default/skills/visual-explainer/templates/code-diff.html` for severity badges and KPI card patterns, AND read `default/skills/visual-explainer/templates/data-table.html` for table/heatmap patterns. Combine patterns for an audit dashboard layout. Also read `default/skills/visual-explainer/references/responsive-nav.md` for section navigation (7 sections require sidebar TOC).
 
 **Generate the HTML dashboard with these sections:**
 
