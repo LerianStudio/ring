@@ -5,6 +5,20 @@
 - **Features**
   - Added skill for Lerian Map platform integration.
 
+- **Improvements**
+  - Updated CHANGELOG for ring-pm-team:v0.22.0.
+
+Contributors: @fred
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.22.0...ring-pm-team@0.23.0)
+
+---
+
+## [0.23.0](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.23.0)
+
+- **Features**
+  - Added skill for Lerian Map platform integration.
+
 Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.22.0...ring-pm-team@0.23.0)
