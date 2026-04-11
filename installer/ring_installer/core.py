@@ -134,9 +134,11 @@ def _discover_codex_support_dirs(
 
         skills_dir = plugin_path / "skills"
         if skills_dir.exists():
-            for references_dir in skills_dir.glob("*/references"):
-                if references_dir.is_dir():
-                    dirs.append(references_dir)
+            for skill_subdir in skills_dir.glob("*/*"):
+                if skill_subdir.is_dir() and skill_subdir.name in (
+                    "references", "templates", "examples",
+                ):
+                    dirs.append(skill_subdir)
 
         support_dirs[plugin_name] = dirs
 
@@ -891,6 +893,22 @@ def install(
                             )
                             result.add_success(source_file, target_file, backup_path)
                             installed_paths.append(target_file)
+
+                            # Copy skill artifact subdirectories (templates/, references/, examples/)
+                            if component_type == "skills":
+                                for subdir in source_file.parent.iterdir():
+                                    if subdir.is_dir():
+                                        target_subdir = target_file.parent / subdir.name
+                                        try:
+                                            if target_subdir.exists():
+                                                safe_remove(target_subdir, missing_ok=True)
+                                            shutil.copytree(subdir, target_subdir)
+                                        except Exception as sub_e:
+                                            logger.warning(
+                                                "Failed to copy skill artifact dir %s: %s",
+                                                subdir.name,
+                                                sub_e,
+                                            )
                         except Exception as e:
                             result.add_failure(
                                 source_file, target_file, f"Write error: {e}", exc_info=e
@@ -1417,6 +1435,22 @@ def update_with_diff(
                                 transform_func=lambda _, transformed=transformed: transformed,
                             )
                             result.add_success(source_file, target_file, backup_path)
+
+                            # Copy skill artifact subdirectories (templates/, references/, examples/)
+                            if component_type == "skills":
+                                for subdir in source_file.parent.iterdir():
+                                    if subdir.is_dir():
+                                        target_subdir = target_file.parent / subdir.name
+                                        try:
+                                            if target_subdir.exists():
+                                                safe_remove(target_subdir, missing_ok=True)
+                                            shutil.copytree(subdir, target_subdir)
+                                        except Exception as sub_e:
+                                            logger.warning(
+                                                "Failed to copy skill artifact dir %s: %s",
+                                                subdir.name,
+                                                sub_e,
+                                            )
                         except Exception as e:
                             result.add_failure(source_file, target_file, f"Write error: {e}")
                             continue
