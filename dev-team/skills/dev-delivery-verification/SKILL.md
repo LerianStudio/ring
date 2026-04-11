@@ -689,7 +689,10 @@ if [ -z "$contracts" ]; then
 else
   blocking=0
 
-  echo "$contracts" | while IFS='|' read -r _ id product endpoint method req_schema resp_schema version _; do
+  # Normalize files_changed once before the loop (not per-iteration)
+  normalized_files=$(echo "$files_changed" | tr ',' '\n' | xargs)
+
+  while IFS='|' read -r _ id product endpoint method req_schema resp_schema version _; do
     id=$(echo "$id" | xargs)
     product=$(echo "$product" | xargs)
     endpoint=$(echo "$endpoint" | xargs)
@@ -717,12 +720,9 @@ else
 
     if [ "$spec_found" = false ]; then
       echo "  ⚠️ WARNING: $id — spec for $product not found locally (cannot auto-validate)"
-      continue
     fi
 
     # Step H.3: Verify implementation calls the declared endpoint
-    # Normalize files_changed from comma-separated to newline-separated for grep
-    normalized_files=$(echo "$files_changed" | tr ',' '\n' | xargs)
     endpoint_path=$(echo "$endpoint" | sed 's|^[A-Z]* ||')  # Strip HTTP method prefix
     refs=$(grep -rn "$endpoint_path" $normalized_files 2>/dev/null | grep -v "_test" | wc -l)
     if [ "$refs" -eq 0 ]; then
@@ -745,7 +745,7 @@ else
       echo "  ✅ Spec available — field-level validation deferred to manual review or oasdiff"
     fi
 
-  done
+  done <<< "$contracts"
 
   if [ "$blocking" -eq 1 ]; then
     echo "CONTRACT_COMPLIANCE: ⛔ FAIL — implementation does not match declared integration contracts"

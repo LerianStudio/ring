@@ -651,6 +651,27 @@ In addition to the standard Coverage Table, ring:ui-engineer MUST output:
 
 ---
 
+### ring:performance-reviewer → (no dedicated standards file)
+
+**Cross-references performance-relevant sections from existing standards.**
+
+Performance Review does not have its own standards file. Instead, it validates findings against performance-relevant sections in Go, TypeScript, and SRE standards.
+
+| # | Section to Check | Source File | What to Cross-Reference |
+|---|------------------|-------------|------------------------|
+| PERF-GO-1 | Performance Patterns | golang/architecture.md | Allocation patterns, sync.Pool, escape analysis |
+| PERF-GO-2 | Concurrency Patterns | golang/architecture.md | Goroutine lifecycle, errgroup, context cancellation |
+| PERF-GO-3 | N+1 Query Detection | golang/architecture.md | JOIN vs loop queries, batch loading |
+| PERF-GO-4 | Goroutine Leak Detection | golang/architecture.md | goleak framework, leak test patterns, context cancellation |
+| PERF-GO-5 | Connection Management | golang/bootstrap.md | Pool sizing, max connections, idle timeout, graceful shutdown |
+| PERF-GO-6 | Dependency Management | golang/core.md | Outdated dependencies, performance regressions, version constraints |
+| PERF-TS-1 | Testing (performance) | typescript.md | Benchmark patterns, load testing |
+| PERF-TS-2 | Frameworks & Libraries | typescript.md | Event loop, memory leaks, bundling |
+| PERF-SRE-1 | Health Checks | sre.md | Readiness impact from performance issues |
+| PERF-SRE-2 | Observability | sre.md | Metrics for performance monitoring |
+
+---
+
 ## Maintenance Instructions
 
 **When you add/modify a section in a standards file:**
