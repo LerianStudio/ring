@@ -674,7 +674,101 @@ fi
 - Missing ctx on exported methods → **WARNING** (informational)
 - Not a Go project → **SKIP**
 
-**Verdict integration:** ALL seven checks (A, B, C, D, E, F, G) must pass for overall PASS. Any FAIL in checks D, E, F, or G → overall verdict is **FAIL** (hard block, return to Gate 0). Any FAIL in checks A, B, C → overall verdict is **PARTIAL** (return to Gate 0 with fix instructions, max 2 retries). SKIP checks do not affect the verdict. WARNING checks are informational.
+#### H. Integration Contract Compliance
+**Reference:** Integration Contracts section from tasks.md (pre-dev-task-breakdown)
+
+This check only runs when the task's source spec (tasks.md or subtask file) contains an `## Integration Contracts` section.
+
+```bash
+# Step H.1: Extract Integration Contracts from task spec
+task_file="$1"  # Path to the task/subtask file
+contracts=$(sed -n '/^## Integration Contracts/,/^## /p' "$task_file" | grep '^| IC-')
+
+if [ -z "$contracts" ]; then
+  echo "CONTRACT_COMPLIANCE: ⚠️ SKIP — no Integration Contracts section in task spec"
+else
+  blocking=0
+
+  echo "$contracts" | while IFS='|' read -r _ id product endpoint method req_schema resp_schema version _; do
+    id=$(echo "$id" | xargs)
+    product=$(echo "$product" | xargs)
+    endpoint=$(echo "$endpoint" | xargs)
+    method=$(echo "$method" | xargs)
+    version=$(echo "$version" | xargs)
+
+    echo "Checking $id: $product $method $endpoint ($version)"
+
+    # Step H.2: Locate dependent product's API spec
+    spec_found=false
+    product_lower=$(echo "$product" | tr '[:upper:]' '[:lower:]' | tr ' ' '-')
+
+    # Check common spec locations
+    for spec_path in \
+      "../\${product_lower}/api/swagger.yaml" \
+      "../\${product_lower}/api/swagger.json" \
+      "../\${product_lower}/api/openapi.yaml" \
+      "../\${product_lower}/proto/\${product_lower}.proto"; do
+      if [ -f "$spec_path" ]; then
+        spec_found=true
+        echo "  Spec found: $spec_path"
+        break
+      fi
+    done
+
+    if [ "$spec_found" = false ]; then
+      echo "  ⚠️ WARNING: $id — spec for $product not found locally (cannot auto-validate)"
+      continue
+    fi
+
+    # Step H.3: Verify implementation calls the declared endpoint
+    # Search for the endpoint path or gRPC method in changed files
+    endpoint_path=$(echo "$endpoint" | sed 's|^[A-Z]* ||')  # Strip HTTP method prefix
+    refs=$(grep -rn "$endpoint_path" $files_changed 2>/dev/null | grep -v "_test" | wc -l)
+    if [ "$refs" -eq 0 ]; then
+      echo "  ⛔ BLOCKING: $id — endpoint $endpoint_path not referenced in implementation"
+      blocking=1
+    fi
+
+    # Step H.4: Verify HTTP method matches
+    if echo "$method" | grep -qiE "^(GET|POST|PUT|PATCH|DELETE)$"; then
+      method_upper=$(echo "$method" | tr '[:lower:]' '[:upper:]')
+      method_refs=$(grep -rn "$method_upper.*$endpoint_path\|$endpoint_path.*$method_upper" $files_changed 2>/dev/null | grep -v "_test" | wc -l)
+      if [ "$method_refs" -eq 0 ]; then
+        echo "  ⚠️ WARNING: $id — HTTP method $method_upper not clearly associated with $endpoint_path"
+      fi
+    fi
+
+    # Step H.5: Cross-reference request fields against spec
+    # (Detailed field-level validation requires parsing OpenAPI — flag for manual review if spec exists)
+    if [ "$spec_found" = true ]; then
+      echo "  ✅ Spec available — field-level validation deferred to manual review or oasdiff"
+    fi
+
+  done
+
+  if [ "$blocking" -eq 1 ]; then
+    echo "CONTRACT_COMPLIANCE: ⛔ FAIL — implementation does not match declared integration contracts"
+  else
+    echo "CONTRACT_COMPLIANCE: ✅ PASS — all declared contracts referenced in implementation"
+  fi
+fi
+```
+
+**Verification logic (per contract row):**
+
+| Check | What it validates | Failure = |
+|-------|------------------|-----------|
+| Endpoint referenced | Implementation calls the declared endpoint path | ⛔ FAIL |
+| Method matches | HTTP method matches the contract declaration | ⚠️ WARNING |
+| Spec locatable | Dependent product's OpenAPI/proto spec exists locally | ⚠️ WARNING (informational) |
+| Field-level match | Request/response fields match spec | Deferred to manual review or oasdiff when spec available |
+
+- Contract endpoint not referenced in implementation → **FAIL** (return to Gate 0: "IC-XXX: endpoint not called — implement integration with $product per contract")
+- Method mismatch → **WARNING** (may be false positive from abstraction layers)
+- Spec not found locally → **WARNING** (cannot auto-validate, flag for manual review)
+- No Integration Contracts section → **SKIP** (check does not apply)
+
+**Verdict integration:** ALL eight checks (A, B, C, D, E, F, G, H) must pass for overall PASS. Any FAIL in checks D, E, F, or G → overall verdict is **FAIL** (hard block, return to Gate 0). Any FAIL in checks A, B, C → overall verdict is **PARTIAL** (return to Gate 0 with fix instructions, max 2 retries). SKIP checks do not affect the verdict. WARNING checks are informational.
 
 ### Step 4: Dead Code Detection
 
@@ -778,6 +872,8 @@ FAIL: Critical requirements NOT DELIVERED
 | "The feature works, just missing one small piece" | Partial delivery ≠ delivery. If R4 of 7 requirements is missing, task is incomplete. | **Deliver ALL requirements** |
 | "That requirement was implied, not explicit" | If the task says it, verify it. Ambiguity → ask, don't skip. | **Verify or clarify with requester** |
 | "I did the hard part, the wiring is trivial" | Trivial ≠ done. If it's trivial, do it now. | **Complete the trivial wiring** |
+| "The integration contract is just a guideline" | The contract is the spec. If implementation deviates from it, either the code or the contract is wrong — fix one. | **Match implementation to contract or update contract with justification** |
+| "I'll validate the integration in testing" | Testing validates behavior. This gate validates contract adherence. Different concerns. | **Verify contract compliance now** |
 
 ## Integration with dev-cycle
 

@@ -524,6 +524,7 @@ Each task includes:
 | **User/Technical Value** | What users can do; what this enables |
 | **Technical Components** | From TRD, From Dependencies |
 | **Dependencies** | Blocks (T-AAA), Requires (T-BBB), Optional (T-CCC) |
+| **Integration Contracts** | Required when task involves cross-product or cross-plugin integration. See [Integration Contracts](#integration-contracts) |
 | **Effort Estimate** | AI Estimate: X AI-agent-hours, Confidence: [High/Medium/Low], Estimation Method: [Agent Name], Team type |
 | **Risks** | Per risk: Impact, Probability, Mitigation, Fallback |
 | **Testing Strategy** | Unit, Integration, E2E, Performance, Security |
@@ -594,6 +595,53 @@ Re-estimation scheduled: [Date when AI available]
 - ✅ Document who approved and when
 - ❌ NEVER mark manual estimates as "High" confidence
 - ❌ NEVER skip variance tracking for manual estimates
+
+## Integration Contracts
+
+**When required:** Any task whose Deliverable, Technical Components, or Success Criteria references an external product or plugin (e.g., plugin-pix, plugin-fees, Matcher, Tracer, Fetcher, or any service outside the current repository).
+
+**When NOT required:** Tasks that only interact with internal modules within the same repository.
+
+Each integration dependency must be declared as a formal contract row:
+
+```markdown
+## Integration Contracts
+
+| ID | Product/Plugin | Endpoint/Interface | Method | Request Schema | Response Schema | Version |
+|----|---------------|-------------------|--------|---------------|----------------|--------|
+| IC-001 | plugin-pix | POST /api/v1/pix/payments | POST | { amount: number, key: string, ... } | { id: string, status: string, ... } | v1.2.0 |
+| IC-002 | Matcher | gRPC ReconcileService.Match | gRPC | ReconcileRequest { ... } | ReconcileResponse { ... } | v2.0.0 |
+```
+
+### Contract Declaration Rules
+
+| Rule | Requirement |
+|------|------------|
+| **Endpoint/Interface** | Exact path (REST) or service.method (gRPC). No vague references like "Pix API" |
+| **Request Schema** | All required fields with types. Can reference OpenAPI spec: `See plugin-pix/api/swagger.yaml#/paths/~1pix~1payments` |
+| **Response Schema** | Fields the implementation will read/use. Include error responses |
+| **Version** | Exact API version of the dependent product. Mandatory — prevents implementing against a changed interface |
+| **Source of truth** | Contract must come from the dependent product's actual spec (OpenAPI, protobuf, docs), not from memory or assumption |
+
+### Validation (Gate 7 Checklist Addition)
+
+| Check | Requirement |
+|-------|------------|
+| **Existence** | If task mentions external product/plugin in Deliverable, Technical Components, or Success Criteria → Integration Contracts section MUST exist with at least one row |
+| **Completeness** | Each row must have non-empty: Endpoint/Interface, Method, Request Schema, Response Schema, and Version |
+| **Source verification** | Schema must reference the dependent product's actual API spec, not ad-hoc definitions |
+| **Version pinning** | Version field must be an exact version (e.g., `v1.2.0`), not `latest` or a range |
+
+### Anti-Rationalization
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|------------------|
+| "Integration details can be figured out during implementation" | Implementation without contract = guessing. Guesses cause the exact bugs we're trying to prevent | **Declare contract before task leaves pre-dev** |
+| "The other team will provide the spec" | Then wait for the spec. A task with undefined contracts is not ready for dev-cycle | **Block task until contract is formalized** |
+| "We've integrated with this product before, we know the API" | Past knowledge drifts. APIs change. The contract forces verification against the current spec | **Document the current contract, not memory** |
+| "It's an internal product, we control both sides" | Internal products change too. The TED case proves this | **Same rules apply — declare the contract** |
+
+---
 
 ## Common Violations
 
