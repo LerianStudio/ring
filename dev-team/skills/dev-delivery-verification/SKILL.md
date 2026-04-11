@@ -704,10 +704,10 @@ else
 
     # Check common spec locations
     for spec_path in \
-      "../\${product_lower}/api/swagger.yaml" \
-      "../\${product_lower}/api/swagger.json" \
-      "../\${product_lower}/api/openapi.yaml" \
-      "../\${product_lower}/proto/\${product_lower}.proto"; do
+      "../${product_lower}/api/swagger.yaml" \
+      "../${product_lower}/api/swagger.json" \
+      "../${product_lower}/api/openapi.yaml" \
+      "../${product_lower}/proto/${product_lower}.proto"; do
       if [ -f "$spec_path" ]; then
         spec_found=true
         echo "  Spec found: $spec_path"
@@ -721,9 +721,10 @@ else
     fi
 
     # Step H.3: Verify implementation calls the declared endpoint
-    # Search for the endpoint path or gRPC method in changed files
+    # Normalize files_changed from comma-separated to newline-separated for grep
+    normalized_files=$(echo "$files_changed" | tr ',' '\n' | xargs)
     endpoint_path=$(echo "$endpoint" | sed 's|^[A-Z]* ||')  # Strip HTTP method prefix
-    refs=$(grep -rn "$endpoint_path" $files_changed 2>/dev/null | grep -v "_test" | wc -l)
+    refs=$(grep -rn "$endpoint_path" $normalized_files 2>/dev/null | grep -v "_test" | wc -l)
     if [ "$refs" -eq 0 ]; then
       echo "  ⛔ BLOCKING: $id — endpoint $endpoint_path not referenced in implementation"
       blocking=1
@@ -732,7 +733,7 @@ else
     # Step H.4: Verify HTTP method matches
     if echo "$method" | grep -qiE "^(GET|POST|PUT|PATCH|DELETE)$"; then
       method_upper=$(echo "$method" | tr '[:lower:]' '[:upper:]')
-      method_refs=$(grep -rn "$method_upper.*$endpoint_path\|$endpoint_path.*$method_upper" $files_changed 2>/dev/null | grep -v "_test" | wc -l)
+      method_refs=$(grep -rn "$method_upper.*$endpoint_path\|$endpoint_path.*$method_upper" $normalized_files 2>/dev/null | grep -v "_test" | wc -l)
       if [ "$method_refs" -eq 0 ]; then
         echo "  ⚠️ WARNING: $id — HTTP method $method_upper not clearly associated with $endpoint_path"
       fi
@@ -768,7 +769,7 @@ fi
 - Spec not found locally → **WARNING** (cannot auto-validate, flag for manual review)
 - No Integration Contracts section → **SKIP** (check does not apply)
 
-**Verdict integration:** ALL eight checks (A, B, C, D, E, F, G, H) must pass for overall PASS. Any FAIL in checks D, E, F, or G → overall verdict is **FAIL** (hard block, return to Gate 0). Any FAIL in checks A, B, C → overall verdict is **PARTIAL** (return to Gate 0 with fix instructions, max 2 retries). SKIP checks do not affect the verdict. WARNING checks are informational.
+**Verdict integration:** ALL eight checks (A, B, C, D, E, F, G, H) must pass for overall PASS. Any FAIL in checks D, E, F, G, or H → overall verdict is **FAIL** (hard block, return to Gate 0). Any FAIL in checks A, B, C → overall verdict is **PARTIAL** (return to Gate 0 with fix instructions, max 2 retries). SKIP checks do not affect the verdict. WARNING checks are informational.
 
 ### Step 4: Dead Code Detection
 
