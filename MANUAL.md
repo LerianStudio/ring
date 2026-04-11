@@ -89,12 +89,9 @@ Commands are invoked directly: `/command-name`.
 | `/ring:diagram [topic]`         | Generate a Mermaid diagram                  | `/ring:diagram payment-flow`                       |
 | `/ring:visualize [topic]`       | Generate visual explanation                 | `/ring:visualize auth-architecture`                |
 | `/ring:release-guide`           | Generate step-by-step release instructions  | `/ring:release-guide`                              |
-| `/ring:pre-dev-feature [name]`  | Plan simple features (<2 days) – 5 gates    | `/ring:pre-dev-feature logout-button`              |
-| `/ring:pre-dev-full [name]`     | Plan complex features (≥2 days) – 10 gates  | `/ring:pre-dev-full payment-system`                |
 | `/ring:worktree [branch-name]`  | Create isolated git workspace               | `/ring:worktree auth-system`                       |
 | `/ring:write-plan [feature]`    | Generate detailed task breakdown            | `/ring:write-plan dashboard-redesign`              |
 | `/ring:execute-plan [path]`     | Execute plan in batches with checkpoints    | `/ring:execute-plan docs/pre-dev/feature/tasks.md` |
-| `/ring:delivery-status`         | Show delivery status and tracking           | `/ring:delivery-status`                            |
 
 ### Code & Integration Workflows
 
@@ -109,6 +106,14 @@ Commands are invoked directly: `/command-name`.
 | Command                       | Use Case                                                      | Example                              |
 | ----------------------------- | ------------------------------------------------------------- | ------------------------------------ |
 | `/ring:create-handoff [name]` | Create handoff document before /clear (auto-resumes via hook) | `/ring:create-handoff auth-refactor` |
+
+### Product Planning (ring-pm-team)
+
+| Command                        | Use Case                                   | Example                               |
+| ------------------------------ | ------------------------------------------ | ------------------------------------- |
+| `/ring:pre-dev-feature [name]` | Plan simple features (<2 days) – 5 gates   | `/ring:pre-dev-feature logout-button` |
+| `/ring:pre-dev-full [name]`    | Plan complex features (≥2 days) – 10 gates | `/ring:pre-dev-full payment-system`   |
+| `/ring:delivery-status`        | Show delivery status and tracking          | `/ring:delivery-status`               |
 
 ### Development Cycle (ring-dev-team)
 
