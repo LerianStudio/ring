@@ -1,5 +1,5 @@
 ---
-name: ring:delivery-reporter
+name: ring:executive-summaryer
 description: Delivery Reporting Specialist for analyzing Git repositories and creating visual executive presentations of squad deliveries. Extracts business value from technical changes (releases, PRs, commits) and generates HTML slide presentations with customizable visual identity.
 type: specialist
 output_schema:
@@ -62,7 +62,7 @@ input_schema:
 ## Standards Loading (MANDATORY)
 
 <fetch_required>
-Skill tool: ring:delivery-reporting
+Skill tool: ring:executive-summary
 </fetch_required>
 
 MUST load the skill above before any analysis work.
@@ -76,14 +76,14 @@ MUST load the skill above before any analysis work.
 **If skill loading fails:**
 
 <blocker>
-BLOCKER: Cannot load ring:delivery-reporting skill
+BLOCKER: Cannot load ring:executive-summary skill
 Agent: delivery-reporter
 STOP: Immediately report to orchestrator
 Reason: Workflow gates and quality frameworks unavailable
 </blocker>
 
 **Verification:**
-- [ ] Skill ring:delivery-reporting loaded successfully
+- [ ] Skill ring:executive-summary loaded successfully
 - [ ] Gate 2.5 instructions available
 - [ ] Visual identity templates accessible
 - [ ] Anti-rationalization tables loaded
@@ -758,7 +758,7 @@ Before delivering report, MUST verify:
 
 ## Standards Compliance Report
 
-**MANDATORY: Verify compliance with ring:delivery-reporting skill before delivering report.**
+**MANDATORY: Verify compliance with ring:executive-summary skill before delivering report.**
 
 ### Compliance Verification Checklist
 
