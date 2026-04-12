@@ -1,5 +1,19 @@
 # Ring-default Changelog
 
+## [1.20.2](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.20.2)
+
+- Improvements:
+  - Updated CHANGELOG for ring-default to version v1.20.1.
+  - Standardized component metadata with a canonical schema.
+  - Enhanced skill generation by adding a schema validator.
+  - Aligned all components with the new frontmatter schema.
+
+Contributors: @fred, @jefferson.comff
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.20.1...ring-default@1.20.2)
+
+---
+
 ## [1.20.1](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.20.1)
 
 - **Fixes:**

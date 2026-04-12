@@ -1,5 +1,15 @@
 # Ring-pm-team Changelog
 
+## [0.23.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.23.1)
+
+- Refactor: Removed commands layer and renamed skills to match command names.
+
+Contributors: @fred
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.23.0...ring-pm-team@0.23.1)
+
+---
+
 ## [0.23.0](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.23.0)
 
 - **Features**
