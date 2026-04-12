@@ -168,7 +168,7 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 
 1. Add to `default/agents/your-reviewer.md` with output_schema (see [AGENT_DESIGN.md](AGENT_DESIGN.md))
 
-2. Reference in `default/skills/requesting-code-review/SKILL.md:85`
+2. Reference in `default/skills/codereview/SKILL.md:85`
 
 3. Dispatch via Task tool:
 

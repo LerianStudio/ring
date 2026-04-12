@@ -1,6 +1,6 @@
 # Ring Marketplace Manual
 
-Quick reference guide for the Ring skills library and workflow system. This monorepo provides 6 plugins with 93 skills, 38 agents, and 33 slash commands for enforcing proven software engineering practices across the entire software delivery value chain.
+Quick reference guide for the Ring skills library and workflow system. This monorepo provides 6 plugins with 90 skills and 38 agents for enforcing proven software engineering practices across the entire software delivery value chain.
 
 ---
 
@@ -13,15 +13,15 @@ Quick reference guide for the Ring skills library and workflow system. This mono
 │                                                                                    │
 │  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐      │
 │  │ ring-default  │  │ ring-dev-team │  │ ring-pm-team  │  │ring-finops-   │      │
-│  │  Skills(22)   │  │  Skills(32)   │  │  Skills(16)   │  │  team         │      │
+│  │  Skills(22)   │  │  Skills(31)   │  │  Skills(15)   │  │  team         │      │
 │  │  Agents(10)   │  │  Agents(12)   │  │  Agents(4)    │  │  Skills(7)    │      │
-│  │  Cmds(14)     │  │  Cmds(9)      │  │  Cmds(3)      │  │  Agents(3)    │      │
+│  │               │  │               │  │               │  │  Agents(3)    │      │
 │  └───────────────┘  └───────────────┘  └───────────────┘  └───────────────┘      │
 │  ┌───────────────┐  ┌───────────────┐                                            │
 │  │ ring-tw-team  │  │ ring-pmo-team │                                            │
-│  │  Skills(7)    │  │  Skills(9)    │                                            │
+│  │  Skills(6)    │  │  Skills(9)    │                                            │
 │  │  Agents(3)    │  │  Agents(6)    │                                            │
-│  │  Cmds(3)      │  │  Cmds(4)      │                                            │
+│  │               │  │               │                                            │
 │  └───────────────┘  └───────────────┘                                            │
 └────────────────────────────────────────────────────────────────────────────────────┘
 
@@ -35,16 +35,16 @@ Quick reference guide for the Ring skills library and workflow system. This mono
            │                        │                        │
            ▼                        ▼                        ▼
     ┌──────────────┐         ┌──────────────┐         ┌──────────────┐
-    │    HOOKS     │         │   COMMANDS   │         │    SKILLS    │
-    │ auto-inject  │         │ user-invoked │         │ auto-applied │
-    │   context    │         │  /ring:...   │         │  internally  │
+    │    HOOKS     │         │    SKILLS    │         │    AGENTS    │
+    │ auto-inject  │         │   primary    │         │  dispatched  │
+    │   context    │         │  invocation  │         │  for work    │
     └──────────────┘         └──────────────┘         └──────────────┘
            │                        │                        │
            │                        ▼                        │
            │                 ┌──────────────┐                │
-           └────────────────▶│    AGENTS    │◀───────────────┘
-                             │  dispatched  │
-                             │  for work    │
+           └────────────────▶│   RESULTS    │◀───────────────┘
+                             │  aggregated  │
+                             │  & reported  │
                              └──────────────┘
 
                             COMPONENT ROLES
@@ -54,10 +54,9 @@ Quick reference guide for the Ring skills library and workflow system. This mono
     │ Component  │ Purpose                                          │
     ├────────────┼──────────────────────────────────────────────────┤
     │ MARKETPLACE│ Monorepo containing all plugins                  │
-    │ PLUGIN     │ Self-contained package (skills+agents+commands)  │
+    │ PLUGIN     │ Self-contained package (skills+agents+hooks)     │
     │ HOOK       │ Auto-runs at session events (injects context)    │
-    │ SKILL      │ Workflow pattern (Claude Code uses internally)   │
-    │ COMMAND    │ User-invokable action (/ring:codereview)         │
+    │ SKILL      │ Primary invocation (user or Claude Code)          │
     │ AGENT      │ Specialized subprocess (Task tool dispatch)      │
     └────────────┴──────────────────────────────────────────────────┘
 ```
@@ -66,93 +65,18 @@ Quick reference guide for the Ring skills library and workflow system. This mono
 
 ## 🎯 Quick Start
 
-Ring is auto-loaded at session start. Three ways to invoke Ring capabilities:
+Ring is auto-loaded at session start. Two ways to invoke Ring capabilities:
 
-1. **Slash Commands** – `/command-name`
-2. **Skills** – `Skill tool: "ring:skill-name"`
-3. **Agents** – `Task tool with subagent_type: "ring:agent-name"`
-
----
-
-## 📋 Slash Commands
-
-Commands are invoked directly: `/command-name`.
-
-### Project & Feature Workflows
-
-| Command                         | Use Case                                    | Example                                            |
-| ------------------------------- | ------------------------------------------- | -------------------------------------------------- |
-| `/ring:brainstorm [topic]`      | Interactive design refinement before coding | `/ring:brainstorm user-authentication`             |
-| `/ring:explore-codebase [path]` | Autonomous two-phase codebase exploration   | `/ring:explore-codebase payment/`                  |
-| `/ring:interview-me [topic]`    | Proactive requirements gathering interview  | `/ring:interview-me auth-system`                   |
-| `/ring:md-to-html [file]`       | Transform a markdown file into an HTML page | `/ring:md-to-html architecture.md`                 |
-| `/ring:diagram [topic]`         | Generate a Mermaid diagram                  | `/ring:diagram payment-flow`                       |
-| `/ring:visualize [topic]`       | Generate visual explanation                 | `/ring:visualize auth-architecture`                |
-| `/ring:release-guide`           | Generate step-by-step release instructions  | `/ring:release-guide`                              |
-| `/ring:worktree [branch-name]`  | Create isolated git workspace               | `/ring:worktree auth-system`                       |
-| `/ring:write-plan [feature]`    | Generate detailed task breakdown            | `/ring:write-plan dashboard-redesign`              |
-| `/ring:execute-plan [path]`     | Execute plan in batches with checkpoints    | `/ring:execute-plan docs/pre-dev/feature/tasks.md` |
-
-### Code & Integration Workflows
-
-| Command                             | Use Case                                       | Example                                              |
-| ----------------------------------- | ---------------------------------------------- | ---------------------------------------------------- |
-| `/ring:codereview [files-or-paths]` | Dispatch 7 parallel code reviewers             | `/ring:codereview src/auth/`                         |
-| `/ring:commit [message]`            | Create git commit with AI trailers             | `/ring:commit "fix(auth): improve token validation"` |
-| `/ring:lint [path]`                 | Run lint and dispatch agents to fix all issues | `/ring:lint src/`                                    |
-
-### Session Management
-
-| Command                       | Use Case                                                      | Example                              |
-| ----------------------------- | ------------------------------------------------------------- | ------------------------------------ |
-| `/ring:create-handoff [name]` | Create handoff document before /clear (auto-resumes via hook) | `/ring:create-handoff auth-refactor` |
-
-### Product Planning (ring-pm-team)
-
-| Command                        | Use Case                                   | Example                               |
-| ------------------------------ | ------------------------------------------ | ------------------------------------- |
-| `/ring:pre-dev-feature [name]` | Plan simple features (<2 days) – 5 gates   | `/ring:pre-dev-feature logout-button` |
-| `/ring:pre-dev-full [name]`    | Plan complex features (≥2 days) – 10 gates | `/ring:pre-dev-full payment-system`   |
-| `/ring:delivery-status`        | Show delivery status and tracking          | `/ring:delivery-status`               |
-
-### Development Cycle (ring-dev-team)
-
-| Command                     | Use Case                           | Example                                 |
-| --------------------------- | ---------------------------------- | --------------------------------------- |
-| `/ring:dev-cycle [task]`    | Start 10-gate development workflow | `/ring:dev-cycle "implement user auth"` |
-| `/ring:dev-cycle-frontend [task]` | Start 9-gate frontend workflow | `/ring:dev-cycle-frontend "improve dashboard UX"` |
-| `/ring:dev-refactor [path]` | Analyze codebase against standards | `/ring:dev-refactor src/`               |
-| `/ring:dev-refactor-frontend [path]` | Analyze frontend against standards | `/ring:dev-refactor-frontend web/` |
-| `/ring:dev-service-discovery [path]` | Scan service/module/resource hierarchy | `/ring:dev-service-discovery .` |
-| `/ring:dev-status`          | Show current gate progress         | `/ring:dev-status`                      |
-| `/ring:dev-report`          | Generate development cycle report  | `/ring:dev-report`                      |
-| `/ring:dev-cancel`          | Cancel active development cycle    | `/ring:dev-cancel`                      |
-| `/ring:migrate-v4 [path]`  | Analyze Go service for lib-commons v4 migration | `/ring:migrate-v4 src/`        |
-
-### Technical Writing (Documentation)
-
-| Command                      | Use Case                         | Example                            |
-| ---------------------------- | -------------------------------- | ---------------------------------- |
-| `/ring:write-guide [topic]`  | Start writing a functional guide | `/ring:write-guide authentication` |
-| `/ring:write-api [endpoint]` | Start writing API documentation  | `/ring:write-api POST /accounts`   |
-| `/ring:review-docs [file]`   | Review documentation for quality | `/ring:review-docs docs/guide.md`  |
-
-### PMO Portfolio (ring-pmo-team)
-
-| Command                             | Use Case                         | Example                                    |
-| ----------------------------------- | -------------------------------- | ------------------------------------------ |
-| `/ring:portfolio-review [scope]`    | Comprehensive portfolio review   | `/ring:portfolio-review Q1-2025`           |
-| `/ring:dependency-analysis [scope]` | Cross-project dependency mapping | `/ring:dependency-analysis payment-system` |
-| `/ring:executive-summary [scope]`   | Executive status summary         | `/ring:executive-summary board-meeting`    |
-| `/ring:delivery-report [scope]`     | Generate delivery status report  | `/ring:delivery-report Q1-2025`            |
+1. **Skills** – `Skill tool: "ring:skill-name"` (primary invocation method)
+2. **Agents** – `Task tool with subagent_type: "ring:agent-name"`
 
 ---
 
 ## 💡 About Skills
 
-Skills (93) are workflows that Claude Code invokes automatically when it detects they're applicable. They handle testing, debugging, verification, planning, and code review enforcement. You don't call them directly - Claude Code uses them internally to enforce best practices.
+Skills (90) are the primary invocation mechanism for Ring. They can be invoked directly by users (`Skill tool: "ring:skill-name"`) or applied automatically by Claude Code when it detects they're applicable. They handle testing, debugging, verification, planning, code review enforcement, and more.
 
-Examples: ring:test-driven-development, ring:systematic-debugging, ring:requesting-code-review, ring:verification-before-completion, ring:production-readiness-audit (44-dimension audit, up to 10 explorers per batch, incremental report 0-430, max 440 with multi-tenant; see [default/skills/production-readiness-audit/SKILL.md](default/skills/production-readiness-audit/SKILL.md)), etc.
+Examples: ring:test-driven-development, ring:systematic-debugging, ring:codereview, ring:verification-before-completion, ring:production-readiness-audit (44-dimension audit, up to 10 explorers per batch, incremental report 0-430, max 440 with multi-tenant; see [default/skills/production-readiness-audit/SKILL.md](default/skills/production-readiness-audit/SKILL.md)), etc.
 
 ### Skill Selection Criteria
 
@@ -193,7 +117,7 @@ Invoke via `Task tool with subagent_type: "..."`.
 | `ring:consequences-reviewer`   | Ripple effect, caller impact, downstream consequences |
 | `ring:dead-code-reviewer`      | Unused code, unreachable paths, dead exports          |
 
-**Example:** Before merging, run all 7 parallel reviewers via `/ring:codereview src/`
+**Example:** Before merging, run all 7 parallel reviewers via `ring:codereview` skill
 
 ### Orchestration (ring-default)
 
@@ -304,12 +228,12 @@ For portfolio-level project management and oversight:
 
 ### New Feature Development
 
-1. **Design** → `/ring:brainstorm feature-name`
-2. **Plan** → `/ring:pre-dev-feature feature-name` (or `ring:pre-dev-full` if complex)
-3. **Isolate** → `/ring:worktree feature-branch`
+1. **Design** → Use `ring:brainstorm` skill
+2. **Plan** → Use `ring:pre-dev-feature` skill (or `ring:pre-dev-full` if complex)
+3. **Isolate** → Use `ring:worktree` skill
 4. **Implement** → Use `ring:test-driven-development` skill
-5. **Review** → `/ring:codereview src/` (dispatches 7 reviewers)
-6. **Commit** → `/ring:commit "message"`
+5. **Review** → Use `ring:codereview` skill (dispatches 7 reviewers)
+6. **Commit** → Use `ring:commit` skill
 
 ### Bug Investigation
 
@@ -317,12 +241,12 @@ For portfolio-level project management and oversight:
 2. **Trace** → Use `ring:root-cause-tracing` if needed
 3. **Implement** → Use `ring:test-driven-development` skill
 4. **Verify** → Use `ring:verification-before-completion` skill
-5. **Review & Merge** → `/ring:codereview` + `/ring:commit`
+5. **Review & Merge** → Use `ring:codereview` + `ring:commit` skills
 
 ### Code Review
 
 ```
-/ring:codereview [files-or-paths]
+ring:codereview skill
     ↓
 Runs in parallel:
   • ring:code-reviewer
@@ -344,7 +268,7 @@ These enforce quality standards:
 
 1. **TDD is enforced** – Test must fail (RED) before implementation
 2. **Skill check is mandatory** – Use `ring:using-ring` before any task
-3. **Reviewers run parallel** – Never sequential review (use `/ring:codereview`)
+3. **Reviewers run parallel** – Never sequential review (use `ring:codereview` skill)
 4. **Verification required** – Don't claim complete without evidence
 5. **No incomplete code** – No "TODO" or placeholder comments
 6. **Error handling required** – Don't ignore errors
@@ -353,21 +277,22 @@ These enforce quality standards:
 
 ## 💡 Best Practices
 
-### Command Selection
+### Skill & Command Selection
 
-| Situation                                              | Use This                |
-| ------------------------------------------------------ | ----------------------- |
-| New feature, unsure about design                       | `/ring:brainstorm`      |
-| Feature will take < 2 days                             | `/ring:pre-dev-feature` |
-| Feature will take ≥ 2 days or has complex dependencies | `/ring:pre-dev-full`    |
-| Need implementation tasks                              | `/ring:write-plan`      |
-| Before merging code                                    | `/ring:codereview`      |
+| Situation                                              | Use This                       |
+| ------------------------------------------------------ | ------------------------------ |
+| New feature, unsure about design                       | `ring:brainstorm` (skill)      |
+| Feature will take < 2 days                             | `ring:pre-dev-feature` (skill) |
+| Feature will take ≥ 2 days or has complex dependencies | `ring:pre-dev-full` (skill)    |
+| Need implementation tasks                              | `ring:write-plan` (skill)      |
+| Before merging code                                    | `ring:codereview` (skill)      |
+| Start development cycle                                | `ring:dev-cycle` (skill)       |
 
 ### Agent Selection
 
 | Need                              | Agent to Use                                |
 | --------------------------------- | ------------------------------------------- |
-| General code quality review       | 7 parallel reviewers via `/ring:codereview` |
+| General code quality review       | 7 parallel reviewers via `ring:codereview` skill |
 | Large PR review (15+ files)       | Auto-sliced via `ring:review-slicer`        |
 | Implementation planning           | `ring:write-plan`                           |
 | Deep codebase analysis            | `ring:codebase-explorer`                    |
@@ -407,7 +332,7 @@ These enforce quality standards:
 ### Session Startup
 
 1. SessionStart hook runs automatically
-2. All 93 skills are auto-discovered and available
+2. All 90 skills are auto-discovered and available
 3. `ring:using-ring` workflow is activated (skill checking is now mandatory)
 
 ### Agent Dispatching
@@ -452,7 +377,6 @@ Consolidated report
 
 - **Full Documentation** → `default/skills/*/SKILL.md` files
 - **Agent Definitions** → `default/agents/*.md` files
-- **Commands** → `default/commands/*.md` files
 - **Plugin Config** → `.claude-plugin/marketplace.json`
 - **CLAUDE.md** → Project-specific instructions (checked into repo)
 
@@ -460,6 +384,6 @@ Consolidated report
 
 ## ❓ Need Help?
 
-- **How to use Claude Code?** → Ask about Claude Code features, MCP servers, slash commands
+- **How to use Claude Code?** → Ask about Claude Code features, MCP servers, skills
 - **How to use Ring?** → Check skill names in this manual or in `ring:using-ring` skill
 - **Feature/bug tracking?** → https://github.com/lerianstudio/ring/issues

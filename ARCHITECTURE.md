@@ -13,7 +13,7 @@
 
 ## Overview
 
-Ring is a **Claude Code plugin marketplace** that provides a comprehensive skills library and workflow system with **6 active plugins** (93 skills, 38 agents, 33 commands). It extends Claude Code's capabilities through structured, reusable patterns that enforce proven software engineering practices across the software delivery value chain: Product Planning → Development → Documentation.
+Ring is a **Claude Code plugin marketplace** that provides a comprehensive skills library and workflow system with **6 active plugins** (90 skills, 38 agents). It extends Claude Code's capabilities through structured, reusable patterns that enforce proven software engineering practices across the software delivery value chain: Product Planning → Development → Documentation.
 
 ### Architecture Philosophy
 
@@ -33,22 +33,20 @@ Ring operates on three core principles:
 │  │                          Ring Marketplace                                  │  │
 │  │  ┌──────────────────────┐  ┌──────────────────────┐                       │  │
 │  │  │ ring-default         │  │ ring-dev-team        │                       │  │
-│  │  │ Skills(22) Agents(10)│  │ Skills(32) Agents(12)│                       │  │
-│  │  │ Cmds(14) Hooks/Lib   │  │ Cmds(9)              │                       │  │
+│  │  │ Skills(22) Agents(10)│  │ Skills(31) Agents(12)│                       │  │
+│  │  │ Hooks/Lib            │  │                      │                       │  │
 │  │  └──────────────────────┘  └──────────────────────┘                       │  │
 │  │  ┌──────────────────────┐  ┌──────────────────────┐                       │  │
 │  │  │ ring-pm-team         │  │ ring-tw-team         │                       │  │
-│  │  │ Skills(16) Agents(4) │  │ Skills(7) Agents(3)  │                       │  │
-│  │  │ Cmds(3)              │  │ Cmds(3)              │                       │  │
+│  │  │ Skills(15) Agents(4) │  │ Skills(7) Agents(3)  │                       │  │
 │  │  └──────────────────────┘  └──────────────────────┘                       │  │
 │  │  ┌──────────────────────┐  ┌──────────────────────┐                       │  │
 │  │  │ ring-finops-team     │  │ ring-pmo-team        │                       │  │
-│  │  │ Skills(7) Agents(3)  │  │ Skills(9) Agents(6)  │                       │  │
-│  │  └──────────────────────┘  │ Cmds(4)              │                       │  │
-│  │                            └──────────────────────┘                       │  │
+│  │  │ Skills(6) Agents(3)  │  │ Skills(9) Agents(6)  │                       │  │
+│  │  └──────────────────────┘  └──────────────────────┘                       │  │
 │  └───────────────────────────────────────────────────────────────────────────┘  │
 │                                                                                  │
-│  Native Tools: Skill, Task, TodoWrite, SlashCommand                             │
+│  Native Tools: Skill, Task, TodoWrite                                           │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -74,12 +72,12 @@ _Versions managed in `.claude-plugin/marketplace.json`_
 
 | Plugin               | Description                          | Components                       |
 | -------------------- | ------------------------------------ | -------------------------------- |
-| **ring-default**     | Core skills library                  | 22 skills, 10 agents, 14 commands |
-| **ring-dev-team**    | Developer agents                     | 32 skills, 12 agents, 9 commands |
+| **ring-default**     | Core skills library                  | 22 skills, 10 agents              |
+| **ring-dev-team**    | Developer agents                     | 31 skills, 12 agents              |
 | **ring-finops-team** | FinOps regulatory compliance         | 7 skills, 3 agents               |
-| **ring-pm-team**     | Product planning workflows           | 16 skills, 4 agents, 3 commands  |
-| **ring-pmo-team**    | PMO portfolio management specialists | 9 skills, 6 agents, 4 commands   |
-| **ring-tw-team**     | Technical writing specialists        | 7 skills, 3 agents, 3 commands   |
+| **ring-pm-team**     | Product planning workflows           | 15 skills, 4 agents               |
+| **ring-pmo-team**    | PMO portfolio management specialists | 9 skills, 6 agents                |
+| **ring-tw-team**     | Technical writing specialists        | 6 skills, 3 agents                |
 
 ## Component Hierarchy
 
@@ -161,11 +159,11 @@ pmo-team/agents/
 
 - Invoked via Claude's `Task` tool with `subagent_type`
 - Invoked with specialized subagent_type for domain-specific analysis
-- Review agents run in parallel (7 reviewers dispatch simultaneously via `/ring:codereview` command)
+- Review agents run in parallel (7 reviewers dispatch simultaneously via `ring:codereview` skill)
 - Developer agents provide specialized domain expertise
 - Return structured reports with severity-based findings
 
-**Note:** Parallel review orchestration is handled by the `/ring:codereview` command
+**Note:** Parallel review orchestration is handled by the `ring:codereview` skill
 
 **Standards Compliance Output (ring-dev-team agents):**
 
@@ -190,7 +188,7 @@ All ring-dev-team agents include a `## Standards Compliance` section in their ou
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│  User invokes: /ring:dev-refactor                          │
+│  User invokes: ring:dev-refactor skill                      │
 │         ↓                                                           │
 │  ring:dev-refactor skill dispatches agents with prompt:                  │
 │  "**MODE: ANALYSIS ONLY** - Compare codebase with Ring standards"   │
@@ -244,65 +242,7 @@ All ring-dev-team agents include a `## Standards Compliance` section in their ou
 - `dev-team/skills/dev-refactor/SKILL.md`: HARD GATES defining requirement
 - `dev-team/hooks/session-start.sh`: Injects guidance at session start
 
-### 3. Commands (`commands/`)
-
-**Purpose:** Slash commands that provide shortcuts to skills/workflows
-
-**Structure:**
-
-```
-default/commands/
-├── brainstorm.md         # /ring:brainstorm - Socratic design refinement
-├── codereview.md         # /ring:codereview - Parallel 7-reviewer dispatch
-├── commit.md             # /ring:commit - Git commit with trailers
-├── create-handoff.md     # /ring:create-handoff - Create session handoff
-├── diagram.md            # /ring:diagram - Generate Mermaid diagrams
-├── execute-plan.md       # /ring:execute-plan - Batch execution
-├── explore-codebase.md   # /ring:explore-codebase - Deep architecture analysis
-├── interview-me.md       # /ring:interview-me - Interactive interview
-├── lint.md               # /ring:lint - Run linters and fix issues
-├── md-to-html.md         # /ring:md-to-html - Markdown to HTML
-├── release-guide.md      # /ring:release-guide - Release guidance
-├── visualize.md          # /ring:visualize - Visual system explanations
-├── worktree.md           # /ring:worktree - Git worktree creation
-└── write-plan.md         # /ring:write-plan - Implementation planning
-
-pm-team/commands/
-├── delivery-status.md    # /ring:delivery-status - Delivery status tracking
-├── pre-dev-feature.md    # /ring:pre-dev-feature - 5-gate workflow
-└── pre-dev-full.md       # /ring:pre-dev-full - 10-gate workflow
-
-pmo-team/commands/
-├── delivery-report.md      # /ring:delivery-report - PMO delivery reporting
-├── dependency-analysis.md  # /ring:dependency-analysis - Dependency analysis
-├── executive-summary.md    # /ring:executive-summary - Executive summary
-└── portfolio-review.md     # /ring:portfolio-review - Portfolio review
-
-dev-team/commands/
-├── dev-cancel.md           # /ring:dev-cancel - Cancel dev cycle
-├── dev-cycle.md            # /ring:dev-cycle - 10-gate development cycle
-├── dev-cycle-frontend.md   # /ring:dev-cycle-frontend - 9-gate frontend cycle
-├── dev-refactor.md         # /ring:dev-refactor - Standards refactoring
-├── dev-refactor-frontend.md # /ring:dev-refactor-frontend - Frontend standards refactor
-├── dev-report.md           # /ring:dev-report - Development reporting
-├── dev-service-discovery.md # /ring:dev-service-discovery - Service hierarchy scan
-├── dev-status.md           # /ring:dev-status - Development status
-└── migrate-v4.md           # /ring:migrate-v4 - V4 migration
-
-tw-team/commands/
-├── review-docs.md          # /ring:review-docs - Documentation review
-├── write-api.md            # /ring:write-api - API documentation
-└── write-guide.md          # /ring:write-guide - Guide writing
-```
-
-**Key Characteristics:**
-
-- Simple `.md` files with YAML frontmatter
-- Invoked via `/{command}` syntax
-- Typically reference a corresponding skill
-- Expand into full skill/agent invocation
-
-### 4. Hooks (`hooks/`)
+### 3. Hooks (`hooks/`)
 
 **Purpose:** Session lifecycle management and automatic initialization
 
@@ -324,7 +264,7 @@ default/hooks/
 - Auto-generates skills quick reference from frontmatter
 - Ensures mandatory workflows are loaded
 
-### 5. Plugin Configuration (`.claude-plugin/`)
+### 4. Plugin Configuration (`.claude-plugin/`)
 
 **Purpose:** Integration metadata for Claude Code marketplace
 
@@ -445,8 +385,8 @@ sequenceDiagram
     participant ring:consequences-reviewer
     participant DCR as ring:dead-code-reviewer
 
-    User->>Claude: /ring:codereview
-    Note over Claude: Command provides<br/>parallel review workflow
+    User->>Claude: Use ring:codereview skill
+    Note over Claude: Skill provides<br/>parallel review workflow
 
     Claude->>Task Tool: Dispatch 7 parallel tasks
 
@@ -482,7 +422,7 @@ sequenceDiagram
 
 ### Native Tool Integration
 
-Ring leverages four primary Claude Code tools:
+Ring leverages three primary Claude Code tools:
 
 1. **Skill Tool**
 
@@ -501,11 +441,6 @@ Ring leverages four primary Claude Code tools:
    - Tracks multi-step workflows: `TodoWrite(todos=[...])`
    - Integrates with skills via shared patterns
    - Provides progress visibility to users
-
-4. **SlashCommand Tool**
-   - Executes commands: `SlashCommand(command="/ring:brainstorm")`
-   - Commands expand to skill/agent invocations
-   - Provides user-friendly shortcuts
 
 ### Session Context Injection
 
@@ -535,7 +470,7 @@ User Request → ring:using-ring check → Relevant skill?
 ### Pattern 2: Parallel Review Execution
 
 ```
-Review Request → /ring:codereview → ring:review-slicer (classify)
+Review Request → ring:codereview skill → ring:review-slicer (classify)
     ├─ Small/focused PR → 7 Tasks in parallel (full diff)
     └─ Large/multi-theme PR → For EACH slice:
         ├─ ring:code-reviewer           ─┐
@@ -549,25 +484,7 @@ Review Request → /ring:codereview → ring:review-slicer (classify)
 
 **Implementation:** The `ring:review-slicer` agent classifies files into thematic slices for large PRs (15+ files). For each slice, all 7 reviewers dispatch in parallel via a single message with 7 Task tool calls. Results are merged and deduplicated before consolidation. Small PRs skip slicing entirely (zero overhead).
 
-### Pattern 3: Skill-to-Command Mapping
-
-```
-User: /ring:brainstorm
-    ↓
-SlashCommand Tool
-    ↓
-commands/brainstorm.md
-    ↓
-"Use and follow the ring:brainstorming skill"
-    ↓
-Skill Tool: ring:brainstorming
-    ↓
-skills/brainstorming/SKILL.md
-```
-
-**Implementation:** Commands are thin wrappers that immediately invoke corresponding skills.
-
-### Pattern 4: Progressive Skill Execution
+### Pattern 3: Progressive Skill Execution
 
 ```
 Complex Skill → TodoWrite tracking
@@ -590,21 +507,8 @@ Complex Skill → TodoWrite tracking
 
 **Interaction:**
 
-- Skills can invoke agents (e.g., ring:requesting-code-review skill dispatches review agents)
+- Skills can invoke agents (e.g., ring:codereview skill dispatches review agents)
 - Agents don't typically invoke skills (they're independent analyzers)
-
-### Skills ↔ Commands
-
-**Relationship:** One-to-one or one-to-many mapping
-
-- Most commands map directly to a single skill
-- Some commands (like review) orchestrate multiple components
-
-**Example Mappings:**
-
-- `/ring:brainstorm` → `ring:brainstorming` skill
-- `/ring:write-plan` → `ring:writing-plans` skill
-- `/ring:codereview` → dispatches 7 parallel review agents (`ring:code-reviewer`, `ring:business-logic-reviewer`, `ring:security-reviewer`, `ring:test-reviewer`, `ring:nil-safety-reviewer`, `ring:consequences-reviewer`, `ring:dead-code-reviewer`)
 
 ### Skills ↔ Shared Patterns
 
@@ -696,14 +600,8 @@ SKILL.md frontmatter → generate-skills-ref.py → formatted overview → sessi
 1. Create `{plugin}/agents/{name}.md` with agent definition
 2. Include YAML frontmatter: `name`, `description`, `version`
 3. Invoke via Task tool with `subagent_type="ring:{name}"`
-4. Review agents can run in parallel via `/ring:codereview`
+4. Review agents can run in parallel via `ring:codereview` skill
 5. Developer agents provide domain expertise via direct Task invocation
-
-### Adding New Commands
-
-1. Create `commands/{name}.md`
-2. Reference skill or agent to invoke
-3. Available via `/{name}`
 
 ### Adding Shared Patterns
 
@@ -713,7 +611,7 @@ SKILL.md frontmatter → generate-skills-ref.py → formatted overview → sessi
 
 ### Adding New Plugins
 
-1. Create plugin directory: `mkdir -p {plugin-name}/{skills,agents,commands,hooks,lib}`
+1. Create plugin directory: `mkdir -p {plugin-name}/{skills,agents,hooks,lib}`
 2. Register in `.claude-plugin/marketplace.json`:
    ```json
    {
@@ -780,12 +678,6 @@ SKILL.md frontmatter → generate-skills-ref.py → formatted overview → sessi
 2. Verify agent names match exactly
 3. Check agent names match exactly
 
-### Commands Not Recognized
-
-1. Verify command file exists in commands/
-2. Check command name matches file name
-3. Ensure proper frontmatter in command file
-
 ### Context Overflow
 
 1. Consider selective skill loading
@@ -799,7 +691,7 @@ Ring's architecture is designed for:
 - **Modularity** - Independent, composable components across multiple plugins
 - **Performance** - Parallel execution wherever possible (3x faster reviews)
 - **Reliability** - Mandatory workflows prevent failures
-- **Extensibility** - Easy to add new skills/agents/commands/plugins
+- **Extensibility** - Easy to add new skills/agents/plugins
 - **Scalability** - Marketplace structure supports product and team-specific plugins
 - **Integration** - Seamless with Claude Code's native tools
 
@@ -811,12 +703,12 @@ _Component counts reflect current state; plugin versions managed in `.claude-plu
 | ------------------------- | ---------- | ---------------------- |
 | Active Plugins            | 6          | All plugin directories |
 | Skills (ring-default)     | 22         | `default/skills/`      |
-| Skills (ring-dev-team)    | 32         | `dev-team/skills/`     |
+| Skills (ring-dev-team)    | 31         | `dev-team/skills/`     |
 | Skills (ring-finops-team) | 7          | `finops-team/skills/`  |
-| Skills (ring-pm-team)     | 16         | `pm-team/skills/`      |
+| Skills (ring-pm-team)     | 15         | `pm-team/skills/`      |
 | Skills (ring-pmo-team)    | 9          | `pmo-team/skills/`     |
-| Skills (ring-tw-team)     | 7          | `tw-team/skills/`      |
-| **Total Skills**          | **93**     | **All plugins**        |
+| Skills (ring-tw-team)     | 6          | `tw-team/skills/`      |
+| **Total Skills**          | **90**     | **All plugins**        |
 | Agents (ring-default)     | 10         | `default/agents/`      |
 | Agents (ring-dev-team)    | 12         | `dev-team/agents/`     |
 | Agents (ring-finops-team) | 3          | `finops-team/agents/`  |
@@ -824,12 +716,6 @@ _Component counts reflect current state; plugin versions managed in `.claude-plu
 | Agents (ring-pmo-team)    | 6          | `pmo-team/agents/`     |
 | Agents (ring-tw-team)     | 3          | `tw-team/agents/`      |
 | **Total Agents**          | **38**     | **All plugins**        |
-| Commands (ring-default)   | 14         | `default/commands/`    |
-| Commands (ring-dev-team)  | 9          | `dev-team/commands/`   |
-| Commands (ring-pm-team)   | 3          | `pm-team/commands/`    |
-| Commands (ring-pmo-team)  | 4          | `pmo-team/commands/`   |
-| Commands (ring-tw-team)   | 3          | `tw-team/commands/`    |
-| **Total Commands**        | **33**     | **All plugins**        |
 | Hooks                     | Per plugin | `{plugin}/hooks/`      |
 
 The system achieves these goals through clear component separation, structured workflows, automatic context management, and a modular marketplace architecture, creating a robust foundation for AI-assisted software development.

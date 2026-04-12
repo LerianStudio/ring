@@ -29,7 +29,7 @@
     },
     {
       "name": "ring-dev-team",
-      "description": "12 specialized developer agents + 32 development skills + 9 slash commands: Backend 10-gate dev cycle + Frontend 9-gate dev cycle (accessibility, visual, E2E, performance) + Frontend refactoring + delivery verification + service discovery + cycle management. Go/TypeScript Backend specialists, DevOps Engineer, Frontend TypeScript specialist, Frontend Designer, QA Backend Analyst, QA Frontend Analyst, and SRE. Complete development team coverage with TDD, observability, and security best practices.",
+      "description": "12 specialized developer agents + 31 development skills: Backend 10-gate dev cycle + Frontend 9-gate dev cycle (accessibility, visual, E2E, performance) + Frontend refactoring + delivery verification + service discovery + cycle management. Go/TypeScript Backend specialists, DevOps Engineer, Frontend TypeScript specialist, Frontend Designer, QA Backend Analyst, QA Frontend Analyst, and SRE. Complete development team coverage with TDD, observability, and security best practices.",
       "version": "1.49.0",
       "source": "./dev-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/dev-team",
@@ -58,7 +58,7 @@
     },
     {
       "name": "ring-pm-team",
-      "description": "Product team workflow: 16 skills + 4 research agents. Pre-dev planning with 5-gate (small features) and 10-gate (large features) orchestrators, delivery roadmap generation, plus delivery status tracking for evidence-based progress reporting. Includes parallel research agents, specialized code analysis, and Product Designer.",
+      "description": "Product team workflow: 15 skills + 4 research agents. Pre-dev planning with 5-gate (small features) and 10-gate (large features) orchestrators, delivery roadmap generation, plus delivery status tracking for evidence-based progress reporting. Includes parallel research agents, specialized code analysis, and Product Designer.",
       "version": "0.23.0",
       "source": "./pm-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/pm-team",
@@ -80,7 +80,7 @@
     },
     {
       "name": "ring-pmo-team",
-      "description": "PMO (Project Management Office) specialists for portfolio-level oversight: 6 agents (portfolio-manager, resource-planner, risk-analyst, governance-specialist, executive-reporter, delivery-reporter), 9 skills for portfolio planning, resource allocation, risk management, executive reporting, and squad delivery reporting. Complements ring-pm-team (single feature) with portfolio-level coordination.",
+      "description": "PMO (Project Management Office) specialists for portfolio-level oversight: 6 agents (portfolio-manager, resource-planner, risk-analyst, governance-specialist, executive-reporter, delivery-reporter), 9 skills for portfolio planning, resource allocation, risk management, portfolio review, executive reporting, and squad delivery reporting. Complements ring-pm-team (single feature) with portfolio-level coordination.",
       "version": "0.7.0",
       "source": "./pmo-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/pmo-team",
@@ -93,7 +93,7 @@
         "resource-planning",
         "risk-management",
         "governance",
-        "executive-reporting",
+        "executive-summary",
         "agents"
       ]
     },
@@ -116,7 +116,7 @@
     },
     {
       "name": "ring-tw-team",
-      "description": "Technical writing specialists for functional and API documentation. 3 specialized agents (functional-writer, api-writer, docs-reviewer) and 7 documentation skills covering voice/tone, structure, API field descriptions, and quality review. Enforces clear, consistent documentation standards.",
+      "description": "Technical writing specialists for functional and API documentation. 3 specialized agents (functional-writer, api-writer, docs-reviewer) and 6 documentation skills covering voice/tone, structure, API field descriptions, and quality review. Enforces clear, consistent documentation standards.",
       "version": "0.4.2",
       "source": "./tw-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/tw-team",

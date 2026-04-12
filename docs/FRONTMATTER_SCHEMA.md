@@ -14,7 +14,7 @@ Skills live in `{plugin}/skills/{name}/SKILL.md`.
 
 | Field | Type | Parsed by Hooks | Description |
 |-------|------|-----------------|-------------|
-| `name` | string | YES | Skill identifier. MUST use `ring:` prefix (e.g., `ring:brainstorming`) |
+| `name` | string | YES | Skill identifier. MUST use `ring:` prefix (e.g., `ring:brainstorm`) |
 | `description` | string | YES | What the skill does -- method or technique. Supports block scalar (`\|`) |
 
 ### Recommended Fields
@@ -35,7 +35,7 @@ Parsed by hooks and used for skill discovery/routing. Skills should define these
 |-------|------|-----------------|-------------|
 | `when_to_use` | string | YES | **DEPRECATED** -- use `trigger` instead. Kept for backward compatibility; hook falls back to this if `trigger` is absent |
 | `sequence.after` | list | YES | Skills that should come before this one (e.g., `[ring:dev-implementation]`) |
-| `sequence.before` | list | YES | Skills that typically follow this one (e.g., `[ring:writing-plans]`) |
+| `sequence.before` | list | YES | Skills that typically follow this one (e.g., `[ring:write-plan]`) |
 | `related.similar` | list | YES | Skills that seem similar but differ (helps differentiation) |
 | `related.complementary` | list | YES | Skills that pair well with this one |
 
@@ -76,30 +76,9 @@ These are defined in skill frontmatter but not read by `generate-skills-ref.py`.
 
 ---
 
-## Commands (`*.md` in `commands/`)
+## Commands (Removed)
 
-Commands live in `{plugin}/commands/{name}.md`.
-
-### Required Fields
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `name` | string | Command identifier. MUST use `ring:` prefix (e.g., `ring:commit`) |
-| `description` | string | What the command does -- single line |
-
-### Recommended Fields
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `argument-hint` | string | Argument syntax hint shown in command listings (e.g., `"[topic]"`, `"[message]"`) |
-
-### Explicitly NOT Valid for Commands
-
-| Field | Reason |
-|-------|--------|
-| `arguments` | Use `argument-hint` for syntax hints; document arguments in the command body |
-| `args` | Use `argument-hint` |
-| `version` | Use git history |
+Commands have been removed from Ring. All workflows are now invoked via skills.
 
 ---
 
