@@ -17,7 +17,7 @@ skip_when: |
 
 sequence:
   after: [ring:pre-dev-trd-creation, ring:pre-dev-dependency-map]
-  before: [ring:pre-dev-subtask-creation, ring:executing-plans]
+  before: [ring:pre-dev-subtask-creation, ring:execute-plan]
 ---
 
 # Task Breakdown - Value-Driven Decomposition

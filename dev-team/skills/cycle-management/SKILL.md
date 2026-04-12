@@ -4,7 +4,7 @@ description: Development cycle state management — status reporting and cycle c
 trigger: |
   - User wants to check the status of a running development cycle
   - User wants to cancel an active development cycle
-  - Invoked by /ring:dev-status or /ring:dev-cancel commands
+  - Invoked with mode=status or mode=cancel
 skip_when: |
   - No development cycle is active or was recently started
   - User is asking about general project status (not cycle-specific)
@@ -16,14 +16,14 @@ Unified skill for managing development cycle state. Provides two modes: **status
 
 ## Mode Selection
 
-This skill is invoked by the `ring:dev-status` and `ring:dev-cancel` commands. The calling command specifies the mode:
+This skill provides two modes selected by the `mode` parameter:
 
-| Mode | Invoking Command | Purpose |
-|------|-----------------|---------|
-| `status` | `/ring:dev-status` | Read-only — display cycle metrics |
-| `cancel` | `/ring:dev-cancel [--force]` | Mutating — cancel the active cycle |
+| Mode | Purpose |
+|------|---------|
+| `status` | Read-only — display cycle metrics |
+| `cancel` | Mutating — cancel the active cycle |
 
-The mode is determined by the argument passed from the delegating command. If no mode is provided, default to `status`.
+If no mode is provided, default to `status`.
 
 ---
 
@@ -156,7 +156,7 @@ To resume later:
 No development cycle to cancel.
 
 Check status with:
-  /ring:dev-status
+  ring:cycle-management (mode=status)
 ```
 
 ### Execution Steps (Cancel)
@@ -172,14 +172,14 @@ Check status with:
 
 ---
 
-## Related Commands
+## Related Skills
 
-| Command | Description |
-|---------|-------------|
-| `/ring:dev-cycle` | Start or resume cycle |
-| `/ring:dev-cancel` | Cancel running cycle |
-| `/ring:dev-status` | Check current status |
-| `/ring:dev-report` | View feedback report |
+| Skill | Description |
+|-------|-------------|
+| `ring:dev-cycle` | Start or resume cycle |
+| `ring:cycle-management` (mode=cancel) | Cancel running cycle |
+| `ring:cycle-management` (mode=status) | Check current status |
+| `ring:dev-report` | View feedback report |
 
 ---
 

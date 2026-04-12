@@ -11,11 +11,11 @@ trigger: |
   - Creating navigation patterns
 
 skip_when: |
-  - Writing content → use writing-functional-docs or writing-api-docs
+  - Writing content → use write-guide or write-api
   - Checking voice → use voice-and-tone
 
 related:
-  complementary: [writing-functional-docs, writing-api-docs]
+  complementary: [write-guide, write-api]
 ---
 
 # Documentation Structure
@@ -154,7 +154,7 @@ If >5 screens, consider splitting.
 Before planning documentation structure:
 
 1. **Understand content types** - What documents will exist (conceptual, how-to, API reference)
-2. **Load writing skills** - `ring:writing-functional-docs` and `ring:writing-api-docs`
+2. **Load writing skills** - `ring:write-guide` and `ring:write-api`
 3. **Review existing structure** - Understand current documentation hierarchy
 
 **HARD GATE:** CANNOT reorganize documentation without understanding content and audience.

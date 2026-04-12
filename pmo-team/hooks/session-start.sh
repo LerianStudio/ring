@@ -66,7 +66,6 @@ ${agents_table}
 **Commands:**
 - \`/ring-pmo-team:portfolio-review\` - Full portfolio health review
 - \`/ring-pmo-team:executive-summary\` - Portfolio/project status report (PMO focus)
-- \`/ring-pmo-team:delivery-report\` - Squad delivery report from Git analysis (engineering focus)
 - \`/ring-pmo-team:dependency-analysis\` - Cross-project dependencies
 
 For full details: Skill tool with \"ring-pmo-team:using-pmo-team\"

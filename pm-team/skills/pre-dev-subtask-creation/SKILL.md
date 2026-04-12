@@ -17,7 +17,7 @@ skip_when: |
 
 sequence:
   after: [ring:pre-dev-task-breakdown]
-  before: [ring:executing-plans, ring:subagent-driven-development]
+  before: [ring:execute-plan, ring:subagent-driven-development]
 ---
 
 # Subtask Creation - Bite-Sized, Zero-Context Steps
@@ -53,7 +53,7 @@ Requiring context creates bottlenecks, onboarding friction, and integration fail
 | Field | Content |
 |-------|---------|
 | Title | `# ST-[task-id]-[number]: [Subtask Name]` |
-| Agent Note | `> **For Agents:** REQUIRED SUB-SKILL: Use ring:executing-plans` |
+| Agent Note | `> **For Agents:** REQUIRED SUB-SKILL: Use ring:execute-plan` |
 | Goal | One sentence describing what this builds |
 | Prerequisites | Verification commands with expected output |
 | Files | Create: `exact/path`, Modify: `exact/path:lines`, Test: `tests/path` |
@@ -172,7 +172,7 @@ After creating subtasks, offer execution choice:
 
 **"Subtasks complete. Two execution options:**
 1. **Subagent-Driven** - Fresh subagent per subtask, review between, fast iteration → Use `ring:subagent-driven-development`
-2. **Parallel Session** - New session with ring:executing-plans, batch with checkpoints → Use `ring:executing-plans`
+2. **Parallel Session** - New session with ring:execute-plan, batch with checkpoints → Use `ring:execute-plan`
 
 **Which approach?"**
 
@@ -265,5 +265,5 @@ These requirements are NON-NEGOTIABLE:
 - Small Track workflow (execute tasks directly without subtask breakdown)
 - Tasks are simple enough without fine-grained breakdown
 - Tasks (Gate 7) not yet validated (complete Gate 7 first)
-- Implementation already in progress (use ring:executing-plans)
+- Implementation already in progress (use ring:execute-plan)
 - Proof-of-concept work without formal process needs

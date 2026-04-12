@@ -34,7 +34,7 @@ sequence:
   after: [ring:dev-devops]
 
 related:
-  complementary: [ring:dev-cycle, ring:dev-implementation, ring:dev-devops, ring:dev-unit-testing, ring:requesting-code-review, ring:dev-validation]
+  complementary: [ring:dev-cycle, ring:dev-implementation, ring:dev-devops, ring:dev-unit-testing, ring:codereview, ring:dev-validation]
 
 input_schema:
   description: |
@@ -255,7 +255,7 @@ MUST report all severities. CRITICAL: STOP immediately (security breach). HIGH: 
 |------|------|-----------|-------|
 | 0 | Stack Detection + Compliance Audit | Always | Orchestrator |
 | 1 | Codebase Analysis (multi-tenant focus) | Always | ring:codebase-explorer |
-| 1.5 | Implementation Preview (visual report) | Always | Orchestrator (ring:visual-explainer) |
+| 1.5 | Implementation Preview (visual report) | Always | Orchestrator (ring:visualize) |
 | 2 | lib-commons v4 + lib-auth v2 Upgrade | Skip only if `go.mod` contains `lib-commons/v4` AND `lib-auth/v2` (verified via grep) | ring:backend-engineer-golang |
 | 3 | Multi-Tenant Configuration | Always — verify compliance or implement/fix | ring:backend-engineer-golang |
 | 4 | Tenant Middleware (TenantMiddleware with WithPG/WithMB) | Always — verify compliance or implement/fix | ring:backend-engineer-golang |
@@ -519,11 +519,11 @@ MUST ensure backward compatibility context: the analysis MUST identify how the s
 
 **Always executes. This gate generates a visual HTML report showing exactly what will change before any code is written.**
 
-**Uses the `ring:visual-explainer` skill to produce a self-contained HTML page.**
+**Uses the `ring:visualize` skill to produce a self-contained HTML page.**
 
 The report is built from Gate 0 (stack detection) and Gate 1 (codebase analysis). It shows the developer a complete preview of every change that will be made across all subsequent gates, with backward compatibility analysis.
 
-**Orchestrator generates the report using `ring:visual-explainer` with this content:**
+**Orchestrator generates the report using `ring:visualize` with this content:**
 
 The HTML page MUST include these sections:
 
@@ -580,7 +580,7 @@ MultiTenantConnectionsCheckIntervalSec int `env:"MULTI_TENANT_CONNECTIONS_CHECK_
 For each file in the change map, generate a before/after diff panel showing:
 - **Before:** The exact current code from the codebase (sourced from the Gate 1 analysis)
 - **After:** The exact code that will be written (following multi-tenant.md patterns)
-- Use syntax highlighting and line numbers (read `default/skills/visual-explainer/templates/code-diff.html` for patterns)
+- Use syntax highlighting and line numbers (read `default/skills/visualize/templates/code-diff.html` for patterns)
 
 Example diff panel for a repository file:
 
@@ -1034,7 +1034,7 @@ HARD GATE: Backward compatibility MUST pass.
 
 ## Gate 9: Code Review
 
-**Dispatch 7 parallel reviewers (same pattern as ring:requesting-code-review).**
+**Dispatch 7 parallel reviewers (same pattern as ring:codereview).**
 
 MUST include this context in ALL 7 reviewer dispatches:
 

@@ -18,7 +18,7 @@ skip_when: |
 
 sequence:
   after: [ring:pre-dev-task-breakdown, ring:pre-dev-subtask-creation]
-  before: [ring:executing-plans, ring:dev-cycle]
+  before: [ring:execute-plan, ring:dev-cycle]
 ---
 
 # Delivery Planning - Realistic Roadmap with Critical Path

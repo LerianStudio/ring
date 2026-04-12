@@ -115,7 +115,7 @@ categorize_skill() {
         pre-dev-*) echo "Pre-Dev Workflow" ;;
         test-*|*-debugging|condition-*|defense-*|root-cause*) echo "Testing & Debugging" ;;
         *-review|dispatching-*|sharing-*) echo "Collaboration" ;;
-        brainstorming|writing-plans|executing-plans|*-worktrees|subagent-driven*) echo "Planning & Execution" ;;
+        brainstorm|write-plan|execute-plan|*worktree|subagent-driven*) echo "Planning & Execution" ;;
         using-*|writing-skills|testing-skills*|testing-agents*) echo "Meta Skills" ;;
         *) echo "Other" ;;
     esac
@@ -161,7 +161,7 @@ generate_markdown() {
     echo "## Usage"
     echo ""
     echo "To use a skill: Use the Skill tool with skill name"
-    echo "Example: \`ring:brainstorming\`"
+    echo "Example: \`ring:brainstorm\`"
 
     # Output stats to stderr (like Python version)
     echo "" >&2

@@ -1,7 +1,7 @@
 # Review Slicing Strategy
 
 **Version:** 2.0.0
-**Applies to:** ring:requesting-code-review, ring:codereview command, ring:review-slicer agent
+**Applies to:** ring:codereview, ring:codereview command, ring:review-slicer agent
 
 ---
 

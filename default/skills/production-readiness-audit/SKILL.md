@@ -6518,9 +6518,9 @@ Write: docs/audits/production-readiness-{YYYY-MM-DDTHH:MM:SS}.md
 
 **MANDATORY: Generate a visual HTML dashboard from the audit results.**
 
-Invokes `Skill("ring:visual-explainer")` to produce a self-contained HTML page showing the production readiness score and findings visually. The markdown report is exhaustive (thousands of lines) — the HTML dashboard provides an executive overview that opens in the browser.
+Invokes `Skill("ring:visualize")` to produce a self-contained HTML page showing the production readiness score and findings visually. The markdown report is exhaustive (thousands of lines) — the HTML dashboard provides an executive overview that opens in the browser.
 
-**Read templates first:** Read `default/skills/visual-explainer/templates/code-diff.html` for severity badges and KPI card patterns, AND read `default/skills/visual-explainer/templates/data-table.html` for table/heatmap patterns. Combine patterns for an audit dashboard layout. Also read `default/skills/visual-explainer/references/responsive-nav.md` for section navigation (7 sections require sidebar TOC).
+**Read templates first:** Read `default/skills/visualize/templates/code-diff.html` for severity badges and KPI card patterns, AND read `default/skills/visualize/templates/data-table.html` for table/heatmap patterns. Combine patterns for an audit dashboard layout. Also read `default/skills/visualize/references/responsive-nav.md` for section navigation (7 sections require sidebar TOC).
 
 **Generate the HTML dashboard with these sections:**
 

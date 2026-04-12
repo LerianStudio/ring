@@ -48,7 +48,7 @@ This is not negotiable. This is not optional. You cannot rationalize your way ou
 | "update across", "change all", "refactor" | Launch specialist agent |
 | "find where", "search for", "locate" | Launch Explore agent |
 | "understand how", "how does X work" | Launch Explore agent |
-| "draw a diagram", "explain architecture", "visualize", "comparison table" | Load ring:visual-explainer skill |
+| "draw a diagram", "explain architecture", "visualize", "comparison table" | Load ring:visualize skill |
 
 **Why?** These phrases imply multi-file operations. You WILL exceed 3 files. Pre-empt the violation.
 
@@ -250,7 +250,7 @@ When dispatching code reviewers, **single message with 3 Task calls:**
 
 ## Announcing Skill Usage
 
-- **Always announce meta-skills:** brainstorming, ring:writing-plans, systematic-debugging (methodology change)
+- **Always announce meta-skills:** brainstorm, ring:write-plan, systematic-debugging (methodology change)
 - **Skip when obvious:** User says "write tests first" → no need to announce TDD
 
 ## Required Patterns
@@ -275,7 +275,7 @@ The skill itself tells you which type it is.
 
 Your human partner's specific instructions describe WHAT to do, not HOW.
 
-"Add X", "Fix Y" = the goal, NOT permission to skip brainstorming, TDD, or RED-GREEN-REFACTOR.
+"Add X", "Fix Y" = the goal, NOT permission to skip brainstorm, TDD, or RED-GREEN-REFACTOR.
 
 **Red flags:** "Instruction was specific" • "Seems simple" • "Workflow is overkill"
 

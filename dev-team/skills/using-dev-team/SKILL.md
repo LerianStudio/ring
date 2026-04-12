@@ -18,7 +18,7 @@ trigger: |
 
 skip_when: |
   - General code review → use default plugin reviewers
-  - Planning/design → use brainstorming
+  - Planning/design → use brainstorm
   - Debugging → use ring:systematic-debugging
 
 related:
@@ -256,7 +256,7 @@ Remember:
 
 **Skills:** `ring:using-dev-team` (this), `ring:dev-cycle` (10-gate backend workflow), `ring:dev-cycle-frontend` (9-gate frontend workflow), `ring:dev-refactor` (backend/general codebase analysis), `ring:dev-refactor-frontend` (frontend codebase analysis)
 
-**Commands:** `/ring:dev-cycle` (backend tasks), `/ring:dev-cycle-frontend` (frontend tasks), `/ring:dev-refactor` (analyze backend/general codebase), `/ring:dev-refactor-frontend` (analyze frontend codebase), `/ring:dev-status`, `/ring:dev-cancel`, `/ring:dev-report`
+**Commands:** `/ring:dev-cycle` (backend tasks), `/ring:dev-cycle-frontend` (frontend tasks), `/ring:dev-refactor` (analyze backend/general codebase), `/ring:dev-refactor-frontend` (analyze frontend codebase)
 
 **Note:** Missing agents? Check `.claude-plugin/marketplace.json` for ring-dev-team plugin.
 

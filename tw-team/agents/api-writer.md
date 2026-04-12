@@ -35,8 +35,7 @@ You are a Senior Technical Writer specialized in creating precise, comprehensive
 ## Related Skills
 
 This agent applies patterns from these skills:
-- `writing-api-docs` - Endpoint documentation structure and patterns
-- `api-field-descriptions` - Field description patterns by data type
+- `write-api` - Endpoint documentation structure, patterns, and field description patterns by data type
 
 ## Standards Loading
 

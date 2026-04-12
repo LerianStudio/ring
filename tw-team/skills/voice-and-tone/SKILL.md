@@ -14,7 +14,7 @@ skip_when: |
   - Only checking technical accuracy → use docs-reviewer agent
 
 related:
-  complementary: [writing-functional-docs, writing-api-docs, documentation-review]
+  complementary: [write-guide, write-api, review-docs]
 ---
 
 # Voice and Tone Guidelines
@@ -151,8 +151,8 @@ Use naturally to make writing conversational:
 Voice and tone guidelines are foundational. When applying this skill:
 
 1. **Load this skill first** before any documentation writing
-2. **Cross-reference** with `ring:writing-functional-docs` or `ring:writing-api-docs`
-3. **Use with documentation-review** for quality verification
+2. **Cross-reference** with `ring:write-guide` or `ring:write-api`
+3. **Use with review-docs** for quality verification
 
 **HARD GATE:** CANNOT write documentation without understanding voice and tone principles.
 

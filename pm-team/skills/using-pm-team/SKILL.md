@@ -10,14 +10,14 @@ trigger: |
   - User requests "plan a feature"
 
 skip_when: |
-  - Quick exploratory work → ring:brainstorming may suffice
+  - Quick exploratory work → ring:brainstorm may suffice
   - Bug fix with known solution → direct implementation
   - Trivial change (<1 hour) → skip formal planning
 ---
 
 # Using Ring Team-Product: Pre-Dev Workflow & Delivery Tracking
 
-The ring-pm-team plugin provides 12 pre-development planning skills and 4 research agents. Use them via `Skill tool: "ring:gate-name"` or via slash commands.
+The ring-pm-team plugin provides 12 pre-development planning skills and 4 research agents. Use them via `Skill tool: "ring:gate-name"`.
 
 **Remember:** Follow the **ORCHESTRATOR principle** from `ring:using-ring`. Dispatch pre-dev workflow to handle planning; plan thoroughly before coding.
 
@@ -119,7 +119,7 @@ After planning and during execution, track progress:
 
 | Skill                           | Command                 | Purpose                                                   |
 | ------------------------------- | ----------------------- | --------------------------------------------------------- |
-| `ring:delivery-status-tracking` | `/ring:delivery-status` | Evidence-based progress analysis against delivery roadmap |
+| `ring:delivery-status` | `/ring:delivery-status` | Evidence-based progress analysis against delivery roadmap |
 
 **What it does:**
 
@@ -191,7 +191,7 @@ docs/pre-dev/{feature}/
 - `ring:execute-plan` – Run tasks in batches
 - `ring:write-plan` – Generate plan from scratch
 - `*-engineer` – Specialist review of design
-- `ring:requesting-code-review` – Post-implementation review
+- `ring:codereview` – Post-implementation review
 
 ## ORCHESTRATOR Principle
 
@@ -281,9 +281,9 @@ These requirements are NON-NEGOTIABLE:
 
 ## When This Skill Is Not Needed
 
-- Quick exploratory work where `ring:brainstorming` suffices
+- Quick exploratory work where `ring:brainstorm` suffices
 - Bug fix with known solution requiring no design changes
 - Trivial changes that take less than 1 hour
 - Documentation-only updates
 - Configuration changes with no code impact
-- Direct implementation after planning is already complete (use `ring:executing-plans` or `ring:dev-cycle` instead)
+- Direct implementation after planning is already complete (use `ring:execute-plan` or `ring:dev-cycle` instead)

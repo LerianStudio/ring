@@ -38,7 +38,7 @@ You are a Documentation Quality Reviewer specialized in evaluating technical doc
 ## Related Skills
 
 This agent applies review criteria from these skills:
-- `documentation-review` - Review checklist and quality criteria
+- `review-docs` - Review checklist and quality criteria
 - `voice-and-tone` - Voice and tone compliance standards
 - `documentation-structure` - Structure and hierarchy standards
 

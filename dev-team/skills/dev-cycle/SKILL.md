@@ -31,10 +31,10 @@ NOT_skip_when: |
   - "Already did N gates" → Sunk cost is irrelevant. Complete all gates.
 
 sequence:
-  before: [ring:dev-feedback-loop]
+  before: [ring:dev-report]
 
 related:
-  complementary: [ring:dev-implementation, ring:dev-devops, ring:dev-sre, ring:dev-unit-testing, ring:requesting-code-review, ring:dev-validation, ring:dev-feedback-loop, ring:dev-delivery-verification]
+  complementary: [ring:dev-implementation, ring:dev-devops, ring:dev-sre, ring:dev-unit-testing, ring:codereview, ring:dev-validation, ring:dev-report, ring:dev-delivery-verification]
 
 verification:
   automated:
@@ -168,7 +168,7 @@ This is not negotiable:
 - Gate 5: `Skill("ring:dev-property-testing")` → then `Task(subagent_type="ring:qa-analyst", test_mode="property", ...)`
 - Gate 6: `Skill("ring:dev-integration-testing")` → per unit: write/update tests + compile check (no execution); end of cycle: execute
 - Gate 7: `Skill("ring:dev-chaos-testing")` → per unit: write/update tests + compile check (no execution); end of cycle: execute
-- Gate 8: `Skill("ring:requesting-code-review")` → then 5x `Task(...)` in parallel
+- Gate 8: `Skill("ring:codereview")` → then 5x `Task(...)` in parallel
 - Gate 9: `Skill("ring:dev-validation")` → N/A (verification only)
 </cannot_skip>
 
@@ -459,7 +459,7 @@ Day 4: Production incident from Day 1 code
 | 5 | ring:dev-property-testing | Property-based tests for domain invariants | ring:qa-analyst (test_mode: property) | Write + Run | testing-property.md |
 | 6 | ring:dev-integration-testing | Integration tests with testcontainers | ring:qa-analyst (test_mode: integration) | **Write only** | testing-integration.md |
 | 7 | ring:dev-chaos-testing | Chaos tests for failure scenarios | ring:qa-analyst (test_mode: chaos) | **Write only** | testing-chaos.md |
-| 8 | ring:requesting-code-review | Parallel code review (7 reviewers) | ring:code-reviewer, ring:business-logic-reviewer, ring:security-reviewer, ring:nil-safety-reviewer, ring:test-reviewer, ring:consequences-reviewer, ring:dead-code-reviewer | Run | N/A |
+| 8 | ring:codereview | Parallel code review (7 reviewers) | ring:code-reviewer, ring:business-logic-reviewer, ring:security-reviewer, ring:nil-safety-reviewer, ring:test-reviewer, ring:consequences-reviewer, ring:dead-code-reviewer | Run | N/A |
 | 9 | ring:dev-validation | Final acceptance validation | N/A (verification) | Run | N/A |
 
 **All gates are MANDATORY. No exceptions. No skip reasons.**
@@ -836,7 +836,7 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
 
 ### Structured Error/Issue Schemas
 
-**These schemas enable `ring:dev-feedback-loop` to analyze issues without parsing raw output.**
+**These schemas enable `ring:dev-report` to analyze issues without parsing raw output.**
 
 #### Standards Compliance Gap Schema
 
@@ -2781,9 +2781,9 @@ chaos_testing_input = {
 
 ## Step 10: Gate 8 - Review (Per Execution Unit)
 
-**REQUIRED SUB-SKILL:** Use `ring:requesting-code-review`
+**REQUIRED SUB-SKILL:** Use `ring:codereview`
 
-### Step 10.1: Prepare Input for ring:requesting-code-review Skill
+### Step 10.1: Prepare Input for ring:codereview Skill
 
 ```text
 Gather from previous gates:
@@ -2802,14 +2802,14 @@ review_input = {
 }
 ```
 
-### Step 10.2: Invoke ring:requesting-code-review Skill
+### Step 10.2: Invoke ring:codereview Skill
 
 ```text
 1. Record gate start timestamp
 
-2. Invoke ring:requesting-code-review skill with structured input:
+2. Invoke ring:codereview skill with structured input:
 
-   Skill("ring:requesting-code-review") with input:
+   Skill("ring:codereview") with input:
      unit_id: review_input.unit_id
      base_sha: review_input.base_sha
      head_sha: review_input.head_sha
@@ -2850,7 +2850,7 @@ review_input = {
 ### Step 10.3: Gate 8 Complete
 
 ```text
-5. When ring:requesting-code-review skill returns PASS:
+5. When ring:codereview skill returns PASS:
 
    Parse from skill output:
    - reviewers_passed: extract from "## Reviewer Verdicts" (should be "5/5")
@@ -2860,7 +2860,7 @@ review_input = {
    - iterations: extract from "Iterations:" line
 
    - agent_outputs.review = {
-       skill: "ring:requesting-code-review",
+       skill: "ring:codereview",
        output: "[full skill output]",
        iterations: [count],
        timestamp: "[ISO timestamp]",
@@ -2992,8 +2992,8 @@ For current execution unit:
    - else: Skip commit (will happen at task or cycle end)
 
 0b. **VISUAL CHANGE REPORT (MANDATORY - before checkpoint):**
-   - MANDATORY: Invoke `Skill("ring:visual-explainer")` to generate a code-diff HTML report for this execution unit
-   - Read `default/skills/visual-explainer/templates/code-diff.html` to absorb the patterns before generating
+   - MANDATORY: Invoke `Skill("ring:visualize")` to generate a code-diff HTML report for this execution unit
+   - Read `default/skills/visualize/templates/code-diff.html` to absorb the patterns before generating
    - Content sourced from state JSON `agent_outputs` for the current unit:
      * **TDD Output:** `tdd_red` (failing test with failure_output) + `tdd_green` (implementation with pass_output)
      * **Files Changed:** Per-file before/after using `git diff` data from the implementation (for new files, show "New File" in the before panel). Do not read source files directly — use diff output provided by the implementation agent.
@@ -3032,8 +3032,8 @@ For current execution unit:
    - else: Skip commit (will happen at cycle end)
 
 0b. **VISUAL CHANGE REPORT (MANDATORY - before task checkpoint):**
-   - MANDATORY: Invoke `Skill("ring:visual-explainer")` to generate an aggregate code-diff HTML report for all subtasks in this task
-   - Read `default/skills/visual-explainer/templates/code-diff.html` to absorb the patterns before generating
+   - MANDATORY: Invoke `Skill("ring:visualize")` to generate an aggregate code-diff HTML report for all subtasks in this task
+   - Read `default/skills/visualize/templates/code-diff.html` to absorb the patterns before generating
    - Content aggregated from all subtask executions:
      * **Task Overview:** Task ID, title, all subtask IDs and their gate statuses
      * **Combined File Changes:** All files modified across all subtasks with before/after diff panels
@@ -3062,14 +3062,14 @@ After completing all subtasks of a task:
 
 1. Set task status = "completed"
 
-2. **⛔ MANDATORY: Run ring:dev-feedback-loop skill**
+2. **⛔ MANDATORY: Run ring:dev-report skill**
 
    ```yaml
    Skill tool:
-     skill: "ring:dev-feedback-loop"
+     skill: "ring:dev-report"
    ```
 
-   **Note:** ring:dev-feedback-loop manages its own TodoWrite tracking internally.
+   **Note:** ring:dev-report manages its own TodoWrite tracking internally.
    
    The skill will:
    - Add its own todo item for tracking
@@ -3273,14 +3273,14 @@ All units have written/updated test code during their Gate 6-7 passes. Now execu
 2. **Update state:** `status = "completed"`, `completed_at = timestamp`
 3. **Generate report:** Task | Subtasks | Duration | Review Iterations | Status | Commit Status
 
-4. **⛔ MANDATORY: Run ring:dev-feedback-loop skill for cycle metrics**
+4. **⛔ MANDATORY: Run ring:dev-report skill for cycle metrics**
 
    ```yaml
    Skill tool:
-     skill: "ring:dev-feedback-loop"
+     skill: "ring:dev-report"
    ```
 
-   **Note:** ring:dev-feedback-loop manages its own TodoWrite tracking internally.
+   **Note:** ring:dev-report manages its own TodoWrite tracking internally.
 
    **After feedback-loop completes, update state:**
    - Set `feedback_loop_completed = true` at cycle level in state file

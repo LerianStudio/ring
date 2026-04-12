@@ -24,7 +24,7 @@ NOT_skip_when: |
 
 sequence:
   after: [ring:dev-unit-testing]
-  before: [ring:requesting-code-review]
+  before: [ring:codereview]
 
 related:
   complementary: [ring:qa-analyst, ring:backend-engineer-golang]

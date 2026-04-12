@@ -12,12 +12,12 @@ trigger: |
 
 skip_when: |
   - Single project planning → use ring:pre-dev-feature
-  - Immediate status report → use executive-reporting
+  - Immediate status report → use executive-summary
   - Resource-only analysis → use resource-allocation
 
 related:
   similar: [ring:pre-dev-feature]
-  complementary: [resource-allocation, risk-management, executive-reporting]
+  complementary: [resource-allocation, risk-management, executive-summary]
 ---
 
 # Portfolio Planning Skill

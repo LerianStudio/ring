@@ -255,16 +255,14 @@ Remember:
 - `resource-allocation` - Resource and capacity management
 - `risk-management` - Portfolio risk management
 - `project-health-check` - Individual project health assessment
-- `dependency-mapping` - Cross-project dependency analysis
-- `executive-reporting` - Executive communication for portfolio/project status (PMO focus)
-- `delivery-reporting` - Visual executive presentations of squad deliveries from Git analysis (engineering focus)
+- `dependency-analysis` - Cross-project dependency analysis
+- `executive-summary` - Executive communication for portfolio/project status (PMO focus)
 - `ring:pmo-retrospective` - Portfolio retrospectives and lessons learned
 
-**Commands:**
-- `/portfolio-review` - Conduct portfolio review
-- `/executive-summary` - Generate executive summary (PMO/project status)
-- `/delivery-report` - Generate visual delivery report from Git repositories (squad deliveries)
-- `/dependency-analysis` - Analyze cross-project dependencies
+**Additional Skills:**
+- `ring:portfolio-review` - Conduct portfolio review (dispatches 4 PMO specialists in parallel)
+- `ring:executive-summary` - Generate executive summary (PMO/project status)
+- `ring:dependency-analysis` - Analyze cross-project dependencies
 
 **Note:** Missing agents? Check `.claude-plugin/marketplace.json` for ring-pmo-team plugin.
 
@@ -274,36 +272,19 @@ Remember:
 
 | Workflow | Entry Point | Output |
 |----------|-------------|--------|
-| **Portfolio Review** | `/portfolio-review` | `docs/pmo/{date}/portfolio-status.md` |
-| **Executive Report (PMO)** | `/executive-summary` | `docs/pmo/{date}/executive-summary.md` |
-| **Delivery Report (Squad)** | `/delivery-report` | `docs/pmo/delivery-reports/{date}/delivery-report-{date}.html` |
-| **Dependency Analysis** | `/dependency-analysis` | `docs/pmo/{date}/dependency-map.md` |
+| **Portfolio Review** | `ring:portfolio-review` | `docs/pmo/{date}/portfolio-status.md` |
+| **Executive Report (PMO)** | `ring:executive-summary` | `docs/pmo/{date}/executive-summary.md` |
+| **Dependency Analysis** | `ring:dependency-analysis` | `docs/pmo/{date}/dependency-map.md` |
 
 ### Report Type Selection Guide
 
-**Two types of executive reports available:**
-
-| Aspect | `/executive-summary` | `/delivery-report` |
-|--------|---------------------|-------------------|
-| **Focus** | Portfolio/project status (PMO view) | Squad deliveries (eng+product view) |
-| **Data Source** | PMO data (RAG status, SPI, CPI) | Git repositories (tags, PRs, commits) |
-| **Output Format** | Markdown dashboard | Visual HTML slides |
-| **Metrics** | Projects on track, budget, resources | Releases, PRs, commits, velocity |
-| **Audience** | Portfolio executives, board | Engineering/product executives |
-| **Update** | "How is the portfolio doing?" | "What did the squad deliver?" |
-| **Agent** | `ring:executive-reporter` | `ring:delivery-reporter` |
-
-**Use `/executive-summary` for:**
+**Use `ring:executive-summary` for:**
 - Portfolio health dashboards
 - Project status updates (RAG, SPI, CPI)
 - Board packages with governance focus
 - Resource and budget tracking
 
-**Use `/delivery-report` for:**
-- Squad delivery showcases
-- Engineering/product presentations
-- Quarterly release summaries
-- Client-facing delivery reports
+**For squad delivery reports**, use the `ring:delivery-reporter` agent directly.
 
 ---
 

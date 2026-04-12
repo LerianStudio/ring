@@ -22,7 +22,7 @@ NOT_skip_when: |
 
 sequence:
   after: [ring:dev-implementation, ring:dev-devops, ring:dev-ring:sre]
-  before: [ring:requesting-code-review]
+  before: [ring:codereview]
 
 related:
   complementary: [ring:test-driven-development, ring:qa-analyst]

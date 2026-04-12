@@ -20,10 +20,10 @@ skip_when: |
   - "Backend already tested this" → Frontend has different quality concerns.
 
 sequence:
-  before: [ring:dev-feedback-loop]
+  before: [ring:dev-report]
 
 related:
-  complementary: [ring:dev-frontend-accessibility, ring:dev-unit-testing, ring:dev-frontend-visual, ring:dev-frontend-e2e, ring:dev-frontend-performance, ring:requesting-code-review, ring:dev-validation, ring:dev-feedback-loop]
+  complementary: [ring:dev-frontend-accessibility, ring:dev-unit-testing, ring:dev-frontend-visual, ring:dev-frontend-e2e, ring:dev-frontend-performance, ring:codereview, ring:dev-validation, ring:dev-report]
 
 verification:
   automated:
@@ -211,7 +211,7 @@ Check: Does docs/ring:dev-cycle/handoff-frontend.json exist?
 - Gate 4: `Skill("ring:dev-frontend-visual")` → then `Task(subagent_type="ring:qa-analyst-frontend", test_mode="visual")`
 - Gate 5: `Skill("ring:dev-frontend-e2e")` → then `Task(subagent_type="ring:qa-analyst-frontend", test_mode="e2e")`
 - Gate 6: `Skill("ring:dev-frontend-performance")` → then `Task(subagent_type="ring:qa-analyst-frontend", test_mode="performance")`
-- Gate 7: `Skill("ring:requesting-code-review")` → then 5x `Task(...)` in parallel
+- Gate 7: `Skill("ring:codereview")` → then 5x `Task(...)` in parallel
 - Gate 8: `Skill("ring:dev-validation")` → N/A (verification only)
 </cannot_skip>
 
@@ -396,7 +396,7 @@ No negotiation. No exceptions. No "special cases".
 | 4 | ring:dev-frontend-visual | Snapshot/visual regression tests | ring:qa-analyst-frontend (test_mode: visual) | testing-visual.md |
 | 5 | ring:dev-frontend-e2e | E2E tests with Playwright | ring:qa-analyst-frontend (test_mode: e2e) | testing-e2e.md |
 | 6 | ring:dev-frontend-performance | Core Web Vitals + Lighthouse | ring:qa-analyst-frontend (test_mode: performance) | testing-performance.md |
-| 7 | ring:requesting-code-review | Parallel code review (5 reviewers) | ring:code-reviewer, ring:business-logic-reviewer, ring:security-reviewer, ring:test-reviewer, ring:frontend-engineer (review mode) | N/A |
+| 7 | ring:codereview | Parallel code review (5 reviewers) | ring:code-reviewer, ring:business-logic-reviewer, ring:security-reviewer, ring:test-reviewer, ring:frontend-engineer (review mode) | N/A |
 | 8 | ring:dev-validation | Final acceptance validation | N/A (verification) | N/A |
 
 **All gates are MANDATORY. No exceptions. No skip reasons.**
@@ -901,8 +901,8 @@ Read tool:
 **Unit Checkpoint (after subtask completes Gate 8):**
 
 **VISUAL CHANGE REPORT (MANDATORY - before checkpoint question):**
-- MANDATORY: Invoke `Skill("ring:visual-explainer")` to generate a code-diff HTML report for this execution unit
-- Read `default/skills/visual-explainer/templates/code-diff.html` to absorb the patterns before generating
+- MANDATORY: Invoke `Skill("ring:visualize")` to generate a code-diff HTML report for this execution unit
+- Read `default/skills/visualize/templates/code-diff.html` to absorb the patterns before generating
 - Content sourced from state JSON `agent_outputs` for the current unit:
   * **TDD Output:** `tdd_red` (failing test) + `tdd_green` (implementation)
   * **Files Changed:** Per-file before/after diff panels using `git diff` data from the implementation (do not read source files directly — use diff output provided by the implementation agent)
@@ -927,8 +927,8 @@ Subtask {id} complete. All 9 gates passed.
 **Task Checkpoint (after all subtasks of a task complete):**
 
 **VISUAL CHANGE REPORT (MANDATORY - before task checkpoint question):**
-- MANDATORY: Invoke `Skill("ring:visual-explainer")` to generate an aggregate code-diff HTML report for all subtasks
-- Read `default/skills/visual-explainer/templates/code-diff.html` to absorb the patterns before generating
+- MANDATORY: Invoke `Skill("ring:visualize")` to generate an aggregate code-diff HTML report for all subtasks
+- Read `default/skills/visualize/templates/code-diff.html` to absorb the patterns before generating
 - Content aggregated from all subtask executions:
   * **Task Overview:** Task ID, title, all subtask IDs and their gate statuses
   * **Combined File Changes:** All files modified across all subtasks with before/after diff panels
@@ -1093,7 +1093,7 @@ Dispatch `ring:qa-analyst-frontend` with `test_mode="performance"`. MUST verify:
 
 ### Step 9: Gate 7 - Code Review
 
-**REQUIRED SUB-SKILL:** `Skill("ring:requesting-code-review")`
+**REQUIRED SUB-SKILL:** `Skill("ring:codereview")`
 
 Dispatch all 5 reviewers in parallel (see Gate 7: Code Review Adaptation above).
 

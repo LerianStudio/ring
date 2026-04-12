@@ -18,7 +18,7 @@ sequence:
   before: [ring:dev-devops]
 
 related:
-  complementary: [ring:dev-cycle, ring:test-driven-development, ring:requesting-code-review]
+  complementary: [ring:dev-cycle, ring:test-driven-development, ring:codereview]
 
 input_schema:
   required:

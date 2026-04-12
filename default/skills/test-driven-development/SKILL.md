@@ -12,7 +12,7 @@ trigger: |
 skip_when: |
   - Reviewing/modifying existing tests → use testing-anti-patterns
   - Code already exists without tests → add tests first, then TDD for new code
-  - Exploratory/spike work → consider brainstorming first
+  - Exploratory/spike work → consider brainstorm first
 
 related:
   complementary: [testing-anti-patterns, verification-before-completion]
@@ -52,7 +52,7 @@ composition:
       when: "before marking test suite or feature complete"
       transition: "Run verification to ensure all tests pass, return to TDD if issues found"
 
-    - skill: "ring:requesting-code-review"
+    - skill: "ring:codereview"
       when: "after completing RED-GREEN-REFACTOR cycle for feature"
       transition: "Request review before merging, address feedback, mark complete"
 

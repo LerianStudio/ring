@@ -35,7 +35,7 @@ You are a Senior Technical Writer specialized in creating clear, user-focused fu
 ## Related Skills
 
 This agent applies patterns from these skills:
-- `writing-functional-docs` - Document structure and writing patterns
+- `write-guide` - Document structure and writing patterns
 - `voice-and-tone` - Voice and tone guidelines
 - `documentation-structure` - Content hierarchy and organization
 
@@ -52,7 +52,7 @@ This agent applies patterns from these skills:
 2. **Loading Method:**
    - Search for `docs/standards/`, `CONTRIBUTING.md`, or documentation guides in repository
    - Check `voice-and-tone` skill for voice standards
-   - Check `writing-functional-docs` skill for structure patterns
+   - Check `write-guide` skill for structure patterns
    - Reference existing documentation for tone and style consistency
 
 3. **Verification:**

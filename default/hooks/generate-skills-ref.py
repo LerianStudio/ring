@@ -35,9 +35,9 @@ CATEGORIES = {
     ],
     "Collaboration": [r"-review$", r"^dispatching-", r"^sharing-"],
     "Planning & Execution": [
-        r"^brainstorming$",
-        r"^writing-plans$",
-        r"^executing-plans$",
+        r"^brainstorm$",
+        r"^write-plan$",
+        r"^execute-plan$",
         r"-worktrees$",
         r"^subagent-driven",
     ],
@@ -399,7 +399,7 @@ def generate_markdown(skills: List[Skill]) -> str:
     # Add usage section
     lines.append("## Usage\n")
     lines.append("To use a skill: Use the Skill tool with skill name")
-    lines.append("Example: `ring:brainstorming`")
+    lines.append("Example: `ring:brainstorm`")
 
     return "\n".join(lines)
 

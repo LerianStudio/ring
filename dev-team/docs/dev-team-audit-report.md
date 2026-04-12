@@ -83,7 +83,7 @@
 | ring:dev-cycle | orchestrator | 95% | None |
 | ring:dev-cycle-frontend | orchestrator | 95% | None |
 | ring:dev-devops | gate-1 | 92% | None |
-| ring:dev-feedback-loop | post-cycle | 88% | Severity Calibration implicit |
+| ring:dev-report | post-cycle | 88% | Severity Calibration implicit |
 | ring:dev-frontend-accessibility | gate-2-frontend | 92% | None |
 | ring:dev-frontend-e2e | gate-5-frontend | 92% | None |
 | ring:dev-frontend-performance | gate-6-frontend | 92% | None |
@@ -136,8 +136,8 @@
 - **Issue:** Significantly shorter than other gate skills (~150 lines vs ~300+ lines)
 - **Fix:** Expand with more detailed examples, edge cases, and verification steps
 
-#### GAP-M003: ring:dev-feedback-loop - Missing Explicit Severity Calibration
-- **File:** `dev-team/skills/dev-feedback-loop/SKILL.md`
+#### GAP-M003: ring:dev-report - Missing Explicit Severity Calibration
+- **File:** `dev-team/skills/dev-report/SKILL.md`
 - **Issue:** No severity calibration table for findings
 - **Fix:** Add severity levels for different types of feedback findings
 
@@ -152,7 +152,7 @@
 - **Fix:** Add more prominent role clarification at the top
 
 #### GAP-M006: Standards Loading URLs - 2 Skills Missing
-- **Files:** `ring:dev-feedback-loop`, `ring:using-dev-team`
+- **Files:** `ring:dev-report`, `ring:using-dev-team`
 - **Issue:** No explicit WebFetch URLs in fetch_required tags
 - **Fix:** Add `<fetch_required>` blocks with explicit URLs
 

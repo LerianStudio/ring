@@ -81,12 +81,12 @@ Task #3: docs-reviewer (review both)
 
 **Skills:**
 - using-tw-team: Plugin introduction
-- writing-functional-docs: Functional doc patterns
-- writing-api-docs: API reference patterns
+- write-guide: Functional doc patterns
+- write-api: API reference patterns
 - documentation-structure: Hierarchy and organization
 - voice-and-tone: Voice guidelines
-- documentation-review: Quality checklist
-- api-field-descriptions: Field description patterns
+- review-docs: Quality checklist
+- write-api: Also includes detailed field description patterns (merged from api-field-descriptions)
 
 **Commands:**
 - /write-guide: Start functional guide

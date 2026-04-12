@@ -77,7 +77,7 @@ output_schema:
 | **This Skill** | Detect stack, determine gates, pass context to agent, verify outputs, enforce order |
 | **ring:backend-engineer-golang** | Implement systemplane code following the patterns in this document |
 | **ring:codebase-explorer** | Analyze the codebase for configuration patterns (Gate 1) |
-| **ring:visual-explainer** | Generate implementation preview HTML (Gate 1.5) |
+| **ring:visualize** | Generate implementation preview HTML (Gate 1.5) |
 | **7 reviewers** | Review at Gate 8 |
 
 **CANNOT change scope:** the skill defines WHAT to implement. The agent implements HOW.
@@ -248,7 +248,7 @@ MUST report all severities. CRITICAL: STOP immediately. HIGH: Fix before gate pa
 |------|------|-----------|-------|
 | 0 | Stack Detection + Prerequisite Audit | Always | Orchestrator |
 | 1 | Codebase Analysis (Config Focus) | Always | ring:codebase-explorer |
-| 1.5 | Implementation Preview | Always | Orchestrator (ring:visual-explainer) |
+| 1.5 | Implementation Preview | Always | Orchestrator (ring:visualize) |
 | 2 | Key Definitions + Registry | Always | ring:backend-engineer-golang |
 | 3 | Bundle + BundleFactory | Always | ring:backend-engineer-golang |
 | 4 | Reconcilers | Conditional (skip if no workers AND no RMQ AND no HTTP policy changes) | ring:backend-engineer-golang |
@@ -520,11 +520,11 @@ HARD GATE: MUST complete the analysis report and config inventory before proceed
 
 **Always executes. This gate generates a visual HTML report showing exactly what will change before any code is written.**
 
-**Uses the `ring:visual-explainer` skill to produce a self-contained HTML page.**
+**Uses the `ring:visualize` skill to produce a self-contained HTML page.**
 
 The report is built from Gate 0 (stack detection) and Gate 1 (codebase analysis). It shows the developer a complete preview of every change that will be made across all subsequent gates.
 
-**Orchestrator generates the report using `ring:visual-explainer` with this content:**
+**Orchestrator generates the report using `ring:visualize` with this content:**
 
 The HTML page MUST include these sections:
 
@@ -1342,7 +1342,7 @@ go build ./...
 
 ## Gate 8: Code Review
 
-**Dispatch 7 parallel reviewers (same pattern as ring:requesting-code-review).**
+**Dispatch 7 parallel reviewers (same pattern as ring:codereview).**
 
 MUST include this context in ALL 7 reviewer dispatches:
 

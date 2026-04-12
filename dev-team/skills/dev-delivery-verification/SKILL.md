@@ -30,7 +30,7 @@ sequence:
   before: [ring:dev-devops]
 
 related:
-  complementary: [ring:dev-cycle, ring:dev-implementation, ring:verification-before-completion, ring:requesting-code-review]
+  complementary: [ring:dev-cycle, ring:dev-implementation, ring:verification-before-completion, ring:codereview]
 
 input_schema:
   required:

@@ -61,7 +61,7 @@ flowchart LR
         prop["ring:dev-property-testing"]
         integ["ring:dev-integration-testing"]
         chaos["ring:dev-chaos-testing"]
-        review["ring:requesting-code-review"]
+        review["ring:codereview"]
         valid["ring:dev-validation"]
         a11y["ring:dev-frontend-accessibility"]
         visual["ring:dev-frontend-visual"]
@@ -69,7 +69,7 @@ flowchart LR
         perf["ring:dev-frontend-performance"]
         refactor_s["ring:dev-refactor"]
         refactorFE_s["ring:dev-refactor-frontend"]
-        feedback["ring:dev-feedback-loop"]
+        feedback["ring:dev-report"]
     end
 
     subgraph Agents["Agents (Executors)"]
@@ -634,7 +634,7 @@ flowchart TD
         g5["Gate 5: Property Testing<br/>Skill: ring:dev-property-testing<br/>Agent: ring:qa-analyst"]
         g6["Gate 6: Integration Testing<br/>Skill: ring:dev-integration-testing<br/>Agent: ring:qa-analyst"]
         g7["Gate 7: Chaos Testing<br/>Skill: ring:dev-chaos-testing<br/>Agent: ring:qa-analyst"]
-        g8["Gate 8: Code Review<br/>Skill: ring:requesting-code-review<br/>5 reviewers in PARALLEL<br/>HARD GATE: all must pass"]
+        g8["Gate 8: Code Review<br/>Skill: ring:codereview<br/>5 reviewers in PARALLEL<br/>HARD GATE: all must pass"]
         g9["Gate 9: Validation<br/>Skill: ring:dev-validation<br/>HARD GATE: user approval"]
 
         g0 --> g1 --> g2 --> g3 --> g4
@@ -643,7 +643,7 @@ flowchart TD
 
     manual_sub & manual_task & auto --> PerTask
 
-    g9 --> feedback["Post-cycle:<br/>ring:dev-feedback-loop<br/>Agent: ring:prompt-quality-reviewer"]
+    g9 --> feedback["Post-cycle:<br/>ring:dev-report<br/>Agent: ring:prompt-quality-reviewer"]
     feedback --> report["Generate report:<br/>docs/dev-team/feedback/<br/>cycle-YYYY-MM-DD.md"]
     report --> done([Cycle Complete])
 
@@ -683,7 +683,7 @@ flowchart TD
         g4["Gate 4: Visual Testing<br/>Skill: ring:dev-frontend-visual<br/>Agent: ring:qa-analyst-frontend"]
         g5["Gate 5: E2E Testing<br/>Skill: ring:dev-frontend-e2e<br/>Agent: ring:qa-analyst-frontend"]
         g6["Gate 6: Performance<br/>Skill: ring:dev-frontend-performance<br/>Agent: ring:qa-analyst-frontend<br/>HARD GATE: LCP<2.5s CLS<0.1 INP<200ms"]
-        g7["Gate 7: Code Review<br/>Skill: ring:requesting-code-review<br/>5 reviewers in PARALLEL<br/>HARD GATE: all must pass"]
+        g7["Gate 7: Code Review<br/>Skill: ring:codereview<br/>5 reviewers in PARALLEL<br/>HARD GATE: all must pass"]
         g8["Gate 8: Validation<br/>Skill: ring:dev-validation<br/>HARD GATE: user approval"]
 
         g0 --> g1 --> g2 --> g3 --> g4
@@ -692,7 +692,7 @@ flowchart TD
 
     askMode --> PerTask
 
-    g8 --> feedback["Post-cycle:<br/>ring:dev-feedback-loop"]
+    g8 --> feedback["Post-cycle:<br/>ring:dev-report"]
     feedback --> report["Generate report:<br/>docs/dev-team/feedback/<br/>cycle-frontend-YYYY-MM-DD.md"]
     report --> done([Cycle Complete])
 
@@ -885,7 +885,7 @@ flowchart TD
 flowchart TD
     start(["/ring:dev-report [cycle-date]"])
 
-    loadSkill["Load skill:<br/>ring:dev-feedback-loop"]
+    loadSkill["Load skill:<br/>ring:dev-report"]
 
     dateCheck{"cycle-date<br/>argument?"}
     specific["Load report:<br/>cycle-YYYY-MM-DD.md"]

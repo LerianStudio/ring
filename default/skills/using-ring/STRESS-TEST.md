@@ -131,7 +131,7 @@ My thought: "This is new feature implementation - need to understand existing pa
 
 TodoWrite:
 1. "Orchestration decision: Explore agent for API architecture understanding"
-2. "Check for relevant skills" (might match brainstorming or pre-dev)
+2. "Check for relevant skills" (might match brainstorm or pre-dev)
 
 Action: Task tool with Explore agent
 Prompt: "Understand existing API endpoint patterns, user controller structure, and authentication middleware to inform new profile update endpoint"

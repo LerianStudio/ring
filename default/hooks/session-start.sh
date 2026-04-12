@@ -66,7 +66,7 @@ DO NOT read/edit >3 files directly. This is a PROHIBITION.
 - "fix issues/remaining/findings" → Launch specialist agent
 - "apply fixes", "fix the X issues" → Launch specialist agent
 - "find where", "search for", "understand how" → Launch Explore agent
-- "draw a diagram", "explain architecture", "visualize", "comparison table" → Load ring:visual-explainer skill
+- "draw a diagram", "explain architecture", "visualize", "comparison table" → Load ring:visualize skill
 
 **If you think "this task is small" or "I can handle 5 files":**
 WRONG. Count > 3 = agent. No exceptions. Task size is irrelevant.

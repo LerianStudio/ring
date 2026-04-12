@@ -19,7 +19,7 @@ NOT_skip_when: |
   - "User will validate manually" → Gate 5 IS user validation. Cannot skip.
 
 sequence:
-  after: [ring:requesting-code-review]
+  after: [ring:codereview]
 
 related:
   complementary: [verification-before-completion]

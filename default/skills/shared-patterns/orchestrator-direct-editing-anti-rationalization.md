@@ -1,6 +1,6 @@
 # Anti-Rationalization: Orchestrator Direct Editing
 
-**Applies to:** Skills and workflows that orchestrate code changes (e.g., ring:requesting-code-review Gate 4, ring:dev-cycle)
+**Applies to:** Skills and workflows that orchestrate code changes (e.g., ring:codereview Gate 4, ring:dev-cycle)
 
 **CRITICAL PRINCIPLE: Orchestrators DISPATCH agents to fix issues. Orchestrators do NOT edit source files directly.**
 
@@ -49,7 +49,7 @@ If you catch yourself about to use Edit/Write/Create on source files → STOP. D
 
 ## How to Reference This Pattern
 
-In orchestrating skills (e.g., ring:requesting-code-review, ring:dev-cycle), add:
+In orchestrating skills (e.g., ring:codereview, ring:dev-cycle), add:
 
 ```markdown
 ### Orchestrator Boundaries (HARD GATE)
