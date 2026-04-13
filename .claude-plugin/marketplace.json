@@ -30,7 +30,7 @@
     {
       "name": "ring-dev-team",
       "description": "12 specialized developer agents + 31 development skills: Backend 10-gate dev cycle + Frontend 9-gate dev cycle (accessibility, visual, E2E, performance) + Frontend refactoring + delivery verification + service discovery + cycle management. Go/TypeScript Backend specialists, DevOps Engineer, Frontend TypeScript specialist, Frontend Designer, QA Backend Analyst, QA Frontend Analyst, and SRE. Complete development team coverage with TDD, observability, and security best practices.",
-      "version": "1.49.1",
+      "version": "1.49.2",
       "source": "./dev-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/dev-team",
       "repository": "https://github.com/lerianstudio/ring/tree/dev-team",
@@ -81,7 +81,7 @@
     {
       "name": "ring-pmo-team",
       "description": "PMO (Project Management Office) specialists for portfolio-level oversight: 6 agents (portfolio-manager, resource-planner, risk-analyst, governance-specialist, executive-reporter, delivery-reporter), 9 skills for portfolio planning, resource allocation, risk management, portfolio review, executive reporting, and squad delivery reporting. Complements ring-pm-team (single feature) with portfolio-level coordination.",
-      "version": "0.7.1",
+      "version": "0.7.2",
       "source": "./pmo-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/pmo-team",
       "repository": "https://github.com/lerianstudio/ring/tree/pmo-team",
@@ -136,5 +136,5 @@
       ]
     }
   ],
-  "version": "0.315.0"
+  "version": "0.316.0"
 }
