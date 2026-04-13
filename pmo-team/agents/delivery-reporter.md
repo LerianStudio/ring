@@ -1,5 +1,5 @@
 ---
-name: ring:executive-summaryer
+name: ring:delivery-reporter
 description: Delivery Reporting Specialist for analyzing Git repositories and creating visual executive presentations of squad deliveries. Extracts business value from technical changes (releases, PRs, commits) and generates HTML slide presentations with customizable visual identity.
 type: specialist
 output_schema:
