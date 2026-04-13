@@ -63,7 +63,7 @@ build_skills_table() {
 
     if [ -n "$gate" ]; then
       # Append row with gate for sorting (format: gate|skill|gate|output)
-      table_rows="${table_rows}${gate}|\`ring-pm-team:${skill_name}\`|${gate}|${output}"$'\n'
+      table_rows="${table_rows}${gate}|\`ring:${skill_name}\`|${gate}|${output}"$'\n'
     fi
   done
 
@@ -99,7 +99,7 @@ fi
 if [ -d "$PLUGIN_ROOT/skills" ]; then
   # Build table dynamically
   table_content=$(build_skills_table "$PLUGIN_ROOT/skills")
-  skill_count=$(echo "$table_content" | grep -c "ring-pm-team" || echo "0")
+  skill_count=$(echo "$table_content" | grep -c "ring:" || echo "0")
 
   if [ -n "$table_content" ] && [ "$skill_count" -gt 0 ]; then
     # Build the context message with dynamically discovered skills
@@ -112,7 +112,7 @@ ${skill_count}-gate structured feature planning (use via Skill tool):
 |-------|------|--------|
 ${table_content}
 
-For full details: Skill tool with \"ring-pm-team:using-pm-team\"
+For full details: Skill tool with \"ring:using-pm-team\"
 </ring-pm-team-system>"
 
     # Escape for JSON using shared utility
@@ -132,7 +132,7 @@ EOF
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "<ring-pm-team-system>\n**Pre-Dev Planning Skills**\n\n9-gate structured feature planning (use via Skill tool):\n\n| Skill | Gate | Output |\n|-------|------|--------|\n| `ring-pm-team:pre-dev-research` | 0 | research.md |\n| `ring-pm-team:pre-dev-prd-creation` | 1 | PRD.md |\n| `ring-pm-team:pre-dev-feature-map` | 2 | feature-map.md |\n| `ring-pm-team:pre-dev-trd-creation` | 3 | TRD.md |\n| `ring-pm-team:pre-dev-api-design` | 4 | API.md |\n| `ring-pm-team:pre-dev-data-model` | 5 | data-model.md |\n| `ring-pm-team:pre-dev-dependency-map` | 6 | dependencies.md |\n| `ring-pm-team:pre-dev-task-breakdown` | 7 | tasks.md |\n| `ring-pm-team:pre-dev-subtask-creation` | 8 | subtasks.md |\n\nFor full details: Skill tool with \"ring-pm-team:using-pm-team\"\n</ring-pm-team-system>"
+    "additionalContext": "<ring-pm-team-system>\n**Pre-Dev Planning Skills**\n\n9-gate structured feature planning (use via Skill tool):\n\n| Skill | Gate | Output |\n|-------|------|--------|\n| `ring:pre-dev-research` | 0 | research.md |\n| `ring:pre-dev-prd-creation` | 1 | PRD.md |\n| `ring:pre-dev-feature-map` | 2 | feature-map.md |\n| `ring:pre-dev-trd-creation` | 3 | TRD.md |\n| `ring:pre-dev-api-design` | 4 | API.md |\n| `ring:pre-dev-data-model` | 5 | data-model.md |\n| `ring:pre-dev-dependency-map` | 6 | dependencies.md |\n| `ring:pre-dev-task-breakdown` | 7 | tasks.md |\n| `ring:pre-dev-subtask-creation` | 8 | subtasks.md |\n\nFor full details: Skill tool with \"ring:using-pm-team\"\n</ring-pm-team-system>"
   }
 }
 EOF
@@ -143,7 +143,7 @@ else
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "<ring-pm-team-system>\n**Pre-Dev Planning Skills** (9 gates)\n\nFor full list: Skill tool with \"ring-pm-team:using-pm-team\"\n</ring-pm-team-system>"
+    "additionalContext": "<ring-pm-team-system>\n**Pre-Dev Planning Skills** (9 gates)\n\nFor full list: Skill tool with \"ring:using-pm-team\"\n</ring-pm-team-system>"
   }
 }
 EOF

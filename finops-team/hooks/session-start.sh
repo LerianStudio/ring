@@ -59,7 +59,7 @@ ${agents_table}
 Workflow: Setup → Analyzer (compliance) → Automation (templates)
 Supported: BACEN, RFB, Open Banking, DIMP, APIX
 
-For full details: Skill tool with \"ring-finops-team:using-finops-team\"
+For full details: Skill tool with \"ring:using-finops-team\"
 </ring-finops-team-system>"
 
     # Escape for JSON using shared utility
@@ -79,7 +79,7 @@ EOF
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "<ring-finops-team-system>\n**FinOps & Regulatory Compliance**\n\n2 specialist agents for Brazilian financial compliance:\n\n| Agent | Purpose |\n|-------|----------|\n| `ring-finops-team:finops-analyzer` | Field mapping & compliance analysis (Gates 1-2) |\n| `ring-finops-team:finops-automation` | Template generation in .tpl format (Gate 3) |\n\nWorkflow: Setup → Analyzer (compliance) → Automation (templates)\nSupported: BACEN, RFB, Open Banking, DIMP, APIX\n\nFor full details: Skill tool with \"ring-finops-team:using-finops-team\"\n</ring-finops-team-system>"
+    "additionalContext": "<ring-finops-team-system>\n**FinOps & Regulatory Compliance**\n\n2 specialist agents for Brazilian financial compliance:\n\n| Agent | Purpose |\n|-------|----------|\n| `ring:finops-analyzer` | Field mapping & compliance analysis (Gates 1-2) |\n| `ring:finops-automation` | Template generation in .tpl format (Gate 3) |\n\nWorkflow: Setup → Analyzer (compliance) → Automation (templates)\nSupported: BACEN, RFB, Open Banking, DIMP, APIX\n\nFor full details: Skill tool with \"ring:using-finops-team\"\n</ring-finops-team-system>"
   }
 }
 EOF
@@ -90,7 +90,7 @@ else
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "<ring-finops-team-system>\n**FinOps & Regulatory Compliance** (2 agents)\n\nFor full list: Skill tool with \"ring-finops-team:using-finops-team\"\n</ring-finops-team-system>"
+    "additionalContext": "<ring-finops-team-system>\n**FinOps & Regulatory Compliance** (2 agents)\n\nFor full list: Skill tool with \"ring:using-finops-team\"\n</ring-finops-team-system>"
   }
 }
 EOF
