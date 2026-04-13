@@ -247,22 +247,24 @@ Remember:
 
 ## Available in This Plugin
 
-**Agents:** See "6 PMO Specialists" table above.
+**Agents (6):**
+- ring:portfolio-manager (Multi-project coordination, strategic alignment, portfolio health)
+- ring:resource-planner (Capacity planning, skills matrix, allocation optimization)
+- ring:governance-specialist (Gate reviews, compliance, process adherence, audit readiness)
+- ring:risk-analyst (RAID logs, risk aggregation, mitigation planning, portfolio risk)
+- ring:executive-reporter (Portfolio status dashboards, project summaries, board packages)
+- ring:delivery-reporter (Git analysis, squad delivery showcases, visual HTML presentations)
 
-**Skills:**
-- `using-pmo-team` (this) - Introduction and dispatch guide
-- `portfolio-planning` - Portfolio strategy and planning
-- `resource-allocation` - Resource and capacity management
-- `risk-management` - Portfolio risk management
-- `project-health-check` - Individual project health assessment
-- `dependency-analysis` - Cross-project dependency analysis
-- `executive-summary` - Executive communication for portfolio/project status (PMO focus)
-- `ring:pmo-retrospective` - Portfolio retrospectives and lessons learned
-
-**Additional Skills:**
-- `ring:portfolio-review` - Conduct portfolio review (dispatches 4 PMO specialists in parallel)
-- `ring:executive-summary` - Generate executive summary (PMO/project status)
-- `ring:dependency-analysis` - Analyze cross-project dependencies
+**Skills (9):**
+- ring:using-pmo-team (this skill - plugin introduction and dispatch guide)
+- ring:portfolio-planning (Strategic portfolio planning, capacity assessment, optimization)
+- ring:portfolio-review (Comprehensive portfolio review - dispatches 4 specialists in parallel)
+- ring:resource-allocation (Resource capacity planning and allocation across projects)
+- ring:risk-management (Portfolio-level risk identification, assessment, and mitigation)
+- ring:project-health-check (Individual project health assessment across multiple dimensions)
+- ring:dependency-analysis (Cross-project dependency mapping and management)
+- ring:executive-summary (Executive dashboards, status summaries, and board packages)
+- ring:pmo-retrospective (Portfolio retrospectives and lessons learned)
 
 **Note:** Missing agents? Check `.claude-plugin/marketplace.json` for ring-pmo-team plugin.
 

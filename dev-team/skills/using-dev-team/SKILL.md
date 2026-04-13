@@ -252,11 +252,66 @@ Remember:
 
 ## Available in This Plugin
 
-**Agents:** See "12 Developer Specialists" table above.
+**Agents (12):** See "12 Developer Specialists" table above.
+- ring:backend-engineer-golang (Go microservices, PostgreSQL/MongoDB, concurrency)
+- ring:backend-engineer-typescript (TypeScript/Node.js backends, NestJS, Prisma)
+- ring:devops-engineer (Docker, Terraform, Helm, cloud infrastructure)
+- ring:frontend-bff-engineer-typescript (Next.js BFF, Clean Architecture, DDD)
+- ring:frontend-designer (Bold typography, color systems, animations, design systems)
+- ring:frontend-engineer (React/Next.js, App Router, Server Components, accessibility)
+- ring:helm-engineer (Helm charts, Lerian conventions, chart audits)
+- ring:prompt-quality-reviewer (Agent quality analysis, prompt deficiency detection)
+- ring:qa-analyst (Backend test strategy, coverage, fuzz/property/integration/chaos)
+- ring:qa-analyst-frontend (Vitest, Playwright, axe-core, Lighthouse, visual testing)
+- ring:sre (Structured logging, tracing, health checks, observability)
+- ring:ui-engineer (Wireframe-to-code, Design System compliance, UX criteria)
 
-**Skills:** `ring:using-dev-team` (this), `ring:dev-cycle` (10-gate backend workflow), `ring:dev-cycle-frontend` (9-gate frontend workflow), `ring:dev-refactor` (backend/general codebase analysis), `ring:dev-refactor-frontend` (frontend codebase analysis)
+**Skills (31):**
 
-**Commands:** `/ring:dev-cycle` (backend tasks), `/ring:dev-cycle-frontend` (frontend tasks), `/ring:dev-refactor` (analyze backend/general codebase), `/ring:dev-refactor-frontend` (analyze frontend codebase)
+*Cycle Orchestrators:*
+- ring:using-dev-team (this skill - plugin introduction and dispatch guide)
+- ring:dev-cycle (10-gate backend development cycle orchestrator)
+- ring:dev-cycle-frontend (9-gate frontend development cycle orchestrator)
+- ring:dev-cycle-management (Development cycle state management - status reporting and cancellation)
+
+*Implementation & Verification:*
+- ring:dev-implementation (Gate 0 - code implementation with TDD RED-GREEN phases)
+- ring:dev-delivery-verification (Delivery verification - confirms requested features are reachable code)
+- ring:dev-validation (Gate 9 - validates acceptance criteria met, requires user approval)
+
+*Infrastructure & DevOps:*
+- ring:dev-devops (Gate 1 - Docker, docker-compose, environment variables)
+- ring:dev-sre (Gate 2 - validates observability: logging, tracing, health checks)
+- ring:dev-helm (Helm chart creation/maintenance following Lerian conventions)
+- ring:dev-docker-security (Dockerfile auditing for Docker Hub Health Score grade A)
+- ring:dev-readyz (Readiness probes and startup self-probes for Lerian services)
+
+*Backend Testing Gates:*
+- ring:dev-unit-testing (Gate 3 - unit test coverage 85%+ with TDD)
+- ring:dev-fuzz-testing (Gate 4 - fuzz tests for edge cases and crashes)
+- ring:dev-property-testing (Gate 5 - property-based tests for domain invariants)
+- ring:dev-integration-testing (Gate 6 - integration tests with testcontainers)
+- ring:dev-chaos-testing (Gate 7 - chaos tests with Toxiproxy for graceful degradation)
+- ring:dev-goroutine-leak-testing (Goroutine leak detection with goleak)
+
+*Frontend Testing Gates:*
+- ring:dev-frontend-accessibility (Gate 2 - axe-core WCAG 2.1 AA compliance)
+- ring:dev-frontend-visual (Gate 4 - snapshot tests for all component states)
+- ring:dev-frontend-e2e (Gate 5 - Playwright E2E tests across browsers)
+- ring:dev-frontend-performance (Gate 6 - Core Web Vitals, Lighthouse > 90)
+
+*Analysis & Refactoring:*
+- ring:dev-refactor (Analyzes backend codebase against standards, generates tasks)
+- ring:dev-refactor-frontend (Analyzes frontend codebase against standards, generates tasks)
+- ring:dev-report (Cycle feedback - assertiveness scores, prompt quality, root cause analysis)
+
+*Specialized:*
+- ring:dev-multi-tenant (Multi-tenant development orchestrator with auto-detected stack)
+- ring:dev-systemplane-migration (Gate-based migration to database-backed runtime configuration)
+- ring:dev-service-discovery (Scans Go project for service/module/resource hierarchy)
+- ring:dev-dep-security-check (Audits dependency installations before execution)
+- ring:dev-llms-txt (Generates/audits llms.txt files per llmstxt.org spec)
+- ring:using-lib-commons (Reference for lib-commons v4.6.0, Lerian shared Go library)
 
 **Note:** Missing agents? Check `.claude-plugin/marketplace.json` for ring-dev-team plugin.
 

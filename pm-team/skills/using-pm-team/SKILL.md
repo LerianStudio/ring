@@ -279,6 +279,47 @@ These requirements are NON-NEGOTIABLE:
 
 ---
 
+## Available in This Plugin
+
+**Agents (4):**
+- ring:repo-research-analyst (Codebase research - searches repository for existing patterns and conventions)
+- ring:best-practices-researcher (External research - web search for industry best practices and guidance)
+- ring:framework-docs-researcher (Tech stack analysis - detects stack and fetches framework documentation)
+- ring:product-designer (UX research, user validation, design specifications for features)
+
+**Skills (15):**
+
+*Workflow Orchestrators:*
+- ring:using-pm-team (this skill - plugin introduction and workflow guide)
+- ring:pre-dev-feature (Small Track 5-gate orchestrator for features <2 days)
+- ring:pre-dev-full (Large Track 10-gate orchestrator for features >=2 days)
+
+*Research & Discovery:*
+- ring:pre-dev-research (Gate 0 - parallel research agents for codebase, best practices, frameworks)
+
+*Requirements & Design:*
+- ring:pre-dev-prd-creation (Gate 1 - business requirements, user stories, success metrics)
+- ring:pre-dev-feature-map (Gate 2 - feature relationships and interactions, Large Track only)
+- ring:pre-dev-design-validation (Gate 1.5/2.5 - verifies UX specifications are complete)
+
+*Architecture & Contracts:*
+- ring:pre-dev-trd-creation (Gate 3 - technical architecture with technology-agnostic patterns)
+- ring:pre-dev-api-design (Gate 4 - API contracts and data contracts, Large Track only)
+- ring:pre-dev-data-model (Gate 5 - entities, relationships, ownership, Large Track only)
+- ring:pre-dev-dependency-map (Gate 6 - explicit versioned technology selections, Large Track only)
+
+*Task Planning & Delivery:*
+- ring:pre-dev-task-breakdown (Gate 7 - value-driven decomposition into working increments)
+- ring:pre-dev-subtask-creation (Gate 8 - zero-context 2-5 min atomic subtasks, Large Track only)
+- ring:pre-dev-delivery-planning (Gate 9/4 - delivery roadmap with timeline and critical path)
+
+*Post-Planning:*
+- ring:delivery-status (Evidence-based progress tracking against delivery roadmap)
+
+**Note:** Missing agents? Check `.claude-plugin/marketplace.json` for ring-pm-team plugin.
+
+---
+
 ## When This Skill Is Not Needed
 
 - Quick exploratory work where `ring:brainstorm` suffices
