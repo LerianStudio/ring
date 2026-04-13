@@ -1,5 +1,5 @@
 ---
-name: ring:cycle-management
+name: ring:dev-cycle-management
 description: Development cycle state management — status reporting and cycle cancellation
 trigger: |
   - User wants to check the status of a running development cycle
@@ -156,7 +156,7 @@ To resume later:
 No development cycle to cancel.
 
 Check status with:
-  ring:cycle-management (mode=status)
+  ring:dev-cycle-management (mode=status)
 ```
 
 ### Execution Steps (Cancel)
@@ -177,8 +177,8 @@ Check status with:
 | Skill | Description |
 |-------|-------------|
 | `ring:dev-cycle` | Start or resume cycle |
-| `ring:cycle-management` (mode=cancel) | Cancel running cycle |
-| `ring:cycle-management` (mode=status) | Check current status |
+| `ring:dev-cycle-management` (mode=cancel) | Cancel running cycle |
+| `ring:dev-cycle-management` (mode=status) | Check current status |
 | `ring:dev-report` | View feedback report |
 
 ---

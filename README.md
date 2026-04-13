@@ -342,7 +342,7 @@ No "should work" → Only "does work" with proof
 - `ring:dev-cycle-frontend` - 9-gate frontend development workflow orchestrator
 - `ring:dev-refactor` - Backend/codebase standards analysis
 - `ring:dev-refactor-frontend` - Frontend standards analysis and task generation
-- `ring:cycle-management` - Development cycle state management (status reporting and cancellation)
+- `ring:dev-cycle-management` - Development cycle state management (status reporting and cancellation)
 
 **Backend Gate Skills (9):**
 
@@ -370,7 +370,7 @@ No "should work" → Only "does work" with proof
 **Migration & Reference (4):**
 
 - `ring:using-lib-commons` - Comprehensive reference for lib-commons v4 (Lerian's shared Go library with 30+ packages)
-- `ring:systemplane-migration` - Migrate Lerian Go services from .env/YAML config to systemplane (database-backed hot-reloadable config)
+- `ring:dev-systemplane-migration` - Migrate Lerian Go services from .env/YAML config to systemplane (database-backed hot-reloadable config)
 - `ring:dev-llms-txt` - Generate or audit llms.txt files following llmstxt.org spec for AI-friendly repository entry points
 
 **Security (1):**

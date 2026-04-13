@@ -1,5 +1,5 @@
 ---
-name: ring:systemplane-migration
+name: ring:dev-systemplane-migration
 description: >
   Gate-based systemplane migration orchestrator. Migrates Lerian Go services from
   .env/YAML-based configuration to the systemplane — a database-backed, hot-reloadable
@@ -446,7 +446,7 @@ N3. Custom change notification channels:
 
 ```json
 {
-  "skill": "ring:systemplane-migration",
+  "skill": "ring:dev-systemplane-migration",
   "gate": "0",
   "detection": {
     "lib_commons_version": "v4.3.2",
@@ -1488,11 +1488,11 @@ curl -s http://localhost:{port}/v1/system/settings?scope=global | jq
 
 ## State Persistence
 
-Save to `docs/ring-systemplane-migration/current-cycle.json` for resume support:
+Save to `docs/dev-systemplane-migration/current-cycle.json` for resume support:
 
 ```json
 {
-  "skill": "ring:systemplane-migration",
+  "skill": "ring:dev-systemplane-migration",
   "version": "2.0.0",
   "service": "{service_name}",
   "started_at": "ISO8601",
