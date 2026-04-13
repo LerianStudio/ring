@@ -75,7 +75,7 @@ flowchart LR
     subgraph Agents["Agents (Executors)"]
         goEng["ring:backend-engineer-golang"]
         tsEng["ring:backend-engineer-typescript"]
-        bffEng["ring:frontend-bff-engineer-ts"]
+        bffEng["ring:frontend-bff-engineer-typescript"]
         feEng["ring:frontend-engineer"]
         feDes["ring:frontend-designer"]
         uiEng["ring:ui-engineer"]
@@ -141,7 +141,7 @@ flowchart LR
         devops["ring:devops-engineer"]
         sre["ring:sre"]
         qa["ring:qa-analyst"]
-        bff["ring:frontend-bff-engineer-ts"]
+        bff["ring:frontend-bff-engineer-typescript"]
     end
 
     subgraph ProjectFiles["Project Files"]
@@ -201,7 +201,7 @@ flowchart LR
 
 ```mermaid
 flowchart LR
-    agent(["ring:frontend-bff-engineer-ts<br/>v2.5.0"])
+    agent(["ring:frontend-bff-engineer-typescript<br/>v2.5.0"])
 
     subgraph Standards["Standards (WebFetch)"]
         ts["typescript.md<br/>(14 core + 6 BFF sections)"]
@@ -258,7 +258,7 @@ flowchart LR
 
     subgraph Consumes["Consumes From"]
         designer["ring:frontend-designer<br/>(handoff contract)"]
-        bff["ring:frontend-bff-engineer-ts<br/>(BFF API contract)"]
+        bff["ring:frontend-bff-engineer-typescript<br/>(BFF API contract)"]
     end
 
     subgraph Delegates["Delegates To"]
@@ -451,7 +451,7 @@ flowchart LR
     subgraph Validates["Validates Code From"]
         goEng["ring:backend-engineer-golang"]
         tsEng["ring:backend-engineer-typescript"]
-        bffEng["ring:frontend-bff-engineer-ts"]
+        bffEng["ring:frontend-bff-engineer-typescript"]
     end
 
     subgraph Scope["Scope Boundary"]
@@ -563,7 +563,7 @@ flowchart LR
     subgraph Analyzes["Analyzes Outputs From"]
         goEng["ring:backend-engineer-golang"]
         tsEng["ring:backend-engineer-typescript"]
-        bffEng["ring:frontend-bff-engineer-ts"]
+        bffEng["ring:frontend-bff-engineer-typescript"]
         feEng["ring:frontend-engineer"]
         feDes["ring:frontend-designer"]
         uiEng["ring:ui-engineer"]
@@ -927,7 +927,7 @@ flowchart TD
 
     goAgent(["ring:backend-engineer-golang"])
     tsAgent(["ring:backend-engineer-typescript"])
-    bffAgent(["ring:frontend-bff-engineer-ts"])
+    bffAgent(["ring:frontend-bff-engineer-typescript"])
     feAgent(["ring:frontend-engineer"])
     uiAgent(["ring:ui-engineer"])
     designAgent(["ring:frontend-designer"])
@@ -983,7 +983,7 @@ flowchart LR
     handoff -->|"design specs"| feEng
 
     subgraph BFFPhase["BFF Phase"]
-        bff(["ring:frontend-bff-engineer-ts"])
+        bff(["ring:frontend-bff-engineer-typescript"])
     end
 
     subgraph BFFArtifacts["BFF Artifacts"]
@@ -1020,7 +1020,7 @@ flowchart LR
 |-------|---------------|----------|
 | ring:backend-engineer-golang | golang.md | 47 |
 | ring:backend-engineer-typescript | typescript.md | 14 |
-| ring:frontend-bff-engineer-ts | typescript.md | 14 core + 6 BFF |
+| ring:frontend-bff-engineer-typescript | typescript.md | 14 core + 6 BFF |
 | ring:frontend-engineer | frontend.md | 19 |
 | ring:frontend-designer | frontend.md | 19 |
 | ring:ui-engineer | frontend.md | 19 |
