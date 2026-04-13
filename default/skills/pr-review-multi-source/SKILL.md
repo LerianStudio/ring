@@ -115,8 +115,8 @@ gh pr view <PR_NUMBER_OR_URL> --comments
 
 **Review comments (inline code comments and review summaries):**
 ```bash
-gh api repos/{owner}/{repo}/pulls/{number}/reviews
-gh api repos/{owner}/{repo}/pulls/{number}/comments
+gh api --paginate repos/{owner}/{repo}/pulls/{number}/reviews
+gh api --paginate repos/{owner}/{repo}/pulls/{number}/comments
 ```
 
 For each comment, extract and categorize:
@@ -526,8 +526,8 @@ gh api graphql -f query='
           nodes {
             id
             isResolved
-            comments(first: 1) {
-              nodes { body databaseId }
+            comments(first: 100) {
+              nodes { id body }
             }
           }
         }
@@ -537,7 +537,7 @@ gh api graphql -f query='
 '
 ```
 
-Match each thread by its first comment's `databaseId` to the `comment_id` collected in Step 0.3, then resolve using the thread's `id`.
+Match each thread by comparing the REST comment's `node_id` (collected in Step 0.3) against any comment's `id` in `comments.nodes[*]`, then resolve using the thread's `id`. Do NOT use `databaseId` — it is deprecated in GitHub's GraphQL API.
 
 ### Step 9.3: Reply Templates
 
