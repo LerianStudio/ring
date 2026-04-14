@@ -4,6 +4,22 @@
 
 Changelog for ring-default:
 
+- **Features**
+  - Added pr-review-multi-source skill, adapted from optimus.
+
+- **Fixes**
+  - Added pagination and used node_id instead of deprecated databaseId for pr-review-multi-source.
+
+Contributors: @gandalf, @jeff, @jefferson.comff
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.21.0...ring-default@1.22.0)
+
+---
+
+## [1.22.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.22.0)
+
+Changelog for ring-default:
+
 - **Features:**
   - Added pr-review-multi-source skill (adapted from optimus).
 
