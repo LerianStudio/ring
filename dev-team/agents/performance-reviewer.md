@@ -58,9 +58,17 @@ Performance Review does not have a dedicated standards file. Instead, cross-refe
 | TypeScript | `typescript.md` (Testing, Frameworks & Libraries) |
 | SRE/Infra (Layer 2) | `sre.md` (Health Checks, Observability) |
 
+<fetch_required>
+https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/architecture.md
+https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/core.md
+https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/bootstrap.md
+https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md
+https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/sre.md
+</fetch_required>
+
 **Loading Steps:**
 1. Detect language(s) from project files (see Language Detection below)
-2. For each detected language, fetch the corresponding standards file(s) from `dev-team/docs/standards/`
+2. WebFetch the standards files listed in `<fetch_required>` above (filter by detected language)
 3. Use fetched standards as reference when evaluating findings
 4. If standards cannot be loaded, report in output: "Standards not loaded — findings based on built-in checks only"
 

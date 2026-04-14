@@ -682,10 +682,13 @@ This check only runs when the task's source spec (tasks.md or subtask file) cont
 ```bash
 # Step H.1: Extract Integration Contracts from task spec
 task_file="$1"  # Path to the task/subtask file
+section_exists=$(sed -n '/^## Integration Contracts/p' "$task_file")
 contracts=$(sed -n '/^## Integration Contracts/,/^## /p' "$task_file" | grep '^| IC-')
 
-if [ -z "$contracts" ]; then
+if [ -z "$section_exists" ]; then
   echo "CONTRACT_COMPLIANCE: ⚠️ SKIP — no Integration Contracts section in task spec"
+elif [ -z "$contracts" ]; then
+  echo "CONTRACT_COMPLIANCE: ⛔ FAIL — Integration Contracts section exists but contains no IC- rows (malformed or empty)"
 else
   blocking=0
 
@@ -724,7 +727,7 @@ else
 
     # Step H.3: Verify implementation calls the declared endpoint
     endpoint_path=$(echo "$endpoint" | sed 's|^[A-Z]* ||')  # Strip HTTP method prefix
-    refs=$(grep -rn "$endpoint_path" $normalized_files 2>/dev/null | grep -v "_test" | wc -l)
+    refs=$(grep -rFn "$endpoint_path" $normalized_files 2>/dev/null | grep -v "_test" | wc -l)
     if [ "$refs" -eq 0 ]; then
       echo "  ⛔ BLOCKING: $id — endpoint $endpoint_path not referenced in implementation"
       blocking=1
@@ -733,7 +736,7 @@ else
     # Step H.4: Verify HTTP method matches
     if echo "$method" | grep -qiE "^(GET|POST|PUT|PATCH|DELETE)$"; then
       method_upper=$(echo "$method" | tr '[:lower:]' '[:upper:]')
-      method_refs=$(grep -rn "$method_upper.*$endpoint_path\|$endpoint_path.*$method_upper" $normalized_files 2>/dev/null | grep -v "_test" | wc -l)
+      method_refs=$(grep -rFn "$endpoint_path" $normalized_files 2>/dev/null | grep -v "_test" | grep -iF "$method_upper" | wc -l)
       if [ "$method_refs" -eq 0 ]; then
         echo "  ⚠️ WARNING: $id — HTTP method $method_upper not clearly associated with $endpoint_path"
       fi
