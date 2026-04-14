@@ -1,6 +1,6 @@
 Lerian Studio General License
 
-Copyright (c) 2025 Lerian Studio Ltd. All rights reserved.
+Copyright (c) {YEAR} {COPYRIGHT_HOLDER}. All rights reserved.
 
 NOTICE: All information contained herein is, and remains the property of
 Lerian Studio Ltd. and its suppliers, if any. The intellectual and technical

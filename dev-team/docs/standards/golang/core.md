@@ -901,7 +901,7 @@ package yourpackage
 | Copyright holder  | `Lerian Studio Ltd.`           | Default for all Lerian projects                    |
 | Copyright year    | Current year (e.g., `2025`)    | Update when making significant changes             |
 | License reference | Depends on repository LICENSE  | MUST match the LICENSE file in the repo root        |
-| LICENSE location  | Inline in header               | No separate LICENSE file reference needed           |
+| LICENSE location  | Reference to LICENSE file       | Header points to LICENSE file in repo root (e.g., "that can be found in the LICENSE file") |
 
 ### Files That MUST Have Headers
 

@@ -31,12 +31,12 @@ related:
   complementary: [ring:dev-cycle, ring:dev-implementation, ring:backend-engineer-golang, ring:backend-engineer-typescript]
 
 input_schema:
-  required:
+  required: []
+  optional:
     - name: license_type
       type: string
       enum: [apache, elv2, proprietary]
-      description: "The license to apply: apache (Apache 2.0), elv2 (Elastic License v2), proprietary (Lerian Studio General License)"
-  optional:
+      description: "The license to apply. If omitted, the skill detects the current license from the repository or prompts the user interactively."
     - name: copyright_holder
       type: string
       default: "Lerian Studio Ltd."
@@ -257,6 +257,18 @@ CURRENT LICENSE DETECTION:
 | SPDX identifier  | {value} / none      | {file:line}        |
 | README section   | present / absent    | {line}             |
 ```
+
+### License Type Resolution
+
+If `license_type` was provided as input, use it directly.
+
+If `license_type` was NOT provided (interactive mode):
+1. Use the detected license from Gate 0 as the current state
+2. Ask the user: "Detected current license: {detected_type}. Which license should this repository use? [apache|elv2|proprietary]"
+3. Set `license_type` to the user's selection
+4. If no LICENSE file was detected AND no type provided: ask user to choose before proceeding
+
+**MUST have a resolved `license_type` before entering Gate 1.**
 
 ---
 
