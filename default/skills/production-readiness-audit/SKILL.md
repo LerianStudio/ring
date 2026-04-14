@@ -3677,7 +3677,7 @@ M2M Credentials (CONDITIONAL — activation criteria below):
 Activation rule: M2M checks apply ONLY when BOTH conditions are met:
   (a) Service declares a non-empty `targetServices` in typed config/DTO/module wiring, AND
   (b) Outbound service-to-service credential provider usage is detected in code paths (e.g., secretsmanager.GetM2MCredentials, m2m.NewM2MCredentialProvider).
-If neither condition is met, mark M2M section as N/A and do not deduct score.
+If either condition is missing, mark M2M section as N/A and do not deduct score.
 40. M2M credential provider with two-level cache: L1 (sync.Map, 30s) → L2 (Redis) → AWS Secrets Manager
 41. Cache-bust on 401: invalidate L2 → L1 → re-fetch
 42. 6 M2M metrics: m2m_credential_l1_cache_hits, m2m_credential_l2_cache_hits, m2m_credential_cache_misses, m2m_credential_fetch_errors, m2m_credential_fetch_duration_seconds, m2m_credential_invalidations
