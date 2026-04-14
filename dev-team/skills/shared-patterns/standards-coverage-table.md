@@ -309,6 +309,9 @@ These sections describe HOW to use the standards, not WHAT the standards are.
 | 52 | CORS Configuration | security.md | `#cors-configuration-mandatory` | **Configuration-driven (MANDATORY)**, production validation (no wildcard, no empty), middleware ordering (before Helmet), Helmet integration, detection commands |
 | 53 | Service Authentication | multi-tenant.md | `#service-authentication-mandatory` | **MANDATORY: API key authentication for tenant-manager /settings endpoint.** `MULTI_TENANT_SERVICE_API_KEY` env var, `client.WithServiceAPIKey()`, `X-API-Key` header, key rotation via service catalog |
 | 54 | Settings Revalidation | multi-tenant.md | N/A (pgManager internal) | **pgManager handles internally via `WithConnectionsCheckInterval`.** No separate watcher needed. Pass option when creating PostgreSQL manager. Detects maxOpenConns/maxIdleConns/statementTimeout changes |
+| 55 | Caching Strategy Patterns | caching.md | `#caching-strategy-patterns-mandatory` | **Cache-Aside, Write-Through, Write-Behind (MANDATORY)**: lib-commons Redis, valkey.GetKeyContext, TTL, stampede prevention, detection commands |
+| 56 | Cache Compliance Detection | caching.md | `#cache-compliance-detection` | Strategy detection, tenant-aware keys, TTL enforcement, invalidation, graceful degradation |
+| 57 | CQRS Pattern | architecture.md | `#cqrs-pattern-conditional` | **⚠️ CONDITIONAL** — Command/Query separation, detection commands, Ring pattern integration |
 
 **Module Loading Guide:**
 
@@ -323,6 +326,8 @@ These sections describe HOW to use the standards, not WHAT the standards are.
 | API endpoints | api-patterns.md (pagination + swaggo) |
 | Idempotency | idempotency.md + domain.md |
 | Multi-tenant | multi-tenant.md + bootstrap.md |
+| Caching strategy | caching.md |
+| CQRS pattern | architecture.md + domain-modeling.md |
 | Full compliance check | all modules |
 
 ---

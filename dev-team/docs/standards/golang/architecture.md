@@ -1,6 +1,6 @@
 # Go Standards - Architecture
 
-> **Module:** architecture.md | **Sections:** §23-29 | **Parent:** [index.md](index.md)
+> **Module:** architecture.md | **Sections:** §23-30 | **Parent:** [index.md](index.md)
 
 This module covers architecture patterns, directory structure, concurrency, goroutine recovery, and query optimization.
 
@@ -17,6 +17,7 @@ This module covers architecture patterns, directory structure, concurrency, goro
 | 5 | [Goroutine Leak Detection](#goroutine-leak-detection-mandatory) | goleak framework for detecting goroutine leaks |
 | 6 | [N+1 Query Detection](#n1-query-detection-mandatory) | Avoiding N+1 queries in collection processing |
 | 7 | [Performance Patterns](#performance-patterns-mandatory) | SELECT * avoidance, sync.Pool, memory optimization |
+| 8 | [CQRS Pattern (CONDITIONAL)](#cqrs-pattern-conditional) | Command/Query separation, when to apply, Ring pattern integration |
 
 ---
 
@@ -880,4 +881,126 @@ grep -rn "for.*{" --include="*.go" -A 5 | grep "make("
 | "Builder is verbose" | Verbose > quadratic complexity. | **Use strings.Builder** |
 
 ---
+
+## CQRS Pattern (CONDITIONAL)
+
+**CONDITIONAL:** Only applies when the service has separate read and write models, or when read/write ratio exceeds 10:1.
+
+### When to Use CQRS
+
+| Scenario | Use CQRS? | Rationale |
+|----------|-----------|-----------|
+| Read/write ratio > 10:1 | Yes | Optimize read model independently |
+| Different read formats needed (API + reports + dashboards) | Yes | Each consumer gets its own denormalized model |
+| Financial systems with audit trail + query views | Yes | Write model captures events, read model serves queries |
+| Simple CRUD with 1:1 read/write | No | Overhead without benefit |
+| Small service with < 5 endpoints | No | Over-engineering |
+
+### Pattern Structure
+
+```text
+/internal
+  /services
+    /command        # Write operations — validate, persist, return minimal
+      create_entity.go
+      update_entity.go
+    /query          # Read operations — denormalized, return rich
+      get_entity.go
+      list_entities.go
+  /domain           # Rich domain model (used by command side)
+    entity.go
+  /projection       # Read models (used by query side)
+    entity_view.go
+```
+
+### Command Side (Write)
+
+Command handlers validate business rules using the Always-Valid Domain Model and persist via repositories.
+
+```go
+// internal/services/command/create_account.go
+
+type CreateAccountCommand struct {
+    OrgID     uuid.UUID
+    Name      string
+    Currency  string
+}
+
+type CreateAccountHandler struct {
+    repo ports.AccountRepository
+}
+
+func (h *CreateAccountHandler) Handle(ctx context.Context, cmd CreateAccountCommand) (*entity.Account, error) {
+    // Domain validation via constructor (Always-Valid Domain Model)
+    account, err := entity.NewAccount(cmd.OrgID, cmd.Name, cmd.Currency)
+    if err != nil {
+        return nil, err
+    }
+
+    if err := h.repo.Create(ctx, account); err != nil {
+        return nil, err
+    }
+
+    return account, nil
+}
+```
+
+### Query Side (Read)
+
+Query handlers return denormalized views optimized for the consumer. No business logic.
+
+```go
+// internal/services/query/get_account_summary.go
+
+type AccountSummaryView struct {
+    ID            uuid.UUID `json:"id"`
+    Name          string    `json:"name"`
+    Currency      string    `json:"currency"`
+    Balance       int64     `json:"balance"`
+    LastTxDate    time.Time `json:"lastTransactionDate"`
+    TxCount       int       `json:"transactionCount"`
+}
+
+type GetAccountSummaryHandler struct {
+    queryRepo ports.AccountQueryRepository  // reads from denormalized view/table
+}
+
+func (h *GetAccountSummaryHandler) Handle(ctx context.Context, id uuid.UUID) (*AccountSummaryView, error) {
+    return h.queryRepo.GetSummary(ctx, id)
+}
+```
+
+### Integration with Ring Patterns
+
+| Ring Pattern | Command Side | Query Side |
+|-------------|-------------|-----------|
+| Always-Valid Domain Model | MUST use `entity.New*` constructors with validation | Not needed — views are read-only DTOs |
+| Repository Pattern | Standard write repository (`Create`, `Update`, `Delete`) | Separate query repository (`GetSummary`, `ListByFilter`) |
+| Idempotency (idempotency.md) | MUST apply to command handlers that create resources | Not applicable (reads are idempotent by nature) |
+| Caching (caching.md) | Invalidate cache on command execution | Cache query results (Cache-Aside recommended) |
+
+### Detection Commands (for dev-refactor)
+
+```bash
+# Detect CQRS pattern: separate command/query directories
+find internal/services -type d -name "command" -o -name "query" 2>/dev/null
+# If both exist → CQRS detected
+
+# Detect separate read models (projection/view types)
+grep -rn "View\}\|Summary\}\|Projection\}" internal/ --include="*.go" | grep "type.*struct" | grep -v "_test.go"
+# If present alongside domain entities → CQRS detected
+
+# Detect mixed read/write in same handler (anti-pattern when CQRS should apply)
+# Look for handlers that both query and mutate
+grep -rn "func.*Handler.*Handle" internal/services/ --include="*.go" | grep -v "_test.go"
+```
+
+### Anti-Rationalization Table
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "CQRS is over-engineering for our service" | If read/write ratio is < 10:1 and models are identical, you're right — skip CQRS. But if you have separate views, reports, or dashboards, you already need it. | **Evaluate read/write ratio before deciding** |
+| "We can add CQRS later" | Retrofitting CQRS into a mixed read/write codebase is a rewrite. Design the separation early. | **Separate command/query from the start if criteria met** |
+| "One repository handles both reads and writes" | Mixed repositories grow into god objects. Command repos need transactions; query repos need JOINs and denormalization. | **Separate repositories for command and query** |
+| "Views are just DTOs, no need for separate models" | Views often need JOINs, aggregations, and computed fields that don't belong in the domain model. | **Use dedicated view types for query side** |
 
