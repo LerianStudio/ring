@@ -1,6 +1,6 @@
 # Ring Marketplace Manual
 
-Quick reference guide for the Ring skills library and workflow system. This monorepo provides 6 plugins with 90 skills and 38 agents for enforcing proven software engineering practices across the entire software delivery value chain.
+Quick reference guide for the Ring skills library and workflow system. This monorepo provides 6 plugins with 94 skills and 39 agents for enforcing proven software engineering practices across the entire software delivery value chain.
 
 ---
 
@@ -13,8 +13,8 @@ Quick reference guide for the Ring skills library and workflow system. This mono
 │                                                                                    │
 │  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐      │
 │  │ ring-default  │  │ ring-dev-team │  │ ring-pm-team  │  │ring-finops-   │      │
-│  │  Skills(22)   │  │  Skills(31)   │  │  Skills(15)   │  │  team         │      │
-│  │  Agents(10)   │  │  Agents(12)   │  │  Agents(4)    │  │  Skills(7)    │      │
+│  │  Skills(23)   │  │  Skills(33)   │  │  Skills(16)   │  │  team         │      │
+│  │  Agents(10)   │  │  Agents(13)   │  │  Agents(4)    │  │  Skills(7)    │      │
 │  │               │  │               │  │               │  │  Agents(3)    │      │
 │  └───────────────┘  └───────────────┘  └───────────────┘  └───────────────┘      │
 │  ┌───────────────┐  ┌───────────────┐                                            │
@@ -74,9 +74,9 @@ Ring is auto-loaded at session start. Two ways to invoke Ring capabilities:
 
 ## 💡 About Skills
 
-Skills (90) are the primary invocation mechanism for Ring. They can be invoked directly by users (`Skill tool: "ring:skill-name"`) or applied automatically by Claude Code when it detects they're applicable. They handle testing, debugging, verification, planning, code review enforcement, and more.
+Skills (94) are the primary invocation mechanism for Ring. They can be invoked directly by users (`Skill tool: "ring:skill-name"`) or applied automatically by Claude Code when it detects they're applicable. They handle testing, debugging, verification, planning, code review enforcement, and more.
 
-Examples: ring:test-driven-development, ring:systematic-debugging, ring:codereview, ring:verification-before-completion, ring:production-readiness-audit (44-dimension audit, up to 10 explorers per batch, incremental report 0-430, max 440 with multi-tenant; see [default/skills/production-readiness-audit/SKILL.md](default/skills/production-readiness-audit/SKILL.md)), etc.
+Examples: ring:test-driven-development, ring:systematic-debugging, ring:codereview, ring:production-readiness-audit (44-dimension audit, up to 10 explorers per batch, incremental report 0-430, max 440 with multi-tenant; see [default/skills/production-readiness-audit/SKILL.md](default/skills/production-readiness-audit/SKILL.md)), etc.
 
 ### Skill Selection Criteria
 
@@ -88,7 +88,7 @@ Each skill has structured frontmatter that helps Claude Code determine which ski
 | `trigger`     | WHEN to use (specific conditions) | "Bug reported", "Test failure observed"  |
 | `skip_when`   | WHEN NOT to use (exclusions)      | "Root cause already known → just fix it" |
 | `sequence`    | Workflow ordering (optional)      | `after: [prd-creation]`                  |
-| `related`     | Similar/complementary skills      | `similar: [root-cause-tracing]`          |
+| `related`     | Similar/complementary skills      | `similar: [systematic-debugging]`        |
 
 **How Claude Code chooses skills:**
 
@@ -105,7 +105,7 @@ Invoke via `Task tool with subagent_type: "..."`.
 
 ### Code Review (ring-default)
 
-**Always dispatch all 7 in parallel** (single message, 7 Task calls):
+**Always dispatch all 8 in parallel** (single message, 8 Task calls):
 
 | Agent                          | Purpose                                      |
 | ------------------------------ | -------------------------------------------- |
@@ -116,8 +116,9 @@ Invoke via `Task tool with subagent_type: "..."`.
 | `ring:nil-safety-reviewer`     | Nil/null pointer safety analysis             |
 | `ring:consequences-reviewer`   | Ripple effect, caller impact, downstream consequences |
 | `ring:dead-code-reviewer`      | Unused code, unreachable paths, dead exports          |
+| `ring:performance-reviewer`    | Performance hotspots, allocations, goroutine leaks, N+1 queries |
 
-**Example:** Before merging, run all 7 parallel reviewers via `ring:codereview` skill
+**Example:** Before merging, run all 8 parallel reviewers via `ring:codereview` skill
 
 ### Orchestration (ring-default)
 
@@ -149,6 +150,7 @@ Use when you need expert depth in specific domains:
 | `ring:qa-analyst`                       | Quality assurance            | Test strategy, automation, coverage                |
 | `ring:qa-analyst-frontend`              | Frontend QA specialist       | Accessibility, visual regression, E2E, performance |
 | `ring:sre`                              | Site reliability & ops       | Monitoring, alerting, incident response, SLOs      |
+| `ring:performance-reviewer`             | Performance review           | Go, TypeScript, Python, GOMAXPROCS, GC tuning      |
 | `ring:ui-engineer`                      | UI component specialist      | Design systems, accessibility, React               |
 
 **Standards Compliance Output:** All ring-dev-team agents include a `## Standards Compliance` output section with conditional requirement:
@@ -232,16 +234,14 @@ For portfolio-level project management and oversight:
 2. **Plan** → Use `ring:pre-dev-feature` skill (or `ring:pre-dev-full` if complex)
 3. **Isolate** → Use `ring:worktree` skill
 4. **Implement** → Use `ring:test-driven-development` skill
-5. **Review** → Use `ring:codereview` skill (dispatches 7 reviewers)
+5. **Review** → Use `ring:codereview` skill (dispatches 8 reviewers)
 6. **Commit** → Use `ring:commit` skill
 
 ### Bug Investigation
 
 1. **Investigate** → Use `ring:systematic-debugging` skill
-2. **Trace** → Use `ring:root-cause-tracing` if needed
-3. **Implement** → Use `ring:test-driven-development` skill
-4. **Verify** → Use `ring:verification-before-completion` skill
-5. **Review & Merge** → Use `ring:codereview` + `ring:commit` skills
+2. **Implement** → Use `ring:test-driven-development` skill
+3. **Review & Merge** → Use `ring:codereview` + `ring:commit` skills
 
 ### Code Review
 
@@ -256,6 +256,7 @@ Runs in parallel:
   • ring:nil-safety-reviewer
   • ring:consequences-reviewer
   • ring:dead-code-reviewer
+  • ring:performance-reviewer
     ↓
 Consolidated report with recommendations
 ```
@@ -292,7 +293,7 @@ These enforce quality standards:
 
 | Need                              | Agent to Use                                |
 | --------------------------------- | ------------------------------------------- |
-| General code quality review       | 7 parallel reviewers via `ring:codereview` skill |
+| General code quality review       | 8 parallel reviewers via `ring:codereview` skill |
 | Large PR review (15+ files)       | Auto-sliced via `ring:review-slicer`        |
 | Implementation planning           | `ring:write-plan`                           |
 | Deep codebase analysis            | `ring:codebase-explorer`                    |
@@ -307,6 +308,7 @@ These enforce quality standards:
 | AI prompt quality review          | `ring:prompt-quality-reviewer`              |
 | Backend quality assurance          | `ring:qa-analyst`                           |
 | Frontend quality assurance         | `ring:qa-analyst-frontend`                  |
+| Performance review                | `ring:performance-reviewer`                 |
 | Site reliability & operations     | `ring:sre`                                  |
 | Best practices research           | `ring:best-practices-researcher`            |
 | Framework documentation research  | `ring:framework-docs-researcher`            |
@@ -332,7 +334,7 @@ These enforce quality standards:
 ### Session Startup
 
 1. SessionStart hook runs automatically
-2. All 90 skills are auto-discovered and available
+2. All 94 skills are auto-discovered and available
 3. `ring:using-ring` workflow is activated (skill checking is now mandatory)
 
 ### Agent Dispatching
@@ -350,7 +352,7 @@ Returns structured output per agent's output_schema
 ### Parallel Review Pattern
 
 ```
-Single message with 7 Task calls (not sequential):
+Single message with 8 Task calls (not sequential):
 
 Task #1: ring:code-reviewer
 Task #2: ring:business-logic-reviewer
@@ -359,6 +361,7 @@ Task #4: ring:test-reviewer
 Task #5: ring:nil-safety-reviewer
 Task #6: ring:consequences-reviewer
 Task #7: ring:dead-code-reviewer
+Task #8: ring:performance-reviewer
     ↓
 All run in parallel (saves ~15 minutes vs sequential)
     ↓

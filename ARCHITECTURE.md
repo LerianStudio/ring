@@ -13,7 +13,7 @@
 
 ## Overview
 
-Ring is a **Claude Code plugin marketplace** that provides a comprehensive skills library and workflow system with **6 active plugins** (90 skills, 38 agents). It extends Claude Code's capabilities through structured, reusable patterns that enforce proven software engineering practices across the software delivery value chain: Product Planning → Development → Documentation.
+Ring is a **Claude Code plugin marketplace** that provides a comprehensive skills library and workflow system with **6 active plugins** (94 skills, 39 agents). It extends Claude Code's capabilities through structured, reusable patterns that enforce proven software engineering practices across the software delivery value chain: Product Planning → Development → Documentation.
 
 ### Architecture Philosophy
 
@@ -33,16 +33,16 @@ Ring operates on three core principles:
 │  │                          Ring Marketplace                                  │  │
 │  │  ┌──────────────────────┐  ┌──────────────────────┐                       │  │
 │  │  │ ring-default         │  │ ring-dev-team        │                       │  │
-│  │  │ Skills(22) Agents(10)│  │ Skills(31) Agents(12)│                       │  │
+│  │  │ Skills(23) Agents(10)│  │ Skills(33) Agents(13)│                       │  │
 │  │  │ Hooks/Lib            │  │                      │                       │  │
 │  │  └──────────────────────┘  └──────────────────────┘                       │  │
 │  │  ┌──────────────────────┐  ┌──────────────────────┐                       │  │
 │  │  │ ring-pm-team         │  │ ring-tw-team         │                       │  │
-│  │  │ Skills(15) Agents(4) │  │ Skills(7) Agents(3)  │                       │  │
+│  │  │ Skills(16) Agents(4) │  │ Skills(6) Agents(3)  │                       │  │
 │  │  └──────────────────────┘  └──────────────────────┘                       │  │
 │  │  ┌──────────────────────┐  ┌──────────────────────┐                       │  │
 │  │  │ ring-finops-team     │  │ ring-pmo-team        │                       │  │
-│  │  │ Skills(6) Agents(3)  │  │ Skills(9) Agents(6)  │                       │  │
+│  │  │ Skills(7) Agents(3)  │  │ Skills(9) Agents(6)  │                       │  │
 │  │  └──────────────────────┘  └──────────────────────┘                       │  │
 │  └───────────────────────────────────────────────────────────────────────────┘  │
 │                                                                                  │
@@ -72,10 +72,10 @@ _Versions managed in `.claude-plugin/marketplace.json`_
 
 | Plugin               | Description                          | Components                       |
 | -------------------- | ------------------------------------ | -------------------------------- |
-| **ring-default**     | Core skills library                  | 22 skills, 10 agents              |
-| **ring-dev-team**    | Developer agents                     | 31 skills, 12 agents              |
+| **ring-default**     | Core skills library                  | 23 skills, 10 agents              |
+| **ring-dev-team**    | Developer agents                     | 33 skills, 13 agents              |
 | **ring-finops-team** | FinOps regulatory compliance         | 7 skills, 3 agents               |
-| **ring-pm-team**     | Product planning workflows           | 15 skills, 4 agents               |
+| **ring-pm-team**     | Product planning workflows           | 16 skills, 4 agents               |
 | **ring-pmo-team**    | PMO portfolio management specialists | 9 skills, 6 agents                |
 | **ring-tw-team**     | Technical writing specialists        | 6 skills, 3 agents                |
 
@@ -136,6 +136,7 @@ dev-team/agents/
 ├── frontend-designer.md               # Visual design specialist (`ring:frontend-designer`)
 ├── frontend-engineer.md               # Frontend engineer (`ring:frontend-engineer`)
 ├── helm-engineer.md                   # Helm chart specialist (`ring:helm-engineer`)
+├── performance-reviewer.md              # Performance review (`ring:performance-reviewer`)
 ├── prompt-quality-reviewer.md         # Prompt quality specialist (`ring:prompt-quality-reviewer`)
 ├── qa-analyst.md                      # Backend QA specialist (`ring:qa-analyst`)
 ├── qa-analyst-frontend.md             # Frontend QA specialist (`ring:qa-analyst-frontend`)
@@ -159,7 +160,7 @@ pmo-team/agents/
 
 - Invoked via Claude's `Task` tool with `subagent_type`
 - Invoked with specialized subagent_type for domain-specific analysis
-- Review agents run in parallel (7 reviewers dispatch simultaneously via `ring:codereview` skill)
+- Review agents run in parallel (8 reviewers dispatch simultaneously via `ring:codereview` skill)
 - Developer agents provide specialized domain expertise
 - Return structured reports with severity-based findings
 
@@ -384,11 +385,12 @@ sequenceDiagram
     participant ring:nil-safety-reviewer
     participant ring:consequences-reviewer
     participant DCR as ring:dead-code-reviewer
+    participant PR as ring:performance-reviewer
 
     User->>Claude: Use ring:codereview skill
     Note over Claude: Skill provides<br/>parallel review workflow
 
-    Claude->>Task Tool: Dispatch 7 parallel tasks
+    Claude->>Task Tool: Dispatch 8 parallel tasks
 
     par Parallel Execution
         Task Tool->>ring:code-reviewer: Review architecture
@@ -404,6 +406,8 @@ sequenceDiagram
         Task Tool->>ring:consequences-reviewer: Review ripple effects
         and
         Task Tool->>DCR: Review dead code
+        and
+        Task Tool->>PR: Review performance
     end
 
     ring:code-reviewer-->>Claude: Return findings
@@ -413,6 +417,7 @@ sequenceDiagram
     ring:nil-safety-reviewer-->>Claude: Return findings
     ring:consequences-reviewer-->>Claude: Return findings
     DCR-->>Claude: Return findings
+    PR-->>Claude: Return findings
 
     Note over Claude: Aggregate & prioritize by severity
     Claude->>User: Consolidated report
@@ -471,18 +476,19 @@ User Request → ring:using-ring check → Relevant skill?
 
 ```
 Review Request → ring:codereview skill → ring:review-slicer (classify)
-    ├─ Small/focused PR → 7 Tasks in parallel (full diff)
+    ├─ Small/focused PR → 8 Tasks in parallel (full diff)
     └─ Large/multi-theme PR → For EACH slice:
         ├─ ring:code-reviewer           ─┐
         ├─ ring:business-logic-reviewer  │
         ├─ ring:security-reviewer        │
-        ├─ ring:test-reviewer            ┼─→ Merge + dedup → Handle by severity
-        ├─ ring:nil-safety-reviewer      │
+        ├─ ring:test-reviewer            │
+        ├─ ring:nil-safety-reviewer      ┼─→ Merge + dedup → Handle by severity
         ├─ ring:dead-code-reviewer       │
-        └─ ring:consequences-reviewer   ─┘
+        ├─ ring:consequences-reviewer    │
+        └─ ring:performance-reviewer    ─┘
 ```
 
-**Implementation:** The `ring:review-slicer` agent classifies files into thematic slices for large PRs (15+ files). For each slice, all 7 reviewers dispatch in parallel via a single message with 7 Task tool calls. Results are merged and deduplicated before consolidation. Small PRs skip slicing entirely (zero overhead).
+**Implementation:** The `ring:review-slicer` agent classifies files into thematic slices for large PRs (15+ files). For each slice, all 8 reviewers dispatch in parallel via a single message with 8 Task tool calls. Results are merged and deduplicated before consolidation. Small PRs skip slicing entirely (zero overhead).
 
 ### Pattern 3: Progressive Skill Execution
 
@@ -702,20 +708,20 @@ _Component counts reflect current state; plugin versions managed in `.claude-plu
 | Component                 | Count      | Location               |
 | ------------------------- | ---------- | ---------------------- |
 | Active Plugins            | 6          | All plugin directories |
-| Skills (ring-default)     | 22         | `default/skills/`      |
-| Skills (ring-dev-team)    | 31         | `dev-team/skills/`     |
+| Skills (ring-default)     | 23         | `default/skills/`      |
+| Skills (ring-dev-team)    | 33         | `dev-team/skills/`     |
 | Skills (ring-finops-team) | 7          | `finops-team/skills/`  |
-| Skills (ring-pm-team)     | 15         | `pm-team/skills/`      |
+| Skills (ring-pm-team)     | 16         | `pm-team/skills/`      |
 | Skills (ring-pmo-team)    | 9          | `pmo-team/skills/`     |
 | Skills (ring-tw-team)     | 6          | `tw-team/skills/`      |
-| **Total Skills**          | **90**     | **All plugins**        |
+| **Total Skills**          | **94**     | **All plugins**        |
 | Agents (ring-default)     | 10         | `default/agents/`      |
-| Agents (ring-dev-team)    | 12         | `dev-team/agents/`     |
+| Agents (ring-dev-team)    | 13         | `dev-team/agents/`     |
 | Agents (ring-finops-team) | 3          | `finops-team/agents/`  |
 | Agents (ring-pm-team)     | 4          | `pm-team/agents/`      |
 | Agents (ring-pmo-team)    | 6          | `pmo-team/agents/`     |
 | Agents (ring-tw-team)     | 3          | `tw-team/agents/`      |
-| **Total Agents**          | **38**     | **All plugins**        |
+| **Total Agents**          | **39**     | **All plugins**        |
 | Hooks                     | Per plugin | `{plugin}/hooks/`      |
 
 The system achieves these goals through clear component separation, structured workflows, automatic context management, and a modular marketplace architecture, creating a robust foundation for AI-assisted software development.

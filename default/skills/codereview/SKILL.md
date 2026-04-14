@@ -1,8 +1,8 @@
 ---
 name: ring:codereview
 description: |
-  Gate 4 of development cycle - dispatches 7 specialized reviewers (code, business-logic,
-  security, test, nil-safety, consequences, dead-code) in parallel for comprehensive code review feedback.
+  Gate 4 of development cycle - dispatches 8 specialized reviewers (code, business-logic,
+  security, test, nil-safety, consequences, dead-code, performance) in parallel for comprehensive code review feedback.
 
 trigger: |
   - Gate 4 of development cycle
@@ -55,7 +55,7 @@ input_schema:
     - name: skip_reviewers
       type: array
       items: string
-      enum: [ring:code-reviewer, ring:business-logic-reviewer, ring:security-reviewer, ring:test-reviewer, ring:nil-safety-reviewer, ring:consequences-reviewer, ring:dead-code-reviewer]
+      enum: [ring:code-reviewer, ring:business-logic-reviewer, ring:security-reviewer, ring:test-reviewer, ring:nil-safety-reviewer, ring:consequences-reviewer, ring:dead-code-reviewer, ring:performance-reviewer]
       description: "Reviewers to skip (use sparingly)"
     - name: skip_preanalysis
       type: boolean
@@ -94,7 +94,7 @@ output_schema:
       values: [PASS, FAIL, NEEDS_FIXES]
     - name: reviewers_passed
       type: string
-      description: "X/6 format"
+      description: "X/8 format"
     - name: issues_critical
       type: integer
     - name: issues_high
@@ -128,7 +128,7 @@ output_schema:
 
 ## Overview
 
-Dispatch all seven reviewer subagents in **parallel** for fast, comprehensive feedback:
+Dispatch all eight reviewer subagents in **parallel** for fast, comprehensive feedback:
 
 1. **ring:code-reviewer** - Architecture, design patterns, code quality
 2. **ring:business-logic-reviewer** - Domain correctness, business rules, edge cases
@@ -137,8 +137,9 @@ Dispatch all seven reviewer subagents in **parallel** for fast, comprehensive fe
 5. **ring:nil-safety-reviewer** - Nil/null pointer safety for Go and TypeScript
 6. **ring:consequences-reviewer** - Ripple effects, caller chain impact, downstream consequences
 7. **ring:dead-code-reviewer** - Orphaned code detection, reachability analysis, dead dependency chains
+8. **ring:performance-reviewer** - Performance hotspots, allocations, goroutine leaks, N+1 queries, infra misconfigurations
 
-**Core principle:** All 7 reviewers run simultaneously in a single message with 7 Task tool calls.
+**Core principle:** All 8 reviewers run simultaneously in a single message with 8 Task tool calls.
 
 ## CRITICAL: Role Clarification
 
@@ -198,7 +199,7 @@ AFTER AUTO-DETECTION, display context:
 │ Files Changed: [count] files                                    │
 │ Commits: [count] commits                                        │
 │                                                                 │
-│ Dispatching 7 reviewers in parallel...                          │
+│ Dispatching 8 reviewers in parallel...                          │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -216,7 +217,8 @@ review_state = {
     test_reviewer: {verdict: null, issues: []},
     nil_safety_reviewer: {verdict: null, issues: []},
     consequences_reviewer: {verdict: null, issues: []},
-    dead_code_reviewer: {verdict: null, issues: []}
+    dead_code_reviewer: {verdict: null, issues: []},
+    performance_reviewer: {verdict: null, issues: []}
   },
   aggregated_issues: {
     critical: [],
@@ -282,7 +284,7 @@ fi
 
 ### Step 2.5.2: Read Context Files
 
-If pipeline succeeded, read the 7 context files:
+If pipeline succeeded, read the 8 context files:
 
 | Reviewer | Context File |
 |----------|--------------|
@@ -293,6 +295,7 @@ If pipeline succeeded, read the 7 context files:
 | `ring:nil-safety-reviewer` | `docs/codereview/context-nil-safety-reviewer.md` |
 | `ring:consequences-reviewer` | `docs/codereview/context-consequences-reviewer.md` |
 | `ring:dead-code-reviewer` | `docs/codereview/context-dead-code-reviewer.md` |
+| `ring:performance-reviewer` | `docs/codereview/context-performance-reviewer.md` |
 
 Store each file's content in `preanalysis_state.context[reviewer_name]`.
 
@@ -309,7 +312,8 @@ preanalysis_state = {
     "ring:test-reviewer": null,
     "ring:nil-safety-reviewer": null,
     "ring:consequences-reviewer": null,
-    "ring:dead-code-reviewer": null
+    "ring:dead-code-reviewer": null,
+    "ring:performance-reviewer": null
   }
 }
 ```
@@ -464,7 +468,7 @@ IF slicer_response.shouldSlice == true:
   │ │ infrastructure   │ Helm charts, CI/CD        │ 5     │         │
   │ └──────────────────┴──────────────────────────┴───────┘         │
   │                                                                 │
-  │ Dispatching 7 reviewers x [N] slices = [7*N] review tasks...   │
+  │ Dispatching 8 reviewers x [N] slices = [8*N] review tasks...   │
   │                                                                 │
   └─────────────────────────────────────────────────────────────────┘
   → Continue to Step 3 (Sliced Dispatch variant)
@@ -488,15 +492,15 @@ NOTE: Input collection failures are NOT blockers.
 
 ---
 
-## Step 3: Dispatch All 7 Reviewers in Parallel
+## Step 3: Dispatch All 8 Reviewers in Parallel
 
-**⛔ CRITICAL: All 7 reviewers MUST be dispatched in a SINGLE message with 7 Task calls.**
+**⛔ CRITICAL: All 8 reviewers MUST be dispatched in a SINGLE message with 8 Task calls.**
 
 ### Step 3 Mode Selection
 
 ```text
 IF review_state.slicing.enabled == false:
-  → STANDARD MODE: Dispatch 7 reviewers on full diff (unchanged from current flow)
+  → STANDARD MODE: Dispatch 8 reviewers on full diff (unchanged from current flow)
   → Continue with Step 3 dispatch below as-is
 
 IF review_state.slicing.enabled == true:
@@ -505,7 +509,7 @@ IF review_state.slicing.enabled == true:
 
 ### Step 3-S: Sliced Dispatch (When Slicing Is Active)
 
-**⛔ CRITICAL: All 7 reviewers run on ALL slices. No "relevant reviewer" routing. More eyes = more safety.**
+**⛔ CRITICAL: All 8 reviewers run on ALL slices. No "relevant reviewer" routing. More eyes = more safety.**
 
 ```text
 FOR EACH slice IN review_state.slicing.slices:
@@ -519,8 +523,8 @@ FOR EACH slice IN review_state.slicing.slices:
        → Store as slice_filtered_context[reviewer_name]
      (If a context section mentions no files in this slice, exclude it entirely)
 
-  3. Dispatch all 7 reviewers with slice-scoped context:
-     ⛔ All 7 MUST be dispatched in a SINGLE message with 7 Task calls (per slice)
+  3. Dispatch all 8 reviewers with slice-scoped context:
+     ⛔ All 8 MUST be dispatched in a SINGLE message with 8 Task calls (per slice)
 
      The prompt for each reviewer is IDENTICAL to the standard Step 3 prompts below,
      with these substitutions:
@@ -538,7 +542,7 @@ FOR EACH slice IN review_state.slicing.slices:
      review_state.slicing.slices[i].reviewer_results = {
        code_reviewer: {verdict, issues},
        business_logic_reviewer: {verdict, issues},
-       ... (all 7)
+       ... (all 8)
      }
 
 AFTER ALL SLICES COMPLETE:
@@ -1024,6 +1028,101 @@ Task:
 
     ### Orphan Trace Analysis
     [For each orphan: What happened, caller count evidence, ring, cascade check]
+
+# Task 8: Performance Reviewer
+Task:
+  subagent_type: "ring:performance-reviewer"
+  description: "Performance review for [unit_id]"
+  prompt: |
+    ## Performance Review Request
+
+    **Unit ID:** [unit_id]
+    **Base SHA:** [base_sha]
+    **Head SHA:** [head_sha]
+
+    ## What Was Implemented
+    [implementation_summary]
+
+    ## Requirements
+    [requirements]
+
+    ## Files Changed
+    [implementation_files or "Use git diff"]
+
+    ## Pre-Analysis Context
+
+    **Static Analysis Results:**
+    The following findings were automatically extracted by the pre-analysis pipeline.
+    Use these to INFORM your review, not REPLACE your analysis.
+
+    ---
+
+    [IF preanalysis_state.context["ring:performance-reviewer"] exists AND is not empty:]
+    [INSERT the content of preanalysis_state.context["ring:performance-reviewer"]]
+    [ELSE:]
+    _No pre-analysis context available. Perform standard review based on git diff._
+
+    ---
+
+    ## Your Focus — Layer 1: Code-Level Performance
+    - **Allocations in hot paths** — repeated heap allocations in request handlers, tight loops; missing sync.Pool usage
+    - **Goroutine leaks** — missing context cancellation, unbounded `go func()` spawning, channels without consumers
+    - **N+1 queries** — loop-based DB queries where a JOIN or batch query would suffice
+    - **Event loop blocking** (TypeScript) — synchronous file I/O, CPU-heavy computation in main thread
+    - **String concatenation in loops** — using `+` or `fmt.Sprintf` in loops instead of `strings.Builder`
+    - **Connection pool sizing** — pool size vs expected concurrency mismatch
+    - **GC pressure** — excessive small allocations creating GC churn in short-lived objects
+    - **defer in tight loops** — deferred call stack growth inside loops
+    - **reflect in hot paths** — `reflect` package usage in request handlers or frequently-called functions
+    - **Missing b.Loop() in benchmarks** — Go 1.24+ requires `b.Loop()` instead of `for i := 0; i < b.N; i++`
+
+    ## Your Focus — Layer 2: Runtime/Infrastructure
+    - **GOMAXPROCS vs cgroup limits** — Go <1.25 reads host CPUs, not cgroup limits; must use `automaxprocs` or explicit setting
+    - **GC tuning (GOGC, GOMEMLIMIT)** — memory-constrained pods without `GOMEMLIMIT` risk OOMKill before GC triggers
+    - **CFS throttling** — high GOMAXPROCS + low CPU limit causes CFS throttling
+    - **Container resource ratio** — `requests` vs `limits` spread >4x is suspicious
+    - **Connection pool vs replica count** — total pool across replicas must not exceed DB `max_connections × 0.8`
+    - **HPA alignment** — scaling metrics must match workload classification (I/O-bound vs CPU-bound)
+    - **Workload classification** — verify resource strategy matches actual workload type
+
+    ## ⛔ Ring Standards Verification (MANDATORY)
+
+    **WebFetch the relevant standards and verify the changed code against them.**
+
+    For Go projects, WebFetch these modules based on changed files:
+    Base URL: `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/`
+
+    **Always load:**
+    - `architecture.md` (Performance Patterns, Concurrency Patterns, N+1 Query Detection, Goroutine Leak Detection)
+    - `core.md` (Dependency Management)
+    - `bootstrap.md` (Connection Management, Graceful Shutdown)
+
+    For TypeScript: WebFetch `typescript.md` (Testing, Frameworks & Libraries)
+    For SRE/Infra (Layer 2): WebFetch `sre.md` (Health Checks, Observability)
+
+    **Include a Standards Compliance section in your output** listing which standards were verified and any violations found.
+
+    ## Required Output
+    ### VERDICT: PASS / FAIL
+
+    ### Performance Review Summary
+    | Layer | Checks Run | Issues Found | Severity Breakdown |
+    |-------|-----------|--------------|-------------------|
+    | Code-Level | [N] | [N] | [critical/warning/info counts] |
+    | Runtime/Infra | [N] | [N] | [critical/warning/info counts] |
+
+    ### Issues Found
+    | Severity | Check ID | Description | File:Line | Estimated Impact | Recommendation |
+    |----------|----------|-------------|-----------|-----------------|----------------|
+    | [CRITICAL/HIGH/MEDIUM/LOW] | [G-1..G-13/T-1..T-7/P-1..P-5/R-1..R-8] | [issue] | [location] | [latency/throughput/memory impact] | [fix] |
+
+    ### Standards Compliance
+    | Standard | Section | Status | Evidence |
+    |----------|---------|--------|----------|
+    | [module.md] | [section name] | ✅/❌ | [file:line or N/A] |
+
+    ### Recommended Actions
+    [Prioritized list of performance improvements with estimated impact]
 ```
 
 ## Step 4: Wait for All Reviewers and Parse Output
@@ -1044,7 +1143,7 @@ IF review_state.slicing.enabled == true:
   → Skip to verdict aggregation below
 
 IF review_state.slicing.enabled == false (STANDARD MODE):
-  → Wait for all 7 Task calls to complete.
+  → Wait for all 8 Task calls to complete.
 
 For each reviewer:
 1. Extract VERDICT (PASS/FAIL)
@@ -1137,9 +1236,9 @@ Task:
 ```text
 After fixes committed:
 1. Get new HEAD_SHA
-2. Go back to Step 3 (dispatch all 7 reviewers again)
+2. Go back to Step 3 (dispatch all 8 reviewers again)
 
-⛔ CRITICAL: Always re-run ALL 7 reviewers after fixes.
+⛔ CRITICAL: Always re-run ALL 8 reviewers after fixes.
 Do NOT cherry-pick reviewers.
 ```
 
@@ -1261,7 +1360,7 @@ coderabbit auth login --token "cr_xxxxxxxxxxxxx"
 
 ```text
 ┌─────────────────────────────────────────────────────────────────┐
-│ ✅ ALL 3 RING REVIEWERS PASSED                                  │
+│ ✅ ALL 8 RING REVIEWERS PASSED                                  │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                 │
 │ Checking CodeRabbit CLI availability...                         │
@@ -1985,10 +2084,10 @@ LEGACY FLOW (when validation_scope.mode == "task"):
     │                                                                 │
     └─────────────────────────────────────────────────────────────────┘
     
-    Step 7.5.3a: Re-Run All 7 Ring Reviewers
+    Step 7.5.3a: Re-Run All 8 Ring Reviewers
     ─────────────────────────────────────────
     1. Get new HEAD_SHA after CodeRabbit fixes
-    2. Dispatch all 7 reviewers in parallel (per Step 3):
+    2. Dispatch all 8 reviewers in parallel (per Step 3):
        - ring:code-reviewer
        - ring:business-logic-reviewer
        - ring:security-reviewer
@@ -1996,11 +2095,12 @@ LEGACY FLOW (when validation_scope.mode == "task"):
        - ring:nil-safety-reviewer
        - ring:consequences-reviewer
        - ring:dead-code-reviewer
-    3. Wait for all 7 to complete
+       - ring:performance-reviewer
+    3. Wait for all 8 to complete
 
     Step 7.5.3b: Handle Ring Reviewer Results
     ─────────────────────────────────────────
-    IF all 7 Ring reviewers PASS:
+    IF all 8 Ring reviewers PASS:
       → Proceed to Step 8 (Success Output)
     
     IF any Ring reviewer finds CRITICAL/HIGH/MEDIUM issues:
@@ -2012,7 +2112,7 @@ LEGACY FLOW (when validation_scope.mode == "task"):
       → After fixes committed:
           → Re-run CodeRabbit: `coderabbit --prompt-only`
           → IF CodeRabbit passes:
-              → Re-run all 7 Ring reviewers (loop back to Step 7.5.3a)
+              → Re-run all 8 Ring reviewers (loop back to Step 7.5.3a)
           → IF CodeRabbit finds issues:
               → Fix CodeRabbit issues first, then re-run Ring reviewers
     
@@ -2040,7 +2140,7 @@ IF CodeRabbit found only MEDIUM/LOW issues:
       Format: // TODO(coderabbit): [issue description]
   
   → After TODO comments added (code changed):
-      → Re-run all 7 Ring reviewers (per Step 7.5.3a above)
+      → Re-run all 8 Ring reviewers (per Step 7.5.3a above)
       → IF Ring reviewers PASS: Proceed to Step 8
       → IF Ring reviewers find issues: Fix and re-run (max 2 iterations)
 
@@ -2299,10 +2399,10 @@ Invokes `Skill("ring:visualize")` to produce a self-contained HTML page showing 
 **1. Review Dashboard**
 - Overall status (PASS/FAIL) with large status indicator
 - Unit ID, iterations count, total duration
-- KPI cards: Total issues found, issues fixed, issues remaining, reviewers passed (X/7)
+- KPI cards: Total issues found, issues fixed, issues remaining, reviewers passed (X/8)
 
 **2. Reviewer Verdicts Panel**
-- 7 reviewer cards in a grid layout, each showing:
+- 8 reviewer cards in a grid layout, each showing:
   - Reviewer name, PASS/FAIL badge
   - Issue count by severity (severity badges)
   - Key findings summary (1-2 lines)
@@ -2360,6 +2460,7 @@ Generate skill output:
 | ring:nil-safety-reviewer | ✅ PASS | [count] |
 | ring:consequences-reviewer | ✅ PASS | [count] |
 | ring:dead-code-reviewer | ✅ PASS | [count] |
+| ring:performance-reviewer | ✅ PASS | [count] |
 
 ## Review Slicing
 [IF review_state.slicing.enabled:]
@@ -2382,7 +2483,7 @@ Generate skill output:
 ## Handoff to Next Gate
 - Review status: COMPLETE
 - All blocking issues: RESOLVED
-- Reviewers passed: 7/7
+- Reviewers passed: 8/8
 - CodeRabbit findings: [status]
 - Ready for Gate 5 (Validation): YES
 ```
@@ -2442,9 +2543,9 @@ STOP and report if:
 ### Cannot Be Overridden
 
 The following requirements CANNOT be waived:
-- MUST dispatch ALL 7 reviewers in parallel (not sequential, not partial)
+- MUST dispatch ALL 8 reviewers in parallel (not sequential, not partial)
 - CANNOT edit source files directly - MUST dispatch implementation agent for fixes
-- MUST re-run ALL 7 reviewers after any fix (no cherry-picking reviewers)
+- MUST re-run ALL 8 reviewers after any fix (no cherry-picking reviewers)
 - CANNOT skip CodeRabbit if installed and authenticated
 - MUST fix Critical, High, and Medium severity issues before Gate 5
 
@@ -2467,8 +2568,8 @@ See [dev-team/skills/shared-patterns/shared-pressure-resistance.md](../../dev-te
 
 | User Says | Your Response |
 |-----------|---------------|
-| "Skip review, code is simple" | "Simple code can have security issues. Dispatching all 7 reviewers." |
-| "Just run ring:code-reviewer" | "All 7 reviewers run in parallel. No time saved by skipping." |
+| "Skip review, code is simple" | "Simple code can have security issues. Dispatching all 8 reviewers." |
+| "Just run ring:code-reviewer" | "All 8 reviewers run in parallel. No time saved by skipping." |
 | "Fix later, merge now" | "Blocking issues (Critical/High/Medium) MUST be fixed before Gate 5." |
 
 ## Anti-Rationalization Table
@@ -2479,11 +2580,11 @@ See [dev-team/skills/shared-patterns/shared-anti-rationalization.md](../../dev-t
 
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
-| "Run reviewers one at a time" | Sequential = slow. Parallel = 7x faster. | **Dispatch all 7 in single message** |
+| "Run reviewers one at a time" | Sequential = slow. Parallel = 8x faster. | **Dispatch all 8 in single message** |
 | "Skip security for internal code" | Internal code can have vulnerabilities. | **Include ring:security-reviewer** |
 | "Critical issue is false positive" | Prove it with evidence, don't assume. | **Fix or provide evidence** |
 | "Low issues don't need TODO" | TODOs ensure issues aren't forgotten. | **Add TODO comments** |
-| "6 of 7 reviewers passed" | Gate 4 requires ALL 7. 6/7 = 0/7. | **Re-run ALL 7 reviewers** |
+| "7 of 8 reviewers passed" | Gate 4 requires ALL 8. 7/8 = 0/8. | **Re-run ALL 8 reviewers** |
 | "MEDIUM is not blocking" | MEDIUM = MUST FIX. Same as CRITICAL/HIGH. | **Fix MEDIUM issues NOW** |
 
 ---
@@ -2515,6 +2616,7 @@ See [dev-team/skills/shared-patterns/shared-anti-rationalization.md](../../dev-t
 | ring:nil-safety-reviewer | ✅/❌ |
 | ring:consequences-reviewer | ✅/❌ |
 | ring:dead-code-reviewer | ✅/❌ |
+| ring:performance-reviewer | ✅/❌ |
 
 ## Review Slicing
 **Sliced:** [Yes — N thematic groups | No — full-diff review]

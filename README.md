@@ -6,7 +6,7 @@
 
 **Proven engineering practices, enforced through skills.**
 
-Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **6 active plugins** and **90 skills** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
+Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **6 active plugins** and **94 skills** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
 
 ## ✨ Why Ring?
 
@@ -21,8 +21,8 @@ Without Ring, AI assistants often:
 Ring solves this by:
 
 - **Enforcing proven workflows** - Test-driven development, systematic debugging, proper planning
-- **Providing 90 specialized skills** (22 core + 31 dev-team + 15 product planning + 7 FinOps regulatory + 6 technical writing + 9 PMO)
-- **38 specialized agents** - 10 review/planning + 12 developer + 4 product research + 3 FinOps regulatory + 3 technical writing + 6 PMO
+- **Providing 94 specialized skills** (23 core + 33 dev-team + 16 product planning + 7 FinOps regulatory + 6 technical writing + 9 PMO)
+- **39 specialized agents** - 10 review/planning + 13 developer + 4 product research + 3 FinOps regulatory + 3 technical writing + 6 PMO
 - **Automating skill discovery** - Skills load automatically at session start
 - **Preventing common failures** - Built-in anti-patterns and mandatory checklists
 
@@ -64,6 +64,7 @@ Ring solves this by:
 - `ring:sre` - Site reliability engineer (monitoring, alerting, SLOs)
 - `ring:ui-engineer` - UI component specialist (design systems, accessibility)
 - `ring:helm-engineer` - Helm chart specialist (chart structure, security, Lerian conventions)
+- `ring:performance-reviewer` - Performance review (code hotspots, infra misconfigurations, Go/TypeScript/Python)
 
 > **Standards Compliance:** All dev-team agents include a `## Standards Compliance` output section with conditional requirement:
 >
@@ -291,7 +292,7 @@ No "should work" → Only "does work" with proof
 
 ## 📚 All 94 Skills (Across 6 Plugins)
 
-### Core Skills (ring-default plugin - 22 skills)
+### Core Skills (ring-default plugin - 23 skills)
 
 **Testing & Debugging (4):**
 
@@ -300,13 +301,14 @@ No "should work" → Only "does work" with proof
 - `ring:testing-anti-patterns` - Common test pitfalls to avoid
 - `ring:lint` - Parallel lint fixing with agent dispatch
 
-**Collaboration & Planning (7):**
+**Collaboration & Planning (8):**
 
 - `ring:brainstorm` - Structured design refinement
 - `ring:interview-me` - Proactive requirements gathering through structured interview
 - `ring:write-plan` - Zero-context implementation plans
 - `ring:execute-plan` - Batch execution with checkpoints
-- `ring:codereview` - **Parallel 7-reviewer dispatch** with severity-based handling
+- `ring:codereview` - **Parallel 8-reviewer dispatch** with severity-based handling
+- `ring:pr-review-multi-source` - **PR-aware multi-source review** with CodeRabbit/CI comment integration
 - `ring:worktree` - Isolated development
 - `ring:commit` - Smart commit organization with atomic grouping, conventional commits, and trailers
 
@@ -333,7 +335,7 @@ No "should work" → Only "does work" with proof
 
 - `ring:production-readiness-audit` - 44-dimension production readiness audit; runs explorers in batches of up to 10, appends incrementally to a single report; output: scored report (0-430, max 440 with multi-tenant) with severity ratings. See [default/skills/production-readiness-audit/SKILL.md](default/skills/production-readiness-audit/SKILL.md) for invocation and implementation details.
 
-### Developer Skills (ring-dev-team plugin - 31 skills)
+### Developer Skills (ring-dev-team plugin - 33 skills)
 
 **Orchestration & Refactoring (6):**
 
@@ -356,7 +358,7 @@ No "should work" → Only "does work" with proof
 - `ring:dev-service-discovery` - Service/module/resource hierarchy scanner for tenant-manager
 - `ring:dev-readyz` - Comprehensive readiness probes (/readyz) with per-dependency status and TLS validation
 
-**Testing & Validation (8):**
+**Testing & Validation (9):**
 
 - `ring:dev-unit-testing` - Gate 3: Unit test coverage (85%+ threshold)
 - `ring:dev-fuzz-testing` - Gate 4: Fuzz testing with seed corpus for edge case discovery
@@ -366,12 +368,14 @@ No "should work" → Only "does work" with proof
 - `ring:dev-goroutine-leak-testing` - Goroutine leak detection and regression testing
 - `ring:dev-validation` - Gate 9: User approval
 - `ring:dev-report` - Assertiveness scoring and metrics
+- `ring:dev-verify-code` - Atomic Go code verification with MERGE_READY/NEEDS_FIX verdict
 
 **Migration & Reference (4):**
 
 - `ring:using-lib-commons` - Comprehensive reference for lib-commons v4 (Lerian's shared Go library with 30+ packages)
 - `ring:dev-systemplane-migration` - Migrate Lerian Go services from .env/YAML config to systemplane (database-backed hot-reloadable config)
 - `ring:dev-llms-txt` - Generate or audit llms.txt files following llmstxt.org spec for AI-friendly repository entry points
+- `ring:dev-licensing` - Repository license management (Apache 2.0, Elastic v2, Proprietary)
 
 **Security (1):**
 
@@ -386,7 +390,7 @@ No "should work" → Only "does work" with proof
 
 > Frontend and backend dev-cycle workflows both use `ring:codereview` (core plugin) as the review gate.
 
-### Product Planning Skills (ring-pm-team plugin - 15 skills)
+### Product Planning Skills (ring-pm-team plugin - 16 skills)
 
 **Pre-Development Workflow (includes ring:using-pm-team + 9 gates):**
 
@@ -412,6 +416,7 @@ No "should work" → Only "does work" with proof
 - `ring:pre-dev-design-validation` - Gate 1.5/2.5: Design validation for UI features
 - `ring:pre-dev-delivery-planning` - Gate 4 (Small) / Gate 9 (Large): Delivery roadmap and timeline
 - `ring:delivery-status` - Delivery progress tracking against roadmap
+- `ring:deep-doc-review` - Deep cross-reference review of pre-dev documentation artifacts
 
 ### Technical Writing Skills (ring-tw-team plugin - 6 skills)
 
@@ -489,14 +494,14 @@ Claude: I'll use the pre-dev workflow to plan this systematically...
         ... [Through all 8 gates]
 ```
 
-### Code Review (Parallel, 7 Reviewers!)
+### Code Review (Parallel, 8 Reviewers!)
 
 ```
 User: "Review my authentication implementation"
-Claude: Dispatching all 7 reviewers in parallel...
+Claude: Dispatching all 8 reviewers in parallel...
         [Launches ring:code-reviewer, ring:business-logic-reviewer, ring:security-reviewer,
          ring:test-reviewer, ring:nil-safety-reviewer, ring:consequences-reviewer,
-         ring:dead-code-reviewer simultaneously]
+         ring:dead-code-reviewer, ring:performance-reviewer simultaneously]
 
         Code reviewer: PASS. Clean architecture, good tests.
         Business reviewer: FAIL. Missing password reset flow (HIGH severity).
@@ -504,6 +509,7 @@ Claude: Dispatching all 7 reviewers in parallel...
         Test reviewer: PASS. Good coverage, assertions well-structured.
         Nil-safety reviewer: PASS. No unguarded nil dereferences found.
         Consequences reviewer: PASS. No downstream breakage detected.
+        Performance reviewer: PASS. No hotspots or goroutine leaks found.
 
         Aggregating issues by severity:
         - CRITICAL: JWT secret hardcoded in auth.ts:42
@@ -512,7 +518,7 @@ Claude: Dispatching all 7 reviewers in parallel...
         Dispatching fix subagent to address Critical/High issues...
         [Fixes applied]
 
-        Re-running all 7 reviewers in parallel...
+        Re-running all 8 reviewers in parallel...
         All reviewers: PASS. Ready for production.
 ```
 
@@ -532,7 +538,7 @@ ring/                                  # Monorepo root
 ├── .claude-plugin/
 │   └── marketplace.json              # Multi-plugin marketplace config (6 active plugins)
 ├── default/                          # Core Ring plugin (ring-default)
-│   ├── skills/                       # 22 core skills
+│   ├── skills/                       # 23 core skills
 │   │   ├── skill-name/
 │   │   │   └── SKILL.md             # Skill definition with frontmatter
 │   │   └── shared-patterns/         # Universal patterns (15 patterns)
@@ -552,8 +558,8 @@ ring/                                  # Monorepo root
 │   │   ├── write-plan.md                # Implementation planning (`ring:write-plan`)
 │   │   └── codebase-explorer.md         # Deep architecture analysis (`ring:codebase-explorer`)
 │   └── docs/                       # Documentation
-├── dev-team/                      # Developer Agents plugin (ring-dev-team) - 31 skills, 12 agents
-│   └── agents/                      # 12 specialized developer agents
+├── dev-team/                      # Developer Agents plugin (ring-dev-team) - 33 skills, 13 agents
+│   └── agents/                      # 13 specialized developer agents
 │       ├── backend-engineer-golang.md       # Go backend specialist (`ring:backend-engineer-golang`)
 │       ├── backend-engineer-typescript.md   # TypeScript/Node.js backend specialist (`ring:backend-engineer-typescript`)
 │       ├── devops-engineer.md               # DevOps infrastructure (`ring:devops-engineer`)
@@ -561,13 +567,14 @@ ring/                                  # Monorepo root
 │       ├── frontend-designer.md             # Visual design specialist (`ring:frontend-designer`)
 │       ├── frontend-engineer.md             # Frontend engineer (`ring:frontend-engineer`)
 │       ├── helm-engineer.md                 # Helm chart specialist (`ring:helm-engineer`)
+│       ├── performance-reviewer.md          # Performance review (`ring:performance-reviewer`)
 │       ├── prompt-quality-reviewer.md       # Agent quality reviewer (`ring:prompt-quality-reviewer`)
 │       ├── qa-analyst.md                    # Backend QA specialist (`ring:qa-analyst`)
 │       ├── qa-analyst-frontend.md           # Frontend QA specialist (`ring:qa-analyst-frontend`)
 │       ├── sre.md                           # Site reliability engineer (`ring:sre`)
 │       └── ui-engineer.md                   # UI component specialist (`ring:ui-engineer`)
 ├── pm-team/                    # Product Planning plugin (ring-pm-team)
-│   └── skills/                      # 15 pre-dev workflow skills
+│   └── skills/                      # 16 pre-dev workflow skills
 │       └── pre-dev-*/              # PRD, TRD, API, Data, Tasks
 ├── finops-team/                     # FinOps Regulatory plugin (ring-finops-team)
 │   ├── skills/                      # 7 regulatory skills
