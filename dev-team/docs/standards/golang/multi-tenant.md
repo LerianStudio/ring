@@ -703,6 +703,44 @@ RabbitMQ multi-tenant requires **two complementary layers** — both are mandato
 
 **⛔ Layer 1 alone is incomplete.** Vhosts isolate but the `X-Tenant-ID` header is needed for log correlation, distributed tracing, and downstream context propagation across services.
 
+### RabbitMQ Manager Initialization
+
+The `tmrabbitmq.Manager` manages per-tenant vhost connections. Initialize it in the bootstrap with functional options:
+
+```go
+import tmrabbitmq "github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/rabbitmq"
+
+rmqOpts := []tmrabbitmq.Option{
+    tmrabbitmq.WithModule(constant.ModuleManager),
+    tmrabbitmq.WithLogger(logger),
+    tmrabbitmq.WithMaxTenantPools(cfg.MultiTenantMaxTenantPools),
+    tmrabbitmq.WithIdleTimeout(time.Duration(cfg.MultiTenantIdleTimeoutSec) * time.Second),
+}
+
+// TLS for production environments (AWS AmazonMQ, CloudAMQP, etc.)
+if cfg.RabbitMQTLS {
+    rmqOpts = append(rmqOpts, tmrabbitmq.WithTLS())
+}
+
+rabbitMQManager := tmrabbitmq.NewManager(
+    tmClient,
+    cfg.ApplicationName,
+    rmqOpts...,
+)
+```
+
+**Available options:**
+
+| Option | Purpose | Required |
+|--------|---------|----------|
+| `WithModule(name)` | Module name for the manager | Yes |
+| `WithLogger(logger)` | Logger instance | Yes |
+| `WithMaxTenantPools(n)` | LRU soft limit for vhost connections | No (default: 100) |
+| `WithIdleTimeout(d)` | Idle timeout before connection eviction | No (default: 5min) |
+| `WithTLS()` | Enable TLS for AMQPS connections (required for AWS AmazonMQ, CloudAMQP, and production environments) | No (default: false) |
+
+**TLS configuration:** The `RABBITMQ_TLS` env var controls whether the manager uses AMQPS (TLS) connections to per-tenant vhosts. In production with managed RabbitMQ services (AWS AmazonMQ, CloudAMQP), TLS is typically required. The `WithTLS()` option configures the manager to use `amqps://` scheme and TLS dial for all tenant connections.
+
 ### RabbitMQ Multi-Tenant Producer
 
 ```go
