@@ -3,6 +3,17 @@
 ## [0.25.0](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.25.0)
 
 - Features:
+  - Added deep-doc-review skill, adapted from optimus.
+
+Contributors: @gandalf, @jeff
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.24.0...ring-pm-team@0.25.0)
+
+---
+
+## [0.25.0](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.25.0)
+
+- Features:
   - Added deep-doc-review skill (adapted from optimus).
 
 Contributors: @gandalf, @jeff
