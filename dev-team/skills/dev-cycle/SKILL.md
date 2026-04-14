@@ -1809,6 +1809,28 @@ PM team task files often omit external_dependencies. If the codebase uses postgr
 Multi-tenant state is detected here and passed to Gate 0 (implementation) and Gate 0.5G (verification). See [multi-tenant.md](../../docs/standards/golang/multi-tenant.md) for the canonical model and compliance criteria.
 </auto_detect_reason>
 
+### License Detection (Advisory)
+
+Detect the repository license at cycle start. This check is advisory — it does not block Gate 0. If no license is found, prompt the user; if the user declines, log a warning and proceed.
+
+```text
+7. Detect repository license:
+   license_type = "unknown"
+
+   - ls LICENSE LICENSE.md LICENSE.txt 2>/dev/null
+   - If found:
+     - grep -l "Apache License" LICENSE* → license_type = "apache"
+     - grep -l "Elastic License" LICENSE* → license_type = "elv2"
+     - grep -l "All rights reserved.*Lerian" LICENSE* → license_type = "proprietary"
+   - If not found (no LICENSE file):
+     → Ask user: "No LICENSE file detected. Which license should this repository use? [apache|elv2|proprietary|skip]"
+     → If user selects a license: set license_type = <chosen value>, invoke Skill("ring:dev-licensing") with chosen type
+     → If user selects "skip": set license_type = "skip", log "⚠️ WARNING: No LICENSE file. License headers may be inconsistent."
+
+   Store: state.license_type = license_type
+   Log: "License detected: {license_type}"
+```
+
 ---
 
 ## Step 2: Gate 0 - Implementation (Per Execution Unit)

@@ -844,23 +844,64 @@ grep -rn "CREATE TABLE\|ALTER TABLE\|DROP TABLE" --include="*.go" ./internal
 | Compliance audit failures | Audit-ready codebase          |
 | Inconsistent attribution  | Uniform legal protection      |
 
-### Required Format (Elastic License 2.0)
+### Important: License Is Per-Repository
+
+Lerian uses three license types, chosen per-app. The actual header text MUST match the LICENSE file in the repository root. Use the `/ring:dev-license` command (or the `ring:dev-licensing` skill) to apply or switch licenses consistently across a repository.
+
+| License | SPDX Identifier | When Used |
+| ------- | --------------- | --------- |
+| Apache 2.0 | `Apache-2.0` | Open source projects (e.g., Midaz core) |
+| Elastic License v2 | `Elastic-2.0` | Source-available Lerian products |
+| Proprietary | `LicenseRef-Lerian-Proprietary` | Internal/closed repositories |
+
+### Required Format: Apache 2.0
 
 ```go
-// Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-// or more contributor license agreements. Licensed under the Elastic License 2.0;
-// you may not use this file except in compliance with the Elastic License 2.0.
+// Copyright (c) 2025 Lerian Studio Ltd.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package yourpackage
+```
+
+### Required Format: Elastic License 2.0
+
+```go
+// Copyright (c) 2025 Lerian Studio Ltd.
+// Use of this source code is governed by the Elastic License 2.0
+// that can be found in the LICENSE file.
+
+package yourpackage
+```
+
+### Required Format: Proprietary (Lerian Studio General License)
+
+```go
+// Copyright (c) 2025 Lerian Studio Ltd. All rights reserved.
+// This source code is proprietary and confidential.
+// Unauthorized copying of this file is strictly prohibited.
 
 package yourpackage
 ```
 
 ### Header Components
 
-| Component         | Value                 | Notes                                     |
-| ----------------- | --------------------- | ----------------------------------------- |
-| Copyright holder  | `Elasticsearch B.V.`  | Fixed for all projects                    |
-| License reference | `Elastic License 2.0` | Or as specified in LICENSE file           |
-| LICENSE location  | Inline in header      | No separate LICENSE file reference needed |
+| Component         | Value                          | Notes                                              |
+| ----------------- | ------------------------------ | -------------------------------------------------- |
+| Copyright holder  | `Lerian Studio Ltd.`           | Default for all Lerian projects                    |
+| Copyright year    | Current year (e.g., `2025`)    | Update when making significant changes             |
+| License reference | Depends on repository LICENSE  | MUST match the LICENSE file in the repo root        |
+| LICENSE location  | Reference to LICENSE file       | Header points to LICENSE file in repo root (e.g., "that can be found in the LICENSE file") |
 
 ### Files That MUST Have Headers
 
@@ -883,9 +924,9 @@ package yourpackage
 ### Correct Examples
 
 ```go
-// Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-// or more contributor license agreements. Licensed under the Elastic License 2.0;
-// you may not use this file except in compliance with the Elastic License 2.0.
+// Copyright (c) 2025 Lerian Studio Ltd.
+// Use of this source code is governed by the Elastic License 2.0
+// that can be found in the LICENSE file.
 
 package bootstrap
 
@@ -896,9 +937,9 @@ import (
 ```
 
 ```go
-// Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-// or more contributor license agreements. Licensed under the Elastic License 2.0;
-// you may not use this file except in compliance with the Elastic License 2.0.
+// Copyright (c) 2025 Lerian Studio Ltd.
+// Use of this source code is governed by the Elastic License 2.0
+// that can be found in the LICENSE file.
 
 package bootstrap_test
 
@@ -916,18 +957,22 @@ package model
 import "time"
 
 // ❌ FORBIDDEN: Wrong format (missing full license text)
-// Copyright Elasticsearch B.V.
+// Copyright Lerian Studio
 // Licensed under Elastic License 2.0
 package model
 
 // ❌ FORBIDDEN: Header after package declaration
 package model
 
-// Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-// or more contributor license agreements. Licensed under the Elastic License 2.0;
-// you may not use this file except in compliance with the Elastic License 2.0.
+// Copyright (c) 2025 Lerian Studio Ltd.
+// Use of this source code is governed by the Elastic License 2.0
+// that can be found in the LICENSE file.
 
 import "time"
+
+// ❌ FORBIDDEN: Header from a different license than the repo LICENSE file
+// (e.g., Apache header in an ELv2 repo, or ELv2 header in an Apache repo)
+// Headers MUST match the LICENSE file in the repository root
 ```
 
 ### Verification Commands
