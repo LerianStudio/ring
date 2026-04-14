@@ -3,7 +3,7 @@ name: ring:pr-review-multi-source
 description: |
   PR-aware code review orchestrator that fetches PR metadata AND existing review
   comments from ALL sources (CodeRabbit, human reviewers, CI), dispatches Ring's
-  7 specialized reviewer agents to evaluate BOTH code AND existing comments, and
+  8 specialized reviewer agents to evaluate BOTH code AND existing comments, and
   presents consolidated findings with source attribution. Batch applies approved
   fixes at the end and responds to PR comment threads with resolution status.
 
@@ -65,7 +65,7 @@ verification:
 
 # PR Review Multi-Source
 
-PR-aware code review orchestrator. Fetches PR metadata, collects existing review comments from all sources (CodeRabbit, human reviewers, CI), dispatches Ring's 7 specialized reviewer agents to evaluate both code and existing comments, and presents findings with source attribution.
+PR-aware code review orchestrator. Fetches PR metadata, collects existing review comments from all sources (CodeRabbit, human reviewers, CI), dispatches Ring's 8 specialized reviewer agents to evaluate both code and existing comments, and presents findings with source attribution.
 
 > Adapted from [alexgarzao/optimus](https://github.com/alexgarzao/optimus) (optimus-pr-review).
 
@@ -201,8 +201,8 @@ Ask the user which type of review to run:
 
 - **Initial** (5 agents) — correctness and critical gaps, suitable for in-progress PRs.
   Dispatches: ring:code-reviewer, ring:business-logic-reviewer, ring:security-reviewer, ring:test-reviewer, ring:nil-safety-reviewer
-- **Final** (7 agents) — full coverage including ripple effects and dead code, suitable for PRs ready to merge.
-  Dispatches all 7: adds ring:consequences-reviewer and ring:dead-code-reviewer
+- **Final** (8 agents) — full coverage including ripple effects, dead code, and performance, suitable for PRs ready to merge.
+  Dispatches all 8: adds ring:consequences-reviewer, ring:dead-code-reviewer, and ring:performance-reviewer
 
 ---
 
@@ -275,12 +275,13 @@ Required output format:
 | 4 | **ring:test-reviewer** | Test coverage gaps, error scenarios, flaky patterns |
 | 5 | **ring:nil-safety-reviewer** | Nil/null pointer safety, missing guards, panic paths |
 
-### Final Review (7 agents — includes the 5 above plus)
+### Final Review (8 agents — includes the 5 above plus)
 
 | # | Agent | Focus |
 |---|-------|-------|
 | 6 | **ring:consequences-reviewer** | Ripple effects, caller chain impact, consumer contract integrity |
 | 7 | **ring:dead-code-reviewer** | Orphaned code, dead dependencies, unreachable paths |
+| 8 | **ring:performance-reviewer** | Performance hotspots, allocations, goroutine leaks, N+1 queries |
 
 All agents MUST be dispatched in a SINGLE message with parallel Task calls.
 

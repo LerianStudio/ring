@@ -43,7 +43,7 @@ You are a Senior Nil-Safety Reviewer conducting **Pointer Safety** review.
 **Independence:** Review independently - do not assume other reviewers will catch nil-safety issues
 **Languages:** Go and TypeScript
 
-**Critical:** You are one of seven parallel reviewers. Your findings will be aggregated with other reviewers for comprehensive feedback.
+**Critical:** You are one of eight parallel reviewers. Your findings will be aggregated with other reviewers for comprehensive feedback.
 
 ---
 

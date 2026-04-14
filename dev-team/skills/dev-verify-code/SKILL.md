@@ -34,7 +34,7 @@ related:
   differentiation:
     - name: ring:requesting-code-review
       difference: |
-        ring:requesting-code-review dispatches 7 specialist reviewer agents for deep
+        ring:requesting-code-review dispatches 8 specialist reviewer agents for deep
         analysis of code quality, business logic, and security. ring:dev-verify-code
         runs automated tooling checks (lint, vet, tests) and reports pass/fail verdicts.
     - name: ring:dev-cycle

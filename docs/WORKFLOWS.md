@@ -233,6 +233,7 @@ review4 = Task("ring:test-reviewer")           # 20 min
 review5 = Task("ring:nil-safety-reviewer")     # 20 min
 review6 = Task("ring:consequences-reviewer")   # 20 min
 review7 = Task("ring:dead-code-reviewer")      # 20 min
+review8 = Task("ring:performance-reviewer")    # 20 min
 ```
 
 ### Run parallel (20 min total)
@@ -245,13 +246,14 @@ Task.parallel([
     ("ring:nil-safety-reviewer", prompt),
     ("ring:test-reviewer", prompt),
     ("ring:consequences-reviewer", prompt),
-    ("ring:dead-code-reviewer", prompt)
-])  # Single message, 7 tool calls
+    ("ring:dead-code-reviewer", prompt),
+    ("ring:performance-reviewer", prompt)
+])  # Single message, 8 tool calls
 ```
 
 ### Key rule
 
-Always dispatch all 7 reviewers in a single message with multiple Task tool calls.
+Always dispatch all 8 reviewers in a single message with multiple Task tool calls.
 
 ---
 

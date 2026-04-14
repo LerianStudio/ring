@@ -32,6 +32,7 @@
           "nil-safety-reviewer",
           "consequences-reviewer",
           "dead-code-reviewer",
+          "performance-reviewer",
           "codebase-explorer",
           "write-plan",
           "backend-engineer-golang",

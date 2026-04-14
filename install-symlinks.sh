@@ -243,7 +243,7 @@ print_summary() {
     echo -e "    ${BOLD}/ring:brainstorm${NC}      - Socratic design refinement"
     echo -e "    ${BOLD}/ring:dev-cycle${NC}       - 10-gate development cycle"
     echo -e "    ${BOLD}/ring:pre-dev-feature${NC} - Lightweight pre-dev workflow"
-    echo -e "    ${BOLD}/ring:codereview${NC}      - Parallel code review (7 reviewers)"
+    echo -e "    ${BOLD}/ring:codereview${NC}      - Parallel code review (8 reviewers)"
     echo ""
   fi
 }

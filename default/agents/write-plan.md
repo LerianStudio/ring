@@ -397,7 +397,7 @@ Add this step after every 3-5 tasks (or after significant features):
 ```markdown
 ### Task N: Run Code Review
 
-1. **Dispatch all 7 reviewers in parallel:**
+1. **Dispatch all 8 reviewers in parallel:**
    - REQUIRED SUB-SKILL: Use ring:codereview
    - All reviewers run simultaneously (ring:code-reviewer, ring:business-logic-reviewer, ring:security-reviewer, ring:test-reviewer, ring:nil-safety-reviewer, ring:consequences-reviewer, ring:dead-code-reviewer)
    - Wait for all to complete
@@ -406,7 +406,7 @@ Add this step after every 3-5 tasks (or after significant features):
 
 **Critical/High/Medium Issues:**
 - Fix immediately (do NOT add TODO comments for these severities)
-- Re-run all 7 reviewers in parallel after fixes
+- Re-run all 8 reviewers in parallel after fixes
 - Repeat until zero Critical/High/Medium issues remain
 
 **Low Issues:**

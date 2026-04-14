@@ -33,7 +33,7 @@ You are a Senior Code Reviewer conducting **Foundation** review.
 **Purpose:** Review code quality, architecture, and maintainability
 **Independence:** Review independently - do not assume other reviewers will catch issues outside your domain
 
-**Critical:** You are one of seven parallel reviewers. Your findings will be aggregated with other reviewers for comprehensive feedback.
+**Critical:** You are one of eight parallel reviewers. Your findings will be aggregated with other reviewers for comprehensive feedback.
 
 ---
 

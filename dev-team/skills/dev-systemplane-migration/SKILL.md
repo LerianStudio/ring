@@ -78,7 +78,7 @@ output_schema:
 | **ring:backend-engineer-golang** | Implement systemplane code following the patterns in this document |
 | **ring:codebase-explorer** | Analyze the codebase for configuration patterns (Gate 1) |
 | **ring:visualize** | Generate implementation preview HTML (Gate 1.5) |
-| **7 reviewers** | Review at Gate 8 |
+| **8 reviewers** | Review at Gate 8 |
 
 **CANNOT change scope:** the skill defines WHAT to implement. The agent implements HOW.
 
@@ -235,7 +235,7 @@ MUST report all severities. CRITICAL: STOP immediately. HIGH: Fix before gate pa
 | "Config bridge is backward compat only" | SCOPE_REDUCTION | "Existing code reads Config struct. Without StateSync, it reads stale bootstrap values forever. MUST implement Gate 6." |
 | "Reconcilers are optional" | SCOPE_REDUCTION | "Without reconcilers, workers and HTTP policies ignore config changes. Hot-reload is partial." |
 | "The service already has systemplane" | COMPLIANCE_BYPASS | "Existence ≠ compliance. MUST run compliance audit. If it doesn't match canonical patterns exactly, it is non-compliant." |
-| "Skip code review, we tested it" | QUALITY_BYPASS | "MANDATORY: 7 reviewers. One wiring mistake = silent config corruption or resource leak." |
+| "Skip code review, we tested it" | QUALITY_BYPASS | "MANDATORY: 8 reviewers. One wiring mistake = silent config corruption or resource leak." |
 | "Agent says out of scope" | AUTHORITY_OVERRIDE | "Skill defines scope, not agent. Re-dispatch with gate context." |
 | "ChangeFeed can be added later" | SCOPE_REDUCTION | "Without ChangeFeed, hot-reload is broken. Config changes in DB are invisible to the service. MUST start DebouncedFeed." |
 | "Active bundle state is internal detail" | SCOPE_REDUCTION | "Without thread-safe accessor, request handlers cannot read live config. Race conditions. MUST implement active_bundle_state.go." |
@@ -255,7 +255,7 @@ MUST report all severities. CRITICAL: STOP immediately. HIGH: Fix before gate pa
 | 5 | Identity + Authorization | Always | ring:backend-engineer-golang |
 | 6 | Config Manager Bridge | Always | ring:backend-engineer-golang |
 | 7 | Wiring + HTTP Mount + Swagger + ChangeFeed | Always ⛔ NEVER SKIPPABLE | ring:backend-engineer-golang |
-| 8 | Code Review | Always | 7 parallel reviewers |
+| 8 | Code Review | Always | 8 parallel reviewers |
 | 9 | User Validation | Always | User |
 | 10 | Activation Guide | Always | Orchestrator |
 
@@ -1342,9 +1342,9 @@ go build ./...
 
 ## Gate 8: Code Review
 
-**Dispatch 7 parallel reviewers (same pattern as ring:codereview).**
+**Dispatch 8 parallel reviewers (same pattern as ring:codereview).**
 
-MUST include this context in ALL 7 reviewer dispatches:
+MUST include this context in ALL 8 reviewer dispatches:
 
 > **SYSTEMPLANE REVIEW CONTEXT:**
 > - Systemplane is a three-tier configuration system: bootstrap (env, immutable) → runtime (DB, hot-reload) → live-read (snapshot, per-request).
@@ -1364,8 +1364,9 @@ MUST include this context in ALL 7 reviewer dispatches:
 | ring:nil-safety-reviewer | Nil risks in snapshot reads, bundle adoption, reconciler error paths, active bundle state before first reload |
 | ring:consequences-reviewer | Impact on existing config reads, backward compat via StateSync, degradation when store unavailable, shutdown resource cleanup |
 | ring:dead-code-reviewer | Orphaned env-reading code, dead config helpers replaced by systemplane, unused YAML/viper imports, stale .env files |
+| ring:performance-reviewer | Hot-path allocations in config reads, caching efficiency, systemplane polling overhead, connection pool sizing |
 
-**⛔ MANDATORY:** All 7 reviewers must PASS. 6/7 = FAIL. Critical findings → fix and re-review.
+**⛔ MANDATORY:** All 8 reviewers must PASS. 7/8 = FAIL. Critical findings → fix and re-review.
 
 ---
 
@@ -1390,7 +1391,7 @@ MUST approve: present checklist for explicit user approval.
 - [ ] Shutdown: clean 5-step resource release on SIGTERM
 - [ ] Backward compat: service starts normally without systemplane store (degrades to defaults)
 - [ ] Tests pass: `go test ./...`
-- [ ] Code review passed: all 7 reviewers PASS
+- [ ] Code review passed: all 8 reviewers PASS
 ```
 
 ---
@@ -1528,7 +1529,7 @@ Save to `docs/dev-systemplane-migration/current-cycle.json` for resume support:
 | "Service already has systemplane code" | Existence ≠ compliance. Code that doesn't follow canonical patterns is WRONG and must be fixed. | STOP. Run compliance audit (Gate 0 Phase 2). Fix every NON-COMPLIANT component. |
 | "Partial systemplane is good enough" | Partial = broken. Without ChangeFeed, no hot-reload. Without Mount, no API. Without StateSync, stale config. | STOP. Every component is required. Execute all gates. |
 | "The current approach works fine" | Working ≠ compliant. Custom config management creates drift and blocks standardization. | Replace with canonical systemplane implementation. |
-| "Skip code review, we tested it" | One wiring mistake = resource leak, config corruption, or silent degradation. 7 reviewers catch what tests miss. | MANDATORY: All 7 reviewers must PASS. |
+| "Skip code review, we tested it" | One wiring mistake = resource leak, config corruption, or silent degradation. 8 reviewers catch what tests miss. | MANDATORY: All 8 reviewers must PASS. |
 | "ChangeFeed can be added later" | Later = never. Without ChangeFeed, the database is a dead store — changes are invisible. | MUST start DebouncedFeed in Gate 7 |
 | "Agent says out of scope" | Skill defines scope, not agent. | Re-dispatch with gate context |
 | "Active bundle state is an implementation detail" | Without it, request handlers cannot safely read live config. Race conditions and nil panics. | MUST implement in Gate 7 |

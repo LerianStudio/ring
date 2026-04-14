@@ -111,7 +111,7 @@ output_schema:
 |-----|----------------|
 | **This Skill** | Detect stack, determine gates, pass context to agent, verify outputs, enforce order |
 | **ring:backend-engineer-golang** | Load multi-tenant.md via WebFetch, implement following the standards |
-| **7 reviewers** | Review at Gate 9 |
+| **8 reviewers** | Review at Gate 9 |
 
 **CANNOT change scope:** the skill defines WHAT to implement. The agent implements HOW.
 
@@ -238,7 +238,7 @@ MUST report all severities. CRITICAL: STOP immediately (security breach). HIGH: 
 | "Skip the lib-commons upgrade" | QUALITY_BYPASS | "CANNOT proceed without lib-commons v4. Tenant-manager sub-packages do not exist in v2." |
 | "Just do the happy path, skip backward compat" | SCOPE_REDUCTION | "Backward compatibility is NON-NEGOTIABLE. Single-tenant deployments depend on it." |
 | "organization_id is our tenant identifier" | AUTHORITY_OVERRIDE | "STOP. organization_id is NOT multi-tenant. tenantId from JWT is the only mechanism." |
-| "Skip code review, we tested it" | QUALITY_BYPASS | "MANDATORY: 7 reviewers. One security mistake = cross-tenant data leak." |
+| "Skip code review, we tested it" | QUALITY_BYPASS | "MANDATORY: 8 reviewers. One security mistake = cross-tenant data leak." |
 | "We don't need RabbitMQ multi-tenant" | SCOPE_REDUCTION | "MUST execute Gate 6 if RabbitMQ was detected. CANNOT skip detected stack." |
 | "I'll make a quick edit directly" | CODE_BYPASS | "FORBIDDEN: All code changes go through ring:backend-engineer-golang. Dispatch the agent." |
 | "It's just one line, no need for an agent" | CODE_BYPASS | "FORBIDDEN: Even single-line changes MUST be dispatched. Agent ensures standards compliance." |
@@ -264,7 +264,7 @@ MUST report all severities. CRITICAL: STOP immediately (security breach). HIGH: 
 | 6 | RabbitMQ Multi-Tenant | Skip if no RabbitMQ | ring:backend-engineer-golang |
 | 7 | Metrics & Backward Compat | Always | ring:backend-engineer-golang |
 | 8 | Tests | Always | ring:backend-engineer-golang |
-| 9 | Code Review | Always | 7 parallel reviewers |
+| 9 | Code Review | Always | 8 parallel reviewers |
 | 10 | User Validation | Always | User |
 | 11 | Activation Guide | Always | Orchestrator |
 
@@ -1034,9 +1034,9 @@ HARD GATE: Backward compatibility MUST pass.
 
 ## Gate 9: Code Review
 
-**Dispatch 7 parallel reviewers (same pattern as ring:codereview).**
+**Dispatch 8 parallel reviewers (same pattern as ring:codereview).**
 
-MUST include this context in ALL 7 reviewer dispatches:
+MUST include this context in ALL 8 reviewer dispatches:
 
 > **MULTI-TENANT REVIEW CONTEXT:**
 > - Multi-tenant isolation is based on `tenantId` from JWT → tenant-manager middleware (TenantMiddleware with WithPG/WithMB) → database-per-tenant.
@@ -1052,8 +1052,9 @@ MUST include this context in ALL 7 reviewer dispatches:
 | ring:nil-safety-reviewer | Nil risks in tenant context extraction from JWT and context getters |
 | ring:consequences-reviewer | Impact on single-tenant paths, backward compat when MULTI_TENANT_ENABLED=false |
 | ring:dead-code-reviewer | Orphaned code from tenant changes, dead tenant-specific helpers |
+| ring:performance-reviewer | Hot-path allocations in tenant resolution, connection pool sizing per tenant, query performance across tenant databases |
 
-MUST pass all 7 reviewers. Critical findings → fix and re-review.
+MUST pass all 8 reviewers. Critical findings → fix and re-review.
 
 ---
 

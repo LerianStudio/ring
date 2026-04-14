@@ -5,9 +5,10 @@
   "disabled_hooks": [],
 
   // Agents to disable. Allowed: "code-reviewer", "security-reviewer", "business-logic-reviewer",
-  // "test-reviewer", "nil-safety-reviewer", "codebase-explorer", "write-plan",
-  // "backend-engineer-golang", "backend-engineer-typescript", "frontend-engineer",
-  // "frontend-designer", "devops-engineer", "sre", "qa-analyst".
+  // "test-reviewer", "nil-safety-reviewer", "consequences-reviewer", "dead-code-reviewer",
+  // "performance-reviewer", "codebase-explorer", "write-plan", "backend-engineer-golang",
+  // "backend-engineer-typescript", "frontend-engineer", "frontend-designer", "devops-engineer",
+  // "sre", "qa-analyst".
   "disabled_agents": [],
 
   // Skills to disable. Allowed: "using-ring-opencode", "test-driven-development",
