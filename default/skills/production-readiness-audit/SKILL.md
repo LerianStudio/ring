@@ -3458,7 +3458,7 @@ If multi-tenant IS detected, audit multi-tenant architecture patterns for produc
 
 **Reference Implementation (GOOD):**
 ```go
-// Canonical env vars in config.go (14 MANDATORY — APPLICATION_NAME + 13 MULTI_TENANT_*)
+// Canonical env vars in config.go (15 MANDATORY — APPLICATION_NAME + 14 MULTI_TENANT_*)
 ApplicationName                        string `env:"APPLICATION_NAME"`
 MultiTenantEnabled                     bool   `env:"MULTI_TENANT_ENABLED" default:"false"`
 MultiTenantURL                         string `env:"MULTI_TENANT_URL"`
@@ -3618,7 +3618,7 @@ HARD GATES (Score = 0 if any fails):
 5. (WARNING — not HARD GATE) Non-canonical source implementation files detected: custom tenant resolvers, manual pool managers, or wrapper middleware in source paths (internal/, pkg/, cmd/) outside canonical lib-commons integration paths. Excludes docs, tests, fixtures, vendored code.
 
 Canonical Environment Variables:
-6. All 14 canonical env var names present with exact names: APPLICATION_NAME, MULTI_TENANT_ENABLED, MULTI_TENANT_URL, MULTI_TENANT_REDIS_HOST, MULTI_TENANT_REDIS_PORT, MULTI_TENANT_REDIS_PASSWORD, MULTI_TENANT_REDIS_TLS, MULTI_TENANT_MAX_TENANT_POOLS, MULTI_TENANT_IDLE_TIMEOUT_SEC, MULTI_TENANT_TIMEOUT, MULTI_TENANT_CIRCUIT_BREAKER_THRESHOLD, MULTI_TENANT_CIRCUIT_BREAKER_TIMEOUT_SEC, MULTI_TENANT_SERVICE_API_KEY, MULTI_TENANT_CACHE_TTL_SEC, MULTI_TENANT_CONNECTIONS_CHECK_INTERVAL_SEC
+6. All 15 canonical env var names present with exact names: APPLICATION_NAME, MULTI_TENANT_ENABLED, MULTI_TENANT_URL, MULTI_TENANT_REDIS_HOST, MULTI_TENANT_REDIS_PORT, MULTI_TENANT_REDIS_PASSWORD, MULTI_TENANT_REDIS_TLS, MULTI_TENANT_MAX_TENANT_POOLS, MULTI_TENANT_IDLE_TIMEOUT_SEC, MULTI_TENANT_TIMEOUT, MULTI_TENANT_CIRCUIT_BREAKER_THRESHOLD, MULTI_TENANT_CIRCUIT_BREAKER_TIMEOUT_SEC, MULTI_TENANT_SERVICE_API_KEY, MULTI_TENANT_CACHE_TTL_SEC, MULTI_TENANT_CONNECTIONS_CHECK_INTERVAL_SEC
 7. No non-canonical env var names for tenant configuration (e.g., TENANT_MANAGER_URL, TENANT_ENABLED, MULTI_TENANT_ENVIRONMENT are violations — APPLICATION_NAME is valid)
 
 Middleware & Routing:
@@ -3720,7 +3720,7 @@ If either condition is missing, mark M2M section as N/A and do not deduct score.
 - TenantMiddleware (WithPG/WithMB): Yes / No / Custom / Missing
 - Auth-before-tenant ordering: Yes / No / Inconsistent
 - Route composition: Per-route WhenEnabled / Global app.Use / Mixed
-- Canonical env vars: X/14 present with correct names (APPLICATION_NAME + 13 MULTI_TENANT_*)
+- Canonical env vars: X/15 present with correct names (APPLICATION_NAME + 14 MULTI_TENANT_*)
 - Non-canonical env vars detected: [list or "None"]
 - Non-canonical source files detected: [list or "None"]
 - Circuit breaker on TM client: Yes / No
