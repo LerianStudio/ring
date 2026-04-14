@@ -2,6 +2,23 @@
 
 ## [1.21.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.21.0)
 
+- Features:
+  - Expanded multi-tenant dimension to 100% standard coverage.
+
+- Fixes:
+  - Moved WARNING out of HARD GATES and made environment variables conditional.
+  - Corrected canonical environment variable count from 14 to 15.
+  - Corrected M2M activation logic to require both conditions.
+  - Aligned Agent 33 multi-tenant checks with canonical standard.
+
+Contributors: @jeff, @jefferson.comff
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.20.2...ring-default@1.21.0)
+
+---
+
+## [1.21.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.21.0)
+
 - **Features**
   - Expanded multi-tenant dimension to achieve 100% standard coverage.
 

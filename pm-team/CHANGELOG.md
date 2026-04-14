@@ -1,5 +1,17 @@
 # Ring-pm-team Changelog
 
+## [0.24.0](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.24.0)
+
+- **Features**
+  - Added integration contract validation to pre-dev and delivery verification.
+
+- **Contributors**
+  - @fred, @gandalf, @jeff
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.23.1...ring-pm-team@0.24.0)
+
+---
+
 ## [0.23.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.23.1)
 
 - Updated CHANGELOG for ring-pm-team to v0.23.0.
