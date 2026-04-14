@@ -125,6 +125,8 @@ For each comment, extract and categorize:
 - **File and line** (for inline comments) — map to the changed files
 - **Content** — the actual feedback
 - **Status:** Resolved/unresolved (if the platform tracks it)
+- **comment_id:** The REST API comment ID (numeric)
+- **node_id:** The GraphQL node ID (e.g., `PRR_...`, `PRRC_...`) — required for Phase 9 thread resolution
 
 **Duplicated comments sections:**
 Some review tools (e.g., CodeRabbit) group repeated or similar comments under sections titled "Duplicated Comments" or similar headings. These contain valid feedback. You MUST:
@@ -516,26 +518,44 @@ gh api graphql -f query='
 '
 ```
 
-To get the thread node ID, query the PR's review threads:
+To get the thread node ID, query the PR's review threads with pagination:
 ```bash
-gh api graphql -f query='
-  query {
-    repository(owner: "<owner>", name: "<repo>") {
-      pullRequest(number: <number>) {
-        reviewThreads(first: 100) {
-          nodes {
-            id
-            isResolved
-            comments(first: 100) {
-              nodes { id body }
+# Paginate reviewThreads — repeat until hasNextPage is false
+cursor=""
+all_threads="[]"
+while true; do
+  after_arg=""
+  if [ -n "$cursor" ]; then after_arg=", after: \"$cursor\""; fi
+
+  result=$(gh api graphql -f query="
+    query {
+      repository(owner: \"<owner>\", name: \"<repo>\") {
+        pullRequest(number: <number>) {
+          reviewThreads(first: 100${after_arg}) {
+            pageInfo { hasNextPage endCursor }
+            nodes {
+              id
+              isResolved
+              comments(first: 100) {
+                nodes { id body }
+              }
             }
           }
         }
       }
     }
-  }
-'
+  ")
+
+  # Accumulate nodes (merge with jq or equivalent)
+  all_threads=$(echo "$all_threads" "$result" | jq -s '.[0] + [.[1].data.repository.pullRequest.reviewThreads.nodes[]]')
+
+  has_next=$(echo "$result" | jq -r '.data.repository.pullRequest.reviewThreads.pageInfo.hasNextPage')
+  if [ "$has_next" != "true" ]; then break; fi
+  cursor=$(echo "$result" | jq -r '.data.repository.pullRequest.reviewThreads.pageInfo.endCursor')
+done
 ```
+
+**Note:** For PRs with >100 comments per thread, add a similar inner pagination loop on `comments`. In practice, most threads have <10 comments, so `first: 100` on comments is sufficient for the inner query.
 
 Match each thread by comparing the REST comment's `node_id` (collected in Step 0.3) against any comment's `id` in `comments.nodes[*]`, then resolve using the thread's `id`. Do NOT use `databaseId` — it is deprecated in GitHub's GraphQL API.
 
