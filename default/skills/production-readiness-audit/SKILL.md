@@ -3615,10 +3615,12 @@ HARD GATES (Score = 0 if any fails):
 2. (HARD GATE) All database queries use tenant-routed connections via tmcore.GetPGContext/tmcore.GetMBContext (not static connections or package-level singletons)
 3. (HARD GATE) TenantMiddleware with WithPG/WithMB from lib-commons v4 injects tenant into request context with module-specific connections
 4. (HARD GATE) lib-commons v4 (not v2/v3) for all tenant-manager sub-package imports — deprecated functions (WithPostgresManager, MultiPoolMiddleware, DualPoolMiddleware, ResolvePostgres, ResolveModuleDB, etc.) are NON-COMPLIANT
-5. (WARNING — not HARD GATE) Non-canonical source implementation files detected: custom tenant resolvers, manual pool managers, or wrapper middleware in source paths (internal/, pkg/, cmd/) outside canonical lib-commons integration paths. Excludes docs, tests, fixtures, vendored code.
+
+WARNINGS (does not zero the score, but flagged as HIGH):
+5. (WARNING) Non-canonical source implementation files detected: custom tenant resolvers, manual pool managers, or wrapper middleware in source paths (internal/, pkg/, cmd/) outside canonical lib-commons integration paths. Excludes docs, tests, fixtures, vendored code.
 
 Canonical Environment Variables:
-6. All 15 canonical env var names present with exact names: APPLICATION_NAME, MULTI_TENANT_ENABLED, MULTI_TENANT_URL, MULTI_TENANT_REDIS_HOST, MULTI_TENANT_REDIS_PORT, MULTI_TENANT_REDIS_PASSWORD, MULTI_TENANT_REDIS_TLS, MULTI_TENANT_MAX_TENANT_POOLS, MULTI_TENANT_IDLE_TIMEOUT_SEC, MULTI_TENANT_TIMEOUT, MULTI_TENANT_CIRCUIT_BREAKER_THRESHOLD, MULTI_TENANT_CIRCUIT_BREAKER_TIMEOUT_SEC, MULTI_TENANT_SERVICE_API_KEY, MULTI_TENANT_CACHE_TTL_SEC, MULTI_TENANT_CONNECTIONS_CHECK_INTERVAL_SEC
+6. APPLICATION_NAME always required (used for Tenant Manager settings resolution regardless of mode). When MULTI_TENANT_ENABLED=true, all 14 MULTI_TENANT_* env vars must also be declared in the config struct with exact names: MULTI_TENANT_ENABLED, MULTI_TENANT_URL, MULTI_TENANT_REDIS_HOST, MULTI_TENANT_REDIS_PORT, MULTI_TENANT_REDIS_PASSWORD, MULTI_TENANT_REDIS_TLS, MULTI_TENANT_MAX_TENANT_POOLS, MULTI_TENANT_IDLE_TIMEOUT_SEC, MULTI_TENANT_TIMEOUT, MULTI_TENANT_CIRCUIT_BREAKER_THRESHOLD, MULTI_TENANT_CIRCUIT_BREAKER_TIMEOUT_SEC, MULTI_TENANT_SERVICE_API_KEY, MULTI_TENANT_CACHE_TTL_SEC, MULTI_TENANT_CONNECTIONS_CHECK_INTERVAL_SEC. Single-tenant mode (MULTI_TENANT_ENABLED=false or absent) must work without any MULTI_TENANT_* vars set.
 7. No non-canonical env var names for tenant configuration (e.g., TENANT_MANAGER_URL, TENANT_ENABLED, MULTI_TENANT_ENVIRONMENT are violations — APPLICATION_NAME is valid)
 
 Middleware & Routing:
@@ -3720,7 +3722,8 @@ If either condition is missing, mark M2M section as N/A and do not deduct score.
 - TenantMiddleware (WithPG/WithMB): Yes / No / Custom / Missing
 - Auth-before-tenant ordering: Yes / No / Inconsistent
 - Route composition: Per-route WhenEnabled / Global app.Use / Mixed
-- Canonical env vars: X/15 present with correct names (APPLICATION_NAME + 14 MULTI_TENANT_*)
+- APPLICATION_NAME: Present / Missing
+- Canonical MULTI_TENANT_* env vars (when MT enabled): X/14 present with correct names
 - Non-canonical env vars detected: [list or "None"]
 - Non-canonical source files detected: [list or "None"]
 - Circuit breaker on TM client: Yes / No
