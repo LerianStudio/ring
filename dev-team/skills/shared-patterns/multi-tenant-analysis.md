@@ -11,13 +11,13 @@ See [multi-tenant.md § Canonical Model Compliance](../../docs/standards/golang/
 1. WebFetch multi-tenant.md: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/multi-tenant.md
 2. **Detection:** Check if any multi-tenant code exists (`MULTI_TENANT_ENABLED`, `tenant-manager` in go.mod, `TenantMiddleware`)
 3. **If multi-tenant code exists → run compliance audit:**
-   - Config vars: MUST use the 7 canonical `MULTI_TENANT_*` names (not `TENANT_MANAGER_ADDRESS`, `TENANT_URL`, etc.)
+   - Config vars: MUST use the 14 canonical `MULTI_TENANT_*` names (not `TENANT_MANAGER_ADDRESS`, `TENANT_URL`, etc.) + `APPLICATION_NAME`
    - Middleware: MUST use `tmmiddleware.NewTenantMiddleware` with `WithPG`/`WithMB` options from lib-commons v4
    - Route ordering: Auth MUST run before tenant middleware — per-route via `WhenEnabled` (not global `app.Use`)
    - Repositories: MUST use `tmcore.GetPGContext`/`tmcore.GetMBContext` (not static connections)
    - Redis: MUST use `valkey.GetKeyContext` for every key operation (including Lua script KEYS[]/ARGV[])
    - S3: MUST use `s3.GetS3KeyStorageContext` for every object key
-   - RabbitMQ: MUST use `tmrabbitmq.Manager` (Layer 1 — vhost isolation) + `X-Tenant-ID` header (Layer 2 — audit)
+   - RabbitMQ: MUST use `tmrabbitmq.Manager` (Layer 1 — vhost isolation) + `X-Tenant-ID` header (Layer 2 — audit). Use `WithTLS()` for production (AWS AmazonMQ, CloudAMQP)
    - Circuit breaker: MUST have `client.WithCircuitBreaker` on Tenant Manager client
    - Backward compat: MUST have `TestMultiTenant_BackwardCompatibility` test
    - Non-canonical files: MUST NOT have custom tenant packages (`internal/tenant/`, `pkg/multitenancy/`, custom middleware). See [dev-multi-tenant SKILL.md § Phase 3](../dev-multi-tenant/SKILL.md#phase-3-non-canonical-file-detection-mandatory) for specific grep commands.
