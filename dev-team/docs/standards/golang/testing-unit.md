@@ -505,13 +505,13 @@ type MockRepository struct {
 ```go
 func TestConfig_LoadFromEnv(t *testing.T) {
     // ✅ CORRECT: t.Setenv auto-cleans after test
-    t.Setenv("DB_HOST", "localhost")
-    t.Setenv("DB_PORT", "5432")
-    t.Setenv("DB_NAME", "test_db")
+    t.Setenv("POSTGRES_HOST", "localhost")
+    t.Setenv("POSTGRES_PORT", "5432")
+    t.Setenv("POSTGRES_NAME", "test_db")
 
     cfg, err := LoadConfig()
     require.NoError(t, err)
-    assert.Equal(t, "localhost", cfg.DBHost)
+    assert.Equal(t, "localhost", cfg.PrimaryHost)
 }
 
 func TestConfig_Parallel(t *testing.T) {
@@ -534,8 +534,8 @@ func TestConfig_Parallel(t *testing.T) {
 ```go
 // ❌ FORBIDDEN: os.Setenv in tests
 func TestConfig_LoadFromEnv(t *testing.T) {
-    os.Setenv("DB_HOST", "localhost")     // WRONG: leaks to other tests
-    defer os.Unsetenv("DB_HOST")          // WRONG: manual cleanup is error-prone
+    os.Setenv("POSTGRES_HOST", "localhost")     // WRONG: leaks to other tests
+    defer os.Unsetenv("POSTGRES_HOST")          // WRONG: manual cleanup is error-prone
     // ...
 }
 ```
@@ -622,7 +622,7 @@ grep -rn "func Ptr\[" --include="*_test.go" ./internal ./pkg
 | Mock service interfaces | GoMock | `mockSvc.EXPECT().Process(gomock.Any())` |
 | Mock HTTP clients | GoMock | `mockClient.EXPECT().Get(gomock.Any())` |
 | In-memory data | Struct literals | `input := CreateRequest{Name: "test"}` |
-| Environment variables | t.Setenv | `t.Setenv("DB_HOST", "localhost")` |
+| Environment variables | t.Setenv | `t.Setenv("POSTGRES_HOST", "localhost")` |
 
 ### What is FORBIDDEN in Unit Tests
 

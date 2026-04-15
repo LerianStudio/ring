@@ -88,8 +88,8 @@ import "os"
 
 func LoadConfig() *Config {
     return &Config{
-        DBHost: os.Getenv("DB_HOST"),
-        DBPort: os.Getenv("DB_PORT"),
+        PrimaryHost: os.Getenv("POSTGRES_HOST"),
+        PrimaryPort: os.Getenv("POSTGRES_PORT"),
     }
 }
 ```
@@ -100,8 +100,8 @@ func LoadConfig() *Config {
 import libCommons "github.com/LerianStudio/lib-commons/v2/commons"
 
 type Config struct {
-    DBHost string `env:"DB_HOST"`
-    DBPort string `env:"DB_PORT"`
+    PrimaryHost string `env:"POSTGRES_HOST"`
+    PrimaryPort string `env:"POSTGRES_PORT"`
 }
 
 cfg := &Config{}

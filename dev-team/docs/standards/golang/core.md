@@ -330,25 +330,25 @@ type Config struct {
     LogLevel      string `env:"LOG_LEVEL"`
     ServerAddress string `env:"SERVER_ADDRESS"`
 
-    // Database - Primary
-    PrimaryDBHost     string `env:"DB_HOST"`
-    PrimaryDBUser     string `env:"DB_USER"`
-    PrimaryDBPassword string `env:"DB_PASSWORD"`
-    PrimaryDBName     string `env:"DB_NAME"`
-    PrimaryDBPort     string `env:"DB_PORT"`
-    PrimaryDBSSLMode  string `env:"DB_SSLMODE"`
+    // PostgreSQL - Primary
+    PrimaryHost      string `env:"POSTGRES_HOST"`
+    PrimaryPort      string `env:"POSTGRES_PORT"`
+    PrimaryUser      string `env:"POSTGRES_USER"`
+    PrimaryPassword  string `env:"POSTGRES_PASSWORD"`
+    PrimaryName      string `env:"POSTGRES_NAME"`
+    PrimarySSLMode   string `env:"POSTGRES_SSLMODE"`
 
-    // Database - Replica (for read scaling)
-    ReplicaDBHost     string `env:"DB_REPLICA_HOST"`
-    ReplicaDBUser     string `env:"DB_REPLICA_USER"`
-    ReplicaDBPassword string `env:"DB_REPLICA_PASSWORD"`
-    ReplicaDBName     string `env:"DB_REPLICA_NAME"`
-    ReplicaDBPort     string `env:"DB_REPLICA_PORT"`
-    ReplicaDBSSLMode  string `env:"DB_REPLICA_SSLMODE"`
+    // PostgreSQL - Replica (for read scaling)
+    ReplicaHost     string `env:"POSTGRES_REPLICA_HOST"`
+    ReplicaPort     string `env:"POSTGRES_REPLICA_PORT"`
+    ReplicaUser     string `env:"POSTGRES_REPLICA_USER"`
+    ReplicaPassword string `env:"POSTGRES_REPLICA_PASSWORD"`
+    ReplicaName     string `env:"POSTGRES_REPLICA_NAME"`
+    ReplicaSSLMode  string `env:"POSTGRES_REPLICA_SSLMODE"`
 
-    // Database - Connection Pool
-    MaxOpenConnections int `env:"DB_MAX_OPEN_CONNS"`
-    MaxIdleConnections int `env:"DB_MAX_IDLE_CONNS"`
+    // PostgreSQL - Connection Pool
+    MaxOpenConnections int `env:"POSTGRES_MAX_OPEN_CONNS"`
+    MaxIdleConnections int `env:"POSTGRES_MAX_IDLE_CONNS"`
 
     // MongoDB (if needed)
     MongoDBHost       string `env:"MONGO_HOST"`
@@ -396,8 +396,8 @@ func InitServers() (*Service, error) {
     }
 
     // Validate required fields
-    if cfg.PrimaryDBHost == "" || cfg.PrimaryDBName == "" {
-        return nil, fmt.Errorf("DB_HOST and DB_NAME must be configured")
+    if cfg.PrimaryHost == "" || cfg.PrimaryName == "" {
+        return nil, fmt.Errorf("POSTGRES_HOST and POSTGRES_NAME must be configured")
     }
 
     // Continue with initialization...
@@ -417,8 +417,8 @@ func InitServers() (*Service, error) {
 | Category           | Prefix            | Example                                   |
 | ------------------ | ----------------- | ----------------------------------------- |
 | Application        | None              | `ENV_NAME`, `LOG_LEVEL`, `SERVER_ADDRESS` |
-| PostgreSQL         | `DB_`             | `DB_HOST`, `DB_USER`, `DB_PASSWORD`       |
-| PostgreSQL Replica | `DB_REPLICA_`     | `DB_REPLICA_HOST`, `DB_REPLICA_USER`      |
+| PostgreSQL         | `POSTGRES_`       | `POSTGRES_HOST`, `POSTGRES_USER`, `POSTGRES_PASSWORD` |
+| PostgreSQL Replica | `POSTGRES_REPLICA_` | `POSTGRES_REPLICA_HOST`, `POSTGRES_REPLICA_USER`    |
 | MongoDB            | `MONGO_`          | `MONGO_HOST`, `MONGO_NAME`                |
 | Redis              | `REDIS_`          | `REDIS_HOST`, `REDIS_PASSWORD`            |
 | OpenTelemetry      | `OTEL_`           | `OTEL_RESOURCE_SERVICE_NAME`              |
@@ -430,16 +430,16 @@ func InitServers() (*Service, error) {
 
 ```go
 // FORBIDDEN: Manual os.Getenv calls scattered across code
-host := os.Getenv("DB_HOST")  // DON'T do this
+host := os.Getenv("POSTGRES_HOST")  // DON'T do this
 
 // FORBIDDEN: Configuration outside bootstrap
 func NewService() *Service {
-    dbHost := os.Getenv("DB_HOST")  // DON'T do this
+    dbHost := os.Getenv("POSTGRES_HOST")  // DON'T do this
 }
 
 // CORRECT: All configuration in Config struct, loaded once in bootstrap
 type Config struct {
-    PrimaryDBHost string `env:"DB_HOST"`  // Centralized
+    PrimaryHost string `env:"POSTGRES_HOST"`  // Centralized
 }
 
 // Load with: libCommons.SetConfigFromEnvVars(&cfg)

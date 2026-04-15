@@ -389,16 +389,16 @@ Services that start with invalid or missing configuration cause runtime failures
 
 type Config struct {
     // Required fields - MUST have validation
-    ServerAddress string `env:"SERVER_ADDRESS"`
-    DBHost        string `env:"DB_HOST"`
-    DBName        string `env:"DB_NAME"`
-    DBUser        string `env:"DB_USER"`
-    DBPassword    string `env:"DB_PASSWORD"`
+    ServerAddress  string `env:"SERVER_ADDRESS"`
+    PrimaryHost    string `env:"POSTGRES_HOST"`
+    PrimaryName    string `env:"POSTGRES_NAME"`
+    PrimaryUser    string `env:"POSTGRES_USER"`
+    PrimaryPassword string `env:"POSTGRES_PASSWORD"`
 
     // Optional with defaults
-    DBPort        string `env:"DB_PORT" default:"5432"`
-    LogLevel      string `env:"LOG_LEVEL" default:"info"`
-    MaxPoolSize   int    `env:"DB_MAX_POOL_SIZE" default:"50"`
+    PrimaryPort    string `env:"POSTGRES_PORT" default:"5432"`
+    LogLevel       string `env:"LOG_LEVEL" default:"info"`
+    MaxPoolSize    int    `env:"POSTGRES_MAX_POOL_SIZE" default:"50"`
 }
 
 // Validate checks all required fields and returns a detailed error
@@ -409,22 +409,22 @@ func (c *Config) Validate() error {
     if c.ServerAddress == "" {
         errs = append(errs, "SERVER_ADDRESS is required")
     }
-    if c.DBHost == "" {
-        errs = append(errs, "DB_HOST is required")
+    if c.PrimaryHost == "" {
+        errs = append(errs, "POSTGRES_HOST is required")
     }
-    if c.DBName == "" {
-        errs = append(errs, "DB_NAME is required")
+    if c.PrimaryName == "" {
+        errs = append(errs, "POSTGRES_NAME is required")
     }
-    if c.DBUser == "" {
-        errs = append(errs, "DB_USER is required")
+    if c.PrimaryUser == "" {
+        errs = append(errs, "POSTGRES_USER is required")
     }
-    if c.DBPassword == "" {
-        errs = append(errs, "DB_PASSWORD is required")
+    if c.PrimaryPassword == "" {
+        errs = append(errs, "POSTGRES_PASSWORD is required")
     }
 
     // Format validation
     if c.MaxPoolSize < 1 || c.MaxPoolSize > 500 {
-        errs = append(errs, "DB_MAX_POOL_SIZE must be between 1 and 500")
+        errs = append(errs, "POSTGRES_MAX_POOL_SIZE must be between 1 and 500")
     }
 
     validLogLevels := map[string]bool{"debug": true, "info": true, "warn": true, "error": true}
@@ -488,8 +488,8 @@ func InitServers() *Service {
 
 // ❌ FORBIDDEN: Validation that returns nil on invalid config (silent failure)
 func (c *Config) Validate() error {
-    if c.DBHost == "" {
-        log.Printf("Warning: DB_HOST not set")  // WRONG: Must return error
+    if c.PrimaryHost == "" {
+        log.Printf("Warning: POSTGRES_HOST not set")  // WRONG: Must return error
         return nil  // WRONG: Silent failure
     }
     return nil
