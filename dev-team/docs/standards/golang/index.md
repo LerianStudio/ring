@@ -14,7 +14,7 @@ This directory contains modular Go standards for Lerian Studio. Load only the mo
 | # | Section | Description |
 |---|---------|-------------|
 | 1 | [Quick Reference - Which File for What](#quick-reference---which-file-for-what) | Task-based file selection guide |
-| 2 | [Module Index](#module-index) | All 18 modules with section counts and descriptions |
+| 2 | [Module Index](#module-index) | All 20 modules with section counts and descriptions |
 | 3 | [Section Index (Full)](#section-index-full) | Complete section index with anchors |
 | 4 | [Dependency Graph](#dependency-graph) | Module dependency relationships |
 | 5 | [WebFetch URLs](#webfetch-urls) | Raw GitHub URLs for agent loading |
@@ -38,6 +38,8 @@ This directory contains modular Go standards for Lerian Studio. Load only the mo
 | **Benchmark testing (optional)** | testing-benchmark.md |
 | **Idempotency** | idempotency.md (+ domain.md for error codes) |
 | **Multi-tenant** | multi-tenant.md (+ bootstrap.md for context) |
+| **Caching strategy** | caching.md |
+| **CQRS pattern** | architecture.md (+ domain-modeling.md for command side) |
 | **Database migration** | migration-safety.md (+ core.md for golang-migrate) |
 | **Compliance check** | ALL modules |
 
@@ -53,7 +55,7 @@ This directory contains modular Go standards for Lerian Studio. Load only the mo
 | 4 | [domain.md](domain.md) | 5 | ~255 | ToEntity/FromEntity, Error Codes, Error Handling, Exit/Fatal Rules, Function Design |
 | 5 | [api-patterns.md](api-patterns.md) | 6 | ~900 | JSON Naming, Pagination, HTTP Status Codes, OpenAPI/Swaggo, Handler Constructor, Input Validation |
 | 6 | [quality.md](quality.md) | 4 | ~900 | Logging, Linting, Config Validation, Container Security |
-| 7 | [architecture.md](architecture.md) | 7 | ~500 | Architecture, Directory, Concurrency, Goroutine Recovery, Goroutine Leak Detection (goleak), N+1 Detection, Performance |
+| 7 | [architecture.md](architecture.md) | 8 | ~1000 | Architecture, Directory, Concurrency, Goroutine Recovery, Goroutine Leak Detection (goleak), N+1 Detection, Performance, CQRS |
 | 8 | [messaging.md](messaging.md) | 2 | ~650 | RabbitMQ Worker Pattern, Reconnection Strategy |
 | 9 | [domain-modeling.md](domain-modeling.md) | 4 | ~290 | Always-Valid Domain Model, Constructor Patterns, ToEntity Integration |
 | 10 | [idempotency.md](idempotency.md) | 1 | ~510 | Idempotency Patterns (Redis SetNX, hash fallback) |
@@ -66,8 +68,9 @@ This directory contains modular Go standards for Lerian Studio. Load only the mo
 | 17 | [testing-chaos.md](testing-chaos.md) | 5 | ~350 | Chaos Testing (Gate 7): Toxiproxy, failure injection |
 | 18 | [testing-benchmark.md](testing-benchmark.md) | 4 | ~250 | Benchmark Testing (optional): b.Loop(), performance |
 | 19 | [migration-safety.md](migration-safety.md) | 5 | ~350 | Migration Safety (Gate 0.5D): Dangerous ops detection, expand-contract, multi-tenant idempotency |
+| 20 | [caching.md](caching.md) | 2 | ~350 | Caching Strategy Patterns (Cache-Aside, Write-Through, Write-Behind), Cache Compliance Detection |
 
-**Total:** 19 modules with testing split into 6 specialized files
+**Total:** 20 modules with testing split into 6 specialized files
 
 ---
 
@@ -148,6 +151,7 @@ This directory contains modular Go standards for Lerian Studio. Load only the mo
 | 5 | Goroutine Leak Detection (MANDATORY) | [#goroutine-leak-detection-mandatory](architecture.md#goroutine-leak-detection-mandatory) |
 | 6 | N+1 Query Detection (MANDATORY) | [#n1-query-detection-mandatory](architecture.md#n1-query-detection-mandatory) |
 | 7 | Performance Patterns (MANDATORY) | [#performance-patterns-mandatory](architecture.md#performance-patterns-mandatory) |
+| 8 | CQRS Pattern (CONDITIONAL) | [#cqrs-pattern-conditional](architecture.md#cqrs-pattern-conditional) |
 
 ### Messaging (messaging.md)
 
@@ -248,6 +252,13 @@ This directory contains modular Go standards for Lerian Studio. Load only the mo
 | 3 | Common Patterns | [#common-patterns](testing-benchmark.md#common-patterns) |
 | 4 | Running Benchmarks | [#running-benchmarks](testing-benchmark.md#running-benchmarks) |
 
+### Caching (caching.md)
+
+| # | Section | Anchor |
+|---|---------|--------|
+| 1 | Caching Strategy Patterns (MANDATORY) | [#caching-strategy-patterns-mandatory](caching.md#caching-strategy-patterns-mandatory) |
+| 2 | Cache Compliance Detection | [#cache-compliance-detection](caching.md#cache-compliance-detection) |
+
 ---
 
 ## Dependency Graph
@@ -300,8 +311,11 @@ core.md (foundation - load first)
     ├── idempotency.md (depends on domain.md, multi-tenant.md)
     │   └── Idempotency (uses error codes, tenant prefix)
     │
-    └── multi-tenant.md (depends on bootstrap.md, security.md)
-        └── Tenant Manager, JWT extraction, Context injection
+    ├── multi-tenant.md (depends on bootstrap.md, security.md)
+    │   └── Tenant Manager, JWT extraction, Context injection
+    │
+    └── caching.md (depends on core.md, multi-tenant.md)
+        └── Caching Strategy (uses Redis, tenant-aware keys)
 ```
 
 ---
@@ -332,3 +346,4 @@ For agents loading standards via WebFetch:
 | testing-chaos.md | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/testing-chaos.md` |
 | testing-benchmark.md | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/testing-benchmark.md` |
 | migration-safety.md | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/migration-safety.md` |
+| caching.md | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/caching.md` |

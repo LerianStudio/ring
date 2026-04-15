@@ -205,12 +205,12 @@ type Config struct {
     MultiTenantConnectionsCheckIntervalSec int    `env:"MULTI_TENANT_CONNECTIONS_CHECK_INTERVAL_SEC" default:"30"`
 
     // PostgreSQL Primary (used as default connection in single-tenant mode)
-    PrimaryDBHost     string `env:"DB_HOST"`
-    PrimaryDBUser     string `env:"DB_USER"`
-    PrimaryDBPassword string `env:"DB_PASSWORD"`
-    PrimaryDBName     string `env:"DB_NAME"`
-    PrimaryDBPort     string `env:"DB_PORT"`
-    PrimaryDBSSLMode  string `env:"DB_SSLMODE"`
+    PrimaryHost     string `env:"POSTGRES_HOST"`
+    PrimaryUser     string `env:"POSTGRES_USER"`
+    PrimaryPassword string `env:"POSTGRES_PASSWORD"`
+    PrimaryName     string `env:"POSTGRES_NAME"`
+    PrimaryPort     string `env:"POSTGRES_PORT"`
+    PrimarySSLMode  string `env:"POSTGRES_SSLMODE"`
 }
 ```
 
@@ -1150,7 +1150,7 @@ func TestMultiTenant_TenantIsolation(t *testing.T) {
 #### Testing Error Cases
 
 ```go
-func TestMiddleware_WithTenantDB_ErrorCases(t *testing.T) {
+func TestMiddleware_WithTenantPostgres_ErrorCases(t *testing.T) {
     tests := []struct {
         name           string
         setupContext   func(*fiber.Ctx)
@@ -1521,7 +1521,7 @@ func TestMultiTenant_BackwardCompatibility(t *testing.T) {
 | 2 | Service starts without Tenant Manager | Don't run Tenant Manager, start service | No connection errors, no panics |
 | 3 | All existing CRUD operations work | Run pre-existing integration tests | All pass with same behavior as before |
 | 4 | Health/version/swagger endpoints work | `GET /health`, `GET /version` | 200 OK without any auth headers |
-| 5 | Default DB connection is used | Check DB queries go to the configured `DB_HOST` | Queries hit single-tenant database |
+| 5 | Default PostgreSQL connection is used | Check DB queries go to the configured `POSTGRES_HOST` | Queries hit single-tenant database |
 | 6 | No new required env vars break startup | Start with only the env vars the service had before | Service starts without errors |
 
 **Step 5 — Run multi-tenant test suite (both modes work):**

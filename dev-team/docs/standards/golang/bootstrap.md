@@ -602,25 +602,25 @@ type Config struct {
     ServerAddress string `env:"SERVER_ADDRESS"`
     LogLevel      string `env:"LOG_LEVEL"`
 
-    // Database - Primary
-    PrimaryDBHost      string `env:"DB_HOST"`
-    PrimaryDBUser      string `env:"DB_USER"`
-    PrimaryDBPassword  string `env:"DB_PASSWORD"`
-    PrimaryDBName      string `env:"DB_NAME"`
-    PrimaryDBPort      string `env:"DB_PORT"`
-    PrimaryDBSSLMode   string `env:"DB_SSLMODE"`
+    // PostgreSQL - Primary
+    PrimaryHost      string `env:"POSTGRES_HOST"`
+    PrimaryPort      string `env:"POSTGRES_PORT"`
+    PrimaryUser      string `env:"POSTGRES_USER"`
+    PrimaryPassword  string `env:"POSTGRES_PASSWORD"`
+    PrimaryName      string `env:"POSTGRES_NAME"`
+    PrimarySSLMode   string `env:"POSTGRES_SSLMODE"`
 
-    // Database - Replica (optional, for read scaling)
-    ReplicaDBHost     string `env:"DB_REPLICA_HOST"`
-    ReplicaDBUser     string `env:"DB_REPLICA_USER"`
-    ReplicaDBPassword string `env:"DB_REPLICA_PASSWORD"`
-    ReplicaDBName     string `env:"DB_REPLICA_NAME"`
-    ReplicaDBPort     string `env:"DB_REPLICA_PORT"`
-    ReplicaDBSSLMode  string `env:"DB_REPLICA_SSLMODE"`
+    // PostgreSQL - Replica (optional, for read scaling)
+    ReplicaHost     string `env:"POSTGRES_REPLICA_HOST"`
+    ReplicaPort     string `env:"POSTGRES_REPLICA_PORT"`
+    ReplicaUser     string `env:"POSTGRES_REPLICA_USER"`
+    ReplicaPassword string `env:"POSTGRES_REPLICA_PASSWORD"`
+    ReplicaName     string `env:"POSTGRES_REPLICA_NAME"`
+    ReplicaSSLMode  string `env:"POSTGRES_REPLICA_SSLMODE"`
 
-    // Database - Connection Pool
-    MaxOpenConnections int `env:"DB_MAX_OPEN_CONNS"`
-    MaxIdleConnections int `env:"DB_MAX_IDLE_CONNS"`
+    // PostgreSQL - Connection Pool
+    MaxOpenConnections int `env:"POSTGRES_MAX_OPEN_CONNS"`
+    MaxIdleConnections int `env:"POSTGRES_MAX_IDLE_CONNS"`
 
     // MongoDB (if needed)
     MongoURI          string `env:"MONGO_URI"`

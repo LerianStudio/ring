@@ -191,17 +191,17 @@ DETECT database names (run in parallel per module):
 1. Bootstrap config struct (source of truth for env var names):
    - Read config_path
    - Grep for env tags matching database name patterns:
-     a. PostgreSQL: env:"DB_NAME" or env:"DB_<MODULE_UPPER>_NAME"
+     a. PostgreSQL: env:"POSTGRES_NAME" or env:"DB_<MODULE_UPPER>_NAME"
      b. MongoDB:    env:"MONGO_NAME" or env:"MONGO_<MODULE_UPPER>_NAME"
    - Extract the Go struct field name and env var name
    - Note: Prefixed variants (DB_<MODULE>_NAME) are used in unified services
      where a parent component composes child modules (e.g., ledger composing
-     onboarding + transaction). Non-prefixed (DB_NAME) is the standard form.
+     onboarding + transaction). Non-prefixed (POSTGRES_NAME) is the standard form.
 
 2. .env.example (source of truth for default values):
    - Read env_path
    - For each env var name found in step 1, extract the default value:
-     a. PostgreSQL: DB_NAME=<value> or DB_<MODULE_UPPER>_NAME=<value>
+     a. PostgreSQL: POSTGRES_NAME=<value> or DB_<MODULE_UPPER>_NAME=<value>
      b. MongoDB:    MONGO_NAME=<value> or MONGO_<MODULE_UPPER>_NAME=<value>
    - These are the actual database names used in development
 
@@ -217,7 +217,7 @@ DETECT database names (run in parallel per module):
 
 Store per module:
   module.databases = {
-    postgresql: {env_var: "DB_NAME", default_value: "onboarding", source: ".env.example"},
+    postgresql: {env_var: "POSTGRES_NAME", default_value: "onboarding", source: ".env.example"},
     mongodb:    {env_var: "MONGO_NAME", default_value: "onboarding", source: ".env.example"},
   }
   module.external_datasources = [
@@ -370,7 +370,7 @@ One card per module. When a resource is shared with another module, display a
 │ MODULE: onboarding                       │
 ├──────────────────────────────────────────┤
 │ PostgreSQL ✅  (7 repositories)          │
-│   DB name: "onboarding" (DB_NAME)        │
+│   DB name: "onboarding" (POSTGRES_NAME)   │
 │   organization, ledger, account,         │
 │   asset, portfolio, segment,             │
 │   accounttype                            │
@@ -496,11 +496,11 @@ graph TD
 - [ ] **Service:** `ledger` (type: product, isolation: database)
 
 - [ ] **Module:** `onboarding`
-  - [ ] Resource: postgresql (DB: "onboarding", env: DB_NAME)
+  - [ ] Resource: postgresql (DB: "onboarding", env: POSTGRES_NAME)
   - [ ] Resource: mongodb (DB: "onboarding", env: MONGO_NAME)
 
 - [ ] **Module:** `transaction`
-  - [ ] Resource: postgresql (DB: "transaction", env: DB_NAME)
+  - [ ] Resource: postgresql (DB: "transaction", env: POSTGRES_NAME)
   - [ ] Resource: mongodb (DB: "transaction", env: MONGO_NAME)
   - [ ] Resource: rabbitmq
 ```

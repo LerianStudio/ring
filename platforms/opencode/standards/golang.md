@@ -167,11 +167,11 @@ const ApplicationName = "your-service-name"
 // v4 uses nested structs to group related configuration.
 type Config struct {
     App   AppConfig   `envPrefix:""`
-    DB    DBConfig    `envPrefix:"DB_"`
-    Mongo MongoConfig `envPrefix:"MONGO_"`
-    Redis RedisConfig `envPrefix:"REDIS_"`
-    OTel  OTelConfig  `envPrefix:"OTEL_"`
-    Auth  AuthConfig  `envPrefix:"PLUGIN_AUTH_"`
+    Postgres PostgresConfig `envPrefix:"POSTGRES_"`
+    Mongo    MongoConfig    `envPrefix:"MONGO_"`
+    Redis    RedisConfig    `envPrefix:"REDIS_"`
+    OTel     OTelConfig     `envPrefix:"OTEL_"`
+    Auth     AuthConfig     `envPrefix:"PLUGIN_AUTH_"`
 }
 
 type AppConfig struct {
@@ -180,7 +180,7 @@ type AppConfig struct {
     ServerAddress string `env:"SERVER_ADDRESS"`
 }
 
-type DBConfig struct {
+type PostgresConfig struct {
     Host            string `env:"HOST"`
     User            string `env:"USER"`
     Password        string `env:"PASSWORD"`
@@ -270,8 +270,8 @@ func InitServersWithOptions(opts ...Option) (*Service, error) {
 | Category | Prefix | Example |
 |----------|--------|---------|
 | Application | None | `ENV_NAME`, `LOG_LEVEL`, `SERVER_ADDRESS` |
-| PostgreSQL | `DB_` | `DB_HOST`, `DB_USER`, `DB_PASSWORD` |
-| PostgreSQL Replica | `DB_REPLICA_` | `DB_REPLICA_HOST`, `DB_REPLICA_USER` |
+| PostgreSQL | `POSTGRES_` | `POSTGRES_HOST`, `POSTGRES_USER`, `POSTGRES_PASSWORD` |
+| PostgreSQL Replica | `POSTGRES_REPLICA_` | `POSTGRES_REPLICA_HOST`, `POSTGRES_REPLICA_USER` |
 | MongoDB | `MONGO_` | `MONGO_HOST`, `MONGO_NAME` |
 | Redis | `REDIS_` | `REDIS_HOST`, `REDIS_PASSWORD` |
 | OpenTelemetry | `OTEL_` | `OTEL_RESOURCE_SERVICE_NAME` |
@@ -282,19 +282,19 @@ func InitServersWithOptions(opts ...Option) (*Service, error) {
 
 ```go
 // FORBIDDEN: Manual os.Getenv calls scattered across code
-host := os.Getenv("DB_HOST")  // DON'T do this
+host := os.Getenv("POSTGRES_HOST")  // DON'T do this
 
 // FORBIDDEN: Configuration outside bootstrap
 func NewService() *Service {
-    dbHost := os.Getenv("DB_HOST")  // DON'T do this
+    dbHost := os.Getenv("POSTGRES_HOST")  // DON'T do this
 }
 
 // CORRECT: All configuration in nested Config struct, loaded once in bootstrap
 type Config struct {
-    DB DBConfig `envPrefix:"DB_"`
+    Postgres PostgresConfig `envPrefix:"POSTGRES_"`
 }
-type DBConfig struct {
-    Host string `env:"HOST"`  // Reads DB_HOST (prefix + field)
+type PostgresConfig struct {
+    Host string `env:"HOST"`  // Reads POSTGRES_HOST (prefix + field)
 }
 
 // Load with: libCommons.InitLocalEnvConfig() + env.Parse(&cfg)
@@ -889,11 +889,11 @@ const ApplicationName = "your-service"
 // v4 uses nested structs with `envPrefix` tags for grouping.
 type Config struct {
     App   AppConfig   `envPrefix:""`
-    DB    DBConfig    `envPrefix:"DB_"`
-    Mongo MongoConfig `envPrefix:"MONGO_"`
-    Redis RedisConfig `envPrefix:"REDIS_"`
-    OTel  OTelConfig  `envPrefix:"OTEL_"`
-    Auth  AuthConfig  `envPrefix:"PLUGIN_AUTH_"`
+    Postgres PostgresConfig `envPrefix:"POSTGRES_"`
+    Mongo    MongoConfig    `envPrefix:"MONGO_"`
+    Redis    RedisConfig    `envPrefix:"REDIS_"`
+    OTel     OTelConfig     `envPrefix:"OTEL_"`
+    Auth     AuthConfig     `envPrefix:"PLUGIN_AUTH_"`
 }
 
 // (See Configuration section above for nested struct definitions)
@@ -937,28 +937,28 @@ func InitServersWithOptions(opts ...Option) (*Service, error) {
         return nil, fmt.Errorf("apply telemetry globals: %w", err)
     }
 
-    // 4. INITIALIZE DATABASE CONNECTIONS
+    // 4. INITIALIZE POSTGRESQL CONNECTIONS
     // PostgreSQL connection with primary/replica support
     postgreSourcePrimary := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
-        cfg.DB.Host, cfg.DB.User, cfg.DB.Password,
-        cfg.DB.Name, cfg.DB.Port, cfg.DB.SSLMode)
+        cfg.Postgres.Host, cfg.Postgres.User, cfg.Postgres.Password,
+        cfg.Postgres.Name, cfg.Postgres.Port, cfg.Postgres.SSLMode)
 
     postgreSourceReplica := postgreSourcePrimary
-    if cfg.DB.ReplicaHost != "" {
+    if cfg.Postgres.ReplicaHost != "" {
         postgreSourceReplica = fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
-            cfg.DB.ReplicaHost, cfg.DB.ReplicaUser, cfg.DB.ReplicaPassword,
-            cfg.DB.ReplicaName, cfg.DB.ReplicaPort, cfg.DB.ReplicaSSLMode)
+            cfg.Postgres.ReplicaHost, cfg.Postgres.ReplicaUser, cfg.Postgres.ReplicaPassword,
+            cfg.Postgres.ReplicaName, cfg.Postgres.ReplicaPort, cfg.Postgres.ReplicaSSLMode)
     }
 
     postgresConnection := &cpostgres.PostgresConnection{
         ConnectionStringPrimary: postgreSourcePrimary,
         ConnectionStringReplica: postgreSourceReplica,
-        PrimaryDBName:           cfg.DB.Name,
-        ReplicaDBName:           cfg.DB.ReplicaName,
+        PrimaryName:             cfg.Postgres.Name,
+        ReplicaName:             cfg.Postgres.ReplicaName,
         Component:               ApplicationName,
         Logger:                  logger,
-        MaxOpenConnections:      cfg.DB.MaxOpenConns,
-        MaxIdleConnections:      cfg.DB.MaxIdleConns,
+        MaxOpenConnections:      cfg.Postgres.MaxOpenConns,
+        MaxIdleConnections:      cfg.Postgres.MaxIdleConns,
     }
 
     // MongoDB connection (optional - include only if service uses MongoDB)
