@@ -7,6 +7,9 @@
 # Returns permissionDecision: "deny" if gate progression is invalid.
 # Returns exit 0 (allow) if progression is valid or file is not a cycle state file.
 #
+# Note: Gate 9 (Validation) requires explicit user approval per SKILL.md
+# and cannot be programmatically validated — intentionally omitted.
+#
 # Install: add to hooks.json under PreToolUse with matcher "Write"
 # and if condition "Write(*current-cycle.json)"
 
@@ -115,6 +118,12 @@ validate_gate_3() {
     (if .unit_testing.status == "completed" then 85 else 0 end)
   ')
 
+  # Ensure coverage is numeric (guards against null/malformed values)
+  if ! [[ "$coverage" =~ ^[0-9]+\.?[0-9]*$ ]]; then
+    errors+=("Gate 3 (Unit Testing): invalid coverage value: $coverage")
+    return
+  fi
+
   if [[ "$status" != "completed" ]]; then
     errors+=("Gate 3 (Unit Testing): not completed (status: $status)")
   else
@@ -207,13 +216,30 @@ gate_to_num() {
     7)   echo 8 ;;
     8)   echo 9 ;;
     9)   echo 10 ;;
-    *)   echo 0 ;;
+    *)   echo -1 ;;
   esac
 }
 
 TARGET_NUM=$(gate_to_num "$TARGET_GATE")
 
+# Reject unrecognized gate values
+if [[ "$TARGET_NUM" -eq -1 ]]; then
+  jq -n --arg gate "$TARGET_GATE" '{
+    hookSpecificOutput: {
+      hookEventName: "PreToolUse",
+      permissionDecision: "deny",
+      permissionDecisionReason: ("Invalid gate value: " + $gate + ". Expected: 0, 0.5, 1-9.")
+    }
+  }'
+  exit 0
+fi
+
 # ─── Read existing state to detect regression (allowed) vs progression ───
+# Normalize FILE_PATH to absolute (tool_input may provide relative paths)
+if [[ "$FILE_PATH" != /* ]]; then
+  FILE_PATH="${PWD}/${FILE_PATH}"
+fi
+
 # If the state file exists, check if this is a regression (going back) — always allow
 if [[ -f "$FILE_PATH" ]]; then
   EXISTING_GATE=$(jq -r '.current_gate // 0' "$FILE_PATH" 2>/dev/null || echo "0")
@@ -267,6 +293,8 @@ fi
 if [[ "$TARGET_NUM" -ge 10 ]]; then
   validate_gate_8
 fi
+
+# Note: Gate 9 (Validation) is user approval — cannot be automated
 
 # ─── Decision ───
 
