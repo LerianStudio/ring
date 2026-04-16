@@ -36,26 +36,116 @@ Creating unrealistic timelines creates:
 **Roadmaps answer**: When will working software be delivered to users?
 **Roadmaps never answer**: How fast could we go if everything goes perfectly (that's fantasy).
 
+## Delivery Phase Model
+
+Every task passes through 4 delivery phases. Phase classification is automatic based on task signals from tasks.md — the planner MUST NOT ask the user to classify phases.
+
+### Phase Definitions
+
+| Phase | Owner | What Happens | Exit Criterion |
+|-------|-------|-------------|----------------|
+| **Planning** | PM / Orchestrator | Pre-dev gates complete, tasks.md validated, delivery-roadmap approved | Roadmap approved by user |
+| **Development** | AI Agent (ring:dev-cycle) | Coding, TDD, automated review, unit/integration tests, PR merged | PR merged to main with all dev-cycle gates passed |
+| **Quality** | QA / Human + Taura | Manual QA, regression testing, staging validation, cross-service integration verification | QA sign-off, staging environment green |
+| **Delivery** | DevOps / SRE | Helm chart updates, pipeline execution, production deploy, monitoring validation, rollback readiness | Production deploy verified, monitoring green |
+
+### Automatic Phase Classification Rules
+
+**Cut criterion:** Use task signals from tasks.md to classify automatically.
+
+| Signal in tasks.md | Phase | Rationale |
+|--------------------|-------|-----------|
+| CRUD, config, single endpoint, single service | **Development** | Dev does alone as part of PR |
+| 2+ services, external API, shared state, database migration across services | **Quality** | Depends on integrated env / another team / external validation |
+| Helm chart, pipeline config, infra provisioning, monitoring setup, deploy script | **Delivery** | Depends on DevOps |
+| Stakeholder demo, UAT, compliance sign-off | **Quality** | Requires external validation |
+
+**Planning phase is always implicit** — it ends when the roadmap is approved. All other phases are assigned per-task.
+
+### Phase Duration Impact
+
+Each phase adds time to the task's total cycle. The layered calculation model (see [Layered Calculation Model](#layered-calculation-model)) accounts for each phase's overhead through dedicated layers:
+
+- **Development** → Layer 1 (Coding) + Layer 2 (Process)
+- **Quality** → Layer 3 (QA)
+- **Delivery** → Layer 4 (DevOps)
+- **All phases** → Layer 5 (Bug Buffer) applied to total
+
+## Task Type Classification
+
+Every task MUST be classified into one of three types based on signals from tasks.md. Classification determines the multipliers used in Layer 1 (Coding) and Layer 3 (QA).
+
+### Type Definitions
+
+| Type | Description | Typical Signals in tasks.md |
+|------|-------------|----------------------------|
+| **Isolated** | Self-contained work touching a single service/component | CRUD endpoint, config change, single model, feature flag, UI component in isolation |
+| **Integration** | Work spanning 2+ services or involving external contracts | Multi-service flow, external API call, event-driven communication, shared database access, BFF aggregation |
+| **Restructuring** | Refactoring, migration, or model changes with broad impact | Database migration, domain model change, library upgrade, API versioning, service decomposition |
+
+### Classification by Signals
+
+MUST classify automatically by scanning task description and subtasks for these signals:
+
+```
+IF task mentions: CRUD, config, single endpoint, single model, feature flag
+  → Type: Isolated
+
+IF task mentions: 2+ services, external API, event/message queue, shared state, BFF
+  → Type: Integration
+
+IF task mentions: migration, refactor, model change, library upgrade, breaking change
+  → Type: Restructuring
+```
+
+**When ambiguous:** Classify UP (Isolated → Integration, Integration → Restructuring). Over-estimating is safer than under-estimating.
+
 ## Mandatory Workflow
 
 | Phase | Activities |
 |-------|------------|
-| **1. Input Gathering** | Load tasks.md, ask user for start date + team composition + delivery cadence + period configuration + velocity multiplier |
+| **1. Input Gathering** | Load tasks.md, classify task types + phases automatically, ask user for start date + team composition + delivery cadence + period configuration + product (for bug buffer) |
 | **2. Dependency Analysis** | Build dependency graph, identify critical path, find parallelization opportunities |
-| **3. Capacity Planning** | Calculate team velocity (custom multiplier), allocate resources, identify bottlenecks |
-| **4. Delivery Breakdown** | Group tasks by cadence (sprint/cycle/continuous), calculate period boundaries, identify spill overs, map parallel streams |
+| **3. Layered Calculation** | Apply 5-layer model (L1 Coding → L2 Process → L3 QA → L4 DevOps → L5 Bug Buffer), calculate per-task calendar days |
+| **4. Delivery Breakdown** | Group tasks into Ciclos/Semanas (or sprints/milestones per cadence), calculate period boundaries, identify spill overs, map parallel streams |
 | **5. Risk Analysis** | Identify critical dependencies, flag high-risk milestones, define contingencies |
 | **6. Gate Validation** | Verify all tasks scheduled, critical path correct, resources realistic, dates achievable, period boundaries respected |
+
+## Cycle Nomenclature
+
+**MUST use "Ciclo N, Semana N" as the primary naming convention for delivery periods.** This is the Lerian standard.
+
+### Naming Rules
+
+| Cadence | Period Name | Week Name | Example |
+|---------|------------|-----------|---------|
+| **Cycles (Lerian default)** | Ciclo N | Semana N | Ciclo 1 Semana 1, Ciclo 1 Semana 2, Ciclo 2 Semana 1 |
+| **Sprints** | Sprint N | Semana N (within sprint) | Sprint 1 Semana 1, Sprint 1 Semana 2 |
+| **Continuous** | Milestone N | Semana N | Milestone 1 (Semana 3) |
+
+### Usage in Roadmap Output
+
+- Section headers: `### Ciclo 1: {Goal} (2026-03-01 to 2026-04-30)`
+- Task tables: Include `Ciclo` and `Semana` columns
+- Timeline: Reference `Ciclo N Semana M` in Gantt visualization
+- JSON output: `milestones[].name` uses `"Ciclo 1"`, `"Ciclo 2"` etc.
+
+### Anti-Pattern
+
+- "Phase 1", "Phase 2" → FORBIDDEN (ambiguous, conflicts with delivery phases)
+- "Period 1", "Period 2" → FORBIDDEN (too generic)
+- "Week 1", "Week 2" without Ciclo context → FORBIDDEN (no cycle reference)
+- MUST use "Ciclo N Semana M" or the cadence-specific equivalent
 
 ## Explicit Rules
 
 ### ✅ DO Include in Roadmap
 
-Start/end dates (YYYY-MM-DD format), team composition (N devs, roles), velocity multiplier (custom or default), critical path (longest dependency chain), parallel streams (independent task groups), delivery goals (what ships each period), period boundaries (sprint/cycle start/end dates), spill over identification (tasks crossing period boundaries), resource allocation (who works on what), risk milestones (high-impact dependencies), contingency buffer (10-20% for unknowns), Definition of Done per delivery period
+Start/end dates (YYYY-MM-DD format), team composition (N devs, roles), task type classification (Isolated/Integration/Restructuring per task), delivery phase assignment (Development/Quality/Delivery per task), layered calculation breakdown (L1-L5 per task), critical path (longest dependency chain), parallel streams (independent task groups), delivery goals (what ships each Ciclo/Semana), period boundaries (Ciclo/Sprint start/end dates), spill over identification (tasks crossing period boundaries), resource allocation (who works on what), risk milestones (high-impact dependencies), bug buffer (product-specific 20-30%), Definition of Done per delivery period
 
 ### ❌ NEVER Include in Roadmap
 
-Best-case scenarios ("if everything goes perfectly"), optimistic estimates ("assuming no blockers"), undefined capacity ("we'll figure it out"), missing dependencies ("tasks are independent"), unrealistic parallelization ("everyone works on everything"), no buffer time ("ship on last day"), vague milestones ("feature mostly done"), assumed availability ("team always at 100%"), fixed cadence without asking user, period boundaries ignored (tasks don't respect sprint/cycle limits)
+Best-case scenarios ("if everything goes perfectly"), optimistic estimates ("assuming no blockers"), undefined capacity ("we'll figure it out"), missing dependencies ("tasks are independent"), unrealistic parallelization ("everyone works on everything"), no buffer time ("ship on last day"), vague milestones ("feature mostly done"), assumed availability ("team always at 100%"), fixed cadence without asking user, period boundaries ignored (tasks don't respect Ciclo/Sprint limits), single-multiplier shortcuts ("just use 1.5x for everything"), skipping task type classification ("all tasks are the same"), ignoring Taura cycles ("QA is instant"), omitting DevOps overhead ("deploy takes no time")
 
 ## Rationalization Table
 
@@ -64,7 +154,8 @@ Best-case scenarios ("if everything goes perfectly"), optimistic estimates ("ass
 | "Team composition doesn't matter, estimate anyway" | Capacity = reality. Without team size, timeline is fantasy. | **STOP. Ask user for team composition.** |
 | "Dependencies are obvious, skip the graph" | Obvious to you ≠ validated. Hidden deps surface during execution. | **MUST build dependency graph. Verify critical path.** |
 | "Parallel streams will emerge naturally" | Natural emergence = chaos. Define streams upfront. | **MUST identify independent task groups explicitly.** |
-| "Default velocity multiplier is fine for everyone" | Teams vary. AI adoption varies. Experience varies. | **MUST ask user: use default or custom velocity.** |
+| "All tasks are the same type, skip classification" | Isolated ≠ Integration ≠ Restructuring. Multipliers differ 1.2x to 2.0x. | **MUST classify every task by type from signals.** |
+| "Single multiplier is good enough" | Single multiplier hides QA, DevOps, Taura, and bug buffer. Reality has 5 layers. | **MUST use layered calculation model (L1-L5).** |
 | "Assume sprint cadence, everyone uses sprints" | Cadence = team culture. Scrum ≠ Kanban ≠ Shape Up. | **MUST ask user for their delivery cadence.** |
 | "Period start date doesn't matter" | Period boundaries determine task allocation. Without start, can't calculate fit. | **MUST ask period start date if sprint/cycle chosen.** |
 | "Tasks will fit naturally into periods" | Tasks don't respect arbitrary boundaries. Calculate fit explicitly. | **MUST check if task fits period, identify spill overs.** |
@@ -87,10 +178,14 @@ If you catch yourself doing any of these, **STOP and ask the user**:
 - Missing period duration when user chose sprint/cycle
 - Scheduling tasks without checking blockers
 - Assuming 100% capacity (no meetings, no interruptions)
-- Using velocity multiplier without offering customization
+- Using a single multiplier instead of the 5-layer model
+- Skipping task type classification (Isolated/Integration/Restructuring)
+- Omitting Taura QA cycle days from timeline
+- Ignoring DevOps overhead (Helm, pipeline, infra hours)
+- Not asking product for bug buffer percentage
 - Using round numbers for dates ("exactly 4 weeks")
-- Missing contingency buffer
-- Not checking if tasks fit within period boundaries
+- Missing bug buffer (Layer 5)
+- Not checking if tasks fit within Ciclo/Sprint boundaries
 - No clear definition of "done" per delivery period
 - Ambiguous priorities (which task first if both ready?)
 
@@ -141,57 +236,39 @@ If you catch yourself doing any of these, **STOP and ask the user**:
   - **Why:** Establishes period boundaries to check if tasks fit completely or spill over
 - **Note:** If user chose "Continuous", skip this question (no fixed periods)
 
-### Question 5: Human Validation Overhead
+### Question 5: Product (for Bug Buffer)
 
 **Context:**
-- Baseline: AI Agent implements via ring:dev-cycle
-- AI handles: coding, TDD, automated review, SRE validation, DevOps
-- AI Estimate: X AI-agent-hours (from tasks.md)
+- Layers 1-4 (Coding, Process, QA, DevOps) are calculated automatically from task signals
+- Layer 5 (Bug Buffer) depends on the product being developed
+- Different products have different regression surfaces and regulatory scrutiny
 
-**Question:** "What overhead for human validation and adjustments?"
+**Question:** "Which product is this feature for?"
 
 **Options:**
 
-1. **"1.2x - Minimal validation (20% overhead)"**
-   - AI generates consistently high-quality code
-   - Quick review, minimal adjustments
-   - Example: 4h AI → 4.8h adjusted → 5.3h calendar
+1. **"Standard product (new/greenfield)"**
+   - 20% bug buffer
+   - Lower codebase complexity, fewer regressions
+   - Examples: new microservice, internal tool, standalone feature
 
-2. **"1.5x - Standard validation (50% overhead)"** ← RECOMMENDED
-   - Normal review process with some adjustments
-   - Re-run tests after changes
-   - Standard manual QA
-   - Example: 4h AI → 6h adjusted → 6.67h calendar
+2. **"Core one (core ledger / financial)"**
+   - 25-30% bug buffer
+   - Higher regulatory scrutiny, complex domain rules
+   - Larger regression surface, financial correctness requirements
+   - Examples: ledger operations, transaction processing, account management
 
-3. **"2.0x - Deep validation (100% overhead)"**
-   - Critical review with multiple rounds
-   - Significant refactoring requested
-   - Extensive manual testing
-   - Example: 4h AI → 8h adjusted → 8.89h calendar
-
-4. **"2.5x - Heavy rework (150% overhead)"**
-   - AI code needs major changes
-   - Multiple iteration cycles
-   - Complex stakeholder feedback
-   - Example: 4h AI → 10h adjusted → 11.11h calendar
-
-5. **"Custom multiplier"**
+3. **"Custom buffer percentage"**
    - Specify value based on historical data
-   - Example: 1.7x, 1.8x, etc.
+   - Example: 22%, 28%, etc.
 
-**Multiplier accounts for:**
-- Human code review time (validation, not execution)
-- Requested adjustments and refactoring
-- Manual exploratory testing
-- Stakeholder demos and feedback
-- Documentation review
-- Deployment validation
+**Why only this question?** The old single-multiplier approach (Question 5 in previous version) collapsed 5 different concerns into one number. Now Layers 1-4 are calculated automatically from task classification and signals. Only the bug buffer requires product context that cannot be inferred from tasks.md.
 
-**Historical data (update after tasks):**
-After completing tasks, track actual multipliers:
-- Task T-001: Planned 1.5x, Actual 1.6x (close)
-- Task T-002: Planned 1.5x, Actual 2.1x (underestimated)
-- Average: 1.7x → Adjust future estimates
+**Historical data (update after delivery):**
+After completing deliveries, track actual bug rates:
+- Ciclo 1: Planned 20% buffer, Actual bugs consumed 18% → Buffer accurate
+- Ciclo 2: Planned 20% buffer, Actual bugs consumed 27% → Under-estimated, adjust to 25%
+- Core one Ciclo 1: Planned 27% buffer, Actual bugs consumed 30% → Increase to 30%
 
 ### Question 6 (CONDITIONAL): Priority Clarification
 - **When to ask:** If multiple tasks have same dependencies and could start simultaneously
@@ -213,36 +290,155 @@ After completing tasks, track actual multipliers:
 
 | Category | Requirements |
 |----------|--------------|
-| **Input Completeness** | Start date confirmed; team composition known; delivery cadence selected; period configuration set (if sprint/cycle); velocity multiplier validated (default or custom); all tasks loaded from tasks.md |
+| **Input Completeness** | Start date confirmed; team composition known; delivery cadence selected; period configuration set (if sprint/cycle); product selected (for bug buffer %); all tasks loaded from tasks.md; all tasks classified by type (Isolated/Integration/Restructuring); all tasks assigned delivery phase (Development/Quality/Delivery) |
 | **Dependency Analysis** | Dependency graph built; critical path identified; parallel streams defined; no circular dependencies |
-| **Capacity Planning** | Velocity calculated (custom or default multiplier); resources allocated to tasks; bottlenecks identified; realistic capacity (70-80% utilization) |
+| **Capacity Planning** | 5-layer calculation applied per task (L1-L5); resources allocated to tasks; bottlenecks identified; realistic capacity (90% AI utilization); Taura days included; DevOps hours included; bug buffer applied |
 | **Delivery Breakdown** | Periods match chosen cadence; period boundaries calculated (if sprint/cycle); tasks allocated to periods; spill overs identified; delivery goals measurable; parallel streams mapped; handoffs minimized |
 | **Risk Management** | High-risk dependencies flagged; contingency buffer added (10-20%); mitigation strategies defined; spill over risks documented |
 | **Timeline Realism** | No best-case assumptions; critical path validated; dates achievable with given capacity; period boundaries respected; user approved |
 
 **Gate Result:** ✅ PASS → Ready for execution | ⚠️ CONDITIONAL (adjust capacity/dates) | ❌ FAIL (unrealistic, rework)
 
-## Velocity Calibration (Lerian Standard)
+## Layered Calculation Model
 
 **See [shared-patterns/ai-agent-baseline.md](../shared-patterns/ai-agent-baseline.md) for baseline definition.**
 
 **Baseline:** AI Agent via ring:dev-cycle
 **Capacity:** 90% (hardcoded)
-**Multiplier:** User-defined (human validation overhead)
+**Layers:** 5 calculation layers replace the single humanValidationMultiplier
 
-### Calculation Formula
+The old single-multiplier approach (1.2x–2.5x) collapsed all overhead into one number. Reality is layered: coding complexity, process overhead, QA effort, DevOps work, and bug discovery each scale differently based on task type and product context. The layered model separates these concerns for accurate estimation.
+
+### Layer Summary
+
+| Layer | Name | What It Captures | Applied To | Determined By |
+|-------|------|-----------------|------------|---------------|
+| L1 | Coding | Implementation complexity beyond AI estimate | AI estimate | Task type (auto) |
+| L2 | Process | PR reviews, merge conflicts, CI cycles | L1-adjusted estimate | PR count (auto) |
+| L3 | QA | Manual testing, staging validation, Taura cycles | L2-adjusted estimate | Task type (auto) + Taura fixed |
+| L4 | DevOps | Deploy, Helm, pipeline, infra, observability | Fixed hours added | Task signals (auto) |
+| L5 | Bug Buffer | Bugs found in QA/staging/production | Total cycle capacity | Product (user selects) |
+
+**Layers 1-4 are calculated automatically** from task signals in tasks.md. Only Layer 5 requires user input (product selection).
+
+### Layer 1: Coding Complexity
+
+Accounts for human review overhead, refactoring requests, and re-implementation beyond what the AI produces.
+
+| Task Type | Multiplier | Rationale |
+|-----------|-----------|-----------|
+| **Isolated** | 1.2x | Quick review, minimal adjustments |
+| **Integration** | 1.5x | Cross-service review, contract verification, re-runs |
+| **Restructuring** | 2.0x | Multiple review rounds, significant rework likely |
+
+**Applied to:** `ai_estimate` from tasks.md
 
 ```
-adjusted_hours = ai_estimate × multiplier
-calendar_hours = adjusted_hours ÷ 0.90
-calendar_days = calendar_hours ÷ 8 ÷ team_size
+L1_hours = ai_estimate × L1_multiplier
+```
+
+### Layer 2: Process Overhead
+
+Accounts for PR review cycles, merge conflicts, CI pipeline waits, and branch management.
+
+| PR Complexity | Multiplier | Signals |
+|---------------|-----------|---------|
+| **Standard (1-2 PRs)** | 1.4x | Single feature, no cross-repo changes |
+| **Complex (3+ PRs)** | 1.6x | Multi-repo, breaking changes, coordinated merges |
+
+**Determined automatically:** Count subtasks that produce independent PRs. If task has subtasks across multiple services/repos → Complex.
+
+**Applied to:** `L1_hours`
+
+```
+L2_hours = L1_hours × L2_multiplier
+```
+
+### Layer 3: QA Overhead
+
+Accounts for manual exploratory testing, staging validation, regression testing, and Taura test cycles.
+
+| Task Type | Multiplier | Rationale |
+|-----------|-----------|-----------|
+| **Isolated** | 1.0x | Automated tests sufficient, minimal manual QA |
+| **Integration** | 1.3x | Cross-service testing, staging environment validation |
+| **Restructuring** | 1.6x | Full regression testing, behavior verification |
+
+**Plus Taura fixed addition:** +5 to +10 calendar days for Taura test cycles (applied to tasks that enter Quality phase).
+
+- +5 days: Standard Taura cycle (isolated tasks entering QA)
+- +10 days: Extended Taura cycle (integration/restructuring tasks)
+
+**Applied to:** `L2_hours` (multiplier), then add Taura days
+
+```
+L3_hours = L2_hours × L3_multiplier
+L3_total_days = (L3_hours ÷ 0.90 ÷ 8) + taura_days
+```
+
+### Layer 4: DevOps Overhead
+
+Fixed hours added for DevOps work. Determined automatically from task signals in tasks.md.
+
+**Base:** +2 to +4 hours (every task has minimum deploy overhead)
+
+**Variable additions (cumulative):**
+
+| DevOps Activity | Hours Added | Signals in tasks.md |
+|----------------|-------------|---------------------|
+| **Config changes** | +1-2h | Environment variables, feature flags, config files |
+| **Pipeline changes** | +4-8h | CI/CD modifications, new build steps, test stages |
+| **Helm chart changes** | +6-12h | New chart, values changes, template modifications |
+| **Infrastructure** | +8-16h | New service, database provisioning, network config |
+| **Observability (O11y)** | +4-8h | Dashboards, alerts, SLOs, logging configuration |
+
+**Applied as:** Fixed hours added to task total (not a multiplier)
+
+```
+L4_hours = base_devops + sum(applicable_variable_additions)
+```
+
+### Layer 5: Bug Buffer
+
+Percentage buffer applied to total cycle capacity to absorb bugs discovered during QA, staging, and production.
+
+| Product | Buffer % | Rationale |
+|---------|----------|-----------|
+| **Standard** (new product, greenfield) | 20% | Lower codebase complexity, fewer regressions |
+| **Core one** (core ledger, financial) | 25-30% | Higher regulatory scrutiny, complex domain, more regression surface |
+
+**Determined by:** User selects product in Question 5 (see [Mandatory User Questions](#mandatory-user-questions)).
+
+**Applied to:** Total cycle duration (after all other layers)
+
+```
+buffered_days = total_days × (1 + bug_buffer_percentage)
+```
+
+### Complete Calculation Formula
+
+```
+Step 1: Classify task type (Isolated / Integration / Restructuring)
+Step 2: L1_hours = ai_estimate × L1_multiplier (coding)
+Step 3: L2_hours = L1_hours × L2_multiplier (process)
+Step 4: L3_hours = L2_hours × L3_multiplier (QA)
+Step 5: calendar_hours = L3_hours ÷ 0.90 (capacity)
+Step 6: task_days = (calendar_hours ÷ 8 ÷ team_size) + taura_days
+Step 7: L4_hours added = base_devops + variable_devops
+Step 8: total_task_days = task_days + (L4_hours ÷ 8)
+Step 9: buffered_days = total_task_days × (1 + bug_buffer %)
 
 Where:
 - ai_estimate = from tasks.md (AI-agent-hours)
-- multiplier = human validation overhead (typically 1.2x - 2.5x)
-- 0.90 = capacity utilization (90%)
+- L1_multiplier = 1.2 (Isolated) | 1.5 (Integration) | 2.0 (Restructuring)
+- L2_multiplier = 1.4 (1-2 PRs) | 1.6 (3+ PRs)
+- L3_multiplier = 1.0 (Isolated) | 1.3 (Integration) | 1.6 (Restructuring)
+- taura_days = 5 (standard) | 10 (integration/restructuring)
+- 0.90 = capacity utilization (AI Agent)
 - 8 = hours per working day
 - team_size = number of developers
+- L4_hours = DevOps base + variable additions
+- bug_buffer = 0.20 (standard) | 0.25–0.30 (Core one)
 ```
 
 ### Capacity Utilization: 90% (Fixed)
@@ -251,51 +447,44 @@ Where:
 
 **Summary:** AI Agent has 90% capacity (10% overhead from API limits, context loading, tool execution).
 
-### Multiplier: Human Validation Overhead
+### Example Calculation (Layered)
 
-**User selects multiplier to account for:**
-- ✅ Human code review and validation time
-- ✅ Requested adjustments and refactoring
-- ✅ Re-running tests after changes
-- ✅ Manual exploratory testing (beyond automated)
-- ✅ Stakeholder demos and feedback cycles
-- ✅ Deployment validation and monitoring setup
-- ✅ Integration issues found in staging/production
-
-**Does NOT account for (already done by AI):**
-- ❌ Initial code implementation
-- ❌ Unit/integration test writing (TDD)
-- ❌ Automated code review (ring:code-reviewer)
-- ❌ SRE validation (ring:sre)
-- ❌ DevOps setup (ring:devops-engineer)
-
-### Example Calculation
-
-**Task T-001: "User Management CRUD API"**
+**Task T-001: "User Management CRUD API"** (Isolated, 1 PR, standard product)
 
 ```
-Step 1: AI Estimation (Gate 7)
-AI Estimate: 4.5 AI-agent-hours
-
-Step 2: Apply Multiplier (Gate 9)
-User selects: 1.5x (standard validation)
-Adjusted Hours: 4.5h × 1.5 = 6.75h
-
-Step 3: Apply Capacity (hardcoded)
-Calendar Hours: 6.75h ÷ 0.90 = 7.5h
-
-Step 4: Convert to Days
-Calendar Days: 7.5h ÷ 8h/day = 0.94 developer-days
-
-Step 5: Account for Team Size
-With 1 dev: 0.94 ÷ 1 = 0.94 calendar days ≈ 1 day
-With 2 devs: 0.94 ÷ 2 = 0.47 calendar days ≈ 0.5 day (4 hours)
+Step 1: Task type = Isolated (single CRUD endpoint)
+Step 2: L1 = 4.5h × 1.2 = 5.4h (coding)
+Step 3: L2 = 5.4h × 1.4 = 7.56h (process, 1 PR)
+Step 4: L3 = 7.56h × 1.0 = 7.56h (QA, isolated = no multiplier)
+Step 5: Calendar = 7.56h ÷ 0.90 = 8.4h
+Step 6: Task days = (8.4h ÷ 8 ÷ 1 dev) + 5 Taura days = 1.05 + 5 = 6.05 days
+Step 7: L4 = +3h base DevOps (deploy only)
+Step 8: Total = 6.05 + (3 ÷ 8) = 6.05 + 0.375 = 6.43 days
+Step 9: Buffered = 6.43 × 1.20 = 7.7 days ≈ 8 calendar days
 ```
 
-**Breakdown of 7.5h total:**
-- AI implementation: 4.5h (60%)
-- Human validation: 2.25h (30%) ← multiplier overhead
-- Technical overhead: 0.75h (10%) ← capacity overhead
+**Task T-002: "Order Processing Multi-Service Flow"** (Integration, 3 PRs, Core one)
+
+```
+Step 1: Task type = Integration (3 services: order, payment, notification)
+Step 2: L1 = 12h × 1.5 = 18h (coding)
+Step 3: L2 = 18h × 1.6 = 28.8h (process, 3 PRs)
+Step 4: L3 = 28.8h × 1.3 = 37.44h (QA, integration)
+Step 5: Calendar = 37.44h ÷ 0.90 = 41.6h
+Step 6: Task days = (41.6h ÷ 8 ÷ 2 devs) + 10 Taura days = 2.6 + 10 = 12.6 days
+Step 7: L4 = +3h base + 6h Helm + 4h O11y = 13h
+Step 8: Total = 12.6 + (13 ÷ 8) = 12.6 + 1.625 = 14.23 days
+Step 9: Buffered = 14.23 × 1.27 = 18.1 days ≈ 18 calendar days
+```
+
+**Breakdown comparison (old vs new for T-001):**
+
+| Approach | AI Time | Overhead | Total | Accuracy |
+|----------|---------|----------|-------|----------|
+| Old (single 1.5x) | 4.5h | 1 multiplier | ~1 day | Low (hides QA/DevOps) |
+| New (5 layers) | 4.5h | 5 explicit layers | ~8 days | High (QA + Taura + DevOps visible) |
+
+The layered model reveals the true delivery timeline by making Taura cycles, DevOps work, and bug buffer explicit instead of hidden inside a single multiplier.
 
 ## Period Boundary Calculation
 
@@ -410,11 +599,11 @@ With 1 dev:  Fully sequential (slowest)
 | **Parallel Streams** | N streams identified |
 | **Team Composition** | N developers (roles) |
 | **Development Mode** | AI Agent via ring:dev-cycle |
-| **Human Validation Multiplier** | Xx (e.g., 1.5x = 50% overhead for validation) |
-| **Multiplier Source** | Default (1.5x) / Custom (user-validated) |
+| **Calculation Model** | Layered (5 layers: Coding → Process → QA → DevOps → Bug Buffer) |
 | **Capacity Utilization** | 90% (AI Agent standard) |
-| **Formula** | ai_estimate × multiplier ÷ 0.90 |
-| **Delivery Cadence** | Sprints (1-2w) / Cycles (1-3m) / Continuous |
+| **Task Types** | N Isolated, N Integration, N Restructuring |
+| **Bug Buffer** | X% ({product name}) |
+| **Delivery Cadence** | Ciclos (1-3m) / Sprints (1-2w) / Continuous |
 | **Period Duration** | {X} weeks/months (if sprint/cycle) |
 | **First Period Starts** | YYYY-MM-DD (if sprint/cycle) |
 | **Contingency Buffer** | Z% (A days) |
@@ -607,8 +796,8 @@ Legend:
 3. **Scope Stability:** No scope changes during execution (new requirements = new planning)
 4. **Infrastructure Ready:** Development/staging environments available Day 1
 5. **Capacity Utilization:** 90% (AI Agent via ring:dev-cycle, 10% overhead for API/technical)
-6. **Multiplier Accuracy:** Custom multiplier ({X}x) validated against historical validation overhead OR using default multiplier (1.5x)
-7. **Period Boundaries:** Sprint/Cycle boundaries do not shift (dates fixed)
+6. **Layered Model Accuracy:** 5-layer multipliers calibrated from task type signals; Taura cycle durations based on standard/extended classification; DevOps hours based on task signal detection
+7. **Period Boundaries:** Ciclo/Sprint boundaries do not shift (dates fixed)
 8. **Baseline Execution:** All implementation via ring:dev-cycle (AI Agent with automated gates)
 
 ## Constraints
@@ -630,7 +819,7 @@ Legend:
 | **100% Capacity** | "2 devs × 2 weeks × 5 days = 20 dev-days" (unrealistic) | "2 devs × 2 weeks × 5 days × 0.75 capacity = 15 dev-days" |
 | **Fixed Cadence Assumption** | "Everyone works in 2-week sprints" | "Ask user: sprint/cycle/continuous delivery?" |
 | **Ignoring Period Boundaries** | "Task T-002 starts in Sprint 1, wherever it ends is fine" | "T-002 starts Sprint 1, ends Sprint 2 → spill over, track explicitly" |
-| **Default Multiplier Always** | "Use 1.5x always" | "Ask user: default (1.5x) or custom based on historical validation overhead?" |
+| **Single Multiplier Shortcut** | "Use 1.5x for everything" | "Apply 5-layer model: L1 (coding) → L2 (process) → L3 (QA + Taura) → L4 (DevOps) → L5 (bug buffer per product)" |
 
 ## Confidence Scoring
 
@@ -704,8 +893,14 @@ The JSON provides a stable, predictable contract for programmatic consumers. Unl
   "velocity": {
     "teamSize": 2,
     "utilizationRate": 0.9,
-    "humanValidationMultiplier": 1.5,
-    "multiplierSource": "default | custom"
+    "calculationModel": "layered",
+    "layers": {
+      "L1_coding": { "isolated": 1.2, "integration": 1.5, "restructuring": 2.0 },
+      "L2_process": { "standard": 1.4, "complex": 1.6 },
+      "L3_qa": { "isolated": 1.0, "integration": 1.3, "restructuring": 1.6, "tauraDays": { "standard": 5, "extended": 10 } },
+      "L4_devops": { "baseHours": 3, "variableHours": 0 },
+      "L5_bugBuffer": { "percentage": 0.20, "product": "standard" }
+    }
   },
   "deliveryCadence": {
     "type": "sprint | cycle | continuous",
@@ -716,10 +911,19 @@ The JSON provides a stable, predictable contract for programmatic consumers. Unl
     {
       "id": "T-001",
       "description": "Task description from tasks.md",
+      "taskType": "isolated | integration | restructuring",
+      "phase": "development | quality | delivery",
       "aiEstimate": "2h",
-      "adjusted": "3.0h",
-      "calendar": "3.3h",
-      "days": "0.4d",
+      "layers": {
+        "L1": "2.4h",
+        "L2": "3.36h",
+        "L3": "3.36h",
+        "L4": "3h",
+        "tauraDays": 5
+      },
+      "calendar": "3.7h",
+      "days": "0.5d",
+      "bufferedDays": "0.6d",
       "dependencies": ["T-002"],
       "assignee": "Backend | Frontend | DevOps | QA",
       "status": "ready | blocked | in_progress | completed",
@@ -772,18 +976,31 @@ The JSON provides a stable, predictable contract for programmatic consumers. Unl
 | `dates.totalDuration` | string | yes | Total project duration in working weeks (e.g., "5.5 weeks") |
 | `velocity.teamSize` | number | yes | Number of developers |
 | `velocity.utilizationRate` | number | yes | Capacity utilization (always 0.9 for AI Agent) |
-| `velocity.humanValidationMultiplier` | number | yes | User-selected multiplier (1.2x to 2.5x) |
-| `velocity.multiplierSource` | string | yes | `"default"` or `"custom"` |
+| `velocity.calculationModel` | string | yes | Always `"layered"` |
+| `velocity.layers` | object | yes | Layer configuration with multipliers per task type |
+| `velocity.layers.L1_coding` | object | yes | Coding multipliers: `isolated`, `integration`, `restructuring` |
+| `velocity.layers.L2_process` | object | yes | Process multipliers: `standard` (1-2 PRs), `complex` (3+ PRs) |
+| `velocity.layers.L3_qa` | object | yes | QA multipliers + `tauraDays` (`standard`: 5, `extended`: 10) |
+| `velocity.layers.L4_devops` | object | yes | `baseHours` + `variableHours` totals |
+| `velocity.layers.L5_bugBuffer` | object | yes | `percentage` (0.20-0.30) + `product` name |
 | `deliveryCadence.type` | string | yes | `"sprint"`, `"cycle"`, or `"continuous"` |
 | `deliveryCadence.periodDuration` | string | no | Period duration (null if continuous) |
 | `deliveryCadence.periodStartDate` | string | no | First period start date (null if continuous) |
 | `tasks[]` | array | yes | all tasks from tasks.md with calculated estimates |
 | `tasks[].id` | string | yes | Task ID matching tasks.md (e.g., `"T-001"`) |
 | `tasks[].description` | string | yes | Task description/title |
+| `tasks[].taskType` | string | yes | `"isolated"`, `"integration"`, or `"restructuring"` |
+| `tasks[].phase` | string | yes | `"development"`, `"quality"`, or `"delivery"` |
 | `tasks[].aiEstimate` | string | yes | Original AI estimate from tasks.md. Format: `{number}h` (e.g., `"2h"`, `"4.5h"`) |
-| `tasks[].adjusted` | string | yes | After applying human validation multiplier. Format: `{number}h` (e.g., `"3.0h"`, `"6.75h"`) |
-| `tasks[].calendar` | string | yes | After applying capacity utilization. Format: `{number}h` (e.g., `"3.3h"`, `"7.5h"`) |
-| `tasks[].days` | string | yes | Calendar days (accounting for team size). Format: `{number}d` (e.g., `"0.4d"`, `"1.1d"`) |
+| `tasks[].layers` | object | yes | Per-layer calculation breakdown |
+| `tasks[].layers.L1` | string | yes | After Layer 1 (Coding). Format: `{number}h` |
+| `tasks[].layers.L2` | string | yes | After Layer 2 (Process). Format: `{number}h` |
+| `tasks[].layers.L3` | string | yes | After Layer 3 (QA). Format: `{number}h` |
+| `tasks[].layers.L4` | string | yes | Layer 4 (DevOps) fixed hours. Format: `{number}h` |
+| `tasks[].layers.tauraDays` | number | yes | Taura test cycle days (5 or 10) |
+| `tasks[].calendar` | string | yes | After applying capacity utilization. Format: `{number}h` (e.g., `"3.7h"`, `"41.6h"`) |
+| `tasks[].days` | string | yes | Calendar days before bug buffer. Format: `{number}d` (e.g., `"6.4d"`) |
+| `tasks[].bufferedDays` | string | yes | Calendar days after bug buffer. Format: `{number}d` (e.g., `"7.7d"`) |
 | `tasks[].dependencies` | array | yes | Task IDs this task depends on (empty array if none) |
 | `tasks[].assignee` | string | yes | Role assigned to this task |
 | `tasks[].status` | string | yes | Current status |
@@ -811,7 +1028,7 @@ MUST validate the JSON before writing:
 
 1. **`dates.startDate` and `dates.endDate` are REQUIRED** — MUST NOT be empty or null
 2. **`tasks` array MUST have at least 1 item** — empty roadmap is invalid
-3. **Every task MUST have `id`, `description`, `aiEstimate`, `adjusted`, `calendar`, `days`** — these fields match lerian-map's `RoadmapTask` interface exactly
+3. **Every task MUST have `id`, `description`, `taskType`, `phase`, `aiEstimate`, `layers`, `calendar`, `days`, `bufferedDays`** — these fields match lerian-map's `RoadmapTask` interface exactly
 4. **`confidenceScore` MUST be 0-100** — matches the scoring rubric in this skill
 5. **`milestones` array MUST have at least 1 item** — every roadmap has at least one delivery milestone
 6. **`criticalPath.taskIds` MUST reference valid task IDs** — all IDs must exist in `tasks[]`
@@ -820,6 +1037,12 @@ MUST validate the JSON before writing:
 9. **`milestones[].spillOvers` MUST reference valid task IDs** from `tasks[]`
 10. **`risks[].taskIds` MUST reference valid task IDs** from `tasks[]`
 11. **`velocity.teamSize` MUST be greater than 0** — zero team size causes division-by-zero
+12. **`velocity.calculationModel` MUST be `"layered"`** — single multiplier model is deprecated
+13. **`velocity.layers` MUST include all 5 layers** (L1_coding, L2_process, L3_qa, L4_devops, L5_bugBuffer)
+14. **Every `tasks[].taskType` MUST be one of** `"isolated"`, `"integration"`, `"restructuring"`
+15. **Every `tasks[].phase` MUST be one of** `"development"`, `"quality"`, `"delivery"`
+16. **Every `tasks[].layers` MUST include** `L1`, `L2`, `L3`, `L4`, `tauraDays`
+17. **Every `tasks[].bufferedDays` MUST be present** — represents final calendar estimate after bug buffer
 
 ### Continuous Cadence Rules
 
@@ -856,11 +1079,11 @@ When `deliveryCadence.type` is `"continuous"`, the following rules apply:
 |-----------|---------------|
 | "Just estimate with 'a team'" | "Cannot create realistic roadmap without team size. Timeline varies dramatically:<br>- 1 dev: 8 weeks sequential<br>- 2 devs: 5 weeks (some parallelization)<br>- 4 devs: 4 weeks (max parallelization)<br><br>How many developers will work on this?" |
 
-### Scenario 3: User Wants Default Velocity Without Validation
+### Scenario 3: User Wants to Skip Layered Calculation
 
 | User Says | Your Response |
 |-----------|---------------|
-| "Just use the default, I don't have historical data" | "Understood. Using default multipliers:<br>- AI-assisted: 0.6x (40% faster)<br>- Traditional: 1.0x (baseline)<br><br>Note: These are industry averages. Your team's actual velocity may vary. Recommend tracking actuals and updating multiplier after first period." |
+| "Just use a single 1.5x multiplier, the layers are overkill" | "The single multiplier hides critical timeline components:<br>- Taura QA cycles add 5-10 days per task (invisible in 1.5x)<br>- DevOps work adds 2-16h per task depending on scope<br>- Bug buffer varies 20-30% by product<br><br>Layers 1-4 are calculated automatically — no extra input needed from you. I only need to know which product (for bug buffer %). The layered model produces more accurate dates." |
 
 ### Scenario 4: User Disagrees with Critical Path
 
@@ -882,32 +1105,40 @@ When `deliveryCadence.type` is `"continuous"`, the following rules apply:
 
 ## The Bottom Line
 
-**If you created a roadmap without asking about team composition, delivery cadence, period configuration, or velocity multiplier, delete it and start over.**
+**If you created a roadmap without classifying task types, applying the 5-layer model, or asking about product (for bug buffer), delete it and start over.**
 
 Roadmaps are not educated guesses. Roadmaps are calculated schedules based on:
+- Task type classification (Isolated/Integration/Restructuring per task)
+- Delivery phase assignment (Development/Quality/Delivery per task)
+- 5-layer calculation model (Coding → Process → QA → DevOps → Bug Buffer)
 - Validated dependency chains (critical path analysis)
-- Realistic team capacity (size × utilization × custom velocity)
+- Realistic team capacity (size × 90% utilization × layered multipliers)
 - Explicit parallelization opportunities (independent task streams)
-- Risk-adjusted timelines (contingency buffer for unknowns)
-- Team-specific delivery rhythm (sprint/cycle/continuous)
-- Period boundary awareness (tasks fit or spill over)
+- Risk-adjusted timelines (bug buffer + Taura cycles for unknowns)
+- Team-specific delivery rhythm (Ciclo/Sprint/Continuous)
+- Period boundary awareness (tasks fit or spill over within Ciclos/Semanas)
 
 "We'll figure it out as we go" is not a roadmap. It's hope.
 
 **Questions that must be answered before committing dates:**
 1. When do we start? (start date)
 2. Who is working on this? (team composition)
-3. How do they work? (AI-assisted or traditional, default or custom velocity)
-4. What rhythm do they follow? (sprint/cycle/continuous)
-5. When do periods start? (if sprint/cycle: period start date + duration)
+3. What rhythm do they follow? (Ciclo/Sprint/Continuous)
+4. When do periods start? (if Ciclo/Sprint: period start date + duration)
+5. Which product? (for bug buffer: standard 20% or Core one 25-30%)
 6. What must happen first? (critical path)
 7. What can happen in parallel? (parallelization)
 8. Where are the risks? (high-impact dependencies)
-9. Which tasks cross period boundaries? (spill overs)
+9. Which tasks cross Ciclo/Sprint boundaries? (spill overs)
 
-If any question is unanswered, **STOP and ask the user.**
+**Automatically determined (no user input needed):**
+- Task type classification (from task signals in tasks.md)
+- Delivery phase assignment (from task signals)
+- Layers 1-4 multipliers (from task type + PR count + DevOps signals)
 
-**Deliver realistic roadmaps. Respect team capacity. Respect period boundaries. Build trust through accuracy.**
+If any user question is unanswered, **STOP and ask the user.**
+
+**Deliver realistic roadmaps. Respect team capacity. Respect Ciclo boundaries. Build trust through accuracy.**
 
 ---
 
@@ -941,11 +1172,18 @@ These requirements are NON-NEGOTIABLE:
 - MUST gather ALL mandatory user questions before creating roadmap
 - MUST NOT create roadmap without team composition
 - MUST NOT assume delivery cadence (must ask user)
-- MUST include contingency buffer (10-20%)
+- MUST classify every task by type (Isolated/Integration/Restructuring) from signals
+- MUST assign every task a delivery phase (Development/Quality/Delivery)
+- MUST apply 5-layer calculation model (CANNOT use single multiplier shortcut)
+- MUST include Taura QA cycle days for tasks entering Quality phase
+- MUST include DevOps overhead hours for tasks with DevOps signals
+- MUST ask user for product to determine bug buffer percentage (Layer 5)
 - MUST calculate critical path from dependency graph
-- MUST identify and document spill overs for sprint/cycle cadences
+- MUST identify and document spill overs for Ciclo/Sprint cadences
 - MUST use AI estimates from tasks.md (no manual guessing)
-- CANNOT commit to dates without capacity analysis
+- MUST use "Ciclo N, Semana N" nomenclature (not "Phase N" or "Period N")
+- CANNOT commit to dates without layered capacity analysis
+- CANNOT collapse 5 layers into a single multiplier
 
 ---
 
