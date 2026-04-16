@@ -319,24 +319,31 @@ if [[ ${#errors[@]} -gt 0 ]]; then
     esac
   done
 
-  # Deduplicate recovery steps
-  RECOVERY_JSON_ARRAY=$(printf '%s\n' "${recovery_steps[@]}" | sort -u | jq -R . | jq -sc .)
+  # Deduplicate recovery steps (preserve gate order — sort -u would reorder)
+  RECOVERY_JSON_ARRAY=$(printf '%s\n' "${recovery_steps[@]}" | awk '!seen[$0]++' | jq -R . | jq -sc .)
 
   # Extract task context for recovery instructions
   TASK_TITLE=$(echo "$NEW_STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].title // empty")
-  TASK_FILE=$(echo "$NEW_STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].subtasks[0].file // .source_file // empty")
-  LAST_COMPLETED_GATE=$(echo "$TASK_GATES" | jq -r '[
-    if .implementation.tdd_green.status == "completed" then "0" else empty end,
-    if .delivery_verification.status == "completed" then "0.5" else empty end,
-    if .devops.status == "completed" then "1" else empty end,
-    if .sre.status == "completed" then "2" else empty end,
-    if .unit_testing.status == "completed" then "3" else empty end,
-    if .fuzz_testing.status == "completed" then "4" else empty end,
-    if .property_testing.status == "completed" then "5" else empty end,
-    if .integration_testing.status == "completed" then "6" else empty end,
-    if .chaos_testing.status == "completed" then "7" else empty end,
-    if .review.status == "completed" then "8" else empty end
-  ] | last // "none"')
+  # Derive last contiguously valid gate using the SAME predicates as the validators
+  # (not just status == completed — also checks evidence thresholds)
+  LAST_COMPLETED_GATE=$(echo "$TASK_GATES" | jq -r '
+    if (.implementation.tdd_red.status != "completed") or (.implementation.tdd_green.status != "completed") then "none"
+    elif .delivery_verification.status != "completed" then "0"
+    elif (.delivery_verification.requirements_total // 0) > 0 and (.delivery_verification.requirements_delivered // 0) < (.delivery_verification.requirements_total // 0) then "0"
+    elif .devops.status != "completed" then "0.5"
+    elif .sre.status != "completed" then "1"
+    elif .unit_testing.status != "completed" then "2"
+    elif (.unit_testing.coverage_actual // 0) < 85 then "2"
+    elif .fuzz_testing.status != "completed" then "3"
+    elif (.fuzz_testing.corpus_entries // 0) < 5 then "3"
+    elif .property_testing.status != "completed" then "4"
+    elif (.property_testing.properties_tested // 0) < 1 then "4"
+    elif .integration_testing.status != "completed" then "5"
+    elif .chaos_testing.status != "completed" then "6"
+    elif .review.status != "completed" then "7"
+    else "8"
+    end
+  ')
 
   jq -n \
     --arg task "$TASK_ID" \
