@@ -404,7 +404,7 @@ import (
 // skipTelemetryPaths returns true for paths that should not be instrumented.
 func skipTelemetryPaths(c *fiber.Ctx) bool {
     switch c.Path() {
-    case "/health", "/ready", "/metrics":
+    case "/health", "/readyz", "/metrics":
         return true
     default:
         return false
@@ -1057,20 +1057,20 @@ _ = app.Shutdown()  // WRONG: Errors must be logged
 
 ## Health Checks (MANDATORY)
 
-Services missing the `/ready` endpoint cause Kubernetes to route traffic to unready pods.
+Services missing the `/readyz` endpoint cause Kubernetes to route traffic to unready pods.
 
-**⛔ HARD GATE:** All services MUST implement both `/health` and `/ready` endpoints.
+**⛔ HARD GATE:** All services MUST implement both `/health` and `/readyz` endpoints. See `ring:dev-readyz` skill for the full readiness contract (deep dependency checks with TLS verification and startup self-probe).
 
 ### Endpoint Distinction (MANDATORY)
 
 | Endpoint | Purpose | When Returns 503 | Kubernetes Use |
 |----------|---------|------------------|----------------|
-| `/health` | Liveness check | Process is deadlocked | `livenessProbe` - restarts pod |
-| `/ready` | Readiness check | Dependencies unavailable | `readinessProbe` - removes from service |
+| `/health` | Liveness check | Process is deadlocked or startup self-probe failed | `livenessProbe` - restarts pod |
+| `/readyz` | Readiness check | Any dependency unavailable (DB, cache, queue, TLS) | `readinessProbe` - removes from service |
 
 **Why Both Are Required:**
-- `/health` without `/ready`: Traffic routes to pods with dead DB connections
-- `/ready` without `/health`: Deadlocked pods never restart
+- `/health` without `/readyz`: Traffic routes to pods with dead DB connections
+- `/readyz` without `/health`: Deadlocked pods never restart
 - Missing both: Kubernetes blindly routes traffic, causes cascading failures
 
 ### Implementation Pattern (REQUIRED)
@@ -1088,8 +1088,8 @@ f.Get("/health", func(c *fiber.Ctx) error {
 })
 
 // Readiness check - returns 200 only if all dependencies are ready
-// Used by Kubernetes readiness probe
-f.Get("/ready", func(c *fiber.Ctx) error {
+// Used by Kubernetes readiness probe. See ring:dev-readyz for full contract.
+f.Get("/readyz", func(c *fiber.Ctx) error {
     ctx := c.UserContext()
 
     // Check PostgreSQL
@@ -1134,7 +1134,7 @@ spec:
         failureThreshold: 3
       readinessProbe:
         httpGet:
-          path: /ready
+          path: /readyz
           port: 8080
         initialDelaySeconds: 5
         periodSeconds: 5
@@ -1145,7 +1145,7 @@ spec:
 
 ```bash
 # MANDATORY: Run before every PR
-grep -rn '"/ready"' internal/adapters/http/in/routes*.go
+grep -rn '"/readyz"' internal/adapters/http/in/routes*.go
 
 # Check for health endpoint
 grep -rn '"/health"' internal/adapters/http/in/routes*.go
@@ -1167,11 +1167,11 @@ grep -rn '"/health"' internal/adapters/http/in/routes*.go
 
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
-| "/health is enough" | /health doesn't check dependencies. Unready pods receive traffic. | **Add /ready with dependency checks** |
-| "Kubernetes checks TCP port" | TCP != application ready. DB might be dead. | **Add /ready with dependency checks** |
-| "Service starts fast" | Cold starts vary. DB might be migrating. | **Add /ready with dependency checks** |
-| "Dependencies are always up" | Dependencies fail. Networks partition. | **Add /ready with dependency checks** |
-| "We'll add it later" | Later = incident. Add now. | **Add /ready before deployment** |
+| "/health is enough" | /health doesn't check dependencies. Unready pods receive traffic. | **Add /readyz with dependency checks** |
+| "Kubernetes checks TCP port" | TCP != application ready. DB might be dead. | **Add /readyz with dependency checks** |
+| "Service starts fast" | Cold starts vary. DB might be migrating. | **Add /readyz with dependency checks** |
+| "Dependencies are always up" | Dependencies fail. Networks partition. | **Add /readyz with dependency checks** |
+| "We'll add it later" | Later = incident. Add now. | **Add /readyz before deployment** |
 
 ---
 

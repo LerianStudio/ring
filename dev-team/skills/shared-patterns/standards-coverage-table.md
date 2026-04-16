@@ -267,7 +267,7 @@ These sections describe HOW to use the standards, not WHAT the standards are.
 | 10 | Observability | bootstrap.md | `#observability` | OpenTelemetry integration, **Span Naming Conventions (MANDATORY)**: layer.domain.operation pattern, detection commands |
 | 11 | Bootstrap | bootstrap.md | `#bootstrap` | Application initialization |
 | 12 | Graceful Shutdown Patterns | bootstrap.md | `#graceful-shutdown-patterns-mandatory` | **Signal handling (MANDATORY)**, shutdown order, resource cleanup, detection commands |
-| 13 | Health Checks | bootstrap.md | `#health-checks-mandatory` | **/health vs /ready (MANDATORY)**, Kubernetes probes, dependency checks |
+| 13 | Health Checks | bootstrap.md | `#health-checks-mandatory` | **/health vs /readyz (MANDATORY)**, Kubernetes probes, dependency checks |
 | 14 | Connection Management | bootstrap.md | `#connection-management-mandatory` | **Pool configuration (MANDATORY)**, timeouts, graceful shutdown, detection commands |
 | 15 | Access Manager Integration | security.md | `#access-manager-integration-mandatory` | **CONDITIONAL** - Check if project has auth |
 | 16 | License Manager Integration | security.md | `#license-manager-integration-mandatory` | **CONDITIONAL** - Check if project is licensed |

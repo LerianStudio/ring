@@ -244,6 +244,11 @@ Task:
     - [ ] JSON format with timestamp, level, message, service
     - [ ] trace_id correlation in logs
     - [ ] **no FORBIDDEN patterns** (see check 0 above)
+    - [ ] Verify structured log events use the canonical names from ring:dev-readyz:
+          `startup_self_probe_started`, `startup_self_probe_passed`,
+          `startup_self_probe_failed`, `self_probe_check`. These names are a
+          handshake contract — downstream log alerting depends on them. Verifying
+          "structured logs exist" is not sufficient; the event names must match.
 
     ### 2. Instrumentation Coverage (90%+ required)
     For [language], check these patterns:
@@ -278,6 +283,14 @@ Task:
     - [ ] Structured logs include `tenant_id` field when in multi-tenant mode
     - [ ] Metrics include `tenant_id` label when in multi-tenant mode
     - [ ] Graceful degradation: no crash when `tenant_id` is absent (single-tenant mode)
+
+    ### 5. Deployment Mode Configuration
+    - [ ] For services with database connections, verify the container receives
+          DEPLOYMENT_MODE env var (set in docker-compose/Helm values). Without it,
+          the TLS enforcement in bootstrap code silently no-ops — service boots
+          permissive even in SaaS deployment. Cross-reference: ring:dev-readyz
+          requires `os.Getenv("DEPLOYMENT_MODE") == "saas"` to enforce TLS; that
+          branch is dead code if the env var is missing.
 
     ## Required Output Format
 

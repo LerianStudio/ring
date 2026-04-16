@@ -133,7 +133,7 @@ MUST be the first section in your response. Proves you read the application sour
 |-------|--------|---------|
 | App .env.example | Found/Not Found | Path: {path} |
 | App config struct | Found/Not Found | Path: {path} |
-| Health endpoints | Verified | Paths: /health, /ready |
+| Health endpoints | Verified | Paths: /health (liveness), /readyz (readiness) |
 | Existing chart | Found/Not Found | Path: {path} |
 
 ### Env Vars Extracted
@@ -167,7 +167,7 @@ VERIFICATION PROCESS:
 
 3. Find health endpoint registration
    → Go: mux.HandleFunc, router.GET, http.HandleFunc
-   → Node: app.get("/health"), app.get("/ready")
+   → Node: app.get("/health"), app.get("/readyz") or app.get("/api/admin/health/readyz")
    → Record EXACT paths and ports
 
 4. Compare extracted vars with chart configmap + secrets
@@ -308,7 +308,7 @@ Before marking chart complete, MUST verify:
 |-------|--------|---------|
 | App .env.example | Found | components/worker/.env.example (50 vars) |
 | App config struct | Found | internal/bootstrap/config.go (37 fields) |
-| Health endpoints | Verified | /health, /ready on HEALTH_PORT:4006 |
+| Health endpoints | Verified | /health (liveness), /readyz (readiness) on HEALTH_PORT:4006 |
 | Existing chart | Not Found | New chart |
 
 ### Env Vars Extracted
@@ -378,8 +378,8 @@ helm template test . --set keda.enabled=false
 
 # Probe path verification
 grep -r "path:" templates/*/deployment.yaml
-# manager: /health (liveness), /ready (readiness) on :3002
-# worker: /health (liveness), /ready (readiness) on :4006
+# manager: /health (liveness), /readyz (readiness) on :3002
+# worker: /health (liveness), /readyz (readiness) on :4006
 ```
 
 ## Validation Results
@@ -389,7 +389,7 @@ grep -r "path:" templates/*/deployment.yaml
 | helm lint | ✅ PASS |
 | helm template (default) | ✅ PASS |
 | helm template (no keda) | ✅ PASS |
-| Health paths verified | ✅ /health, /ready on :4006 |
+| Health paths verified | ✅ /health (liveness), /readyz (readiness) on :4006 |
 | Env var coverage | ✅ 52/52 (100%) |
 | Security context | ✅ Non-root, drop ALL |
 | No hardcoded secrets | ✅ Placeholders only |

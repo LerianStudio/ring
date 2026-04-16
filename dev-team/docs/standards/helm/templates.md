@@ -49,8 +49,8 @@ MUST include these sections in order:
       - envFrom (secretRef + configMapRef)
       - env (dynamic: HOST_IP for OTEL, AWS IAM endpoint)
       - resources
-      - readinessProbe (httpGet to /health)
-      - livenessProbe (httpGet to /health)
+      - readinessProbe (httpGet to /readyz — validates all dependencies)
+      - livenessProbe (httpGet to /health — process liveness only)
       - securityContext (container-level)
    f. AWS IAM sidecar (conditional)
    g. volumes (conditional)
@@ -147,12 +147,13 @@ Wrong paths = CrashLoopBackOff. This is the #1 deployment failure cause.
 
 ```text
 COMMON LERIAN PATTERNS:
-  Go API services: /health (liveness), /ready (readiness)
-  Go workers:      /health (liveness), /ready (readiness) on HEALTH_PORT
-  Next.js:         /api/admin/health/ready
+  Go API services: /health (liveness), /readyz (readiness)
+  Go workers:      /health (liveness), /readyz (readiness) on HEALTH_PORT
+  Next.js:         /api/admin/health/readyz (both liveness and readiness)
   Casdoor:         /api/health
 
 VERIFY by reading application source code. Do NOT guess.
+See ring:dev-readyz for the readiness contract; /readyz performs deep dependency checks with TLS verification, /health only signals process liveness.
 ```
 
 ### Health Check Path Convention
@@ -160,13 +161,13 @@ VERIFY by reading application source code. Do NOT guess.
 ```text
 VERIFY health endpoints by reading application source code:
   - Go: Look for mux.HandleFunc("/health", ...) or router.GET("/health", ...)
-  - Node.js: Look for app.get("/health", ...) or app.get("/api/admin/health/ready", ...)
+  - Node.js: Look for app.get("/health", ...) or app.get("/api/admin/health/readyz", ...)
 
 COMMON PATHS:
   - /health           → Most Go services (liveness)
-  - /ready            → Readiness with dependency checks
-  - /healthz          → Alternative convention
-  - /api/admin/health/ready → Next.js services (product-console)
+  - /readyz           → Readiness with dependency checks (ring:dev-readyz)
+  - /healthz          → Alternative liveness convention
+  - /api/admin/health/readyz → Next.js services (serves both liveness and readiness)
 
 NEVER use paths that don't exist in the application.
 Wrong probe paths = CrashLoopBackOff.

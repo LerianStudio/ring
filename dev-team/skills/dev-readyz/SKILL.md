@@ -130,6 +130,13 @@ Build dependency map: PostgreSQL (pgx), MongoDB (mongo-driver), Redis/Valkey (go
 
 ### Go Implementation (Fiber + lib-commons)
 
+The `DependencyCheck`, `ReadyResponse`, `Dependencies`, and `HealthChecker`
+types below are service-local — they are NOT provided by lib-commons.
+Define them in your service's `internal/adapters/http/in/` or equivalent
+package. lib-commons provides `HealthWithDependencies` (used in /health
+wiring below) but does NOT define the dependency-check contract used by
+/readyz. That contract is per-service.
+
 ```go
 // internal/adapters/http/in/readyz.go
 
@@ -186,9 +193,9 @@ func ReadyHandler(deps Dependencies) fiber.Handler {
         }
 
         if resp.Status != "healthy" {
-            return libHTTP.ServiceUnavailable(c, "UNHEALTHY", "Service Unhealthy", resp)
+            return libHTTP.Respond(c, fiber.StatusServiceUnavailable, resp)
         }
-        return libHTTP.OK(c, resp)
+        return libHTTP.Respond(c, fiber.StatusOK, resp)
     }
 }
 ```
@@ -217,6 +224,24 @@ if os.Getenv("DEPLOYMENT_MODE") == "saas" && connOpts.TLSConfig == nil {
     return nil, fmt.Errorf("TLS is required in SaaS mode but not configured for %s", depName)
 }
 ```
+
+### Metric Emission (MANDATORY)
+
+Each readiness check MUST emit metrics so that /readyz failures are observable
+without scraping logs. Emit at minimum:
+
+| Metric | Type | Labels | Purpose |
+|--------|------|--------|---------|
+| `readyz_check_duration_ms` | Histogram | `dep`, `status` | Latency distribution per dependency |
+| `readyz_check_status` | Counter | `dep`, `status` (up/down) | Count of check outcomes |
+| `selfprobe_result` | Gauge | `dep` (0=down, 1=up) | Last self-probe result per dependency |
+
+Metrics registration is the responsibility of this skill, NOT `ring:dev-sre`.
+dev-sre validates that metrics exist; it does not emit them.
+
+Emit via lib-commons observability package or the service's existing metrics
+registry. If the service has no registry, add one as part of this gate — not
+later. Silent /readyz = defeats the purpose.
 
 ### Next.js Implementation
 
@@ -308,7 +333,7 @@ if err := RunSelfProbe(ctx, deps, logger); err != nil {
 // /health handler
 f.Get("/health", func(c *fiber.Ctx) error {
     if !selfProbeOK.Load() {
-        return libHTTP.ServiceUnavailable(c, "UNHEALTHY", "Self-probe failed", nil)
+        return libHTTP.RenderError(c, fiber.StatusServiceUnavailable, "self-probe failed")
     }
     return libHTTP.HealthWithDependencies(deps)(c)
 })
@@ -376,7 +401,7 @@ Verify `/readyz` endpoint, `RunSelfProbe` function, and `/health` self-probe wir
 - [ ] Startup self-probe runs before accepting traffic
 - [ ] Self-probe results logged as structured JSON
 - [ ] /health returns 503 if self-probe failed
-- [ ] Helm values use /readyz for readinessProbe
+- [ ] **Dev-helm contract:** readinessProbe MUST target /readyz (verified in ring:dev-helm gate — NOT this skill)
 - [ ] SaaS mode enforces TLS on all DB connections
 
 ### Anti-Rationalization Table
