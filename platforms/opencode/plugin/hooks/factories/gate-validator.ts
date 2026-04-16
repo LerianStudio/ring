@@ -20,8 +20,21 @@ import { execSync } from "node:child_process"
 /** Per-call state: tracks files we need to validate after write */
 const pendingValidations = new Map<
   string,
-  { filePath: string; previousContent: string | null }
+  { filePath: string; previousContent: string | null; timestamp: number }
 >()
+
+/** Max age for pending entries (5 minutes) — prevents leaks on tool timeouts */
+const PENDING_TTL_MS = 5 * 60 * 1000
+
+/** Evict stale entries on each before hook call */
+function evictStale(): void {
+  const now = Date.now()
+  for (const [key, entry] of pendingValidations) {
+    if (now - entry.timestamp > PENDING_TTL_MS) {
+      pendingValidations.delete(key)
+    }
+  }
+}
 
 /**
  * Resolve the validate-gate-progression.sh script path.
@@ -29,13 +42,10 @@ const pendingValidations = new Map<
 function findValidatorScript(projectRoot: string): string | null {
   const candidates = [
     path.join(projectRoot, "dev-team", "hooks", "validate-gate-progression.sh"),
-    path.join(
-      process.env.HOME ?? "~",
-      ".config",
-      "opencode",
-      "hooks",
-      "validate-gate-progression.sh",
-    ),
+    // HOME-based path (skip if HOME undefined — literal "~" won't resolve)
+    ...(process.env.HOME
+      ? [path.join(process.env.HOME, ".config", "opencode", "hooks", "validate-gate-progression.sh")]
+      : []),
     path.join(projectRoot, ".ring", "hooks", "validate-gate-progression.sh"),
   ]
 
@@ -111,7 +121,8 @@ export function createToolExecuteBefore(projectRoot: string) {
       }
     }
 
-    pendingValidations.set(input.callID, { filePath: absPath, previousContent })
+    evictStale()
+    pendingValidations.set(input.callID, { filePath: absPath, previousContent, timestamp: Date.now() })
   }
 }
 
@@ -147,6 +158,8 @@ export function createToolExecuteAfter(projectRoot: string) {
 
     // Temporarily restore previous state so the script's regression check
     // compares against the ORIGINAL state, not the already-written content.
+    // NOTE: Non-atomic window between restore and re-write. Acceptable in
+    // single-agent usage; concurrent file access could read reverted state.
     if (pending.previousContent !== null) {
       fs.writeFileSync(pending.filePath, pending.previousContent, "utf-8")
     } else {
