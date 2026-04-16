@@ -1,5 +1,17 @@
 {
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Write(*current-cycle.json)",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/validate-gate-progression.sh"
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "matcher": "startup|resume",
