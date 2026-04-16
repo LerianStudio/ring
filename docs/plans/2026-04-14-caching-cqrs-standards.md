@@ -1083,16 +1083,16 @@ Run: `git diff --stat HEAD~1`
 
 ### Task 6: Run Code Review (Part A)
 
-1. **Dispatch all 7 reviewers in parallel:**
+1. **Dispatch all 8 reviewers in parallel:**
    - REQUIRED SUB-SKILL: Use ring:codereview
-   - All reviewers run simultaneously (ring:code-reviewer, ring:business-logic-reviewer, ring:security-reviewer, ring:test-reviewer, ring:nil-safety-reviewer, ring:consequences-reviewer, ring:dead-code-reviewer)
+   - All reviewers run simultaneously (ring:code-reviewer, ring:business-logic-reviewer, ring:security-reviewer, ring:test-reviewer, ring:nil-safety-reviewer, ring:consequences-reviewer, ring:dead-code-reviewer, ring:performance-reviewer)
    - Wait for all to complete
 
 2. **Handle findings by severity (MANDATORY):**
 
 **Critical/High/Medium Issues:**
 - Fix immediately (do NOT add TODO comments for these severities)
-- Re-run all 7 reviewers in parallel after fixes
+- Re-run all 8 reviewers in parallel after fixes
 - Repeat until zero Critical/High/Medium issues remain
 
 **Low Issues:**
@@ -1558,16 +1558,16 @@ Run: `git diff --stat HEAD~1`
 
 ### Task 11: Run Code Review (Part B)
 
-1. **Dispatch all 7 reviewers in parallel:**
+1. **Dispatch all 8 reviewers in parallel:**
    - REQUIRED SUB-SKILL: Use ring:codereview
-   - All reviewers run simultaneously (ring:code-reviewer, ring:business-logic-reviewer, ring:security-reviewer, ring:test-reviewer, ring:nil-safety-reviewer, ring:consequences-reviewer, ring:dead-code-reviewer)
+   - All reviewers run simultaneously (ring:code-reviewer, ring:business-logic-reviewer, ring:security-reviewer, ring:test-reviewer, ring:nil-safety-reviewer, ring:consequences-reviewer, ring:dead-code-reviewer, ring:performance-reviewer)
    - Wait for all to complete
 
 2. **Handle findings by severity (MANDATORY):**
 
 **Critical/High/Medium Issues:**
 - Fix immediately (do NOT add TODO comments for these severities)
-- Re-run all 7 reviewers in parallel after fixes
+- Re-run all 8 reviewers in parallel after fixes
 - Repeat until zero Critical/High/Medium issues remain
 
 **Low Issues:**
@@ -1806,9 +1806,9 @@ Run: `git diff --stat HEAD~3`
 
 ### Task 15: Run Final Code Review
 
-1. **Dispatch all 7 reviewers in parallel:**
+1. **Dispatch all 8 reviewers in parallel:**
    - REQUIRED SUB-SKILL: Use ring:codereview
-   - All reviewers run simultaneously
+   - All reviewers run simultaneously (ring:code-reviewer, ring:business-logic-reviewer, ring:security-reviewer, ring:test-reviewer, ring:nil-safety-reviewer, ring:consequences-reviewer, ring:dead-code-reviewer, ring:performance-reviewer)
    - Scope: All changes from HEAD~3 to HEAD
 
 2. **Handle findings by severity (MANDATORY):**
