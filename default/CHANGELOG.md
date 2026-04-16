@@ -6,6 +6,21 @@
   - Restored complete 8-reviewer verdict table in escalation output.
 
 - **Improvements:**
+  - Propagated performance-reviewer as the 8th code review agent across all downstream references.
+  - Synced plugin counts and added performance-reviewer as the 8th code review reviewer.
+
+Contributors: @fred
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.22.0...ring-default@1.22.1)
+
+---
+
+## [1.22.1](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.22.1)
+
+- **Fixes:**
+  - Restored complete 8-reviewer verdict table in escalation output.
+
+- **Improvements:**
   - Propagated performance-reviewer as 8th code review agent across all downstream references.
   - Synced plugin counts and added performance-reviewer as 8th code review reviewer.
 
