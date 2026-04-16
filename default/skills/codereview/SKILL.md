@@ -2516,6 +2516,11 @@ Generate skill output:
 | ring:code-reviewer | [PASS/FAIL] |
 | ring:business-logic-reviewer | [PASS/FAIL] |
 | ring:security-reviewer | [PASS/FAIL] |
+| ring:test-reviewer | [PASS/FAIL] |
+| ring:nil-safety-reviewer | [PASS/FAIL] |
+| ring:consequences-reviewer | [PASS/FAIL] |
+| ring:dead-code-reviewer | [PASS/FAIL] |
+| ring:performance-reviewer | [PASS/FAIL] |
 
 ## Handoff to Next Gate
 - Review status: FAILED
