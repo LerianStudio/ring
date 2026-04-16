@@ -202,8 +202,15 @@ link_hooks() {
   rewritten=$(sed "s|\${CLAUDE_PLUGIN_ROOT}/hooks/|$hooks_target/|g" "$hooks_json")
 
   if [[ ! -f "$settings_file" ]]; then
-    echo "$rewritten" | jq '.' > "$settings_file"
-    log_success "Created settings.json with hooks from $plugin"
+    local formatted
+    formatted=$(echo "$rewritten" | jq '.' 2>/dev/null)
+    if [[ -n "$formatted" ]]; then
+      echo "$formatted" > "$settings_file"
+      log_success "Created settings.json with hooks from $plugin"
+    else
+      log_error "Invalid hooks.json in $plugin — skipping"
+      ERRORS=$((ERRORS + 1))
+    fi
     return
   fi
 
