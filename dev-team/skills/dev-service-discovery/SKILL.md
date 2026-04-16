@@ -293,18 +293,18 @@ Store results:
 **Read the full reference:** `references/mongodb-index-detection.md` (in this skill's directory)
 
 Summary of steps:
-1. **Detect in-code indexes** — scan `EnsureIndexes()` / `IndexModel{}` in MongoDB adapter files
-2. **Detect existing scripts** — scan `scripts/mongodb/*.js` for `createIndex` calls
-3. **Cross-reference** — match in-code indexes against script indexes (covered / missing_script / script_only)
-4. **Generate missing scripts** — create `mongosh`-compatible `.js` scripts following the idempotent `createIndexSafely` pattern (see reference for full template)
-5. **Upload to S3** — asks which bucket to use, then uploads scripts following the migrations bucket convention: `s3://{bucket}/{service}/{module}/mongodb/` (requires valid AWS credentials; verify with `aws sts get-caller-identity`). S3 upload failures are non-blocking — skill continues to Phase 4 with upload status reported in the HTML report
+1. **Detect in-code indexes** — scan `EnsureIndexes()` / `IndexModel{}` in MongoDB adapter files. Store keys as flat objects (e.g., `{"tenant_id": 1, "service_name": 1}`) — same format used by migration files
+2. **Detect existing migration files** — scan `scripts/mongodb/*.up.json` and `*.down.json` for existing per-index migration pairs
+3. **Cross-reference** — match in-code indexes against migration files (covered / missing_migration / migration_only)
+4. **Generate missing migration files** — for each missing index, create a `.up.json` and `.down.json` file pair. Each index is an atomic migration (one pair per index, NOT grouped by collection). Naming: `{NNNNNN}_{collection}_{index_name}.up.json` / `.down.json`. Optionally generate convenience `.js` scripts for manual `mongosh` execution (NOT uploaded to S3)
+5. **Upload to S3** — asks which bucket to use, then uploads `.up.json`/`.down.json` pairs following the migrations bucket convention: `s3://{bucket}/{service}/{module}/mongodb/`. The tenant-manager reads these files from S3 and applies them automatically — `.up.json` to create indexes when provisioning tenant databases, `.down.json` to drop indexes when rolling back or deprovisioning. Requires valid AWS credentials (verify with `aws sts get-caller-identity`). S3 upload failures are non-blocking — skill continues to Phase 4 with upload status reported in the HTML report
 
 Store results for Phase 4 report:
 ```text
   index_coverage = {
-    covered: [{collection, keys, in_code_file, script_file}],
-    missing_script: [{collection, keys, in_code_file}],
-    script_only: [{collection, keys, script_file}],
+    covered: [{collection, keys, index_name, in_code_file, migration_file}],
+    missing_migration: [{collection, keys, index_name, in_code_file}],
+    migration_only: [{collection, keys, index_name, migration_file}],
   }
 ```
 
@@ -387,24 +387,27 @@ One card per module. When a resource is shared with another module, display a
 - External datasources appear in a separate sub-section per module
 - **SHARED databases** get a `🔗 SHARED DB with: <modules>` line and a `⚠ Provision ONCE` warning
 
-### 2. MongoDB Index Scripts
+### 2. MongoDB Index Migrations
 
-Table showing what scripts exist and where they are:
+Table showing per-index migration file pairs and their S3 status:
 
 ```
-| Script                       | Module      | Indexes | S3 Status  | S3 Path                                       |
-|------------------------------|-------------|---------|------------|-----------------------------------------------|
-| create-metadata-indexes.js   | onboarding  | 7       | ✅ Uploaded | s3://{bucket}/{service}/onboarding/mongodb/    |
-| create-metadata-indexes.js   | transaction | 4       | ✅ Uploaded | s3://{bucket}/{service}/transaction/mongodb/   |
-| create-audit-indexes.js      | transaction | 2       | ⚠️ Missing  | (generated locally, not yet uploaded)          |
+| Migration File                             | Module      | Collection | S3 Status  | S3 Path                                       |
+|--------------------------------------------|-------------|------------|------------|-----------------------------------------------|
+| 000001_metadata_idx_tenant_id              | onboarding  | metadata   | ✅ Uploaded | s3://{bucket}/{service}/onboarding/mongodb/    |
+| 000002_metadata_idx_key_unique             | onboarding  | metadata   | ✅ Uploaded | s3://{bucket}/{service}/onboarding/mongodb/    |
+| 000003_metadata_idx_entity_type            | onboarding  | metadata   | ⚠️ Missing  | (generated locally, not yet uploaded)          |
 ```
 
-If there are indexes in code without scripts:
+Each row = one `.up.json` + one `.down.json` file pair (one index per pair).
+
+If there are indexes in code without migration files:
 ```
-⚠️  {N} indexes detected in code without corresponding scripts.
-    Scripts were generated in scripts/mongodb/ — upload to S3 at
-    s3://{bucket}/{service}/{module}/mongodb/ to make them available
-    for dedicated tenant database provisioning.
+⚠️  {N} indexes detected in code without corresponding .up.json/.down.json pairs.
+    Migration files were generated in scripts/mongodb/ — upload to S3 at
+    s3://{bucket}/{service}/{module}/mongodb/ so the tenant-manager can
+    apply them when provisioning new tenant databases.
+    Without these files, new tenant databases will have NO indexes.
 ```
 
 ### 2.5. Shared Databases Summary
@@ -530,11 +533,11 @@ Linux: xdg-open docs/service-discovery.html
 | "Redis should be included as a resource" | Redis uses key prefixing (`GetKeyContext`), not per-tenant provisioning. It is not a tenant-manager resource. | **Exclude Redis from resources** |
 | "The report doesn't need to be visual" | Visual reports are for human decision-making. A JSON dump is not actionable. | **Generate HTML via ring:visualize** |
 | "WithModule not found, so no modules" | Fall back to component structure or ApplicationName. A service always has at least one module. | **Use Strategy B or C** |
-| "No index scripts needed, EnsureIndexes handles it" | In-code indexes run at app startup — but only if the app has connected. Scripts are needed for pre-provisioning, CI/CD, and dedicated tenant databases where the app hasn't booted yet. | **Generate scripts for all in-code indexes** |
-| "I'll just run the indexes manually" | Manual index creation is error-prone and not reproducible. Scripts are idempotent, documented, and version-controlled. | **Generate scripts** |
+| "No migration files needed, EnsureIndexes handles it" | In-code indexes run at app startup — but only if the app has connected. The tenant-manager reads `.up.json`/`.down.json` from S3 and applies them automatically when provisioning dedicated tenant databases. Without these files, new tenant databases have no indexes. | **Generate .up.json/.down.json pairs for all in-code indexes** |
+| "I'll just run the indexes manually" | Manual index creation is error-prone and not reproducible. Migration file pairs are atomic, idempotent, documented, and version-controlled. | **Generate migration files** |
 | "Same DB name = probably a mistake" | Multiple modules sharing a database is a deliberate architecture pattern. Two modules may read/write the same tables. Detect and flag it, don't ignore it. | **Run Phase 3.6 cross-module analysis** |
 | "Each module gets its own database, always" | Not true. Two modules often share the same database (same tables, same schema). Creating duplicates breaks tenant isolation — tenant-manager must provision ONE database and grant both modules access. | **Detect shared databases and mark provision-once** |
-| "Index names aren't needed, MongoDB auto-generates them" | Auto-generated names (e.g., `field_1`) are inconsistent across environments and break down migrations. The `.down.json` needs explicit names to drop indexes reliably. | **Every index in `.up.json` MUST have `"name": "idx_..."` in options. `.down.json` MUST reference the same names.** |
+| "Index names aren't needed, MongoDB auto-generates them" | Auto-generated names (e.g., `field_1`) are inconsistent across environments and break down migrations. The `.down.json` needs explicit names to drop indexes reliably. | **Every index in `.up.json` MUST have `"name"` in options (`idx_*` or `uniq_*`). `.down.json` MUST reference the same names.** |
 | "Key order in JSON doesn't matter" | MongoDB compound index key order determines query optimization (ESR rule). JSON key order in `.up.json` MUST match the `bson.D` order in Go source code. Wrong order = wrong index = degraded queries. | **Validate key order against code (Step 3.5 V2). Fix and re-upload if mismatched.** |
 | "The S3 migrations are already there, skip validation" | Existing ≠ correct. S3 migrations may have missing names, wrong key order, or stale index counts. Step 3.5 validates all four dimensions before proceeding. | **Run Step 3.5 validation on ALL existing S3 migration files.** |
 
