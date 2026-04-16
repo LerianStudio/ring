@@ -75,7 +75,7 @@ resolve_ring_dir() {
 }
 
 create_directories() {
-  local base_dirs=("agents" "commands" "skills")
+  local base_dirs=("agents" "commands" "skills" "hooks")
   
   if [[ "$INSTALL_CLAUDE" == true ]]; then
     for subdir in "${base_dirs[@]}"; do
@@ -175,6 +175,59 @@ link_skills() {
   done
 }
 
+link_hooks() {
+  local plugin="$1"
+  local target_dir="$2"
+  local hooks_dir="$RING_DIR/$plugin/hooks"
+
+  [[ ! -d "$hooks_dir" ]] && return
+
+  # 1. Symlink executable hook scripts (.sh) to target/hooks/
+  for hook_script in "$hooks_dir"/*.sh; do
+    [[ ! -f "$hook_script" ]] && continue
+    local name
+    name="$(basename "$hook_script")"
+    create_symlink "$hook_script" "$target_dir/hooks/$name"
+  done
+
+  # 2. Merge hooks.json into settings.json (rewriting paths)
+  local hooks_json="$hooks_dir/hooks.json"
+  [[ ! -f "$hooks_json" ]] && return
+
+  local settings_file="$target_dir/settings.json"
+  local hooks_target="$target_dir/hooks"
+
+  # Rewrite ${CLAUDE_PLUGIN_ROOT}/hooks/ → absolute path to target/hooks/
+  local rewritten
+  rewritten=$(sed "s|\${CLAUDE_PLUGIN_ROOT}/hooks/|$hooks_target/|g" "$hooks_json")
+
+  if [[ ! -f "$settings_file" ]]; then
+    echo "$rewritten" | jq '.' > "$settings_file"
+    log_success "Created settings.json with hooks from $plugin"
+    return
+  fi
+
+  # Deep merge hook arrays per event type, deduplicating by matcher+command
+  local merged
+  merged=$(
+    jq -s '
+      .[0] as $base | .[1] as $new |
+      ($base.hooks // {}) as $bh | ($new.hooks // {}) as $nh |
+      ($bh | keys) + ($nh | keys) | unique | reduce .[] as $evt ({};
+        . + {($evt): (($bh[$evt] // []) + ($nh[$evt] // []) | unique_by({matcher: (.matcher // ""), hooks: .hooks}))}
+      ) | $base * {hooks: .}
+    ' "$settings_file" <(echo "$rewritten")
+  )
+
+  if [[ -n "$merged" ]]; then
+    echo "$merged" | jq '.' > "$settings_file"
+    log_success "Merged hooks from $plugin into settings.json"
+  else
+    log_error "Failed to merge hooks from $plugin"
+    ERRORS=$((ERRORS + 1))
+  fi
+}
+
 install_symlinks() {
   local plugins=("default" "dev-team" "pm-team" "pmo-team" "finops-team" "tw-team")
 
@@ -184,11 +237,13 @@ install_symlinks() {
       link_agents "$plugin" "$CLAUDE_DIR"
       link_commands "$plugin" "$CLAUDE_DIR"
       link_skills "$plugin" "$CLAUDE_DIR"
+      link_hooks "$plugin" "$CLAUDE_DIR"
     fi
     if [[ "$INSTALL_FACTORY" == true ]]; then
       link_agents "$plugin" "$FACTORY_DIR"
       link_commands "$plugin" "$FACTORY_DIR"
       link_skills "$plugin" "$FACTORY_DIR"
+      link_hooks "$plugin" "$FACTORY_DIR"
     fi
   done
 }
@@ -196,7 +251,7 @@ install_symlinks() {
 remove_symlinks() {
   log_section "Removing Ring symlinks"
 
-  for dir in agents commands skills; do
+  for dir in agents commands skills hooks; do
     local target_dir="$CLAUDE_DIR/$dir"
     [[ ! -d "$target_dir" ]] && continue
 
@@ -212,6 +267,25 @@ remove_symlinks() {
       fi
     done
   done
+
+  # Remove Ring hook entries from settings.json
+  local settings_file="$CLAUDE_DIR/settings.json"
+  if [[ -f "$settings_file" ]]; then
+    local cleaned
+    cleaned=$(jq '
+      if .hooks then
+        .hooks |= with_entries(
+          .value |= map(select(
+            (.hooks // []) | all(.command | contains("/.claude/hooks/") | not)
+          ))
+        )
+      else . end
+    ' "$settings_file")
+    if [[ -n "$cleaned" ]]; then
+      echo "$cleaned" | jq '.' > "$settings_file"
+      log_success "Cleaned Ring hooks from settings.json"
+    fi
+  fi
 
   echo ""
   echo -e "  ${GREEN}${BOLD}Done!${NC} Removed ${REMOVED} symlinks."
