@@ -2,6 +2,21 @@
 
 ## [1.22.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.22.0)
 
+- Features:
+  - Added pr-review-multi-source skill, adapted from optimus.
+
+- Fixes:
+  - Added pagination and switched to using node_id instead of the deprecated databaseId in pr-review-multi-source.
+  - Added node_id to Phase 0 extraction and implemented pagination for GraphQL.
+
+Contributors: @gandalf, @jeff, @jefferson.comff,
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.21.0...ring-default@1.22.0)
+
+---
+
+## [1.22.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.22.0)
+
 - **Features:**
   - Added pr-review-multi-source skill, adapted from optimus.
 

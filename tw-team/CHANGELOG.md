@@ -2,6 +2,17 @@
 
 ## [0.4.3](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.3)
 
+- **Improvements:**
+  - Updated CHANGELOG for ring-tw-team to version v0.4.2.
+
+Contributors: @fred
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
+
+---
+
+## [0.4.3](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.3)
+
 - **Features**
   - Added schema validator and enhanced skill generation.
 
