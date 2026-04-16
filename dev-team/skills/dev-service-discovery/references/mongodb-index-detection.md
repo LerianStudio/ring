@@ -104,7 +104,7 @@ Compare in-code indexes vs migration files.
 Both sources use the same flat object format for keys (e.g., {"tenant_id": 1, "service_name": 1}).
 
 For each in-code index:
-  - Compute index_name using naming convention (idx_{field}, idx_{f1}_{f2}, etc.)
+  - Compute index_name using naming convention (idx_{collection}_{field}, idx_{collection}_{f1}_{f2}, etc.)
   - Find matching migration (same collection + same key fields in same order)
   - If found → status: "covered"
   - If NOT found → status: "missing_migration"
@@ -175,8 +175,10 @@ Each `.down.json` contains the drop instruction referencing the index name:
 ### Index Name Conventions
 
 Two naming prefixes are used:
-- `idx_*` — standard indexes (e.g., `idx_connection_org_config_name`)
-- `uniq_*` — unique constraint indexes (e.g., `uniq_job_org_hash_active`)
+- `idx_*` — general-purpose indexes, including unique indexes (e.g., `idx_connection_org_config_name` which has `"unique": true`)
+- `uniq_*` — used when the index's primary purpose is enforcing a uniqueness business constraint (e.g., `uniq_job_org_hash_active` prevents duplicate active jobs per org+hash)
+
+Both prefixes can have `"unique": true` in options. The distinction is semantic: `uniq_*` signals that uniqueness IS the business rule, while `idx_*` with unique signals a query-performance index that happens to enforce uniqueness.
 
 Rules:
 - Compound: concatenate field names with `_` (e.g., `idx_connection_org_product_config`)
@@ -475,11 +477,12 @@ Each module's MongoDB migration files go into `s3://{bucket}/{service}/{module}/
 
 5. Upload each file pair to the correct module path (best-effort, continue on failure):
    - For each (file_pair, module):
+     # Use the local filename directly — it already has the correct .up.json/.down.json extension
      aws s3 cp {up_json_path} \
-       s3://{s3_bucket}/{service_name}/{module}/mongodb/{filename}.up.json \
+       s3://{s3_bucket}/{service_name}/{module}/mongodb/$(basename {up_json_path}) \
        --content-type "application/json"
      aws s3 cp {down_json_path} \
-       s3://{s3_bucket}/{service_name}/{module}/mongodb/{filename}.down.json \
+       s3://{s3_bucket}/{service_name}/{module}/mongodb/$(basename {down_json_path}) \
        --content-type "application/json"
    - If a single upload fails, log the error and continue with remaining files
    - Track: successful_uploads = [], failed_uploads = []
