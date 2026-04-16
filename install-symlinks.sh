@@ -217,13 +217,13 @@ link_hooks() {
   # Deep merge hook arrays per event type, deduplicating by matcher+command
   local merged
   merged=$(
-    jq -s '
+    echo "$rewritten" | jq -s '
       .[0] as $base | .[1] as $new |
       ($base.hooks // {}) as $bh | ($new.hooks // {}) as $nh |
       ($bh | keys) + ($nh | keys) | unique | reduce .[] as $evt ({};
         . + {($evt): (($bh[$evt] // []) + ($nh[$evt] // []) | unique_by({matcher: (.matcher // ""), hooks: .hooks}))}
       ) | $base * {hooks: .}
-    ' "$settings_file" <(echo "$rewritten")
+    ' "$settings_file" -
   )
 
   if [[ -n "$merged" ]]; then
