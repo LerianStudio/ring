@@ -476,6 +476,19 @@ if [[ -d "$SCRIPT_DIR/plugin" ]]; then
   echo "  Installed plugin/"
 fi
 
+# Gate progression validator hook (shell script used by plugin)
+GATE_VALIDATOR="$RING_ROOT/dev-team/hooks/validate-gate-progression.sh"
+if [[ -f "$GATE_VALIDATOR" ]]; then
+  mkdir -p "$TARGET_ROOT/hooks"
+  if [[ -f "$TARGET_ROOT/hooks/validate-gate-progression.sh" ]]; then
+    mkdir -p "$BACKUP_DIR/hooks"
+    cp "$TARGET_ROOT/hooks/validate-gate-progression.sh" "$BACKUP_DIR/hooks/validate-gate-progression.sh"
+  fi
+  cp "$GATE_VALIDATOR" "$TARGET_ROOT/hooks/validate-gate-progression.sh"
+  chmod +x "$TARGET_ROOT/hooks/validate-gate-progression.sh"
+  echo "  Installed hooks/validate-gate-progression.sh"
+fi
+
 # Prompts (session-start, context-injection)
 if [[ -d "$SCRIPT_DIR/prompts" ]]; then
   mkdir -p "$TARGET_ROOT/prompts"

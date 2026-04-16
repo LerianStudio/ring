@@ -14,6 +14,8 @@
 
 import type { Plugin, PluginInput } from "@opencode-ai/plugin"
 import type { Config as OpenCodeSdkConfig } from "@opencode-ai/sdk"
+// Gate validator (soft block via detect-and-revert)
+import { createToolExecuteAfter, createToolExecuteBefore } from "./hooks/factories/gate-validator.js"
 import type { RingConfig } from "./config/index.js"
 // Config
 import { createConfigHandler, loadConfig } from "./config/index.js"
@@ -103,6 +105,10 @@ export const RingUnifiedPlugin: Plugin = async (ctx: PluginInput) => {
   const sessionId = getSessionId()
   const ringTools = createRingTools(directory)
 
+  // Gate progression validator
+  const gateValidatorBefore = createToolExecuteBefore(directory)
+  const gateValidatorAfter = createToolExecuteAfter(directory)
+
   return {
     // Register Ring tools
     tool: ringTools,
@@ -155,6 +161,10 @@ export const RingUnifiedPlugin: Plugin = async (ctx: PluginInput) => {
         await hookRegistry.executeLifecycle("session.error", hookCtx, output)
       }
     },
+
+    // Gate progression validation (soft block — OpenCode lacks hard deny)
+    "tool.execute.before": gateValidatorBefore,
+    "tool.execute.after": gateValidatorAfter,
 
     // System prompt transformation
     "experimental.chat.system.transform": async (

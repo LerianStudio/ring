@@ -299,21 +299,70 @@ fi
 # ─── Decision ───
 
 if [[ ${#errors[@]} -gt 0 ]]; then
-  # Build error list as JSON array, then format reason as single escaped string
+  # Build error list as JSON array
   ERROR_JSON_ARRAY=$(printf '%s\n' "${errors[@]}" | jq -R . | jq -sc .)
+
+  # Build recovery instructions based on which gates failed
+  recovery_steps=()
+  for err in "${errors[@]}"; do
+    case "$err" in
+      *"Gate 0:"*)   recovery_steps+=("Gate 0: Load Skill(ring:dev-implementation), dispatch backend-engineer agent with TDD cycle") ;;
+      *"Gate 0.5:"*) recovery_steps+=("Gate 0.5: Load Skill(ring:dev-delivery-verification), verify all requirements delivered") ;;
+      *"Gate 1"*)    recovery_steps+=("Gate 1: Load Skill(ring:dev-devops), dispatch ring:devops-engineer") ;;
+      *"Gate 2"*)    recovery_steps+=("Gate 2: Load Skill(ring:dev-sre), dispatch ring:sre") ;;
+      *"Gate 3"*)    recovery_steps+=("Gate 3: Load Skill(ring:dev-unit-testing), dispatch ring:qa-analyst (test_mode=unit, coverage >= 85%)") ;;
+      *"Gate 4"*)    recovery_steps+=("Gate 4: Load Skill(ring:dev-fuzz-testing), dispatch ring:qa-analyst (test_mode=fuzz, corpus >= 5)") ;;
+      *"Gate 5"*)    recovery_steps+=("Gate 5: Load Skill(ring:dev-property-testing), dispatch ring:qa-analyst (test_mode=property)") ;;
+      *"Gate 6"*)    recovery_steps+=("Gate 6: Load Skill(ring:dev-integration-testing), dispatch ring:qa-analyst (test_mode=integration, write only)") ;;
+      *"Gate 7"*)    recovery_steps+=("Gate 7: Load Skill(ring:dev-chaos-testing), dispatch ring:qa-analyst (test_mode=chaos, write only)") ;;
+      *"Gate 8"*)    recovery_steps+=("Gate 8: Load Skill(ring:codereview), dispatch ALL 8 reviewers in parallel") ;;
+    esac
+  done
+
+  # Deduplicate recovery steps (preserve gate order — sort -u would reorder)
+  RECOVERY_JSON_ARRAY=$(printf '%s\n' "${recovery_steps[@]}" | awk '!seen[$0]++' | jq -R . | jq -sc .)
+
+  # Extract task context for recovery instructions
+  TASK_TITLE=$(echo "$NEW_STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].title // empty")
+  # Derive last contiguously valid gate using the SAME predicates as the validators
+  # (not just status == completed — also checks evidence thresholds)
+  LAST_COMPLETED_GATE=$(echo "$TASK_GATES" | jq -r '
+    if (.implementation.tdd_red.status != "completed") or (.implementation.tdd_green.status != "completed") then "none"
+    elif .delivery_verification.status != "completed" then "0"
+    elif (.delivery_verification.requirements_total // 0) > 0 and (.delivery_verification.requirements_delivered // 0) < (.delivery_verification.requirements_total // 0) then "0"
+    elif .devops.status != "completed" then "0.5"
+    elif .sre.status != "completed" then "1"
+    elif .unit_testing.status != "completed" then "2"
+    elif (.unit_testing.coverage_actual // 0) < 85 then "2"
+    elif .fuzz_testing.status != "completed" then "3"
+    elif (.fuzz_testing.corpus_entries // 0) < 5 then "3"
+    elif .property_testing.status != "completed" then "4"
+    elif (.property_testing.properties_tested // 0) < 1 then "4"
+    elif .integration_testing.status != "completed" then "5"
+    elif .chaos_testing.status != "completed" then "6"
+    elif .review.status != "completed" then "7"
+    else "8"
+    end
+  ')
 
   jq -n \
     --arg task "$TASK_ID" \
+    --arg title "$TASK_TITLE" \
     --arg gate "$TARGET_GATE" \
+    --arg lastGate "$LAST_COMPLETED_GATE" \
     --argjson errs "$ERROR_JSON_ARRAY" \
+    --argjson recovery "$RECOVERY_JSON_ARRAY" \
     '{
       hookSpecificOutput: {
         hookEventName: "PreToolUse",
         permissionDecision: "deny",
         permissionDecisionReason: (
-          "GATE PROGRESSION BLOCKED for " + $task + " (target: Gate " + $gate + "): " +
-          ($errs | join("; ")) +
-          ". Complete all prerequisite gates before progressing."
+          "GATE PROGRESSION BLOCKED for " + $task +
+          (if $title != "" then " (" + $title + ")" else "" end) +
+          " — target: Gate " + $gate + ", last completed: Gate " + $lastGate + ". " +
+          "Issues: " + ($errs | join("; ")) + ". " +
+          "RECOVERY for " + $task + " — Resume from Gate " + $lastGate + ", execute in order: " +
+          ($recovery | join("; "))
         )
       }
     }'
