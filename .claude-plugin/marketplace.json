@@ -9,7 +9,7 @@
     {
       "name": "ring-default",
       "description": "Core skills library for the Lerian Team: TDD, debugging, collaboration patterns, and proven techniques. Features parallel 8-reviewer code review system, systematic debugging, and workflow orchestration. 23 essential skills for software engineering excellence.",
-      "version": "1.22.1",
+      "version": "1.23.0",
       "source": "./default",
       "homepage": "https://github.com/lerianstudio/ring/tree/default",
       "repository": "https://github.com/lerianstudio/ring/tree/default",
@@ -136,5 +136,5 @@
       ]
     }
   ],
-  "version": "0.326.0"
+  "version": "0.327.0"
 }
