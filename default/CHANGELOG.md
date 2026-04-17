@@ -2,6 +2,17 @@
 
 ## [1.23.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.23.0)
 
+- Features:
+  - Context-aware drift refresh with PROJECT_RULES support.
+
+Contributors: @fred
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.22.1...ring-default@1.23.0)
+
+---
+
+## [1.23.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.23.0)
+
 - **Features**
   - Context-aware drift refresh with PROJECT_RULES support.
 
