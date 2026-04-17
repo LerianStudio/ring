@@ -2,7 +2,7 @@
 # shellcheck disable=SC2034  # Unused variables OK for exported config
 # UserPromptSubmit hook to periodically re-inject instruction files
 # Combats context drift in long-running sessions by re-surfacing project instructions
-# Supports: CLAUDE.md, AGENTS.md, RULES.md
+# Supports: CLAUDE.md, AGENTS.md, PROJECT_RULES.md (dedupes symlinks to avoid double-injection)
 
 set -euo pipefail
 
@@ -16,28 +16,97 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 
 # File types to discover
-INSTRUCTION_FILES=("CLAUDE.md" "AGENTS.md" "RULES.md")
+# PROJECT_RULES.md replaced RULES.md per Lerian standard (2026-04)
+INSTRUCTION_FILES=("CLAUDE.md" "AGENTS.md" "PROJECT_RULES.md")
 
-# Use session-specific state file (per-session, not persistent)
+# Context window usage threshold (percentage). When harness reports context ≥ this value,
+# force a refresh. Calibrated for 1M-token context windows: 15% ≈ 150k tokens consumed,
+# which is already substantial drift territory. Lower = more aggressive refresh (safer,
+# higher token cost). Raise if re-injection overhead becomes visible.
+readonly CTX_PCT_THRESHOLD=15
+
+# Transcript byte delta threshold (fallback when context_window field unavailable).
+# ~200KB of transcript growth ≈ 50k tokens at 4 chars/token estimate.
+readonly BYTE_THRESHOLD=200000
+
+# Cooldown: non-temporal triggers require at least this many prompts since last injection.
+# Prevents tight loops — a single injection adds 70KB+, context_pct would re-trigger immediately.
+readonly MIN_PROMPT_COOLDOWN=2
+
+# Use session-specific state files (per-session, not persistent)
 # CLAUDE_SESSION_ID should be provided by Claude Code, fallback to PPID for session isolation
 SESSION_ID="${CLAUDE_SESSION_ID:-$PPID}"
 STATE_FILE="/tmp/claude-instruction-reminder-${SESSION_ID}.state"
-CACHE_FILE="/tmp/claude-instruction-reminder-${SESSION_ID}.cache"
+BYTES_FILE="/tmp/claude-instruction-reminder-${SESSION_ID}.bytes"
+LAST_INJECT_FILE="/tmp/claude-instruction-reminder-${SESSION_ID}.lastinject"
 
-# Initialize or read state
+# Read UserPromptSubmit event JSON from stdin (non-blocking if no stdin).
+# Claude Code provides: session_id, transcript_path, cwd, user_prompt, hook_event_name,
+# and (recently added) context_window with .used_percentage / .used_tokens / .total_tokens.
+hook_input=""
+if [ ! -t 0 ]; then
+  hook_input=$(cat)
+fi
+
+# Extract context metrics from hook event JSON.
+# PRIMARY signal: context_window.used_percentage (direct from harness, authoritative).
+# SECONDARY signal: transcript_path → byte delta (heuristic fallback for older harness versions).
+ctx_pct=0
+ctx_tokens=0
+transcript_path=""
+if [ -n "$hook_input" ] && command -v jq >/dev/null 2>&1; then
+  ctx_pct=$(echo "$hook_input" | jq -r '.context_window.used_percentage // 0' 2>/dev/null || echo 0)
+  ctx_tokens=$(echo "$hook_input" | jq -r '.context_window.used_tokens // 0' 2>/dev/null || echo 0)
+  transcript_path=$(echo "$hook_input" | jq -r '.transcript_path // empty' 2>/dev/null || echo "")
+fi
+
+# Transcript byte measurement (fallback proxy when context_window unavailable).
+current_bytes=0
+if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
+  current_bytes=$(wc -c < "$transcript_path" 2>/dev/null | tr -d ' ' || echo 0)
+fi
+last_bytes=0
+if [ -f "$BYTES_FILE" ]; then
+  last_bytes=$(cat "$BYTES_FILE" 2>/dev/null || echo 0)
+fi
+delta_bytes=$((current_bytes - last_bytes))
+
+# Cumulative prompt count (for display and temporal trigger).
 if [ -f "$STATE_FILE" ]; then
   PROMPT_COUNT=$(cat "$STATE_FILE")
 else
   PROMPT_COUNT=0
 fi
-
-# Increment prompt count
 PROMPT_COUNT=$((PROMPT_COUNT + 1))
 echo "$PROMPT_COUNT" > "$STATE_FILE"
 
-# Check if we should inject (every THROTTLE_INTERVAL prompts)
-if [ $((PROMPT_COUNT % THROTTLE_INTERVAL)) -ne 0 ]; then
-  # Not time to inject, return empty
+# Prompts since last injection (for cooldown enforcement on non-temporal triggers).
+LAST_INJECT_PROMPT=0
+if [ -f "$LAST_INJECT_FILE" ]; then
+  LAST_INJECT_PROMPT=$(cat "$LAST_INJECT_FILE" 2>/dev/null || echo 0)
+fi
+prompts_since_inject=$((PROMPT_COUNT - LAST_INJECT_PROMPT))
+
+# Trigger cascade (first match wins; order reflects signal quality and priority):
+#   1. Temporal floor — guaranteed baseline, fires every THROTTLE_INTERVAL prompts.
+#   2. Context-window saturation — most accurate signal, uses harness-reported usage.
+#   3. Volumetric fallback — proxy via transcript bytes when context_window missing.
+# Cooldown applies to (2) and (3) to prevent re-injection on consecutive prompts.
+should_inject=false
+trigger_reason=""
+if [ $((PROMPT_COUNT % THROTTLE_INTERVAL)) -eq 0 ]; then
+  should_inject=true
+  trigger_reason="temporal (prompt ${PROMPT_COUNT})"
+elif [ "$prompts_since_inject" -ge "$MIN_PROMPT_COOLDOWN" ] && [ "${ctx_pct:-0}" -ge "$CTX_PCT_THRESHOLD" ] 2>/dev/null; then
+  should_inject=true
+  trigger_reason="context-window (${ctx_pct}% used, ${ctx_tokens} tokens)"
+elif [ "$prompts_since_inject" -ge "$MIN_PROMPT_COOLDOWN" ] && [ "$current_bytes" -gt 0 ] && [ "$delta_bytes" -gt "$BYTE_THRESHOLD" ]; then
+  should_inject=true
+  trigger_reason="volumetric (+${delta_bytes} bytes since last inject)"
+fi
+
+if [ "$should_inject" != true ]; then
+  # Not time to inject, return empty response.
   cat <<EOF
 {
   "hookSpecificOutput": {
@@ -46,6 +115,12 @@ if [ $((PROMPT_COUNT % THROTTLE_INTERVAL)) -ne 0 ]; then
 }
 EOF
   exit 0
+fi
+
+# Injecting — record state for next invocation's delta/cooldown calculations.
+echo "$PROMPT_COUNT" > "$LAST_INJECT_FILE"
+if [ "$current_bytes" -gt 0 ]; then
+  echo "$current_bytes" > "$BYTES_FILE"
 fi
 
 # Time to inject! Find all instruction files
@@ -82,26 +157,82 @@ for file_name in "${INSTRUCTION_FILES[@]}"; do
     -print0 2>/dev/null)
 done
 
-# Remove duplicates (project root might be found twice)
-# Use sort -u with proper handling of paths containing spaces/newlines
+# Canonicalize path for symlink-aware dedup.
+# Tries coreutils `realpath`, then Python, then raw path. Graceful fallback ensures
+# the hook still functions (just without symlink-dedup) on minimal environments.
+canonicalize_path() {
+  if command -v realpath >/dev/null 2>&1; then
+    realpath "$1" 2>/dev/null || echo "$1"
+  elif command -v python3 >/dev/null 2>&1; then
+    python3 -c "import os,sys; print(os.path.realpath(sys.argv[1]))" "$1" 2>/dev/null || echo "$1"
+  else
+    echo "$1"
+  fi
+}
+
+# JSON-encode file content for safe embedding in hook output.
+# RFC 8259 mandates escaping all control characters U+0000..U+001F as \uXXXX when they
+# lack short-form escapes (\n \r \t \b \f). Hand-rolled awk regex misses vertical tab,
+# null bytes, ESC, etc. — CLAUDE.md files in the wild contain these (415 lines in Ring's
+# project CLAUDE.md had unescaped control chars when audited). Cascade: jq → python3 → awk.
+# jq -Rs: raw input, slurped as single string; `.` emits it as a JSON string literal.
+# We strip the outer quotes to splice into a larger JSON string being built by the hook.
+escape_for_json() {
+  local f="$1"
+  if command -v jq >/dev/null 2>&1; then
+    jq -Rs '.' < "$f" | sed -e '1s/^"//' -e '$s/"$//'
+  elif command -v python3 >/dev/null 2>&1; then
+    python3 -c '
+import sys, json
+with open(sys.argv[1], "r", encoding="utf-8", errors="replace") as fh:
+    # json.dumps wraps in quotes; strip them to match jq -Rs behavior
+    sys.stdout.write(json.dumps(fh.read())[1:-1])
+' "$f"
+  else
+    # Last-resort awk escape. Known to miss some control characters — see RFC 8259.
+    awk '
+      BEGIN { ORS="" }
+      {
+        gsub(/\\/, "\\\\")
+        gsub(/"/, "\\\"")
+        gsub(/\t/, "\\t")
+        gsub(/\r/, "\\r")
+        gsub(/\f/, "\\f")
+        if (NR > 1) printf "\\n"
+        printf "%s", $0
+      }
+      END { printf "\\n" }
+    ' "$f"
+  fi
+}
+
+# Dedup by canonical path to handle two cases:
+# 1. Same file discovered via different methods (project root + find)
+# 2. Symlinks (e.g., Ring convention: AGENTS.md -> CLAUDE.md) — avoid double-injection
+# First occurrence wins, which preserves INSTRUCTION_FILES priority order
+# (CLAUDE.md displayed before AGENTS.md when they share the same inode).
 if [ "${#instruction_files[@]}" -gt 0 ]; then
-  # Create a temporary file to store paths (one per line)
-  tmp_file=$(mktemp)
-  trap "rm -f '$tmp_file'" EXIT INT TERM HUP
-  printf '%s\n' "${instruction_files[@]}" | sort -u > "$tmp_file"
-
-  # Read back into array
-  instruction_files=()
-  while IFS= read -r file; do
-    [ -n "$file" ] && instruction_files+=("$file")
-  done < "$tmp_file"
-
-  rm -f "$tmp_file"
+  unique_files=()
+  seen_paths=""
+  for f in "${instruction_files[@]}"; do
+    real_f=$(canonicalize_path "$f")
+    # Newline delimiters avoid substring collisions between similar paths
+    case "${seen_paths}" in
+      *$'\n'"${real_f}"$'\n'*)
+        # Already seen (likely symlink target) — skip silently
+        ;;
+      *)
+        unique_files+=("$f")
+        seen_paths="${seen_paths}"$'\n'"${real_f}"$'\n'
+        ;;
+    esac
+  done
+  instruction_files=("${unique_files[@]}")
 fi
 
 # Build reminder context
 reminder="<instruction-files-reminder>\n"
-reminder="${reminder}Re-reading instruction files to combat context drift (prompt ${PROMPT_COUNT}):\n\n"
+reminder="${reminder}Re-reading instruction files to combat context drift — trigger: ${trigger_reason}\n\n"
 
 for file in "${instruction_files[@]}"; do
   # Get relative path for display
@@ -126,7 +257,7 @@ for file in "${instruction_files[@]}"; do
     AGENTS.md)
       emoji="🤖"
       ;;
-    RULES.md)
+    PROJECT_RULES.md)
       emoji="📜"
       ;;
     *)
@@ -138,25 +269,8 @@ for file in "${instruction_files[@]}"; do
   reminder="${reminder}${emoji} ${display_path}\n"
   reminder="${reminder}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
 
-  # Read entire file content and escape for JSON
-  # Proper JSON string escaping for all control characters (RFC 8259)
-  # Uses gsub for reliable cross-platform escaping (works on BSD and GNU awk)
-  escaped_content=$(awk '
-    BEGIN { ORS="" }
-    {
-      # Order matters: backslash must be escaped first
-      gsub(/\\/, "\\\\")
-      gsub(/"/, "\\\"")
-      gsub(/\t/, "\\t")
-      gsub(/\r/, "\\r")
-      gsub(/\f/, "\\f")
-      # Note: \b (backspace) rarely appears in text files, skip to avoid regex issues
-      # Add escaped newline between lines
-      if (NR > 1) printf "\\n"
-      printf "%s", $0
-    }
-    END { printf "\\n" }
-  ' "$file")
+  # JSON-encode file content (RFC 8259 compliant via jq/python3 cascade).
+  escaped_content=$(escape_for_json "$file")
 
   reminder="${reminder}${escaped_content}\n\n"
 done
