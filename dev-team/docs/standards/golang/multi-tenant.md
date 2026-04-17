@@ -37,7 +37,7 @@ The only valid multi-tenant implementation uses:
 - `valkey.GetKeyContext` for Redis key prefixing (from `lib-commons/v4/commons/tenant-manager/valkey`)
 - `s3.GetS3KeyStorageContext` for S3 key prefixing (from `lib-commons/v4/commons/tenant-manager/s3`)
 - `tmrabbitmq.Manager` for RabbitMQ vhost isolation (from `lib-commons/v4/commons/tenant-manager/rabbitmq`)
-- The 14 canonical `MULTI_TENANT_*` environment variables with correct names and defaults
+- The 13 canonical `MULTI_TENANT_*` environment variables with correct names and defaults
 - `client.WithCircuitBreaker` on the Tenant Manager HTTP client
 - `client.WithServiceAPIKey` on the Tenant Manager HTTP client for `/settings` endpoint authentication
 - pgManager handles settings revalidation internally via `WithConnectionsCheckInterval` — PostgreSQL only, MongoDB excluded
@@ -55,7 +55,7 @@ These are the only files that require multi-tenant changes. The exact paths foll
 | File | Gate | What Changes |
 |------|------|-------------|
 | `go.mod` | 2 | lib-commons v4, lib-auth v2 |
-| `internal/bootstrap/config.go` | 3 | 14 canonical `MULTI_TENANT_*` env vars in Config struct |
+| `internal/bootstrap/config.go` | 3 | 13 canonical `MULTI_TENANT_*` env vars in Config struct |
 | `internal/bootstrap/service.go` (or equivalent init file) | 4 | Conditional initialization: Tenant Manager client, connection managers, middleware creation. Branch on `cfg.MultiTenantEnabled` |
 | `internal/bootstrap/routes.go` (or equivalent router file) | 4 | Per-route composition via `WhenEnabled(ttHandler)` — auth validates JWT before tenant resolves DB. Each project implements the `WhenEnabled` helper locally. See [Route-Level Auth-Before-Tenant Ordering](#route-level-auth-before-tenant-ordering-mandatory) |
 
@@ -160,7 +160,6 @@ go build ./...
 | `MULTI_TENANT_CIRCUIT_BREAKER_TIMEOUT_SEC` | Seconds before circuit breaker resets (half-open) | `30` | Yes |
 | `MULTI_TENANT_SERVICE_API_KEY` | API key for authenticating with tenant-manager `/settings` endpoint. Generated via service catalog. | - | If multi-tenant |
 | `MULTI_TENANT_CACHE_TTL_SEC` | In-memory cache TTL for tenant config. Passed to the tenant client. | `120` | Yes |
-| `MULTI_TENANT_CONNECTIONS_CHECK_INTERVAL_SEC` | pgManager async settings revalidation interval (via `WithConnectionsCheckInterval`). | `30` | Yes |
 | `RABBITMQ_TLS` | Enable TLS/AMQPS connections for per-tenant RabbitMQ vhosts (AWS AmazonMQ, CloudAMQP) | `false` | No |
 
 
@@ -179,7 +178,6 @@ MULTI_TENANT_CIRCUIT_BREAKER_THRESHOLD=5
 MULTI_TENANT_CIRCUIT_BREAKER_TIMEOUT_SEC=30
 MULTI_TENANT_SERVICE_API_KEY=your-service-api-key-here
 MULTI_TENANT_CACHE_TTL_SEC=120
-MULTI_TENANT_CONNECTIONS_CHECK_INTERVAL_SEC=30
 RABBITMQ_TLS=false
 ```
 
@@ -204,7 +202,6 @@ type Config struct {
     MultiTenantCircuitBreakerTimeoutSec int    `env:"MULTI_TENANT_CIRCUIT_BREAKER_TIMEOUT_SEC" default:"30"`
     MultiTenantServiceAPIKey            string `env:"MULTI_TENANT_SERVICE_API_KEY"`
     MultiTenantCacheTTLSec              int    `env:"MULTI_TENANT_CACHE_TTL_SEC" default:"120"`
-    MultiTenantConnectionsCheckIntervalSec int    `env:"MULTI_TENANT_CONNECTIONS_CHECK_INTERVAL_SEC" default:"30"`
 
     // RabbitMQ TLS (for managed services like AWS AmazonMQ, CloudAMQP)
     RabbitMQTLS                            bool   `env:"RABBITMQ_TLS" default:"false"`
@@ -1597,12 +1594,11 @@ MULTI_TENANT_ENABLED=true MULTI_TENANT_URL=http://tenant-manager:4003 go test ./
 - [ ] `MULTI_TENANT_CIRCUIT_BREAKER_TIMEOUT_SEC` in config struct (default: `30`)
 - [ ] `MULTI_TENANT_SERVICE_API_KEY` in config struct (required)
 - [ ] `MULTI_TENANT_CACHE_TTL_SEC` in config struct (default: `120`)
-- [ ] `MULTI_TENANT_CONNECTIONS_CHECK_INTERVAL_SEC` in config struct (default: `30`)
 
 **Event-Driven Discovery (required if multi-tenant):**
 - [ ] `tmredis.NewTenantPubSubRedisClient(ctx, cfg)` used to create Redis client (NOT manual `libRedis.Config`)
 - [ ] `tmevent.NewTenantEventListener(tmRedisClient, dispatcher.HandleEvent, ...)` wired with Pub/Sub Redis client
-- [ ] All 14 canonical `MULTI_TENANT_*` envs declared in `.env.example` (commented out with defaults)
+- [ ] All 13 canonical `MULTI_TENANT_*` envs declared in `.env.example` (commented out with defaults)
 
 **Architecture:**
 - [ ] `client.NewClient(url, logger, opts...)` returns `(*Client, error)` — handle error for fail-fast
@@ -2171,7 +2167,7 @@ tenants/{env}/{tenantOrgID}/{applicationName}/m2m/{targetService}/credentials
 
 ### Environment Variables (M2M)
 
-In addition to the 14 canonical multi-tenant env vars, plugins MUST add:
+In addition to the 13 canonical multi-tenant env vars, plugins MUST add:
 
 | Env Var | Description | Default | Required |
 |---------|-------------|---------|----------|
