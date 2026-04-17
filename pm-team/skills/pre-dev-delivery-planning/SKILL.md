@@ -38,7 +38,7 @@ Creating unrealistic timelines creates:
 
 ## Delivery Phase Model
 
-Every task passes through 4 delivery phases. Phase classification is automatic based on task signals from tasks.md — the planner MUST NOT ask the user to classify phases.
+Every task passes an implicit Planning phase and is then classified into exactly one execution phase (Development, Quality, or Delivery) based on task signals from tasks.md. Phase classification is automatic — the planner MUST NOT ask the user to classify phases.
 
 ### Phase Definitions
 
@@ -881,7 +881,7 @@ The JSON provides a stable, predictable contract for programmatic consumers. Unl
 ```json
 {
   "version": "1.0.0",
-  "gate": 9,
+  "gate": "9 | 4 (set from invocation context)",
   "feature": "{feature-name}",
   "generatedAt": "ISO-8601 timestamp (e.g., 2026-03-10T14:30:00Z)",
   "dates": {
@@ -954,6 +954,13 @@ The JSON provides a stable, predictable contract for programmatic consumers. Unl
       "mitigation": "Start immediately, daily progress checks"
     }
   ],
+  "cycleCapacity": {
+    "grossDays": 28,
+    "bugBufferDays": 5.6,
+    "availableDays": 22.4,
+    "allocatedDays": 19.2,
+    "slackDays": 3.2
+  },
   "contingencyBuffer": {
     "percentage": 15,
     "days": 4
@@ -967,7 +974,7 @@ The JSON provides a stable, predictable contract for programmatic consumers. Unl
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `version` | string | yes | Schema version for forward compatibility. Currently `"1.0.0"` |
-| `gate` | number | yes | Gate number (9 for Full Track, 4 for Small Track) |
+| `gate` | number | yes | Gate number populated from invocation context (9 for Full Track, 4 for Small Track). MUST NOT be hardcoded — set by the orchestrator skill that invokes delivery planning |
 | `feature` | string | yes | Feature name matching the pre-dev folder name |
 | `generatedAt` | string | yes | ISO-8601 timestamp of generation |
 | `dates.startDate` | string | yes | Project start date (YYYY-MM-DD) |
@@ -1018,6 +1025,12 @@ The JSON provides a stable, predictable contract for programmatic consumers. Unl
 | `criticalPath.minimumProjectDuration` | string | yes | Minimum possible project duration |
 | `risks[]` | array | yes | Risk items (empty array if none) |
 | `risks[].taskIds` | array | yes | Task IDs affected by this risk |
+| `cycleCapacity` | object | yes | Cycle capacity summary showing how available time is allocated |
+| `cycleCapacity.grossDays` | number | yes | Total working days in the cycle (team size × working days in period) |
+| `cycleCapacity.bugBufferDays` | number | yes | Days reserved for bug buffer (grossDays × L5_bugBuffer percentage) |
+| `cycleCapacity.availableDays` | number | yes | Gross minus buffer (grossDays − bugBufferDays) |
+| `cycleCapacity.allocatedDays` | number | yes | Sum of all tasks' `bufferedDays` values |
+| `cycleCapacity.slackDays` | number | yes | Available minus allocated (availableDays − allocatedDays). Negative value = over-committed |
 | `contingencyBuffer.percentage` | number | yes | Buffer percentage (10-20) |
 | `contingencyBuffer.days` | number | yes | Buffer in calendar days |
 | `confidenceScore` | number | yes | Confidence score (0-100) from scoring rubric |
@@ -1043,6 +1056,9 @@ MUST validate the JSON before writing:
 15. **Every `tasks[].phase` MUST be one of** `"development"`, `"quality"`, `"delivery"`
 16. **Every `tasks[].layers` MUST include** `L1`, `L2`, `L3`, `L4`, `tauraDays`
 17. **Every `tasks[].bufferedDays` MUST be present** — represents final calendar estimate after bug buffer
+18. **`cycleCapacity` MUST be present** with all 5 fields: `grossDays`, `bugBufferDays`, `availableDays`, `allocatedDays`, `slackDays`
+19. **`cycleCapacity.availableDays` MUST equal `grossDays - bugBufferDays`** — consistency check
+20. **`cycleCapacity.slackDays` MUST equal `availableDays - allocatedDays`** — negative value indicates over-commitment (valid but MUST trigger a risk entry)
 
 ### Continuous Cadence Rules
 
