@@ -29,7 +29,6 @@ NOT_skip_when: |
 related:
   complementary:
     - ring:requesting-code-review
-    - ring:dev-delivery-verification
     - ring:dev-validation
   differentiation:
     - name: ring:requesting-code-review

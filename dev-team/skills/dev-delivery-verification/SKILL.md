@@ -890,23 +890,10 @@ FAIL: Critical requirements NOT DELIVERED
 | "The integration contract is just a guideline" | The contract is the spec. If implementation deviates from it, either the code or the contract is wrong — fix one. | **Match implementation to contract or update contract with justification** |
 | "I'll validate the integration in testing" | Testing validates behavior. This gate validates contract adherence. Different concerns. | **Verify contract compliance now** |
 
-## Integration with dev-cycle
+## DEPRECATED — Integration moved into `ring:dev-cycle`
 
-This gate runs as **Gate 0.5** — after implementation (Gate 0), before DevOps (Gate 1):
+This skill is deprecated. Delivery verification is now performed inline:
+- **Subtask-level exit criteria:** See Step 7 "Delivery Verification Exit Check" in `ring:dev-implementation`.
+- **Cycle-level multi-tenant verification:** See Gate 0.5G (Step 12.0.5) in `ring:dev-cycle`.
 
-```
-Gate 0:   Implementation (write code)
-Gate 0.5: Delivery Verification (verify ALL requested work is delivered) ← THIS GATE
-Gate 1:   DevOps (infrastructure)
-Gate 2:   SRE (reliability)
-Gate 3:   Unit Testing
-...
-```
-
-If Gate 0.5 returns PARTIAL or FAIL:
-1. List ALL undelivered requirements with specific evidence
-2. Return to Gate 0 with explicit instructions: "Deliver the following: [list with file:line references]"
-3. Re-run Gate 0.5 after fixes
-4. Only advance to Gate 1 when Gate 0.5 returns PASS
-
-**Gate 0.5 is language-agnostic and task-type-agnostic.** It works the same whether the task is a Go API endpoint, a TypeScript frontend component, a database migration, an infrastructure change, or a business logic refactor. The process is always: extract requirements → verify each is delivered → report gaps.
+Do NOT dispatch `ring:dev-delivery-verification` from new cycles. This file is retained as a historical reference only.

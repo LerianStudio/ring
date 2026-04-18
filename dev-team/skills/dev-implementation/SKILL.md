@@ -4,7 +4,7 @@ description: |
   Gate 0 of the development cycle. Executes code implementation using the appropriate
   specialized agent based on task content and project language. Handles TDD workflow
   with RED-GREEN phases. Follows project standards defined in docs/PROJECT_RULES.md.
-  Includes delivery verification exit criteria (merged from deprecated ring:dev-delivery-verification).
+  Includes delivery verification exit criteria integrated into Gate 0.
 
 trigger: |
   - Gate 0 of development cycle
@@ -700,7 +700,7 @@ IF `result == "PASS"`:
 - Proceed to Handoff to Next Gate
 
 ### Reference
-Full detailed check list preserved in `/Users/fredamaral/repos/lerianstudio/ring/dev-team/skills/dev-delivery-verification/SKILL.md` (deprecated but retained for reference).
+The full delivery verification checklist is embedded in Step 7 below and in Gate 0.5G of `ring:dev-cycle`.
 
 ---
 
