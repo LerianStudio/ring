@@ -30,7 +30,7 @@ related:
 
 See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.md) for canonical validation and gate requirements. This skill collects metrics and generates improvement reports.
 
-**Invocation Contract (since R4 of "prancy Bentley" speedup):** This skill is invoked EXACTLY ONCE per dev-cycle, at Step 12.1 of ring:dev-cycle (and equivalent in ring:dev-cycle-frontend). Per-task invocations at Step 11.2 have been REMOVED. This skill expects aggregated data spanning ALL tasks in the cycle.
+**Invocation Contract:** This skill is invoked EXACTLY ONCE per dev-cycle, at Step 12.1 of ring:dev-cycle (and equivalent in ring:dev-cycle-frontend). Per-task invocations are NOT supported. This skill expects aggregated data spanning ALL tasks in the cycle.
 
 Continuous improvement system that tracks development cycle effectiveness through assertiveness scores, identifies recurring failure patterns, and generates actionable improvement suggestions.
 
@@ -392,9 +392,9 @@ Task tool:
   subagent_type: "ring:prompt-quality-reviewer"
   prompt: |
     CONTEXT: You are analyzing a COMPLETE dev-cycle across N tasks (not a single task).
-    The data you receive spans all tasks in the cycle. Since R4 of the
-    "prancy Bentley" speedup, ring:dev-report is invoked exactly ONCE per cycle
-    (Step 12.1 of ring:dev-cycle), so aggregate-level analysis is the expected mode.
+    The data you receive spans all tasks in the cycle. ring:dev-report is invoked
+    exactly ONCE per cycle (Step 12.1 of ring:dev-cycle), so aggregate-level analysis
+    is the expected mode.
 
     Cycle: [cycle_id]
     Tasks analyzed: [task_ids] (N total)

@@ -581,7 +581,7 @@ Task → (for each subtask: Gate 0 → Gate 3 → Gate 8)
 | Task without subtasks | Task itself (treated as single subtask) | 0, 3, 8 | 1, 2, 4, 5, 6, 7 |
 | Task with subtasks | Each subtask | 0, 3, 8 (per subtask) | 1, 2, 4, 5, 6, 7 (once per task) |
 
-## Execution Loop Structure (the "Prancy Bentley" cadence model)
+## Execution Loop Structure (cadence model)
 
 ```yaml
 for each task in state.tasks:

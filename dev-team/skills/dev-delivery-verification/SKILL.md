@@ -84,7 +84,7 @@ output_schema:
 
 ---
 
-> ⚠️ **DEPRECATION NOTICE (since "prancy Bentley" speedup)**
+> ⚠️ **DEPRECATION NOTICE**
 >
 > This skill's functionality has been **inlined into `ring:dev-implementation` as Step 7:
 > Delivery Verification Exit Check**. New cycles should NOT dispatch this skill as a

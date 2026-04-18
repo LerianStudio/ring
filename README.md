@@ -340,7 +340,7 @@ No "should work" → Only "does work" with proof
 **Orchestration & Refactoring (6):**
 
 - `ring:using-dev-team` - Introduction to developer specialist agents
-- `ring:dev-cycle` - 10-gate development workflow orchestrator (Gates 0–9, with Gate 0.5 delivery verification)
+- `ring:dev-cycle` - 10-gate development workflow orchestrator (Gates 0–9, with subtask/task/cycle cadence classification; Gate 0 includes inline delivery verification exit check)
 - `ring:dev-cycle-frontend` - 9-gate frontend development workflow orchestrator
 - `ring:dev-refactor` - Backend/codebase standards analysis
 - `ring:dev-refactor-frontend` - Frontend standards analysis and task generation
@@ -349,7 +349,7 @@ No "should work" → Only "does work" with proof
 **Backend Gate Skills (9):**
 
 - `ring:dev-implementation` - Gate 0: TDD implementation
-- `ring:dev-delivery-verification` - Gate 0.5: Delivery verification (ensures requested features are reachable)
+- `ring:dev-delivery-verification` - DEPRECATED: delivery verification merged into ring:dev-implementation Step 7 (Gate 0 exit criterion). Skill preserved for reference only.
 - `ring:dev-multi-tenant` - Multi-tenant adaptation (database-per-tenant isolation, integrated into Gate 0)
 - `ring:dev-devops` - Gate 1: DevOps setup (Docker, compose)
 - `ring:dev-docker-security` - Docker image security audit for Docker Hub Health Score grade A

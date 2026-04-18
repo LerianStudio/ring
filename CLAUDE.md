@@ -496,8 +496,8 @@ python default/hooks/generate-skills-ref.py # Generate skill overview
 | Code review | `ring:codereview` skill dispatches 8 parallel reviewers |
 | Pre-dev (small) | `ring:pre-dev-feature` skill → 5-gate workflow |
 | Pre-dev (large) | `ring:pre-dev-full` skill → 10-gate workflow |
-| Dev cycle - backend (10 gates) | `ring:dev-cycle` skill → implementation→delivery-verification→devops→SRE→unit-testing→fuzz-testing→property-testing→integration-testing→chaos-testing→review→validation (see [dev-team/skills/dev-cycle/SKILL.md](dev-team/skills/dev-cycle/SKILL.md)) |
-| Dev cycle - frontend (9 gates) | `ring:dev-cycle-frontend` skill → implementation→devops→accessibility→unit-testing→visual-testing→e2e-testing→performance→review→validation (see [dev-team/skills/dev-cycle-frontend/SKILL.md](dev-team/skills/dev-cycle-frontend/SKILL.md)) |
+| Dev cycle - backend (10 gates) | `ring:dev-cycle` skill → Subtask loop: implementation (w/ delivery-verification exit check)→unit-testing→validation. Task-level: devops→SRE→fuzz→property→integration (write)→chaos (write)→review. Cycle-end: integration (execute)→chaos (execute)→multi-tenant verify→dev-report. See [dev-team/skills/dev-cycle/SKILL.md](dev-team/skills/dev-cycle/SKILL.md) |
+| Dev cycle - frontend (9 gates) | `ring:dev-cycle-frontend` skill → Subtask loop: implementation→unit-testing→validation. Task-level: devops→accessibility→visual→e2e→performance→review. See [dev-team/skills/dev-cycle-frontend/SKILL.md](dev-team/skills/dev-cycle-frontend/SKILL.md) |
 | Refactor - frontend | `ring:dev-refactor-frontend` skill → dispatches 5-7 frontend agents in ANALYSIS mode → generates findings → tasks → handoff to `ring:dev-cycle-frontend` |
 
 See [docs/WORKFLOWS.md](docs/WORKFLOWS.md) for detailed instructions.

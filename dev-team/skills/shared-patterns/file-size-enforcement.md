@@ -27,8 +27,7 @@ This is a **HARD GATE** — not a suggestion.
 
 | Context | Check Point |
 |---------|-------------|
-| **ring:dev-cycle Gate 0** | After implementation agent completes — verify no file exceeds 300 lines; >300 = loop back; >500 = hard block |
-| **ring:dev-cycle Gate 0.5** | Delivery verification MUST run file-size verification command and fail if any file > 300 lines |
+| **ring:dev-cycle Gate 0** | After implementation agent completes — verify no file exceeds 300 lines; >300 = loop back; >500 = hard block. Delivery verification exit check (ring:dev-implementation Step 7) MUST run file-size verification and fail if any file > 300 lines. |
 | **ring:dev-cycle Gate 8** | Code reviewers MUST flag any file > 300 lines as a MEDIUM+ issue |
 | **ring:dev-refactor Step 4** | Agents MUST flag files > 300 lines as ISSUE-XXX |
 | **ring:dev-implementation** | Agent MUST NOT create files > 300 lines. If a task would make a file exceed 300 lines, agent MUST split proactively |

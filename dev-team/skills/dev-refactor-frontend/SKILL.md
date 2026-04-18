@@ -52,7 +52,7 @@ output_schema:
     - name: "findings.md"
       description: "All findings mapped from agent reports"
     - name: "tasks.md"
-      description: "1:1 mapped REFACTOR-XXX tasks from findings"
+      description: "Clustered REFACTOR-XXX tasks by (file, pattern_category) with findings:[] traceability array"
     - name: "change-report.html"
       description: "Visual HTML change report from ring:visualize"
   traceability: "Ring Standard -> Agent Report -> FINDING-XXX -> REFACTOR-XXX -> Implementation"

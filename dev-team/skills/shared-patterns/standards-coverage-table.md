@@ -4,7 +4,7 @@ This file defines the MANDATORY output format for agents comparing codebases aga
 
 ---
 
-## Standards Source (new, since "prancy Bentley" speedup)
+## Standards Source
 
 Agents and sub-skills MUST read standards from `state.cached_standards` (populated by
 dev-cycle Step 1.5) instead of calling WebFetch directly. This eliminates ~15–25

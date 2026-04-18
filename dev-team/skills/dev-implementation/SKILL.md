@@ -656,12 +656,12 @@ if pass_output contains "PASS" and all standards ✅ and Standards Coverage Tabl
     → Proceed to Step 8
 ```
 
-## Step 7: Delivery Verification Exit Check (MANDATORY — absorbed from former Gate 0.5)
+## Step 7: Delivery Verification Exit Check (MANDATORY)
 
 Before emitting the "Ready for Gate 1: YES" handoff, verify that every requirement in the
 task/subtask's acceptance criteria is DELIVERED (reachable, integrated, not dead code).
 
-### Checks to run (absorbed from deprecated ring:dev-delivery-verification skill)
+### Checks to run
 
 #### Check 1: Requirement Coverage Matrix (MANDATORY)
 For each acceptance criterion in input.requirements:

@@ -1,11 +1,11 @@
 ---
 name: ring:dev-cycle
 description: |
-  Main orchestrator for the 10-gate development cycle system. Loads tasks/subtasks
-  from PM team output and executes through implementation → devops → SRE → unit testing → fuzz testing → property testing → integration testing (write) → chaos testing (write) → review → validation
-  gates (Gates 0-9), with state persistence and metrics collection.
-  Gates 6-7 (integration/chaos) write and update test code per unit but only execute tests at end of cycle (deferred execution).
-  Multi-tenant dual-mode is implemented during Gate 0 and verified at Gate 0.5G (no separate post-cycle step).
+  10-gate development cycle orchestrator with subtask/task/cycle cadence classification.
+  Subtask-level gates: implementation (includes delivery verification exit check), unit testing, validation.
+  Task-level gates: devops, SRE, fuzz, property, integration (write), chaos (write), review (8 reviewers on cumulative task diff).
+  Cycle-end: integration execute, chaos execute, multi-tenant verify, dev-report aggregate, final commit.
+  State schema v1.1.0.
 
 trigger: |
   - Starting a new development cycle with a task file
@@ -70,7 +70,7 @@ If any condition is true, STOP and report blocker. Cannot proceed without Ring s
 
 ## Overview
 
-The development cycle orchestrator loads tasks/subtasks from PM team output (or manual task files) and executes through 11 gates (Gate 0–9, including 0.5 Delivery Verification) with **deferred execution** for infrastructure-dependent tests:
+The development cycle orchestrator loads tasks/subtasks from PM team output (or manual task files) and executes through 10 gates (Gate 0–9) at three cadences (subtask / task / cycle). Gate 0 includes delivery verification as an inline exit check. **Deferred execution** applies for infrastructure-dependent tests:
 
 - **Gates 0-5, 8-9 (per unit):** Write code + run tests per task/subtask
 - **Gates 6-7 (per unit):** Write/update integration and chaos test code, verify compilation, but do **not execute** tests (no containers)
@@ -78,7 +78,7 @@ The development cycle orchestrator loads tasks/subtasks from PM team output (or 
 
 This keeps test code current with each feature while avoiding redundant container spin-ups during development.
 
-**MUST announce at start:** "I'm using the ring:dev-cycle skill to orchestrate task execution through 11 gates (Gate 0–9, including 0.5 Delivery Verification). Gates 6-7 write tests per unit but execute at end of cycle."
+**MUST announce at start:** "I'm using the ring:dev-cycle skill to orchestrate task execution through 10 gates (Gate 0–9). Subtask-level: 0 (implementation + delivery verification exit check), 3 (unit testing), 9 (validation). Task-level (after all subtasks): 1 (devops), 2 (SRE), 4 (fuzz), 5 (property), 6 write (integration), 7 write (chaos), 8 (review — 8 reviewers). Cycle-end: gates 6/7 execute mode, multi-tenant verify, dev-report, final commit."
 
 ## ⛔ CRITICAL: Specialized Agents Perform All Tasks
 
@@ -159,7 +159,7 @@ This is not negotiable:
 **Before dispatching any agent, you MUST load the corresponding sub-skill first.**
 
 <cannot_skip>
-- Gate 0: `Skill("ring:dev-implementation")` → then `Task(subagent_type="ring:backend-engineer-*", ...)`. **Gate 0 includes delivery verification exit check inline** (formerly Gate 0.5 — now a sub-check of ring:dev-implementation Step 7): verifies all requirements are DELIVERED (not just created), catches dead code, unwired structs, unregistered middleware, and runs 7 automated checks: (A) file size ≤300 lines, (B) license headers, (C) linting, (D) migration safety, (E) vulnerability scanning, (F) API backward compatibility, (G) multi-tenant dual-mode. FAIL → ring:dev-implementation re-iterates with fix instructions.
+- Gate 0: `Skill("ring:dev-implementation")` → then `Task(subagent_type="ring:backend-engineer-*", ...)`. **Gate 0 includes delivery verification exit check inline** (a sub-check of ring:dev-implementation Step 7): verifies all requirements are DELIVERED (not just created), catches dead code, unwired structs, unregistered middleware, and runs 7 automated checks: (A) file size ≤300 lines, (B) license headers, (C) linting, (D) migration safety, (E) vulnerability scanning, (F) API backward compatibility, (G) multi-tenant dual-mode. FAIL → ring:dev-implementation re-iterates with fix instructions.
 - Gate 1: `Skill("ring:dev-devops")` → then `Task(subagent_type="ring:devops-engineer", ...)`
 - Gate 2: `Skill("ring:dev-sre")` → then `Task(subagent_type="ring:sre", ...)`
 - Gate 3: `Skill("ring:dev-unit-testing")` → then `Task(subagent_type="ring:qa-analyst", test_mode="unit", ...)`
@@ -296,9 +296,9 @@ You CANNOT proceed when blocked. Report and wait for resolution.
 ### Cannot Be Overridden
 
 <cannot_skip>
-- All 11 gates must execute (0→0.5→1→2→3→4→5→6→7→8→9) - Each gate catches different issues
+- All 10 gates must execute across their respective cadences: Subtask loop (Gate 0 → 3 → 9), then Task-level (Gate 1 → 2 → 4 → 5 → 6 write → 7 write → 8), then Cycle-end (Gate 6 execute → 7 execute → multi-tenant verify → dev-report → final commit).
+- Gate 0 includes delivery verification exit check inline (MUST NOT dispatch a separate gate for delivery verification).
 - All testing gates (3-7) are MANDATORY - Comprehensive test coverage ensures quality
-- Gates execute in order (0→0.5→1→2→3→4→5→6→7→8→9) - Dependencies exist between gates
 - Gate 8 requires all 8 reviewers - Different review perspectives are complementary
 - Coverage threshold ≥ 85% - Industry standard for quality code
 - PROJECT_RULES.md must exist - Cannot verify standards without target
@@ -489,7 +489,7 @@ Day 4: Production incident from Day 1 code
 
 **All gates are MANDATORY. No exceptions. No skip reasons.**
 
-**Note:** Gate 0 includes delivery verification exit criteria (formerly Gate 0.5). See Step 2.3.1.
+**Note:** Gate 0 includes delivery verification exit criteria. See Step 2.3.1.
 
 **Gates 6-7 Deferred Execution:** Test code is written/updated per unit to stay current. Actual test execution (with containers) happens once at end of cycle.
 
@@ -504,7 +504,7 @@ Day 4: Production incident from Day 1 code
 
 ## Execution Order
 
-**Core Principle (two-level cadence — the "Prancy Bentley" model):**
+**Core Principle (two-level cadence):**
 
 - **Subtask-level gates** run per execution unit (subtask, or task-itself if no subtasks): Gate 0 (Implementation, incl. delivery verification exit check), Gate 3 (Unit Testing), Gate 9 (Validation).
 - **Task-level gates** run ONCE per task, after all its subtasks finish their subtask-level gates: Gate 1 (DevOps), Gate 2 (SRE), Gate 4 (Fuzz), Gate 5 (Property), Gate 6 write (Integration), Gate 7 write (Chaos), Gate 8 (Review — 8 reviewers on cumulative task diff).
@@ -525,7 +525,7 @@ Day 4: Production incident from Day 1 code
 - Running containers per subtask is wasteful when subsequent subtasks modify the same code
 - Test code stays current (written per task), infrastructure cost is paid once
 
-## Execution Loop Structure (the "Prancy Bentley" cadence model)
+## Execution Loop Structure (cadence model)
 
 ```yaml
 for each task in state.tasks:
@@ -1067,7 +1067,7 @@ Write tool:
 | **Before Gate 0 (task start)** | Task | `task.status = "in_progress"` in JSON **+ tasks.md Status → `🔄 Doing`** | ✅ YES |
 | Gate 0.1 (TDD-RED) | Subtask | `state.tasks[i].subtasks[j].gate_progress.implementation.tdd_red.status` + `.failure_output` | ✅ YES |
 | Gate 0.2 (TDD-GREEN) | Subtask | `state.tasks[i].subtasks[j].gate_progress.implementation.tdd_green.status` + `.implementation.status` | ✅ YES |
-| Gate 0 exit (Delivery Verification) | Subtask | `state.tasks[i].subtasks[j].gate_progress.implementation.delivery_verified = true` (absorbed from former Gate 0.5) | ✅ YES |
+| Gate 0 exit (Delivery Verification) | Subtask | `state.tasks[i].subtasks[j].gate_progress.implementation.delivery_verified = true` | ✅ YES |
 | Gate 3 (Unit Testing) | Subtask | `state.tasks[i].subtasks[j].gate_progress.unit_testing.status` + `.coverage_actual` + `agent_outputs.unit_testing` | ✅ YES |
 | Gate 9 (Validation) | Subtask | `state.tasks[i].subtasks[j].gate_progress.validation.status` + `.result` (do NOT touch task-level status here) | ✅ YES |
 | Gate 1 (DevOps) | Task | `state.tasks[i].gate_progress.devops.status` + `agent_outputs.devops` | ✅ YES |
@@ -2022,7 +2022,7 @@ See [shared-patterns/file-size-enforcement.md](../shared-patterns/file-size-enfo
 **Summary:** No source file may exceed 300 lines (>300 = loop back to agent; >500 = hard block). Implementation agents MUST split proactively. Enforcement points:
 
 - **Gate 0:** Implementation agent receives file-size instructions; orchestrator runs verification command after agent completes and loops back if any file > 300 lines.
-- **Gate 0 exit check (formerly Gate 0.5, now inline in ring:dev-implementation Step 7):** Delivery verification runs 7 checks as exit criteria: (A) file-size, (B) license headers, (C) linting, (D) migration safety, (E) vulnerability scanning, (F) API backward compatibility, (G) multi-tenant dual-mode. Any FAIL → ring:dev-implementation re-iterates with specific fix instructions.
+- **Gate 0 exit check (inline in ring:dev-implementation Step 7):** Delivery verification runs 7 checks as exit criteria: (A) file-size, (B) license headers, (C) linting, (D) migration safety, (E) vulnerability scanning, (F) API backward compatibility, (G) multi-tenant dual-mode. Any FAIL → ring:dev-implementation re-iterates with specific fix instructions.
 - **Gate 8:** Code reviewers MUST flag any file > 300 lines as a MEDIUM+ issue (blocking).
 
 ### Step 2.1: Prepare Input for ring:dev-implementation Skill
@@ -3462,7 +3462,7 @@ All units have written/updated test code during their Gate 6-7 passes. Now execu
 
 4. **⛔ MANDATORY: Run ring:dev-report skill for cycle metrics**
 
-   **IMPORTANT (since R4):** This is the ONE AND ONLY ring:dev-report dispatch in the cycle. Per-task runs were removed (see Step 11.2). ring:dev-report reads `accumulated_metrics` from ALL tasks in state and generates aggregate analysis.
+   **IMPORTANT:** This is the ONE AND ONLY ring:dev-report dispatch in the cycle. ring:dev-report reads `accumulated_metrics` from ALL tasks in state and generates aggregate analysis.
 
    ```yaml
    Skill tool:

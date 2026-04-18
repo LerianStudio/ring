@@ -49,7 +49,10 @@ fi
 
 # ─── Gate ordering map ───
 # Maps gate index to the gate_progress field name and required evidence checks
-# Gate order: 0 → 0.5 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9
+# Gate order: 0 → 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9
+# Note: Delivery Verification is an inline exit check for Gate 0, tracked per-subtask
+# at state.tasks[i].subtasks[j].gate_progress.implementation.delivery_verified
+# and validated by validate_delivery_verification() alongside Gate 0.
 
 # Extract current task being progressed
 CURRENT_TASK_INDEX=$(echo "$NEW_STATE" | jq -r '.current_task_index // 0')
@@ -81,17 +84,31 @@ validate_gate_0() {
   fi
 }
 
-validate_gate_05() {
-  local status total delivered
-  status=$(echo "$TASK_GATES" | jq -r '.delivery_verification.status // "pending"')
-  total=$(echo "$TASK_GATES" | jq -r '.delivery_verification.requirements_total // 0')
-  delivered=$(echo "$TASK_GATES" | jq -r '.delivery_verification.requirements_delivered // 0')
+# Delivery Verification — Gate 0 exit criterion. Iterates subtasks of the current
+# task and verifies each past-Gate-0 subtask has implementation.delivery_verified == true.
+validate_delivery_verification() {
+  local subtask_count i subtask_id current_gate delivery_verified
 
-  if [[ "$status" != "completed" ]]; then
-    errors+=("Gate 0.5: Delivery verification not completed (status: $status)")
-  elif [[ "$total" -gt 0 && "$delivered" -lt "$total" ]]; then
-    errors+=("Gate 0.5: Requirements gap — delivered $delivered/$total")
+  subtask_count=$(echo "$NEW_STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].subtasks | length // 0")
+
+  if [[ "$subtask_count" -eq 0 ]]; then
+    # No subtasks defined — nothing to verify at subtask level
+    return
   fi
+
+  for ((i=0; i<subtask_count; i++)); do
+    subtask_id=$(echo "$NEW_STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].subtasks[$i].id // \"S-???\"")
+    current_gate=$(echo "$NEW_STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].subtasks[$i].current_gate // 0")
+    delivery_verified=$(echo "$NEW_STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].subtasks[$i].gate_progress.implementation.delivery_verified // false")
+
+    # Only flag subtasks that are PAST Gate 0 (i.e., have progressed beyond implementation)
+    # If current_gate is non-numeric or "0", skip; otherwise require delivery_verified == true
+    if [[ "$current_gate" =~ ^[0-9]+$ ]] && [[ "$current_gate" -ge 1 ]]; then
+      if [[ "$delivery_verified" != "true" ]]; then
+        errors+=("Gate 0 exit criteria: subtask $subtask_id has not passed delivery verification (implementation.delivery_verified != true)")
+      fi
+    fi
+  done
 }
 
 validate_gate_1() {
@@ -201,22 +218,22 @@ validate_gate_8() {
 }
 
 # ─── Gate numeric mapping ───
-# Convert current_gate to a comparable number (0.5 → 05 for ordering)
+# Convert current_gate to a comparable number.
+# Delivery verification is a Gate 0 exit criterion checked inline.
 gate_to_num() {
   local g="$1"
   case "$g" in
-    0)   echo 0 ;;
-    0.5) echo 1 ;;
-    1)   echo 2 ;;
-    2)   echo 3 ;;
-    3)   echo 4 ;;
-    4)   echo 5 ;;
-    5)   echo 6 ;;
-    6)   echo 7 ;;
-    7)   echo 8 ;;
-    8)   echo 9 ;;
-    9)   echo 10 ;;
-    *)   echo -1 ;;
+    0) echo 0 ;;
+    1) echo 1 ;;
+    2) echo 2 ;;
+    3) echo 3 ;;
+    4) echo 4 ;;
+    5) echo 5 ;;
+    6) echo 6 ;;
+    7) echo 7 ;;
+    8) echo 8 ;;
+    9) echo 9 ;;
+    *) echo -1 ;;
   esac
 }
 
@@ -228,7 +245,7 @@ if [[ "$TARGET_NUM" -eq -1 ]]; then
     hookSpecificOutput: {
       hookEventName: "PreToolUse",
       permissionDecision: "deny",
-      permissionDecisionReason: ("Invalid gate value: " + $gate + ". Expected: 0, 0.5, 1-9.")
+      permissionDecisionReason: ("Invalid gate value: " + $gate + ". Expected: 0-9.")
     }
   }'
   exit 0
@@ -254,43 +271,42 @@ fi
 # ─── Progressive validation ───
 # Validate all gates that should be completed before TARGET_GATE
 
+# Gate 0 completion (TDD RED/GREEN) AND its inline delivery verification exit
+# criterion are both required before progressing to Gate 1.
 if [[ "$TARGET_NUM" -ge 1 ]]; then
   validate_gate_0
+  validate_delivery_verification
 fi
 
 if [[ "$TARGET_NUM" -ge 2 ]]; then
-  validate_gate_05
-fi
-
-if [[ "$TARGET_NUM" -ge 3 ]]; then
   validate_gate_1
 fi
 
-if [[ "$TARGET_NUM" -ge 4 ]]; then
+if [[ "$TARGET_NUM" -ge 3 ]]; then
   validate_gate_2
 fi
 
-if [[ "$TARGET_NUM" -ge 5 ]]; then
+if [[ "$TARGET_NUM" -ge 4 ]]; then
   validate_gate_3
 fi
 
-if [[ "$TARGET_NUM" -ge 6 ]]; then
+if [[ "$TARGET_NUM" -ge 5 ]]; then
   validate_gate_4
 fi
 
-if [[ "$TARGET_NUM" -ge 7 ]]; then
+if [[ "$TARGET_NUM" -ge 6 ]]; then
   validate_gate_5
 fi
 
-if [[ "$TARGET_NUM" -ge 8 ]]; then
+if [[ "$TARGET_NUM" -ge 7 ]]; then
   validate_gate_6
 fi
 
-if [[ "$TARGET_NUM" -ge 9 ]]; then
+if [[ "$TARGET_NUM" -ge 8 ]]; then
   validate_gate_7
 fi
 
-if [[ "$TARGET_NUM" -ge 10 ]]; then
+if [[ "$TARGET_NUM" -ge 9 ]]; then
   validate_gate_8
 fi
 
@@ -306,8 +322,8 @@ if [[ ${#errors[@]} -gt 0 ]]; then
   recovery_steps=()
   for err in "${errors[@]}"; do
     case "$err" in
-      *"Gate 0:"*)   recovery_steps+=("Gate 0: Load Skill(ring:dev-implementation), dispatch backend-engineer agent with TDD cycle") ;;
-      *"Gate 0.5:"*) recovery_steps+=("Gate 0.5: Load Skill(ring:dev-delivery-verification), verify all requirements delivered") ;;
+      *"Gate 0 exit criteria:"*) recovery_steps+=("Gate 0 exit criteria: Re-dispatch ring:dev-implementation for the affected subtask; it runs delivery verification inline at Step 7 (Delivery Verification Exit Check). Do NOT dispatch ring:dev-delivery-verification — deprecated.") ;;
+      *"Gate 0:"*)              recovery_steps+=("Gate 0: Load Skill(ring:dev-implementation), dispatch backend-engineer agent with TDD cycle") ;;
       *"Gate 1"*)    recovery_steps+=("Gate 1: Load Skill(ring:dev-devops), dispatch ring:devops-engineer") ;;
       *"Gate 2"*)    recovery_steps+=("Gate 2: Load Skill(ring:dev-sre), dispatch ring:sre") ;;
       *"Gate 3"*)    recovery_steps+=("Gate 3: Load Skill(ring:dev-unit-testing), dispatch ring:qa-analyst (test_mode=unit, coverage >= 85%)") ;;
@@ -326,11 +342,22 @@ if [[ ${#errors[@]} -gt 0 ]]; then
   TASK_TITLE=$(echo "$NEW_STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].title // empty")
   # Derive last contiguously valid gate using the SAME predicates as the validators
   # (not just status == completed — also checks evidence thresholds)
-  LAST_COMPLETED_GATE=$(echo "$TASK_GATES" | jq -r '
+  # Delivery verification is tracked per-subtask at
+  # tasks[i].subtasks[j].gate_progress.implementation.delivery_verified and
+  # enforced as a Gate 0 exit criterion (see validate_delivery_verification).
+  # Determine if any past-Gate-0 subtask lacks delivery verification.
+  DELIVERY_VERIFIED_ALL=$(echo "$NEW_STATE" | jq -r --argjson ti "$CURRENT_TASK_INDEX" '
+    (.tasks[$ti].subtasks // [])
+    | map(select((.current_gate // 0) >= 1))
+    | if length == 0 then "true"
+      else (map(.gate_progress.implementation.delivery_verified // false) | all) | tostring
+      end
+  ')
+
+  LAST_COMPLETED_GATE=$(echo "$TASK_GATES" | jq -r --arg dv "$DELIVERY_VERIFIED_ALL" '
     if (.implementation.tdd_red.status != "completed") or (.implementation.tdd_green.status != "completed") then "none"
-    elif .delivery_verification.status != "completed" then "0"
-    elif (.delivery_verification.requirements_total // 0) > 0 and (.delivery_verification.requirements_delivered // 0) < (.delivery_verification.requirements_total // 0) then "0"
-    elif .devops.status != "completed" then "0.5"
+    elif $dv != "true" then "0"
+    elif .devops.status != "completed" then "0"
     elif .sre.status != "completed" then "1"
     elif .unit_testing.status != "completed" then "2"
     elif (.unit_testing.coverage_actual // 0) < 85 then "2"

@@ -215,9 +215,32 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 
 ---
 
-## Development Cycle (10-gate)
+## Development Cycle (10-gate — cadence-classified)
 
-The **ring:dev-cycle** skill orchestrates task execution through **10 gates** (Gates 0–9, with Gate 0.5 for delivery verification): implementation (Gate 0) → delivery verification (Gate 0.5) → devops (Gate 1) → SRE (Gate 2) → unit-testing (Gate 3) → fuzz-testing (Gate 4) → property-testing (Gate 5) → integration-testing (Gate 6) → chaos-testing (Gate 7) → review (Gate 8) → validation (Gate 9). Multi-tenant adaptation is integrated into Gate 0. All gates are MANDATORY. Invoke with `/ring:dev-cycle [tasks-file]` or Skill tool `ring:dev-cycle`. State is persisted to `docs/ring:dev-cycle/current-cycle.json`. See [dev-team/skills/dev-cycle/SKILL.md](../dev-team/skills/dev-cycle/SKILL.md) for full protocol.
+`ring:dev-cycle` orchestrates 10 gates at three cadences. Every gate runs; only the frequency changes.
+
+**Subtask cadence** (runs for each subtask, or for the task itself if no subtasks):
+- Gate 0 — Implementation (includes Delivery Verification exit check inline)
+- Gate 3 — Unit Testing
+- Gate 9 — Validation
+
+**Task cadence** (runs once per task, after all subtasks complete the three subtask-cadence gates):
+- Gate 1 — DevOps
+- Gate 2 — SRE
+- Gate 4 — Fuzz Testing
+- Gate 5 — Property Testing
+- Gate 6 — Integration Testing (write mode)
+- Gate 7 — Chaos Testing (write mode)
+- Gate 8 — Review (8 parallel reviewers on cumulative task diff)
+
+**Cycle cadence** (runs once per cycle at the end):
+- Gate 6 execute — Integration Testing (execute mode)
+- Gate 7 execute — Chaos Testing (execute mode)
+- Multi-Tenant Verify
+- `ring:dev-report` aggregate
+- Final Commit
+
+Inputs for task-cadence gates receive UNION of changed files across all subtasks of the task. Multi-tenant adaptation is integrated into Gate 0. All gates are MANDATORY. Invoke with `/ring:dev-cycle [tasks-file]` or Skill tool `ring:dev-cycle`. State is persisted to `docs/ring:dev-cycle/current-cycle.json`. See `dev-team/skills/shared-patterns/gate-cadence-classification.md` for full taxonomy and [dev-team/skills/dev-cycle/SKILL.md](../dev-team/skills/dev-cycle/SKILL.md) for full protocol.
 
 ---
 

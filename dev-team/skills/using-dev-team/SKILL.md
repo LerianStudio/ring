@@ -276,7 +276,7 @@ Remember:
 
 *Implementation & Verification:*
 - ring:dev-implementation (Gate 0 - code implementation with TDD RED-GREEN phases)
-- ring:dev-delivery-verification (Delivery verification - confirms requested features are reachable code)
+- ring:dev-delivery-verification — DEPRECATED: functionality merged into ring:dev-implementation Step 7 (Delivery Verification Exit Check). Do not dispatch directly.
 - ring:dev-validation (Gate 9 - validates acceptance criteria met, requires user approval)
 
 *Infrastructure & DevOps:*
