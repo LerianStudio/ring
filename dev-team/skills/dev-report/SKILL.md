@@ -7,7 +7,7 @@ description: |
 
 trigger: |
   - Invoked EXACTLY ONCE per dev-cycle at Step 12.1 of ring:dev-cycle (and equivalent in ring:dev-cycle-frontend).
-  - Per-task invocations at Step 11.2 were REMOVED in R4 — per-task metrics are accumulated into state.tasks[*].accumulated_metrics and analyzed in aggregate here.
+  - Per-task metrics are accumulated into state.tasks[*].accumulated_metrics during the cycle and analyzed here in aggregate at cycle end.
 
 skip_when: |
   - Cycle still in progress -> wait for Step 12.1 (cycle completion)
@@ -273,7 +273,7 @@ If you're thinking "perfect outcome, skip metrics" → STOP. This is Red Flag at
 
 **After cycle completion, gather from `agent_outputs` in state file:**
 
-### New (R4): `state.tasks[*].accumulated_metrics`
+### Aggregated Task Metrics: `state.tasks[*].accumulated_metrics`
 
 Per-task metrics accumulated during the cycle at each task's approval checkpoint (Step 11.2 of ring:dev-cycle). Use these to construct the cycle-wide analysis instead of single-task analysis.
 

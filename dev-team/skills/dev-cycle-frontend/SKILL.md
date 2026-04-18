@@ -675,9 +675,9 @@ State is persisted to `docs/ring:dev-cycle-frontend/current-cycle.json`:
   "state_path": "docs/ring:dev-cycle-frontend/current-cycle.json",
   "cycle_type": "frontend",
   "ui_library_mode": "sindarian-ui | fallback-only",
-  "_comment_cached_standards": "Populated by Step 1.5 (Standards Pre-Cache). Dictionary of URL → {fetched_at, content}. Sub-skills MUST read from here instead of calling WebFetch. See plan Section 3.1.",
+  "_comment_cached_standards": "Populated by Step 1.5 (Standards Pre-Cache). Dictionary of URL → {fetched_at, content}. Sub-skills MUST read from here instead of calling WebFetch.",
   "cached_standards": {},
-  "_comment_visual_report_granularity": "Default 'task' (generate visual report once per task). Opt-in 'subtask' to generate per-subtask reports. See plan Section 3.3.",
+  "_comment_visual_report_granularity": "Default 'task' (generate visual report once per task). Opt-in 'subtask' to generate per-subtask reports.",
   "visual_report_granularity": "task",
   "backend_handoff": {
     "loaded": true,
@@ -711,7 +711,7 @@ State is persisted to `docs/ring:dev-cycle-frontend/current-cycle.json`:
           "id": "ST-001-01",
           "file": "subtasks/T-001/ST-001-01.md",
           "status": "pending|completed",
-          "_comment_subtask_gate_progress": "Per-subtask tracking of subtask-level gates (0, 3, 8). Added in plan Section 3 / Edit 4.2.4. Task-level gates (1,2,4,5,6,7) live on state.tasks[i].gate_progress instead.",
+          "_comment_subtask_gate_progress": "Per-subtask tracking of subtask-level gates (0, 3, 8). Task-level gates (1,2,4,5,6,7) live on state.tasks[i].gate_progress instead.",
           "gate_progress": {
             "implementation": {"status": "pending|completed"},
             "unit_testing": {"status": "pending|completed", "coverage_actual": 0.0},
@@ -891,7 +891,7 @@ State is persisted to `docs/ring:dev-cycle-frontend/current-cycle.json`:
           "timestamp": "ISO timestamp"
         }
       },
-      "_comment_accumulated_metrics": "Task-level rollup of gate metrics. Populated after the task-level gates complete. Cycle-end dev-report reads accumulated_metrics from all tasks. See plan Section 3 / Edit 4.2.4.",
+      "_comment_accumulated_metrics": "Task-level rollup of gate metrics. Populated after the task-level gates complete. Cycle-end dev-report reads accumulated_metrics from all tasks.",
       "accumulated_metrics": {
         "gate_durations_ms": {},
         "review_iterations": 0,
@@ -997,8 +997,8 @@ Write tool:
 
 **VISUAL CHANGE REPORT (subtask-level — OPT-IN ONLY):**
 - Default: SKIP per-subtask visual report. Task-level aggregate report is generated at the Task Checkpoint below.
-- Opt-in: If `state.visual_report_granularity == "subtask"`, generate per-subtask report
-  as previously documented. Default value is "task".
+- Opt-in: If `state.visual_report_granularity == "subtask"`, generate per-subtask report.
+  Default value is "task".
 - Rationale: Task-level aggregate covers all subtasks' diffs; per-subtask reports are
   rarely consumed and cost one visualize dispatch each.
 
@@ -1112,7 +1112,7 @@ Check: Does docs/PROJECT_RULES.md exist?
 
 ## Step 2-10: Gate Execution
 
-**See [Execution Loop Structure](#execution-loop-structure-the-prancy-bentley-cadence-model) below for the full subtask/task cadence model.** Step headings below indicate cadence explicitly.
+**See [Execution Loop Structure](#execution-loop-structure-cadence-model) below for the full subtask/task cadence model.** Step headings below indicate cadence explicitly.
 
 ### Step 2: Gate 0 - Implementation (Per Execution Unit)
 

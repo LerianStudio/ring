@@ -34,7 +34,7 @@ sequence:
   before: [ring:dev-report]
 
 related:
-  complementary: [ring:dev-implementation, ring:dev-devops, ring:dev-sre, ring:dev-unit-testing, ring:codereview, ring:dev-validation, ring:dev-report, ring:dev-delivery-verification]
+  complementary: [ring:dev-implementation, ring:dev-devops, ring:dev-sre, ring:dev-unit-testing, ring:codereview, ring:dev-validation, ring:dev-report]
 
 verification:
   automated:
@@ -43,7 +43,7 @@ verification:
       success_pattern: "exit 0"
     - command: "cat docs/ring:dev-cycle/current-cycle.json 2>/dev/null || cat docs/ring:dev-refactor/current-cycle.json | jq '.current_gate'"
       description: "Current gate is valid"
-      success_pattern: '[0-5]|0\.5'
+      success_pattern: '[0-9]'
   manual:
     - "All gates for current task show PASS in state file"
     - "No tasks have status 'blocked' for more than 3 iterations"
@@ -570,6 +570,8 @@ Execute Final Commit
 - **Integration / Chaos (write):** Test scenarios span multiple subtasks; writing them once per task avoids churn as later subtasks land.
 - **Review (Gate 8):** Cumulative task diff shows ALL subtasks' changes at once. Cross-subtask interactions (contract drift, hidden coupling) are MORE visible at this cadence, not less.
 
+**Subtask failure semantics:** If any subtask's Gate 0, Gate 3, or Gate 9 fails terminally (after retry budget exhausted), the task MUST enter `status: failed`. Task-cadence gates (1, 2, 4, 5, 6w, 7w, 8) MUST NOT dispatch. Remaining subtasks in that task MUST NOT execute. Cycle halts at the checkpoint for user decision (abort / fix-and-retry / skip-task).
+
 ## Commit Timing
 
 **User selects when commits happen (Step 7 of initialization).**
@@ -641,9 +643,9 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
   "cycle_type": "feature | refactor",
   "execution_mode": "manual_per_subtask|manual_per_task|automatic",
   "commit_timing": "per_subtask|per_task|at_end",
-  "_comment_cached_standards": "Populated by Step 1.5 (Standards Pre-Cache). Dictionary of URL → {fetched_at, content}. Sub-skills MUST read from here instead of calling WebFetch. See plan Section 3.1.",
+  "_comment_cached_standards": "Populated by Step 1.5 (Standards Pre-Cache). Dictionary of URL → {fetched_at, content}. Sub-skills MUST read from here instead of calling WebFetch.",
   "cached_standards": {},
-  "_comment_visual_report_granularity": "Default 'task' (generate visual report once per task). Opt-in 'subtask' to generate per-subtask reports. See plan Section 3.3.",
+  "_comment_visual_report_granularity": "Default 'task' (generate visual report once per task). Opt-in 'subtask' to generate per-subtask reports.",
   "visual_report_granularity": "task",
   "custom_prompt": {
     "type": "string",
@@ -678,7 +680,7 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
       "title": "Task title",
       "status": "pending|in_progress|completed|failed|blocked",
       "feedback_loop_completed": false,
-      "_comment_accumulated_metrics": "Populated at Step 11.2 (Task Approval Checkpoint). Aggregated at cycle end by ring:dev-report (Step 12.1). See plan Section 4.1.7 / R4.",
+      "_comment_accumulated_metrics": "Populated at Step 11.2 (Task Approval Checkpoint). Aggregated at cycle end by ring:dev-report (Step 12.1).",
       "accumulated_metrics": {
         "gate_durations_ms": {},
         "review_iterations": 0,
@@ -690,7 +692,7 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
           "LOW": 0
         }
       },
-      "_comment_subtask_gate_progress": "Per plan Section 3.2 / R5B — subtask-level gate_progress holds SUBTASK-CADENCE gates only: implementation (Gate 0), unit_testing (Gate 3), validation (Gate 9). Task-cadence gates (1, 2, 4, 5, 6w, 7w, 8) live in task.gate_progress, not here.",
+      "_comment_subtask_gate_progress": "Subtask-level gate_progress holds SUBTASK-CADENCE gates only: implementation (Gate 0), unit_testing (Gate 3), validation (Gate 9). Task-cadence gates (1, 2, 4, 5, 6w, 7w, 8) live in task.gate_progress, not here.",
       "subtasks": [
         {
           "id": "ST-001-01",
@@ -727,7 +729,7 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
           }
         }
       ],
-      "_comment_task_gate_progress": "Per plan Section 3.2 / R5B — task-level gate_progress holds TASK-CADENCE gates only: devops (1), sre (2), fuzz_testing (4), property_testing (5), integration_testing (6w), chaos_testing (7w), review (8). Subtask-cadence gates (0, 3, 9) live in each subtask's gate_progress, not here. Gates 6/7 keep write_mode and execute_mode phases; execute_mode transitions at cycle end (Step 12.1).",
+      "_comment_task_gate_progress": "Task-level gate_progress holds TASK-CADENCE gates only: devops (1), sre (2), fuzz_testing (4), property_testing (5), integration_testing (6w), chaos_testing (7w), review (8). Subtask-cadence gates (0, 3, 9) live in each subtask's gate_progress, not here. Gates 6/7 keep write_mode and execute_mode phases; execute_mode transitions at cycle end (Step 12.1).",
       "gate_progress": {
         "devops": {"status": "pending"},
         "sre": {"status": "pending"},
@@ -1923,7 +1925,7 @@ detected_dependencies = []
 <cannot_skip>
 MANDATORY: Multi-tenant dual-mode applies to all Go services (no exceptions). Gate 0 implements dual-mode from the start using lib-commons v4 resolvers. Gate 0.5G verifies compliance. This detection captures the CURRENT state of the codebase for context.
 
-See [multi-tenant.md](../../docs/standards/golang/multi-tenant.md) for the canonical model and [dev-delivery-verification](../dev-delivery-verification/SKILL.md) Step 3.5G for the verification checks.
+See [multi-tenant.md](../../docs/standards/golang/multi-tenant.md) for the canonical model. Verification checks are performed inline by Gate 0.5G (Step 12.0.5) of this skill.
 </cannot_skip>
 
 ```text
@@ -2178,7 +2180,7 @@ Verify that the dev-implementation handoff includes `delivery_verification` fiel
     - tests_written
     - tdd_red_evidence
     - tdd_green_evidence
-    - delivery_verification:        # NEW — added in R3
+    - delivery_verification:
         result: "PASS|PARTIAL|FAIL"
         requirements_total: int
         requirements_delivered: int
@@ -3222,8 +3224,8 @@ For current execution unit:
 
 0b. **VISUAL CHANGE REPORT (subtask-level — OPT-IN ONLY):**
    - Default: SKIP per-subtask visual report. Task-level aggregate report is generated in Step 11.2.
-   - Opt-in: If `state.visual_report_granularity == "subtask"`, generate per-subtask report
-     as previously documented. Default value is "task".
+   - Opt-in: If `state.visual_report_granularity == "subtask"`, generate per-subtask report.
+     Default value is "task".
    - Rationale: Task-level aggregate covers all subtasks' diffs; per-subtask reports are
      rarely consumed and cost one visualize dispatch each.
 
@@ -3463,7 +3465,7 @@ All units have written/updated test code during their Gate 6-7 passes. Now execu
 3. MANDATORY: ⛔ Save state to file — Write tool → [state.state_path]
 ```
 
-**Note:** The full ring:dev-multi-tenant skill (12 gates) is now used ONLY for migrating legacy codebases that were written before dual-mode was standard. For new development via dev-cycle, all multi-tenant compliance is handled by Gate 0 (implementation) + Gate 0.5G (verification).
+**Note:** The full ring:dev-multi-tenant skill (12 gates) targets legacy single-tenant codebases being migrated to dual-mode. For new development via dev-cycle, multi-tenant compliance is handled inline by Gate 0 (implementation) + Gate 0.5G (verification).
 
 ---
 
