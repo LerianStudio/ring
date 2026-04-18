@@ -1,5 +1,21 @@
 # Ring-default Changelog
 
+## [1.25.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.25.0)
+
+- **Features**
+  - Added multi-tenant and lib-commons agents to the review cycle.
+
+- **Improvements**
+  - Aligned all documentation with the new 10-reviewer workflow.
+  - Updated skill documentation to reflect major v5.0.2 release of lib-commons.
+  - Tuned context reminder hook to reduce token consumption.
+
+Contributors: @fred
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.24.0...ring-default@1.25.0)
+
+---
+
 ## [1.24.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.24.0)
 
 - **Features**
