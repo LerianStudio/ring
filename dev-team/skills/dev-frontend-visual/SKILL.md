@@ -3,6 +3,7 @@ name: ring:dev-frontend-visual
 description: |
   Gate 4 of frontend development cycle - ensures all components have snapshot
   tests covering all states, viewports, and edge cases.
+  Runs at TASK cadence (after all subtasks complete Gate 0 + Gate 3 + Gate 8).
 
 trigger: |
   - After unit testing complete (Gate 3)
@@ -31,11 +32,15 @@ input_schema:
   required:
     - name: unit_id
       type: string
-      description: "Task or subtask identifier"
+      description: "Task identifier (always a TASK id; runs at task cadence)"
     - name: implementation_files
       type: array
       items: string
-      description: "Files from Gate 0 implementation"
+      description: "Union of changed files across all subtasks of this task"
+    - name: gate0_handoffs
+      type: array
+      items: object
+      description: "Array of per-subtask implementation handoffs (one per subtask). NOT a single gate0_handoff object."
   optional:
     - name: ux_criteria_path
       type: string
@@ -114,7 +119,21 @@ Ensure all frontend components have **snapshot tests** covering all states, resp
 
 ## Standards Reference
 
-**MANDATORY:** Load testing-visual.md standards via WebFetch.
+> **Standards Source (Cache-First Pattern):** This sub-skill reads standards from `state.cached_standards` populated by dev-cycle Step 1.5. If invoked outside a cycle (standalone), it falls back to direct WebFetch with a warning. See `shared-patterns/standards-cache-protocol.md` for protocol details.
+
+**MANDATORY:** Load testing-visual.md standards using the cache-first pattern below.
+
+Required URL: `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/frontend/testing-visual.md`
+
+```yaml
+For the required standards URL above:
+  IF state.cached_standards[url] exists:
+    → Read content from state.cached_standards[url].content
+    → Log: "Using cached standard: {url} (fetched {state.cached_standards[url].fetched_at})"
+  ELSE:
+    → WebFetch url (fallback — should not happen if orchestrator ran Step 1.5)
+    → Log warning: "Standard {url} was not pre-cached; fetched inline"
+```
 
 <fetch_required>
 https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/frontend/testing-visual.md
@@ -126,8 +145,9 @@ https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards
 
 ```text
 REQUIRED INPUT:
-- unit_id: [task/subtask being tested]
-- implementation_files: [files from Gate 0]
+- unit_id: [TASK id — this gate runs at task cadence, aggregating all subtasks]
+- implementation_files: [union of changed files across all subtasks of the task]
+- gate0_handoffs: [array of per-subtask implementation handoffs, one per subtask]
 
 OPTIONAL INPUT:
 - ux_criteria_path: [path to ux-criteria.md]
@@ -135,6 +155,9 @@ OPTIONAL INPUT:
 
 if any REQUIRED input is missing:
   → STOP and report: "Missing required input: [field]"
+
+if gate0_handoffs is not an array:
+  → STOP and report: "gate0_handoffs must be an array of per-subtask handoffs"
 ```
 
 ## Step 2: Dispatch Frontend QA Analyst Agent (Visual Mode)
@@ -148,9 +171,12 @@ Task tool:
     **Standards:** Load testing-visual.md
 
     **Input:**
-    - Unit ID: {unit_id}
-    - Implementation Files: {implementation_files}
+    - Task ID: {unit_id} (task-level — aggregates all subtasks)
+    - Implementation Files (union across all subtasks): {implementation_files}
+    - Per-Subtask Gate 0 Handoffs: {gate0_handoffs}
     - UX Criteria: {ux_criteria_path or "N/A"}
+
+    **Scope:** Validate visual/snapshot coverage for the task (all subtasks aggregated), not a single subtask.
 
     **Requirements:**
     1. Create snapshot tests for all components

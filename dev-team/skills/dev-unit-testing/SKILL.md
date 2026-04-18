@@ -204,9 +204,23 @@ Task:
     ## Implementation Files to Test
     [list implementation_files]
 
+    ## Standards Source (Cache-First Pattern)
+
+    **Standards Source (Cache-First Pattern):** This sub-skill reads standards from `state.cached_standards` populated by dev-cycle Step 1.5. If invoked outside a cycle (standalone), it falls back to direct WebFetch with a warning. See `shared-patterns/standards-cache-protocol.md` for protocol details.
+
     ## Standards Reference
+
     For Go: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang.md
     For TS: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md
+
+    **Cache-first loading protocol:**
+    For each required standards URL:
+      IF state.cached_standards[url] exists:
+        → Read content from state.cached_standards[url].content
+        → Log: "Using cached standard: {url} (fetched {state.cached_standards[url].fetched_at})"
+      ELSE:
+        → WebFetch url (fallback — should not happen if orchestrator ran Step 1.5)
+        → Log warning: "Standard {url} was not pre-cached; fetched inline"
 
     Focus on: Testing Patterns section
 

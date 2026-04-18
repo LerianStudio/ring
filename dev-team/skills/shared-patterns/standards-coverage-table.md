@@ -4,6 +4,18 @@ This file defines the MANDATORY output format for agents comparing codebases aga
 
 ---
 
+## Standards Source (new, since "prancy Bentley" speedup)
+
+Agents and sub-skills MUST read standards from `state.cached_standards` (populated by
+dev-cycle Step 1.5) instead of calling WebFetch directly. This eliminates ~15–25
+redundant network fetches per cycle.
+
+If a sub-skill is invoked outside of a dev-cycle context (standalone testing, manual
+dispatch), it MAY fall back to direct WebFetch — but it MUST log a warning and
+operators should expect slower execution.
+
+---
+
 ## ⛔ CRITICAL: All Sections Are Required
 
 **This is NON-NEGOTIABLE. Every section listed in the Agent → Standards Section Index below MUST be checked.**

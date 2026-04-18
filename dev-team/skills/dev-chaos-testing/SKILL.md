@@ -3,6 +3,8 @@ name: ring:dev-chaos-testing
 description: |
   Gate 7 of development cycle - ensures chaos tests exist using Toxiproxy
   to verify graceful degradation under connection loss, latency, and partitions.
+  Runs at TASK cadence (after all subtasks complete Gate 0 + Gate 3 + Gate 9):
+  write mode runs per task, execute mode runs per cycle.
 
 trigger: |
   - After integration testing complete (Gate 6)
@@ -31,7 +33,7 @@ input_schema:
   required:
     - name: unit_id
       type: string
-      description: "Task or subtask identifier"
+      description: "TASK identifier (not a subtask id). This skill's write mode runs at TASK cadence — unit_id is always a task id. Execute mode runs per cycle."
     - name: external_dependencies
       type: array
       items: string
@@ -40,6 +42,13 @@ input_schema:
       type: string
       enum: [go, typescript]
       description: "Programming language"
+    - name: implementation_files
+      type: array
+      items: string
+      description: "Union of changed files across all subtasks of this task."
+    - name: gate0_handoffs
+      type: array
+      description: "Array of per-subtask implementation handoffs (one entry per subtask). NOT a single gate0_handoff object."
   optional:
     - name: gate6_handoff
       type: object
@@ -111,9 +120,24 @@ Ensure code handles **failure conditions gracefully** by injecting faults using 
 
 ---
 
+## Standards Source (Cache-First Pattern)
+
+**Standards Source (Cache-First Pattern):** This sub-skill reads standards from `state.cached_standards` populated by dev-cycle Step 1.5. If invoked outside a cycle (standalone), it falls back to direct WebFetch with a warning. See `shared-patterns/standards-cache-protocol.md` for protocol details.
+
 ## Standards Reference
 
-**MANDATORY:** Load testing-chaos.md standards via WebFetch.
+**MANDATORY:** Load testing-chaos.md standards via the cache-first pattern below.
+
+URL: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/testing-chaos.md
+
+**Cache-first loading protocol:**
+For each required standards URL:
+  IF state.cached_standards[url] exists:
+    → Read content from state.cached_standards[url].content
+    → Log: "Using cached standard: {url} (fetched {state.cached_standards[url].fetched_at})"
+  ELSE:
+    → WebFetch url (fallback — should not happen if orchestrator ran Step 1.5)
+    → Log warning: "Standard {url} was not pre-cached; fetched inline"
 
 <fetch_required>
 https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/testing-chaos.md
@@ -173,9 +197,11 @@ PM team task files often omit external_dependencies. If the codebase uses postgr
 
 ```text
 REQUIRED INPUT:
-- unit_id: [task/subtask being tested]
+- unit_id: [TASK id — write mode runs at task cadence, not per subtask]
 - external_dependencies: [postgres, mongodb, valkey, redis, rabbitmq, etc.] (from input OR auto-detected in Step 0)
 - language: [go|typescript]
+- implementation_files: [union of changed files across all subtasks of this task]
+- gate0_handoffs: [array of per-subtask Gate 0 handoffs — one entry per subtask]
 
 OPTIONAL INPUT:
 - gate6_handoff: [full Gate 6 output]

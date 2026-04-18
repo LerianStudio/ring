@@ -96,6 +96,23 @@ This principle is NON-NEGOTIABLE for all dev-team skills.
 ✅ Task(subagent_type="ring:finops-automation", ...)
 ```
 
+## Gate Cadence Classification
+
+Gates in dev-cycle operate at three cadences:
+
+| Cadence | Gates (backend) | Gates (frontend) |
+|---------|-----------------|------------------|
+| **Subtask** | 0 (impl + delivery verify), 3 (unit test), 9 (validation) | 0, 3, 8 |
+| **Task** | 1 (devops), 2 (sre), 4 (fuzz), 5 (property), 6 write, 7 write, 8 (review) | 1, 2, 4, 5, 6, 7 |
+| **Cycle** | 6 execute, 7 execute, multi-tenant verify, dev-report, final commit | (minimal cycle-level) |
+
+Sub-skills that run at task cadence receive input aggregated across all subtasks of
+the task (e.g., `implementation_files` = UNION of all subtasks' changed files).
+
+Sub-skills that run at subtask cadence receive input scoped to that single subtask.
+
+See `shared-patterns/gate-cadence-classification.md` for the full classification and rationale.
+
 ## Gate/Step → Agent Mapping
 
 ### ring:dev-cycle Gates

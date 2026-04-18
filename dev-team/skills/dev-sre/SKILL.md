@@ -3,6 +3,7 @@ name: ring:dev-sre
 description: |
   Gate 2 of the development cycle. VALIDATES that observability was correctly implemented
   by developers. Does not implement observability code - only validates it.
+  Runs at TASK cadence (after all subtasks complete Gate 0 + Gate 3 + Gate 9).
 
 trigger: |
   - Gate 2 of development cycle
@@ -32,7 +33,7 @@ input_schema:
   required:
     - name: unit_id
       type: string
-      description: "Task or subtask identifier being validated"
+      description: "TASK identifier (not a subtask id). This skill runs at TASK cadence — unit_id is always a task id."
     - name: language
       type: string
       enum: [go, typescript, python]
@@ -47,15 +48,15 @@ input_schema:
     - name: implementation_files
       type: array
       items: string
-      description: "List of files created/modified in Gate 0"
+      description: "Union of changed files across all subtasks of this task."
+    - name: gate0_handoffs
+      type: array
+      description: "Array of per-subtask implementation handoffs (one entry per subtask). NOT a single gate0_handoff object."
   optional:
     - name: external_dependencies
       type: array
       items: string
       description: "External services called (HTTP, gRPC, queues)"
-    - name: gate0_handoff
-      type: object
-      description: "Summary from Gate 0 implementation"
     - name: gate1_handoff
       type: object
       description: "Summary from Gate 1 DevOps setup"
@@ -142,15 +143,15 @@ This skill VALIDATES that observability was correctly implemented by developers:
 
 ```text
 REQUIRED INPUT (from ring:dev-cycle orchestrator):
-- unit_id: [task/subtask being validated]
+- unit_id: [TASK id — runs at task cadence, not per subtask]
 - language: [go|typescript|python]
 - service_type: [api|worker|batch|cli|library]
 - implementation_agent: [agent that did Gate 0]
-- implementation_files: [list of files from Gate 0]
+- implementation_files: [union of changed files across all subtasks of this task]
+- gate0_handoffs: [array of per-subtask Gate 0 handoffs — one entry per subtask]
 
 OPTIONAL INPUT:
 - external_dependencies: [HTTP clients, gRPC clients, queues]
-- gate0_handoff: [summary from Gate 0]
 - gate1_handoff: [summary from Gate 1]
 
 if any REQUIRED input is missing:
@@ -191,8 +192,22 @@ Task:
     - **Files to Validate:** [implementation_files]
     - **External Dependencies:** [external_dependencies or "None"]
 
+    ## Standards Source (Cache-First Pattern)
+
+    **Standards Source (Cache-First Pattern):** This sub-skill reads standards from `state.cached_standards` populated by dev-cycle Step 1.5. If invoked outside a cycle (standalone), it falls back to direct WebFetch with a warning. See `shared-patterns/standards-cache-protocol.md` for protocol details.
+
     ## Standards Reference
-    WebFetch: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/sre.md
+
+    URL: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/sre.md
+
+    **Cache-first loading protocol:**
+    For each required standards URL:
+      IF state.cached_standards[url] exists:
+        → Read content from state.cached_standards[url].content
+        → Log: "Using cached standard: {url} (fetched {state.cached_standards[url].fetched_at})"
+      ELSE:
+        → WebFetch url (fallback — should not happen if orchestrator ran Step 1.5)
+        → Log warning: "Standard {url} was not pre-cached; fetched inline"
 
     ## Your Role
     - VALIDATE that observability is implemented correctly

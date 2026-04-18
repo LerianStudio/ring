@@ -7,15 +7,9 @@ description: |
   functioning in the running application?" Applies to ANY task type: features, refactors,
   fixes, infrastructure, API endpoints, middleware, business logic, integrations.
 
-trigger: |
-  - After Gate 0 (implementation) completes, before advancing to Gate 1
-  - After any refactoring task claims completion
-  - When code is generated/scaffolded and needs integration verification
+trigger: "Deprecated — use ring:dev-implementation instead (includes these checks as Gate 0 exit criteria)."
 
-skip_when: |
-  - Not inside a development cycle (ring:dev-cycle or ring:dev-refactor)
-  - Task is documentation-only, configuration-only, or non-code
-  - No implementation was produced in Gate 0 (nothing to verify)
+skip_when: "always — this skill is preserved but not dispatched in normal cycles."
 
 NOT_skip_when: |
   - "Code compiles" → Compilation ≠ integration. Dead code compiles.
@@ -86,6 +80,23 @@ output_schema:
     - name: remediation_items
       type: integer
       description: "Number of fix instructions returned to Gate 0 (0 when PASS)"
+---
+
+---
+
+> ⚠️ **DEPRECATION NOTICE (since "prancy Bentley" speedup)**
+>
+> This skill's functionality has been **inlined into `ring:dev-implementation` as Step 7:
+> Delivery Verification Exit Check**. New cycles should NOT dispatch this skill as a
+> separate gate — the checks run as exit criteria of Gate 0.
+>
+> This file is preserved for:
+> 1. Historical reference of the full check list
+> 2. External consumers that may still reference the skill by name
+> 3. Potential future use as a standalone audit tool outside the cycle
+>
+> If you are modifying dev-cycle or dev-implementation, do NOT add dispatches to this skill.
+
 ---
 
 # Delivery Verification Gate

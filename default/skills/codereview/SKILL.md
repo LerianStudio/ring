@@ -3,6 +3,7 @@ name: ring:codereview
 description: |
   Gate 4 of development cycle - dispatches 8 specialized reviewers (code, business-logic,
   security, test, nil-safety, consequences, dead-code, performance) in parallel for comprehensive code review feedback.
+  Runs at TASK cadence — reviewers see cumulative diff, not per-subtask fragments.
 
 trigger: |
   - Gate 4 of development cycle
@@ -30,15 +31,30 @@ related:
 input_schema:
   required: []  # All inputs optional for standalone usage
   optional:
+    - name: scope
+      type: string
+      enum: [task, subtask]
+      default: task
+      description: "Review scope granularity. Default 'task' — reviewers see the cumulative diff of all subtasks of a task. 'subtask' is only for standalone/legacy usage."
+    - name: task_id
+      type: string
+      description: "Task identifier (when scope=task). This is the task whose cumulative diff is under review."
+    - name: subtask_ids
+      type: array
+      items: string
+      description: "All subtask identifiers covered by this task-level review."
+    - name: cumulative_diff_range
+      type: object
+      description: "Cumulative diff range for the task: {base_sha, head_sha}. base_sha is HEAD before the first subtask, head_sha is HEAD after the last subtask."
     - name: unit_id
       type: string
-      description: "Task or subtask identifier (auto-generated if not provided)"
+      description: "Task or subtask identifier (auto-generated if not provided). When scope=task, this equals task_id."
     - name: base_sha
       type: string
-      description: "Git SHA before implementation (auto-detected via git merge-base HEAD main)"
+      description: "Git SHA before implementation (auto-detected via git merge-base HEAD main). When scope=task, equals cumulative_diff_range.base_sha."
     - name: head_sha
       type: string
-      description: "Git SHA after implementation (auto-detected via git rev-parse HEAD)"
+      description: "Git SHA after implementation (auto-detected via git rev-parse HEAD). When scope=task, equals cumulative_diff_range.head_sha."
     - name: implementation_summary
       type: string
       description: "Summary of what was implemented (auto-generated from git log if not provided)"
@@ -494,6 +510,10 @@ NOTE: Input collection failures are NOT blockers.
 
 ## Step 3: Dispatch All 8 Reviewers in Parallel
 
+> **Standards Source (Cache-First Pattern):** Reviewer prompts below instruct agents to load Ring standards. When invoked inside a dev-cycle, those standards are available via `state.cached_standards` (populated by dev-cycle Step 1.5). Each reviewer reads from cache when available and falls back to direct WebFetch (with a warning) only when invoked standalone. See `shared-patterns/standards-cache-protocol.md` for protocol details.
+>
+> NOTE: The reviewer agents themselves live in `*/agents/*-reviewer.md`. The cache-first pattern inside the dispatch prompts below is the source of truth for the SKILL layer. Full cache-aware loading in the agent definitions will be addressed in a separate stream.
+
 **⛔ CRITICAL: All 8 reviewers MUST be dispatched in a SINGLE message with 8 Task calls.**
 
 ### Step 3 Mode Selection
@@ -601,6 +621,21 @@ AFTER ALL SLICES COMPLETE:
 
 The following dispatch is used when `review_state.slicing.enabled == false` (unchanged from current flow):
 
+**⛔ MANDATORY SCOPE HEADER — inject into every reviewer prompt below.**
+
+When `scope == "task"` (the default, set by `ring:dev-cycle` orchestrator), the orchestrator MUST inject the following block into each of the 8 reviewer prompts, immediately after the `## Code Review Request` / `## Business Logic Review Request` / etc. header:
+
+```markdown
+**REVIEW SCOPE: TASK-LEVEL**
+This review covers the CUMULATIVE diff of task {task_id}, which includes changes from
+{N} subtasks: {subtask_ids}. Review the full task as an integrated unit; subtask
+boundaries are implementation detail, not review boundaries.
+```
+
+Substitution: `{task_id}` = `task_id` input, `{N}` = `len(subtask_ids)`, `{subtask_ids}` = comma-separated `subtask_ids`. When `scope == "subtask"` (standalone/legacy), omit the block entirely.
+
+Additionally, when `scope == "task"`, each reviewer prompt's `**Base SHA:**` and `**Head SHA:**` MUST be populated from `cumulative_diff_range.base_sha` and `cumulative_diff_range.head_sha` respectively.
+
 ```yaml
 # Task 1: Code Reviewer
 Task:
@@ -608,7 +643,9 @@ Task:
   description: "Code review for [unit_id]"
   prompt: |
     ## Code Review Request
-    
+
+    [INJECT REVIEW SCOPE: TASK-LEVEL block here when scope=task]
+
     **Unit ID:** [unit_id]
     **Base SHA:** [base_sha]
     **Head SHA:** [head_sha]
@@ -647,9 +684,19 @@ Task:
 
     ## ⛔ Ring Standards Verification (MANDATORY)
     
-    **WebFetch the relevant standards modules and verify the changed code against them.**
+    **Load the relevant standards modules using the cache-first pattern and verify the changed code against them.**
     
-    For Go projects, WebFetch these modules based on changed files:
+    ```yaml
+    For each required standards URL below:
+      IF state.cached_standards[url] exists:
+        → Read content from state.cached_standards[url].content
+        → Log: "Using cached standard: {url} (fetched {state.cached_standards[url].fetched_at})"
+      ELSE:
+        → WebFetch url (fallback — should not happen if orchestrator ran Step 1.5)
+        → Log warning: "Standard {url} was not pre-cached; fetched inline"
+    ```
+    
+    For Go projects, load these modules based on changed files:
     Base URL: `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/`
     
     **Always load:**
@@ -665,7 +712,7 @@ Task:
     - `security.md` (if auth/middleware/validation code changed)
     - `messaging.md` (if RabbitMQ/message queue code changed)
     
-    For TypeScript: WebFetch `typescript.md`
+    For TypeScript: load `typescript.md` via the same cache-first pattern
     
     **Check the changed code against ALL applicable sections.** Use the section index from `standards-coverage-table.md`.
     
@@ -780,7 +827,19 @@ Task:
 
     ## ⛔ Ring Security Standards Verification (MANDATORY)
     
-    **WebFetch the security standards and verify changed code against them:**
+    **Load the security standards using the cache-first pattern and verify changed code against them:**
+    
+    ```yaml
+    For each required standards URL below:
+      IF state.cached_standards[url] exists:
+        → Read content from state.cached_standards[url].content
+        → Log: "Using cached standard: {url} (fetched {state.cached_standards[url].fetched_at})"
+      ELSE:
+        → WebFetch url (fallback — should not happen if orchestrator ran Step 1.5)
+        → Log warning: "Standard {url} was not pre-cached; fetched inline"
+    ```
+    
+    Required URLs:
     - `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/security.md`
     
     **Check ALL applicable sections from standards-coverage-table.md → ring:backend-engineer-golang:**
@@ -1087,9 +1146,19 @@ Task:
 
     ## ⛔ Ring Standards Verification (MANDATORY)
 
-    **WebFetch the relevant standards and verify the changed code against them.**
+    **Load the relevant standards using the cache-first pattern and verify the changed code against them.**
 
-    For Go projects, WebFetch these modules based on changed files:
+    ```yaml
+    For each required standards URL below:
+      IF state.cached_standards[url] exists:
+        → Read content from state.cached_standards[url].content
+        → Log: "Using cached standard: {url} (fetched {state.cached_standards[url].fetched_at})"
+      ELSE:
+        → WebFetch url (fallback — should not happen if orchestrator ran Step 1.5)
+        → Log warning: "Standard {url} was not pre-cached; fetched inline"
+    ```
+
+    For Go projects, load these modules based on changed files:
     Base URL: `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/`
 
     **Always load:**
@@ -1097,8 +1166,8 @@ Task:
     - `core.md` (Dependency Management)
     - `bootstrap.md` (Connection Management, Graceful Shutdown)
 
-    For TypeScript: WebFetch `typescript.md` (Testing, Frameworks & Libraries)
-    For SRE/Infra (Layer 2): WebFetch `sre.md` (Health Checks, Observability)
+    For TypeScript: load `typescript.md` (Testing, Frameworks & Libraries) via the same cache-first pattern
+    For SRE/Infra (Layer 2): load `sre.md` (Health Checks, Observability) via the same cache-first pattern
 
     **Include a Standards Compliance section in your output** listing which standards were verified and any violations found.
 

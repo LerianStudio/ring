@@ -3,6 +3,8 @@ name: ring:dev-integration-testing
 description: |
   Gate 6 of development cycle - ensures integration tests pass for all
   external dependency interactions using real containers via testcontainers.
+  Runs at TASK cadence (after all subtasks complete Gate 0 + Gate 3 + Gate 9):
+  write mode runs per task, execute mode runs per cycle.
 
 trigger: |
   - After property-based testing complete (Gate 5)
@@ -31,7 +33,7 @@ input_schema:
   required:
     - name: unit_id
       type: string
-      description: "Task or subtask identifier"
+      description: "TASK identifier (not a subtask id). This skill's write mode runs at TASK cadence — unit_id is always a task id. Execute mode runs per cycle."
     - name: integration_scenarios
       type: array
       items: string
@@ -44,14 +46,17 @@ input_schema:
       type: string
       enum: [go, typescript]
       description: "Programming language"
+    - name: implementation_files
+      type: array
+      items: string
+      description: "Union of changed files across all subtasks of this task."
+    - name: gate0_handoffs
+      type: array
+      description: "Array of per-subtask implementation handoffs (one entry per subtask). NOT a single gate0_handoff object."
   optional:
     - name: gate3_handoff
       type: object
       description: "Full handoff from Gate 3 (unit testing)"
-    - name: implementation_files
-      type: array
-      items: string
-      description: "Files from Gate 0 implementation"
 
 output_schema:
   format: markdown
@@ -176,15 +181,16 @@ PM team task files often omit external_dependencies. If the codebase uses postgr
 ```text
 REQUIRED INPUT (from ring:dev-cycle orchestrator):
 <verify_before_proceed>
-- unit_id exists
+- unit_id exists (TASK id — write mode runs at task cadence, not per subtask)
 - language is valid (go|typescript)
+- implementation_files: [union of changed files across all subtasks of this task]
+- gate0_handoffs: [array of per-subtask Gate 0 handoffs — one entry per subtask]
 </verify_before_proceed>
 
 OPTIONAL INPUT (determines if Gate 6 runs or skips):
 - integration_scenarios: [list of scenarios] - if provided and non-empty, Gate 6 runs
 - external_dependencies: [list of deps] (from input OR auto-detected in Step 0) - if non-empty, Gate 6 runs
 - gate3_handoff: [full Gate 3 output]
-- implementation_files: [files from Gate 0]
 
 EXECUTION LOGIC:
 1. if any REQUIRED input is missing:
@@ -270,8 +276,22 @@ Task:
     ## External Dependencies
     [list external_dependencies with container requirements]
 
+    ## Standards Source (Cache-First Pattern)
+
+    **Standards Source (Cache-First Pattern):** This sub-skill reads standards from `state.cached_standards` populated by dev-cycle Step 1.5. If invoked outside a cycle (standalone), it falls back to direct WebFetch with a warning. See `shared-patterns/standards-cache-protocol.md` for protocol details.
+
     ## Standards Reference
-    WebFetch: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/testing-integration.md
+
+    URL: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/testing-integration.md
+
+    **Cache-first loading protocol:**
+    For each required standards URL:
+      IF state.cached_standards[url] exists:
+        → Read content from state.cached_standards[url].content
+        → Log: "Using cached standard: {url} (fetched {state.cached_standards[url].fetched_at})"
+      ELSE:
+        → WebFetch url (fallback — should not happen if orchestrator ran Step 1.5)
+        → Log warning: "Standard {url} was not pre-cached; fetched inline"
 
     Focus on: All sections, especially INT-5 (Build Tags), INT-6 (Testcontainers), INT-7 (No t.Parallel())
 

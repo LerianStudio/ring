@@ -159,8 +159,7 @@ This is not negotiable:
 **Before dispatching any agent, you MUST load the corresponding sub-skill first.**
 
 <cannot_skip>
-- Gate 0: `Skill("ring:dev-implementation")` → then `Task(subagent_type="ring:backend-engineer-*", ...)`
-- Gate 0.5: `Skill("ring:dev-delivery-verification")` → Verify all requirements are DELIVERED (not just created). Catches dead code, unwired structs, unregistered middleware. Also runs 7 automated checks: (A) file size ≤300 lines, (B) license headers, (C) linting, (D) migration safety, (E) vulnerability scanning, (F) API backward compatibility, (G) multi-tenant dual-mode. FAIL → return to Gate 0 with explicit fix instructions.
+- Gate 0: `Skill("ring:dev-implementation")` → then `Task(subagent_type="ring:backend-engineer-*", ...)`. **Gate 0 includes delivery verification exit check inline** (formerly Gate 0.5 — now a sub-check of ring:dev-implementation Step 7): verifies all requirements are DELIVERED (not just created), catches dead code, unwired structs, unregistered middleware, and runs 7 automated checks: (A) file size ≤300 lines, (B) license headers, (C) linting, (D) migration safety, (E) vulnerability scanning, (F) API backward compatibility, (G) multi-tenant dual-mode. FAIL → ring:dev-implementation re-iterates with fix instructions.
 - Gate 1: `Skill("ring:dev-devops")` → then `Task(subagent_type="ring:devops-engineer", ...)`
 - Gate 2: `Skill("ring:dev-sre")` → then `Task(subagent_type="ring:sre", ...)`
 - Gate 3: `Skill("ring:dev-unit-testing")` → then `Task(subagent_type="ring:qa-analyst", test_mode="unit", ...)`
@@ -360,6 +359,8 @@ See [shared-patterns/shared-anti-rationalization.md](../shared-patterns/shared-a
 | "Defense in depth exists (frontend validates)" | Frontend can be bypassed. Backend is the last line. Fix at source. |
 | "Backlog the Medium issue, it's documented" | Documented risk ≠ mitigated risk. Medium in Gate 4 = fix NOW, not later. |
 | "Risk-based prioritization allows deferral" | Gates ARE the risk-based system. Reviewers define severity, not you. |
+| "I'll WebFetch standards again for this gate" | Standards are pre-cached at Step 1.5 in `state.cached_standards`. Read from state, do not re-fetch. |
+| "Task-level Gate 8 misses bugs from subtask 2" | Cumulative task diff shows ALL subtasks' changes. Cross-subtask interactions are MORE visible, not less. |
 
 ---
 
@@ -398,7 +399,7 @@ Day 4: Production incident from Day 1 code
 |------|---------------------|----------------|
 | 0.1 | TDD-RED: Failing test written + failure output captured | Test exists but no failure output = FAIL |
 | 0.2 | TDD-GREEN: Implementation passes test | Code exists but test fails = FAIL |
-| 0 | Both 0.1 and 0.2 complete | 0.1 done without 0.2 = FAIL |
+| 0 | Both 0.1 and 0.2 complete + Delivery verification: all requirements delivered, 0 dead code items | 0.1 done without 0.2 = FAIL; missing/dead code = FAIL |
 | 1 | Dockerfile + docker-compose + .env.example | Missing any = FAIL |
 | 2 | Structured JSON logs with trace correlation | Partial structured logs = FAIL |
 | 3 | Unit test coverage ≥ 85% + all AC tested | 84% = FAIL |
@@ -426,14 +427,38 @@ Day 4: Production incident from Day 1 code
 
 ## Gate Order Enforcement (HARD GATE)
 
-**Gates MUST execute in order: 0 → 0.5 → 1 → 2 → 3 → 4 → 5 → 6(write) → 7(write) → 8 → 9. All 11 gates are MANDATORY.**
+**Gates MUST execute in this order within each task:**
+
+1. **Subtask loop** (per subtask OR per task-itself if no subtasks):
+   - Gate 0 (Implementation — INCLUDES delivery verification exit check inline)
+   - Gate 3 (Unit Testing)
+   - Gate 9 (Validation)
+
+2. **After all subtasks complete their subtask-level gates — task-level gates** (once per task):
+   - Gate 1 (DevOps)
+   - Gate 2 (SRE)
+   - Gate 4 (Fuzz)
+   - Gate 5 (Property)
+   - Gate 6 (Integration — write mode)
+   - Gate 7 (Chaos — write mode)
+   - Gate 8 (Review — 8 reviewers)
+
+3. **End of cycle** (once per cycle):
+   - Gate 6 (Integration — execute mode)
+   - Gate 7 (Chaos — execute mode)
+   - Multi-Tenant Verify
+   - dev-report (aggregate)
+   - Final Commit
 
 **Deferred Execution Model for Gates 6-7:**
-- **Per unit:** Write/update test code + verify compilation (no container execution)
-- **End of cycle:** Execute all integration and chaos tests (containers spun up once), then verify multi-tenant dual-mode compliance (already implemented at Gate 0, verified at Gate 0.5G)
+- **Write mode (task-level):** Write/update test code + verify compilation (no container execution)
+- **Execute mode (end of cycle):** Execute all integration and chaos tests (containers spun up once), then verify multi-tenant dual-mode compliance (already implemented at Gate 0, verified at Gate 0.5G)
 
 | Violation | Why It's WRONG | Consequence |
 |-----------|----------------|-------------|
+| Dispatching Gate 1 during subtask loop | Gate 1 is task-level; MUST wait until all subtasks done | DevOps validated N times instead of once |
+| Dispatching Gate 2/4/5/6(write)/7(write)/8 during subtask loop | These are task-cadence; MUST wait until ALL subtasks of the current task complete Gate 0 + Gate 3 + Gate 9 | Redundant reviewer/QA runs; broken input aggregation (missing UNION of files) |
+| Dispatching Gate 0.5 as separate gate | Gate 0.5 was REMOVED; delivery verification runs inline as Gate 0 exit criteria | Duplicate dispatch; broken gate accounting |
 | Skip Gate 1 (DevOps) | "No infra changes" | Code without container = works on my machine only |
 | Skip Gate 2 (SRE) | "Observability later" | Blind production = debugging nightmare |
 | Skip Gate 4 (Fuzz) | "Unit tests are enough" | Edge cases and crashes not discovered |
@@ -445,7 +470,7 @@ Day 4: Production incident from Day 1 code
 
 **All testing gates (3-7) are MANDATORY. No exceptions. No skip reasons.**
 
-**Gates are not parallelizable across different gates. Sequential execution is MANDATORY.**
+**Gates are not parallelizable across different gates. Sequential execution is MANDATORY within each cadence layer.**
 
 ## The 10 Gates
 
@@ -464,6 +489,8 @@ Day 4: Production incident from Day 1 code
 
 **All gates are MANDATORY. No exceptions. No skip reasons.**
 
+**Note:** Gate 0 includes delivery verification exit criteria (formerly Gate 0.5). See Step 2.3.1.
+
 **Gates 6-7 Deferred Execution:** Test code is written/updated per unit to stay current. Actual test execution (with containers) happens once at end of cycle.
 
 ## Integrated PM → Dev Workflow
@@ -477,21 +504,70 @@ Day 4: Production incident from Day 1 code
 
 ## Execution Order
 
-**Core Principle:** Each execution unit passes through all 11 gates. Gates 6-7 write test code per unit but defer execution to end of cycle.
+**Core Principle (two-level cadence — the "Prancy Bentley" model):**
 
-**Per-Unit Flow:** Unit → Gate 0→0.5(delivery verify)→1→2→3→4→5→6(write)→7(write)→8→9 → 🔒 Unit Checkpoint → 🔒 Task Checkpoint → Next Unit
-**End-of-Cycle Flow:** All units done → Gate 6(execute)→7(execute) → **Multi-Tenant Adaptation** → Final Commit → Feedback
+- **Subtask-level gates** run per execution unit (subtask, or task-itself if no subtasks): Gate 0 (Implementation, incl. delivery verification exit check), Gate 3 (Unit Testing), Gate 9 (Validation).
+- **Task-level gates** run ONCE per task, after all its subtasks finish their subtask-level gates: Gate 1 (DevOps), Gate 2 (SRE), Gate 4 (Fuzz), Gate 5 (Property), Gate 6 write (Integration), Gate 7 write (Chaos), Gate 8 (Review — 8 reviewers on cumulative task diff).
+- **Cycle-level gates** run ONCE per cycle, after all tasks are done: Gate 6 execute, Gate 7 execute, Multi-Tenant Verify, ring:dev-report (aggregate), Final Commit.
 
-| Scenario | Execution Unit | Gates Per Unit | End of Cycle |
-|----------|----------------|----------------|--------------|
-| Task without subtasks | Task itself | 11 gates (6-7 write only) | Gate 6-7 execute |
-| Task with subtasks | Each subtask | 11 gates per subtask (6-7 write only) | Gate 6-7 execute |
+**Per-Subtask Flow:** Subtask → Gate 0 (incl. delivery verification exit check) → Gate 3 → Gate 9 → [opt-in subtask visual report] → [subtask checkpoint if `execution_mode = manual_per_subtask`]
+**Per-Task Flow (after all subtasks done):** Gate 1 → Gate 2 → Gate 4 → Gate 5 → Gate 6 (write) → Gate 7 (write) → Gate 8 (Review) → Task-level visual report → Accumulate metrics → [task checkpoint if `execution_mode in {manual_per_task, manual_per_subtask}`]
+**End-of-Cycle Flow:** All tasks done → Gate 6 (execute) → Gate 7 (execute) → Multi-Tenant Verify → ring:dev-report (ONE dispatch, reads accumulated_metrics) → Final Commit
+
+| Scenario | Execution Unit | Subtask-Level Gates (0, 3, 9) | Task-Level Gates (1, 2, 4, 5, 6w, 7w, 8) |
+|----------|----------------|-------------------------------|-------------------------------------------|
+| Task without subtasks | Task itself (single unit) | 3 gates per unit | 7 gates once (same scope as the unit) |
+| Task with subtasks | Each subtask | 3 gates per subtask | 7 gates once per task (UNION of all subtasks' files) |
 
 **Why deferred execution for Gates 6-7:**
 - Integration tests require testcontainers (slow to spin up/tear down)
 - Chaos tests require Toxiproxy infrastructure
 - Running containers per subtask is wasteful when subsequent subtasks modify the same code
-- Test code stays current (written per unit), infrastructure cost is paid once
+- Test code stays current (written per task), infrastructure cost is paid once
+
+## Execution Loop Structure (the "Prancy Bentley" cadence model)
+
+```yaml
+for each task in state.tasks:
+  # ===== SUBTASK-LEVEL GATES =====
+  for each subtask in task.subtasks (or task-itself if no subtasks):
+    Execute Gate 0 (Implementation, includes delivery verification exit check)
+    Execute Gate 3 (Unit Testing)
+    Execute Gate 9 (Validation)
+    [per-subtask visual report — OPT-IN only via state.visual_report_granularity == "subtask"]
+    [subtask checkpoint if execution_mode == manual_per_subtask]
+  end for
+
+  # ===== TASK-LEVEL GATES =====
+  # Input aggregation: implementation_files = UNION across all subtasks of this task.
+  # gate0_handoffs = ARRAY of per-subtask implementation handoffs (one per subtask).
+  Execute Gate 1 (DevOps)
+  Execute Gate 2 (SRE)
+  Execute Gate 4 (Fuzz)
+  Execute Gate 5 (Property)
+  Execute Gate 6 (Integration — write mode)
+  Execute Gate 7 (Chaos — write mode)
+  Execute Gate 8 (Review — 8 parallel reviewers on cumulative task diff)
+
+  Generate task-level visual report
+  Accumulate metrics into state.tasks[i].accumulated_metrics  (no dev-report dispatch here)
+  [task checkpoint if execution_mode in {manual_per_task, manual_per_subtask}]
+end for
+
+# ===== CYCLE-LEVEL GATES =====
+Execute Gate 6 (Integration — execute mode)
+Execute Gate 7 (Chaos — execute mode)
+Execute Multi-Tenant Verify
+Dispatch ring:dev-report (ONE AND ONLY dispatch per cycle — reads accumulated_metrics)
+Execute Final Commit
+```
+
+⛔ **CADENCE RULE:** Gates 1, 2, 4, 5, 6w, 7w, 8 MUST NOT be dispatched during the subtask loop. They are task-cadence — wait until ALL subtasks of the current task have completed Gates 0, 3, and 9 before dispatching them.
+
+**Why task-level cadence for Gates 1, 2, 4, 5, 6w, 7w, 8:**
+- **DevOps / SRE / Fuzz / Property:** Container configs, observability, edge-case coverage, and invariants are coherent at the task boundary, not at each subtask. Running them per subtask duplicates work against an in-flight feature.
+- **Integration / Chaos (write):** Test scenarios span multiple subtasks; writing them once per task avoids churn as later subtasks land.
+- **Review (Gate 8):** Cumulative task diff shows ALL subtasks' changes at once. Cross-subtask interactions (contract drift, hidden coupling) are MORE visible at this cadence, not less.
 
 ## Commit Timing
 
@@ -555,7 +631,7 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
 
 ```json
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "cycle_id": "uuid",
   "started_at": "ISO timestamp",
   "updated_at": "ISO timestamp",
@@ -564,6 +640,10 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
   "cycle_type": "feature | refactor",
   "execution_mode": "manual_per_subtask|manual_per_task|automatic",
   "commit_timing": "per_subtask|per_task|at_end",
+  "_comment_cached_standards": "Populated by Step 1.5 (Standards Pre-Cache). Dictionary of URL → {fetched_at, content}. Sub-skills MUST read from here instead of calling WebFetch. See plan Section 3.1.",
+  "cached_standards": {},
+  "_comment_visual_report_granularity": "Default 'task' (generate visual report once per task). Opt-in 'subtask' to generate per-subtask reports. See plan Section 3.3.",
+  "visual_report_granularity": "task",
   "custom_prompt": {
     "type": "string",
     "optional": true,
@@ -582,54 +662,82 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
       "title": "Task title",
       "status": "pending|in_progress|completed|failed|blocked",
       "feedback_loop_completed": false,
+      "_comment_accumulated_metrics": "Populated at Step 11.2 (Task Approval Checkpoint). Aggregated at cycle end by ring:dev-report (Step 12.1). See plan Section 4.1.7 / R4.",
+      "accumulated_metrics": {
+        "gate_durations_ms": {},
+        "review_iterations": 0,
+        "testing_iterations": 0,
+        "issues_by_severity": {
+          "CRITICAL": 0,
+          "HIGH": 0,
+          "MEDIUM": 0,
+          "LOW": 0
+        }
+      },
+      "_comment_subtask_gate_progress": "Per plan Section 3.2 / R5B — subtask-level gate_progress holds SUBTASK-CADENCE gates only: implementation (Gate 0), unit_testing (Gate 3), validation (Gate 9). Task-cadence gates (1, 2, 4, 5, 6w, 7w, 8) live in task.gate_progress, not here.",
       "subtasks": [
         {
           "id": "ST-001-01",
           "file": "subtasks/T-001/ST-001-01.md",
-          "status": "pending|completed"
+          "status": "pending|completed",
+          "gate_progress": {
+            "implementation": {
+              "status": "pending|in_progress|completed",
+              "started_at": "ISO timestamp",
+              "tdd_red": {
+                "status": "pending|in_progress|completed",
+                "test_file": "path/to/test_file.go",
+                "failure_output": "FAIL: TestFoo - expected X got nil",
+                "completed_at": "ISO timestamp"
+              },
+              "tdd_green": {
+                "status": "pending|in_progress|completed",
+                "implementation_file": "path/to/impl.go",
+                "test_pass_output": "PASS: TestFoo (0.003s)",
+                "completed_at": "ISO timestamp"
+              },
+              "delivery_verified": false,
+              "files_changed": []
+            },
+            "unit_testing": {
+              "status": "pending|in_progress|completed",
+              "coverage_actual": 0.0,
+              "coverage_threshold": 85
+            },
+            "validation": {
+              "status": "pending|in_progress|completed",
+              "result": "pending|approved|rejected"
+            }
+          }
         }
       ],
+      "_comment_task_gate_progress": "Per plan Section 3.2 / R5B — task-level gate_progress holds TASK-CADENCE gates only: devops (1), sre (2), fuzz_testing (4), property_testing (5), integration_testing (6w), chaos_testing (7w), review (8). Subtask-cadence gates (0, 3, 9) live in each subtask's gate_progress, not here. Gates 6/7 keep write_mode and execute_mode phases; execute_mode transitions at cycle end (Step 12.1).",
       "gate_progress": {
-        "implementation": {
-          "status": "in_progress",
-          "started_at": "...",
-          "tdd_red": {
-            "status": "pending|in_progress|completed",
-            "test_file": "path/to/test_file.go",
-            "failure_output": "FAIL: TestFoo - expected X got nil",
-            "completed_at": "ISO timestamp"
-          },
-          "tdd_green": {
-            "status": "pending|in_progress|completed",
-            "implementation_file": "path/to/impl.go",
-            "test_pass_output": "PASS: TestFoo (0.003s)",
-            "completed_at": "ISO timestamp"
-          }
-        },
-        "delivery_verification": {
-          "status": "pending|in_progress|completed",
-          "requirements_total": 0,
-          "requirements_delivered": 0,
-          "requirements_missing": 0,
-          "dead_code_items": 0,
-          "remediation_items": 0,
-          "completed_at": "ISO timestamp"
-        },
         "devops": {"status": "pending"},
         "sre": {"status": "pending"},
-        "unit_testing": {"status": "pending"},
         "fuzz_testing": {"status": "pending"},
         "property_testing": {"status": "pending"},
         "integration_testing": {
-          "status": "pending|in_progress|completed",
+          "write_mode": {
+            "status": "pending|in_progress|completed",
+            "test_files": [],
+            "compilation_passed": false
+          },
+          "execute_mode": "pending|completed",
           "scenarios_tested": 0,
           "tests_passed": 0,
           "tests_failed": 0,
           "flaky_tests_detected": 0
         },
-        "chaos_testing": {"status": "pending"},
-        "review": {"status": "pending"},
-        "validation": {"status": "pending"}
+        "chaos_testing": {
+          "write_mode": {
+            "status": "pending|in_progress|completed",
+            "test_files": [],
+            "compilation_passed": false
+          },
+          "execute_mode": "pending|completed"
+        },
+        "review": {"status": "pending"}
       },
       "artifacts": {},
       "agent_outputs": {
@@ -948,33 +1056,31 @@ state.updated_at = "[ISO timestamp]"
 Write tool:
   file_path: [state.state_path]  # Use state_path from state object
   content: [full JSON state]
-
-# Step 3: Verify persistence (MANDATORY - use Read tool)
-Read tool:
-  file_path: [state.state_path]  # Use state_path from state object
-# Confirm current_gate and gate_progress match expected values
 ```
 
 ### State Persistence Checkpoints
 
-| Checkpoint | MUST Update | MUST Write File |
-|------------|-------------|-----------------|
-| **Before Gate 0 (task start)** | `task.status = "in_progress"` in JSON **+ tasks.md Status → `🔄 Doing`** | ✅ YES |
-| Gate 0.1 (TDD-RED) | `tdd_red.status`, `tdd_red.failure_output` | ✅ YES |
-| Gate 0.2 (TDD-GREEN) | `tdd_green.status`, `implementation.status` | ✅ YES |
-| Gate 0.5 (Delivery Verification) | `delivery_verification.status`, `delivery_verification.requirements_total`, `delivery_verification.requirements_delivered`, `delivery_verification.dead_code_items` | ✅ YES |
-| Gate 1 (DevOps) | `devops.status`, `agent_outputs.devops` | ✅ YES |
-| Gate 2 (SRE) | `sre.status`, `agent_outputs.sre` | ✅ YES |
-| Gate 3 (Unit Testing) | `unit_testing.status`, `agent_outputs.unit_testing` | ✅ YES |
-| Gate 4 (Fuzz Testing) | `fuzz_testing.status`, `agent_outputs.fuzz_testing` | ✅ YES |
-| Gate 5 (Property Testing) | `property_testing.status`, `agent_outputs.property_testing` | ✅ YES |
-| Gate 6 (Integration Testing) | `integration_testing.status`, `agent_outputs.integration_testing` | ✅ YES |
-| Gate 7 (Chaos Testing) | `chaos_testing.status`, `agent_outputs.chaos_testing` | ✅ YES |
-| Gate 8 (Review) | `review.status`, `agent_outputs.review` | ✅ YES |
-| Gate 9 (Validation) | `validation.status` (execution unit only — do NOT touch task-level status here) | ✅ YES |
-| Step 11.1 (Unit Approval) | `status = "paused_for_approval"` | ✅ YES |
-| Step 11.2 (Task Approval) | `task.status = "completed"` in JSON **+ tasks.md Status → `✅ Done`** | ✅ YES |
-| HARD BLOCK (any gate) | `task.status = "failed"` in JSON **+ tasks.md Status → `❌ Failed`** | ✅ YES |
+⛔ **Cadence-aware write paths.** Subtask-level gates (0, 3, 9) write to `state.tasks[i].subtasks[j].gate_progress.<gate_name>`. Task-level gates (1, 2, 4, 5, 6w, 7w, 8) write to `state.tasks[i].gate_progress.<gate_name>`. Never write task-level gate status under a subtask and never write subtask-level gate status under the task.
+
+| Checkpoint | Cadence | MUST Update | MUST Write File |
+|------------|---------|-------------|-----------------|
+| **Before Gate 0 (task start)** | Task | `task.status = "in_progress"` in JSON **+ tasks.md Status → `🔄 Doing`** | ✅ YES |
+| Gate 0.1 (TDD-RED) | Subtask | `state.tasks[i].subtasks[j].gate_progress.implementation.tdd_red.status` + `.failure_output` | ✅ YES |
+| Gate 0.2 (TDD-GREEN) | Subtask | `state.tasks[i].subtasks[j].gate_progress.implementation.tdd_green.status` + `.implementation.status` | ✅ YES |
+| Gate 0 exit (Delivery Verification) | Subtask | `state.tasks[i].subtasks[j].gate_progress.implementation.delivery_verified = true` (absorbed from former Gate 0.5) | ✅ YES |
+| Gate 3 (Unit Testing) | Subtask | `state.tasks[i].subtasks[j].gate_progress.unit_testing.status` + `.coverage_actual` + `agent_outputs.unit_testing` | ✅ YES |
+| Gate 9 (Validation) | Subtask | `state.tasks[i].subtasks[j].gate_progress.validation.status` + `.result` (do NOT touch task-level status here) | ✅ YES |
+| Gate 1 (DevOps) | Task | `state.tasks[i].gate_progress.devops.status` + `agent_outputs.devops` | ✅ YES |
+| Gate 2 (SRE) | Task | `state.tasks[i].gate_progress.sre.status` + `agent_outputs.sre` | ✅ YES |
+| Gate 4 (Fuzz Testing) | Task | `state.tasks[i].gate_progress.fuzz_testing.status` + `agent_outputs.fuzz_testing` | ✅ YES |
+| Gate 5 (Property Testing) | Task | `state.tasks[i].gate_progress.property_testing.status` + `agent_outputs.property_testing` | ✅ YES |
+| Gate 6 (Integration — write) | Task | `state.tasks[i].gate_progress.integration_testing.write_mode.status` + `.test_files` + `.compilation_passed` | ✅ YES |
+| Gate 7 (Chaos — write) | Task | `state.tasks[i].gate_progress.chaos_testing.write_mode.status` + `.test_files` + `.compilation_passed` | ✅ YES |
+| Gate 8 (Review) | Task | `state.tasks[i].gate_progress.review.status` + `agent_outputs.review` (reviewers see cumulative task diff) | ✅ YES |
+| Step 11.1 (Subtask Approval) | Subtask | `status = "paused_for_approval"` (subtask-level checkpoint; set only when `execution_mode = manual_per_subtask`) | ✅ YES |
+| Step 11.2 (Task Approval) | Task | `task.status = "completed"` in JSON **+ tasks.md Status → `✅ Done`** + `task.accumulated_metrics` populated (gate_durations_ms, review_iterations, testing_iterations, issues_by_severity); NO dev-report dispatch here (runs ONCE at Step 12.1) | ✅ YES |
+| Step 12.1 (Cycle end — Gate 6/7 execute + dev-report) | Cycle | `state.tasks[i].gate_progress.integration_testing.execute_mode = "completed"` + `.chaos_testing.execute_mode = "completed"`; `state.feedback_loop_completed = true` after the ONE AND ONLY `ring:dev-report` dispatch | ✅ YES |
+| HARD BLOCK (any gate) | Task | `task.status = "failed"` in JSON **+ tasks.md Status → `❌ Failed`** | ✅ YES |
 
 **tasks.md Status update rules (apply at the three checkpoints above):**
 
@@ -1004,15 +1110,6 @@ Use Edit tool on state.source_file (tasks.md):
 | "Only save on checkpoints" | Gates without saves = unrecoverable on resume | **Save after every gate** |
 | "Write tool is slow" | Write takes <100ms. Lost progress takes hours. | **Write after every gate** |
 | "I updated the state variable" | Variable ≠ file. Without Write tool, nothing persists. | **Use Write tool explicitly** |
-
-### Verification Command
-
-After each gate, the state file MUST reflect:
-- `current_gate` = next gate number
-- `updated_at` = recent timestamp
-- Previous gate `status` = "completed"
-
-**If verification fails → State was not persisted. Re-execute Write tool.**
 
 ---
 
@@ -1716,7 +1813,55 @@ Task files are generated by `/pre-dev-*` or `/ring:dev-refactor`, which handle c
 | Task ID format | `## Task: {ID} - {Title}` | Warning: use line number as ID |
 | Acceptance criteria | At least one `- [ ]` per task | Warning: task may fail validation gate |
 
-## Step 1.5: Detect External Dependencies (Cycle-Level Auto-Detection)
+## Step 1.5: Standards Pre-Cache (MANDATORY)
+
+Cache all standards URLs the cycle will need, ONCE, into `state.cached_standards`.
+Sub-skills read from this cache instead of calling WebFetch themselves.
+
+**Required URLs to pre-fetch (MUST succeed all):**
+
+1. `https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.md`
+2. Language-specific (based on detected project stack):
+   - **If Go project:**
+     - `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang.md`
+     - `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/core.md`
+     - `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/bootstrap.md`
+     - `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/domain.md`
+     - `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/api-patterns.md`
+     - `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/security.md`
+     - `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/quality.md`
+     - `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/multi-tenant.md`
+     - `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/testing-fuzz.md`
+     - `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/testing-property.md`
+     - `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/testing-integration.md`
+     - `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/testing-chaos.md`
+   - **If TypeScript backend:**
+     - `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md`
+     - `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript/multi-tenant.md`
+3. `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/devops.md`
+4. `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/sre.md`
+5. `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/migration-safety.md` (if SQL migrations detected in project)
+
+**Protocol:**
+
+```text
+For each URL in the required list:
+  WebFetch: [URL]
+  Write to state.cached_standards[URL] = {
+    "fetched_at": current_iso_timestamp,
+    "content": <fetched content>
+  }
+```
+
+**MANDATORY:** Save state to file after cache populated — Write tool → [state.state_path]
+
+**Blocker:** If ANY URL fails to fetch, STOP cycle and report. Cache MUST be complete. Sub-skills downstream rely on `state.cached_standards` being populated; a partial cache causes WebFetch fallback warnings and defeats the purpose of pre-caching.
+
+**Rationale:** Before this step existed, every sub-skill dispatch triggered its own WebFetch of the same standards. The 5-minute prompt cache TTL is regularly exceeded, producing 15–25+ redundant network fetches per cycle. A single pre-cache at cycle start reduces that to one fetch per unique URL.
+
+---
+
+## Step 1.6: Detect External Dependencies (Cycle-Level Auto-Detection)
 
 **MANDATORY:** Scan the codebase once at cycle start to detect external dependencies. Store in `state.detected_dependencies` for use by Gates 2, 6, and 7.
 
@@ -1835,9 +1980,11 @@ Detect the repository license at cycle start. This check is advisory — it does
 
 ## Step 2: Gate 0 - Implementation (Per Execution Unit)
 
+ℹ️ **CADENCE:** Subtask-level. Execution unit is always a subtask (or the task-itself when the task has no subtasks). Writes to `state.tasks[i].subtasks[j].gate_progress.implementation`. Task-level gates (1, 2, 4, 5, 6w, 7w, 8) MUST NOT be dispatched from inside this step — they run after the subtask loop.
+
 **REQUIRED SUB-SKILL:** Use ring:dev-implementation
 
-**Execution Unit:** Task (if no subtasks) or Subtask (if task has subtasks)
+**Execution Unit:** Task-itself (if no subtasks) or a Subtask (if task has subtasks). Either way, the unit is a SUBTASK-LEVEL scope.
 
 ### Pre-Dispatch: Before Gate 0 Checkpoint (MANDATORY)
 
@@ -1866,7 +2013,7 @@ After ring:dev-implementation completes, verify generated code:
 | No Must* helpers | `grep -rn "Must[A-Z]" --include="*.go" \| grep -v "regexp\.MustCompile"` | 0 results | Return to Gate 0 with fix instructions |
 | No os.Exit() | `grep -rn "os.Exit" --include="*.go" --exclude="main.go"` | 0 results | Return to Gate 0 with fix instructions |
 
-**If any check fails: DO NOT proceed to Gate 0.5. Return to Gate 0 with specific fix instructions.**
+**If any check fails: DO NOT proceed to Gate 1. Return to Gate 0 with specific fix instructions.**
 
 ### ⛔ File Size Enforcement (MANDATORY — All Gates)
 
@@ -1875,7 +2022,7 @@ See [shared-patterns/file-size-enforcement.md](../shared-patterns/file-size-enfo
 **Summary:** No source file may exceed 300 lines (>300 = loop back to agent; >500 = hard block). Implementation agents MUST split proactively. Enforcement points:
 
 - **Gate 0:** Implementation agent receives file-size instructions; orchestrator runs verification command after agent completes and loops back if any file > 300 lines.
-- **Gate 0.5:** Delivery verification skill runs 7 checks: (A) file-size, (B) license headers, (C) linting, (D) migration safety, (E) vulnerability scanning, (F) API backward compatibility, (G) multi-tenant dual-mode. Any FAIL → return to Gate 0 with specific fix instructions.
+- **Gate 0 exit check (formerly Gate 0.5, now inline in ring:dev-implementation Step 7):** Delivery verification runs 7 checks as exit criteria: (A) file-size, (B) license headers, (C) linting, (D) migration safety, (E) vulnerability scanning, (F) API backward compatibility, (G) multi-tenant dual-mode. Any FAIL → ring:dev-implementation re-iterates with specific fix instructions.
 - **Gate 8:** Code reviewers MUST flag any file > 300 lines as a MEDIUM+ issue (blocking).
 
 ### Step 2.1: Prepare Input for ring:dev-implementation Skill
@@ -1995,77 +2142,45 @@ implementation_input = {
 7. MANDATORY: ⛔ Save state to file — Write tool → [state.state_path]
    See "State Persistence Rule" section.
 
-8. Proceed to Gate 0.5
+8. Proceed to Step 2.3.1 (Delivery Verification Exit Check)
 ```
 
-## Step 2.5: Gate 0.5 - Delivery Verification (Per Execution Unit)
+### Step 2.3.1: Delivery Verification Exit Check (MANDATORY before Gate 1)
 
-```text
-1. Load Skill:
-   Skill("ring:dev-delivery-verification")
+After Gate 0 PASS, delivery verification runs AS EXIT CRITERIA (not as a separate gate).
+This check is performed inside `ring:dev-implementation` as its Step 7 (Delivery
+Verification Exit Check). The orchestrator DOES NOT dispatch a separate skill.
 
-2. Invoke with Gate 0 outputs:
-   - unit_id: current task/subtask ID
-   - requirements: original task requirements from tasks.md
-   - files_changed: from Gate 0 agent_outputs.implementation (## Files Changed)
-   - gate0_handoff: full Gate 0 output
+Verify that the dev-implementation handoff includes `delivery_verification` field:
 
-3. Parse result from skill output:
-   - result: PASS | PARTIAL | FAIL
-   - requirements_total: from "## Requirement Coverage Matrix"
-   - requirements_delivered: count of ✅ DELIVERED rows
-   - requirements_missing: count of ❌ NOT DELIVERED rows
-   - dead_code_items: count from "## Dead Code Detection"
-   - remediation_items: count from "## Return to Gate 0" (0 if PASS)
+  required_handoff_fields:
+    - implementation_summary
+    - files_changed
+    - tests_written
+    - tdd_red_evidence
+    - tdd_green_evidence
+    - delivery_verification:        # NEW — added in R3
+        result: "PASS|PARTIAL|FAIL"
+        requirements_total: int
+        requirements_delivered: int
+        requirements_missing: int
+        dead_code_items: int
 
-4. Update state:
-   - gate_progress.delivery_verification = {
-       status: "completed",
-       requirements_total: [N],
-       requirements_delivered: [N],
-       requirements_missing: [N],
-       dead_code_items: [N],
-       remediation_items: [N],
-       completed_at: "[ISO timestamp]"
-     }
+IF delivery_verification.result == "PASS":
+  → Update state.tasks[current].subtasks[current].gate_progress.implementation.delivery_verified = true
+  → Proceed to Gate 1 (DevOps)
 
-5. Control flow based on result:
+IF delivery_verification.result == "PARTIAL" or "FAIL":
+  → Return control to dev-implementation with remediation instructions (max 2 retries)
+  → After 2 retries → escalate to user
 
-   IF PASS:
-     → Display ✓ GATE 0.5 COMPLETE, proceed to Gate 1
-   
-   IF PARTIAL:
-     → Extract undelivered requirements from "## Return to Gate 0"
-     → Display ⚠ GATE 0.5 PARTIAL — [N] of [M] requirements not delivered
-     → Return to Gate 0 (Step 2) with explicit fix instructions:
-       "Deliver the following requirements: [list from Return to Gate 0]"
-     → After Gate 0 re-run, re-execute Gate 0.5
-     → Max 2 retries. If still PARTIAL after 2 retries → escalate to user
-   
-   IF FAIL:
-     → Extract all gaps from "## Return to Gate 0"
-     → Display ✗ GATE 0.5 FAIL — critical requirements not delivered
-     → Return to Gate 0 (Step 2) with full remediation list
-     → After Gate 0 re-run, re-execute Gate 0.5
-     → Max 2 retries. If still FAIL after 2 retries → escalate to user
+Anti-Rationalization:
+| Rationalization | Why It's WRONG | Required Action |
+|---|---|---|
+| "Gate 0.5 still exists, just renamed" | Gate 0.5 was DELETED as a separate dispatch. Checks now run inline in Gate 0. | **Read `delivery_verification` from Gate 0 handoff; do NOT dispatch a separate skill.** |
+| "I'll just skip this check if Gate 0 passed" | Gate 0 passing without `delivery_verification` means Gate 0 is incomplete. | **Verify `delivery_verification` exists in handoff. If absent → Gate 0 failed.** |
 
-6. Display to user:
-   ┌─────────────────────────────────────────────────┐
-   │ ✓ GATE 0.5 COMPLETE                            │
-   ├─────────────────────────────────────────────────┤
-   │ Skill: ring:dev-delivery-verification           │
-   │ Requirements: [delivered]/[total] DELIVERED     │
-   │ Dead Code: [N] items                            │
-   │ Verdict: [PASS|PARTIAL|FAIL]                    │
-   │                                                 │
-   │ Proceeding to Gate 1 (DevOps)...               │
-   └─────────────────────────────────────────────────┘
-
-7. MANDATORY: ⛔ Save state to file — Write tool → [state.state_path]
-   See "State Persistence Rule" section.
-
-8. Proceed to Gate 1
-```
+No separate `state.gate_progress.delivery_verification` field — delivery verification is a sub-check of implementation, tracked inline.
 
 ### Anti-Rationalization: Gate 0 Skill Invocation
 
@@ -2080,7 +2195,9 @@ implementation_input = {
 
 ---
 
-## Step 3: Gate 1 - DevOps (Per Execution Unit)
+## Step 3: Gate 1 - DevOps (Per Task — after all subtasks complete Gate 0 + Gate 3 + Gate 9)
+
+⛔ **CADENCE:** This gate runs ONCE per task, NOT per subtask. Do NOT dispatch during the subtask loop. Input `implementation_files` is the UNION of all subtasks' changed files; `gate0_handoffs` is an ARRAY of per-subtask implementation handoffs.
 
 **REQUIRED SUB-SKILLS:** Use ring:dev-devops, then ring:dev-docker-security (audit)
 
@@ -2103,23 +2220,31 @@ implementation_input = {
 
 ### Step 3.1: Prepare Input for ring:dev-devops Skill
 
+⛔ **Input scope:** TASK-level. `implementation_files` is the UNION of `files_changed` across all subtasks of the current task; `gate0_handoffs` is an ARRAY (one per subtask).
+
 ```text
-Gather from previous gates:
+Gather from completed subtask-level gates of the current task:
+
+task = state.tasks[state.current_task_index]
 
 devops_input = {
-  // REQUIRED - from current execution unit
-  unit_id: state.current_unit.id,
-  
-  // REQUIRED - from Gate 0 context
-  language: state.current_unit.language,  // "go" | "typescript" | "python"
-  service_type: state.current_unit.service_type,  // "api" | "worker" | "batch" | "cli"
-  implementation_files: agent_outputs.implementation.files_changed,  // list of files from Gate 0
-  
-  // OPTIONAL - additional context
-  gate0_handoff: agent_outputs.implementation,  // full Gate 0 output
-  new_dependencies: state.current_unit.new_deps || [],  // new deps added in Gate 0
-  new_env_vars: state.current_unit.env_vars || [],  // env vars needed
-  new_services: state.current_unit.services || [],  // postgres, redis, etc.
+  // REQUIRED - TASK-level identifiers (NOT subtask)
+  unit_id: task.id,  // TASK id (e.g., "T-001"), not subtask id
+  language: task.language,  // "go" | "typescript" | "python"
+  service_type: task.service_type,  // "api" | "worker" | "batch" | "cli"
+
+  // REQUIRED - UNION of files changed across all subtasks of this task
+  implementation_files: flatten(task.subtasks.map(st =>
+    st.gate_progress.implementation.files_changed || []
+  )),
+
+  // REQUIRED - ARRAY of per-subtask Gate 0 handoffs (one per subtask)
+  gate0_handoffs: task.subtasks.map(st => st.gate_progress.implementation),
+
+  // OPTIONAL - additional context (union across subtasks where applicable)
+  new_dependencies: union(task.subtasks.map(st => st.new_deps || [])),
+  new_env_vars: union(task.subtasks.map(st => st.env_vars || [])),
+  new_services: union(task.subtasks.map(st => st.services || [])),
   existing_dockerfile: [check if Dockerfile exists],
   existing_compose: [check if docker-compose.yml exists]
 }
@@ -2133,11 +2258,11 @@ devops_input = {
 2. Invoke ring:dev-devops skill with structured input:
 
    Skill("ring:dev-devops") with input:
-     unit_id: devops_input.unit_id
+     unit_id: devops_input.unit_id                    # TASK id
      language: devops_input.language
      service_type: devops_input.service_type
-     implementation_files: devops_input.implementation_files
-     gate0_handoff: devops_input.gate0_handoff
+     implementation_files: devops_input.implementation_files  # UNION across subtasks
+     gate0_handoffs: devops_input.gate0_handoffs      # ARRAY of subtask handoffs
      new_dependencies: devops_input.new_dependencies
      new_env_vars: devops_input.new_env_vars
      new_services: devops_input.new_services
@@ -2237,29 +2362,41 @@ on the created/updated Dockerfile:
 | ".env.example can be added later" | .env.example documents required config NOW. | **Create .env.example** |
 | "Small service doesn't need all this" | Size is irrelevant. Standards apply uniformly. | **Create all artifacts** |
 
-## Step 4: Gate 2 - SRE (Per Execution Unit)
+## Step 4: Gate 2 - SRE (Per Task — after all subtasks complete Gate 0 + Gate 3 + Gate 9)
+
+⛔ **CADENCE:** This gate runs ONCE per task, NOT per subtask. Input `implementation_files` is the UNION of all subtasks' changed files; `gate0_handoffs` is an ARRAY.
 
 **REQUIRED SUB-SKILL:** Use `ring:dev-sre`
 
 ### Step 4.1: Prepare Input for ring:dev-sre Skill
 
+⛔ **Input scope:** TASK-level. Aggregate from all subtasks of the current task.
+
 ```text
-Gather from previous gates:
+Gather from completed subtask-level gates:
+
+task = state.tasks[state.current_task_index]
 
 sre_input = {
-  // REQUIRED - from current execution unit
-  unit_id: state.current_unit.id,
-  
-  // REQUIRED - from Gate 0 context
-  language: state.current_unit.language,  // "go" | "typescript" | "python"
-  service_type: state.current_unit.service_type,  // "api" | "worker" | "batch" | "cli"
-  implementation_agent: agent_outputs.implementation.agent,  // e.g., "ring:backend-engineer-golang"
-  implementation_files: agent_outputs.implementation.files_changed,  // list of files from Gate 0
-  
+  // REQUIRED - TASK-level identifiers
+  unit_id: task.id,  // TASK id
+  language: task.language,
+  service_type: task.service_type,
+
+  // REQUIRED - UNION across subtasks
+  implementation_files: flatten(task.subtasks.map(st =>
+    st.gate_progress.implementation.files_changed || []
+  )),
+
+  // REQUIRED - ARRAY of per-subtask Gate 0 handoffs
+  gate0_handoffs: task.subtasks.map(st => st.gate_progress.implementation),
+
+  // REQUIRED - implementation_agent (consistent across subtasks of the same task)
+  implementation_agent: task.subtasks[0].gate_progress.implementation.agent,
+
   // OPTIONAL - additional context
-  external_dependencies: state.current_unit.external_deps || state.detected_dependencies || [],  // HTTP clients, gRPC, queues
-  gate0_handoff: agent_outputs.implementation,  // full Gate 0 output
-  gate1_handoff: agent_outputs.devops  // full Gate 1 output
+  external_dependencies: task.external_deps || state.detected_dependencies || [],
+  gate1_handoff: task.gate_progress.devops  // task-level Gate 1 output (just completed)
 }
 ```
 
@@ -2271,13 +2408,13 @@ sre_input = {
 2. Invoke ring:dev-sre skill with structured input:
 
    Skill("ring:dev-sre") with input:
-     unit_id: sre_input.unit_id
+     unit_id: sre_input.unit_id                       # TASK id
      language: sre_input.language
      service_type: sre_input.service_type
      implementation_agent: sre_input.implementation_agent
-     implementation_files: sre_input.implementation_files
+     implementation_files: sre_input.implementation_files  # UNION across subtasks
      external_dependencies: sre_input.external_dependencies
-     gate0_handoff: sre_input.gate0_handoff
+     gate0_handoffs: sre_input.gate0_handoffs          # ARRAY of subtask handoffs
      gate1_handoff: sre_input.gate1_handoff
 
    The skill handles:
@@ -2353,6 +2490,8 @@ See [ring:dev-sre/SKILL.md](../dev-sre/SKILL.md) for complete anti-rationalizati
 | "Instrumentation coverage is low but code works" | "90%+ instrumentation coverage is REQUIRED. ring:dev-sre skill will not pass until met." |
 
 ## Step 5: Gate 3 - Unit Testing (Per Execution Unit)
+
+ℹ️ **CADENCE:** Subtask-level. Execution unit = a subtask (or the task itself when no subtasks). Writes to `state.tasks[i].subtasks[j].gate_progress.unit_testing`.
 
 **REQUIRED SUB-SKILL:** Use `ring:dev-unit-testing`
 
@@ -2492,7 +2631,9 @@ testing_input = {
 | "Skip testing, deadline" | "Testing is MANDATORY. ring:dev-unit-testing skill handles iterations." |
 | "Manual testing covers it" | "Gate 3 requires executable unit tests. Invoking ring:dev-unit-testing now." |
 
-## Step 6: Gate 4 - Fuzz Testing (Per Execution Unit)
+## Step 6: Gate 4 - Fuzz Testing (Per Task — after all subtasks complete Gate 0 + Gate 3 + Gate 9)
+
+⛔ **CADENCE:** This gate runs ONCE per task, NOT per subtask. Input `implementation_files` is the UNION of all subtasks' changed files.
 
 **REQUIRED SUB-SKILL:** Use `ring:dev-fuzz-testing`
 
@@ -2500,17 +2641,23 @@ testing_input = {
 
 ### Step 6.1: Prepare Input for ring:dev-fuzz-testing Skill
 
+⛔ **Input scope:** TASK-level. Aggregate from all subtasks of the current task.
+
 ```text
-Gather from previous gates:
+task = state.tasks[state.current_task_index]
 
 fuzz_testing_input = {
-  // REQUIRED - from current execution unit
-  unit_id: state.current_unit.id,
-  implementation_files: agent_outputs.implementation.files_changed,
-  language: state.current_unit.language,  // "go" | "typescript"
+  // REQUIRED - TASK-level
+  unit_id: task.id,  // TASK id
+  language: task.language,  // "go" | "typescript"
 
-  // OPTIONAL - additional context
-  gate3_handoff: agent_outputs.unit_testing  // full Gate 3 output
+  // REQUIRED - UNION across subtasks
+  implementation_files: flatten(task.subtasks.map(st =>
+    st.gate_progress.implementation.files_changed || []
+  )),
+
+  // REQUIRED - ARRAY of per-subtask unit-testing handoffs (Gate 3 is per subtask)
+  gate3_handoffs: task.subtasks.map(st => st.gate_progress.unit_testing)
 }
 ```
 
@@ -2522,10 +2669,10 @@ fuzz_testing_input = {
 2. Invoke ring:dev-fuzz-testing skill with structured input:
 
    Skill("ring:dev-fuzz-testing") with input:
-     unit_id: fuzz_testing_input.unit_id
-     implementation_files: fuzz_testing_input.implementation_files
+     unit_id: fuzz_testing_input.unit_id               # TASK id
+     implementation_files: fuzz_testing_input.implementation_files  # UNION across subtasks
      language: fuzz_testing_input.language
-     gate3_handoff: fuzz_testing_input.gate3_handoff
+     gate3_handoffs: fuzz_testing_input.gate3_handoffs # ARRAY of per-subtask handoffs
 
    The skill handles:
    - Dispatching ring:qa-analyst agent (test_mode: fuzz)
@@ -2558,7 +2705,9 @@ fuzz_testing_input = {
 
 ---
 
-## Step 7: Gate 5 - Property-Based Testing (Per Execution Unit)
+## Step 7: Gate 5 - Property-Based Testing (Per Task — after all subtasks complete Gate 0 + Gate 3 + Gate 9)
+
+⛔ **CADENCE:** This gate runs ONCE per task, NOT per subtask. Input `implementation_files` is the UNION of all subtasks' changed files; `domain_invariants` is the UNION across subtasks.
 
 **REQUIRED SUB-SKILL:** Use `ring:dev-property-testing`
 
@@ -2566,17 +2715,23 @@ fuzz_testing_input = {
 
 ### Step 7.1: Prepare Input for ring:dev-property-testing Skill
 
+⛔ **Input scope:** TASK-level.
+
 ```text
-Gather from previous gates:
+task = state.tasks[state.current_task_index]
 
 property_testing_input = {
-  // REQUIRED - from current execution unit
-  unit_id: state.current_unit.id,
-  implementation_files: agent_outputs.implementation.files_changed,
-  language: state.current_unit.language,
+  // REQUIRED - TASK-level
+  unit_id: task.id,  // TASK id
+  language: task.language,
 
-  // Domain invariants from requirements
-  domain_invariants: state.current_unit.domain_invariants || []
+  // REQUIRED - UNION across subtasks
+  implementation_files: flatten(task.subtasks.map(st =>
+    st.gate_progress.implementation.files_changed || []
+  )),
+
+  // Domain invariants — UNION across subtasks of the task
+  domain_invariants: union(task.subtasks.map(st => st.domain_invariants || []))
 }
 ```
 
@@ -2624,34 +2779,44 @@ property_testing_input = {
 
 ---
 
-## Step 8: Gate 6 - Integration Testing (Per Execution Unit — WRITE ONLY)
+## Step 8: Gate 6 - Integration Testing (Per Task — WRITE ONLY)
+
+⛔ **CADENCE:** Write mode runs ONCE per task, NOT per subtask. Execute mode runs ONCE at cycle end (Step 12.1). Input `implementation_files` is the UNION of all subtasks' changed files.
 
 **REQUIRED SUB-SKILL:** Use `ring:dev-integration-testing`
 
 **MANDATORY GATE:** All code MUST have integration tests using testcontainers.
 
-**⛔ DEFERRED EXECUTION:** Per unit, this gate writes/updates integration test code and verifies compilation. Tests are NOT executed here (no containers). Actual execution happens at end of cycle (Step 12.1).
+**⛔ DEFERRED EXECUTION:** Per task, this gate writes/updates integration test code and verifies compilation. Tests are NOT executed here (no containers). Actual execution happens at end of cycle (Step 12.1).
 
 ### Step 8.1: Prepare Input for ring:dev-integration-testing Skill
 
+⛔ **Input scope:** TASK-level.
+
 ```text
-Gather from previous gates:
+task = state.tasks[state.current_task_index]
 
 integration_testing_input = {
-  // REQUIRED - from current execution unit
-  unit_id: state.current_unit.id,
-  integration_scenarios: state.current_unit.integration_scenarios || [],
-  external_dependencies: state.current_unit.external_dependencies || state.detected_dependencies || [],
-  language: state.current_unit.language,
+  // REQUIRED - TASK-level
+  unit_id: task.id,  // TASK id
+  language: task.language,
   mode: "write_only",  // CRITICAL: write tests, verify compilation, do NOT execute
 
+  // REQUIRED - UNION across subtasks of the task
+  integration_scenarios: union(task.subtasks.map(st => st.integration_scenarios || [])),
+  external_dependencies: union(task.subtasks.map(st => st.external_dependencies || []))
+    || state.detected_dependencies
+    || [],
+  implementation_files: flatten(task.subtasks.map(st =>
+    st.gate_progress.implementation.files_changed || []
+  )),
+
   // OPTIONAL - additional context
-  gate5_handoff: agent_outputs.property_testing,
-  implementation_files: agent_outputs.implementation.files_changed
+  gate5_handoff: task.gate_progress.property_testing  // task-level Gate 5 output
 }
 
 // NOTE: external_dependencies falls back to state.detected_dependencies
-// from Step 1.5 (cycle-level auto-detection) when the unit doesn't define them.
+// from Step 1.6 (cycle-level auto-detection) when no subtask defines them.
 ```
 
 ### Step 8.2: Invoke ring:dev-integration-testing Skill (Write Mode)
@@ -2717,32 +2882,43 @@ integration_testing_input = {
 
 ---
 
-## Step 9: Gate 7 - Chaos Testing (Per Execution Unit — WRITE ONLY)
+## Step 9: Gate 7 - Chaos Testing (Per Task — WRITE ONLY)
+
+⛔ **CADENCE:** Write mode runs ONCE per task, NOT per subtask. Execute mode runs ONCE at cycle end (Step 12.1). `external_dependencies` is the UNION across all subtasks of the task.
 
 **REQUIRED SUB-SKILL:** Use `ring:dev-chaos-testing`
 
 **MANDATORY GATE:** All external dependencies MUST have chaos tests for failure scenarios.
 
-**⛔ DEFERRED EXECUTION:** Per unit, this gate writes/updates chaos test code and verifies compilation. Tests are NOT executed here (no Toxiproxy). Actual execution happens at end of cycle (Step 12.1).
+**⛔ DEFERRED EXECUTION:** Per task, this gate writes/updates chaos test code and verifies compilation. Tests are NOT executed here (no Toxiproxy). Actual execution happens at end of cycle (Step 12.1).
 
 ### Step 9.1: Prepare Input for ring:dev-chaos-testing Skill
 
+⛔ **Input scope:** TASK-level.
+
 ```text
-Gather from previous gates:
+task = state.tasks[state.current_task_index]
 
 chaos_testing_input = {
-  // REQUIRED - from current execution unit
-  unit_id: state.current_unit.id,
-  external_dependencies: state.current_unit.external_dependencies || state.detected_dependencies || [],
-  language: state.current_unit.language,
+  // REQUIRED - TASK-level
+  unit_id: task.id,  // TASK id
+  language: task.language,
   mode: "write_only",  // CRITICAL: write tests, verify compilation, do NOT execute
 
+  // REQUIRED - UNION across subtasks of the task
+  external_dependencies: union(task.subtasks.map(st => st.external_dependencies || []))
+    || state.detected_dependencies
+    || [],
+  implementation_files: flatten(task.subtasks.map(st =>
+    st.gate_progress.implementation.files_changed || []
+  )),
+
   // OPTIONAL - additional context
-  gate6_handoff: agent_outputs.integration_testing
+  gate6_handoff: task.gate_progress.integration_testing  // task-level Gate 6 (write) output
 }
 
 // NOTE: external_dependencies falls back to state.detected_dependencies
-// from Step 1.5 (cycle-level auto-detection) when the unit doesn't define them.
+// from Step 1.6 (cycle-level auto-detection) when no subtask defines them.
 ```
 
 ### Step 9.2: Invoke ring:dev-chaos-testing Skill (Write Mode)
@@ -2801,26 +2977,36 @@ chaos_testing_input = {
 
 ---
 
-## Step 10: Gate 8 - Review (Per Execution Unit)
+## Step 10: Gate 8 - Review (Per Task — after all subtasks complete Gate 0 + Gate 3 + Gate 9)
+
+⛔ **CADENCE:** This gate runs ONCE per task, NOT per subtask. Reviewers see the CUMULATIVE diff of all subtasks in the task — cross-subtask interaction bugs (contract drift, hidden coupling, duplicated logic) are MORE visible at this cadence, not less.
 
 **REQUIRED SUB-SKILL:** Use `ring:codereview`
 
 ### Step 10.1: Prepare Input for ring:codereview Skill
 
+⛔ **Input scope:** TASK-level. `base_sha` is the SHA before the FIRST subtask's Gate 0 (i.e., the task's starting commit); `head_sha` is the current HEAD after all subtasks and task-level gates up to this point. The resulting diff covers ALL subtasks of the task.
+
 ```text
-Gather from previous gates:
+task = state.tasks[state.current_task_index]
 
 review_input = {
-  // REQUIRED - from current execution unit
-  unit_id: state.current_unit.id,
-  base_sha: state.current_unit.base_sha,  // SHA before implementation
-  head_sha: [current HEAD],  // SHA after all gates
-  implementation_summary: state.current_unit.title + requirements,
-  requirements: state.current_unit.acceptance_criteria,
-  
+  // REQUIRED - TASK-level
+  unit_id: task.id,  // TASK id
+  base_sha: task.base_sha,            // SHA before the FIRST subtask started
+  head_sha: [current HEAD],           // SHA after all subtasks + task-level gates so far
+
+  // REQUIRED - summary and requirements aggregated from task + subtasks
+  implementation_summary: task.title + "\n" +
+    task.subtasks.map(st => "- " + st.title + ": " + (st.summary || "")).join("\n"),
+  requirements: task.acceptance_criteria
+    || flatten(task.subtasks.map(st => st.acceptance_criteria || [])),
+
   // OPTIONAL - additional context
-  implementation_files: agent_outputs.implementation.files_changed,
-  gate0_handoff: agent_outputs.implementation  // full Gate 0 output
+  implementation_files: flatten(task.subtasks.map(st =>
+    st.gate_progress.implementation.files_changed || []
+  )),  // UNION across subtasks
+  gate0_handoffs: task.subtasks.map(st => st.gate_progress.implementation)  // ARRAY
 }
 ```
 
@@ -2832,13 +3018,13 @@ review_input = {
 2. Invoke ring:codereview skill with structured input:
 
    Skill("ring:codereview") with input:
-     unit_id: review_input.unit_id
-     base_sha: review_input.base_sha
-     head_sha: review_input.head_sha
+     unit_id: review_input.unit_id                    # TASK id
+     base_sha: review_input.base_sha                  # SHA before first subtask
+     head_sha: review_input.head_sha                  # Current HEAD (cumulative diff)
      implementation_summary: review_input.implementation_summary
      requirements: review_input.requirements
-     implementation_files: review_input.implementation_files
-     gate0_handoff: review_input.gate0_handoff
+     implementation_files: review_input.implementation_files  # UNION across subtasks
+     gate0_handoffs: review_input.gate0_handoffs      # ARRAY of subtask handoffs
 
    The skill handles:
    - Dispatching all 8 reviewers in PARALLEL (single message with 8 Task calls)
@@ -2972,6 +3158,8 @@ review_input = {
 
 ## Step 11: Gate 9 - Validation (Per Execution Unit)
 
+ℹ️ **CADENCE:** Subtask-level. Runs after Gate 3 for the current subtask (or task-itself when no subtasks). Writes to `state.tasks[i].subtasks[j].gate_progress.validation`. Task-level gates (1, 2, 4, 5, 6w, 7w, 8) only run AFTER every subtask of the task has passed Gates 0, 3, and 9.
+
 ```text
 For current execution unit:
 
@@ -3013,23 +3201,12 @@ For current execution unit:
      - Include all changed files from this subtask
    - else: Skip commit (will happen at task or cycle end)
 
-0b. **VISUAL CHANGE REPORT (MANDATORY - before checkpoint):**
-   - MANDATORY: Invoke `Skill("ring:visualize")` to generate a code-diff HTML report for this execution unit
-   - Read `default/skills/visualize/templates/code-diff.html` to absorb the patterns before generating
-   - Content sourced from state JSON `agent_outputs` for the current unit:
-     * **TDD Output:** `tdd_red` (failing test with failure_output) + `tdd_green` (implementation with pass_output)
-     * **Files Changed:** Per-file before/after using `git diff` data from the implementation (for new files, show "New File" in the before panel). Do not read source files directly — use diff output provided by the implementation agent.
-      * **Review Verdicts:** Summary of all 8 reviewer verdicts from Gate 8
-     * **Acceptance Criteria:** Status from Gate 9 validation
-   - HTML includes: KPI cards (files changed, tests added, review iterations, gate pass/fail summary), per-file diff panels, review issues section (if any Medium+ issues were found and fixed)
-   - Save to: `docs/ring:dev-cycle/reports/unit-{unit_id}-report.html`
-   - Open in browser:
-     ```text
-     macOS: open docs/ring:dev-cycle/reports/unit-{unit_id}-report.html
-     Linux: xdg-open docs/ring:dev-cycle/reports/unit-{unit_id}-report.html
-     ```
-   - Tell the user the file path
-   - See [shared-patterns/anti-rationalization-visual-report.md](../shared-patterns/anti-rationalization-visual-report.md) for anti-rationalization table
+0b. **VISUAL CHANGE REPORT (subtask-level — OPT-IN ONLY):**
+   - Default: SKIP per-subtask visual report. Task-level aggregate report is generated in Step 11.2.
+   - Opt-in: If `state.visual_report_granularity == "subtask"`, generate per-subtask report
+     as previously documented. Default value is "task".
+   - Rationale: Task-level aggregate covers all subtasks' diffs; per-subtask reports are
+     rarely consumed and cost one visualize dispatch each.
 
 1. Set `status = "paused_for_approval"`, save state
 2. Present summary: Unit ID, Parent Task, Gates 0-9 status, Criteria X/X, Duration, Files Changed, Commit Status
@@ -3084,37 +3261,25 @@ After completing all subtasks of a task:
 
 1. Set task status = "completed"
 
-2. **⛔ MANDATORY: Run ring:dev-report skill**
+2. **Accumulate task metrics into state (NO dev-report dispatch here):**
 
-   ```yaml
-   Skill tool:
-     skill: "ring:dev-report"
-   ```
+   Write into `state.tasks[current_task_index].accumulated_metrics`:
+   - `gate_durations_ms`: {gate_name: duration_ms for each completed gate}
+   - `review_iterations`: `state.tasks[current].gate_progress.review.iterations`
+   - `testing_iterations`: sum across all testing gates (unit, fuzz, property, integration, chaos)
+   - `issues_by_severity`: {CRITICAL, HIGH, MEDIUM, LOW counts from Gate 8 output}
 
-   **Note:** ring:dev-report manages its own TodoWrite tracking internally.
-   
-   The skill will:
-   - Add its own todo item for tracking
-   - Calculate assertiveness score for the task
-   - Dispatch prompt-quality-reviewer agent with agent_outputs from state
-   - Generate improvement suggestions
-   - Write feedback to docs/feedbacks/cycle-{date}/{agent}.md
-   - Mark its todo as completed
+   Set `state.tasks[current].feedback_loop_completed = true`
+   (Actual dev-report dispatch happens ONCE at cycle end in Step 12.1.)
 
-   **After feedback-loop completes, update state:**
-   - Set `tasks[current].feedback_loop_completed = true` in state file
+   MANDATORY: Save state to file.
 
-   **Anti-Rationalization for Feedback Loop:**
+   Rationale: Feedback analysis is stronger on aggregate data. A single cycle-end
+   dev-report run produces the same or better insights than N per-task runs.
 
    | Rationalization | Why It's WRONG | Required Action |
    |-----------------|----------------|-----------------|
-   | "Task was simple, skip feedback" | Simple tasks still contribute to patterns | **Execute Skill tool** |
-   | "Already at 100% score" | High scores need tracking for replication | **Execute Skill tool** |
-   | "User approved, feedback unnecessary" | Approval ≠ process quality metrics | **Execute Skill tool** |
-   | "No issues found, nothing to report" | Absence of issues IS data | **Execute Skill tool** |
-   | "Time pressure, skip metrics" | Metrics take <2 min, prevent future issues | **Execute Skill tool** |
-
-   **⛔ HARD GATE: You CANNOT proceed to step 3 without executing the Skill tool above.**
+   | "Should dispatch dev-report now" | dev-report runs ONCE at cycle end (Step 12.1). Per-task metrics are accumulated into state, not analyzed here. | **Accumulate metrics into state, proceed to next task** |
 
 3. Set cycle status = "paused_for_task_approval"
 4. Save state
@@ -3296,6 +3461,8 @@ All units have written/updated test code during their Gate 6-7 passes. Now execu
 3. **Generate report:** Task | Subtasks | Duration | Review Iterations | Status | Commit Status
 
 4. **⛔ MANDATORY: Run ring:dev-report skill for cycle metrics**
+
+   **IMPORTANT (since R4):** This is the ONE AND ONLY ring:dev-report dispatch in the cycle. Per-task runs were removed (see Step 11.2). ring:dev-report reads `accumulated_metrics` from ALL tasks in state and generates aggregate analysis.
 
    ```yaml
    Skill tool:

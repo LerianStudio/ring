@@ -6,14 +6,12 @@ description: |
   on failures, and generates improvement reports to docs/feedbacks/cycle-{date}/.
 
 trigger: |
-  - After task completion (any gate outcome)
-  - After validation approval or rejection
-  - At end of development cycle
-  - When assertiveness drops below threshold
+  - Invoked EXACTLY ONCE per dev-cycle at Step 12.1 of ring:dev-cycle (and equivalent in ring:dev-cycle-frontend).
+  - Per-task invocations at Step 11.2 were REMOVED in R4 — per-task metrics are accumulated into state.tasks[*].accumulated_metrics and analyzed in aggregate here.
 
 skip_when: |
-  - Task still in progress -> wait for completion
-  - Feedback already recorded for this task -> proceed
+  - Cycle still in progress -> wait for Step 12.1 (cycle completion)
+  - Feedback already recorded for this cycle -> proceed
 
 NOT_skip_when: |
   - "Exploratory/spike work" → all work produces learnings. Track metrics for spikes too.
@@ -31,6 +29,8 @@ related:
 ## Overview
 
 See [CLAUDE.md](https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.md) for canonical validation and gate requirements. This skill collects metrics and generates improvement reports.
+
+**Invocation Contract (since R4 of "prancy Bentley" speedup):** This skill is invoked EXACTLY ONCE per dev-cycle, at Step 12.1 of ring:dev-cycle (and equivalent in ring:dev-cycle-frontend). Per-task invocations at Step 11.2 have been REMOVED. This skill expects aggregated data spanning ALL tasks in the cycle.
 
 Continuous improvement system that tracks development cycle effectiveness through assertiveness scores, identifies recurring failure patterns, and generates actionable improvement suggestions.
 
@@ -271,7 +271,34 @@ Base score of 100 points, with deductions for inefficiencies:
 **Anti-exemption check:**
 If you're thinking "perfect outcome, skip metrics" → STOP. This is Red Flag at line 75 ("Perfect outcome, skip the metrics").
 
-**After task completion, gather from `agent_outputs` in state file:**
+**After cycle completion, gather from `agent_outputs` in state file:**
+
+### New (R4): `state.tasks[*].accumulated_metrics`
+
+Per-task metrics accumulated during the cycle at each task's approval checkpoint (Step 11.2 of ring:dev-cycle). Use these to construct the cycle-wide analysis instead of single-task analysis.
+
+**Semantic shift:** Analyze ALL tasks' aggregated metrics + the full `agent_outputs` for the cycle, not a single task's data.
+
+Per-task fields under `state.tasks[i].accumulated_metrics`:
+- `gate_durations_ms`: {gate_name: duration_ms for each completed gate}
+- `review_iterations`: review iterations for this task
+- `testing_iterations`: sum across all testing gates (unit, fuzz, property, integration, chaos)
+- `issues_by_severity`: {CRITICAL, HIGH, MEDIUM, LOW counts from Gate 8 output}
+
+**Aggregation pattern for cycle-wide analysis:**
+
+```yaml
+# Sum across all tasks in the cycle:
+cycle_gate_durations_ms = sum(t.accumulated_metrics.gate_durations_ms for t in state.tasks)
+cycle_review_iterations = sum(t.accumulated_metrics.review_iterations for t in state.tasks)
+cycle_testing_iterations = sum(t.accumulated_metrics.testing_iterations for t in state.tasks)
+cycle_issues_by_severity = {
+  "CRITICAL": sum(t.accumulated_metrics.issues_by_severity.CRITICAL for t in state.tasks),
+  "HIGH":     sum(t.accumulated_metrics.issues_by_severity.HIGH     for t in state.tasks),
+  "MEDIUM":   sum(t.accumulated_metrics.issues_by_severity.MEDIUM   for t in state.tasks),
+  "LOW":      sum(t.accumulated_metrics.issues_by_severity.LOW      for t in state.tasks),
+}
+```
 
 ### Structured Data Fields (NEW)
 
@@ -339,7 +366,7 @@ extra_iterations = (
 
 ## Step 3: Analyze Prompt Quality (Agents Only)
 
-After calculating assertiveness, analyze prompt quality for all **agents** that executed in the task.
+After calculating assertiveness, analyze prompt quality for all **agents** that executed in the cycle (across all tasks).
 
 ### 3.1 Load Agent Outputs
 
@@ -364,20 +391,33 @@ Analyze prompt quality for all agents executed in this task.
 Task tool:
   subagent_type: "ring:prompt-quality-reviewer"
   prompt: |
-    Analyze prompt quality for agents in task [task_id].
+    CONTEXT: You are analyzing a COMPLETE dev-cycle across N tasks (not a single task).
+    The data you receive spans all tasks in the cycle. Since R4 of the
+    "prancy Bentley" speedup, ring:dev-report is invoked exactly ONCE per cycle
+    (Step 12.1 of ring:dev-cycle), so aggregate-level analysis is the expected mode.
 
-    Agent outputs from state:
-    [agent_outputs]
+    Cycle: [cycle_id]
+    Tasks analyzed: [task_ids] (N total)
 
-    For each agent:
+    Aggregated cycle metrics (sum across all tasks' accumulated_metrics):
+      gate_durations_ms: [cycle_gate_durations_ms]
+      review_iterations: [cycle_review_iterations]
+      testing_iterations: [cycle_testing_iterations]
+      issues_by_severity: [cycle_issues_by_severity]
+
+    Full agent_outputs history for the cycle (all tasks, all gates):
+    [agent_outputs]   # from state.tasks[*].agent_outputs (not a single task subset)
+
+    For each agent that executed in the cycle:
     1. Load definition from dev-team/agents/ or default/agents/
     2. Extract rules: MUST, MUST not, ask_when, output_schema
-    3. Compare output vs rules
-    4. Calculate score
-    5. Identify gaps with evidence
-    6. Generate improvements
+    3. Compare each output invocation vs rules (across all tasks)
+    4. Calculate aggregate score (average across invocations)
+    5. Identify recurring gaps with evidence (quote task IDs + gate)
+    6. Generate cycle-level improvements prioritized by occurrence count
 
-    Return structured analysis per agent.
+    Return structured analysis per agent, with per-task evidence rolled into
+    cycle-wide patterns.
 ```
 
 ### 3.3 Write Feedback Files

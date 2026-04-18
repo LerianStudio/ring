@@ -3,7 +3,8 @@ name: ring:dev-devops
 description: |
   Gate 1 of the development cycle. Creates/updates Docker configuration,
   docker-compose setup, and environment variables for local development
-  and deployment readiness.
+  and deployment readiness. Runs at TASK cadence (after all subtasks
+  complete Gate 0 + Gate 3 + Gate 9).
 
 trigger: |
   - Gate 1 of development cycle
@@ -32,7 +33,7 @@ input_schema:
   required:
     - name: unit_id
       type: string
-      description: "Task or subtask identifier"
+      description: "TASK identifier (not a subtask id). This skill runs at TASK cadence — unit_id is always a task id."
     - name: language
       type: string
       enum: [go, typescript, python]
@@ -44,11 +45,11 @@ input_schema:
     - name: implementation_files
       type: array
       items: string
-      description: "List of files from Gate 0 implementation"
+      description: "Union of changed files across all subtasks of this task."
+    - name: gate0_handoffs
+      type: array
+      description: "Array of per-subtask implementation handoffs (one entry per subtask). NOT a single gate0_handoff object."
   optional:
-    - name: gate0_handoff
-      type: object
-      description: "Full handoff from Gate 0"
     - name: new_dependencies
       type: array
       items: string
@@ -152,13 +153,13 @@ This skill configures the development and deployment infrastructure:
 
 ```text
 REQUIRED INPUT (from ring:dev-cycle orchestrator):
-- unit_id: [task/subtask being containerized]
+- unit_id: [TASK id — runs at task cadence, not per subtask]
 - language: [go|typescript|python]
 - service_type: [api|worker|batch|cli]
-- implementation_files: [files from Gate 0]
+- implementation_files: [union of changed files across all subtasks of this task]
+- gate0_handoffs: [array of per-subtask Gate 0 handoffs — one entry per subtask]
 
 OPTIONAL INPUT:
-- gate0_handoff: [full Gate 0 output]
 - new_dependencies: [deps added in Gate 0]
 - new_env_vars: [env vars needed]
 - new_services: [postgres, redis, etc.]
@@ -235,8 +236,22 @@ Task:
     - docker-compose.yml: [EXISTS/MISSING]
     - .env.example: [EXISTS/MISSING]
 
+    ## Standards Source (Cache-First Pattern)
+
+    **Standards Source (Cache-First Pattern):** This sub-skill reads standards from `state.cached_standards` populated by dev-cycle Step 1.5. If invoked outside a cycle (standalone), it falls back to direct WebFetch with a warning. See `shared-patterns/standards-cache-protocol.md` for protocol details.
+
     ## Standards Reference
-    WebFetch: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/devops.md
+
+    URL: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/devops.md
+
+    **Cache-first loading protocol:**
+    For each required standards URL:
+      IF state.cached_standards[url] exists:
+        → Read content from state.cached_standards[url].content
+        → Log: "Using cached standard: {url} (fetched {state.cached_standards[url].fetched_at})"
+      ELSE:
+        → WebFetch url (fallback — should not happen if orchestrator ran Step 1.5)
+        → Log warning: "Standard {url} was not pre-cached; fetched inline"
 
     You MUST implement all sections from devops.md.
 
@@ -341,7 +356,17 @@ Task:
     [list ❌ sections and FAIL verifications]
 
     ## Standards Reference
-    WebFetch: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/devops.md
+
+    URL: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/devops.md
+
+    **Cache-first loading protocol:**
+    For each required standards URL:
+      IF state.cached_standards[url] exists:
+        → Read content from state.cached_standards[url].content
+        → Log: "Using cached standard: {url} (fetched {state.cached_standards[url].fetched_at})"
+      ELSE:
+        → WebFetch url (fallback — should not happen if orchestrator ran Step 1.5)
+        → Log warning: "Standard {url} was not pre-cached; fetched inline"
 
     Fix all issues and re-run verification commands.
     Return updated Standards Coverage Table with all ✅.

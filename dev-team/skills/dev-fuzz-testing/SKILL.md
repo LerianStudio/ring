@@ -3,6 +3,7 @@ name: ring:dev-fuzz-testing
 description: |
   Gate 4 of development cycle - ensures fuzz tests exist with proper seed corpus
   to discover edge cases, crashes, and unexpected input handling.
+  Runs at TASK cadence (after all subtasks complete Gate 0 + Gate 3 + Gate 9).
 
 trigger: |
   - After unit testing complete (Gate 3)
@@ -31,15 +32,18 @@ input_schema:
   required:
     - name: unit_id
       type: string
-      description: "Task or subtask identifier"
+      description: "TASK identifier (not a subtask id). This skill runs at TASK cadence — unit_id is always a task id."
     - name: implementation_files
       type: array
       items: string
-      description: "Files from Gate 0 implementation"
+      description: "Union of changed files across all subtasks of this task."
     - name: language
       type: string
       enum: [go]
       description: "Programming language (Go only for native fuzz)"
+    - name: gate0_handoffs
+      type: array
+      description: "Array of per-subtask implementation handoffs (one entry per subtask). NOT a single gate0_handoff object."
   optional:
     - name: gate3_handoff
       type: object
@@ -110,9 +114,24 @@ Ensure critical parsing and input handling code has **fuzz tests** to discover c
 
 ---
 
+## Standards Source (Cache-First Pattern)
+
+**Standards Source (Cache-First Pattern):** This sub-skill reads standards from `state.cached_standards` populated by dev-cycle Step 1.5. If invoked outside a cycle (standalone), it falls back to direct WebFetch with a warning. See `shared-patterns/standards-cache-protocol.md` for protocol details.
+
 ## Standards Reference
 
-**MANDATORY:** Load testing-fuzz.md standards via WebFetch.
+**MANDATORY:** Load testing-fuzz.md standards via the cache-first pattern below.
+
+URL: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/testing-fuzz.md
+
+**Cache-first loading protocol:**
+For each required standards URL:
+  IF state.cached_standards[url] exists:
+    → Read content from state.cached_standards[url].content
+    → Log: "Using cached standard: {url} (fetched {state.cached_standards[url].fetched_at})"
+  ELSE:
+    → WebFetch url (fallback — should not happen if orchestrator ran Step 1.5)
+    → Log warning: "Standard {url} was not pre-cached; fetched inline"
 
 <fetch_required>
 https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/testing-fuzz.md
@@ -124,9 +143,10 @@ https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards
 
 ```text
 REQUIRED INPUT:
-- unit_id: [task/subtask being tested]
-- implementation_files: [files from Gate 0]
+- unit_id: [TASK id — runs at task cadence, not per subtask]
+- implementation_files: [union of changed files across all subtasks of this task]
 - language: [go only for native fuzz]
+- gate0_handoffs: [array of per-subtask Gate 0 handoffs — one entry per subtask]
 
 OPTIONAL INPUT:
 - gate3_handoff: [full Gate 3 output]

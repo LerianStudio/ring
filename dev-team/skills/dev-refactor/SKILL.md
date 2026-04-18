@@ -847,40 +847,66 @@ If counts don't match → STOP. Go back to Step 4.1. Map missing issues.
 
 ---
 
-## Step 6: Map Findings to Tasks (1:1)
+## Step 6: Map Findings to Tasks (Clustered by file + pattern)
 
 **TodoWrite:** Mark "Map findings 1:1 to REFACTOR-XXX tasks" as `in_progress`
 
-**⛔ HARD GATE: One FINDING-XXX = One REFACTOR-XXX task. No grouping.**
+## Clustering Rule (replaces former 1:1 mapping)
 
-Each finding becomes its own task. This prevents findings from being lost inside grouped tasks.
+Findings are clustered into REFACTOR tasks by the tuple `(file_path, pattern_category)`.
 
-**1:1 Mapping Rule:**
-- FINDING-001 → REFACTOR-001
-- FINDING-002 → REFACTOR-002
-- FINDING-NNN → REFACTOR-NNN
+### Clustering Algorithm
 
-**Ordering:** Sort tasks by severity (Critical first), then by dependency order.
+1. Group all findings by their `file` field (from agent report).
+2. Within each file group, sub-group by `pattern_category`:
+   - `pattern_category` is derived from the finding's "Category" field
+   - (e.g., "error-handling", "logging", "multi-tenant", "file-size", etc.)
+3. Each `(file, pattern_category)` tuple becomes ONE REFACTOR-XXX task.
+4. If a file has findings in 3 different pattern categories → 3 REFACTOR tasks for that file.
+5. If a pattern category spans multiple files → one task per (file, pattern) pair (no cross-file clustering).
 
-**Mapping Verification:**
-```
+### Traceability Preservation (MANDATORY)
+
+Every REFACTOR task MUST include a `findings:` array listing all FINDING-XXX IDs it covers:
+
+~~~markdown
+## REFACTOR-005: Error Wrapping Pattern in internal/handler/user.go
+
+**Cluster Key:** (internal/handler/user.go, error-handling)
+**Findings Covered:** [FINDING-012, FINDING-015, FINDING-018]
+**Severity:** HIGH  (max of covered findings' severities)
+**Effort:** {sum of covered findings' effort estimates}
+
+### Findings Breakdown
+| Finding | Line | Description | Status |
+|---------|------|-------------|--------|
+| FINDING-012 | user.go:45 | `return err` without wrap | pending |
+| FINDING-015 | user.go:78 | `return err` without wrap | pending |
+| FINDING-018 | user.go:102 | `return err` without wrap | pending |
+~~~
+
+During dev-cycle execution, each finding's status is tracked per-line inside the
+REFACTOR task. A REFACTOR task completes only when all covered findings are resolved.
+
+### Mapping Verification (updated)
+
 Before proceeding to Step 7, verify:
 - Total FINDING-XXX in findings.md: X
-- Total REFACTOR-XXX in tasks.md: X (MUST MATCH exactly)
-- Orphan findings (not mapped): 0 (MUST BE ZERO)
-- Grouped tasks (multiple findings): 0 (MUST BE ZERO)
-```
+- Total REFACTOR-XXX in tasks.md: Y (Y ≤ X — clustering reduces count)
+- Every FINDING-XXX appears in exactly ONE REFACTOR task's `findings:` array
+- NO FINDING-XXX is missing from all REFACTOR tasks
+- NO FINDING-XXX appears in multiple REFACTOR tasks
 
-**If counts don't match → STOP. Every finding MUST have its own task.**
+If any finding is orphan or duplicated → STOP. Fix clustering.
 
 ### Anti-Rationalization Table for Step 6
 
 | Rationalization | Why It's WRONG | Required Action |
-|-----------------|----------------|-----------------|
-| "These findings are in the same file, I'll group them" | Grouping hides findings. One fix may be done, others forgotten. | **One finding = One task. No exceptions.** |
-| "Grouping reduces task count and is easier to manage" | Fewer tasks = less visibility. Each finding needs independent tracking. | **Create one REFACTOR-XXX per FINDING-XXX** |
-| "These are related and should be fixed together" | Related ≠ same task. Dev-cycle can execute them sequentially. | **Separate tasks, use Dependencies field to link** |
-| "Too many tasks will overwhelm the developer" | Missing fixes overwhelms production. Completeness > convenience. | **Create all tasks. Priority handles ordering.** |
+|---|---|---|
+| "Just keep 1:1 mapping, it's simpler" | 1:1 mapping multiplies cycle cost ~5x for typical refactors. Clustering preserves traceability. | **Apply (file, pattern) clustering** |
+| "Cluster across files to reduce tasks more" | Cross-file clustering hides file-specific blast radius. Only cluster within a file. | **Cluster only within file** |
+| "Skip the findings: array, it's redundant" | Without traceability array, findings get lost inside tasks. | **ALWAYS populate findings: array** |
+| "One finding can be in multiple tasks" | Duplicates cause double-fix attempts. One finding → one task. | **Each FINDING in exactly one REFACTOR** |
 
 **TodoWrite:** Mark "Map findings 1:1 to REFACTOR-XXX tasks" as `completed`
 
@@ -898,16 +924,17 @@ Before proceeding to Step 7, verify:
 **Source:** findings.md
 **Total Tasks:** {count}
 
-## ⛔ Mandatory 1:1 Mapping Verification
+## ⛔ Mandatory Clustering Traceability Verification
 
-**Every FINDING-XXX has exactly one REFACTOR-XXX. No grouping.**
+**Findings are clustered by (file, pattern_category). Every FINDING-XXX appears in exactly one REFACTOR-XXX via its `findings:` array.**
 
 | Metric | Count |
 |--------|-------|
 | Total FINDING-XXX in findings.md | {X} |
-| Total REFACTOR-XXX in tasks.md | {X} |
-| **Counts match exactly?** | ✅ YES (REQUIRED) |
-| Grouped tasks (multiple findings) | 0 (REQUIRED) |
+| Total REFACTOR-XXX in tasks.md | {Y} (Y ≤ X — clustering reduces count) |
+| **Every finding appears in exactly one task?** | ✅ YES (REQUIRED) |
+| Orphan findings (in zero tasks) | 0 (REQUIRED) |
+| Duplicate findings (in 2+ tasks) | 0 (REQUIRED) |
 
 **Priority affects execution order, not whether to include:**
 - Critical/High tasks: Execute first
@@ -916,19 +943,26 @@ Before proceeding to Step 7, verify:
 
 ---
 
-## REFACTOR-001: {Finding Pattern Name}
+## REFACTOR-001: {Finding Pattern Name} in {file_path}
 
-**Finding:** FINDING-001
-**Severity:** Critical | High | Medium | Low (all ARE MANDATORY)
+**Cluster Key:** ({file_path}, {pattern_category})
+**Findings Covered:** [FINDING-XXX, FINDING-YYY, ...]
+**Severity:** Critical | High | Medium | Low (max of covered findings' severities; all ARE MANDATORY)
 **Category:** {lib-commons | architecture | testing | devops}
 **Agent:** {agent-name}
-**Effort:** {hours}h
+**Effort:** {hours}h (sum of covered findings' effort estimates)
 **Dependencies:** {other REFACTOR-XXX tasks or none}
+
+### Findings Breakdown
+| Finding | Line | Description | Status |
+|---------|------|-------------|--------|
+| FINDING-XXX | {file}:{line} | {short description} | pending |
+| FINDING-YYY | {file}:{line} | {short description} | pending |
 
 ### Current Code
 ```{lang}
 // file: {path}:{lines}
-{actual code from FINDING-001}
+{representative code from covered findings}
 ```
 
 ### Ring Standard Reference
@@ -943,6 +977,7 @@ Before proceeding to Step 7, verify:
 ### Acceptance Criteria
 - [ ] Code follows {standard}.md → {section} pattern
 - [ ] No {anti-pattern} usage remains
+- [ ] All covered findings resolved (status: done for each row in Findings Breakdown)
 - [ ] Tests pass after refactoring
 ```
 
@@ -1051,6 +1086,10 @@ docs/ring:dev-refactor/{timestamp}/
 Skill tool:
   skill: "ring:dev-cycle"
 ```
+
+Note: Each REFACTOR task covering N findings is treated as ONE execution unit with N
+internal acceptance criteria. dev-cycle does not need to know about clustering — it
+consumes the task as-if it were any other task.
 
 **⛔ CRITICAL: Pass tasks file path in context:**
 

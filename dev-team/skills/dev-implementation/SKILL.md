@@ -4,6 +4,7 @@ description: |
   Gate 0 of the development cycle. Executes code implementation using the appropriate
   specialized agent based on task content and project language. Handles TDD workflow
   with RED-GREEN phases. Follows project standards defined in docs/PROJECT_RULES.md.
+  Includes delivery verification exit criteria (merged from deprecated ring:dev-delivery-verification).
 
 trigger: |
   - Gate 0 of development cycle
@@ -215,12 +216,26 @@ Task:
     ## Project Standards
     Read and follow: [project_rules_path]
 
+    ## Standards Source (Cache-First Pattern)
+
+    **Standards Source (Cache-First Pattern):** This sub-skill reads standards from `state.cached_standards` populated by dev-cycle Step 1.5. If invoked outside a cycle (standalone), it falls back to direct WebFetch with a warning. See `shared-patterns/standards-cache-protocol.md` for protocol details.
+
     ## Ring Standards Reference (Modular)
     Go modules: `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/{module}.md`
     For TS: `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md`
-    **Go minimum for tests:** WebFetch `quality.md` → Testing section for test conventions.
+
+    **Cache-first loading protocol:**
+    For each required standards URL:
+      IF state.cached_standards[url] exists:
+        → Read content from state.cached_standards[url].content
+        → Log: "Using cached standard: {url} (fetched {state.cached_standards[url].fetched_at})"
+      ELSE:
+        → WebFetch url (fallback — should not happen if orchestrator ran Step 1.5)
+        → Log warning: "Standard {url} was not pre-cached; fetched inline"
+
+    **Go minimum for tests:** Load `quality.md` via cache-first pattern → Testing section for test conventions.
     Multi-Tenant: Implement DUAL-MODE from the start (Go only). Use resolvers for all resources — they work transparently in both single-tenant and multi-tenant mode. See TDD-GREEN prompt for full Dual-Mode Implementation section and the sub-package import table.
-    WebFetch `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/multi-tenant.md` for patterns.
+    Load `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/multi-tenant.md` via cache-first pattern for patterns.
 
     ## Frontend TDD Policy (React/Next.js only)
     If the component is purely visual/presentational (layout, styling, animations,
@@ -323,15 +338,28 @@ Task:
     ## Project Standards
     Read and follow: [project_rules_path]
 
+    ## Standards Source (Cache-First Pattern)
+
+    **Standards Source (Cache-First Pattern):** This sub-skill reads standards from `state.cached_standards` populated by dev-cycle Step 1.5. If invoked outside a cycle (standalone), it falls back to direct WebFetch with a warning. See `shared-patterns/standards-cache-protocol.md` for protocol details.
+
     ## Ring Standards Reference (Modular — Load by Task Type)
-    
-    **⛔ MANDATORY: WebFetch the MODULAR standards files below, NOT the monolithic golang.md.**
+
+    **⛔ MANDATORY: Load the MODULAR standards files below via the cache-first pattern, NOT the monolithic golang.md.**
     The standards are split into focused modules. Load the ones relevant to your task type.
-    
+
+    **Cache-first loading protocol (applies to every URL listed below):**
+    For each required standards URL:
+      IF state.cached_standards[url] exists:
+        → Read content from state.cached_standards[url].content
+        → Log: "Using cached standard: {url} (fetched {state.cached_standards[url].fetched_at})"
+      ELSE:
+        → WebFetch url (fallback — should not happen if orchestrator ran Step 1.5)
+        → Log warning: "Standard {url} was not pre-cached; fetched inline"
+
     ### Go — Module Loading Guide
     Base URL: `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/`
-    
-    | Task Type | REQUIRED Modules to WebFetch |
+
+    | Task Type | REQUIRED Modules to Load (cache-first) |
     |-----------|----------------------------|
     | New feature (full) | `core.md` → `bootstrap.md` → `domain.md` → `quality.md` → `api-patterns.md` |
     | API endpoint | `core.md` → `api-patterns.md` → `domain.md` → `quality.md` |
@@ -340,12 +368,12 @@ Task:
     | Messaging / RabbitMQ | `core.md` → `messaging.md` |
     | Infra / Bootstrap | `core.md` → `bootstrap.md` |
     | Any task | `core.md` is ALWAYS required (lib-commons, license headers, dependency management) |
-    
+
     ### TypeScript
     URL: `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md`
-    
+
     Multi-Tenant: Implement DUAL-MODE from the start. Use lib-commons v4 resolvers for ALL resources.
-    WebFetch: `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/multi-tenant.md`
+    Load via cache-first pattern: `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/multi-tenant.md`
     
     ## ⛔ Multi-Tenant Dual-Mode Implementation (Go backend only — skip for TypeScript/Frontend)
     
@@ -448,7 +476,7 @@ Task:
 
     <cannot_skip>
     - 90%+ instrumentation coverage required
-    - WebFetch standards file before implementation
+    - Load standards file via cache-first pattern (state.cached_standards → fallback WebFetch) before implementation
     - Follow exact patterns from standards
     - Output Standards Coverage Table with evidence
     </cannot_skip>
@@ -465,12 +493,12 @@ Task:
 
     ### Language-Specific Patterns (MANDATORY)
 
-    **⛔ HARD GATE: Agent MUST WebFetch modular standards files BEFORE writing any code.**
-    
+    **⛔ HARD GATE: Agent MUST load modular standards files (cache-first, WebFetch fallback) BEFORE writing any code.**
+
     Use the Module Loading Guide above to determine which modules to load.
     **Minimum for ANY Go task:** `core.md` (lib-commons, license headers, deps, MongoDB patterns)
-    
-    | Language | Standards Modules | REQUIRED Sections to WebFetch |
+
+    | Language | Standards Modules | REQUIRED Sections to Load (cache-first) |
     |----------|-------------------|-------------------------------|
     | **Go** | See Module Loading Guide above | ALL sections from loaded modules (use `standards-coverage-table.md` → `ring:backend-engineer-golang` section index) |
     | **TypeScript** | `typescript.md` | ALL 15 sections from `standards-coverage-table.md` → `ring:backend-engineer-typescript` |
@@ -480,15 +508,15 @@ Task:
 
     | Requirement | Enforcement |
     |-------------|-------------|
-    | WebFetch modular standards files | MANDATORY before implementation |
+    | Load modular standards files (cache-first, WebFetch fallback) | MANDATORY before implementation |
     | Follow exact patterns | REQUIRED - copy structure from standards |
     | Output Standards Coverage Table | REQUIRED - with file:line evidence for ALL loaded sections |
     | 90%+ instrumentation coverage | HARD GATE - implementation REJECTED if below |
     | All loaded sections ✅ or N/A | HARD GATE - any ❌ = REJECTED |
 
     ### ⛔ FORBIDDEN Patterns (HARD BLOCK)
-    
-    **Agent MUST WebFetch standards and check Anti-Patterns table. Violations = REJECTED.**
+
+    **Agent MUST load standards (cache-first, WebFetch fallback) and check Anti-Patterns table. Violations = REJECTED.**
 
     - **Go:** `golang.md` → "Anti-Patterns" table - MUST check all rows
     - **TypeScript:** `typescript.md` → "Anti-Patterns" table - MUST check all rows
@@ -528,7 +556,7 @@ Task:
 
     ### Standards Coverage Table (MANDATORY)
     
-    **Standards Modules Loaded:** [list modules WebFetched]
+    **Standards Modules Loaded:** [list modules loaded via cache-first pattern; note cache hit/miss per module]
     **Total Sections Checked:** [N]
     
     | # | Section (from standards) | Status | Evidence |
@@ -628,6 +656,54 @@ if pass_output contains "PASS" and all standards ✅ and Standards Coverage Tabl
     → Proceed to Step 8
 ```
 
+## Step 7: Delivery Verification Exit Check (MANDATORY — absorbed from former Gate 0.5)
+
+Before emitting the "Ready for Gate 1: YES" handoff, verify that every requirement in the
+task/subtask's acceptance criteria is DELIVERED (reachable, integrated, not dead code).
+
+### Checks to run (absorbed from deprecated ring:dev-delivery-verification skill)
+
+#### Check 1: Requirement Coverage Matrix (MANDATORY)
+For each acceptance criterion in input.requirements:
+- Locate the file(s) that implement it
+- Verify it's callable from a public entry point (handler, route, CLI command)
+- Mark as ✅ DELIVERED | ⚠️ PARTIAL | ❌ NOT DELIVERED
+
+#### Check 2: Dead Code Detection (MANDATORY)
+For each newly-created struct/interface/function in files_changed:
+- Verify it's referenced from at least one caller (other than tests)
+- If created but uncalled → dead code item
+
+#### Check 3: Integration Verification (MANDATORY)
+- New middleware MUST be wired into router/server
+- New repositories MUST be registered in DI container
+- New types MUST be exported where consumers expect them
+
+### Output (added to handoff to Gate 1)
+
+```yaml
+delivery_verification:
+  result: "PASS" | "PARTIAL" | "FAIL"
+  requirements_total: N
+  requirements_delivered: N
+  requirements_missing: N
+  dead_code_items: N
+```
+
+### Decision gate
+
+IF `result != "PASS"`:
+- Re-run Step 6 (TDD-GREEN) with remediation instructions
+- Max 2 retries before escalating to orchestrator
+
+IF `result == "PASS"`:
+- Proceed to Handoff to Next Gate
+
+### Reference
+Full detailed check list preserved in `/Users/fredamaral/repos/lerianstudio/ring/dev-team/skills/dev-delivery-verification/SKILL.md` (deprecated but retained for reference).
+
+---
+
 ## Step 8: Prepare Output
 
 ```text
@@ -667,6 +743,13 @@ Generate skill output:
 - Standards met: ✅
 - Ready for Gate 1 (DevOps): YES
 - Environment needs: [list any new deps, env vars, services]
+
+delivery_verification:
+  result: "PASS|PARTIAL|FAIL"
+  requirements_total: integer
+  requirements_delivered: integer
+  requirements_missing: integer
+  dead_code_items: integer
 ```
 
 ---

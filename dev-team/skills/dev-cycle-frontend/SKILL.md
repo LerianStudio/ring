@@ -178,6 +178,42 @@ Store result in state file under `ui_library_mode`.
 
 ---
 
+## Step 1.5: Standards Pre-Cache (MANDATORY)
+
+Cache all standards URLs the cycle will need, ONCE, into `state.cached_standards`.
+Sub-skills read from this cache instead of calling WebFetch themselves.
+
+**Required URLs to pre-fetch (MUST succeed all):**
+
+1. `https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.md`
+2. `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/frontend.md`
+3. `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/frontend/testing-accessibility.md`
+4. `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/frontend/testing-visual.md`
+5. `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/frontend/testing-e2e.md`
+6. `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/frontend/testing-performance.md`
+7. `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/devops.md`
+8. `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/sre.md`
+9. `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md` (if BFF layer detected)
+
+**Protocol:**
+
+```text
+For each URL in the required list:
+  WebFetch: [URL]
+  Write to state.cached_standards[URL] = {
+    "fetched_at": current_iso_timestamp,
+    "content": <fetched content>
+  }
+```
+
+**MANDATORY:** Save state to file after cache populated — Write tool → [state.state_path]
+
+**Blocker:** If ANY URL fails to fetch, STOP cycle and report. Cache MUST be complete. Sub-skills downstream rely on `state.cached_standards` being populated; a partial cache causes WebFetch fallback warnings and defeats the purpose of pre-caching.
+
+**Rationale:** Before this step existed, every sub-skill dispatch triggered its own WebFetch of the same standards. The 5-minute prompt cache TTL is regularly exceeded, producing 15–25+ redundant network fetches per cycle. A single pre-cache at cycle start reduces that to one fetch per unique URL.
+
+---
+
 ## Backend Handoff Loading (Optional)
 
 If the frontend cycle follows a backend `ring:dev-cycle`, load the handoff file:
@@ -387,17 +423,19 @@ No negotiation. No exceptions. No "special cases".
 
 ## The 9 Gates
 
-| Gate | Skill | Purpose | Agent | Standards Module |
-|------|-------|---------|-------|------------------|
-| 0 | ring:dev-implementation | Write code following TDD | ring:frontend-engineer / ring:ui-engineer / ring:frontend-bff-engineer-typescript | frontend.md |
-| 1 | ring:dev-devops | Docker/compose/Nginx setup | ring:devops-engineer | devops.md |
-| 2 | ring:dev-frontend-accessibility | WCAG 2.1 AA compliance | ring:qa-analyst-frontend (test_mode: accessibility) | testing-accessibility.md |
-| 3 | ring:dev-unit-testing | Unit tests 85%+ coverage | ring:qa-analyst-frontend (test_mode: unit) | frontend.md |
-| 4 | ring:dev-frontend-visual | Snapshot/visual regression tests | ring:qa-analyst-frontend (test_mode: visual) | testing-visual.md |
-| 5 | ring:dev-frontend-e2e | E2E tests with Playwright | ring:qa-analyst-frontend (test_mode: e2e) | testing-e2e.md |
-| 6 | ring:dev-frontend-performance | Core Web Vitals + Lighthouse | ring:qa-analyst-frontend (test_mode: performance) | testing-performance.md |
-| 7 | ring:codereview | Parallel code review (5 reviewers) | ring:code-reviewer, ring:business-logic-reviewer, ring:security-reviewer, ring:test-reviewer, ring:frontend-engineer (review mode) | N/A |
-| 8 | ring:dev-validation | Final acceptance validation | N/A (verification) | N/A |
+| Gate | Cadence | Skill | Purpose | Agent | Standards Module |
+|------|---------|-------|---------|-------|------------------|
+| 0 | subtask | ring:dev-implementation | Write code following TDD | ring:frontend-engineer / ring:ui-engineer / ring:frontend-bff-engineer-typescript | frontend.md |
+| 1 | task | ring:dev-devops | Docker/compose/Nginx setup | ring:devops-engineer | devops.md |
+| 2 | task | ring:dev-frontend-accessibility | WCAG 2.1 AA compliance | ring:qa-analyst-frontend (test_mode: accessibility) | testing-accessibility.md |
+| 3 | subtask | ring:dev-unit-testing | Unit tests 85%+ coverage | ring:qa-analyst-frontend (test_mode: unit) | frontend.md |
+| 4 | task | ring:dev-frontend-visual | Snapshot/visual regression tests | ring:qa-analyst-frontend (test_mode: visual) | testing-visual.md |
+| 5 | task | ring:dev-frontend-e2e | E2E tests with Playwright | ring:qa-analyst-frontend (test_mode: e2e) | testing-e2e.md |
+| 6 | task | ring:dev-frontend-performance | Core Web Vitals + Lighthouse | ring:qa-analyst-frontend (test_mode: performance) | testing-performance.md |
+| 7 | task | ring:codereview | Parallel code review (5 reviewers, cumulative task diff) | ring:code-reviewer, ring:business-logic-reviewer, ring:security-reviewer, ring:test-reviewer, ring:frontend-engineer (review mode) | N/A |
+| 8 | subtask | ring:dev-validation | Final acceptance validation | N/A (verification) | N/A |
+
+**Cadence column:** `subtask` = runs once per subtask (execution unit). `task` = runs ONCE per task, after all subtasks complete their Gate 0/3/8.
 
 **All gates are MANDATORY. No exceptions. No skip reasons.**
 
@@ -474,19 +512,21 @@ Task 5: { subagent_type: "ring:frontend-engineer", prompt: "REVIEW MODE: Review 
 
 **A gate is COMPLETE only when all components finish successfully:**
 
-| Gate | Components Required | Partial = FAIL |
-|------|---------------------|----------------|
-| 0.1 | TDD-RED: Failing test written + failure output captured (behavioral components only - see [Frontend TDD Policy](#gate-0-frontend-tdd-policy)) | Test exists but no failure output = FAIL. Visual-only components skip to 0.2 |
-| 0.2 | TDD-GREEN: Implementation passes test (behavioral) OR implementation complete (visual) | Code exists but test fails = FAIL |
-| 0 | Both 0.1 and 0.2 complete (behavioral) OR 0.2 complete (visual - snapshots deferred to Gate 4) | 0.1 done without 0.2 = FAIL |
-| 1 | Dockerfile + docker-compose/nginx + .env.example | Missing any = FAIL |
-| 2 | 0 WCAG AA violations + keyboard navigation tested + screen reader tested | Any violation = FAIL |
-| 3 | Unit test coverage >= 85% + all AC tested | 84% = FAIL |
-| 4 | All state snapshots pass + responsive breakpoints covered | Missing snapshots = FAIL |
-| 5 | All user flows tested + cross-browser (Chromium, Firefox, WebKit) + 3x stable pass | Flaky = FAIL |
-| 6 | LCP < 2.5s + CLS < 0.1 + INP < 200ms + Lighthouse >= 90 | Any threshold missed = FAIL |
-| 7 | All 5 reviewers PASS | 4/5 reviewers = FAIL |
-| 8 | Explicit "APPROVED" from user | "Looks good" = not approved |
+| Gate | Cadence | Components Required | Partial = FAIL |
+|------|---------|---------------------|----------------|
+| 0.1 | subtask | TDD-RED: Failing test written + failure output captured (behavioral components only - see [Frontend TDD Policy](#gate-0-frontend-tdd-policy)) | Test exists but no failure output = FAIL. Visual-only components skip to 0.2 |
+| 0.2 | subtask | TDD-GREEN: Implementation passes test (behavioral) OR implementation complete (visual) | Code exists but test fails = FAIL |
+| 0 | subtask | Both 0.1 and 0.2 complete (behavioral) OR 0.2 complete (visual - snapshots deferred to Gate 4) | 0.1 done without 0.2 = FAIL |
+| 1 | task | Dockerfile + docker-compose/nginx + .env.example (produced once per task) | Missing any = FAIL |
+| 2 | task | 0 WCAG AA violations + keyboard navigation tested + screen reader tested (on cumulative task diff) | Any violation = FAIL |
+| 3 | subtask | Unit test coverage >= 85% + all AC tested (per subtask) | 84% = FAIL |
+| 4 | task | All state snapshots pass + responsive breakpoints covered (cumulative task components) | Missing snapshots = FAIL |
+| 5 | task | All user flows tested + cross-browser (Chromium, Firefox, WebKit) + 3x stable pass (task-level flows) | Flaky = FAIL |
+| 6 | task | LCP < 2.5s + CLS < 0.1 + INP < 200ms + Lighthouse >= 90 (task-level measurement) | Any threshold missed = FAIL |
+| 7 | task | All 5 reviewers PASS on cumulative task diff | 4/5 reviewers = FAIL |
+| 8 | subtask | Explicit "APPROVED" from user (per subtask) | "Looks good" = not approved |
+
+**Cadence column:** `subtask` = runs per subtask. `task` = runs ONCE per task on the UNION of all subtasks' changed files. All quality thresholds (WCAG AA, 85% coverage, CWV, Lighthouse ≥ 90) remain unchanged — only the execution frequency changes.
 
 **CRITICAL for Gate 7:** Running 4 of 5 reviewers is not a partial pass - it's a FAIL. Re-run all 5 reviewers.
 
@@ -527,14 +567,55 @@ Task 5: { subagent_type: "ring:frontend-engineer", prompt: "REVIEW MODE: Review 
 
 ## Execution Order
 
-**Core Principle:** Each execution unit passes through all 9 gates. All gates execute and complete per unit.
+**Core Principle:** Each task passes through all 9 gates. Gates 0, 3, 8 execute per subtask (execution unit). Gates 1, 2, 4, 5, 6, 7 execute ONCE per task after all subtasks complete their subtask-level gates.
 
-**Per-Unit Flow:** Unit -> Gate 0->1->2->3->4->5->6->7->8 -> Unit Checkpoint -> Task Checkpoint -> Next Unit
+**Per-Task Flow:**
+```
+Task → (for each subtask: Gate 0 → Gate 3 → Gate 8)
+     → Gate 1 → Gate 2 → Gate 4 → Gate 5 → Gate 6 → Gate 7
+     → Task-level visual report → Task Checkpoint → Next Task
+```
 
-| Scenario | Execution Unit | Gates Per Unit |
-|----------|----------------|----------------|
-| Task without subtasks | Task itself | 9 gates |
-| Task with subtasks | Each subtask | 9 gates per subtask |
+| Scenario | Execution Unit | Subtask-level Gates | Task-level Gates |
+|----------|----------------|---------------------|------------------|
+| Task without subtasks | Task itself (treated as single subtask) | 0, 3, 8 | 1, 2, 4, 5, 6, 7 |
+| Task with subtasks | Each subtask | 0, 3, 8 (per subtask) | 1, 2, 4, 5, 6, 7 (once per task) |
+
+## Execution Loop Structure (the "Prancy Bentley" cadence model)
+
+```yaml
+for each task in state.tasks:
+  # ===== SUBTASK-LEVEL GATES =====
+  for each subtask in task.subtasks:
+    Execute Gate 0 (Implementation)
+    Execute Gate 3 (Unit Testing)
+    Execute Gate 8 (Validation)
+    [per-subtask visual report — OPT-IN only via state.visual_report_granularity]
+  end for
+
+  # ===== TASK-LEVEL GATES =====
+  # Input aggregation: implementation_files = UNION across subtasks
+  Execute Gate 1 (DevOps)
+  Execute Gate 2 (Accessibility)
+  Execute Gate 4 (Visual)
+  Execute Gate 5 (E2E)
+  Execute Gate 6 (Performance)
+  Execute Gate 7 (Review — 5 parallel reviewers on cumulative task diff)
+
+  Generate task-level visual report
+  Accumulate metrics into state.tasks[i].accumulated_metrics
+  [task checkpoint]
+end for
+
+# Cycle-level (minimal for frontend)
+Final Commit
+```
+
+**Key properties:**
+- Subtask-level gates (0, 3, 8) establish working, tested, validated code per subtask.
+- Task-level gates (1, 2, 4, 5, 6, 7) run on the UNION of all subtasks' changed files — one pass per task, not N passes.
+- Reviewers at Gate 7 see the cumulative task diff, so cross-subtask interaction bugs become MORE visible, not less.
+- Per-subtask visual reports are opt-in; the default task-level aggregate report covers all subtasks' diffs.
 
 ## Commit Timing
 
@@ -586,7 +667,7 @@ State is persisted to `docs/ring:dev-cycle-frontend/current-cycle.json`:
 
 ```json
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "cycle_id": "uuid",
   "started_at": "ISO timestamp",
   "updated_at": "ISO timestamp",
@@ -594,6 +675,10 @@ State is persisted to `docs/ring:dev-cycle-frontend/current-cycle.json`:
   "state_path": "docs/ring:dev-cycle-frontend/current-cycle.json",
   "cycle_type": "frontend",
   "ui_library_mode": "sindarian-ui | fallback-only",
+  "_comment_cached_standards": "Populated by Step 1.5 (Standards Pre-Cache). Dictionary of URL → {fetched_at, content}. Sub-skills MUST read from here instead of calling WebFetch. See plan Section 3.1.",
+  "cached_standards": {},
+  "_comment_visual_report_granularity": "Default 'task' (generate visual report once per task). Opt-in 'subtask' to generate per-subtask reports. See plan Section 3.3.",
+  "visual_report_granularity": "task",
   "backend_handoff": {
     "loaded": true,
     "source": "docs/ring:dev-cycle/handoff-frontend.json",
@@ -625,9 +710,16 @@ State is persisted to `docs/ring:dev-cycle-frontend/current-cycle.json`:
         {
           "id": "ST-001-01",
           "file": "subtasks/T-001/ST-001-01.md",
-          "status": "pending|completed"
+          "status": "pending|completed",
+          "_comment_subtask_gate_progress": "Per-subtask tracking of subtask-level gates (0, 3, 8). Added in plan Section 3 / Edit 4.2.4. Task-level gates (1,2,4,5,6,7) live on state.tasks[i].gate_progress instead.",
+          "gate_progress": {
+            "implementation": {"status": "pending|completed"},
+            "unit_testing": {"status": "pending|completed", "coverage_actual": 0.0},
+            "validation": {"status": "pending|completed", "result": "approved|rejected"}
+          }
         }
       ],
+      "_comment_task_gate_progress": "Task-level gates (1, 2, 4, 5, 6, 7) run ONCE per task on the UNION of all subtasks' changed files. Subtask-level gates (0, 3, 8) live on state.tasks[i].subtasks[j].gate_progress.",
       "gate_progress": {
         "implementation": {
           "status": "pending|in_progress|completed",
@@ -798,7 +890,15 @@ State is persisted to `docs/ring:dev-cycle-frontend/current-cycle.json`:
           "result": "approved|rejected",
           "timestamp": "ISO timestamp"
         }
-      }
+      },
+      "_comment_accumulated_metrics": "Task-level rollup of gate metrics. Populated after the task-level gates complete. Cycle-end dev-report reads accumulated_metrics from all tasks. See plan Section 3 / Edit 4.2.4.",
+      "accumulated_metrics": {
+        "gate_durations_ms": {},
+        "review_iterations": 0,
+        "testing_iterations": 0,
+        "issues_by_severity": {"CRITICAL": 0, "HIGH": 0, "MEDIUM": 0, "LOW": 0}
+      },
+      "feedback_loop_completed": false
     }
   ],
   "metrics": {
@@ -848,11 +948,6 @@ state.updated_at = "[ISO timestamp]"
 Write tool:
   file_path: "docs/ring:dev-cycle-frontend/current-cycle.json"
   content: [full JSON state]
-
-# Step 3: Verify persistence (MANDATORY - use Read tool)
-Read tool:
-  file_path: "docs/ring:dev-cycle-frontend/current-cycle.json"
-# Confirm current_gate and gate_progress match expected values
 ```
 
 ### State Persistence Checkpoints
@@ -900,22 +995,12 @@ Read tool:
 
 **Unit Checkpoint (after subtask completes Gate 8):**
 
-**VISUAL CHANGE REPORT (MANDATORY - before checkpoint question):**
-- MANDATORY: Invoke `Skill("ring:visualize")` to generate a code-diff HTML report for this execution unit
-- Read `default/skills/visualize/templates/code-diff.html` to absorb the patterns before generating
-- Content sourced from state JSON `agent_outputs` for the current unit:
-  * **TDD Output:** `tdd_red` (failing test) + `tdd_green` (implementation)
-  * **Files Changed:** Per-file before/after diff panels using `git diff` data from the implementation (do not read source files directly — use diff output provided by the implementation agent)
-  * **Frontend-Specific Metrics:** WCAG violations resolved (Gate 2), visual snapshot pass rate (Gate 4), LCP/CLS/INP values (Gate 6), Lighthouse score (Gate 6)
-  * **Review Verdicts:** Summary of all 5 reviewer verdicts from Gate 7
-- Save to: `docs/ring:dev-cycle-frontend/reports/unit-{unit_id}-report.html`
-- Open in browser:
-  ```text
-  macOS: open docs/ring:dev-cycle-frontend/reports/unit-{unit_id}-report.html
-  Linux: xdg-open docs/ring:dev-cycle-frontend/reports/unit-{unit_id}-report.html
-  ```
-- Tell the user the file path
-- See [shared-patterns/anti-rationalization-visual-report.md](../shared-patterns/anti-rationalization-visual-report.md) for anti-rationalization table
+**VISUAL CHANGE REPORT (subtask-level — OPT-IN ONLY):**
+- Default: SKIP per-subtask visual report. Task-level aggregate report is generated at the Task Checkpoint below.
+- Opt-in: If `state.visual_report_granularity == "subtask"`, generate per-subtask report
+  as previously documented. Default value is "task".
+- Rationale: Task-level aggregate covers all subtasks' diffs; per-subtask reports are
+  rarely consumed and cost one visualize dispatch each.
 
 ```text
 Subtask {id} complete. All 9 gates passed.
@@ -1025,23 +1110,67 @@ Check: Does docs/PROJECT_RULES.md exist?
 
 ---
 
-## Step 2-10: Gate Execution (Per Unit)
+## Step 2-10: Gate Execution
 
-### Step 2: Gate 0 - Implementation
+**See [Execution Loop Structure](#execution-loop-structure-the-prancy-bentley-cadence-model) below for the full subtask/task cadence model.** Step headings below indicate cadence explicitly.
+
+### Step 2: Gate 0 - Implementation (Per Execution Unit)
+
+**Cadence:** Runs once per subtask (execution unit = subtask, or task-itself if no subtasks).
 
 **REQUIRED SUB-SKILL:** `Skill("ring:dev-implementation")`
 
 Dispatch appropriate frontend agent based on task type. Agent follows TDD (RED then GREEN) with frontend.md standards.
 
-### Step 3: Gate 1 - DevOps
+### Step 3: Gate 1 - DevOps (Per Task — after all subtasks complete 0/3/8)
+
+⛔ CADENCE: This gate runs ONCE per task, NOT per subtask.
+Input `implementation_files` is the UNION of all subtasks' changed files.
 
 **REQUIRED SUB-SKILL:** `Skill("ring:dev-devops")`
 
+**Prepare Input (task-level aggregation):**
+
+```yaml
+devops_input = {
+  unit_id: state.tasks[current_task_index].id,  # TASK id
+  implementation_files: [
+    ...flatten(state.tasks[current_task_index].subtasks.map(st =>
+      st.gate_progress.implementation.files_changed
+    ))
+  ],
+  gate0_handoffs: state.tasks[current_task_index].subtasks.map(st =>
+    st.gate_progress.implementation
+  ),
+  # preserve other fields (language, service_type, ui_library_mode, etc.)
+}
+```
+
 Dispatch `ring:devops-engineer` for Dockerfile, docker-compose, Nginx configuration, and .env.example.
 
-### Step 4: Gate 2 - Accessibility
+### Step 4: Gate 2 - Accessibility (Per Task)
+
+⛔ CADENCE: This gate runs ONCE per task, NOT per subtask.
+Input `implementation_files` is the UNION of all subtasks' changed files.
 
 **REQUIRED SUB-SKILL:** `Skill("ring:dev-frontend-accessibility")`
+
+**Prepare Input (task-level aggregation):**
+
+```yaml
+accessibility_input = {
+  unit_id: state.tasks[current_task_index].id,  # TASK id
+  implementation_files: [
+    ...flatten(state.tasks[current_task_index].subtasks.map(st =>
+      st.gate_progress.implementation.files_changed
+    ))
+  ],
+  gate0_handoffs: state.tasks[current_task_index].subtasks.map(st =>
+    st.gate_progress.implementation
+  ),
+  # preserve other fields
+}
+```
 
 Dispatch `ring:qa-analyst-frontend` with `test_mode="accessibility"`. MUST verify:
 - 0 WCAG 2.1 AA violations (axe-core scan)
@@ -1050,7 +1179,9 @@ Dispatch `ring:qa-analyst-frontend` with `test_mode="accessibility"`. MUST verif
 - Focus management is proper
 - Color contrast ratios meet AA thresholds
 
-### Step 5: Gate 3 - Unit Testing
+### Step 5: Gate 3 - Unit Testing (Per Execution Unit)
+
+**Cadence:** Runs once per subtask (unchanged). Coverage threshold (85%) applies per subtask.
 
 **REQUIRED SUB-SKILL:** `Skill("ring:dev-unit-testing")`
 
@@ -1060,9 +1191,29 @@ Dispatch `ring:qa-analyst-frontend` with `test_mode="unit"`. MUST verify:
 - Component rendering, state management, and event handlers tested
 - Edge cases covered (empty states, error states, loading states)
 
-### Step 6: Gate 4 - Visual Testing
+### Step 6: Gate 4 - Visual Testing (Per Task)
+
+⛔ CADENCE: This gate runs ONCE per task, NOT per subtask.
+Input `implementation_files` is the UNION of all subtasks' changed files.
 
 **REQUIRED SUB-SKILL:** `Skill("ring:dev-frontend-visual")`
+
+**Prepare Input (task-level aggregation):**
+
+```yaml
+visual_input = {
+  unit_id: state.tasks[current_task_index].id,  # TASK id
+  implementation_files: [
+    ...flatten(state.tasks[current_task_index].subtasks.map(st =>
+      st.gate_progress.implementation.files_changed
+    ))
+  ],
+  gate0_handoffs: state.tasks[current_task_index].subtasks.map(st =>
+    st.gate_progress.implementation
+  ),
+  # preserve other fields
+}
+```
 
 Dispatch `ring:qa-analyst-frontend` with `test_mode="visual"`. MUST verify:
 - All component states have snapshots (default, hover, active, disabled, error, loading)
@@ -1070,9 +1221,29 @@ Dispatch `ring:qa-analyst-frontend` with `test_mode="visual"`. MUST verify:
 - Design system compliance verified
 - Visual regression baseline established
 
-### Step 7: Gate 5 - E2E Testing
+### Step 7: Gate 5 - E2E Testing (Per Task)
+
+⛔ CADENCE: This gate runs ONCE per task, NOT per subtask.
+Input `implementation_files` is the UNION of all subtasks' changed files.
 
 **REQUIRED SUB-SKILL:** `Skill("ring:dev-frontend-e2e")`
+
+**Prepare Input (task-level aggregation):**
+
+```yaml
+e2e_input = {
+  unit_id: state.tasks[current_task_index].id,  # TASK id
+  implementation_files: [
+    ...flatten(state.tasks[current_task_index].subtasks.map(st =>
+      st.gate_progress.implementation.files_changed
+    ))
+  ],
+  gate0_handoffs: state.tasks[current_task_index].subtasks.map(st =>
+    st.gate_progress.implementation
+  ),
+  # preserve other fields
+}
+```
 
 Dispatch `ring:qa-analyst-frontend` with `test_mode="e2e"`. MUST verify:
 - All user flows tested end-to-end
@@ -1080,9 +1251,29 @@ Dispatch `ring:qa-analyst-frontend` with `test_mode="e2e"`. MUST verify:
 - 3x consecutive stable pass (no flakiness)
 - Page object pattern used for maintainability
 
-### Step 8: Gate 6 - Performance Testing
+### Step 8: Gate 6 - Performance Testing (Per Task)
+
+⛔ CADENCE: This gate runs ONCE per task, NOT per subtask.
+Input `implementation_files` is the UNION of all subtasks' changed files.
 
 **REQUIRED SUB-SKILL:** `Skill("ring:dev-frontend-performance")`
+
+**Prepare Input (task-level aggregation):**
+
+```yaml
+performance_input = {
+  unit_id: state.tasks[current_task_index].id,  # TASK id
+  implementation_files: [
+    ...flatten(state.tasks[current_task_index].subtasks.map(st =>
+      st.gate_progress.implementation.files_changed
+    ))
+  ],
+  gate0_handoffs: state.tasks[current_task_index].subtasks.map(st =>
+    st.gate_progress.implementation
+  ),
+  # preserve other fields
+}
+```
 
 Dispatch `ring:qa-analyst-frontend` with `test_mode="performance"`. MUST verify:
 - LCP (Largest Contentful Paint) < 2.5s
@@ -1091,13 +1282,36 @@ Dispatch `ring:qa-analyst-frontend` with `test_mode="performance"`. MUST verify:
 - Lighthouse Performance score >= 90
 - Bundle size within budget (if defined in PROJECT_RULES.md)
 
-### Step 9: Gate 7 - Code Review
+### Step 9: Gate 7 - Code Review (Per Task)
+
+⛔ CADENCE: This gate runs ONCE per task, NOT per subtask.
+Input `implementation_files` is the UNION of all subtasks' changed files.
+**Reviewers see CUMULATIVE diff of all subtasks; cross-subtask bugs more visible.**
 
 **REQUIRED SUB-SKILL:** `Skill("ring:codereview")`
 
+**Prepare Input (task-level aggregation):**
+
+```yaml
+review_input = {
+  unit_id: state.tasks[current_task_index].id,  # TASK id
+  implementation_files: [
+    ...flatten(state.tasks[current_task_index].subtasks.map(st =>
+      st.gate_progress.implementation.files_changed
+    ))
+  ],
+  gate0_handoffs: state.tasks[current_task_index].subtasks.map(st =>
+    st.gate_progress.implementation
+  ),
+  # preserve other fields
+}
+```
+
 Dispatch all 5 reviewers in parallel (see Gate 7: Code Review Adaptation above).
 
-### Step 10: Gate 8 - Validation
+### Step 10: Gate 8 - Validation (Per Execution Unit)
+
+**Cadence:** Runs once per subtask (unchanged). User approval is per subtask.
 
 **REQUIRED SUB-SKILL:** `Skill("ring:dev-validation")`
 
