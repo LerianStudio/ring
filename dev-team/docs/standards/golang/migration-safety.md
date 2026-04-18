@@ -13,8 +13,9 @@ This module covers database migration safety patterns to prevent production inci
 | 1 | [Principles](#principles) | Core migration safety principles |
 | 2 | [Dangerous Operations](#dangerous-operations-detection) | Operations that require special handling |
 | 3 | [Expand-Contract Pattern](#expand-contract-pattern-mandatory) | Safe schema evolution strategy |
-| 4 | [Multi-Tenant Considerations](#multi-tenant-considerations) | Migration safety in multi-tenant context |
-| 5 | [Verification Commands](#verification-commands) | Automated checks for Gate 0.5 |
+| 4 | [ACKNOWLEDGE Convention](#acknowledge-convention) | Inline SQL comment for intentional breaking migrations |
+| 5 | [Multi-Tenant Considerations](#multi-tenant-considerations) | Migration safety in multi-tenant context |
+| 6 | [Verification Commands](#verification-commands) | Automated checks for Gate 0.5D |
 
 **Meta-sections:**
 - [Anti-Rationalization Table](#anti-rationalization-table) - Common excuses and required actions
@@ -43,7 +44,7 @@ Database migrations in production fintech systems carry disproportionate risk. A
 
 The following SQL operations are dangerous in production and require specific handling:
 
-### ⛔ BLOCKING Operations (Gate 0.5 MUST reject)
+### ⛔ BLOCKING Operations (Gate 0.5D MUST reject)
 
 | Operation | Risk | Safe Alternative |
 |-----------|------|------------------|
@@ -55,7 +56,7 @@ The following SQL operations are dangerous in production and require specific ha
 | `DROP TABLE` | Data loss, breaks dependent services | Rename first (`_deprecated_YYYYMMDD`), drop in next release |
 | `TRUNCATE TABLE` | Data loss | Never in production migrations |
 
-### ⚠️ WARNING Operations (Gate 0.5 flags, does not block)
+### ⚠️ WARNING Operations (Gate 0.5D flags, does not block)
 
 | Operation | Risk | Recommendation |
 |-----------|------|----------------|
@@ -136,6 +137,54 @@ ALTER TABLE accounts DROP COLUMN IF EXISTS name;
 **Never combine expand and contract in the same migration or same PR.** Each phase must be a separate deployment to allow rollback.
 
 **Note on Gate 0.5D interaction:** The contract phase (DROP COLUMN) will trigger a Gate 0.5D BLOCKING flag. This is by design — the agent must verify the expand phase was already deployed and documented in the PR. The check forces explicit acknowledgment, not blind automation.
+
+---
+
+## ACKNOWLEDGE Convention
+
+Gate 0.5D (Migration Safety) defaults to BLOCKING for dangerous operations such as contract-phase `DROP COLUMN` (executed after the expand phase has already been deployed) and `ALTER TYPE` on tables exceeding 100k rows. These are legitimate operations in the correct expand-contract sequence, but they are indistinguishable from accidental destructive changes without author intent. The `ACKNOWLEDGE` comment is how a migration author explicitly opts into accepting that risk.
+
+### Syntax
+
+Place an inline SQL comment on the line immediately above the dangerous operation:
+
+```sql
+-- ACKNOWLEDGE: <rationale>
+```
+
+- The comment MUST be on the line directly preceding the dangerous statement (no blank lines between).
+- `<rationale>` MUST be a human-readable explanation. An empty rationale (`-- ACKNOWLEDGE:` with nothing after) is treated as missing.
+- Multi-line rationales are permitted using consecutive `-- ACKNOWLEDGE:` / `--` comment lines.
+
+### When to use it
+
+The `ACKNOWLEDGE` convention applies only to Gate 0.5D BLOCKING findings that have a legitimate safe usage:
+
+| Finding | When ACKNOWLEDGE is Appropriate |
+|---------|---------------------------------|
+| `DROP COLUMN` | Contract phase of expand-contract, after the expand phase was deployed in a prior PR and consumers have migrated. |
+| `ALTER COLUMN TYPE` on tables > 100k rows | Type change is necessary, expand-contract is not possible, and a maintenance window or streaming migration is planned. |
+
+Other BLOCKING findings (e.g., `CREATE INDEX` without `CONCURRENTLY`, `TRUNCATE TABLE`, `DROP TABLE`, `NOT NULL` without `DEFAULT`) have safe alternatives and CANNOT be acknowledged away — they must be rewritten.
+
+### Example
+
+```sql
+-- ACKNOWLEDGE: contract phase of expand-contract. Expand phase (add new_column)
+-- deployed in PR #1234 on 2026-03-01; consumers migrated by 2026-04-01.
+ALTER TABLE users DROP COLUMN old_column;
+```
+
+### Orchestrator behavior at Gate 0.5D
+
+At Gate 0.5D (`ring:dev-cycle` Step 12.0.5b), each BLOCKING finding is checked for an associated `-- ACKNOWLEDGE:` comment on the line immediately above:
+
+1. **Finding has an ACKNOWLEDGE comment with non-empty rationale** → reclassified from `BLOCKING` to `ACKNOWLEDGE` severity. The cycle pauses at a user checkpoint that displays the finding and the rationale, and requires explicit user approval to proceed.
+2. **Finding has no ACKNOWLEDGE comment** (or the rationale is empty) → remains `BLOCKING`. The cycle HARD BLOCKS. There is no silent opt-out.
+
+### Fail-safe default
+
+No comment = BLOCKING. This is non-negotiable. The absence of a comment is never interpreted as implicit approval. Authors who intend a breaking migration MUST state their intent in the migration file itself, not in commit messages, PR descriptions, or chat — because only the file travels with the migration into every downstream tool that inspects it.
 
 ---
 

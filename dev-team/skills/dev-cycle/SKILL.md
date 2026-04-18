@@ -657,6 +657,21 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
   "current_task_index": 0,
   "current_gate": 0,
   "current_subtask_index": 0,
+  "_comment_migration_safety_verification": "Populated at Step 12.0.5b (Gate 0.5D — Migration Safety, conditional on SQL migration files present in cycle diff vs origin/main). Cycle-cadence (runs once per cycle, not per task/subtask). status transitions: pending → skipped (no migration files) | completed (no BLOCKING findings) | blocked (BLOCKING unacknowledged) | acknowledged (ACKNOWLEDGE findings approved by user). See Step 12.0.5b state persistence block for full shape.",
+  "gate_progress": {
+    "migration_safety_verification": {
+      "status": "pending|completed|skipped|blocked|acknowledged",
+      "files_checked": [],
+      "findings": {
+        "BLOCKING": 0,
+        "WARN": 0,
+        "ACKNOWLEDGE": 0
+      },
+      "user_acknowledgment": null,
+      "started_at": null,
+      "completed_at": null
+    }
+  },
   "tasks": [
     {
       "id": "T-001",
