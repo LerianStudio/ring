@@ -1,5 +1,16 @@
 # Ring-default Changelog
 
+## [1.25.1](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.25.1)
+
+- Fixes:
+  - Align reviewer references and harden lib-commons/multi-tenant agents.
+
+Contributors: @fred
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.25.0...ring-default@1.25.1)
+
+---
+
 ## [1.25.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.25.0)
 
 - **Features**
