@@ -1,5 +1,22 @@
 # Ring-default Changelog
 
+## [1.24.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.24.0)
+
+- **Features**
+  - Cache-first standards injection implemented for 5 reviewers, enhancing review efficiency. (Commit: a074c2c6)
+  
+- **Fixes**
+  - Completed cache-first standards injection end-to-end, ensuring full functionality. (Commit: 33c9e97d)
+
+- **Improvements**
+  - Reclassified gate cadence for approximately 40-50% speedup, optimizing development cycles. (Commit: f862c50a)
+
+Contributors: @fred
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.23.0...ring-default@1.24.0)
+
+---
+
 ## [1.23.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.23.0)
 
 - Features:
