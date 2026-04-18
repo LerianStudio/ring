@@ -4,6 +4,8 @@
 
 See [migration-safety.md](../../docs/standards/golang/migration-safety.md) for the complete standard including expand-contract pattern, multi-tenant considerations, and anti-rationalization table.
 
+**Home:** These checks are executed by [`ring:dev-cycle` Step 12.0.5b](../dev-cycle/SKILL.md) — Gate 0.5D, a post-cycle conditional gate that runs once per cycle when SQL migration files are present in the diff against `origin/main`. Gate 0.5D is parallel to Gate 0.5G (multi-tenant dual-mode verification at Step 12.0.5); 0.5G checks Go code safety while 0.5D checks SQL schema evolution safety. Prior to the Prancy Bentley v1.56.0 refactor these checks lived in the now-deprecated `ring:dev-delivery-verification` skill; they were restored as a standalone gate to close that orphan.
+
 ## When This Applies
 
 This check ONLY runs when the current branch contains new or modified SQL migration files compared to the base branch (main/develop). If no migration files are detected, this check is automatically skipped.

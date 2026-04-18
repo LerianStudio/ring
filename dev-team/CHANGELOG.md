@@ -1,5 +1,14 @@
 # Ring-Dev-Team Changelog
 
+## [1.56.1] — 2026-04-17
+
+### Fixed — Restore Gate 0.5D (Migration Safety) as standalone conditional gate
+
+- **Gate 0.5D restored** at `ring:dev-cycle` Step 12.0.5b as a post-cycle conditional gate, parallel to Gate 0.5G (multi-tenant dual-mode verification). Runs once per cycle when SQL migration files are present in the diff against `origin/main`; skipped otherwise. Fixes an orphan from v1.56.0 where the Prancy Bentley refactor merged 3 general delivery-verification checks into `ring:dev-implementation` Step 7 but left SQL migration safety without a running implementation, even though `docs/standards/golang/migration-safety.md` continued to reference it.
+- **Decision model**: BLOCKING findings HARD BLOCK Final Commit; ACKNOWLEDGE findings require explicit user confirmation phrase ("I acknowledge this breaking change and have verified the expand phase deployment"); WARN findings log and continue.
+- **State schema**: `state.gate_progress.migration_safety_verification` added (additive; no breaking change).
+- **Docs sync**: Updated `docs/standards/golang/migration-safety.md` § Verification Commands and `skills/shared-patterns/migration-safety-checks.md` to point at the new home (dev-cycle Step 12.0.5b) instead of the deprecated `ring:dev-delivery-verification` skill.
+
 ## [1.56.0] — 2026-04-17
 
 ### Changed — "Prancy Bentley" dev-cycle speedup

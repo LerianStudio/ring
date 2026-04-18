@@ -170,7 +170,7 @@ CREATE INDEX CONCURRENTLY idx_transactions_tenant_date
 
 ## Verification Commands
 
-These commands are used by Gate 0.5D (Migration Safety) in the dev-delivery-verification skill.
+These commands are used by Gate 0.5D (Migration Safety) at `ring:dev-cycle` Step 12.0.5b (post-cycle, conditional on SQL migration files present in the cycle diff against `origin/main`).
 
 ### Step 1: Detect migration files
 

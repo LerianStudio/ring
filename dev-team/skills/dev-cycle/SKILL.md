@@ -446,7 +446,8 @@ Day 4: Production incident from Day 1 code
 3. **End of cycle** (once per cycle):
    - Gate 6 (Integration — execute mode)
    - Gate 7 (Chaos — execute mode)
-   - Multi-Tenant Verify
+   - Multi-Tenant Verify (Step 12.0.5, Gate 0.5G reconciliation)
+   - Gate 0.5D — Migration Safety Verification (Step 12.0.5b, conditional on SQL migration files in cycle diff)
    - dev-report (aggregate)
    - Final Commit
 
@@ -508,11 +509,11 @@ Day 4: Production incident from Day 1 code
 
 - **Subtask-level gates** run per execution unit (subtask, or task-itself if no subtasks): Gate 0 (Implementation, incl. delivery verification exit check), Gate 3 (Unit Testing), Gate 9 (Validation).
 - **Task-level gates** run ONCE per task, after all its subtasks finish their subtask-level gates: Gate 1 (DevOps), Gate 2 (SRE), Gate 4 (Fuzz), Gate 5 (Property), Gate 6 write (Integration), Gate 7 write (Chaos), Gate 8 (Review — 8 reviewers on cumulative task diff).
-- **Cycle-level gates** run ONCE per cycle, after all tasks are done: Gate 6 execute, Gate 7 execute, Multi-Tenant Verify, ring:dev-report (aggregate), Final Commit.
+- **Cycle-level gates** run ONCE per cycle, after all tasks are done: Gate 6 execute, Gate 7 execute, Multi-Tenant Verify (Gate 0.5G reconciliation), Gate 0.5D Migration Safety Verification (conditional on SQL migration files), ring:dev-report (aggregate), Final Commit.
 
 **Per-Subtask Flow:** Subtask → Gate 0 (incl. delivery verification exit check) → Gate 3 → Gate 9 → [opt-in subtask visual report] → [subtask checkpoint if `execution_mode = manual_per_subtask`]
 **Per-Task Flow (after all subtasks done):** Gate 1 → Gate 2 → Gate 4 → Gate 5 → Gate 6 (write) → Gate 7 (write) → Gate 8 (Review) → Task-level visual report → Accumulate metrics → [task checkpoint if `execution_mode in {manual_per_task, manual_per_subtask}`]
-**End-of-Cycle Flow:** All tasks done → Gate 6 (execute) → Gate 7 (execute) → Multi-Tenant Verify → ring:dev-report (ONE dispatch, reads accumulated_metrics) → Final Commit
+**End-of-Cycle Flow:** All tasks done → Gate 6 (execute) → Gate 7 (execute) → Multi-Tenant Verify (Step 12.0.5) → Gate 0.5D Migration Safety (Step 12.0.5b, conditional) → ring:dev-report (ONE dispatch, reads accumulated_metrics) → Final Commit
 
 | Scenario | Execution Unit | Subtask-Level Gates (0, 3, 9) | Task-Level Gates (1, 2, 4, 5, 6w, 7w, 8) |
 |----------|----------------|-------------------------------|-------------------------------------------|
@@ -1079,6 +1080,7 @@ Write tool:
 | Gate 8 (Review) | Task | `state.tasks[i].gate_progress.review.status` + `agent_outputs.review` (reviewers see cumulative task diff) | ✅ YES |
 | Step 11.1 (Subtask Approval) | Subtask | `status = "paused_for_approval"` (subtask-level checkpoint; set only when `execution_mode = manual_per_subtask`) | ✅ YES |
 | Step 11.2 (Task Approval) | Task | `task.status = "completed"` in JSON **+ tasks.md Status → `✅ Done`** + `task.accumulated_metrics` populated (gate_durations_ms, review_iterations, testing_iterations, issues_by_severity); NO dev-report dispatch here (runs ONCE at Step 12.1) | ✅ YES |
+| Step 12.0.5b (Gate 0.5D — Migration Safety, conditional) | Cycle | `state.gate_progress.migration_safety_verification = {status: "completed" \| "skipped" \| "blocked" \| "acknowledged", files_checked, findings: {BLOCKING, WARN, ACKNOWLEDGE}, user_acknowledgment}` | ✅ YES |
 | Step 12.1 (Cycle end — Gate 6/7 execute + dev-report) | Cycle | `state.tasks[i].gate_progress.integration_testing.execute_mode = "completed"` + `.chaos_testing.execute_mode = "completed"`; `state.feedback_loop_completed = true` after the ONE AND ONLY `ring:dev-report` dispatch | ✅ YES |
 | HARD BLOCK (any gate) | Task | `task.status = "failed"` in JSON **+ tasks.md Status → `❌ Failed`** | ✅ YES |
 
@@ -3447,6 +3449,106 @@ All units have written/updated test code during their Gate 6-7 passes. Now execu
 ```
 
 **Note:** The full ring:dev-multi-tenant skill (12 gates) is now used ONLY for migrating legacy codebases that were written before dual-mode was standard. For new development via dev-cycle, all multi-tenant compliance is handled by Gate 0 (implementation) + Gate 0.5G (verification).
+
+---
+
+### Step 12.0.5b: Gate 0.5D — Migration Safety Verification (Conditional, Post-Cycle)
+
+**CADENCE:** Post-cycle, conditional. Runs ONCE per cycle if SQL migration files are detected in the cycle diff. Parallel to Gate 0.5G.
+
+**Purpose:** Static analysis on SQL migration files introduced by the cycle, per [migration-safety.md](../../docs/standards/golang/migration-safety.md) and [shared-patterns/migration-safety-checks.md](../shared-patterns/migration-safety-checks.md). Gate 0.5D is orthogonal to Gate 0.5G — 0.5G checks multi-tenant Go code safety; 0.5D checks SQL schema evolution safety.
+
+**Trigger detection:**
+
+```bash
+MIGRATION_FILES=$(git diff --name-only origin/main...HEAD -- '**/migrations/*.sql' '**/*.sql' 2>/dev/null | grep -v "_test")
+if [ -z "$MIGRATION_FILES" ]:
+  → Log: "No SQL migration files detected in cycle diff — Gate 0.5D skipped"
+  → Write state.gate_progress.migration_safety_verification = {status: "skipped", reason: "no_migration_files"}
+  → Proceed to Step 12.1 Final Commit
+else:
+  → Proceed to Gate 0.5D checks below
+```
+
+**Check categories (from [migration-safety.md § Dangerous Operations](../../docs/standards/golang/migration-safety.md#dangerous-operations-detection) + [shared-patterns/migration-safety-checks.md](../shared-patterns/migration-safety-checks.md)):**
+
+1. **BLOCKING** — `ADD COLUMN ... NOT NULL` without `DEFAULT` (ACCESS EXCLUSIVE lock, table rewrite)
+2. **BLOCKING** — `DROP COLUMN` (breaks services still reading; requires expand-contract)
+3. **BLOCKING** — `DROP TABLE` / `TRUNCATE TABLE` (data loss)
+4. **BLOCKING** — `CREATE INDEX` without `CONCURRENTLY` (SHARE lock blocks writes)
+5. **BLOCKING** — `ALTER COLUMN TYPE` (table rewrite)
+6. **BLOCKING** — Missing or empty `.down.sql` rollback migration
+7. **WARN** — DDL without `IF NOT EXISTS` / `IF EXISTS` (not idempotent for multi-tenant re-runs)
+8. **WARN** — Large `UPDATE` without batching (extended row locks)
+9. **ACKNOWLEDGE** — Intentional `DROP COLUMN` that is the contract phase of a prior expand-contract sequence (author must confirm expand phase was already deployed)
+10. **ACKNOWLEDGE** — `ALTER TYPE` on tables documented as > 100k rows (author must confirm maintenance plan)
+
+**Execution (inline, mirrors verification commands in [migration-safety.md § Verification Commands](../../docs/standards/golang/migration-safety.md#verification-commands)):**
+
+```text
+1. Record gate start timestamp.
+
+2. For each file in MIGRATION_FILES:
+   a. Run BLOCKING checks (steps 1–6 above). Collect findings with {file, line, pattern, severity: "BLOCKING"}.
+   b. Run WARN checks (steps 7–8 above). Collect findings with severity: "WARN".
+   c. Scan file for magic markers ("-- EXPAND-CONTRACT: contract phase" or "-- ACKNOWLEDGE: <rationale>") indicating an intentional breaking change. Reclassify matching BLOCKING findings → "ACKNOWLEDGE".
+
+3. Verify paired DOWN migration:
+   For each *.up.sql in MIGRATION_FILES:
+     → Expect *.down.sql in same directory, non-empty.
+     → Missing/empty → BLOCKING finding.
+
+4. Aggregate counts: {BLOCKING: N, WARN: N, ACKNOWLEDGE: N}.
+```
+
+**Decision logic:**
+
+- **ANY BLOCKING finding** → HARD BLOCK: "Gate 0.5D failed: BLOCKING migration safety violation(s) in [files]. Cycle CANNOT proceed to Final Commit. Fix violation and re-run dev-cycle from the affected task, or mark as intentional via '-- ACKNOWLEDGE: <rationale>' inline comment if the operation is truly required (e.g., contract phase of a deployed expand-contract)."
+- **ANY ACKNOWLEDGE finding** → Pause cycle at checkpoint. Display each finding with its `-- ACKNOWLEDGE:` rationale. Require user to respond with the exact phrase: "I acknowledge this breaking change and have verified the expand phase deployment." Any other response → HARD BLOCK.
+- **Only WARN findings** → Log warnings in cycle summary, proceed to Final Commit.
+- **Zero findings** → Log "Gate 0.5D PASSED — all migration files safe" and proceed.
+
+**Report to user:**
+
+```text
+┌─────────────────────────────────────────────────┐
+│ ✓ MIGRATION SAFETY VERIFIED (Gate 0.5D)        │
+├─────────────────────────────────────────────────┤
+│ Files Checked: [count]                          │
+│ BLOCKING: 0    WARN: N    ACKNOWLEDGE: N        │
+│ Standard: docs/standards/golang/migration-safety│
+└─────────────────────────────────────────────────┘
+```
+
+**State persistence:**
+
+```json
+state.gate_progress.migration_safety_verification = {
+  "status": "completed" | "skipped" | "blocked" | "acknowledged",
+  "files_checked": ["path/to/migration.up.sql", ...],
+  "findings": {
+    "BLOCKING": [{"file": "...", "line": N, "pattern": "DROP COLUMN"}, ...],
+    "WARN":     [{"file": "...", "line": N, "pattern": "..."}, ...],
+    "ACKNOWLEDGE": [{"file": "...", "line": N, "pattern": "...", "rationale": "..."}, ...]
+  },
+  "user_acknowledgment": "string | null",
+  "started_at": "ISO-8601",
+  "completed_at": "ISO-8601"
+}
+```
+
+**MANDATORY: ⛔ Save state to file — Write tool → [state.state_path]**
+
+### Step 12.0.5b Anti-Rationalization
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "This migration looks simple, skip the check" | Simple migrations cause incidents too. Gate 0.5D only fires on BLOCKING patterns — if it fires, it's not simple. | **MUST run whenever migration files present in cycle diff.** |
+| "ACKNOWLEDGE findings are informational, just log them" | ACKNOWLEDGE means the author MUST confirm intent. Silent acknowledgment is not acknowledgment. | **MUST pause cycle and require explicit user phrase.** |
+| "Gate 0.5D and Gate 0.5G are redundant" | Different domains: 0.5G = multi-tenant Go code safety; 0.5D = SQL schema evolution safety. Orthogonal. | **MUST run both gates; they check different properties.** |
+| "Delivery-verification already covers migrations at Gate 0" | Gate 0's delivery verification is per-subtask on application code, not cycle-wide SQL. Cycle-level diff can only be assessed post-cycle. | **MUST run 0.5D post-cycle on the full cycle diff.** |
+| "Migration was in an early task, already committed per-task" | 0.5D inspects cumulative cycle diff vs origin/main. Per-task commits don't exempt cycle-level safety. | **MUST check against origin/main, not per-task boundary.** |
+| "BLOCKING will cause rework, let's downgrade to WARN" | Severity is set by migration-safety.md. Downgrading violates the standard. | **MUST HARD BLOCK on BLOCKING; use ACKNOWLEDGE only for documented expand-contract.** |
 
 ---
 
