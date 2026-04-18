@@ -340,7 +340,7 @@ All workflows converge to the 10-gate development cycle:
 | **5: Property Testing**    | Property-based tests for invariants | `ring:qa-analyst`                                                                   |
 | **6: Integration Testing** | Integration tests (write per unit, execute at end) | `ring:qa-analyst`                                                   |
 | **7: Chaos Testing**       | Chaos tests (write per unit, execute at end) | `ring:qa-analyst`                                                         |
-| **8: Review**              | 8 reviewers IN PARALLEL          | `ring:code-reviewer`, `ring:business-logic-reviewer`, `ring:security-reviewer`, `ring:test-reviewer`, `ring:nil-safety-reviewer`, `ring:consequences-reviewer`, `ring:dead-code-reviewer`, `ring:performance-reviewer` |
+| **8: Review**              | 10 reviewers IN PARALLEL         | `ring:code-reviewer`, `ring:business-logic-reviewer`, `ring:security-reviewer`, `ring:test-reviewer`, `ring:nil-safety-reviewer`, `ring:consequences-reviewer`, `ring:dead-code-reviewer`, `ring:performance-reviewer`, `ring:multi-tenant-reviewer`, `ring:lib-commons-reviewer` |
 | **9: Validation**          | User approval: APPROVED/REJECTED | User decision                                                                          |
 | **Post-cycle: Multi-Tenant** | Adapt all code for multi-tenant | `ring:backend-engineer-golang` (via `ring:dev-multi-tenant`)                          |
 
@@ -364,7 +364,7 @@ All workflows converge to the 10-gate development cycle:
 | **4: Visual Testing**     | Snapshots, states, responsive        | `ring:qa-analyst-frontend`      |
 | **5: E2E Testing**        | Playwright, cross-browser, user flows| `ring:qa-analyst-frontend`      |
 | **6: Performance**        | Core Web Vitals, Lighthouse > 90     | `ring:qa-analyst-frontend`      |
-| **7: Review**             | 8 reviewers IN PARALLEL              | `ring:code-reviewer`, `ring:business-logic-reviewer`, `ring:security-reviewer`, `ring:test-reviewer`, `ring:nil-safety-reviewer`, `ring:consequences-reviewer`, `ring:dead-code-reviewer`, `ring:performance-reviewer` |
+| **7: Review**             | 10 reviewers IN PARALLEL             | `ring:code-reviewer`, `ring:business-logic-reviewer`, `ring:security-reviewer`, `ring:test-reviewer`, `ring:nil-safety-reviewer`, `ring:consequences-reviewer`, `ring:dead-code-reviewer`, `ring:performance-reviewer`, `ring:multi-tenant-reviewer`, `ring:lib-commons-reviewer` |
 | **8: Validation**         | User approval: APPROVED/REJECTED     | User decision                   |
 
 **Backend → Frontend Handoff:**
