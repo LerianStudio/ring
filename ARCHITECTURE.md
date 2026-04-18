@@ -253,16 +253,14 @@ All ring-dev-team agents include a `## Standards Compliance` section in their ou
 
 ```
 default/hooks/
-├── hooks.json              # Hook configuration (SessionStart, UserPromptSubmit)
+├── hooks.json              # Hook configuration (SessionStart)
 ├── session-start.sh        # Main initialization script
-├── generate-skills-ref.py  # Dynamic skill reference generator
-└── claude-md-reminder.sh   # CLAUDE.md reminder on prompt submit
+└── generate-skills-ref.py  # Dynamic skill reference generator
 ```
 
 **Key Characteristics:**
 
 - Triggers on SessionStart events (startup|resume, clear|compact)
-- Triggers on UserPromptSubmit for reminders
 - Injects skills context into Claude's memory
 - Auto-generates skills quick reference from frontmatter
 - Ensures mandatory workflows are loaded

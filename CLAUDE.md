@@ -190,16 +190,15 @@ When content is reused across multiple skills within a plugin:
 
 When adding or removing a code review agent in the `ring:codereview` pool:
 
-**⛔ EIGHT-FILE UPDATE RULE:**
+**⛔ SEVEN-FILE UPDATE RULE:**
 
 1. Edit `default/skills/codereview/SKILL.md` — update dispatch step (add/remove Task block), state initialization (review_state.reviewers keys), count references ("N reviewers" throughout), output schema Reviewer Verdicts table
 2. Edit frontmatter `description` in EVERY peer reviewer agent (`default/agents/*-reviewer.md` and `dev-team/agents/*-reviewer.md`) — "Runs in parallel with..." list must reflect new peer set
 3. Edit body prose `## Your Role` section in EVERY peer reviewer agent — `**Position:**` and `**Critical:** You are one of N parallel reviewers` must reflect new count and peer list
 4. Edit `dev-team/hooks/validate-gate-progression.sh` — reviewer array and count threshold
-5. Edit `default/hooks/claude-md-reminder.sh` — line injecting reviewer list into every prompt context
-6. Edit `dev-team/skills/dev-cycle/SKILL.md` — Gate 8 table, agent list, and "N reviewers" references throughout (~15 occurrences typical)
-7. Edit `dev-team/skills/using-dev-team/SKILL.md` — gate tables (backend Gate 8 + frontend Gate 7) with reviewer count and peer enumeration
-8. Edit shared-patterns that enumerate reviewers — `default/skills/shared-patterns/reviewer-slicing-strategy.md`, `dev-team/skills/shared-patterns/shared-anti-rationalization.md`, `dev-team/skills/shared-patterns/gate-cadence-classification.md`, `dev-team/skills/shared-patterns/custom-prompt-validation.md`
+5. Edit `dev-team/skills/dev-cycle/SKILL.md` — Gate 8 table, agent list, and "N reviewers" references throughout (~15 occurrences typical)
+6. Edit `dev-team/skills/using-dev-team/SKILL.md` — gate tables (backend Gate 8 + frontend Gate 7) with reviewer count and peer enumeration
+7. Edit shared-patterns that enumerate reviewers — `default/skills/shared-patterns/reviewer-slicing-strategy.md`, `dev-team/skills/shared-patterns/shared-anti-rationalization.md`, `dev-team/skills/shared-patterns/gate-cadence-classification.md`, `dev-team/skills/shared-patterns/custom-prompt-validation.md`
 
 **All files in same commit** — MUST NOT update one without the others.
 
@@ -225,12 +224,11 @@ Before committing changes to the codereview pool:
 [ ] 2. Updated frontmatter description in ALL peer reviewer agents?
 [ ] 3. Updated body prose Position/Critical in ALL peer reviewer agents?
 [ ] 4. Updated validate-gate-progression.sh (array + threshold)?
-[ ] 5. Updated claude-md-reminder.sh (reviewer list injection)?
-[ ] 6. Updated dev-cycle/SKILL.md (Gate 8 + all "N reviewers" refs)?
-[ ] 7. Updated using-dev-team/SKILL.md (both gate tables)?
-[ ] 8. Updated shared-patterns files enumerating reviewers?
-[ ] 9. Swept secondary consumers (pr-review-multi-source, execute-plan, using-ring, write-plan, docs, marketplace.json)?
-[ ] 10. Grep sanity: `grep -rn "N reviewer\|all N" --include="*.md" --include="*.sh"` returns zero stale counts?
+[ ] 5. Updated dev-cycle/SKILL.md (Gate 8 + all "N reviewers" refs)?
+[ ] 6. Updated using-dev-team/SKILL.md (both gate tables)?
+[ ] 7. Updated shared-patterns files enumerating reviewers?
+[ ] 8. Swept secondary consumers (pr-review-multi-source, execute-plan, using-ring, write-plan, docs, marketplace.json)?
+[ ] 9. Grep sanity: `grep -rn "N reviewer\|all N" --include="*.md" --include="*.sh"` returns zero stale counts?
 
 If any checkbox is no → Fix before committing.
 ```
@@ -246,7 +244,7 @@ If any checkbox is no → Fix before committing.
 | [CRITICAL RULES](#-critical-rules-read-first)                                             | Non-negotiable requirements                        |
 | [CLAUDE.md ↔ AGENTS.md Sync](#6-claudemd--agentsmd-synchronization-automatic-via-symlink) | Symlink ensures sync                               |
 | [Content Duplication Prevention](#7-content-duplication-prevention-must-check)            | Canonical sources + reference pattern              |
-| [Reviewer-Pool Synchronization](#8-reviewer-pool-synchronization-must-check)              | Eight-file update rule for codereview pool changes |
+| [Reviewer-Pool Synchronization](#8-reviewer-pool-synchronization-must-check)              | Seven-file update rule for codereview pool changes |
 | [Anti-Rationalization Tables](#anti-rationalization-tables-mandatory-for-all-agents)      | Prevent AI from assuming/skipping                  |
 | [Lexical Salience Guidelines](#lexical-salience-guidelines-mandatory)                     | Selective emphasis for effective prompts           |
 | [Agent Modification Verification](#agent-modification-verification-mandatory)             | Checklist for agent changes                        |
@@ -630,7 +628,6 @@ The system loads at SessionStart (from `default/` plugin):
 
 1. `default/hooks/session-start.sh` - Loads skill quick reference via `generate-skills-ref.py`
 2. `ring:using-ring` skill - Injected as mandatory workflow
-3. `default/hooks/claude-md-reminder.sh` - Reminds about CLAUDE.md on prompt submit
 
 **Monorepo Context:**
 

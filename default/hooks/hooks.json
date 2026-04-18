@@ -10,16 +10,6 @@
           }
         ]
       }
-    ],
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/claude-md-reminder.sh"
-          }
-        ]
-      }
     ]
   }
 }
