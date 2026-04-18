@@ -2,6 +2,17 @@
 
 ## [0.4.3](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.3)
 
+- **Features**
+  - Refactor skills: Removed commands layer and renamed skills to match command names.
+
+Contributors: @fred
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
+
+---
+
+## [0.4.3](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.3)
+
 - **Improvements:**
   - Refactored skills by removing the commands layer and renamed skills to match command names for better alignment and clarity.
   - Created a canonical schema to standardize component metadata, enhancing consistency across the team.
