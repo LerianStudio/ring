@@ -1,6 +1,6 @@
 ---
 name: ring:security-reviewer
-description: "Safety Review: Reviews vulnerabilities, authentication, input validation, and OWASP risks. Runs in parallel with ring:code-reviewer, ring:business-logic-reviewer, ring:test-reviewer, ring:nil-safety-reviewer, ring:consequences-reviewer, and ring:dead-code-reviewer for fast feedback."
+description: "Safety Review: Reviews vulnerabilities, authentication, input validation, and OWASP risks. Runs in parallel with ring:code-reviewer, ring:business-logic-reviewer, ring:test-reviewer, ring:nil-safety-reviewer, ring:consequences-reviewer, ring:dead-code-reviewer, ring:performance-reviewer, ring:multi-tenant-reviewer, and ring:lib-commons-reviewer for fast feedback."
 type: reviewer
 output_schema:
   format: "markdown"

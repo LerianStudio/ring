@@ -1,6 +1,6 @@
 ---
 name: ring:performance-reviewer
-description: "Performance Reviewer: Reviews code and infrastructure configurations for performance issues across Go, TypeScript, and Python. Covers code-level hotspots (allocations, goroutine leaks, N+1 queries, event loop blocking) and runtime/infra misconfigurations (GOMAXPROCS vs cgroup limits, GC tuning, CFS throttling, connection pool sizing). Usable as a PR reviewer or standalone audit."
+description: "Performance Reviewer: Reviews code and infrastructure configurations for performance issues across Go, TypeScript, and Python. Covers code-level hotspots (allocations, goroutine leaks, N+1 queries, event loop blocking) and runtime/infra misconfigurations (GOMAXPROCS vs cgroup limits, GC tuning, CFS throttling, connection pool sizing). Usable as a PR reviewer or standalone audit. Runs in parallel with ring:code-reviewer, ring:business-logic-reviewer, ring:security-reviewer, ring:test-reviewer, ring:nil-safety-reviewer, ring:consequences-reviewer, ring:dead-code-reviewer, ring:multi-tenant-reviewer, and ring:lib-commons-reviewer for fast feedback."
 type: reviewer
 output_schema:
   format: "markdown"

@@ -10,7 +10,7 @@ set -euo pipefail
 # Re-inject every 3 prompts - balances context freshness with token overhead
 # Lower values = more frequent reminders but higher token cost
 # Higher values = less overhead but risk of context being forgotten
-readonly THROTTLE_INTERVAL=3
+readonly THROTTLE_INTERVAL=5
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
@@ -23,15 +23,15 @@ INSTRUCTION_FILES=("CLAUDE.md" "AGENTS.md" "PROJECT_RULES.md")
 # force a refresh. Calibrated for 1M-token context windows: 15% ≈ 150k tokens consumed,
 # which is already substantial drift territory. Lower = more aggressive refresh (safer,
 # higher token cost). Raise if re-injection overhead becomes visible.
-readonly CTX_PCT_THRESHOLD=15
+readonly CTX_PCT_THRESHOLD=30
 
 # Transcript byte delta threshold (fallback when context_window field unavailable).
 # ~200KB of transcript growth ≈ 50k tokens at 4 chars/token estimate.
-readonly BYTE_THRESHOLD=200000
+readonly BYTE_THRESHOLD=300000
 
 # Cooldown: non-temporal triggers require at least this many prompts since last injection.
 # Prevents tight loops — a single injection adds 70KB+, context_pct would re-trigger immediately.
-readonly MIN_PROMPT_COOLDOWN=2
+readonly MIN_PROMPT_COOLDOWN=3
 
 # Use session-specific state files (per-session, not persistent)
 # CLAUDE_SESSION_ID should be provided by Claude Code, fallback to PPID for session isolation

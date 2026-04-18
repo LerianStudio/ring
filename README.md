@@ -22,7 +22,7 @@ Ring solves this by:
 
 - **Enforcing proven workflows** - Test-driven development, systematic debugging, proper planning
 - **Providing 94 specialized skills** (23 core + 33 dev-team + 16 product planning + 7 FinOps regulatory + 6 technical writing + 9 PMO)
-- **39 specialized agents** - 10 review/planning + 13 developer + 4 product research + 3 FinOps regulatory + 3 technical writing + 6 PMO
+- **41 specialized agents** - 10 review/planning + 15 developer + 4 product research + 3 FinOps regulatory + 3 technical writing + 6 PMO
 - **Automating skill discovery** - Skills load automatically at session start
 - **Preventing common failures** - Built-in anti-patterns and mandatory checklists
 
@@ -64,6 +64,8 @@ Ring solves this by:
 - `ring:sre` - Site reliability engineer (monitoring, alerting, SLOs)
 - `ring:ui-engineer` - UI component specialist (design systems, accessibility)
 - `ring:helm-engineer` - Helm chart specialist (chart structure, security, Lerian conventions)
+- `ring:lib-commons-reviewer` - lib-commons usage review (correct API usage, reinvented-wheel opportunities across 35+ packages)
+- `ring:multi-tenant-reviewer` - Multi-tenant usage review (lib-commons/multitenancy patterns, tenant isolation, JWT tenantId propagation)
 - `ring:performance-reviewer` - Performance review (code hotspots, infra misconfigurations, Go/TypeScript/Python)
 
 > **Standards Compliance:** All dev-team agents include a `## Standards Compliance` output section with conditional requirement:
@@ -498,10 +500,11 @@ Claude: I'll use the pre-dev workflow to plan this systematically...
 
 ```
 User: "Review my authentication implementation"
-Claude: Dispatching all 8 reviewers in parallel...
+Claude: Dispatching all 10 reviewers in parallel...
         [Launches ring:code-reviewer, ring:business-logic-reviewer, ring:security-reviewer,
          ring:test-reviewer, ring:nil-safety-reviewer, ring:consequences-reviewer,
-         ring:dead-code-reviewer, ring:performance-reviewer simultaneously]
+         ring:dead-code-reviewer, ring:performance-reviewer, ring:multi-tenant-reviewer,
+         ring:lib-commons-reviewer simultaneously]
 
         Code reviewer: PASS. Clean architecture, good tests.
         Business reviewer: FAIL. Missing password reset flow (HIGH severity).
@@ -510,6 +513,8 @@ Claude: Dispatching all 8 reviewers in parallel...
         Nil-safety reviewer: PASS. No unguarded nil dereferences found.
         Consequences reviewer: PASS. No downstream breakage detected.
         Performance reviewer: PASS. No hotspots or goroutine leaks found.
+        Multi-tenant reviewer: PASS. No multi-tenant code in scope.
+        lib-commons reviewer: PASS. Correct usage of lib-commons/resilience, no reinvented wheels detected.
 
         Aggregating issues by severity:
         - CRITICAL: JWT secret hardcoded in auth.ts:42
@@ -518,7 +523,7 @@ Claude: Dispatching all 8 reviewers in parallel...
         Dispatching fix subagent to address Critical/High issues...
         [Fixes applied]
 
-        Re-running all 8 reviewers in parallel...
+        Re-running all 10 reviewers in parallel...
         All reviewers: PASS. Ready for production.
 ```
 
@@ -558,8 +563,8 @@ ring/                                  # Monorepo root
 │   │   ├── write-plan.md                # Implementation planning (`ring:write-plan`)
 │   │   └── codebase-explorer.md         # Deep architecture analysis (`ring:codebase-explorer`)
 │   └── docs/                       # Documentation
-├── dev-team/                      # Developer Agents plugin (ring-dev-team) - 33 skills, 13 agents
-│   └── agents/                      # 13 specialized developer agents
+├── dev-team/                      # Developer Agents plugin (ring-dev-team) - 33 skills, 15 agents
+│   └── agents/                      # 15 specialized developer agents
 │       ├── backend-engineer-golang.md       # Go backend specialist (`ring:backend-engineer-golang`)
 │       ├── backend-engineer-typescript.md   # TypeScript/Node.js backend specialist (`ring:backend-engineer-typescript`)
 │       ├── devops-engineer.md               # DevOps infrastructure (`ring:devops-engineer`)
@@ -567,6 +572,8 @@ ring/                                  # Monorepo root
 │       ├── frontend-designer.md             # Visual design specialist (`ring:frontend-designer`)
 │       ├── frontend-engineer.md             # Frontend engineer (`ring:frontend-engineer`)
 │       ├── helm-engineer.md                 # Helm chart specialist (`ring:helm-engineer`)
+│       ├── lib-commons-reviewer.md          # lib-commons usage review (`ring:lib-commons-reviewer`)
+│       ├── multi-tenant-reviewer.md         # Multi-tenant usage review (`ring:multi-tenant-reviewer`)
 │       ├── performance-reviewer.md          # Performance review (`ring:performance-reviewer`)
 │       ├── prompt-quality-reviewer.md       # Agent quality reviewer (`ring:prompt-quality-reviewer`)
 │       ├── qa-analyst.md                    # Backend QA specialist (`ring:qa-analyst`)

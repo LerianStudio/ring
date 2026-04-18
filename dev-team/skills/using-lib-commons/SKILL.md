@@ -1,9 +1,10 @@
 ---
 name: ring:using-lib-commons
 description: |
-  Comprehensive reference for lib-commons v4.6.0 — Lerian's shared Go library providing
+  Comprehensive reference for lib-commons v5.0.2 — Lerian's shared Go library providing
   35+ packages across database connections, messaging, multi-tenancy, runtime configuration,
-  observability, security, resilience, HTTP tooling, and event-driven tenant discovery.
+  observability, security, resilience, HTTP tooling, event-driven tenant discovery,
+  webhook delivery, dead-letter queues, idempotency, and TLS certificate management.
   Load this skill to discover available APIs, find the right package, and learn correct
   initialization patterns.
 
@@ -17,7 +18,11 @@ trigger: |
   - Working with runtime configuration (systemplane)
   - Need database, messaging, or infrastructure patterns
   - Need rate limiting, context helpers, or string utilities
-  - Migrating from older lib-commons versions
+  - Migrating from older lib-commons versions (including v4 → v5)
+  - Implementing webhooks with SSRF protection and HMAC signing
+  - Implementing Redis-backed dead-letter queues
+  - Adding HTTP idempotency middleware
+  - Managing TLS certificates with hot reload
 
 skip_when: |
   - Already know which package to use and how
@@ -28,11 +33,12 @@ related:
   similar: [ring:using-dev-team, ring:using-ring]
 ---
 
-# Using lib-commons v4.6.0 — Developer Reference
+# Using lib-commons v5.0.2 — Developer Reference
 
-lib-commons v4.6.0 is Lerian's foundational Go library. Every Lerian Go microservice depends on it for infrastructure, observability, security, multi-tenancy, event-driven tenant discovery, and runtime configuration.
+lib-commons v5.0.2 is Lerian's foundational Go library. Every Lerian Go microservice depends on it for infrastructure, observability, security, multi-tenancy, event-driven tenant discovery, runtime configuration, webhook delivery, dead-letter queues, idempotency, and TLS certificate management.
 
-- **Module path**: `github.com/LerianStudio/lib-commons/v4`
+- **Module path**: `github.com/LerianStudio/lib-commons/v5` (bumped from `/v4` in v5.0.0)
+- **Go version**: 1.25+
 - **All packages live under**: `commons/`
 - **Scope**: Everything a Lerian Go microservice needs from boot to shutdown
 
@@ -44,20 +50,22 @@ This skill is a comprehensive catalog and quick-reference. Use it to discover wh
 
 | # | Section | What You'll Find |
 |---|---------|-----------------|
-| 1 | [Package Catalog](#1-package-catalog-quick-reference) | All 35+ packages organized by domain |
+| 1 | [Package Catalog](#1-package-catalog-quick-reference) | All packages organized by domain |
 | 2 | [Common Initialization Pattern](#2-common-initialization-pattern) | Typical service bootstrap sequence |
 | 3 | [Database Connections](#3-database-connections) | postgres, mongo, redis, rabbitmq deep-dive |
-| 4 | [HTTP Toolkit](#4-http-toolkit-nethttp) | Middleware, rate limiting, pagination, validation, response helpers, health checks |
+| 4 | [HTTP Toolkit](#4-http-toolkit-nethttp) | Middleware, rate limiting, pagination, validation, response helpers, health checks, **idempotency** |
 | 5 | [Observability](#5-observability) | Logger, tracing, metrics, **runtime** (panic pipeline), **assert** (observability trident) |
 | 6 | [Resilience & Utilities](#6-resilience--utilities) | Circuit breaker, backoff, safe math, pointers |
-| 7 | [Security](#7-security) | JWT, encryption, sensitive fields, AWS secrets |
+| 7 | [Security](#7-security) | JWT, encryption, sensitive fields, AWS secrets, **TLS certificate hot-reload** |
 | 8 | [Transaction Domain](#8-transaction-domain) | Intent planning, balance posting, outbox |
 | 9 | [Tenant Manager](#9-tenant-manager-deep-reference) | Full multi-tenancy subsystem with event-driven discovery |
-| 10 | [Systemplane](#10-systemplane-deep-reference) | Runtime configuration subsystem |
-| 11 | [Root Package & Utilities](#11-root-package--utilities) | App lifecycle, context helpers, business errors, string utilities, env vars |
-| 12 | [Cross-Cutting Patterns](#12-cross-cutting-patterns) | Patterns shared across all packages |
-| 13 | [Which Package Do I Need?](#13-which-package-do-i-need) | Decision tree for package selection |
-| 14 | [Breaking Changes](#14-breaking-changes) | Migration notes for v4.2.0 through v4.6.0 |
+| 10 | [Systemplane v2](#10-systemplane-v2-deep-reference) | Runtime configuration client (rewritten in v5) |
+| 11 | [Webhook Delivery](#11-webhook-delivery) | SSRF-safe HMAC-signed webhook delivery with retries |
+| 12 | [Dead Letter Queue](#12-dead-letter-queue) | Redis-backed DLQ with exponential-backoff retry |
+| 13 | [Root Package & Utilities](#13-root-package--utilities) | App lifecycle, context helpers, business errors, string utilities, env vars |
+| 14 | [Cross-Cutting Patterns](#14-cross-cutting-patterns) | Patterns shared across all packages |
+| 15 | [Which Package Do I Need?](#15-which-package-do-i-need) | Decision tree for package selection |
+| 16 | [Breaking Changes](#16-breaking-changes) | Migration notes for v4.2.0 through v5.0.2 |
 
 ---
 
@@ -90,6 +98,7 @@ This skill is a comprehensive catalog and quick-reference. Use it to discover wh
 | `security` | `commons/security` | Sensitive field detection (90+ patterns) for log/trace obfuscation |
 | `secretsmanager` | `commons/secretsmanager` | AWS Secrets Manager M2M credential fetching with path traversal protection |
 | `license` | `commons/license` | License validation failure handling with fail-open/fail-closed policies |
+| `certificate` | `commons/certificate` | **v5.0.0**: Thread-safe TLS certificate manager with hot reload (PKCS#8/PKCS#1/EC keys, DER chain support, zero-downtime `Rotate`) |
 
 ### Observability & Runtime
 
@@ -109,6 +118,14 @@ This skill is a comprehensive catalog and quick-reference. Use it to discover wh
 |---|---|---|
 | `net/http` | `commons/net/http` | Fiber HTTP toolkit: middleware (CORS, logging, telemetry, basic auth), validation, 3 cursor pagination styles, health checks, SSRF-safe reverse proxy, ownership verification, response helpers, tenant-scoped ID parsing |
 | `net/http/ratelimit` | `commons/net/http/ratelimit` | Redis-backed distributed fixed-window rate limiting with atomic Lua script, tiered presets, dynamic tier selection, identity extractors, fail-open/fail-closed policy, `X-RateLimit-*` headers |
+| `net/http/idempotency` | `commons/net/http/idempotency` | **v5.0.0**: Fiber middleware for best-effort at-most-once request semantics via Redis SetNX, tenant-scoped keys, faithful response replay (status/headers/body), fail-open on Redis outage |
+
+### Webhooks & Dead Letter Queue (New in v5.0.0)
+
+| Package | Import Path Suffix | Purpose |
+|---|---|---|
+| `webhook` | `commons/webhook` | Secure webhook delivery engine: two-layer SSRF protection (pre-resolution IP check + DNS-pinned delivery), HMAC-SHA256 signing (v0 payload-only or v1 timestamp-bound for replay protection), exponential backoff with jitter, concurrent delivery with configurable semaphore |
+| `dlq` | `commons/dlq` | Redis-backed dead letter queue with tenant-isolated keys, exponential backoff retry (AWS Full Jitter, 5s floor, 30s base), background `Consumer` polling, per-source `RetryFunc` callbacks, configurable `MaxRetries` |
 
 ### Resilience & Utilities
 
@@ -139,24 +156,18 @@ This skill is a comprehensive catalog and quick-reference. Use it to discover wh
 | `tenant-manager/event` | `...event` | **v4.5.0**: Event-driven tenant discovery via Redis pub/sub. Events: `tenant.added`, `tenant.connections.updated`, `tenant.credentials.rotated`. `TenantEventListener` for HTTP-only services |
 | `tenant-manager/redis` | `...redis` | **v4.6.0**: `NewTenantPubSubRedisClient` helper for Redis pub/sub with TLS support |
 | `tenant-manager/tenantcache` | `...tenantcache` | **v4.6.0**: `TenantLoader` with `WithOnTenantLoaded` callback for event-driven tenant addition |
+| `tenant-manager/cache` | `...cache` | **v5.0.0**: `ConfigCache` interface for tenant config caching; `InMemoryCache` default implementation. Passed into the TM client via `client.WithCache()` |
+| `tenant-manager/log` | `...log` | **v5.0.0**: `TenantAwareLogger` wraps a `log.Logger` and automatically injects `tenant_id` from context into every log entry |
 
-### Runtime Configuration (Major Subsystem)
+### Runtime Configuration (Systemplane v2 — Rewritten in v5.0.0)
+
+The v4 systemplane (hexagonal-architecture, Supervisor/Manager/Bundle, Registry, adapters/ports/service subpackages) has been **completely replaced** in v5.0.0 with a dramatically simpler client-centric API. all v4 subpackages (`adapters/…`, `bootstrap/…`, `domain`, `ports`, `registry`, `service`, `swagger`, `testutil`) have been removed. See §16 Breaking Changes for migration guidance.
 
 | Package | Import Path Suffix | Purpose |
 |---|---|---|
-| `systemplane` | `commons/systemplane` | Database-backed, hot-reloadable runtime configuration with hexagonal architecture |
-| `systemplane/domain` | `...domain` | Core types: Entry, Snapshot, KeyDef, Target, ApplyBehavior, ValueType |
-| `systemplane/ports` | `...ports` | Port interfaces: Store, HistoryStore, ChangeFeed, BundleFactory, BundleReconciler |
-| `systemplane/service` | `...service` | Manager (read/write configs/settings), Supervisor (bundle lifecycle), SnapshotBuilder |
-| `systemplane/registry` | `...registry` | Thread-safe key definition registry |
-| `systemplane/bootstrap` | `...bootstrap` | Env-var-based config loading, backend factory registration |
-| `systemplane/bootstrap/builtin` | `...bootstrap/builtin` | Ready-to-use entry point (registers PostgreSQL + MongoDB backends) |
-| `systemplane/adapters/store/postgres` | `...adapters/store/postgres` | PostgreSQL store with pg_notify change signals |
-| `systemplane/adapters/store/mongodb` | `...adapters/store/mongodb` | MongoDB store with transaction-based writes |
-| `systemplane/adapters/store/secretcodec` | `...adapters/store/secretcodec` | AES-256-GCM encryption for secret config values |
-| `systemplane/adapters/changefeed/postgres` | `...adapters/changefeed/postgres` | LISTEN/NOTIFY change feed with missed-signal resync |
-| `systemplane/adapters/changefeed/mongodb` | `...adapters/changefeed/mongodb` | Change stream or polling change feed |
-| `systemplane/adapters/http/fiber` | `...adapters/http/fiber` | REST API for config/settings CRUD with optimistic concurrency |
+| `systemplane` | `commons/systemplane` | Dual-backend runtime configuration `Client`. Construct with `NewPostgres(db, listenDSN, ...)` or `NewMongoDB(client, db, ...)`. Register keys with `Client.Register`, hydrate with `Client.Start`, read with `GetString/GetInt/GetBool/GetFloat64/GetDuration`, write with `Set`, subscribe to changes with `OnChange` |
+| `systemplane/admin` | `...admin` | Fiber HTTP handlers (`GET/PUT /system/:namespace[/:key]`) for inspecting and mutating entries at runtime. Requires `WithAuthorizer` (default is deny-all) |
+| `systemplane/systemplanetest` | `...systemplanetest` | Test doubles and harness helpers for consumers of the systemplane API |
 
 ### Build & Shell Utilities
 
@@ -473,6 +484,64 @@ For integrating with other middleware that needs a rate-limit storage backend:
 storage := ratelimit.NewRedisStorage(redisConn)
 // Use storage with third-party rate-limit middleware that accepts a storage interface
 ```
+
+### Idempotency (`net/http/idempotency`) — v5.0.0
+
+**Added in v5.0.0.** Fiber middleware for best-effort at-most-once request semantics using Redis SetNX. Fails open on Redis outages to preserve availability; callers needing strict guarantees must pair with application-level safeguards.
+
+#### Quick Setup
+
+```go
+import "github.com/LerianStudio/lib-commons/v5/commons/net/http/idempotency"
+
+idem := idempotency.New(redisConn,
+    idempotency.WithKeyPrefix("idempotency:"),   // default: "idempotency:"
+    idempotency.WithKeyTTL(7*24*time.Hour),       // default: 7 days
+    idempotency.WithMaxKeyLength(256),            // default: 256
+    idempotency.WithMaxBodyCache(1<<20),          // default: 1 MB
+    idempotency.WithRedisTimeout(500*time.Millisecond),
+    idempotency.WithLogger(logger),
+)
+
+// Apply to specific mutating routes — GET/HEAD/OPTIONS pass through unconditionally
+app.Post("/orders", idem.Check(), createOrderHandler)
+app.Patch("/orders/:id", idem.Check(), updateOrderHandler)
+```
+
+#### Request Header
+
+Clients opt in per request by sending `X-Idempotency: <unique-key>`. Keys are client-generated (UUIDs are typical). The header constant is `constants.IdempotencyKey`.
+
+#### Key Composition
+
+Composite Redis key format: `<prefix><tenantID>:<idempotencyKey>`
+
+- Tenant ID is extracted from tenant-manager context (`tmcore.GetTenantIDContext`)
+- When no tenant is in context, the **middleware bypasses idempotency** (mutating requests proceed normally) — this prevents collapsing all tenantless requests onto a shared key space, which would break isolation
+- A companion `:response` key caches the replay payload
+
+#### Behavior Branches (in order)
+
+| Condition | Behavior |
+|---|---|
+| Method is GET/HEAD/OPTIONS | Pass through (idempotency not applied to safe methods) |
+| No `X-Idempotency` header | Pass through (idempotency is opt-in per request) |
+| No tenant in context | Pass through (preserves tenant isolation) |
+| Key > `maxKeyLength` | Rejected handler invoked; default 400 with code `VALIDATION_ERROR` |
+| Redis unavailable | Fail-open — request proceeds, WARN logged |
+| Duplicate key, response cached | Faithful replay: status, headers (Location, ETag, Set-Cookie), content-type, body — with `X-Idempotency-Replayed: true` |
+| Duplicate key, still processing | 409 Conflict with code `IDEMPOTENCY_CONFLICT` |
+| Duplicate key, complete but body oversized | 200 OK with code `IDEMPOTENT` |
+| Handler success | Response cached via Redis pipeline; key marked `complete` |
+| Handler failure | Lock + response keys deleted so client can retry with same key |
+
+#### Response Replay Headers Preserved
+
+Cached responses preserve `Location`, `ETag`, `Set-Cookie`, and other headers so a replayed response is indistinguishable from the original to the client. `X-Idempotency-Replayed: true` is added to signal a replay.
+
+#### Nil Safety
+
+`idempotency.New(nil)` returns `nil`. A nil `*Middleware` returns a pass-through handler from `Check()`, so bootstrap code that conditionally configures Redis won't crash.
 
 ### Response Helpers
 
@@ -946,6 +1015,73 @@ creds, err := secretsmanager.GetM2MCredentials(
 - Returns structured credentials (client ID, client secret, endpoint)
 - Used by plugins for per-tenant M2M authentication with product APIs
 
+### TLS Certificate Hot-Reload (`commons/certificate`) — v5.0.0
+
+**Added in v5.0.0.** Thread-safe X.509 certificate manager with zero-downtime rotation — load PEM files, serve them via TLS config, and swap them atomically without restarting the process.
+
+#### Constructor
+
+```go
+m, err := certificate.NewManager("server.crt", "server.key")
+if err != nil {
+    return err
+}
+
+// Both paths empty → returns an unconfigured manager (useful when TLS is optional)
+m, _ := certificate.NewManager("", "")
+```
+
+If exactly one of `certPath` / `keyPath` is provided, `NewManager` returns `ErrIncompleteConfig`.
+
+#### Key Formats
+
+Private keys are parsed in order: **PKCS#8 → PKCS#1 (RSA) → EC (SEC 1)**. Supported key types: RSA, ECDSA, Ed25519. At load time, the manager validates that the certificate's public key matches the private key (`ErrKeyMismatch` otherwise).
+
+#### Hot Rotation
+
+```go
+// Pre-flight: load the new pair before touching the manager
+cert, signer, chain, err := certificate.LoadFromFilesWithChain("new.crt", "new.key")
+if err != nil {
+    logger.Errorf("pre-flight validation failed: %v", err)
+    return
+}
+
+// Rotate includes a full chain (leaf + intermediates)
+if err := m.Rotate(cert, signer, chain[1:]...); err != nil {
+    logger.Errorf("certificate rotation failed: %v", err)
+}
+```
+
+`Rotate` rejects expired certificates (`ErrExpired`), not-yet-valid certificates, nil cert/key, and key-mismatches. It deep-copies the certificate DER to prevent aliasing caller-owned memory.
+
+#### TLS Integration
+
+```go
+tlsConfig := &tls.Config{
+    GetCertificate: m.GetCertificateFunc(), // live closure — respects subsequent Rotates
+}
+```
+
+`GetCertificateFunc` on a nil `*Manager` returns a closure that always returns `ErrNilManager`, so bootstrap code that conditionally configures TLS won't crash.
+
+#### Accessors (all Nil-Receiver Safe)
+
+| Method | Returns |
+|---|---|
+| `GetCertificate()` | `*x509.Certificate` (leaf) |
+| `GetSigner()` | `crypto.Signer` (private key) |
+| `PublicKey()` | leaf's public key |
+| `TLSCertificate()` | `tls.Certificate` (leaf + chain + signer) |
+| `ExpiresAt()` | `time.Time` (leaf's `NotAfter`) |
+| `DaysUntilExpiry()` | `int` (days from `time.Now()`) |
+
+Read accessors on a nil `*Manager` return zero values without panicking.
+
+#### Sentinel Errors
+
+`ErrNilManager`, `ErrCertRequired`, `ErrKeyRequired`, `ErrExpired`, `ErrNoPEMBlock`, `ErrKeyParseFailure`, `ErrNotSigner`, `ErrKeyMismatch`, `ErrIncompleteConfig`.
+
 ---
 
 ## 8. Transaction Domain
@@ -1124,7 +1260,7 @@ The context functions now use variadic module parameters instead of separate per
 For services that only handle HTTP requests (no RabbitMQ consumer), use `TenantEventListener`:
 
 ```go
-import tmevent "github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/event"
+import tmevent "github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/event"
 
 listener := tmevent.NewTenantEventListener(redisClient, logger,
     tmevent.WithOnTenantAdded(func(ctx context.Context, tenant TenantConfig) {
@@ -1157,7 +1293,7 @@ runtime.SafeGoWithContextAndComponent(ctx, logger, "my-service", "tenant-listene
 Helper for creating a Redis client specifically configured for tenant pub/sub with TLS:
 
 ```go
-import tmredis "github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/redis"
+import tmredis "github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/redis"
 
 pubsubClient := tmredis.NewTenantPubSubRedisClient(
     os.Getenv("MULTI_TENANT_REDIS_HOST"),
@@ -1175,7 +1311,7 @@ pubsubClient := tmredis.NewTenantPubSubRedisClient(
 The `tenantcache` package provides `TenantLoader` with a callback for event-driven tenant addition:
 
 ```go
-import "github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/tenantcache"
+import "github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/tenantcache"
 
 loader := tenantcache.NewTenantLoader(tmClient, logger,
     tenantcache.WithOnTenantLoaded(func(ctx context.Context, tenant TenantConfig) {
@@ -1260,109 +1396,417 @@ auditDB := tmcore.GetPGContext(ctx, "audit")    // "audit" module
 defaultMB := tmcore.GetMBContext(ctx)           // default module
 ```
 
+### Cache Abstraction (v5.0.0 — `tenant-manager/cache`)
+
+v5.0.0 extracted the tenant-config cache into its own interface so services can plug in Redis or a custom implementation instead of the default in-memory cache:
+
+```go
+import "github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/cache"
+
+// Default: process-local in-memory cache with TTL
+inMem := cache.NewInMemoryCache()
+
+tmClient, _ := client.NewClient("https://tenant-manager:8080", logger,
+    client.WithCache(inMem),
+    client.WithCacheTTL(5*time.Minute),
+)
+```
+
+The `ConfigCache` interface (`Get(ctx, key)` / `Set(ctx, key, val, ttl)` / `Del(ctx, key)`) returns `cache.ErrCacheMiss` on miss or expiry. Implementations must be safe for concurrent use.
+
+### Tenant-Aware Logger (v5.0.0 — `tenant-manager/log`)
+
+Wraps any `log.Logger` to auto-inject `tenant_id` from context into every log entry:
+
+```go
+import tmlog "github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/log"
+
+baseLogger, _ := zap.New(zap.Config{...})
+logger := tmlog.NewTenantAwareLogger(baseLogger)
+
+// Every log call now carries tenant_id when the context has one
+logger.Log(ctx, log.LevelInfo, "transaction processed", log.String("txn_id", id))
+// → fields include tenant_id=<tenant-from-ctx> automatically
+```
+
+This removes the need for every call site to pass `tenant_id` manually, and guarantees the field is present in multi-tenant log aggregators even when handlers forget to add it.
+
 ---
 
-## 10. Systemplane (Deep Reference)
+## 10. Systemplane v2 (Deep Reference)
 
-The systemplane is a database-backed, hot-reloadable runtime configuration system. Services register key definitions at startup, read config/settings from a snapshot (lock-free atomic pointer), and react to changes via a change feed that triggers bundle rebuilds.
+**Rewritten in v5.0.0.** The v4 systemplane (hexagonal-architecture, Supervisor/Manager/Bundle, Registry, ApplyBehavior, Snapshot, `domain`/`ports`/`service`/`adapters`/`bootstrap` subpackages) has been **entirely removed** and replaced with a single `systemplane.Client` type backed by Postgres (LISTEN/NOTIFY) or MongoDB (change streams or polling).
 
-### Key Concepts
+The v2 design is deliberately narrower: it targets *operational knobs* — log levels, feature flags, rate limits, circuit-breaker thresholds — that can be hot-swapped without resource teardown. Settings that imply teardown (DSNs, secrets, TLS material, listen addresses) belong in environment variables, **not** in the runtime config plane.
+
+### Architecture
 
 | Concept | Description |
-|---------|-------------|
-| **Config** (`Kind = "config"`) | Service-level settings (DB pool sizes, feature flags). One global scope. |
-| **Setting** (`Kind = "setting"`) | Can be global or per-tenant. |
-| **KeyDef** | Registry entry with type, default, validator, secret flag, redact policy, apply behavior, mutability. |
-| **ApplyBehavior** | Controls reaction to changes (see table below). |
-| **Snapshot** | Immutable point-in-time view. Read via `supervisor.Snapshot()` — lock-free atomic pointer load. |
-| **RuntimeBundle** | Application-defined struct holding live infrastructure (DB pools, rate limiters, etc.). |
-| **Supervisor** | Manages the bundle lifecycle — build, reconcile, atomic swap, close previous. |
+|---|---|
+| **Client** | Runtime-config handle. Holds registry, cache, subscribers. Safe for concurrent use; read methods are nil-receiver safe. |
+| **Namespace** | Free-text label: `"global"`, `"tenant:acme"`, `"feature-flags"` — you choose the convention. |
+| **Key** | Setting name within a namespace. `(namespace, key)` is the identity. |
+| **keyDef** | Internal: default value + optional validator + description + redaction policy. |
+| **Cache** | In-memory map of effective values (default or override). Updated on Start and via changefeed echo. Writes via `Set` are write-through. |
+| **ChangeFeed** | Postgres `LISTEN/NOTIFY` on `systemplane_changes` channel, or MongoDB change streams (or polling via `WithPollInterval`). |
+| **Debouncer** | Trailing-edge debounce on notifications (default 100ms) to collapse bursty changes. |
 
-### ApplyBehavior Values
-
-| Behavior | When Changed... | Use Case |
-|----------|----------------|----------|
-| `LiveRead` | Re-read from snapshot on next access | Feature flags, simple thresholds |
-| `WorkerReconcile` | Run registered reconcilers | Rate limiter adjustments |
-| `BundleRebuild` | Rebuild entire RuntimeBundle | DB pool size changes |
-| `BootstrapOnly` | Immutable at runtime (restart required) | Listen addresses, TLS certs |
-
-### Setup Pattern
+### Constructors
 
 ```go
-// 1. Bootstrap backend (reads SYSTEMPLANE_* env vars)
-cfg, _ := bootstrap.LoadFromEnv()
-resources, _ := builtin.NewBackendFromConfig(ctx, cfg)
-defer resources.Closer.Close()
+import "github.com/LerianStudio/lib-commons/v5/commons/systemplane"
 
-// 2. Registry — declare all config keys
-reg := registry.New()
-reg.MustRegister(domain.KeyDef{
-    Key:             "db.pool.max_open",
-    Kind:            domain.KindConfig,
-    AllowedScopes:   []domain.Scope{domain.ScopeGlobal},
-    ValueType:       domain.ValueTypeInt,
-    DefaultValue:    25,
-    MutableAtRuntime: true,
-    ApplyBehavior:   domain.ApplyBundleRebuild,
-    Component:       "postgres",
-    Description:     "Max open DB connections",
-})
+// Postgres backend — requires a separate DSN for the dedicated LISTEN connection
+// (database/sql does not expose the DSN used to open *sql.DB, so it must be passed explicitly).
+client, err := systemplane.NewPostgres(db, listenDSN,
+    systemplane.WithLogger(logger),
+    systemplane.WithTelemetry(tl),
+    systemplane.WithListenChannel("systemplane_changes"), // default
+    systemplane.WithTable("systemplane_entries"),          // default
+    systemplane.WithDebounce(100*time.Millisecond),        // default
+)
 
-// 3. Supervisor + Manager
-builder, _ := service.NewSnapshotBuilder(reg, resources.Store)
-sup, _ := service.NewSupervisor(service.SupervisorConfig{
-    Builder:      builder,
-    Factory:      myBundleFactory,
-    Reconcilers:  myReconcilers,
-})
-mgr, _ := service.NewManager(service.ManagerConfig{
-    Registry:   reg,
-    Store:      resources.Store,
-    History:    resources.History,
-    Supervisor: sup,
-    Builder:    builder,
-})
-
-// 4. Initial load — builds the first snapshot and RuntimeBundle
-_ = sup.Reload(ctx, "startup")
-
-// 5. HTTP API — CRUD for config/settings with optimistic concurrency
-handler, _ := fiberhttp.NewHandler(mgr, identityResolver, authorizer)
-handler.Mount(app)
-
-// 6. Change feed — hot-reload on config changes
-go resources.ChangeFeed.Subscribe(ctx, func(signal ports.ChangeSignal) {
-    _ = mgr.ApplyChangeSignal(ctx, signal)
-})
+// MongoDB backend — change streams require a replica set.
+// For standalone MongoDB, use WithPollInterval.
+client, err := systemplane.NewMongoDB(mongoClient, "mydb",
+    systemplane.WithLogger(logger),
+    systemplane.WithCollection("systemplane_entries"),  // default
+    systemplane.WithPollInterval(5*time.Second),         // enables polling mode
+)
 ```
 
-### Environment Variables
+### Client Options
 
-| Variable | Values | Purpose |
-|----------|--------|---------|
-| `SYSTEMPLANE_BACKEND` | `postgres`, `mongodb` | Which database backend to use |
-| `SYSTEMPLANE_POSTGRES_DSN` | DSN string | PostgreSQL connection string |
-| `SYSTEMPLANE_MONGODB_URI` | URI string | MongoDB connection string |
-| `SYSTEMPLANE_MONGODB_DATABASE` | Database name | MongoDB database name |
-| `SYSTEMPLANE_SECRET_KEY` | Hex-encoded key | AES-256-GCM key for secret values |
+| Option | Default | Purpose |
+|---|---|---|
+| `WithLogger(log.Logger)` | nop | Structured logger |
+| `WithTelemetry(*opentelemetry.Telemetry)` | nil | OTel spans + metrics |
+| `WithListenChannel(name)` | `"systemplane_changes"` | Postgres-only |
+| `WithTable(name)` | `"systemplane_entries"` | Postgres-only |
+| `WithCollection(name)` | `"systemplane_entries"` | MongoDB-only |
+| `WithPollInterval(d)` | 0 (change streams) | MongoDB-only; enables polling |
+| `WithDebounce(d)` | 100ms | Trailing-edge notification debounce |
 
-### Snapshot Reading
-
-Reading configuration is lock-free and allocation-free:
+### Lifecycle
 
 ```go
-snap := supervisor.Snapshot()
-maxOpen, _ := snap.GetInt("db.pool.max_open", domain.ScopeGlobal, "")
-featureEnabled, _ := snap.GetBool("feature.new_ui", domain.ScopeGlobal, "")
-tenantLimit, _ := snap.GetInt("rate.limit", domain.ScopeTenant, tenantID)
+// 1. Register keys (MUST be before Start)
+_ = client.Register("global", "log.level", "info",
+    systemplane.WithDescription("zap log level"),
+    systemplane.WithValidator(func(v any) error {
+        s, _ := v.(string)
+        if s != "debug" && s != "info" && s != "warn" && s != "error" {
+            return fmt.Errorf("invalid log level: %s", s)
+        }
+        return nil
+    }),
+)
+_ = client.Register("global", "feature.new_ui", false)
+_ = client.Register("tenant:acme", "rate.limit", 100,
+    systemplane.WithDescription("requests per minute"),
+)
+_ = client.Register("global", "api.secret", "",
+    systemplane.WithRedaction(systemplane.RedactFull),
+)
+
+// 2. Start — hydrates cache from the store and starts the changefeed.
+//    Registering after Start returns ErrRegisterAfterStart.
+if err := client.Start(ctx); err != nil {
+    return err
+}
+defer client.Close(ctx)
 ```
+
+### Typed Reads (Nil-Receiver Safe)
+
+| Method | Signature | Zero Value |
+|---|---|---|
+| `Get(ns, key)` | `(any, bool)` | `(nil, false)` |
+| `GetString(ns, key)` | `string` | `""` |
+| `GetInt(ns, key)` | `int` | `0` |
+| `GetBool(ns, key)` | `bool` | `false` |
+| `GetFloat64(ns, key)` | `float64` | `0` |
+| `GetDuration(ns, key)` | `time.Duration` | `0` |
+| `List(namespace)` | `[]ListEntry` (sorted by key) | `nil` |
+| `KeyDescription(ns, key)` | `string` | `""` |
+| `KeyRedaction(ns, key)` | `RedactPolicy` | `RedactNone` |
+
+`GetInt` handles both `int` and `float64` (JSON decodes numbers as float64). `GetDuration` accepts `time.Duration`, `string` (parseable by `time.ParseDuration`), and `float64` (nanoseconds).
+
+### Writes
+
+```go
+// Set validates, JSON-marshals, persists via the store, and write-through updates the cache.
+// The 'actor' string is recorded in the store for audit purposes.
+if err := client.Set(ctx, "global", "log.level", "debug", "user@example.com"); err != nil {
+    return err
+}
+```
+
+`Set` does **not** fire local `OnChange` subscribers directly — the changefeed echo drives notifications, avoiding double-fire and preserving the semantic that `OnChange` observes *backend* state changes. In multi-process deployments, every subscriber (including the writer) sees the change via the changefeed.
+
+### Change Subscriptions
+
+```go
+unsubscribe := client.OnChange("global", "log.level", func(newValue any) {
+    level, _ := newValue.(string)
+    logger.SetLevel(level)
+})
+defer unsubscribe()
+```
+
+- Callbacks are invoked **sequentially** with panic recovery — a panicking callback does not prevent later subscribers from running
+- Unsubscribe is safe to call multiple times
+- A nil receiver or nil `fn` returns a no-op unsubscribe
+- Subscribing to an unregistered key is silently tolerated (returns a no-op)
+
+### Redaction Policies
+
+| Policy | Rendered As |
+|---|---|
+| `RedactNone` (default) | Actual value |
+| `RedactMask` | `"****"` |
+| `RedactFull` | `"[REDACTED]"` |
+
+Applied by admin handlers and structured logging to prevent sensitive values from leaking. Registered per-key via `WithRedaction`.
+
+### Sentinel Errors
+
+| Error | When |
+|---|---|
+| `ErrClosed` | Method called on nil or closed Client |
+| `ErrNotStarted` | Read/write attempted before `Start` |
+| `ErrRegisterAfterStart` | `Register` called after `Start` |
+| `ErrUnknownKey` | `Get`/`Set` references an unregistered `(ns, key)` |
+| `ErrValidation` | Validator rejected the value, or value is not JSON-serializable |
+| `ErrDuplicateKey` | `Register` called twice with the same `(ns, key)` |
+
+### Admin HTTP API (`systemplane/admin`)
+
+Optional Fiber-based REST API for inspecting and mutating entries at runtime:
+
+```go
+import "github.com/LerianStudio/lib-commons/v5/commons/systemplane/admin"
+
+admin.Mount(app, client,
+    admin.WithPathPrefix("/system"), // default
+    admin.WithAuthorizer(func(c *fiber.Ctx, action string) error {
+        // action is "read" for GET, "write" for PUT
+        if !userCanManageConfig(c, action) {
+            return errors.New("forbidden")
+        }
+        return nil
+    }),
+    admin.WithActorExtractor(func(c *fiber.Ctx) string {
+        return c.Locals("user_email").(string)
+    }),
+)
+```
+
+Routes mounted under `<prefix>`:
+
+| Method | Path | Purpose |
+|---|---|---|
+| `GET` | `/<prefix>/:namespace` | List entries in a namespace |
+| `GET` | `/<prefix>/:namespace/:key` | Read a single entry |
+| `PUT` | `/<prefix>/:namespace/:key` | Write a single entry |
+
+**Security:** The default authorizer is **deny-all** — every request returns 403 until a custom `WithAuthorizer` is supplied. This is deliberate — systemplane admin routes are high-privilege and must not be accidentally exposed.
 
 ---
 
-## 11. Root Package & Utilities
+## 11. Webhook Delivery
 
-The root `commons` package (`github.com/LerianStudio/lib-commons/v4/commons`) provides foundational utilities used across all Lerian services. These are building blocks that other packages and services depend on.
+**Added in v5.0.0.** `commons/webhook` is a secure webhook delivery engine with SSRF protection, HMAC-SHA256 signing, and exponential-backoff retries. Construct one `Deliverer` per service and reuse it — the internal HTTP client maintains a connection pool.
+
+### Core Types
+
+| Type | Purpose |
+|---|---|
+| `Endpoint` | `{ID, URL, Secret, Active}` — the receiver. `Secret` can be plaintext or `"enc:<ciphertext>"` (decrypted via `WithSecretDecryptor`). |
+| `Event` | `{Type, Payload, Timestamp}` — the message to deliver. `Payload` is the JSON-encoded body; `Timestamp` is Unix-epoch seconds. |
+| `EndpointLister` | Interface: `ListActiveEndpoints(ctx) ([]Endpoint, error)` — typically backed by a DB query filtered by tenant ID. |
+| `DeliveryResult` | `{EndpointID, StatusCode, Success, Error, Attempts}` |
+| `DeliveryMetrics` | Interface: `RecordDelivery(ctx, endpointID, success, statusCode, attempts)` |
+| `SecretDecryptor` | `func(encrypted string) (string, error)` for decrypting `"enc:"`-prefixed secrets. |
+
+### Constructor
+
+```go
+import "github.com/LerianStudio/lib-commons/v5/commons/webhook"
+
+d := webhook.NewDeliverer(lister,
+    webhook.WithLogger(logger),
+    webhook.WithTracer(tracer),
+    webhook.WithMetrics(metrics),
+    webhook.WithMaxConcurrency(20),             // default: 20
+    webhook.WithMaxRetries(3),                  // default: 3
+    webhook.WithHTTPClient(customClient),       // redirects always blocked for SSRF safety
+    webhook.WithSecretDecryptor(decryptor),     // optional — fail-closed if "enc:" secrets appear without one
+    webhook.WithSignatureVersion(webhook.SignatureV1), // default: SignatureV0
+)
+```
+
+`NewDeliverer(nil, ...)` returns `nil` — Deliverer methods are nil-safe.
+
+### SSRF Protection (Two Layers)
+
+Webhook URLs are user-controlled, so the package defends against SSRF aggressively:
+
+1. **Pre-resolution IP validation** — hostname resolved, resolved IPs checked against RFC 1918 private ranges, loopback, link-local, and multicast before the connection is opened
+2. **DNS-pinned delivery** — the resolved IP is pinned for the actual connection, preventing DNS rebinding between validation and connect
+3. **Redirects always blocked** — even a user-supplied `*http.Client` is cloned with `CheckRedirect = http.ErrUseLastResponse` so an attacker cannot bounce the request via a 302 to a private IP
+
+### HMAC Signatures — Two Versions
+
+| Version | Format | Replay Protection |
+|---|---|---|
+| `SignatureV0` (default, backward-compatible) | `sha256=<hex(HMAC(payload, secret))>` | **None** — receivers must implement their own (event-ID tracking, etc.) |
+| `SignatureV1` (recommended for new deployments) | `v1,sha256=<hex(HMAC("v1:<timestamp>.<payload>", secret))>` | **Yes** — timestamp is bound into the HMAC input |
+
+The default is V0 to avoid breaking existing consumers. Migration path:
+
+1. Update all receivers to use `VerifySignature` (auto-detects both formats)
+2. Switch senders to `SignatureV1` via `WithSignatureVersion`
+3. Optionally enforce V1-only after the transition window
+
+### Receiver-Side Verification
+
+```go
+// Auto-detects v0 or v1 from the signature string
+if err := webhook.VerifySignature(payload, timestamp, secret, receivedSig); err != nil {
+    return http.StatusUnauthorized
+}
+
+// For v1 signatures: verify + enforce freshness in one call
+if err := webhook.VerifySignatureWithFreshness(payload, timestamp, secret, receivedSig, 5*time.Minute); err != nil {
+    // rejects on signature mismatch OR stale timestamp
+    return http.StatusUnauthorized
+}
+```
+
+### Delivery Headers (Sent by Deliverer)
+
+| Header | Purpose |
+|---|---|
+| `X-Webhook-Signature` | HMAC signature (v0 or v1 format) |
+| `X-Webhook-Timestamp` | Decimal Unix epoch seconds (informational in v0, HMAC-covered in v1) |
+| `Content-Type` | `application/json` |
+
+### Retry Behavior
+
+- Exponential backoff with jitter (1s base, 2x doubling)
+- Up to `maxRetries` attempts per endpoint (default 3)
+- Concurrent delivery across endpoints, bounded by `maxConcurrency` semaphore (default 20)
+- Response body drain capped at 64 KiB so the TCP connection can be reused
+
+### Credential Hygiene
+
+URL query parameters and userinfo (`user:pass@host`) are stripped from log output before emission to prevent credential leakage into log aggregators.
+
+---
+
+## 12. Dead Letter Queue
+
+**Added in v5.0.0.** `commons/dlq` is a Redis-backed DLQ for messages that failed processing. Tenant-isolated keys, exponential-backoff retry, and a background `Consumer` that polls for retryable messages.
+
+### Core Types
+
+| Type | Purpose |
+|---|---|
+| `FailedMessage` | `{Source, OriginalData, ErrorMessage, RetryCount, MaxRetries, CreatedAt, NextRetryAt, TenantID}` |
+| `Handler` | Enqueue/dequeue interface on top of Redis lists |
+| `Consumer` | Background poller that invokes a `RetryFunc` per message |
+| `RetryFunc` | `func(ctx, *FailedMessage) error` — return nil to discard, error to re-enqueue |
+| `DLQMetrics` | Interface: `RecordRetried` / `RecordExhausted` / `RecordLost` |
+
+### Handler
+
+```go
+import "github.com/LerianStudio/lib-commons/v5/commons/dlq"
+
+h := dlq.New(redisConn, "dlq:", 3,              // keyPrefix, maxRetries
+    dlq.WithLogger(logger),
+    dlq.WithTracer(tracer),
+    dlq.WithMetrics(metrics),
+    dlq.WithModule("transaction-outbound"),
+)
+
+// Enqueue a failed message — TenantID is resolved from context if not already set.
+// On initial enqueue, msg.MaxRetries=0 is overwritten with the handler's configured value.
+err := h.Enqueue(ctx, &dlq.FailedMessage{
+    Source:       "outbound",
+    OriginalData: payload,
+    ErrorMessage: originalErr.Error(),
+})
+```
+
+`dlq.New(nil, ...)` returns `nil` — `Handler` methods are nil-safe and return `ErrNilHandler`.
+
+### Key Composition
+
+Keys are tenant-scoped to prevent cross-tenant mixing:
+
+| Context | Redis Key |
+|---|---|
+| Tenant present | `dlq:<tenantID>:<source>` |
+| No tenant | `dlq:<source>` (global) |
+
+Invalid tenant IDs (containing `:`, `*`, `?`, `[`, `]`, `\`) are **rejected fail-closed** — the Enqueue returns an error rather than falling back to the global key, which would corrupt isolation.
+
+### Consumer
+
+```go
+consumer, err := dlq.NewConsumer(handler, retryFn,
+    dlq.WithConsumerLogger(logger),
+    dlq.WithConsumerTracer(tracer),
+    dlq.WithConsumerMetrics(metrics),
+    dlq.WithConsumerModule("transaction-outbound"),
+    dlq.WithPollInterval(30*time.Second),  // default: 30s
+    dlq.WithBatchSize(10),                  // default: 10
+    dlq.WithSources("outbound", "inbound"),
+)
+
+// Start blocks until ctx is canceled — run under a Launcher or SafeGo
+runtime.SafeGoWithContextAndComponent(ctx, logger, "my-service", "dlq-consumer",
+    runtime.KeepRunning, func(ctx context.Context) {
+        _ = consumer.Start(ctx)
+    },
+)
+```
+
+### Retry Function Contract
+
+```go
+retryFn := func(ctx context.Context, msg *dlq.FailedMessage) error {
+    // ctx automatically carries the TenantID from msg.TenantID via tmcore.
+    switch msg.Source {
+    case "outbound":
+        return resendWebhook(ctx, msg.OriginalData)
+    case "inbound":
+        return reprocessEvent(ctx, msg.OriginalData)
+    }
+    return errors.New("unknown source")
+}
+```
+
+- Return `nil` → message is discarded (`RecordRetried`)
+- Return `error` → message is re-enqueued with incremented `RetryCount` and updated `NextRetryAt`
+- `RetryCount >= MaxRetries` → message is discarded as permanently failed (`RecordExhausted`)
+
+### Backoff
+
+30s base with AWS Full Jitter (via `commons/backoff`), floored at 5s so attempt 0 gets genuine jitter spread over `[5s, 30s)` rather than always resolving to exactly 30s.
+
+### Integration with RabbitMQ Consumers
+
+The typical pattern: a RabbitMQ consumer that fails to process a message Enqueues to the DLQ, Acks the original, and the DLQ Consumer retries it later out-of-band. This moves slow retries off the main consumer loop and off the broker, which is particularly useful for multi-tenant deployments where per-tenant retries on the broker can cause head-of-line blocking.
+
+---
+
+## 13. Root Package & Utilities
+
+The root `commons` package (`github.com/LerianStudio/lib-commons/v5/commons`) provides foundational utilities used across all Lerian services. These are building blocks that other packages and services depend on.
 
 ### App Lifecycle (`app.go`)
 
@@ -1487,7 +1931,7 @@ commons.SetConfigFromEnvVars(cfg)
 
 ---
 
-## 12. Cross-Cutting Patterns
+## 14. Cross-Cutting Patterns
 
 These patterns appear consistently across all lib-commons packages. Understanding them helps predict how any package behaves.
 
@@ -1555,7 +1999,7 @@ This pattern applies to both PG and MB context functions. The variadic approach 
 
 ---
 
-## 13. Which Package Do I Need?
+## 15. Which Package Do I Need?
 
 Use this decision tree to find the right package quickly:
 
@@ -1572,6 +2016,7 @@ Use this decision tree to find the right package quickly:
 | **HTTP** | |
 | Add HTTP middleware (CORS, logging, telemetry) | `net/http` |
 | Rate-limit HTTP endpoints | `net/http/ratelimit` |
+| Enforce idempotency on mutating endpoints | `net/http/idempotency` (v5.0.0) |
 | Paginate API responses | `net/http` (offset, UUID cursor, timestamp cursor, sort cursor) |
 | Validate HTTP request bodies | `net/http` (`ParseBodyAndValidate`, `ValidateStruct`) |
 | Send consistent API responses | `net/http` (`Respond`, `RespondStatus`, `RespondError`, `RenderError`) |
@@ -1589,6 +2034,7 @@ Use this decision tree to find the right package quickly:
 | Check if a field name is sensitive | `security` (`IsSensitiveField`) |
 | Fetch AWS secrets for M2M auth | `secretsmanager` (`GetM2MCredentials`) |
 | Handle license validation | `license` (fail-open/fail-closed policies) |
+| Manage TLS certs with hot reload | `certificate` (v5.0.0 — `NewManager`, `Rotate`, `GetCertificateFunc`) |
 | **Multi-Tenancy** | |
 | Add multi-tenancy (database-per-tenant) | `tenant-manager` (full isolation system) |
 | Discover tenants via events (HTTP services) | `tenant-manager/event` (`TenantEventListener`) |
@@ -1596,8 +2042,15 @@ Use this decision tree to find the right package quickly:
 | Create Redis pub/sub client for tenant events | `tenant-manager/redis` (`NewTenantPubSubRedisClient`) |
 | Cache tenants with load callback | `tenant-manager/tenantcache` (`TenantLoader` with `WithOnTenantLoaded`) |
 | Get tenant-scoped PG/MB from context | `tenant-manager/core` (`GetPGContext(ctx, ...module)`, `GetMBContext(ctx, ...module)`) |
+| Plug a custom cache into the TM client | `tenant-manager/cache` (v5.0.0 — `ConfigCache` interface, `InMemoryCache`) |
+| Auto-inject `tenant_id` into every log line | `tenant-manager/log` (v5.0.0 — `TenantAwareLogger`) |
 | **Configuration** | |
-| Add hot-reloadable runtime config | `systemplane` (full config management plane) |
+| Add hot-reloadable runtime config | `systemplane` (v5.0.0 — `NewPostgres` / `NewMongoDB`, `Register`, `Start`, typed Get/Set/OnChange) |
+| Expose runtime config admin REST API | `systemplane/admin` (v5.0.0 — `Mount(app, client, WithAuthorizer(...))`) |
+| **Webhooks & DLQ** | |
+| Deliver webhooks with SSRF protection + HMAC signing | `webhook` (v5.0.0) |
+| Verify incoming webhook signatures | `webhook` (v5.0.0 — `VerifySignature`, `VerifySignatureWithFreshness`) |
+| Route failed messages to a retry queue | `dlq` (v5.0.0 — `Handler.Enqueue` + `Consumer`) |
 | **Transactions** | |
 | Process financial transactions | `transaction` (intent planning, balance posting) |
 | Implement transactional outbox | `outbox` + `outbox/postgres` |
@@ -1624,9 +2077,71 @@ Use this decision tree to find the right package quickly:
 
 ---
 
-## 14. Breaking Changes
+## 16. Breaking Changes
 
-This section documents breaking changes across lib-commons v4.x releases. Consult when upgrading.
+This section documents breaking changes across lib-commons releases. Consult when upgrading.
+
+### v5.0.2
+
+Patch release — no API changes. Hotfixes:
+
+- `commons/rabbitmq`: Close leaked connections on concurrent reconnect in `EnsureChannelContext`
+- `commons/net/http` telemetry: Copy Fiber context strings before `c.Next()` to prevent `UnsafeString` race (caused corrupted span attributes like `GET` → `GETT`)
+
+### v5.0.1
+
+Patch release — no API changes. Internal test improvements and minor fixes.
+
+### v5.0.0
+
+**Major release.** Module path bump + one major rewrite + several new packages.
+
+#### Module Path
+
+| Change | Migration |
+|---|---|
+| **Go module major version bump** | Replace all `github.com/LerianStudio/lib-commons/v4/...` imports with `github.com/LerianStudio/lib-commons/v5/...`. Update `go.mod` to require `v5.0.2` (or latest). Run `go mod tidy`. |
+| **Minimum Go version** | Now `go 1.25` — update your service's `go.mod` if it was on an older Go toolchain. |
+
+#### Systemplane — Complete Rewrite
+
+The entire hexagonal-architecture v4 systemplane has been **removed and replaced**. all of the following packages no longer exist:
+
+- `commons/systemplane/adapters/...` (store/postgres, store/mongodb, store/secretcodec, changefeed/postgres, changefeed/mongodb, http/fiber)
+- `commons/systemplane/bootstrap/...` (and `bootstrap/builtin`)
+- `commons/systemplane/domain/...` (Entry, Snapshot, KeyDef, Target, ApplyBehavior, ValueType, Kind, Scope, Revision, Actor, nil_value, reconciler_phase, backend_kind, bundle)
+- `commons/systemplane/ports/...` (Store, HistoryStore, ChangeFeed, BundleFactory, BundleReconciler, Authorizer)
+- `commons/systemplane/registry/...`
+- `commons/systemplane/service/...` (Manager, Supervisor, SnapshotBuilder)
+- `commons/systemplane/swagger/...`
+- `commons/systemplane/testutil/...`
+
+| Removed Concept | v5 Replacement |
+|---|---|
+| `Supervisor` / `Manager` / `RuntimeBundle` | A single `*systemplane.Client` |
+| `registry.MustRegister(KeyDef{...})` | `client.Register(namespace, key, defaultValue, ...KeyOption)` |
+| `domain.ScopeGlobal` / `ScopeTenant` | Free-text `namespace` string (convention: `"global"`, `"tenant:acme"`, etc.) |
+| `ApplyBehavior` (LiveRead/WorkerReconcile/BundleRebuild/BootstrapOnly) | **Gone** — v2 is strictly "read the value, react in `OnChange`". Settings that need resource teardown belong in env vars. |
+| `supervisor.Snapshot()` + `snap.GetInt(...)` | `client.GetInt(namespace, key)` (direct, nil-safe) |
+| `mgr.Write(...)` with optimistic concurrency | `client.Set(ctx, namespace, key, value, actor)` |
+| `bootstrap.LoadFromEnv()` + `builtin.NewBackendFromConfig()` | Direct `systemplane.NewPostgres(db, listenDSN, ...)` or `systemplane.NewMongoDB(client, db, ...)` |
+| HTTP API: `fiberhttp.NewHandler(mgr, ...).Mount(app)` | `admin.Mount(app, client, admin.WithAuthorizer(...))` |
+| `SYSTEMPLANE_*` env vars | **Gone** — callers pass `*sql.DB` / `*mongo.Client` directly |
+
+**Migration is not mechanical.** If your service uses v4 systemplane, plan for a ground-up rewrite of the systemplane integration: replace registry/supervisor/manager with a single Client, flatten Config/Setting/Kind into `(namespace, key)` pairs, and remove any code that depended on `ApplyBehavior` or `RuntimeBundle` — those concepts no longer exist. Keys whose changes required rebuilding infrastructure (DB pool sizes, TLS material, listen addresses) should be moved to environment variables per the v2 design intent.
+
+#### New Packages
+
+| Package | Purpose |
+|---|---|
+| `commons/certificate` | TLS certificate manager with hot reload |
+| `commons/dlq` | Redis-backed dead letter queue with exponential-backoff retry |
+| `commons/webhook` | SSRF-safe HMAC-signed webhook delivery engine (includes SSRF validation — does **not** live in a separate `ssrf` package) |
+| `commons/net/http/idempotency` | Fiber idempotency middleware with Redis SetNX, tenant-scoped keys, faithful response replay |
+| `commons/tenant-manager/cache` | `ConfigCache` interface + `InMemoryCache` default implementation for the TM client |
+| `commons/tenant-manager/log` | `TenantAwareLogger` — wraps a `log.Logger` and auto-injects `tenant_id` from context |
+
+No packages were renamed. No public APIs outside systemplane changed signatures — the v5 core (postgres, mongo, redis, rabbitmq, opentelemetry, tenant-manager middleware/consumer/event/core, etc.) is source-compatible with v4.6.0 after the module-path bump.
 
 ### v4.6.0
 
