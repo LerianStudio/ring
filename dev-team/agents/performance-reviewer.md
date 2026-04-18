@@ -46,11 +46,11 @@ input_schema:
 
 # Performance Reviewer
 
-## Standards Loading (MANDATORY)
+## Standards Loading (MANDATORY — Cache-First)
 
-**MUST load performance-relevant standards before starting review:**
+**MUST load performance-relevant standards before starting review.**
 
-Performance Review does not have a dedicated standards file. Instead, cross-reference performance-relevant sections from existing standards. MUST load applicable standards via WebFetch based on detected language:
+Performance Review does not have a dedicated standards file. Instead, cross-reference performance-relevant sections from existing standards. Applicable standards by detected language:
 
 | Detected Language | Standards to Load |
 |-------------------|-------------------|
@@ -58,19 +58,29 @@ Performance Review does not have a dedicated standards file. Instead, cross-refe
 | TypeScript | `typescript.md` (Testing, Frameworks & Libraries) |
 | SRE/Infra (Layer 2) | `sre.md` (Health Checks, Observability) |
 
-<fetch_required>
+**Resolution protocol (MUST follow in this order):**
+
+1. **Check dispatch prompt for a `<standards>` block.** If your dispatch prompt contains `<standards>` with populated `<content>` elements, use those as the authoritative rules source. This is the cache-first fast path — the orchestrator pre-fetched standards at cycle start and injected them at dispatch time.
+2. **Cache-miss fallback (empty `<content>`).** If a `<standard>`'s `<content>` element is empty, WebFetch the URL from that `<standard>`'s `url` attribute and use the fetched content. Do not skip the standard.
+3. **Standalone fallback (no `<standards>` block at all).** If your dispatch prompt does not include a `<standards>` block (standalone audit mode, no dev-cycle context), WebFetch the URLs listed in the fallback reference below.
+
+**Rolling standards:** All URLs point to the `main` branch. WebFetch always returns the current rules; there is no pinned version. This is intentional — installed plugins pick up standards updates without a plugin release.
+
+**Fallback reference — URLs to WebFetch when no `<standards>` block is present (filter by detected language):**
+
+```
 https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/architecture.md
 https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/core.md
 https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/bootstrap.md
 https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md
 https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/sre.md
-</fetch_required>
+```
 
 **Loading Steps:**
-1. Detect language(s) from project files (see Language Detection below)
-2. WebFetch the standards files listed in `<fetch_required>` above (filter by detected language)
-3. Use fetched standards as reference when evaluating findings
-4. If standards cannot be loaded, report in output: "Standards not loaded — findings based on built-in checks only"
+1. Detect language(s) from project files (see Language Detection below).
+2. Resolve standards via protocol above: cached `<content>` → WebFetch on cache miss → WebFetch fallback URLs if no `<standards>` block.
+3. Use loaded standards as reference when evaluating findings.
+4. If standards cannot be loaded at all (network failure in standalone mode), report in output: "Standards not loaded — findings based on built-in checks only".
 
 **MUST NOT proceed with review without attempting to load standards.**
 

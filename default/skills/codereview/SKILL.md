@@ -683,39 +683,50 @@ Task:
     - **File size compliance** — Any file > 300 lines (excluding auto-generated: *.pb.go, *.d.ts, */generated/*, */mocks/*) MUST be flagged as MEDIUM+ issue. Files > 500 lines = CRITICAL. See shared-patterns/file-size-enforcement.md.
 
     ## ⛔ Ring Standards Verification (MANDATORY)
-    
-    **Load the relevant standards modules using the cache-first pattern and verify the changed code against them.**
-    
+
+    **Rolling standards policy:** Ring standards live at `raw.githubusercontent.com/.../main/...` and evolve independently of this SKILL. The orchestrator resolves the standards slice below at dispatch time: for each URL, if `state.cached_standards[url]` is populated (pre-cached by dev-cycle Step 1.5), the content is injected into the `<content>` element; if not, the `<content>` is emitted empty as a cache-miss signal, and the reviewer MUST WebFetch the URL itself.
+
+    **Orchestrator dispatch resolution (pseudocode):**
+
     ```yaml
-    For each required standards URL below:
-      IF state.cached_standards[url] exists:
-        → Read content from state.cached_standards[url].content
-        → Log: "Using cached standard: {url} (fetched {state.cached_standards[url].fetched_at})"
-      ELSE:
-        → WebFetch url (fallback — should not happen if orchestrator ran Step 1.5)
-        → Log warning: "Standard {url} was not pre-cached; fetched inline"
+    # When dispatching ring:code-reviewer, the orchestrator MUST:
+    standards_slice:
+      # Always (Go)
+      - https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.md
+      - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang.md
+      - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/core.md
+      - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/quality.md
+      - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/domain.md
+      - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/api-patterns.md
+      - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/bootstrap.md
+      # Or (TypeScript)
+      # - https://raw.githubusercontent.com/LerianStudio/ring/main/CLAUDE.md
+      # - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md
+    resolve_each_url:
+      if state.cached_standards[url] exists:
+        inject <standard url="..."><content>{{cached content}}</content></standard>
+      else:
+        inject <standard url="..."><content></content></standard>  # empty = fallback signal
     ```
-    
-    For Go projects, load these modules based on changed files:
-    Base URL: `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/`
-    
-    **Always load:**
-    - `core.md` (lib-commons, license headers, deps, MongoDB patterns)
-    - `quality.md` (linting, testing, production config validation)
-    
-    **Conditional (load if changed files match):**
-    - `domain.md` (if service/domain/model code changed)
-    - `domain-modeling.md` (if entity/value object code changed)
-    - `api-patterns.md` (if handler/API/route code changed)
-    - `architecture.md` (if structural/directory changes, new packages, concurrency patterns)
-    - `bootstrap.md` (if bootstrap/main/wire/health code changed)
-    - `security.md` (if auth/middleware/validation code changed)
-    - `messaging.md` (if RabbitMQ/message queue code changed)
-    
-    For TypeScript: load `typescript.md` via the same cache-first pattern
-    
+
+    **Standards block (orchestrator substitutes content at dispatch time):**
+
+    ```
+    <standards>
+      <standard url="[url-1]">
+        <content>{{ state.cached_standards["[url-1]"].content OR empty }}</content>
+      </standard>
+      <!-- ...one <standard> per URL in slice... -->
+    </standards>
+    ```
+
+    **Reviewer instructions:**
+    - Read the `<standards>` block. For each `<standard>`, use `<content>` as the authoritative rules source for your review.
+    - If a `<standard>`'s `<content>` is empty, WebFetch that URL yourself (cache miss fallback) and use the fetched content. Do not skip the standard.
+    - Rolling standards: these URLs point to `main`; WebFetch always returns current rules.
+
     **Check the changed code against ALL applicable sections.** Use the section index from `standards-coverage-table.md`.
-    
+
     **Include a Standards Compliance section in your output** listing which standards were verified and any violations found.
 
     ## Required Output
@@ -773,6 +784,46 @@ Task:
     - Requirements coverage
     - Data validation
 
+    ## ⛔ Ring Standards Verification (MANDATORY)
+
+    **Rolling standards policy:** Ring standards live on `main` and evolve independently of this SKILL. The orchestrator resolves the slice below at dispatch time: cached content is injected into `<content>`; cache misses emit empty `<content>` as a fallback signal for the reviewer to WebFetch.
+
+    **Orchestrator dispatch resolution (pseudocode):**
+
+    ```yaml
+    # When dispatching ring:business-logic-reviewer:
+    standards_slice:
+      # Go
+      - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/domain.md
+      - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/domain-modeling.md
+      - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/api-patterns.md
+      # TypeScript
+      # - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md
+    resolve_each_url:
+      if state.cached_standards[url] exists:
+        inject <standard url="..."><content>{{cached content}}</content></standard>
+      else:
+        inject <standard url="..."><content></content></standard>  # empty = fallback signal
+    ```
+
+    **Standards block (orchestrator substitutes content at dispatch time):**
+
+    ```
+    <standards>
+      <standard url="[url-1]">
+        <content>{{ state.cached_standards["[url-1]"].content OR empty }}</content>
+      </standard>
+      <!-- ...one <standard> per URL in slice... -->
+    </standards>
+    ```
+
+    **Reviewer instructions:**
+    - Read the `<standards>` block. For each `<standard>`, use `<content>` as the authoritative rules source.
+    - If `<content>` is empty, WebFetch the URL yourself (cache miss fallback) and use the fetched content.
+    - Rolling standards: URLs point to `main`; WebFetch always returns current rules.
+
+    **Focus areas from these standards:** domain modeling invariants, aggregate boundaries, entity/value-object distinctions, API contract fidelity, request/response validation semantics.
+
     ## Required Output
     ### VERDICT: PASS / FAIL
 
@@ -826,22 +877,44 @@ Task:
     - OWASP Top 10 risks
 
     ## ⛔ Ring Security Standards Verification (MANDATORY)
-    
-    **Load the security standards using the cache-first pattern and verify changed code against them:**
-    
+
+    **Rolling standards policy:** Ring standards live on `main` and evolve independently of this SKILL. The orchestrator resolves the slice below at dispatch time: cached content is injected into `<content>`; cache misses emit empty `<content>` as a fallback signal for the reviewer to WebFetch.
+
+    **Orchestrator dispatch resolution (pseudocode):**
+
     ```yaml
-    For each required standards URL below:
-      IF state.cached_standards[url] exists:
-        → Read content from state.cached_standards[url].content
-        → Log: "Using cached standard: {url} (fetched {state.cached_standards[url].fetched_at})"
-      ELSE:
-        → WebFetch url (fallback — should not happen if orchestrator ran Step 1.5)
-        → Log warning: "Standard {url} was not pre-cached; fetched inline"
+    # When dispatching ring:security-reviewer:
+    standards_slice:
+      # Go
+      - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/security.md
+      - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/multi-tenant.md
+      - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/api-patterns.md
+      # TypeScript
+      # - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md
+      # - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript/multi-tenant.md
+    resolve_each_url:
+      if state.cached_standards[url] exists:
+        inject <standard url="..."><content>{{cached content}}</content></standard>
+      else:
+        inject <standard url="..."><content></content></standard>  # empty = fallback signal
     ```
-    
-    Required URLs:
-    - `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/security.md`
-    
+
+    **Standards block (orchestrator substitutes content at dispatch time):**
+
+    ```
+    <standards>
+      <standard url="[url-1]">
+        <content>{{ state.cached_standards["[url-1]"].content OR empty }}</content>
+      </standard>
+      <!-- ...one <standard> per URL in slice... -->
+    </standards>
+    ```
+
+    **Reviewer instructions:**
+    - Read the `<standards>` block. For each `<standard>`, use `<content>` as the authoritative rules source.
+    - If `<content>` is empty, WebFetch the URL yourself (cache miss fallback) and use the fetched content. Do not skip the standard.
+    - Rolling standards: URLs point to `main`; WebFetch always returns current rules.
+
     **Check ALL applicable sections from standards-coverage-table.md → ring:backend-engineer-golang:**
     - #15 Access Manager Integration (if auth code changed)
     - #16 License Manager Integration (if licensed project)
@@ -918,6 +991,48 @@ Task:
     - Test independence and isolation
     - Assertion quality (not just "no error")
     - Test anti-patterns (testing mock behavior)
+
+    ## ⛔ Ring Testing Standards Verification (MANDATORY)
+
+    **Rolling standards policy:** Ring standards live on `main` and evolve independently of this SKILL. The orchestrator resolves the slice below at dispatch time: cached content is injected into `<content>`; cache misses emit empty `<content>` as a fallback signal for the reviewer to WebFetch.
+
+    **Orchestrator dispatch resolution (pseudocode):**
+
+    ```yaml
+    # When dispatching ring:test-reviewer:
+    standards_slice:
+      # Go
+      - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/quality.md
+      - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/testing-fuzz.md
+      - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/testing-property.md
+      - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/testing-integration.md
+      - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/testing-chaos.md
+      # TypeScript
+      # - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md
+    resolve_each_url:
+      if state.cached_standards[url] exists:
+        inject <standard url="..."><content>{{cached content}}</content></standard>
+      else:
+        inject <standard url="..."><content></content></standard>  # empty = fallback signal
+    ```
+
+    **Standards block (orchestrator substitutes content at dispatch time):**
+
+    ```
+    <standards>
+      <standard url="[url-1]">
+        <content>{{ state.cached_standards["[url-1]"].content OR empty }}</content>
+      </standard>
+      <!-- ...one <standard> per URL in slice... -->
+    </standards>
+    ```
+
+    **Reviewer instructions:**
+    - Read the `<standards>` block. For each `<standard>`, use `<content>` as the authoritative rules source.
+    - If `<content>` is empty, WebFetch the URL yourself (cache miss fallback) and use the fetched content. Do not skip the standard.
+    - Rolling standards: URLs point to `main`; WebFetch always returns current rules.
+
+    **Focus areas from these standards:** unit test coverage thresholds, fuzz corpus quality, property invariants, integration test isolation, chaos injection patterns.
 
     ## Required Output
     ### VERDICT: PASS / FAIL
@@ -1146,28 +1261,45 @@ Task:
 
     ## ⛔ Ring Standards Verification (MANDATORY)
 
-    **Load the relevant standards using the cache-first pattern and verify the changed code against them.**
+    **Rolling standards policy:** Ring standards live on `main` and evolve independently of this SKILL. The orchestrator resolves the slice below at dispatch time: cached content is injected into `<content>`; cache misses emit empty `<content>` as a fallback signal for the reviewer to WebFetch.
+
+    **Orchestrator dispatch resolution (pseudocode):**
 
     ```yaml
-    For each required standards URL below:
-      IF state.cached_standards[url] exists:
-        → Read content from state.cached_standards[url].content
-        → Log: "Using cached standard: {url} (fetched {state.cached_standards[url].fetched_at})"
-      ELSE:
-        → WebFetch url (fallback — should not happen if orchestrator ran Step 1.5)
-        → Log warning: "Standard {url} was not pre-cached; fetched inline"
+    # When dispatching ring:performance-reviewer:
+    standards_slice:
+      # Go (Layer 1 code-level)
+      - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/architecture.md
+      - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/core.md
+      - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/bootstrap.md
+      # TypeScript (Layer 1)
+      # - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md
+      # Layer 2 runtime/infra (both languages)
+      - https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/sre.md
+    resolve_each_url:
+      if state.cached_standards[url] exists:
+        inject <standard url="..."><content>{{cached content}}</content></standard>
+      else:
+        inject <standard url="..."><content></content></standard>  # empty = fallback signal
     ```
 
-    For Go projects, load these modules based on changed files:
-    Base URL: `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/`
+    **Standards block (orchestrator substitutes content at dispatch time):**
 
-    **Always load:**
-    - `architecture.md` (Performance Patterns, Concurrency Patterns, N+1 Query Detection, Goroutine Leak Detection)
-    - `core.md` (Dependency Management)
-    - `bootstrap.md` (Connection Management, Graceful Shutdown)
+    ```
+    <standards>
+      <standard url="[url-1]">
+        <content>{{ state.cached_standards["[url-1]"].content OR empty }}</content>
+      </standard>
+      <!-- ...one <standard> per URL in slice... -->
+    </standards>
+    ```
 
-    For TypeScript: load `typescript.md` (Testing, Frameworks & Libraries) via the same cache-first pattern
-    For SRE/Infra (Layer 2): load `sre.md` (Health Checks, Observability) via the same cache-first pattern
+    **Reviewer instructions:**
+    - Read the `<standards>` block. For each `<standard>`, use `<content>` as the authoritative rules source.
+    - If `<content>` is empty, WebFetch the URL yourself (cache miss fallback) and use the fetched content. Do not skip the standard.
+    - Rolling standards: URLs point to `main`; WebFetch always returns current rules.
+
+    **Focus sections:** `architecture.md` (Performance Patterns, Concurrency Patterns, N+1 Query Detection, Goroutine Leak Detection); `core.md` (Dependency Management); `bootstrap.md` (Connection Management, Graceful Shutdown); `sre.md` (Health Checks, Observability).
 
     **Include a Standards Compliance section in your output** listing which standards were verified and any violations found.
 
