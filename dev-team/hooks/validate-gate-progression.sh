@@ -71,16 +71,73 @@ TASK_ID=$(echo "$NEW_STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].id // \"T-???\"
 
 errors=()
 
+# Gate 0 — TDD RED/GREEN completion check.
+# Iterates subtasks[] because tdd_red/tdd_green are subtask-cadence gates per state
+# schema (see dev-cycle/SKILL.md state schema declaration, lines 693–757). Task-only
+# fallback preserved for cycles without subtask decomposition.
+#
+# A subtask is exempt from this check if its current_gate < 1 (hasn't reached Gate 0
+# yet — don't require TDD complete for future subtasks).
 validate_gate_0() {
-  local tdd_red tdd_green
-  tdd_red=$(echo "$TASK_GATES" | jq -r '.implementation.tdd_red.status // "pending"')
-  tdd_green=$(echo "$TASK_GATES" | jq -r '.implementation.tdd_green.status // "pending"')
+  local subtask_count i subtask_id current_gate tdd_red tdd_green
 
-  if [[ "$tdd_red" != "completed" ]]; then
-    errors+=("Gate 0: TDD-RED not completed (status: $tdd_red)")
+  subtask_count=$(echo "$NEW_STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].subtasks | length // 0")
+
+  if [[ "$subtask_count" -eq 0 ]]; then
+    # Task-only fallback (no subtask decomposition) — read from task scope
+    tdd_red=$(echo "$TASK_GATES" | jq -r '.implementation.tdd_red.status // "pending"')
+    tdd_green=$(echo "$TASK_GATES" | jq -r '.implementation.tdd_green.status // "pending"')
+
+    # Frontend-cycle safety: empty implementation on an empty task → no-op
+    if [[ "$tdd_red" == "pending" && "$tdd_green" == "pending" ]]; then
+      local impl_present
+      impl_present=$(echo "$TASK_GATES" | jq -r 'has("implementation")')
+      if [[ "$impl_present" != "true" ]]; then
+        return
+      fi
+    fi
+
+    if [[ "$tdd_red" != "completed" ]]; then
+      errors+=("Gate 0: TDD-RED not completed (status: $tdd_red)")
+    fi
+    if [[ "$tdd_green" != "completed" ]]; then
+      errors+=("Gate 0: TDD-GREEN not completed (status: $tdd_green)")
+    fi
+    return
   fi
-  if [[ "$tdd_green" != "completed" ]]; then
-    errors+=("Gate 0: TDD-GREEN not completed (status: $tdd_green)")
+
+  # Subtask-scoped validation
+  local any_impl_present=false
+  for ((i=0; i<subtask_count; i++)); do
+    subtask_id=$(echo "$NEW_STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].subtasks[$i].id // \"S-???\"")
+    current_gate=$(echo "$NEW_STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].subtasks[$i].current_gate // 0")
+    tdd_red=$(echo "$NEW_STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].subtasks[$i].gate_progress.implementation.tdd_red.status // \"pending\"")
+    tdd_green=$(echo "$NEW_STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].subtasks[$i].gate_progress.implementation.tdd_green.status // \"pending\"")
+
+    local impl_present
+    impl_present=$(echo "$NEW_STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].subtasks[$i].gate_progress | has(\"implementation\")")
+    if [[ "$impl_present" == "true" ]]; then
+      any_impl_present=true
+    fi
+
+    # Exempt subtasks that haven't reached Gate 0 yet
+    if ! [[ "$current_gate" =~ ^[0-9]+$ ]] || [[ "$current_gate" -lt 1 ]]; then
+      continue
+    fi
+
+    if [[ "$tdd_red" != "completed" ]]; then
+      errors+=("Gate 0 (Subtask $subtask_id): TDD-RED not completed (status: $tdd_red)")
+    fi
+    if [[ "$tdd_green" != "completed" ]]; then
+      errors+=("Gate 0 (Subtask $subtask_id): TDD-GREEN not completed (status: $tdd_green)")
+    fi
+  done
+
+  # Frontend-cycle safety: if no subtask has implementation scope at all, short-circuit
+  if [[ "$any_impl_present" == "false" ]]; then
+    # Clear any errors emitted for subtasks past Gate 0 with absent implementation
+    # (shouldn't happen in practice since current_gate < 1 exempts them, but be explicit)
+    return
   fi
 }
 
@@ -127,27 +184,86 @@ validate_gate_2() {
   fi
 }
 
+# Gate 3 — Unit testing completion and coverage check.
+# Iterates subtasks[] because unit_testing is a subtask-cadence gate per state schema
+# (see dev-cycle/SKILL.md state schema declaration, lines 693–757). Task-only fallback
+# preserved for cycles without subtask decomposition.
+#
+# A subtask is exempt from this check if its current_gate < 4 (hasn't reached Gate 3 yet).
 validate_gate_3() {
-  local status coverage
-  status=$(echo "$TASK_GATES" | jq -r '.unit_testing.status // "pending"')
-  coverage=$(echo "$TASK_GATES" | jq -r '
-    .unit_testing.coverage_actual //
-    (if .unit_testing.status == "completed" then 85 else 0 end)
-  ')
+  local subtask_count i subtask_id current_gate status coverage
 
-  # Ensure coverage is numeric (guards against null/malformed values)
-  if ! [[ "$coverage" =~ ^[0-9]+\.?[0-9]*$ ]]; then
-    errors+=("Gate 3 (Unit Testing): invalid coverage value: $coverage")
+  subtask_count=$(echo "$NEW_STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].subtasks | length // 0")
+
+  if [[ "$subtask_count" -eq 0 ]]; then
+    # Task-only fallback
+    status=$(echo "$TASK_GATES" | jq -r '.unit_testing.status // "pending"')
+    coverage=$(echo "$TASK_GATES" | jq -r '
+      .unit_testing.coverage_actual //
+      (if .unit_testing.status == "completed" then 85 else 0 end)
+    ')
+
+    # Frontend-cycle safety: no unit_testing scope at all → no-op
+    local ut_present
+    ut_present=$(echo "$TASK_GATES" | jq -r 'has("unit_testing")')
+    if [[ "$ut_present" != "true" && "$status" == "pending" ]]; then
+      return
+    fi
+
+    if ! [[ "$coverage" =~ ^[0-9]+\.?[0-9]*$ ]]; then
+      errors+=("Gate 3 (Unit Testing): invalid coverage value: $coverage")
+      return
+    fi
+
+    if [[ "$status" != "completed" ]]; then
+      errors+=("Gate 3 (Unit Testing): not completed (status: $status)")
+    else
+      if awk "BEGIN {exit !($coverage < 85)}"; then
+        errors+=("Gate 3 (Unit Testing): coverage $coverage% < 85% threshold")
+      fi
+    fi
     return
   fi
 
-  if [[ "$status" != "completed" ]]; then
-    errors+=("Gate 3 (Unit Testing): not completed (status: $status)")
-  else
-    # Compare coverage using awk for float comparison
-    if awk "BEGIN {exit !($coverage < 85)}"; then
-      errors+=("Gate 3 (Unit Testing): coverage $coverage% < 85% threshold")
+  # Subtask-scoped validation
+  local any_ut_present=false
+  for ((i=0; i<subtask_count; i++)); do
+    subtask_id=$(echo "$NEW_STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].subtasks[$i].id // \"S-???\"")
+    current_gate=$(echo "$NEW_STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].subtasks[$i].current_gate // 0")
+    status=$(echo "$NEW_STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].subtasks[$i].gate_progress.unit_testing.status // \"pending\"")
+    coverage=$(echo "$NEW_STATE" | jq -r "
+      .tasks[$CURRENT_TASK_INDEX].subtasks[$i].gate_progress.unit_testing.coverage_actual //
+      (if .tasks[$CURRENT_TASK_INDEX].subtasks[$i].gate_progress.unit_testing.status == \"completed\" then 85 else 0 end)
+    ")
+
+    local ut_present
+    ut_present=$(echo "$NEW_STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].subtasks[$i].gate_progress | has(\"unit_testing\")")
+    if [[ "$ut_present" == "true" ]]; then
+      any_ut_present=true
     fi
+
+    # Exempt subtasks that haven't reached Gate 3 yet
+    if ! [[ "$current_gate" =~ ^[0-9]+$ ]] || [[ "$current_gate" -lt 4 ]]; then
+      continue
+    fi
+
+    if ! [[ "$coverage" =~ ^[0-9]+\.?[0-9]*$ ]]; then
+      errors+=("Gate 3 (Subtask $subtask_id): invalid coverage value: $coverage")
+      continue
+    fi
+
+    if [[ "$status" != "completed" ]]; then
+      errors+=("Gate 3 (Subtask $subtask_id): not completed (status: $status)")
+    else
+      if awk "BEGIN {exit !($coverage < 85)}"; then
+        errors+=("Gate 3 (Subtask $subtask_id): coverage $coverage below threshold 85")
+      fi
+    fi
+  done
+
+  # Frontend-cycle safety: if no subtask has unit_testing scope at all, short-circuit
+  if [[ "$any_ut_present" == "false" ]]; then
+    return
   fi
 }
 
@@ -354,13 +470,53 @@ if [[ ${#errors[@]} -gt 0 ]]; then
       end
   ')
 
-  LAST_COMPLETED_GATE=$(echo "$TASK_GATES" | jq -r --arg dv "$DELIVERY_VERIFIED_ALL" '
-    if (.implementation.tdd_red.status != "completed") or (.implementation.tdd_green.status != "completed") then "none"
+  # Aggregate subtask-cadence gates (TDD, unit_testing) across subtasks[].
+  # A task has "completed Gate N" (for subtask-cadence N) when ALL its subtasks past
+  # that gate satisfy the predicate. Subtasks with current_gate < N are exempt.
+  # Falls back to task-scope if no subtasks exist.
+  TDD_COMPLETED_ALL=$(echo "$NEW_STATE" | jq -r --argjson ti "$CURRENT_TASK_INDEX" '
+    (.tasks[$ti].subtasks // []) as $subs
+    | if ($subs | length) == 0 then
+        ((.tasks[$ti].gate_progress.implementation.tdd_red.status == "completed") and
+         (.tasks[$ti].gate_progress.implementation.tdd_green.status == "completed")) | tostring
+      else
+        ($subs
+         | map(select((.current_gate // 0) >= 1))
+         | if length == 0 then "true"
+           else (map(
+             (.gate_progress.implementation.tdd_red.status == "completed") and
+             (.gate_progress.implementation.tdd_green.status == "completed")
+           ) | all) | tostring
+           end)
+      end
+  ')
+
+  UNIT_TESTING_COMPLETED_ALL=$(echo "$NEW_STATE" | jq -r --argjson ti "$CURRENT_TASK_INDEX" '
+    (.tasks[$ti].subtasks // []) as $subs
+    | if ($subs | length) == 0 then
+        ((.tasks[$ti].gate_progress.unit_testing.status == "completed") and
+         ((.tasks[$ti].gate_progress.unit_testing.coverage_actual // 0) >= 85)) | tostring
+      else
+        ($subs
+         | map(select((.current_gate // 0) >= 4))
+         | if length == 0 then "true"
+           else (map(
+             (.gate_progress.unit_testing.status == "completed") and
+             ((.gate_progress.unit_testing.coverage_actual // 0) >= 85)
+           ) | all) | tostring
+           end)
+      end
+  ')
+
+  LAST_COMPLETED_GATE=$(echo "$TASK_GATES" | jq -r \
+    --arg dv "$DELIVERY_VERIFIED_ALL" \
+    --arg tdd "$TDD_COMPLETED_ALL" \
+    --arg ut "$UNIT_TESTING_COMPLETED_ALL" '
+    if $tdd != "true" then "none"
     elif $dv != "true" then "0"
     elif .devops.status != "completed" then "0"
     elif .sre.status != "completed" then "1"
-    elif .unit_testing.status != "completed" then "2"
-    elif (.unit_testing.coverage_actual // 0) < 85 then "2"
+    elif $ut != "true" then "2"
     elif .fuzz_testing.status != "completed" then "3"
     elif (.fuzz_testing.corpus_entries // 0) < 5 then "3"
     elif .property_testing.status != "completed" then "4"
