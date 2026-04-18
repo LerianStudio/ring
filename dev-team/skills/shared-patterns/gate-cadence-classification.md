@@ -44,3 +44,12 @@ Sub-skills that run at task cadence MUST accept aggregated input:
 Sub-skills that run at subtask cadence MUST continue to accept scoped input:
 - `implementation_files`: array (this subtask's changes only)
 - `gate0_handoff`: object (this subtask's handoff)
+
+## Anti-Rationalization Table
+
+| Rationalization | Why It's WRONG | Required Action |
+|-----------------|----------------|-----------------|
+| "Running a task-cadence gate per subtask is safer — more runs catch more bugs" | Task-cadence gates (devops, SRE, fuzz, property, integration-write, chaos-write, review) operate on the UNION of subtask outputs. Per-subtask firing wastes cycle time on in-flight code that will be re-tested when the task completes. Fuzz seeds and property shrinkers stabilize at task boundary; earlier firing produces noisier results. | **MUST dispatch task-cadence gates once per task, after ALL subtasks have passed their subtask-cadence gates (0, 3, 9).** |
+| "A cycle-cadence gate can run at task end — close enough" | Cycle-cadence gates (integration-execute, chaos-execute, multi-tenant-verify, migration-safety, dev-report) require shared infrastructure (containers, Toxiproxy, tenant fixtures) whose setup/teardown cost dominates the actual check. Firing them per task inflates cycle duration by the number of tasks. | **MUST defer execute-mode infrastructure gates to cycle end (Step 12.x of dev-cycle).** |
+| "This task has only one subtask, so cadence doesn't matter" | Cadence is a schema-level invariant enforced by `validate-gate-progression.sh` and the state-write paths documented in `dev-cycle/SKILL.md`. Bypassing it writes state to the wrong path and breaks the hook's progression check for the next task that has multiple subtasks. | **MUST follow the documented cadence regardless of subtask count. Treat single-subtask tasks as "subtasks: [task-itself]" for state purposes.** |
+| "I'll run all gates per subtask because the cycle is short anyway" | Cycle brevity does not license cadence violation. The cadence model is also how reviewers consume aggregate context; per-subtask firing produces incomplete review inputs. | **MUST classify each gate against this table before dispatch. When unclear, STOP and ask the orchestrator.** |
