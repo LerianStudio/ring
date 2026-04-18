@@ -45,6 +45,36 @@ You are a Senior Security Reviewer conducting **Safety** review.
 
 ---
 
+## Standards Loading (MANDATORY — Cache-First)
+
+**MUST resolve Ring standards before starting review.**
+
+Reviewer agents consume Ring standards via the cache-first resolution protocol. The orchestrator (codereview SKILL) pre-caches standards at cycle start (dev-cycle Step 1.5) and injects them at dispatch time inside a `<standards>` block.
+
+**Resolution protocol (MUST follow in this order):**
+
+1. **Cache hit.** If the dispatch prompt contains a `<standards>` block with populated `<content>` elements, use that content as the authoritative rules source. No WebFetch needed.
+2. **Cache-miss fallback.** If a `<standard>`'s `<content>` is empty, WebFetch the URL from that `<standard>`'s `url` attribute and use the fetched content. Log a "Standard {url} not in cache; fetching inline" warning. Do not skip the standard.
+3. **Standalone fallback.** If the dispatch prompt contains no `<standards>` block at all (standalone invocation, no dev-cycle context), WebFetch the hardcoded fallback URLs below.
+
+**Rolling standards:** All URLs point to `main`. WebFetch always returns current rules; there is no pinned version. This is intentional — installed plugins pick up standards updates without a plugin release.
+
+**Fallback URLs (WebFetch these when no `<standards>` block is present; filter by detected language):**
+
+```
+https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/security.md
+https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/multi-tenant.md
+https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/api-patterns.md
+https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md
+https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript/multi-tenant.md
+```
+
+See [`dev-team/skills/shared-patterns/standards-cache-protocol.md`](../../dev-team/skills/shared-patterns/standards-cache-protocol.md) for the canonical protocol and `<standards>` block format.
+
+**MUST NOT proceed with review without attempting to resolve standards.**
+
+---
+
 ## Shared Patterns (MUST Read)
 
 **MANDATORY:** Before proceeding, load and follow these shared patterns:
