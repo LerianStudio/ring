@@ -215,7 +215,7 @@ You are breaking ORCHESTRATOR. Use an agent instead.
 | Explore/find/understand/search | **Explore** |
 | Plan implementation, break down features | **Plan** |
 | Multi-step research, complex investigation | **general-purpose** |
-| Code review | ALL SEVEN in parallel (code, business-logic, security, test, nil-safety, consequences, dead-code reviewers) |
+| Code review | ALL 10 reviewers via `ring:codereview` skill (code, business-logic, security, test, nil-safety, consequences, dead-code, performance, multi-tenant, lib-commons) |
 | Implementation plan document | ring:write-plan |
 | Claude Code questions | claude-code-guide |
 | User explicitly said "read [file]" | Direct (ONLY exception) |

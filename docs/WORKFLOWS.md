@@ -231,7 +231,7 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 - Gate 5 — Property Testing
 - Gate 6 — Integration Testing (write mode)
 - Gate 7 — Chaos Testing (write mode)
-- Gate 8 — Review (8 parallel reviewers on cumulative task diff)
+- Gate 8 — Review (10 parallel reviewers on cumulative task diff)
 
 **Cycle cadence** (runs once per cycle at the end):
 - Gate 6 execute — Integration Testing (execute mode)
@@ -246,17 +246,19 @@ Inputs for task-cadence gates receive UNION of changed files across all subtasks
 
 ## Parallel Code Review
 
-### Instead of sequential (140 min)
+### Instead of sequential (200 min)
 
 ```python
-review1 = Task("ring:code-reviewer")           # 20 min
-review2 = Task("ring:business-logic-reviewer") # 20 min
-review3 = Task("ring:security-reviewer")       # 20 min
-review4 = Task("ring:test-reviewer")           # 20 min
-review5 = Task("ring:nil-safety-reviewer")     # 20 min
-review6 = Task("ring:consequences-reviewer")   # 20 min
-review7 = Task("ring:dead-code-reviewer")      # 20 min
-review8 = Task("ring:performance-reviewer")    # 20 min
+review1  = Task("ring:code-reviewer")             # 20 min
+review2  = Task("ring:business-logic-reviewer")   # 20 min
+review3  = Task("ring:security-reviewer")         # 20 min
+review4  = Task("ring:test-reviewer")             # 20 min
+review5  = Task("ring:nil-safety-reviewer")       # 20 min
+review6  = Task("ring:consequences-reviewer")     # 20 min
+review7  = Task("ring:dead-code-reviewer")        # 20 min
+review8  = Task("ring:performance-reviewer")      # 20 min
+review9  = Task("ring:multi-tenant-reviewer")     # 20 min
+review10 = Task("ring:lib-commons-reviewer")      # 20 min
 ```
 
 ### Run parallel (20 min total)
@@ -270,13 +272,15 @@ Task.parallel([
     ("ring:test-reviewer", prompt),
     ("ring:consequences-reviewer", prompt),
     ("ring:dead-code-reviewer", prompt),
-    ("ring:performance-reviewer", prompt)
-])  # Single message, 8 tool calls
+    ("ring:performance-reviewer", prompt),
+    ("ring:multi-tenant-reviewer", prompt),
+    ("ring:lib-commons-reviewer", prompt)
+])  # Single message, 10 tool calls
 ```
 
 ### Key rule
 
-Always dispatch all 8 reviewers in a single message with multiple Task tool calls.
+Always dispatch all 10 reviewers in a single message with multiple Task tool calls.
 
 ---
 

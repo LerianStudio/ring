@@ -16,7 +16,7 @@ Runs for every subtask (or task itself if no subtasks). Input scoped to a single
 Runs once per task, after all subtasks complete their subtask-level gates. Input is
 UNION of all subtasks' changes.
 - Backend: Gate 1 (DevOps), Gate 2 (SRE), Gate 4 (Fuzz), Gate 5 (Property), Gate 6 write
-  (Integration), Gate 7 write (Chaos), Gate 8 (Review — 8 reviewers)
+  (Integration), Gate 7 write (Chaos), Gate 8 (Review — 10 reviewers)
 - Frontend: Gate 1 (DevOps), Gate 2 (Accessibility), Gate 4 (Visual), Gate 5 (E2E),
   Gate 6 (Performance), Gate 7 (Review — 5 reviewers)
 

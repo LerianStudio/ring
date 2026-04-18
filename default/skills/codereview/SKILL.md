@@ -603,6 +603,8 @@ AFTER ALL SLICES COMPLETE:
      → Add metadata: "Also flagged by: [other_reviewer] in [other_slice]"
      → This indicates higher confidence (multiple independent detections)
 
+   **Note on co-located findings:** When two reviewers flag the same `file:line` with DIFFERENT concerns (e.g., `ring:multi-tenant-reviewer` flags missing tenant context AND `ring:lib-commons-reviewer` flags missing `runtime.SafeGo` — same line, orthogonal issues), BOTH findings MUST be surfaced as distinct entries. Dedup only triggers when either (a) same reviewer reports the same issue twice, or (b) fuzzy description similarity exceeds 80% across reviewers. Co-located-but-orthogonal findings are a feature, not a duplicate — they represent distinct review dimensions hitting the same symptom.
+
 4. CROSS-CUTTING DETECTION:
    Issues found across 2+ slices (same file:line, similar description):
    → Tag as "cross-cutting concern"

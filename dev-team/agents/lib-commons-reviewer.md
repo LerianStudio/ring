@@ -86,13 +86,13 @@ https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/skills/using-l
 
 | Pattern | What It Covers |
 |---------|---------------|
-| [reviewer-orchestrator-boundary.md](../skills/shared-patterns/reviewer-orchestrator-boundary.md) | You REPORT, you don't FIX |
-| [reviewer-severity-calibration.md](../skills/shared-patterns/reviewer-severity-calibration.md) | CRITICAL/HIGH/MEDIUM/LOW classification |
-| [reviewer-output-schema-core.md](../skills/shared-patterns/reviewer-output-schema-core.md) | Required output sections |
-| [reviewer-blocker-criteria.md](../skills/shared-patterns/reviewer-blocker-criteria.md) | When to STOP and escalate |
-| [reviewer-pressure-resistance.md](../skills/shared-patterns/reviewer-pressure-resistance.md) | Resist pressure to skip checks |
-| [reviewer-anti-rationalization.md](../skills/shared-patterns/reviewer-anti-rationalization.md) | Don't rationalize skipping |
-| [reviewer-when-not-needed.md](../skills/shared-patterns/reviewer-when-not-needed.md) | Minimal review conditions |
+| [reviewer-orchestrator-boundary.md](../../default/skills/shared-patterns/reviewer-orchestrator-boundary.md) | You REPORT, you don't FIX |
+| [reviewer-severity-calibration.md](../../default/skills/shared-patterns/reviewer-severity-calibration.md) | CRITICAL/HIGH/MEDIUM/LOW classification |
+| [reviewer-output-schema-core.md](../../default/skills/shared-patterns/reviewer-output-schema-core.md) | Required output sections |
+| [reviewer-blocker-criteria.md](../../default/skills/shared-patterns/reviewer-blocker-criteria.md) | When to STOP and escalate |
+| [reviewer-pressure-resistance.md](../../default/skills/shared-patterns/reviewer-pressure-resistance.md) | Resist pressure to skip checks |
+| [reviewer-anti-rationalization.md](../../default/skills/shared-patterns/reviewer-anti-rationalization.md) | Don't rationalize skipping |
+| [reviewer-when-not-needed.md](../../default/skills/shared-patterns/reviewer-when-not-needed.md) | Minimal review conditions |
 
 **If these patterns cannot be loaded → STOP. You have not loaded the reviewer baseline.**
 
@@ -102,7 +102,7 @@ https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/skills/using-l
 
 ## When lib-commons Review Is Not Needed
 
-See [reviewer-when-not-needed.md](../skills/shared-patterns/reviewer-when-not-needed.md) for universal minimal review criteria.
+See [reviewer-when-not-needed.md](../../default/skills/shared-patterns/reviewer-when-not-needed.md) for universal minimal review criteria.
 
 **lib-commons-Specific Skip Criteria:**
 
@@ -135,6 +135,19 @@ MUST: Emit `VERDICT: PASS` with a clear skip Summary only when ALL of the follow
 | Custom SSRF check / webhook delivery | `commons/webhook` |
 | Manual dead-letter queue semantics | `commons/dlq` |
 | Inline runtime-config reading (env-var lookup on every request) | `commons/systemplane` |
+
+**STILL REQUIRED overrides (full review) — any of the following in the diff:**
+
+MUST run full review even if every skip condition above would otherwise apply:
+
+| Condition | Why Required |
+|-----------|--------------|
+| `go.mod` changes affecting `github.com/lerianstudio/lib-commons` (any major/minor/patch bump, add, or removal) | Version consistency check (Review Checklist Step 4) MUST run — a bump with no other code change still carries breaking-change and drift risk |
+| `go.sum` changes touching `github.com/lerianstudio/lib-commons` (checksum add/update) | Confirms dependency graph mutation; breaking-changes scan MUST run |
+| Any `replace` directive added or modified for `lib-commons` | Fork / local-path drift is CRITICAL-severity by default; CANNOT be skipped |
+| lib-commons major-version upgrade (e.g. v4 → v5) | Deprecated-API flagging (Review Checklist Step 5) MUST run across the entire diff |
+
+**When in doubt → full review. A silently-bumped lib-commons version is a false negative: skipping the consistency check is exactly the drift this reviewer exists to prevent.**
 
 **Skip output (when all conditions met):**
 
@@ -263,16 +276,47 @@ The skill's "Breaking Changes" section enumerates removed/renamed APIs across ve
 
 ## Severity Calibration
 
-See [reviewer-severity-calibration.md](../skills/shared-patterns/reviewer-severity-calibration.md) for universal severity classification.
+See [reviewer-severity-calibration.md](../../default/skills/shared-patterns/reviewer-severity-calibration.md) for universal severity classification.
 
-**lib-commons-Specific Severity:**
+**Codebase-Context Heuristic (MANDATORY — run before applying severity):**
+
+Severity depends on whether the codebase under review is Lerian-owned. Use the `go.mod` module path to decide:
+
+```bash
+# Detect Lerian codebase
+head -1 go.mod   # e.g. "module github.com/lerianstudio/midaz"
+```
+
+| Detection | Codebase Class | lib-commons Status |
+|-----------|---------------|-------------------|
+| Module path starts with `github.com/lerianstudio/` or `github.com/LerianStudio/` | **Lerian** | **THIRD RAIL — mandatory, non-negotiable.** Reinventing what lib-commons provides violates a Lerian operating principle. |
+| Any other module path (external users running Ring agents on their own code) | **External** | **Recommended, not mandatory.** lib-commons adoption is encouraged for convergence benefits but CANNOT be enforced on external codebases. |
+
+**Rationale:** Per Lerian's operating principles (CLAUDE.md), "usage of `github.com/lerianstudio/lib-commons` is mandatory for Lerian's codebase" — it is a third rail, not a preference. External users of Ring agents have no such constraint; severity is dialed down to avoid forcing Lerian-internal mandates on their codebases.
+
+**lib-commons-Specific Severity — Lerian codebases (third-rail enforcement):**
 
 | Severity | lib-commons Examples |
 |----------|---------------------|
-| **CRITICAL** | Deprecated lib-commons API usage (removed in current version — compile break imminent). Version mismatch between services in same repo that breaks cross-service contracts. Misuse causing data corruption (e.g., wrong `dbresolver.DB` primary/replica routing, missed `defer Close`, missed `InitPanicMetrics` so panics go unobserved). Use of v4 module path after v5 migration. |
-| **HIGH** | Reinvented wheel for critical infrastructure: connection pooling, retry logic, transaction handling, panic recovery, TLS handling. Missing mandatory initialization (`runtime.InitPanicMetrics`, `assert.InitAssertionMetrics`, `tl.ApplyGlobals()`). `replace` directive in `go.mod` pointing to a fork. Lagging patch version that misses security fixes. |
-| **MEDIUM** | Reinvented wheel for non-critical utilities (string helpers, UUID generation, env-var reading) when lib-commons has equivalents. Suboptimal API usage (static tier when dynamic tier is documented). Partial adoption — using `commons/postgres` but with inline custom retry loop instead of `commons/backoff`. Missing `MetricsFactory` wiring on a constructor. |
+| **CRITICAL** | Deprecated lib-commons API usage (removed in current version — compile break imminent). Version mismatch between services in same repo that breaks cross-service contracts. Misuse causing data corruption (e.g., wrong `dbresolver.DB` primary/replica routing, missed `defer Close`, missed `InitPanicMetrics` so panics go unobserved). Use of v4 module path after v5 migration. **Reinvented wheel for critical infrastructure (retry, connection pool, transaction, outbox, panic recovery, rate limiting, TLS handling) when lib-commons provides the equivalent — bumped from HIGH because lib-commons is a third rail for Lerian.** |
+| **HIGH** | Missing mandatory initialization (`runtime.InitPanicMetrics`, `assert.InitAssertionMetrics`, `tl.ApplyGlobals()`). `replace` directive in `go.mod` pointing to a fork. Lagging patch version that misses security fixes. **Reinvented wheel for non-critical utilities (string helpers, UUID generation, env-var reading, validators) when lib-commons has equivalents — bumped from MEDIUM because third-rail enforcement applies uniformly.** |
+| **MEDIUM** | Suboptimal API usage (static tier when dynamic tier is documented). Partial adoption — using `commons/postgres` but with inline custom retry loop instead of `commons/backoff` (also CRITICAL under critical-infra rule above — classify by the stricter of the two). Missing `MetricsFactory` wiring on a constructor. |
 | **LOW** | Naming inconsistencies (custom helper named similarly to lib-commons equivalent). Comments about lib-commons usage that are stale. Minor opportunities (e.g., `pointers.String` over inline `&str` helper). |
+
+**Escalation rule (Lerian codebases only):** Any manual implementation where `lib-commons` has the documented equivalent → escalate ONE severity level above its normal classification. Third-rail violations compound quickly; this escalation enforces convergence.
+
+**lib-commons-Specific Severity — External codebases (recommendation tier):**
+
+For diffs where the module path does NOT start with `github.com/lerianstudio/` or `github.com/LerianStudio/`:
+
+| Severity | lib-commons Examples |
+|----------|---------------------|
+| **CRITICAL** | Deprecated lib-commons API usage actively imported (compile break imminent). Direct misuse causing data corruption in code that already imports lib-commons. |
+| **HIGH** | Reinvented wheel for critical infrastructure: connection pooling, retry logic, transaction handling, panic recovery, TLS handling. Missing mandatory initialization in code that imports lib-commons. `replace` directive pointing to a fork. |
+| **MEDIUM** | Reinvented wheel for non-critical utilities (string helpers, UUID generation, env-var reading) when lib-commons has equivalents. Suboptimal API usage. Partial adoption. |
+| **LOW** | Naming inconsistencies. Stale comments. Minor opportunities. |
+
+**Note for external codebases:** lib-commons adoption is *recommended*, not mandatory. MUST NOT flag reinvented wheels as third-rail violations for external users. Frame findings as convergence opportunities, not compliance failures.
 
 **Financial Infrastructure Context (Lerian's domain):**
 
@@ -288,7 +332,7 @@ See [reviewer-severity-calibration.md](../skills/shared-patterns/reviewer-severi
 
 ## Blocker Criteria — STOP and Report
 
-See [reviewer-blocker-criteria.md](../skills/shared-patterns/reviewer-blocker-criteria.md) for universal blocker criteria.
+See [reviewer-blocker-criteria.md](../../default/skills/shared-patterns/reviewer-blocker-criteria.md) for universal blocker criteria.
 
 **lib-commons-Specific Blockers:**
 
@@ -320,7 +364,7 @@ See [reviewer-blocker-criteria.md](../skills/shared-patterns/reviewer-blocker-cr
 
 ## Pressure Resistance
 
-See [reviewer-pressure-resistance.md](../skills/shared-patterns/reviewer-pressure-resistance.md) for universal pressure scenarios.
+See [reviewer-pressure-resistance.md](../../default/skills/shared-patterns/reviewer-pressure-resistance.md) for universal pressure scenarios.
 
 **lib-commons-Specific Pressure Scenarios:**
 
@@ -343,14 +387,15 @@ See [reviewer-pressure-resistance.md](../skills/shared-patterns/reviewer-pressur
 
 ## Anti-Rationalization Table
 
-See [reviewer-anti-rationalization.md](../skills/shared-patterns/reviewer-anti-rationalization.md) for universal anti-rationalization patterns.
+See [reviewer-anti-rationalization.md](../../default/skills/shared-patterns/reviewer-anti-rationalization.md) for universal anti-rationalization patterns.
 
 **lib-commons-Specific Anti-Rationalizations:**
 
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
-| "Manual retry loop is more readable than importing `commons/backoff`" | Readability of a local construct ≠ organizational consistency. `commons/backoff` + `commons/circuitbreaker` are battle-tested with built-in jitter, observability, and context cancellation. "Readable" reinvention is still reinvention. | **MUST flag as HIGH severity. Use lib-commons equivalent.** |
-| "This service doesn't import lib-commons yet, so new code can be custom" | New code MUST adopt lib-commons from day one. A service that reinvents infrastructure accumulates drift that becomes harder to migrate later. | **MUST flag. Adopt lib-commons in this PR.** |
+| "Manual retry loop is more readable than importing `commons/backoff`" | Readability of a local construct ≠ organizational consistency. `commons/backoff` + `commons/circuitbreaker` are battle-tested with built-in jitter, observability, and context cancellation. "Readable" reinvention is still reinvention. Retry is critical infrastructure → CRITICAL in Lerian codebases. | **MUST flag as CRITICAL (Lerian) / HIGH (external). Use lib-commons equivalent.** |
+| "This service doesn't import lib-commons yet, so new code can be custom" | New code MUST adopt lib-commons from day one in Lerian codebases — it is a third rail, not a preference. A service that reinvents infrastructure accumulates drift that becomes harder to migrate later. | **MUST flag. Adopt lib-commons in this PR (Lerian codebase) or emit recommendation (external).** |
+| "lib-commons is optional / we have our own convention" | In Lerian codebases, lib-commons is a third rail: non-negotiable per the operating principles. "Our own convention" = drift that the reviewer exists to prevent. Team-level agreement CANNOT override an organization-level third rail. | **Detect codebase class via `go.mod`. Lerian → MUST flag (severity per table). External → MUST note recommendation.** |
 | "lib-commons version bump is risky, let's stay on old version" | Version drift creates worse risk than a controlled bump — missed security fixes, lost observability improvements, divergent behavior across services. Lagging = technical debt, not safety. | **MUST flag as HIGH. Plan bump in this cycle.** |
 | "The package catalog is large, checking everything is overkill" | The WebFetched skill enumerates 35+ packages. Each imported package MUST be verified against the loaded reference. Partial checks miss deprecated APIs and mis-wiring. | **MUST check every touched package against the skill.** |
 | "I'll skip opportunity detection — just checking API correctness" | Opportunity detection is the reviewer's primary value beyond raw correctness. Skipping it lets reinvented wheels ship. | **MUST scan for reinvented-wheel patterns across the entire diff.** |
@@ -428,7 +473,7 @@ MUST check each standard. No standard may be skipped.
 
 **CRITICAL:** All 7 required sections REQUIRED. Missing any = review rejected.
 
-Use the core output schema from [reviewer-output-schema-core.md](../skills/shared-patterns/reviewer-output-schema-core.md).
+Use the core output schema from [reviewer-output-schema-core.md](../../default/skills/shared-patterns/reviewer-output-schema-core.md).
 
 ```markdown
 # lib-commons Review

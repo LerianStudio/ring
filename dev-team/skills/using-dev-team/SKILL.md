@@ -344,6 +344,14 @@ All workflows converge to the 10-gate development cycle:
 | **9: Validation**          | User approval: APPROVED/REJECTED | User decision                                                                          |
 | **Post-cycle: Multi-Tenant** | Adapt all code for multi-tenant | `ring:backend-engineer-golang` (via `ring:dev-multi-tenant`)                          |
 
+**Note: Review ≠ Adaptation.**
+The `ring:multi-tenant-reviewer` in Gate 8 **audits** multi-tenant compliance but does NOT adapt code. The **Post-cycle: Multi-Tenant** step (via `ring:dev-multi-tenant`) is still required to **actually adapt** code for multi-tenancy — tenant context propagation, database-per-tenant wiring, event-driven tenant discovery registration. The two steps are complementary:
+
+- **Gate 8 (review)**: detects non-compliance in the task's diff.
+- **Post-cycle (adaptation)**: performs the actual code changes for multi-tenancy.
+
+Removing the Post-cycle step because "we have a reviewer now" would be a functional regression — reviewers detect, they do not adapt.
+
 **Gate 0 Agent Selection for Frontend:**
 
 - If `docs/pre-dev/{feature}/ux-criteria.md` exists → use `ring:ui-engineer`

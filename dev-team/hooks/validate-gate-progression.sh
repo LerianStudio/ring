@@ -314,10 +314,11 @@ validate_gate_8() {
     errors+=("Gate 8 (Review): not completed (status: $status)")
   fi
 
-  # Check all 8 reviewers have verdicts
+  # Check all 10 reviewers have verdicts
   local reviewers=("code_reviewer" "business_logic_reviewer" "security_reviewer"
                    "nil_safety_reviewer" "test_reviewer" "consequences_reviewer"
-                   "dead_code_reviewer" "performance_reviewer")
+                   "dead_code_reviewer" "performance_reviewer"
+                   "multi_tenant_reviewer" "lib_commons_reviewer")
 
   local reviewer_count=0
   for reviewer in "${reviewers[@]}"; do
@@ -328,8 +329,8 @@ validate_gate_8() {
     fi
   done
 
-  if [[ "$reviewer_count" -lt 8 && "$status" == "completed" ]]; then
-    errors+=("Gate 8 (Review): only $reviewer_count/8 reviewers have verdicts — all 8 required")
+  if [[ "$reviewer_count" -lt 10 && "$status" == "completed" ]]; then
+    errors+=("Gate 8 (Review): only $reviewer_count/10 reviewers have verdicts — all 10 required")
   fi
 }
 
@@ -447,7 +448,7 @@ if [[ ${#errors[@]} -gt 0 ]]; then
       *"Gate 5"*)    recovery_steps+=("Gate 5: Load Skill(ring:dev-property-testing), dispatch ring:qa-analyst (test_mode=property)") ;;
       *"Gate 6"*)    recovery_steps+=("Gate 6: Load Skill(ring:dev-integration-testing), dispatch ring:qa-analyst (test_mode=integration, write only)") ;;
       *"Gate 7"*)    recovery_steps+=("Gate 7: Load Skill(ring:dev-chaos-testing), dispatch ring:qa-analyst (test_mode=chaos, write only)") ;;
-      *"Gate 8"*)    recovery_steps+=("Gate 8: Load Skill(ring:codereview), dispatch ALL 8 reviewers in parallel") ;;
+      *"Gate 8"*)    recovery_steps+=("Gate 8: Load Skill(ring:codereview), dispatch ALL 10 reviewers in parallel") ;;
     esac
   done
 

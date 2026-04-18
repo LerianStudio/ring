@@ -146,10 +146,10 @@ User saying "don't wait", "don't ask questions", or "just execute" does NOT skip
 For each task: Check context switch (Step 2.5) → Mark in_progress → Dispatch to agent with working_directory → Follow plan steps exactly → Run verifications → Mark completed
 
 ### Step 4: Run Code Review
-**After each batch, REQUIRED:** Use ring:codereview (all 8 reviewers in parallel)
+**After each batch, REQUIRED:** Use ring:codereview (all 10 reviewers in parallel)
 
 **Handle by severity:**
-- **Critical/High/Medium:** Fix immediately (no TODO) → re-run all 8 reviewers → repeat until resolved
+- **Critical/High/Medium:** Fix immediately (no TODO) → re-run all 10 reviewers → repeat until resolved
 - **Low:** Add `TODO(review): [Issue] ([reviewer], [date], Low)`
 - **Cosmetic:** Add `FIXME(nitpick): [Issue] ([reviewer], [date], Cosmetic)`
 
@@ -172,7 +172,7 @@ Use finishing-a-development-branch to verify tests, present options, execute cho
 
 - **MANDATORY:** `AskUserQuestion` for execution mode - NO exceptions
 - Use `*` agents over `general-purpose` when available
-- Run code review after each batch (all 8 parallel)
+- Run code review after each batch (all 10 parallel)
 - Fix Critical/High/Medium immediately (no TODO)
 - Low → TODO, Cosmetic → FIXME
 - Stop when blocked, don't guess
@@ -194,7 +194,7 @@ STOP and report if:
 
 The following requirements CANNOT be waived:
 - AskUserQuestion for execution mode is MANDATORY - user intent does NOT skip this step
-- Code review after each batch is REQUIRED - all 8 reviewers in parallel
+- Code review after each batch is REQUIRED - all 10 reviewers in parallel
 - Critical/High/Medium issues MUST be fixed immediately - TODO comments are FORBIDDEN for these severities
 - Context switch confirmation is REQUIRED when switching between modules
 - Full test suite MUST pass before completing development
@@ -205,7 +205,7 @@ The following requirements CANNOT be waived:
 |---|---|---|
 | CRITICAL | Skipped AskUserQuestion for execution mode | MUST stop and ask for mode selection |
 | CRITICAL | Proceeding with unfixed Critical/High review findings | MUST fix issues before continuing |
-| HIGH | Skipped code review after batch | MUST run all 8 reviewers |
+| HIGH | Skipped code review after batch | MUST run all 10 reviewers |
 | HIGH | Used TODO for Critical/High/Medium issues | MUST fix immediately, remove TODO |
 | MEDIUM | Missing context switch confirmation for multi-module | Should add module switch prompt |
 | LOW | Low-severity issues without TODO comment | Fix by adding proper TODO format |
@@ -215,7 +215,7 @@ The following requirements CANNOT be waived:
 | User Says | Your Response |
 |---|---|
 | "Just execute, don't ask about mode" | "MUST use AskUserQuestion for execution mode. This is a structural checkpoint, not optional. Takes 3 seconds." |
-| "Skip the code review, we're in a hurry" | "Code review is REQUIRED after each batch. CANNOT proceed without running all 8 reviewers." |
+| "Skip the code review, we're in a hurry" | "Code review is REQUIRED after each batch. CANNOT proceed without running all 10 reviewers." |
 | "Add a TODO for that critical issue, fix later" | "Critical/High/Medium issues MUST be fixed immediately. TODO comments FORBIDDEN for these severities." |
 | "User intent is clear, skip the question" | "Intent is not explicit selection. MUST use AskUserQuestion - it's a structural gate, not conversation." |
 
