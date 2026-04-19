@@ -3,6 +3,17 @@
 ## [1.25.2](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.25.2)
 
 - Improvements:
+  - Refactored hooks by removing the periodic context re-injection hook.
+
+Contributors: @fred
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.25.1...ring-default@1.25.2)
+
+---
+
+## [1.25.2](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.25.2)
+
+- Improvements:
   - Refactor hooks to remove periodic context re-injection hook.
 
 Contributors: @fred
