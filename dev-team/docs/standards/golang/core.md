@@ -11,7 +11,7 @@ This module covers the foundational requirements for all Go projects.
 | #   | Section                                                                                     | Description                                     |
 | --- | ------------------------------------------------------------------------------------------- | ----------------------------------------------- |
 | 1   | [Version](#version)                                                                         | Go version requirements                         |
-| 2   | [Core Dependency: lib-commons](#core-dependency-lib-commons-mandatory)                      | Required lib-commons v2 integration             |
+| 2   | [Core Dependency: lib-commons](#core-dependency-lib-commons-mandatory)                      | Required lib-commons v5 integration             |
 | 3   | [Frameworks & Libraries](#frameworks--libraries)                                            | Required versions, validator v10 migration      |
 | 4   | [Configuration](#configuration)                                                             | Environment variable handling                   |
 | 5   | [Database Naming Convention (snake_case)](#database-naming-convention-snake-case-mandatory) | Table and column naming                         |
@@ -31,25 +31,25 @@ This module covers the foundational requirements for all Go projects.
 
 ## Core Dependency: lib-commons (MANDATORY)
 
-All Lerian Studio Go projects **MUST** use `lib-commons/v2` as the foundation library. This ensures consistency across all services.
+All Lerian Studio Go projects **MUST** use `lib-commons/v5` as the foundation library. This ensures consistency across all services.
 
-### Required Import (lib-commons v2)
+### Required Import (lib-commons v5)
 
 ```go
 import (
-    libCommons "github.com/LerianStudio/lib-commons/v2/commons"
-    libZap "github.com/LerianStudio/lib-commons/v2/commons/zap"           // Logger initialization (config/bootstrap only)
-    libLog "github.com/LerianStudio/lib-commons/v2/commons/log"           // Logger interface (services, routes, consumers)
-    libOpentelemetry "github.com/LerianStudio/lib-commons/v2/commons/opentelemetry"
-    libServer "github.com/LerianStudio/lib-commons/v2/commons/server"
-    libHTTP "github.com/LerianStudio/lib-commons/v2/commons/net/http"
-    libPostgres "github.com/LerianStudio/lib-commons/v2/commons/postgres"
-    libMongo "github.com/LerianStudio/lib-commons/v2/commons/mongo"
-    libRedis "github.com/LerianStudio/lib-commons/v2/commons/redis"
+    libCommons "github.com/LerianStudio/lib-commons/v5/commons"
+    libZap "github.com/LerianStudio/lib-commons/v5/commons/zap"           // Logger initialization (config/bootstrap only)
+    libLog "github.com/LerianStudio/lib-commons/v5/commons/log"           // Logger interface (services, routes, consumers)
+    libOpentelemetry "github.com/LerianStudio/lib-commons/v5/commons/opentelemetry"
+    libServer "github.com/LerianStudio/lib-commons/v5/commons/server"
+    libHTTP "github.com/LerianStudio/lib-commons/v5/commons/net/http"
+    libPostgres "github.com/LerianStudio/lib-commons/v5/commons/postgres"
+    libMongo "github.com/LerianStudio/lib-commons/v5/commons/mongo"
+    libRedis "github.com/LerianStudio/lib-commons/v5/commons/redis"
 )
 ```
 
-> **Note:** v2 uses `lib` prefix aliases (e.g., `libCommons`, `libZap`, `libLog`) to distinguish lib-commons packages from standard library and other imports.
+> **Note:** v5 uses `lib` prefix aliases (e.g., `libCommons`, `libZap`, `libLog`) to distinguish lib-commons packages from standard library and other imports.
 
 ### What lib-commons Provides
 
@@ -1279,7 +1279,7 @@ module github.com/LerianStudio/your-service
 go 1.24
 
 require (
-    github.com/LerianStudio/lib-commons/v2 v2.4.0
+    github.com/LerianStudio/lib-commons/v5 v5.0.2
     github.com/gofiber/fiber/v2 v2.52.0
     github.com/jackc/pgx/v5 v5.5.0
 )

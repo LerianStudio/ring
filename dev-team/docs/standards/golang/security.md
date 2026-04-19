@@ -398,7 +398,7 @@ func InitServers() (*Service, error) {
 ```go
 // adapters/http/in/routes.go
 import (
-    libHTTP "github.com/LerianStudio/lib-commons/v2/commons/net/http"
+    libHTTP "github.com/LerianStudio/lib-commons/v5/commons/net/http"
     libLicense "github.com/LerianStudio/lib-license-go/v2/middleware"
 )
 
@@ -440,7 +440,7 @@ func NewRoutes(lg log.Logger, tl *opentelemetry.Telemetry, handler *YourHandler,
 ```go
 // bootstrap/server.go
 import (
-    libCommonsLicense "github.com/LerianStudio/lib-commons/v2/commons/license"
+    libCommonsLicense "github.com/LerianStudio/lib-commons/v5/commons/license"
     libLicense "github.com/LerianStudio/lib-license-go/v2/middleware"
 )
 
@@ -655,7 +655,7 @@ grep -rn "os.Environ\(\)" --include="*.go"
 When using lib-commons logger, configure secret redaction:
 
 ```go
-// lib-commons/v2 automatically redacts certain patterns
+// lib-commons/v5 automatically redacts certain patterns
 // But you MUST NOT pass secrets to the logger in the first place
 
 // ❌ Still FORBIDDEN even with lib-commons:
@@ -1211,7 +1211,7 @@ import (
 
     "github.com/redis/go-redis/v9"
 
-    libRedis "github.com/LerianStudio/lib-commons/v2/commons/redis"
+    libRedis "github.com/LerianStudio/lib-commons/v5/commons/redis"
 )
 
 const (

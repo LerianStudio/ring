@@ -286,7 +286,7 @@ import (
     "fmt"
     "runtime/debug"
 
-    libCommons "github.com/LerianStudio/lib-commons/v2/commons"
+    libCommons "github.com/LerianStudio/lib-commons/v5/commons"
 )
 
 // Go wraps a goroutine with panic recovery

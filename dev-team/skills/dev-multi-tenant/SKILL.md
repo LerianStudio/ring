@@ -3,10 +3,10 @@ name: ring:dev-multi-tenant
 description: |
   Multi-tenant development cycle orchestrator following Ring Standards. Auto-detects service stack
   (PostgreSQL, MongoDB, Redis, RabbitMQ, S3) and targetServices, then executes gate-based implementation
-  using tenantId from JWT for database-per-tenant isolation via lib-commons v4 tenant-manager (postgres.Manager,
+  using tenantId from JWT for database-per-tenant isolation via lib-commons v5 tenant-manager (postgres.Manager,
   mongo.Manager). Uses event-driven tenant discovery (Redis Pub/Sub via EventListener, TenantCache, TenantLoader).
   TenantMiddleware with WithPG/WithMB handles single-module and multi-module services. For targetServices:
-  M2M credentials from AWS Secrets Manager via secretsmanager package. Requires lib-commons v4 + lib-auth v2.
+  M2M credentials from AWS Secrets Manager via secretsmanager package. Requires lib-commons v5 + lib-auth v2.
   Each gate dispatches ring:backend-engineer-golang. Loads multi-tenant.md via WebFetch.
 
 trigger: |
@@ -25,8 +25,8 @@ prerequisites: |
 
 NOT_skip_when: |
   - "organization_id already exists" → organization_id is NOT multi-tenant. tenantId via JWT is required.
-  - "Just need to connect the wiring" → Multi-tenant requires lib-commons v4 tenant-manager sub-packages.
-  - "lib-commons v4 upgrade is too risky" → REQUIRES lib-commons v4 tenant-manager sub-packages. No v3 = no multi-tenant.
+  - "Just need to connect the wiring" → Multi-tenant requires lib-commons v5 tenant-manager sub-packages.
+  - "lib-commons v5 upgrade is too risky" → REQUIRES lib-commons v5 tenant-manager sub-packages. No v3 = no multi-tenant.
   - "Service already has multi-tenant" → Existence ≠ compliance. MUST replace non-standard implementations with Ring canonical model.
   - "Multi-tenant is already done" → Every gate verifies compliance. MUST fix non-compliant code — it is wrong, not done.
 
@@ -169,16 +169,16 @@ Agents must use these exact import paths. Include this table in every gate dispa
 
 | Alias | Import Path | Purpose |
 |-------|-------------|---------|
-| `client` | `github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/client` | Tenant Manager HTTP client with circuit breaker |
-| `tmcore` | `github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/core` | Context helpers, resolvers, errors, types |
-| `tmmiddleware` | `github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/middleware` | TenantMiddleware (with WithPG/WithMB options) |
-| `tmpostgres` | `github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/postgres` | PostgresManager (per-tenant PG pools) |
-| `tmmongo` | `github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/mongo` | MongoManager (per-tenant Mongo pools) |
-| `tmrabbitmq` | `github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/rabbitmq` | RabbitMQ Manager (per-tenant vhosts) |
-| `tmconsumer` | `github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/consumer` | MultiTenantConsumer (on-demand initialization) |
-| `valkey` | `github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/valkey` | Redis key prefixing (GetKeyContext) |
-| `s3` | `github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/s3` | S3 key prefixing (GetS3KeyStorageContext) |
-| `secretsmanager` | `github.com/LerianStudio/lib-commons/v4/commons/secretsmanager` | M2M credential retrieval (services with targetServices) |
+| `client` | `github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/client` | Tenant Manager HTTP client with circuit breaker |
+| `tmcore` | `github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/core` | Context helpers, resolvers, errors, types |
+| `tmmiddleware` | `github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/middleware` | TenantMiddleware (with WithPG/WithMB options) |
+| `tmpostgres` | `github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/postgres` | PostgresManager (per-tenant PG pools) |
+| `tmmongo` | `github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/mongo` | MongoManager (per-tenant Mongo pools) |
+| `tmrabbitmq` | `github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/rabbitmq` | RabbitMQ Manager (per-tenant vhosts) |
+| `tmconsumer` | `github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/consumer` | MultiTenantConsumer (on-demand initialization) |
+| `valkey` | `github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/valkey` | Redis key prefixing (GetKeyContext) |
+| `s3` | `github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/s3` | S3 key prefixing (GetS3KeyStorageContext) |
+| `secretsmanager` | `github.com/LerianStudio/lib-commons/v5/commons/secretsmanager` | M2M credential retrieval (services with targetServices) |
 
 **⛔ HARD GATE:** Agent must not use v2 import paths or invent sub-package paths. If WebFetch truncates, this table is the authoritative reference.
 
@@ -234,8 +234,8 @@ MUST report all severities. CRITICAL: STOP immediately (security breach). HIGH: 
 |-----------|---------|----------|
 | "It already has multi-tenant, skip this gate" | COMPLIANCE_BYPASS | "Existence ≠ compliance. MUST run compliance audit. If it doesn't match the Ring canonical model exactly, it is non-compliant and MUST be replaced." |
 | "Multi-tenant is done, just review it" | COMPLIANCE_BYPASS | "CANNOT skip gates. Every gate verifies compliance OR implements. Non-standard implementations are not 'done' — they are wrong." |
-| "Our custom approach works the same way" | COMPLIANCE_BYPASS | "Working ≠ compliant. Only lib-commons v4 tenant-manager sub-packages are valid. Custom implementations create drift and block upgrades." |
-| "Skip the lib-commons upgrade" | QUALITY_BYPASS | "CANNOT proceed without lib-commons v4. Tenant-manager sub-packages do not exist in v2." |
+| "Our custom approach works the same way" | COMPLIANCE_BYPASS | "Working ≠ compliant. Only lib-commons v5 tenant-manager sub-packages are valid. Custom implementations create drift and block upgrades." |
+| "Skip the lib-commons upgrade" | QUALITY_BYPASS | "CANNOT proceed without lib-commons v5. Tenant-manager sub-packages do not exist in v2." |
 | "Just do the happy path, skip backward compat" | SCOPE_REDUCTION | "Backward compatibility is NON-NEGOTIABLE. Single-tenant deployments depend on it." |
 | "organization_id is our tenant identifier" | AUTHORITY_OVERRIDE | "STOP. organization_id is NOT multi-tenant. tenantId from JWT is the only mechanism." |
 | "Skip code review, we tested it" | QUALITY_BYPASS | "MANDATORY: 10 reviewers. One security mistake = cross-tenant data leak." |
@@ -256,7 +256,7 @@ MUST report all severities. CRITICAL: STOP immediately (security breach). HIGH: 
 | 0 | Stack Detection + Compliance Audit | Always | Orchestrator |
 | 1 | Codebase Analysis (multi-tenant focus) | Always | ring:codebase-explorer |
 | 1.5 | Implementation Preview (visual report) | Always | Orchestrator (ring:visualize) |
-| 2 | lib-commons v4 + lib-auth v2 Upgrade | Skip only if `go.mod` contains `lib-commons/v4` AND `lib-auth/v2` (verified via grep) | ring:backend-engineer-golang |
+| 2 | lib-commons v5 + lib-auth v2 Upgrade | Skip only if `go.mod` contains `lib-commons/v5` AND `lib-auth/v2` (verified via grep) | ring:backend-engineer-golang |
 | 3 | Multi-Tenant Configuration | Always — verify compliance or implement/fix | ring:backend-engineer-golang |
 | 4 | Tenant Middleware (TenantMiddleware with WithPG/WithMB) | Always — verify compliance or implement/fix | ring:backend-engineer-golang |
 | 5 | Repository Adaptation | Always per detected DB/storage — verify compliance or implement/fix | ring:backend-engineer-golang |
@@ -455,7 +455,7 @@ N3. Custom pool managers:
     (any match outside lib-commons = NON-CANONICAL → MUST be removed)
 ```
 
-**If non-canonical files are found:** report them in the compliance audit as `NON-CANONICAL FILES DETECTED`. The implementing agent MUST remove these files and replace their functionality with the canonical lib-commons v4 sub-packages during the appropriate gate.
+**If non-canonical files are found:** report them in the compliance audit as `NON-CANONICAL FILES DETECTED`. The implementing agent MUST remove these files and replace their functionality with the canonical lib-commons v5 sub-packages during the appropriate gate.
 
 **M2M classification (targetServices detection):**
 
@@ -542,7 +542,7 @@ Table with columns: Gate, File, Current Code, New Code, Lines Changed. One row p
 
 | Gate | File | What Changes | Impact |
 |------|------|-------------|--------|
-| 2 | `go.mod` | lib-commons v2 → v4 + lib-auth v2, import paths | All files |
+| 2 | `go.mod` | lib-commons → v5 + lib-auth v2, import paths | All files |
 | 3 | `config.go` | Add the 13 canonical MULTI_TENANT_* env vars to Config struct (exact fields below) | ~20 lines added |
 | 4 | `config.go` | Add TenantMiddleware with WithPG/WithMB setup | ~30 lines added |
 
@@ -702,24 +702,24 @@ HARD GATE: Developer MUST explicitly approve the implementation preview before a
 
 ---
 
-## Gate 2: lib-commons v4 + lib-auth v2 Upgrade
+## Gate 2: lib-commons v5 + lib-auth v2 Upgrade
 
-**SKIP only if:** `go.mod` contains `lib-commons/v4` AND `lib-auth/v2` (verified via grep, not assumed). If the service uses lib-commons v2 or v3, or lib-auth v1, this gate is MANDATORY.
+**SKIP only if:** `go.mod` contains `lib-commons/v5` AND `lib-auth/v2` (verified via grep, not assumed). If the service uses lib-commons v2, v3, or v4, or lib-auth v1, this gate is MANDATORY.
 
 **Dispatch `ring:backend-engineer-golang` with context:**
 
-> TASK: Upgrade lib-commons to v4, then update lib-auth to v2 (lib-auth v2 depends on lib-commons v4).
+> TASK: Upgrade lib-commons to v5, then update lib-auth to v2 (lib-auth v2 depends on lib-commons v5).
 > For both libraries, fetch the latest tag (v4 is currently in beta — use latest beta until stable is released).
 > Check latest tags: `git ls-remote --tags https://github.com/LerianStudio/lib-commons.git | grep "v4" | sort -V | tail -1` and `git ls-remote --tags https://github.com/LerianStudio/lib-auth.git | tail -5`
 > Run in order:
-> 1. `go get github.com/LerianStudio/lib-commons/v4@{latest-v4-tag}`
+> 1. `go get github.com/LerianStudio/lib-commons/v5@{latest-v5-tag}`
 > 2. `go get github.com/LerianStudio/lib-auth/v2@{latest-tag}`
 > Update go.mod and all import paths to v4 for lib-commons (from v2 or v3).
 > Follow multi-tenant.md section "Required lib-commons Version".
 > DO NOT implement multi-tenant code yet — only upgrade the dependencies.
 > Verify: go build ./... and go test ./... MUST pass.
 
-**Verification:** `grep "lib-commons/v4" go.mod` + `grep "lib-auth/v2" go.mod` + `go build ./...` + `go test ./...`
+**Verification:** `grep "lib-commons/v5" go.mod` + `grep "lib-auth/v2" go.mod` + `go build ./...` + `go test ./...`
 
 <block_condition>
 HARD GATE: MUST pass build and tests before proceeding.
@@ -765,13 +765,13 @@ HARD GATE: MUST pass build and tests before proceeding.
 
 ## Gate 4: TenantMiddleware (Core)
 
-**Always executes.** If middleware already exists, this gate VERIFIES it uses the canonical lib-commons v4 tenant-manager sub-packages (`tmmiddleware.NewTenantMiddleware` with `WithPG`/`WithMB` options). Custom middleware, inline JWT parsing, or any non-lib-commons implementation is NON-COMPLIANT and MUST be replaced. Compliance audit from Gate 0 determines whether this is implement or fix.
+**Always executes.** If middleware already exists, this gate VERIFIES it uses the canonical lib-commons v5 tenant-manager sub-packages (`tmmiddleware.NewTenantMiddleware` with `WithPG`/`WithMB` options). Custom middleware, inline JWT parsing, or any non-lib-commons implementation is NON-COMPLIANT and MUST be replaced. Compliance audit from Gate 0 determines whether this is implement or fix.
 
 **This is the CORE gate. Without compliant TenantMiddleware, there is no tenant isolation.**
 
 **Dispatch `ring:backend-engineer-golang` with context from Gate 1 analysis:**
 
-> TASK: Implement tenant middleware using lib-commons/v4 tenant-manager sub-packages.
+> TASK: Implement tenant middleware using lib-commons/v5 tenant-manager sub-packages.
 > DETECTED DATABASES: {postgresql: Y/N, mongodb: Y/N} (from Gate 0)
 > SERVICE ARCHITECTURE: {single-module OR multi-module} (from Gate 1)
 > CONTEXT FROM GATE 1: {Bootstrap location, middleware chain insertion point, service init from analysis report}
@@ -804,7 +804,7 @@ HARD GATE: CANNOT proceed without TenantMiddleware.
 
 ## Gate 5: Repository Adaptation
 
-**Always executes per detected DB/storage.** If repositories already use context-based connections, this gate VERIFIES they use the canonical lib-commons v4 functions (`tmcore.GetPGContext`, `tmcore.GetMBContext`, `valkey.GetKeyContext`, `s3.GetS3KeyStorageContext`). Custom pool lookups, manual DB switching, or any non-lib-commons resolution is NON-COMPLIANT and MUST be replaced. Compliance audit from Gate 0 determines whether this is implement or fix.
+**Always executes per detected DB/storage.** If repositories already use context-based connections, this gate VERIFIES they use the canonical lib-commons v5 functions (`tmcore.GetPGContext`, `tmcore.GetMBContext`, `valkey.GetKeyContext`, `s3.GetS3KeyStorageContext`). Custom pool lookups, manual DB switching, or any non-lib-commons resolution is NON-COMPLIANT and MUST be replaced. Compliance audit from Gate 0 determines whether this is implement or fix.
 
 **Dispatch `ring:backend-engineer-golang` with context from Gate 1 analysis:**
 
@@ -842,7 +842,7 @@ HARD GATE: CANNOT proceed without TenantMiddleware.
 > **What to implement:**
 >
 > 1. **M2M Authenticator struct** with two-level credential caching (clientId/clientSecret only — token acquisition is handled by Plugin Access Manager).
->    Use `secretsmanager.GetM2MCredentials()` from `github.com/LerianStudio/lib-commons/v4/commons/secretsmanager`.
+>    Use `secretsmanager.GetM2MCredentials()` from `github.com/LerianStudio/lib-commons/v5/commons/secretsmanager`.
 >    The function signature is:
 >    ```go
 >    secretsmanager.GetM2MCredentials(ctx, smClient, env, tenantOrgID, applicationName, targetService) (*M2MCredentials, error)
@@ -1045,7 +1045,7 @@ MUST include this context in ALL 10 reviewer dispatches:
 
 | Reviewer | Focus |
 |----------|-------|
-| ring:code-reviewer | Architecture, lib-commons v4 usage, TenantMiddleware with WithPG/WithMB placement, sub-package usage |
+| ring:code-reviewer | Architecture, lib-commons v5 usage, TenantMiddleware with WithPG/WithMB placement, sub-package usage |
 | ring:business-logic-reviewer | Tenant context propagation via tenantId (NOT organization_id) |
 | ring:security-reviewer | Cross-tenant DB isolation, JWT tenantId validation, no data leaks between tenant databases |
 | ring:test-reviewer | Coverage, isolation tests between two tenants, backward compat tests |
@@ -1054,7 +1054,7 @@ MUST include this context in ALL 10 reviewer dispatches:
 | ring:dead-code-reviewer | Orphaned code from tenant changes, dead tenant-specific helpers |
 | ring:performance-reviewer | Hot-path allocations in tenant resolution, connection pool sizing per tenant, query performance across tenant databases |
 | ring:multi-tenant-reviewer | Tenant isolation correctness, database-per-tenant boundaries, JWT tenantId handling, cross-tenant leak prevention |
-| ring:lib-commons-reviewer | lib-commons v4 usage correctness, tenant-manager sub-package adoption, no custom reimplementations of shared helpers |
+| ring:lib-commons-reviewer | lib-commons v5 usage correctness, tenant-manager sub-package adoption, no custom reimplementations of shared helpers |
 
 MUST pass all 10 reviewers. Critical findings → fix and re-review.
 
@@ -1067,7 +1067,7 @@ MUST approve: present checklist for explicit user approval.
 ```markdown
 ## Multi-Tenant Implementation Complete
 
-- [ ] lib-commons v4
+- [ ] lib-commons v5
 - [ ] MULTI_TENANT_ENABLED config
 - [ ] Tenant middleware (TenantMiddleware with WithPG/WithMB)
 - [ ] Repositories use context-based connections
@@ -1126,9 +1126,9 @@ See [multi-tenant.md](../../docs/standards/golang/multi-tenant.md) for the canon
 |-----------------|----------------|-----------------|
 | "Service already has multi-tenant code" | Existence ≠ compliance. Code that doesn't follow the Ring canonical model is WRONG and must be replaced. | **STOP. Run compliance audit (Gate 0 Phase 2). Fix every NON-COMPLIANT component.** |
 | "Multi-tenant is already implemented, just needs tweaks" | Partial or non-standard implementation is not "almost done" — it is non-compliant. Every component must match the canonical model exactly. | **STOP. Execute every gate. Verify or fix each one.** |
-| "Skipping this gate because something similar exists" | "Similar" is not "compliant". Only exact matches to lib-commons v4 tenant-manager sub-packages are valid. | **STOP. Verify with grep evidence. If it doesn't match the canonical pattern → gate MUST execute.** |
+| "Skipping this gate because something similar exists" | "Similar" is not "compliant". Only exact matches to lib-commons v5 tenant-manager sub-packages are valid. | **STOP. Verify with grep evidence. If it doesn't match the canonical pattern → gate MUST execute.** |
 | "The current approach works fine, no need to change" | Working ≠ compliant. A custom solution that works today creates drift, blocks upgrades, and prevents standardized tooling. | **STOP. Replace with canonical implementation.** |
-| "We have a custom tenant package that handles this" | Custom packages are non-canonical. Only lib-commons v4 tenant-manager sub-packages are valid. Custom files MUST be removed. | **STOP. Remove custom files. Use lib-commons v4 sub-packages.** |
+| "We have a custom tenant package that handles this" | Custom packages are non-canonical. Only lib-commons v5 tenant-manager sub-packages are valid. Custom files MUST be removed. | **STOP. Remove custom files. Use lib-commons v5 sub-packages.** |
 | "This extra file just wraps lib-commons" | Wrappers add indirection that breaks compliance verification and creates maintenance burden. MUST use lib-commons directly. | **STOP. Remove wrapper. Call lib-commons directly from bootstrap/adapters.** |
 | "Agent says out of scope" | Skill defines scope, not agent. | **Re-dispatch with gate context** |
 | "Skip tests" | Gate 8 proves isolation works. | **MANDATORY** |

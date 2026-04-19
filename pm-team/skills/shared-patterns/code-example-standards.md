@@ -12,15 +12,15 @@ MUST use lib-commons instead of creating custom utilities when generating Go cod
 
 | Category | lib-commons Package | What It Provides |
 |----------|---------------------|------------------|
-| **Logging** | `libLog "github.com/LerianStudio/lib-commons/v2/commons/log"` | Logger interface for all logging |
-| **Logger Init** | `libZap "github.com/LerianStudio/lib-commons/v2/commons/zap"` | Logger initialization (bootstrap only) |
-| **Telemetry** | `libOpentelemetry "github.com/LerianStudio/lib-commons/v2/commons/opentelemetry"` | Tracing, spans, metrics |
-| **Config** | `libCommons "github.com/LerianStudio/lib-commons/v2/commons"` | `SetConfigFromEnvVars()` |
-| **HTTP** | `libHTTP "github.com/LerianStudio/lib-commons/v2/commons/net/http"` | Router, middleware, responses |
-| **PostgreSQL** | `libPostgres "github.com/LerianStudio/lib-commons/v2/commons/postgres"` | Connection, pagination |
-| **MongoDB** | `libMongo "github.com/LerianStudio/lib-commons/v2/commons/mongo"` | Connection management |
-| **Redis** | `libRedis "github.com/LerianStudio/lib-commons/v2/commons/redis"` | Connection management |
-| **Server** | `libServer "github.com/LerianStudio/lib-commons/v2/commons/server"` | Lifecycle, graceful shutdown |
+| **Logging** | `libLog "github.com/LerianStudio/lib-commons/v5/commons/log"` | Logger interface for all logging |
+| **Logger Init** | `libZap "github.com/LerianStudio/lib-commons/v5/commons/zap"` | Logger initialization (bootstrap only) |
+| **Telemetry** | `libOpentelemetry "github.com/LerianStudio/lib-commons/v5/commons/opentelemetry"` | Tracing, spans, metrics |
+| **Config** | `libCommons "github.com/LerianStudio/lib-commons/v5/commons"` | `SetConfigFromEnvVars()` |
+| **HTTP** | `libHTTP "github.com/LerianStudio/lib-commons/v5/commons/net/http"` | Router, middleware, responses |
+| **PostgreSQL** | `libPostgres "github.com/LerianStudio/lib-commons/v5/commons/postgres"` | Connection, pagination |
+| **MongoDB** | `libMongo "github.com/LerianStudio/lib-commons/v5/commons/mongo"` | Connection management |
+| **Redis** | `libRedis "github.com/LerianStudio/lib-commons/v5/commons/redis"` | Connection management |
+| **Server** | `libServer "github.com/LerianStudio/lib-commons/v5/commons/server"` | Lifecycle, graceful shutdown |
 | **Context** | `libCommons.TrackingContext` | Request context propagation |
 
 ### Verification Before Writing Code Examples
@@ -65,8 +65,8 @@ func LogInfo(msg string, fields ...zap.Field) {
 
 ```go
 import (
-    libZap "github.com/LerianStudio/lib-commons/v2/commons/zap"
-    libLog "github.com/LerianStudio/lib-commons/v2/commons/log"
+    libZap "github.com/LerianStudio/lib-commons/v5/commons/zap"
+    libLog "github.com/LerianStudio/lib-commons/v5/commons/log"
 )
 
 // Bootstrap only
@@ -97,7 +97,7 @@ func LoadConfig() *Config {
 **✅ CORRECT: Use lib-commons**
 
 ```go
-import libCommons "github.com/LerianStudio/lib-commons/v2/commons"
+import libCommons "github.com/LerianStudio/lib-commons/v5/commons"
 
 type Config struct {
     PrimaryHost string `env:"POSTGRES_HOST"`
@@ -128,7 +128,7 @@ func ErrorResponse(c *fiber.Ctx, err error) error {
 **✅ CORRECT: Use lib-commons HTTP utilities**
 
 ```go
-import libHTTP "github.com/LerianStudio/lib-commons/v2/commons/net/http"
+import libHTTP "github.com/LerianStudio/lib-commons/v5/commons/net/http"
 
 // Use lib-commons response helpers and middleware
 ```
@@ -150,7 +150,7 @@ func StartSpan(ctx context.Context, name string) (context.Context, trace.Span) {
 **✅ CORRECT: Use lib-commons**
 
 ```go
-import libOpentelemetry "github.com/LerianStudio/lib-commons/v2/commons/opentelemetry"
+import libOpentelemetry "github.com/LerianStudio/lib-commons/v5/commons/opentelemetry"
 
 // Initialize in bootstrap
 provider := libOpentelemetry.NewTracerProvider(/* config */)
@@ -207,7 +207,7 @@ package service
 import (
     "context"
 
-    libLog "github.com/LerianStudio/lib-commons/v2/commons/log"
+    libLog "github.com/LerianStudio/lib-commons/v5/commons/log"
 
     "github.com/your-org/your-service/internal/domain"
     "github.com/your-org/your-service/internal/repository"

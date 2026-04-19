@@ -37,6 +37,10 @@ verification:
 
 ---
 
+> ⚠️ **ARCHIVED — HISTORICAL REFERENCE ONLY**
+> This skill documented the lib-commons v2/v3 → v4 migration (completed).
+> **Current standard is lib-commons/v5 v5.0.2.** For the v4 → v5 migration path, see the `ring:using-lib-commons` skill's Breaking Changes section.
+
 # Dev Migrate v4
 
 Scans a Go service for lib-commons v2/v3 usage patterns, compares against the v4 standards defined in `golang.md`, and generates an interactive visual migration report showing every required change.

@@ -82,15 +82,15 @@ No migration actions required. All categories verified against Lerian/Ring Go St
 1. **Config Struct Migration**
    - Replace: Direct `os.Getenv()` calls scattered across files
    - With: Single `Config` struct with `env` tags in `/internal/bootstrap/config.go`
-   - Import: `libCommons "github.com/LerianStudio/lib-commons/v2/commons"`
+   - Import: `libCommons "github.com/LerianStudio/lib-commons/v5/commons"`
    - Usage: `libCommons.SetConfigFromEnvVars(&cfg)`
    - Files affected: `cmd/api/main.go`, `internal/service/user.go`
 
 2. **Logger Migration**
    - Replace: Custom logger or `log.Println()`
    - With: lib-commons structured logger
-   - Bootstrap import: `libZap "github.com/LerianStudio/lib-commons/v2/commons/zap"` (initialization)
-   - Application import: `libLog "github.com/LerianStudio/lib-commons/v2/commons/log"` (interface for logging calls)
+   - Bootstrap import: `libZap "github.com/LerianStudio/lib-commons/v5/commons/zap"` (initialization)
+   - Application import: `libLog "github.com/LerianStudio/lib-commons/v5/commons/log"` (interface for logging calls)
    - Bootstrap usage: `logger := libZap.InitializeLogger()` (returns `libLog.Logger` interface)
    - Application usage: Use `libLog.Logger` interface for all logging calls
    - Files affected: [list files]
@@ -98,7 +98,7 @@ No migration actions required. All categories verified against Lerian/Ring Go St
 3. **Telemetry Migration**
    - Replace: No tracing or custom tracing
    - With: OpenTelemetry integration
-   - Import: `libOpentelemetry "github.com/LerianStudio/lib-commons/v2/commons/opentelemetry"`
+   - Import: `libOpentelemetry "github.com/LerianStudio/lib-commons/v5/commons/opentelemetry"`
    - Usage: `telemetry := libOpentelemetry.InitializeTelemetry(&libOpentelemetry.TelemetryConfig{...})`
    - Files affected: [list files]
 
@@ -120,7 +120,7 @@ No migration actions required. All categories verified against Lerian/Ring Go St
 
 Before submitting Go code, verify:
 
-- [ ] Using lib-commons v2 for infrastructure
+- [ ] Using lib-commons v5 for infrastructure
 - [ ] Configuration loaded via `SetConfigFromEnvVars`
 - [ ] Telemetry initialized and middleware configured
 - [ ] Logger/tracer recovered from context via `NewTrackingFromContext`

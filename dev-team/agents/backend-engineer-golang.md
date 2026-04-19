@@ -228,7 +228,7 @@ See [shared-patterns/standards-compliance-detection.md](../skills/shared-pattern
 
 **Example sections from golang.md to check:**
 
-- Core Dependency (lib-commons v2)
+- Core Dependency (lib-commons v5)
 - Configuration Loading
 - Logger Initialization
 - Telemetry/OpenTelemetry
@@ -304,7 +304,7 @@ MUST: Be bound to all sections in [standards-coverage-table.md](../skills/shared
 | New feature (full)               | core.md, bootstrap.md, domain.md, quality.md | Covers most patterns                    |
 | Auth implementation              | core.md, security.md                         | Auth-specific                           |
 | Add tracing                      | bootstrap.md                                 | Observability focus                     |
-| Multi-tenant implementation      | multi-tenant.md, bootstrap.md                | Tenant Manager, JWT, lib-commons v4     |
+| Multi-tenant implementation      | multi-tenant.md, bootstrap.md                | Tenant Manager, JWT, lib-commons v5     |
 | Idempotency                      | idempotency.md, domain.md                    | Redis SetNX, tenant-aware keys          |
 | Messaging / RabbitMQ             | messaging.md, bootstrap.md                   | Worker pattern, reconnection strategy   |
 | Testing                          | quality.md                                   | Test patterns                           |

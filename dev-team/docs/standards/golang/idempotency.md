@@ -132,8 +132,8 @@ The user defines the scope based on their domain model. Examples:
 ```go
 // pkg/net/http/httputils.go
 import (
-    libConstants "github.com/LerianStudio/lib-commons/v2/commons/constants"
-    libRedis "github.com/LerianStudio/lib-commons/v2/commons/redis"
+    libConstants "github.com/LerianStudio/lib-commons/v5/commons/constants"
+    libRedis "github.com/LerianStudio/lib-commons/v5/commons/redis"
 )
 
 // GetIdempotencyKeyAndTTL returns idempotency key and TTL.
@@ -244,8 +244,8 @@ import (
     "errors"
     "time"
 
-    libCommons "github.com/LerianStudio/lib-commons/v2/commons"
-    libOpentelemetry "github.com/LerianStudio/lib-commons/v2/commons/opentelemetry"
+    libCommons "github.com/LerianStudio/lib-commons/v5/commons"
+    libOpentelemetry "github.com/LerianStudio/lib-commons/v5/commons/opentelemetry"
     "github.com/redis/go-redis/v9"
 )
 

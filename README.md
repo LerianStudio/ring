@@ -6,7 +6,7 @@
 
 **Proven engineering practices, enforced through skills.**
 
-Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **6 active plugins** and **94 skills** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
+Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **6 active plugins** and **95 skills** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
 
 ## ✨ Why Ring?
 
@@ -21,7 +21,7 @@ Without Ring, AI assistants often:
 Ring solves this by:
 
 - **Enforcing proven workflows** - Test-driven development, systematic debugging, proper planning
-- **Providing 94 specialized skills** (23 core + 33 dev-team + 16 product planning + 7 FinOps regulatory + 6 technical writing + 9 PMO)
+- **Providing 95 specialized skills** (24 core + 33 dev-team + 16 product planning + 7 FinOps regulatory + 6 technical writing + 9 PMO)
 - **41 specialized agents** - 10 review/planning + 15 developer + 4 product research + 3 FinOps regulatory + 3 technical writing + 6 PMO
 - **Automating skill discovery** - Skills load automatically at session start
 - **Preventing common failures** - Built-in anti-patterns and mandatory checklists
@@ -292,9 +292,9 @@ Run command → Paste output → Then claim
 No "should work" → Only "does work" with proof
 ```
 
-## 📚 All 94 Skills (Across 6 Plugins)
+## 📚 All 95 Skills (Across 6 Plugins)
 
-### Core Skills (ring-default plugin - 23 skills)
+### Core Skills (ring-default plugin - 24 skills)
 
 **Testing & Debugging (4):**
 
@@ -331,6 +331,7 @@ No "should work" → Only "does work" with proof
 - `ring:release-guide` - Generate Ops Update Guide from git diff analysis
 - `ring:visualize` - Generate self-contained HTML pages to visually explain systems, code changes, and data
 - `ring:diagram` - Generate Mermaid diagrams and open them in mermaid.live
+- `ring:deck` - Scaffold Lerian-branded HTML presentation projects with dev server, presenter, remote, and PDF export
 - `ring:create-handoff` - Create handoff documents capturing session state for seamless context-clear and resume
 
 **Audit & Readiness (1):**
@@ -374,7 +375,7 @@ No "should work" → Only "does work" with proof
 
 **Migration & Reference (4):**
 
-- `ring:using-lib-commons` - Comprehensive reference for lib-commons v4 (Lerian's shared Go library with 30+ packages)
+- `ring:using-lib-commons` - Comprehensive reference for lib-commons v5.0.2 (Lerian's shared Go library with 30+ packages)
 - `ring:dev-systemplane-migration` - Migrate Lerian Go services from .env/YAML config to systemplane (database-backed hot-reloadable config)
 - `ring:dev-llms-txt` - Generate or audit llms.txt files following llmstxt.org spec for AI-friendly repository entry points
 - `ring:dev-licensing` - Repository license management (Apache 2.0, Elastic v2, Proprietary)

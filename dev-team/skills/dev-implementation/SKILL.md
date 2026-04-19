@@ -372,26 +372,26 @@ Task:
     ### TypeScript
     URL: `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md`
 
-    Multi-Tenant: Implement DUAL-MODE from the start. Use lib-commons v4 resolvers for ALL resources.
+    Multi-Tenant: Implement DUAL-MODE from the start. Use lib-commons v5 resolvers for ALL resources.
     Load via cache-first pattern: `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/multi-tenant.md`
     
     ## ⛔ Multi-Tenant Dual-Mode Implementation (Go backend only — skip for TypeScript/Frontend)
     
     **Applies only when `language == "go"`.** TypeScript and frontend projects have different patterns.
     
-    All Go backend code must work in BOTH modes from the start. The lib-commons v4 resolvers handle both transparently — in single-tenant mode they return the default connection, in multi-tenant mode they resolve per-tenant. There is NO post-cycle adaptation step.
+    All Go backend code must work in BOTH modes from the start. The lib-commons v5 resolvers handle both transparently — in single-tenant mode they return the default connection, in multi-tenant mode they resolve per-tenant. There is NO post-cycle adaptation step.
     
     ### Sub-Package Import Reference
     
     | Alias | Import Path | Purpose |
     |-------|-------------|---------|
-    | `tmcore` | `github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/core` | Resolvers, context helpers, types |
-    | `tmmiddleware` | `github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/middleware` | TenantMiddleware, WhenEnabled |
-    | `tmpostgres` | `github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/postgres` | PostgresManager |
-    | `tmmongo` | `github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/mongo` | MongoManager |
-    | `tmrabbitmq` | `github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/rabbitmq` | RabbitMQ Manager (vhost isolation) |
-    | `valkey` | `github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/valkey` | Redis key prefixing |
-    | `s3` | `github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/s3` | S3 key prefixing |
+    | `tmcore` | `github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/core` | Resolvers, context helpers, types |
+    | `tmmiddleware` | `github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/middleware` | TenantMiddleware, WhenEnabled |
+    | `tmpostgres` | `github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/postgres` | PostgresManager |
+    | `tmmongo` | `github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/mongo` | MongoManager |
+    | `tmrabbitmq` | `github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/rabbitmq` | RabbitMQ Manager (vhost isolation) |
+    | `valkey` | `github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/valkey` | Redis key prefixing |
+    | `s3` | `github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/s3` | S3 key prefixing |
     
     ### Resource Resolver Rules (ALL resources the service uses)
     

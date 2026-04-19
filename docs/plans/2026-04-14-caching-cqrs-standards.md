@@ -1,5 +1,7 @@
 # Caching Strategy Standard & CQRS Pattern Implementation Plan
 
+> **NOTE:** This plan was authored when lib-commons v2/v4 was current. Code examples reflect the version at plan-time. Current standard is lib-commons/v5 v5.0.2.
+
 > **For Agents:** REQUIRED SUB-SKILL: Use ring:execute-plan to implement this plan task-by-task.
 
 **Goal:** Add two new Go engineering standards to the Ring project: a new `caching.md` module (Module 20) and a new CQRS section in the existing `architecture.md`.

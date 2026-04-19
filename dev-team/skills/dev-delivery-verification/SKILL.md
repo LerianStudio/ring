@@ -575,7 +575,7 @@ fi
 #### G. Multi-Tenant Dual-Mode Verification (Go backend only)
 **Reference:** [multi-tenant.md](../../docs/standards/golang/multi-tenant.md), [dev-multi-tenant SKILL.md § Sub-Package Import Reference](../dev-multi-tenant/SKILL.md)
 
-This check only applies to Go backend services. It verifies that all resource access uses lib-commons v4 resolvers (which work transparently in both single-tenant and multi-tenant mode).
+This check only applies to Go backend services. It verifies that all resource access uses lib-commons v5 resolvers (which work transparently in both single-tenant and multi-tenant mode).
 
 ```bash
 # Step G.1: Detect if this is a Go project

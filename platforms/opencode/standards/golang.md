@@ -11,11 +11,11 @@ This file defines the specific standards for Go development at Lerian Studio.
 | # | Section | Description |
 |---|---------|-------------|
 | 1 | [Version](#version) | Go version requirements |
-| 2 | [Core Dependency: lib-commons](#core-dependency-lib-commons-mandatory) | Required foundation library (v4) |
+| 2 | [Core Dependency: lib-commons](#core-dependency-lib-commons-mandatory) | Required foundation library (v5) |
 | 3 | [Frameworks & Libraries](#frameworks--libraries) | Required packages and versions |
 | 4 | [Configuration](#configuration) | Environment variable handling (nested structs) |
 | 5 | [Observability](#observability) | OpenTelemetry integration |
-| 6 | [Bootstrap](#bootstrap) | Application initialization (v4 patterns) |
+| 6 | [Bootstrap](#bootstrap) | Application initialization (v5 patterns) |
 | 7 | [Access Manager Integration](#access-manager-integration-mandatory) | Authentication and authorization with lib-auth |
 | 8 | [License Manager Integration](#license-manager-integration-mandatory) | License validation with lib-license-go |
 | 9 | [Data Transformation](#data-transformation-toentityfromentity-mandatory) | ToEntity/FromEntity patterns |
@@ -24,7 +24,7 @@ This file defines the specific standards for Go development at Lerian Studio.
 | 12 | [Function Design](#function-design-mandatory) | Single responsibility principle |
 | 13 | [Pagination Patterns](#pagination-patterns) | Cursor and page-based pagination |
 | 14 | [Testing](#testing) | Table-driven tests, edge cases |
-| 15 | [Logging](#logging) | Structured logging with lib-commons v4 |
+| 15 | [Logging](#logging) | Structured logging with lib-commons v5 |
 | 16 | [Linting](#linting) | golangci-lint configuration |
 | 17 | [Architecture Patterns](#architecture-patterns) | Hexagonal architecture |
 | 18 | [Directory Structure](#directory-structure) | Project layout (Lerian pattern) |
@@ -54,29 +54,29 @@ This file defines the specific standards for Go development at Lerian Studio.
 
 ## Core Dependency: lib-commons (MANDATORY)
 
-All Lerian Studio Go projects **MUST** use `lib-commons/v4` as the foundation library. This ensures consistency across all services.
+All Lerian Studio Go projects **MUST** use `lib-commons/v5` as the foundation library. This ensures consistency across all services.
 
-### Required Import (lib-commons v4)
+### Required Import (lib-commons v5)
 
 ```go
 import (
-    libCommons "github.com/LerianStudio/lib-commons/v4/commons"
-    clog "github.com/LerianStudio/lib-commons/v4/commons/log"
-    czap "github.com/LerianStudio/lib-commons/v4/commons/zap"
-    cassert "github.com/LerianStudio/lib-commons/v4/commons/assert"
-    cruntime "github.com/LerianStudio/lib-commons/v4/commons/runtime"
-    cotel "github.com/LerianStudio/lib-commons/v4/commons/opentelemetry"
-    cmetrics "github.com/LerianStudio/lib-commons/v4/commons/opentelemetry/metrics"
-    chttp "github.com/LerianStudio/lib-commons/v4/commons/net/http"
-    cpostgres "github.com/LerianStudio/lib-commons/v4/commons/postgres"
-    cmongo "github.com/LerianStudio/lib-commons/v4/commons/mongo"
-    credis "github.com/LerianStudio/lib-commons/v4/commons/redis"
+    libCommons "github.com/LerianStudio/lib-commons/v5/commons"
+    clog "github.com/LerianStudio/lib-commons/v5/commons/log"
+    czap "github.com/LerianStudio/lib-commons/v5/commons/zap"
+    cassert "github.com/LerianStudio/lib-commons/v5/commons/assert"
+    cruntime "github.com/LerianStudio/lib-commons/v5/commons/runtime"
+    cotel "github.com/LerianStudio/lib-commons/v5/commons/opentelemetry"
+    cmetrics "github.com/LerianStudio/lib-commons/v5/commons/opentelemetry/metrics"
+    chttp "github.com/LerianStudio/lib-commons/v5/commons/net/http"
+    cpostgres "github.com/LerianStudio/lib-commons/v5/commons/postgres"
+    cmongo "github.com/LerianStudio/lib-commons/v5/commons/mongo"
+    credis "github.com/LerianStudio/lib-commons/v5/commons/redis"
 )
 ```
 
-> **Note:** v4 uses `c` prefix aliases (e.g., `clog`, `czap`, `cotel`) except for the root commons package which uses `libCommons`. This distinguishes lib-commons packages from standard library and other imports.
+> **Note:** v5 uses `c` prefix aliases (e.g., `clog`, `czap`, `cotel`) except for the root commons package which uses `libCommons`. This distinguishes lib-commons packages from standard library and other imports.
 
-### What lib-commons v4 Provides
+### What lib-commons v5 Provides
 
 | Package | Alias | Purpose | Where Used |
 |---------|-------|---------|------------|
@@ -103,7 +103,7 @@ import (
 | `commons/constants` | `cconst` | Standard HTTP headers, error codes, pagination defaults | Utilities |
 | `commons/tenant-manager` | — | Multi-tenant middleware, DB routing, Redis key prefixing | See multi-tenant.md |
 
-> **⛔ Version Gate:** The packages `cassert`, `cruntime`, `csafe`, `cbackoff`, and `coutbox` are introduced in lib-commons v4. Before using these, verify the project's `go.mod` declares `lib-commons/v4`. If the project uses v3 or v2, these packages will not compile. Check with: `grep 'lib-commons' go.mod`
+> **⛔ Version Gate:** Verify the project's `go.mod` declares `lib-commons/v5`. If the project uses v2, v3, or v4, it is below the current standard and must be migrated. Check with: `grep 'lib-commons' go.mod`
 
 ---
 
@@ -113,7 +113,7 @@ import (
 
 | Library | Minimum Version | Purpose |
 |---------|-----------------|---------|
-| `lib-commons` | v4.0.0 | Core infrastructure |
+| `lib-commons` | v5.0.2 | Core infrastructure |
 | `fiber/v2` | v2.52.0 | HTTP framework |
 | `pgx/v5` | v5.7.0 | PostgreSQL driver |
 | `go.opentelemetry.io/otel` | v1.42.0 | Telemetry |
@@ -153,7 +153,7 @@ import (
 
 ## Configuration
 
-All services **MUST** use `libCommons.InitLocalEnvConfig()` for configuration loading. v4 uses **nested config structs** that group related settings together.
+All services **MUST** use `libCommons.InitLocalEnvConfig()` for configuration loading. v5 uses **nested config structs** that group related settings together.
 
 ### 1. Define Configuration Struct (Nested Pattern)
 
@@ -164,7 +164,7 @@ package bootstrap
 const ApplicationName = "your-service-name"
 
 // Config is the top level configuration struct for the entire application.
-// v4 uses nested structs to group related configuration.
+// v5 uses nested structs to group related configuration.
 type Config struct {
     App   AppConfig   `envPrefix:""`
     Postgres PostgresConfig `envPrefix:"POSTGRES_"`
@@ -351,7 +351,7 @@ Understanding how traces propagate is critical for proper instrumentation.
 │  ctx, span := telemetry.StartSpan(ctx, "service.tenant.create")             │
 │  defer span.End()                                                           │
 │                                                                             │
-│  // Structured logging with fields (v4 pattern)                             │
+│  // Structured logging with fields (v5 pattern)                             │
 │  s.logger.Log(ctx, clog.LevelInfo, "Creating tenant",                       │
 │      clog.String("name", req.Name))                                         │
 │                                                                             │
@@ -464,7 +464,7 @@ func (s *myService) DoSomething(ctx context.Context, req *Request) (*Response, e
     ctx, span := telemetry.StartSpan(ctx, "service.my_service.do_something")
     defer span.End()
 
-    // 3. Structured logging with typed fields (v4 pattern)
+    // 3. Structured logging with typed fields (v5 pattern)
     s.logger.Log(ctx, clog.LevelInfo, "Processing request",
         clog.String("id", req.ID))
 
@@ -627,12 +627,12 @@ headers := cotel.PrepareQueueHeaders(ctx, map[string]any{
 | Not injecting trace context for outgoing HTTP/gRPC | Remote traces disconnected | Use `cotel.InjectHTTPContext` / `cotel.InjectGRPCContext` |
 | `go func() { ... }()` | No panic recovery, no observability | Use `cruntime.SafeGoWithContextAndComponent` |
 | `logger.Infof("msg: %s", val)` | v2 format-based logging | Use `s.logger.Log(ctx, level, "msg", clog.String(...))` |
-| `libCommons.SetConfigFromEnvVars(&cfg)` | v2 config loading, removed in v4 | Use `libCommons.InitLocalEnvConfig()` + `env.Parse()` |
+| `libCommons.SetConfigFromEnvVars(&cfg)` | v2 config loading, removed in v5 | Use `libCommons.InitLocalEnvConfig()` + `env.Parse()` |
 | `libOpentelemetry.InitializeTelemetry()` | v2 telemetry init, panics on error | Use `cotel.NewTelemetry()` + `tl.ApplyGlobals()` |
 | `libZap.InitializeLogger()` | v2 logger init, no config options | Use `czap.New(czap.Config{...})` |
-| `libCommons.NewTrackingFromContext(ctx)` | v2 context tracking, removed in v4 | Use dependency-injected logger |
-| `libServer.StartWithGracefulShutdown()` | v2 lifecycle, removed in v4 | Use `Service.Run(ctx)` + `Service.Shutdown(ctx)` |
-| `libCommons.NewLauncher(...)` | v2 app launcher, removed in v4 | Use `signal.NotifyContext` + `cruntime.SafeGoWithContextAndComponent` |
+| `libCommons.NewTrackingFromContext(ctx)` | v2 context tracking, removed in v5 | Use dependency-injected logger |
+| `libServer.StartWithGracefulShutdown()` | v2 lifecycle, removed in v5 | Use `Service.Run(ctx)` + `Service.Shutdown(ctx)` |
+| `libCommons.NewLauncher(...)` | v2 app launcher, removed in v5 | Use `signal.NotifyContext` + `cruntime.SafeGoWithContextAndComponent` |
 
 > **⛔ CRITICAL:** Direct imports of `go.opentelemetry.io/otel`, `go.opentelemetry.io/otel/trace`, `go.opentelemetry.io/otel/attribute`, or `go.opentelemetry.io/otel/codes` are **FORBIDDEN** in application code. All telemetry MUST go through lib-commons wrappers (`cotel`). The only exception is if lib-commons doesn't provide a required OTel feature - in that case, open an issue to add it to lib-commons.
 
@@ -685,9 +685,9 @@ func InitServersWithOptions(opts ...Option) (*Service, error) {
 ```go
 // adapters/http/in/routes.go
 import (
-    clog "github.com/LerianStudio/lib-commons/v4/commons/log"
-    chttp "github.com/LerianStudio/lib-commons/v4/commons/net/http"
-    cotel "github.com/LerianStudio/lib-commons/v4/commons/opentelemetry"
+    clog "github.com/LerianStudio/lib-commons/v5/commons/log"
+    chttp "github.com/LerianStudio/lib-commons/v5/commons/net/http"
+    cotel "github.com/LerianStudio/lib-commons/v5/commons/opentelemetry"
     "github.com/gofiber/fiber/v2"
     "github.com/gofiber/fiber/v2/middleware/cors"
     "github.com/gofiber/fiber/v2/middleware/recover"
@@ -702,7 +702,7 @@ func NewRouter(lg clog.Logger, tl *cotel.Telemetry, ...) *fiber.App {
         },
     })
 
-    // Middleware setup - ORDER MATTERS (v4 chain)
+    // Middleware setup - ORDER MATTERS (v5 chain)
     f.Use(recover.New())                           // 1. Panic recovery
     f.Use(requestid.New())                         // 2. Request ID
     // f.Use(securityHeaders())                    // 3. Security headers (if applicable)
@@ -727,7 +727,7 @@ func NewRouter(lg clog.Logger, tl *cotel.Telemetry, ...) *fiber.App {
 
 ### HTTP Metrics (via chttp OTel Middleware)
 
-The `chttp` OTel middleware from lib-commons v4 provides HTTP metrics collection alongside tracing. It uses standard OpenTelemetry semantic conventions.
+The `chttp` OTel middleware from lib-commons v5 provides HTTP metrics collection alongside tracing. It uses standard OpenTelemetry semantic conventions.
 
 **Metrics Collected:**
 
@@ -795,7 +795,7 @@ if err != nil {
 
 ```go
 // bootstrap/service.go
-// v4 uses signal.NotifyContext in main.go and Service.Run(ctx)/Shutdown(ctx)
+// v5 uses signal.NotifyContext in main.go and Service.Run(ctx)/Shutdown(ctx)
 // See the Bootstrap section for complete reference implementations.
 func (svc *Service) Run(ctx context.Context) {
     cruntime.SafeGoWithContextAndComponent(
@@ -864,14 +864,14 @@ import (
     "strings"
     "time"
 
-    libCommons "github.com/LerianStudio/lib-commons/v4/commons"
-    clog "github.com/LerianStudio/lib-commons/v4/commons/log"
-    czap "github.com/LerianStudio/lib-commons/v4/commons/zap"
-    cotel "github.com/LerianStudio/lib-commons/v4/commons/opentelemetry"
-    cpostgres "github.com/LerianStudio/lib-commons/v4/commons/postgres"
-    cmongo "github.com/LerianStudio/lib-commons/v4/commons/mongo"
-    credis "github.com/LerianStudio/lib-commons/v4/commons/redis"
-    cruntime "github.com/LerianStudio/lib-commons/v4/commons/runtime"
+    libCommons "github.com/LerianStudio/lib-commons/v5/commons"
+    clog "github.com/LerianStudio/lib-commons/v5/commons/log"
+    czap "github.com/LerianStudio/lib-commons/v5/commons/zap"
+    cotel "github.com/LerianStudio/lib-commons/v5/commons/opentelemetry"
+    cpostgres "github.com/LerianStudio/lib-commons/v5/commons/postgres"
+    cmongo "github.com/LerianStudio/lib-commons/v5/commons/mongo"
+    credis "github.com/LerianStudio/lib-commons/v5/commons/redis"
+    cruntime "github.com/LerianStudio/lib-commons/v5/commons/runtime"
 
     "github.com/caarlos0/env/v11"
 
@@ -886,7 +886,7 @@ import (
 const ApplicationName = "your-service"
 
 // Config is the top level configuration struct for the entire application.
-// v4 uses nested structs with `envPrefix` tags for grouping.
+// v5 uses nested structs with `envPrefix` tags for grouping.
 type Config struct {
     App   AppConfig   `envPrefix:""`
     Postgres PostgresConfig `envPrefix:"POSTGRES_"`
@@ -900,7 +900,7 @@ type Config struct {
 
 // InitServersWithOptions initializes all application components and returns a Service ready to run.
 // This is the single point of dependency injection for the entire application.
-// v4 returns error instead of panicking.
+// v5 returns error instead of panicking.
 func InitServersWithOptions(opts ...Option) (*Service, error) {
     // 1. LOAD CONFIGURATION
     // InitLocalEnvConfig loads .env for local dev (no-op in production)
@@ -1033,13 +1033,13 @@ func InitServersWithOptions(opts ...Option) (*Service, error) {
 - Uses `czap.New()` instead of `libZap.InitializeLogger()`
 - Uses `cotel.NewTelemetry()` + `tl.ApplyGlobals()` instead of `libOpentelemetry.InitializeTelemetry()`
 - Order matters: config → logger → telemetry → databases → repositories → services → handlers → router → service
-- All database connections use lib-commons v4 packages
+- All database connections use lib-commons v5 packages
 
 ---
 
 ### service.go - Complete Reference
 
-In v4, the `Service` struct manages the full lifecycle. There is no separate `Server` struct or `Launcher`.
+In v5, the `Service` struct manages the full lifecycle. There is no separate `Server` struct or `Launcher`.
 
 ```go
 package bootstrap
@@ -1048,9 +1048,9 @@ import (
     "context"
     "fmt"
 
-    clog "github.com/LerianStudio/lib-commons/v4/commons/log"
-    cotel "github.com/LerianStudio/lib-commons/v4/commons/opentelemetry"
-    cruntime "github.com/LerianStudio/lib-commons/v4/commons/runtime"
+    clog "github.com/LerianStudio/lib-commons/v5/commons/log"
+    cotel "github.com/LerianStudio/lib-commons/v5/commons/opentelemetry"
+    cruntime "github.com/LerianStudio/lib-commons/v5/commons/runtime"
     "github.com/gofiber/fiber/v2"
 )
 
@@ -1333,7 +1333,7 @@ func NewRouter(
         },
     })
 
-    // Middleware setup (v4 chain)
+    // Middleware setup (v5 chain)
     f.Use(recover.New())
     f.Use(cors.New())
 
@@ -1591,7 +1591,7 @@ func InitServersWithOptions(opts ...Option) (*Service, error) {
 ```go
 // adapters/http/in/routes.go
 import (
-    chttp "github.com/LerianStudio/lib-commons/v4/commons/net/http"
+    chttp "github.com/LerianStudio/lib-commons/v5/commons/net/http"
     libLicense "github.com/LerianStudio/lib-license-go/v2/middleware"
 )
 
@@ -1603,7 +1603,7 @@ func NewRoutes(lg clog.Logger, tl *cotel.Telemetry, handler *YourHandler, lc *li
         },
     })
 
-    // Middleware chain (v4 order)
+    // Middleware chain (v5 order)
     f.Use(recover.New())
     f.Use(cors.New())
 
@@ -2245,7 +2245,7 @@ Use when: Client needs total count for pagination UI (showing "Page 1 of 10")
 
 ---
 
-### Shared Utilities from lib-commons v4
+### Shared Utilities from lib-commons v5
 
 | Utility | Package (alias) | Purpose |
 |---------|---------|---------|
@@ -2406,7 +2406,7 @@ grep -rn "fmt.Println\|fmt.Printf\|log.Println\|log.Printf\|log.Fatal\|println("
 // CORRECT: Logger is dependency-injected (struct field)
 // s.logger clog.Logger  (injected at construction time)
 
-// CORRECT: Log with typed fields (v4 pattern)
+// CORRECT: Log with typed fields (v5 pattern)
 s.logger.Log(ctx, clog.LevelInfo, "Processing entity",
     clog.String("entity_id", entityID))
 s.logger.Log(ctx, clog.LevelWarn, "Rate limit approaching",
@@ -2443,7 +2443,7 @@ cotel.HandleSpanError(&span, "Connection failed", err)
 // ❌ FORBIDDEN: log.Fatal (breaks graceful shutdown)
 log.Fatal("Cannot start without config")
 
-// ✅ REQUIRED: return error from InitServersWithOptions (v4 pattern)
+// ✅ REQUIRED: return error from InitServersWithOptions (v5 pattern)
 return nil, fmt.Errorf("cannot start without config: %w", err)
 ```
 
@@ -3091,7 +3091,7 @@ if err != nil {
 ### Using lib-commons Circuit Breaker Manager
 
 ```go
-import ccb "github.com/LerianStudio/lib-commons/v4/commons/circuitbreaker"
+import ccb "github.com/LerianStudio/lib-commons/v5/commons/circuitbreaker"
 
 // Create manager for multiple breakers
 manager := ccb.NewManager(logger)
@@ -3257,23 +3257,23 @@ No migration actions required. All categories verified against Lerian/Ring Go St
 1. **Config Struct Migration**
    - Replace: Direct `os.Getenv()` calls scattered across files
    - With: Nested `Config` struct with `envPrefix` tags in `/internal/bootstrap/config.go`
-   - Import: `libCommons "github.com/LerianStudio/lib-commons/v4/commons"`
+   - Import: `libCommons "github.com/LerianStudio/lib-commons/v5/commons"`
    - Usage: `libCommons.InitLocalEnvConfig()` + `env.Parse(&cfg)`
    - Files affected: `cmd/api/main.go`, `internal/service/user.go`
 
 2. **Logger Migration**
    - Replace: Custom logger or `log.Println()`
-   - With: lib-commons v4 structured logger
-   - Bootstrap import: `czap "github.com/LerianStudio/lib-commons/v4/commons/zap"` (initialization)
-   - Application import: `clog "github.com/LerianStudio/lib-commons/v4/commons/log"` (interface for logging calls)
+   - With: lib-commons v5 structured logger
+   - Bootstrap import: `czap "github.com/LerianStudio/lib-commons/v5/commons/zap"` (initialization)
+   - Application import: `clog "github.com/LerianStudio/lib-commons/v5/commons/log"` (interface for logging calls)
    - Bootstrap usage: `logger, err := czap.New(czap.Config{...})` (returns `clog.Logger` interface)
    - Application usage: `s.logger.Log(ctx, clog.LevelInfo, "msg", clog.String("key", "val"))`
    - Files affected: [list files]
 
 3. **Telemetry Migration**
    - Replace: No tracing or custom tracing
-   - With: OpenTelemetry integration via lib-commons v4
-   - Import: `cotel "github.com/LerianStudio/lib-commons/v4/commons/opentelemetry"`
+   - With: OpenTelemetry integration via lib-commons v5
+   - Import: `cotel "github.com/LerianStudio/lib-commons/v5/commons/opentelemetry"`
    - Usage: `tl, err := cotel.NewTelemetry(cotel.TelemetryConfig{...})` + `tl.ApplyGlobals()`
    - Files affected: [list files]
 
@@ -3295,7 +3295,7 @@ No migration actions required. All categories verified against Lerian/Ring Go St
 
 Before submitting Go code, verify:
 
-- [ ] Using lib-commons v4 for infrastructure
+- [ ] Using lib-commons v5 for infrastructure
 - [ ] Configuration loaded via `libCommons.InitLocalEnvConfig()` + `env.Parse()` with nested config structs
 - [ ] Telemetry initialized via `cotel.NewTelemetry()` + `tl.ApplyGlobals()`
 - [ ] Logger initialized via `czap.New()` and dependency-injected (not recovered from context)

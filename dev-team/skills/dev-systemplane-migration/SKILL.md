@@ -68,6 +68,8 @@ output_schema:
 
 # Systemplane Migration Orchestrator
 
+> ⚠️ **NOTE:** This skill references v4 systemplane APIs. The systemplane was rewritten in lib-commons v5.0.0. Verify against current v5 APIs before executing. See `ring:using-lib-commons` for v5.0.2 reference.
+
 <cannot_skip>
 
 ## CRITICAL: This Skill ORCHESTRATES. Agents IMPLEMENT.

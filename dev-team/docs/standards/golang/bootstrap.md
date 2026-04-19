@@ -393,9 +393,9 @@ func InitServers() (*Service, error) {
 ```go
 // adapters/http/in/routes.go
 import (
-    libLog "github.com/LerianStudio/lib-commons/v2/commons/log"
-    libHTTP "github.com/LerianStudio/lib-commons/v2/commons/net/http"
-    libOpentelemetry "github.com/LerianStudio/lib-commons/v2/commons/opentelemetry"
+    libLog "github.com/LerianStudio/lib-commons/v5/commons/log"
+    libHTTP "github.com/LerianStudio/lib-commons/v5/commons/net/http"
+    libOpentelemetry "github.com/LerianStudio/lib-commons/v5/commons/opentelemetry"
     "github.com/gofiber/contrib/otelfiber/v2"
     "github.com/gofiber/fiber/v2"
     "github.com/gofiber/fiber/v2/middleware/recover"
@@ -577,12 +577,12 @@ import (
     "strings"
     "time"
 
-    libCommons "github.com/LerianStudio/lib-commons/v2/commons"
-    libMongo "github.com/LerianStudio/lib-commons/v2/commons/mongo"
-    libOpentelemetry "github.com/LerianStudio/lib-commons/v2/commons/opentelemetry"
-    libPostgres "github.com/LerianStudio/lib-commons/v2/commons/postgres"
-    libRedis "github.com/LerianStudio/lib-commons/v2/commons/redis"
-    libZap "github.com/LerianStudio/lib-commons/v2/commons/zap"
+    libCommons "github.com/LerianStudio/lib-commons/v5/commons"
+    libMongo "github.com/LerianStudio/lib-commons/v5/commons/mongo"
+    libOpentelemetry "github.com/LerianStudio/lib-commons/v5/commons/opentelemetry"
+    libPostgres "github.com/LerianStudio/lib-commons/v5/commons/postgres"
+    libRedis "github.com/LerianStudio/lib-commons/v5/commons/redis"
+    libZap "github.com/LerianStudio/lib-commons/v5/commons/zap"
 
     // Internal imports
     httpin "github.com/LerianStudio/your-service/internal/adapters/http/in"
@@ -801,10 +801,10 @@ This file defines the HTTP server with graceful shutdown support.
 package bootstrap
 
 import (
-    libCommons "github.com/LerianStudio/lib-commons/v2/commons"
-    libLog "github.com/LerianStudio/lib-commons/v2/commons/log"
-    libOpentelemetry "github.com/LerianStudio/lib-commons/v2/commons/opentelemetry"
-    libCommonsServer "github.com/LerianStudio/lib-commons/v2/commons/server"
+    libCommons "github.com/LerianStudio/lib-commons/v5/commons"
+    libLog "github.com/LerianStudio/lib-commons/v5/commons/log"
+    libOpentelemetry "github.com/LerianStudio/lib-commons/v5/commons/opentelemetry"
+    libCommonsServer "github.com/LerianStudio/lib-commons/v5/commons/server"
     "github.com/gofiber/fiber/v2"
 )
 
@@ -860,8 +860,8 @@ This file defines the Service struct that orchestrates the application lifecycle
 package bootstrap
 
 import (
-    libCommons "github.com/LerianStudio/lib-commons/v2/commons"
-    libLog "github.com/LerianStudio/lib-commons/v2/commons/log"
+    libCommons "github.com/LerianStudio/lib-commons/v5/commons"
+    libLog "github.com/LerianStudio/lib-commons/v5/commons/log"
 )
 
 // Service is the application glue where we put all top level components to be used.
@@ -1079,7 +1079,7 @@ Services missing the `/readyz` endpoint cause Kubernetes to route traffic to unr
 
 ```go
 // internal/adapters/http/in/routes.go
-// Ensure libHTTP is imported: libHTTP "github.com/LerianStudio/lib-commons/v2/commons/net/http"
+// Ensure libHTTP is imported: libHTTP "github.com/LerianStudio/lib-commons/v5/commons/net/http"
 
 // Health check - always returns 200 if process is alive
 // Used by Kubernetes liveness probe

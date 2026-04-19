@@ -29,14 +29,14 @@ This module covers multi-tenant patterns with Tenant Manager.
 
 **Existence ≠ Compliance.** A service that has "some multi-tenant code" is NOT considered multi-tenant unless every component matches the canonical patterns defined in this document exactly.
 
-MUST replace multi-tenant implementations that use custom middleware, manual DB switching, non-standard env var names, or any mechanism other than the lib-commons v4 tenant-manager sub-packages — they are **non-compliant**. Not patched, not adapted, **replaced**.
+MUST replace multi-tenant implementations that use custom middleware, manual DB switching, non-standard env var names, or any mechanism other than the lib-commons v5 tenant-manager sub-packages — they are **non-compliant**. Not patched, not adapted, **replaced**.
 
 The only valid multi-tenant implementation uses:
-- `tenantId` from JWT via `TenantMiddleware` with `WithPG`/`WithMB` options (from `lib-commons/v4/commons/tenant-manager/middleware`), registered per-route using a local `WhenEnabled` helper
-- `tmcore.GetPGContext(ctx)` / `tmcore.GetPGContext(ctx, module)` / `tmcore.GetMBContext(ctx)` / `tmcore.GetMBContext(ctx, module)` for database resolution (from `lib-commons/v4/commons/tenant-manager/core`)
-- `valkey.GetKeyContext` for Redis key prefixing (from `lib-commons/v4/commons/tenant-manager/valkey`)
-- `s3.GetS3KeyStorageContext` for S3 key prefixing (from `lib-commons/v4/commons/tenant-manager/s3`)
-- `tmrabbitmq.Manager` for RabbitMQ vhost isolation (from `lib-commons/v4/commons/tenant-manager/rabbitmq`)
+- `tenantId` from JWT via `TenantMiddleware` with `WithPG`/`WithMB` options (from `lib-commons/v5/commons/tenant-manager/middleware`), registered per-route using a local `WhenEnabled` helper
+- `tmcore.GetPGContext(ctx)` / `tmcore.GetPGContext(ctx, module)` / `tmcore.GetMBContext(ctx)` / `tmcore.GetMBContext(ctx, module)` for database resolution (from `lib-commons/v5/commons/tenant-manager/core`)
+- `valkey.GetKeyContext` for Redis key prefixing (from `lib-commons/v5/commons/tenant-manager/valkey`)
+- `s3.GetS3KeyStorageContext` for S3 key prefixing (from `lib-commons/v5/commons/tenant-manager/s3`)
+- `tmrabbitmq.Manager` for RabbitMQ vhost isolation (from `lib-commons/v5/commons/tenant-manager/rabbitmq`)
 - The 13 canonical `MULTI_TENANT_*` environment variables with correct names and defaults
 - `client.WithCircuitBreaker` on the Tenant Manager HTTP client
 - `client.WithServiceAPIKey` on the Tenant Manager HTTP client for `/settings` endpoint authentication
@@ -54,7 +54,7 @@ These are the only files that require multi-tenant changes. The exact paths foll
 
 | File | Gate | What Changes |
 |------|------|-------------|
-| `go.mod` | 2 | lib-commons v4, lib-auth v2 |
+| `go.mod` | 2 | lib-commons v5, lib-auth v2 |
 | `internal/bootstrap/config.go` | 3 | 13 canonical `MULTI_TENANT_*` env vars in Config struct |
 | `internal/bootstrap/service.go` (or equivalent init file) | 4 | Conditional initialization: Tenant Manager client, connection managers, middleware creation. Branch on `cfg.MultiTenantEnabled` |
 | `internal/bootstrap/routes.go` (or equivalent router file) | 4 | Per-route composition via `WhenEnabled(ttHandler)` — auth validates JWT before tenant resolves DB. Each project implements the `WhenEnabled` helper locally. See [Route-Level Auth-Before-Tenant Ordering](#route-level-auth-before-tenant-ordering-mandatory) |
@@ -97,38 +97,41 @@ These are the only files that require multi-tenant changes. The exact paths foll
 | `docs/multi-tenant-guide.md` | Activation guide: env vars, how to enable/disable, verification steps |
 | `docs/multi-tenant-preview.html` | Visual implementation preview (generated at Gate 1.5, kept for reference) |
 
-**HARD GATE: Files outside this map that contain multi-tenant logic are non-compliant.** If a service has custom files like `internal/tenant/resolver.go`, `internal/middleware/tenant_middleware.go`, `pkg/multitenancy/pool.go` or similar — these MUST be removed and replaced with the canonical lib-commons v4 tenant-manager sub-packages wired through the files listed above.
+**HARD GATE: Files outside this map that contain multi-tenant logic are non-compliant.** If a service has custom files like `internal/tenant/resolver.go`, `internal/middleware/tenant_middleware.go`, `pkg/multitenancy/pool.go` or similar — these MUST be removed and replaced with the canonical lib-commons v5 tenant-manager sub-packages wired through the files listed above.
 
 ### Required lib-commons Version
 
-Multi-tenant support requires **lib-commons v4** (`github.com/LerianStudio/lib-commons/v4`). The `tenant-manager` package does not exist in v2.
+Multi-tenant support requires **lib-commons v5** (`github.com/LerianStudio/lib-commons/v5`). The `tenant-manager` package does not exist in v2.
 
 | lib-commons version | Multi-tenant support | Package path |
 |--------------------|-----------------------|-------------|
 | **v2** (`lib-commons/v2`) | Not available | N/A — no `tenant-manager` package |
-| **v3** (`lib-commons/v3`) | Legacy | Same sub-packages as v4 but without `tenant-manager/cache`. Upgrade to v4. |
-| **v4** (`lib-commons/v4`) | Full support (current) | `github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/...` (sub-packages: `core`, `client`, `cache`, `postgres`, `mongo`, `middleware`, `rabbitmq`, `consumer`, `valkey`, `s3`). The `middleware` sub-package contains `TenantMiddleware` with `WithPG`/`WithMB` variadic options that handle both single-module and multi-module services. Route-level composition uses a local `WhenEnabled` helper (not from lib-commons). |
+| **v3** (`lib-commons/v3`) | Legacy | Same sub-packages as v5 but without `tenant-manager/cache`. Upgrade to v5. |
+| **v4** (`lib-commons/v4`) | Legacy | Superseded by v5. Upgrade to v5. |
+| **v5** (`lib-commons/v5`) | Full support (current) | `github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/...` (sub-packages: `core`, `client`, `cache`, `postgres`, `mongo`, `middleware`, `rabbitmq`, `consumer`, `valkey`, `s3`). The `middleware` sub-package contains `TenantMiddleware` with `WithPG`/`WithMB` variadic options that handle both single-module and multi-module services. Route-level composition uses a local `WhenEnabled` helper (not from lib-commons). |
 
-**Migration to v4:**
+**Migration to v5:**
 
-Services on lib-commons v2 or v3 MUST upgrade to v4 before implementing multi-tenant. The upgrade involves:
+Services on lib-commons v2, v3, or v4 MUST upgrade to v5 before implementing multi-tenant. The upgrade involves:
 
-1. Update `go.mod` to the latest v4 tag
-2. Update all import paths to v4
+1. Update `go.mod` to the latest v5 tag
+2. Update all import paths to v5
 3. Add the `tenant-manager` package imports where needed
 
 ```bash
-# Check latest v4 tag
-git ls-remote --tags https://github.com/LerianStudio/lib-commons.git | grep "v4" | sort -V | tail -1
+# Check latest v5 tag
+git ls-remote --tags https://github.com/LerianStudio/lib-commons.git | grep "v5" | sort -V | tail -1
 
 # Update go.mod
-go get github.com/LerianStudio/lib-commons/v4@v4.5.0
+go get github.com/LerianStudio/lib-commons/v5@v5.0.2
 
 # Update import paths across the codebase (portable — works on macOS and Linux)
 # From v2:
-find . -name "*.go" -exec perl -pi -e 's|lib-commons/v2|lib-commons/v4|g' {} +
+find . -name "*.go" -exec perl -pi -e 's|lib-commons/v2|lib-commons/v5|g' {} +
 # From v3:
-find . -name "*.go" -exec perl -pi -e 's|lib-commons/v3|lib-commons/v4|g' {} +
+find . -name "*.go" -exec perl -pi -e 's|lib-commons/v3|lib-commons/v5|g' {} +
+# From v4:
+find . -name "*.go" -exec perl -pi -e 's|lib-commons/v4|lib-commons/v5|g' {} +
 
 # Verify build
 go build ./...
@@ -379,10 +382,10 @@ func extractTenantIDFromToken(c *fiber.Ctx) (string, error) {
 ```go
 // internal/bootstrap/config.go
 import (
-    "github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/client"
-    tmpostgres "github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/postgres"
-    tmmongo "github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/mongo"
-    "github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/middleware"
+    "github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/client"
+    tmpostgres "github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/postgres"
+    tmmongo "github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/mongo"
+    "github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/middleware"
 )
 
 func initService(cfg *Config) {
@@ -454,8 +457,8 @@ func initService(cfg *Config) {
 
 ```go
 import (
-    tmcore "github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/core"
-    "github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/valkey"
+    tmcore "github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/core"
+    "github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/valkey"
 )
 
 // Single-module service: use generic getter
@@ -488,7 +491,7 @@ tenantID := tmcore.GetTenantIDContext(ctx)
 
 ```go
 import (
-    tmmiddleware "github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/middleware"
+    tmmiddleware "github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/middleware"
 )
 ```
 
@@ -515,7 +518,7 @@ import (
 ```go
 // config.go - Multi-module service (e.g., unified ledger with onboarding + transaction)
 import (
-    tmmiddleware "github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/middleware"
+    tmmiddleware "github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/middleware"
 )
 
 middleware := tmmiddleware.NewTenantMiddleware(
@@ -542,7 +545,7 @@ middleware := tmmiddleware.NewTenantMiddleware(
 **In repositories for multi-module services, use module-scoped getters:**
 
 ```go
-import tmcore "github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/core"
+import tmcore "github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/core"
 
 // Multi-module: use module-specific getter
 db := tmcore.GetPGContext(ctx, constant.ModuleTransaction)
@@ -555,7 +558,7 @@ db := tmcore.GetPGContext(ctx, constant.ModuleOnboarding)
 // config.go - Single-module service (e.g., CRM, plugin, reporter)
 // Use TenantMiddleware with unnamed WithPG/WithMB
 import (
-    tmmiddleware "github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/middleware"
+    tmmiddleware "github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/middleware"
 )
 
 ttMid := tmmiddleware.NewTenantMiddleware(
@@ -710,7 +713,7 @@ RabbitMQ multi-tenant requires **two complementary layers** — both are mandato
 The `tmrabbitmq.Manager` manages per-tenant vhost connections. Initialize it in the bootstrap with functional options:
 
 ```go
-import tmrabbitmq "github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/rabbitmq"
+import tmrabbitmq "github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/rabbitmq"
 
 rmqOpts := []tmrabbitmq.Option{
     tmrabbitmq.WithModule(constant.ModuleManager),
@@ -882,7 +885,7 @@ func (r *MetadataMongoDBRepository) Create(ctx context.Context, collection strin
 **Redis client for Pub/Sub (MANDATORY: use `NewTenantPubSubRedisClient`):**
 
 ```go
-import tmredis "github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/redis"
+import tmredis "github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/redis"
 
 tmRedisClient, err := tmredis.NewTenantPubSubRedisClient(ctx, tmredis.TenantPubSubRedisConfig{
     Host:     cfg.MultiTenantRedisHost,
@@ -897,7 +900,7 @@ Do NOT build `redis.UniversalClient` manually — use the centralized helper abo
 **Event listener initialization (MANDATORY: use `NewTenantEventListener`):**
 
 ```go
-import tmevent "github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/event"
+import tmevent "github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/event"
 
 eventListener, err := tmevent.NewTenantEventListener(
     tmRedisClient,
@@ -1482,8 +1485,8 @@ Services implementing multi-tenant MUST expose these metrics:
 
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
-| "Service already has multi-tenant code" | Existence ≠ compliance. Code that doesn't match the Ring canonical model (lib-commons v4 tenant-manager sub-packages) is non-compliant and MUST be replaced entirely. | **STOP. Run compliance audit against this document. Replace every non-compliant component.** |
-| "Our custom multi-tenant approach works" | Working ≠ compliant. Custom implementations create drift, block lib-commons upgrades, prevent standardized tooling, and cannot be validated by automated compliance checks. | **STOP. Replace with canonical lib-commons v4 implementation.** |
+| "Service already has multi-tenant code" | Existence ≠ compliance. Code that doesn't match the Ring canonical model (lib-commons v5 tenant-manager sub-packages) is non-compliant and MUST be replaced entirely. | **STOP. Run compliance audit against this document. Replace every non-compliant component.** |
+| "Our custom multi-tenant approach works" | Working ≠ compliant. Custom implementations create drift, block lib-commons upgrades, prevent standardized tooling, and cannot be validated by automated compliance checks. | **STOP. Replace with canonical lib-commons v5 implementation.** |
 | "Just need to adapt/patch the existing code" | Non-standard implementations cannot be patched into compliance. The patterns are structurally different (context-based resolution vs static connections, lib-commons middleware vs custom middleware). | **STOP. Replace, do not patch.** |
 | "We only have one customer" | Requirements change. Multi-tenant is easy to add now, hard later. | **Design for multi-tenant, deploy as single** |
 | "Tenant Manager adds complexity" | Complexity is in connection management anyway. Tenant Manager standardizes it. | **Use Tenant Manager for multi-tenant** |
@@ -2146,7 +2149,7 @@ When `MULTI_TENANT_ENABLED=true`, each tenant has its own M2M credentials stored
 
 ```go
 import (
-    secretsmanager "github.com/LerianStudio/lib-commons/v4/commons/secretsmanager"
+    secretsmanager "github.com/LerianStudio/lib-commons/v5/commons/secretsmanager"
 )
 ```
 
@@ -2187,7 +2190,7 @@ import (
 
     awsconfig "github.com/aws/aws-sdk-go-v2/config"
     awssm "github.com/aws/aws-sdk-go-v2/service/secretsmanager"
-    secretsmanager "github.com/LerianStudio/lib-commons/v4/commons/secretsmanager"
+    secretsmanager "github.com/LerianStudio/lib-commons/v5/commons/secretsmanager"
 )
 
 // FetchCredentials retrieves M2M credentials from AWS Secrets Manager for a specific tenant.
@@ -2250,9 +2253,9 @@ import (
     "sync"
     "time"
 
-    libRedis "github.com/LerianStudio/lib-commons/v4/commons/redis"
-    secretsmanager "github.com/LerianStudio/lib-commons/v4/commons/secretsmanager"
-    "github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/valkey"
+    libRedis "github.com/LerianStudio/lib-commons/v5/commons/redis"
+    secretsmanager "github.com/LerianStudio/lib-commons/v5/commons/secretsmanager"
+    "github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/valkey"
 )
 
 // l1CacheTTL is a fixed internal constant — not configurable via env var.
@@ -2483,7 +2486,7 @@ The `secretsmanager` package provides sentinel errors for precise error handling
 ```go
 import (
     "errors"
-    secretsmanager "github.com/LerianStudio/lib-commons/v4/commons/secretsmanager"
+    secretsmanager "github.com/LerianStudio/lib-commons/v5/commons/secretsmanager"
 )
 
 creds, err := secretsmanager.GetM2MCredentials(ctx, client, env, tenantOrgID, appName, target)

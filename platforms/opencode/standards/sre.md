@@ -242,7 +242,7 @@ ctx := otel.GetTextMapPropagator().Extract(
 
 ## OpenTelemetry with lib-commons (MANDATORY for Go)
 
-All Go services **MUST** integrate OpenTelemetry using `lib-commons/v2`. This ensures consistent observability patterns across all Lerian Studio services.
+All Go services **MUST** integrate OpenTelemetry using `lib-commons/v5`. This ensures consistent observability patterns across all Lerian Studio services.
 
 > **Reference**: See `dev-team/docs/standards/golang.md` for complete lib-commons integration patterns.
 
@@ -250,12 +250,12 @@ All Go services **MUST** integrate OpenTelemetry using `lib-commons/v2`. This en
 
 ```go
 import (
-    libCommons "github.com/LerianStudio/lib-commons/v2/commons"
-    libZap "github.com/LerianStudio/lib-commons/v2/commons/zap"           // Logger initialization (bootstrap only)
-    libLog "github.com/LerianStudio/lib-commons/v2/commons/log"           // Logger interface (services, routes, consumers)
-    libOpentelemetry "github.com/LerianStudio/lib-commons/v2/commons/opentelemetry"
-    libHTTP "github.com/LerianStudio/lib-commons/v2/commons/net/http"
-    libServer "github.com/LerianStudio/lib-commons/v2/commons/server"
+    libCommons "github.com/LerianStudio/lib-commons/v5/commons"
+    libZap "github.com/LerianStudio/lib-commons/v5/commons/zap"           // Logger initialization (bootstrap only)
+    libLog "github.com/LerianStudio/lib-commons/v5/commons/log"           // Logger interface (services, routes, consumers)
+    libOpentelemetry "github.com/LerianStudio/lib-commons/v5/commons/opentelemetry"
+    libHTTP "github.com/LerianStudio/lib-commons/v5/commons/net/http"
+    libServer "github.com/LerianStudio/lib-commons/v5/commons/server"
 )
 ```
 

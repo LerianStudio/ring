@@ -95,11 +95,11 @@ See **[shared-patterns/code-example-standards.md](../shared-patterns/code-exampl
 
 | Category | Use lib-commons |
 |----------|-----------------|
-| Logging | `libLog "github.com/LerianStudio/lib-commons/v2/commons/log"` |
+| Logging | `libLog "github.com/LerianStudio/lib-commons/v5/commons/log"` |
 | Config | `libCommons.SetConfigFromEnvVars()` |
-| HTTP | `libHTTP "github.com/LerianStudio/lib-commons/v2/commons/net/http"` |
-| Telemetry | `libOpentelemetry "github.com/LerianStudio/lib-commons/v2/commons/opentelemetry"` |
-| PostgreSQL | `libPostgres "github.com/LerianStudio/lib-commons/v2/commons/postgres"` |
+| HTTP | `libHTTP "github.com/LerianStudio/lib-commons/v5/commons/net/http"` |
+| Telemetry | `libOpentelemetry "github.com/LerianStudio/lib-commons/v5/commons/opentelemetry"` |
+| PostgreSQL | `libPostgres "github.com/LerianStudio/lib-commons/v5/commons/postgres"` |
 
 MUST NOT: Create custom logger, config loader, or HTTP helper in subtasks—use lib-commons.
 

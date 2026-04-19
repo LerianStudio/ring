@@ -12,7 +12,7 @@ See [multi-tenant.md § Canonical Model Compliance](../../docs/standards/golang/
 2. **Detection:** Check if any multi-tenant code exists (`MULTI_TENANT_ENABLED`, `tenant-manager` in go.mod, `TenantMiddleware`)
 3. **If multi-tenant code exists → run compliance audit:**
    - Config vars: MUST use the 14 canonical `MULTI_TENANT_*` names (not `TENANT_MANAGER_ADDRESS`, `TENANT_URL`, etc.) + `APPLICATION_NAME`
-   - Middleware: MUST use `tmmiddleware.NewTenantMiddleware` with `WithPG`/`WithMB` options from lib-commons v4
+   - Middleware: MUST use `tmmiddleware.NewTenantMiddleware` with `WithPG`/`WithMB` options from lib-commons v5
    - Route ordering: Auth MUST run before tenant middleware — per-route via `WhenEnabled` (not global `app.Use`)
    - Repositories: MUST use `tmcore.GetPGContext`/`tmcore.GetMBContext` (not static connections)
    - Redis: MUST use `valkey.GetKeyContext` for every key operation (including Lua script KEYS[]/ARGV[])
@@ -23,7 +23,7 @@ See [multi-tenant.md § Canonical Model Compliance](../../docs/standards/golang/
    - Non-canonical files: MUST NOT have custom tenant packages (`internal/tenant/`, `pkg/multitenancy/`, custom middleware). See [dev-multi-tenant SKILL.md § Phase 3](../dev-multi-tenant/SKILL.md#phase-3-non-canonical-file-detection-mandatory) for specific grep commands.
    - Each non-compliant item → ISSUE-XXX with severity based on impact
 4. **If multi-tenant code is MISSING entirely** → ISSUE-XXX (CRITICAL): "Service does not support multi-tenant mode. MUST run ring:dev-multi-tenant."
-5. **If non-compliant** → ISSUE-XXX per component: "Multi-tenant [component] is non-compliant. MUST be replaced with canonical lib-commons v4 pattern."
+5. **If non-compliant** → ISSUE-XXX per component: "Multi-tenant [component] is non-compliant. MUST be replaced with canonical lib-commons v5 pattern."
 6. **Backward compatibility:** Service MUST work with `MULTI_TENANT_ENABLED=false` (default) and without any `MULTI_TENANT_*` env vars
 
 ## Performance & Operational Readiness

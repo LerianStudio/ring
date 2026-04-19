@@ -269,7 +269,7 @@ These sections describe HOW to use the standards, not WHAT the standards are.
 |---|------------------|------|--------|-----------------|
 | 1 | Version | core.md | `#version` | Go 1.24+ |
 | 2 | Core Dependency: lib-commons | core.md | `#core-dependency-lib-commons-mandatory` | **HARD GATE:** No duplicate utils/helpers - use lib-commons |
-| 3 | Frameworks & Libraries | core.md | `#frameworks--libraries` | lib-commons v2, Fiber v2, pgx/v5, OpenTelemetry, zap, testify, gomock, **validator v10 migration (MANDATORY)** |
+| 3 | Frameworks & Libraries | core.md | `#frameworks--libraries` | lib-commons v5, Fiber v2, pgx/v5, OpenTelemetry, zap, testify, gomock, **validator v10 migration (MANDATORY)** |
 | 4 | Configuration | core.md | `#configuration` | Environment variable handling |
 | 5 | Database Naming Convention (snake_case) | core.md | `#database-naming-convention-snake-case-mandatory` | Table and column naming |
 | 6 | Database Migrations | core.md | `#database-migrations-mandatory` | golang-migrate requirement |

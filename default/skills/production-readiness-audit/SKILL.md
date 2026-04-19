@@ -52,7 +52,7 @@ Use this skill when:
 | 3 | **Route Organization** | Hexagonal structure, handler construction, route registration |
 | 4 | **Bootstrap & Initialization** | Staged startup, cleanup handlers, graceful shutdown |
 | 5 | **Runtime Safety** | Panic recovery, production mode handling |
-| 28 | **Core Dependencies & Frameworks** | lib-commons v2, framework version minimums, no custom utility duplication |
+| 28 | **Core Dependencies & Frameworks** | lib-commons v5, framework version minimums, no custom utility duplication |
 | 29 | **Naming Conventions** | snake_case DB, camelCase JSON body, snake_case query params |
 | 30 | **Domain Modeling** | ToEntity/FromEntity, always-valid constructors, private fields + getters |
 | 35 | **Nil/Null Safety** | Type assertions, nil map/pointer/channel, null guards, API response consistency |
@@ -2910,13 +2910,13 @@ Audit core dependency usage and framework compliance for production readiness.
 
 **Reference Implementation (GOOD):**
 ```go
-// go.mod with lib-commons v2 and required frameworks
+// go.mod with lib-commons v5 and required frameworks
 module github.com/company/project
 
 go 1.24
 
 require (
-    github.com/LerianStudio/lib-commons/v2 v2.x.x   // lib-commons present
+    github.com/LerianStudio/lib-commons/v5 v5.0.2   // lib-commons present
     github.com/gofiber/fiber/v2 v2.52.x               // Fiber v2
     gorm.io/gorm v1.25.x                              // GORM
     github.com/go-playground/validator/v10 v10.x.x     // Validator
@@ -2943,7 +2943,7 @@ func StartSpan(ctx context.Context, name string) (context.Context, trace.Span) {
 ```
 
 **Check Against Ring Standards For:**
-1. (HARD GATE) lib-commons v2 present in go.mod — this is mandatory per Ring standards
+1. (HARD GATE) lib-commons v5 present in go.mod — this is mandatory per Ring standards
 2. (HARD GATE) No custom utility packages that duplicate lib-commons functionality (check utils/, helpers/, common/)
 3. Go version 1.24+ in go.mod
 4. Fiber v2 framework present
@@ -2964,7 +2964,7 @@ func StartSpan(ctx context.Context, name string) (context.Context, trace.Span) {
 ## Core Dependencies & Frameworks Audit Findings
 
 ### Summary
-- lib-commons v2 present: Yes/No
+- lib-commons v5 present: Yes/No
 - Go version: X (minimum 1.24)
 - Required frameworks present: X/Y
 - Custom utility packages found: [list]
@@ -3475,8 +3475,8 @@ MultiTenantServiceAPIKey               string `env:"MULTI_TENANT_SERVICE_API_KEY
 MultiTenantCacheTTLSec                 int    `env:"MULTI_TENANT_CACHE_TTL_SEC" default:"120"`
 MultiTenantConnectionsCheckIntervalSec int    `env:"MULTI_TENANT_CONNECTIONS_CHECK_INTERVAL_SEC" default:"30"`
 
-// TenantMiddleware with multi-module WithPG/WithMB options from lib-commons v4
-import tmmiddleware "github.com/LerianStudio/lib-commons/v4/commons/tenant-manager/middleware"
+// TenantMiddleware with multi-module WithPG/WithMB options from lib-commons v5
+import tmmiddleware "github.com/LerianStudio/lib-commons/v5/commons/tenant-manager/middleware"
 
 ttMiddleware := tmmiddleware.NewTenantMiddleware(
     tmmiddleware.WithPG(pgOnboardingManager, constant.ModuleOnboarding),
@@ -3592,8 +3592,8 @@ s3Client.PutObject(ctx, "bucket", "object-key", body)  // WRONG: must use s3.Get
 // internal/middleware/tenant_middleware.go ← FORBIDDEN
 // pkg/multitenancy/pool.go             ← FORBIDDEN
 
-// BAD: lib-commons v2/v3 imports
-import tenantmanager "github.com/LerianStudio/lib-commons/v2/..."  // WRONG: must be v4
+// BAD: lib-commons v2/v3/v4 imports
+import tenantmanager "github.com/LerianStudio/lib-commons/v2/..."  // WRONG: must be v5
 
 // BAD: RabbitMQ with only X-Tenant-ID header (no vhost isolation)
 headers["X-Tenant-ID"] = tenantID  // Audit only, NOT isolation — must also use tmrabbitmq.Manager
@@ -3613,8 +3613,8 @@ headers["X-Tenant-ID"] = tenantID  // Audit only, NOT isolation — must also us
 HARD GATES (Score = 0 if any fails):
 1. (HARD GATE) Tenant ID extracted from JWT claims (not user-controlled headers/params) per multi-tenant.md
 2. (HARD GATE) All database queries use tenant-routed connections via tmcore.GetPGContext/tmcore.GetMBContext (not static connections or package-level singletons)
-3. (HARD GATE) TenantMiddleware with WithPG/WithMB from lib-commons v4 injects tenant into request context with module-specific connections
-4. (HARD GATE) lib-commons v4 (not v2/v3) for all tenant-manager sub-package imports — deprecated functions (WithPostgresManager, MultiPoolMiddleware, DualPoolMiddleware, ResolvePostgres, ResolveModuleDB, etc.) are NON-COMPLIANT
+3. (HARD GATE) TenantMiddleware with WithPG/WithMB from lib-commons v5 injects tenant into request context with module-specific connections
+4. (HARD GATE) lib-commons v5 (not v2/v3/v4) for all tenant-manager sub-package imports — deprecated functions (WithPostgresManager, MultiPoolMiddleware, DualPoolMiddleware, ResolvePostgres, ResolveModuleDB, etc.) are NON-COMPLIANT
 
 WARNINGS (does not zero the score, but flagged as HIGH):
 5. (WARNING) Non-canonical source implementation files detected: custom tenant resolvers, manual pool managers, or wrapper middleware in source paths (internal/, pkg/, cmd/) outside canonical lib-commons integration paths. Excludes docs, tests, fixtures, vendored code.
@@ -3689,9 +3689,9 @@ If either condition is missing, mark M2M section as N/A and do not deduct score.
 **Severity Ratings:**
 - CRITICAL: Queries using static connections instead of tenant-routed tmcore.GetPGContext/GetMBContext (HARD GATE violation)
 - CRITICAL: Tenant ID from user-controlled input (HARD GATE violation)
-- CRITICAL: Missing TenantMiddleware with WithPG/WithMB from lib-commons v4 (HARD GATE violation)
+- CRITICAL: Missing TenantMiddleware with WithPG/WithMB from lib-commons v5 (HARD GATE violation)
 - CRITICAL: Using deprecated functions (WithPostgresManager, MultiPoolMiddleware, DualPoolMiddleware, ResolvePostgres, ResolveModuleDB, etc.) — NON-COMPLIANT, MUST migrate to current API
-- CRITICAL: lib-commons v2/v3 imports instead of v4 (HARD GATE violation)
+- CRITICAL: lib-commons v2/v3/v4 imports instead of v5 (HARD GATE violation)
 - CRITICAL: Auth-after-tenant ordering — JWT not validated before Tenant Manager API call (security vulnerability)
 - CRITICAL: Global app.Use(tenantMiddleware) instead of per-route WhenEnabled composition (bypasses auth ordering)
 - HIGH: Non-canonical env var names (e.g., TENANT_MANAGER_URL instead of MULTI_TENANT_URL)
@@ -3717,7 +3717,7 @@ If either condition is missing, mark M2M section as N/A and do not deduct score.
 
 ### Summary
 - Multi-tenant detection: Yes/No/N/A
-- lib-commons version: v4 / v3 / v2 / Missing
+- lib-commons version: v5 / v4 / v3 / v2 / Missing
 - Tenant extraction: JWT / Header / Missing
 - TenantMiddleware (WithPG/WithMB): Yes / No / Custom / Missing
 - Auth-before-tenant ordering: Yes / No / Inconsistent

@@ -311,7 +311,7 @@ Remember:
 - ring:dev-service-discovery (Scans Go project for service/module/resource hierarchy)
 - ring:dev-dep-security-check (Audits dependency installations before execution)
 - ring:dev-llms-txt (Generates/audits llms.txt files per llmstxt.org spec)
-- ring:using-lib-commons (Reference for lib-commons v4.6.0, Lerian shared Go library)
+- ring:using-lib-commons (Reference for lib-commons v5.0.2, Lerian shared Go library)
 
 **Note:** Missing agents? Check `.claude-plugin/marketplace.json` for ring-dev-team plugin.
 
