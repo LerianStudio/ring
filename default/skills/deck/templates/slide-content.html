@@ -1,0 +1,105 @@
+<!-- ARCHETYPE: content (default / white) -->
+<!-- Use for: The workhorse. White background, eyebrow + h1 + lede, then a 2- or 3-column grid. -->
+<!-- Vast majority of deck body. Swap in KPIs, lists, tables as the content demands. -->
+<!-- HARD GATE: .body uses flex:1, grid uses flex:1 and min-height:0 so it fills the canvas. -->
+<section data-label="Portfolio" class="slide">
+  <div class="meta">
+    <div class="left">
+      <span class="wordmark">lerian<span class="dot"></span></span>
+      <span>&middot; Act 01 &mdash; Traction &amp; Product</span>
+    </div>
+    <div class="right"><span class="num"><span class="page-num"></span> / <span class="page-total"></span></span></div>
+  </div>
+
+  <div class="body">
+    <div class="eyebrow">Portfolio &mdash; Where We Stand</div>
+    <h1 style="margin-top: 28px; max-width: 1600px;">Complete portfolio for core banking in Brazil.</h1>
+    <p class="lede" style="margin-top: 24px; max-width: 1400px;">Eliminates the "you don't have product X" barrier in enterprise sales.</p>
+
+    <!-- 3-column portfolio matrix. flex:1 ensures the grid fills the remaining canvas. -->
+    <div style="flex: 1; min-height: 0; margin-top: 56px; display: flex; flex-direction: column;">
+      <div style="flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 1px solid var(--c-ink); border-bottom: 1px solid var(--c-rule); align-items: stretch;">
+
+        <!-- Column 1: Core Products -->
+        <div style="padding: 22px 28px 22px 0; border-right: 1px solid var(--c-rule); display: flex; flex-direction: column;">
+          <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 22px;">
+            <div style="font-family: 'Poppins', sans-serif; font-size: 72px; font-weight: 500; line-height: 1; letter-spacing: -0.03em;">6<span style="color: var(--c-accent-2);">.</span></div>
+            <div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-accent-2);">&#9679; Core products</div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-ink-3); margin-top: 2px;">Live in production</div>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 11px; font-size: 22px;">
+            <div><strong>Midaz</strong> <span class="prod-tag">Ledger</span></div>
+            <div><strong>Matcher</strong> <span class="prod-tag">Reconciliation</span></div>
+            <div><strong>Tracer</strong> <span class="prod-tag">Risk</span></div>
+            <div><strong>Flowker</strong> <span class="prod-tag">Orchestration</span></div>
+            <div><strong>Fetcher</strong> <span class="prod-tag">Ingestion</span></div>
+            <div><strong>Reporter</strong> <span class="prod-tag">Regulatory</span></div>
+          </div>
+        </div>
+
+        <!-- Column 2: Plugins -->
+        <div style="padding: 22px 28px; border-right: 1px solid var(--c-rule); display: flex; flex-direction: column;">
+          <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 22px;">
+            <div style="font-family: 'Poppins', sans-serif; font-size: 72px; font-weight: 500; line-height: 1; letter-spacing: -0.03em;">6<span style="color: var(--c-accent-2);">.</span></div>
+            <div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-accent-2);">&#9679; Plugins</div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-ink-3); margin-top: 2px;">Shipping today</div>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 11px; font-size: 22px;">
+            <div><strong>Pix Direto</strong> <span class="prod-tag">Lerian &middot; JD</span></div>
+            <div><strong>Pix Indireto</strong> <span class="prod-tag">via BTG</span></div>
+            <div><strong>TED Direto</strong> <span class="prod-tag">Lerian &middot; JD</span></div>
+            <div><strong>CRM</strong></div>
+            <div><strong>Fees</strong></div>
+            <div><strong>Identity &amp; Auth</strong></div>
+          </div>
+        </div>
+
+        <!-- Column 3: Pipeline -->
+        <div style="padding: 22px 0 22px 28px; display: flex; flex-direction: column;">
+          <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 22px;">
+            <div style="font-family: 'Poppins', sans-serif; font-size: 72px; font-weight: 500; line-height: 1; letter-spacing: -0.03em; color: var(--c-ink-2);">9<span style="color: var(--c-ink-3);">.</span></div>
+            <div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-ink-3);">&#9675; In pipeline</div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-ink-3); margin-top: 2px;">Regulated BR stack</div>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px; font-size: 22px; color: var(--c-ink-2);">
+            <div><strong style="color: var(--c-ink-2); font-weight: 600;">Credit</strong> <span class="prod-tag">Decisioning, via 3rd parties</span></div>
+            <div><strong style="color: var(--c-ink-2); font-weight: 600;">Payments</strong> <span class="prod-tag">Rails</span></div>
+            <div><strong style="color: var(--c-ink-2); font-weight: 600;">BC Correios</strong> <span class="prod-tag">BACEN</span></div>
+            <div><strong style="color: var(--c-ink-2); font-weight: 600;">SIMBA</strong> <span class="prod-tag">COAF</span></div>
+            <div><strong style="color: var(--c-ink-2); font-weight: 600;">BacenJud Direto</strong> <span class="prod-tag">Judicial</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Caption strip -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 18px; font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--c-ink-3);">
+        <div>21 building blocks &middot; one platform</div>
+        <div>Core banking coverage <span style="color: var(--c-accent-2);">&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>Confidential &mdash; Lerian Board</div>
+    <div>April 22, 2026</div>
+  </div>
+
+  <!-- Archetype-local classes: prefix with archetype name to avoid collision -->
+  <style>
+    /* Inline product-category tag used inside list items. JetBrains Mono micro-label. */
+    .prod-tag {
+      color: var(--c-ink-3);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+  </style>
+</section>
+<!-- END ARCHETYPE: content -->

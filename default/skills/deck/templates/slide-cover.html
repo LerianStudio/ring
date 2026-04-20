@@ -1,0 +1,46 @@
+<!-- ARCHETYPE: cover -->
+<!-- Use for: Deck opening. Wordmark, meeting context, title, directors/observers roster. -->
+<!-- Once per deck. MUST reference /assets/lerian-wordmark.svg (not .png). -->
+<!-- Asset pattern: archetype uses <img src="/assets/..."> (absolute path, cacheable, simple). -->
+<!-- deck.html's cover slide inlines the SVG instead — both patterns are acceptable; pick one per deck. -->
+<section data-label="Cover" class="slide" style="padding: 64px 100px 40px;">
+  <div class="meta">
+    <div class="left">
+      <span class="dot"></span>
+      <span>Confidential</span>
+    </div>
+    <div class="right"><span>April 22, 2026</span></div>
+  </div>
+
+  <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding-top: 60px;">
+    <div class="eyebrow" style="margin-bottom: 40px;">Board Meeting &#8470; 01 &mdash; Session Materials</div>
+
+    <div style="display: flex; align-items: flex-end; gap: 56px;">
+      <img src="/assets/lerian-wordmark.svg" alt="Lerian" style="height: 220px; width: auto; display: block;" />
+    </div>
+
+    <div style="font-family: 'Poppins', sans-serif; font-weight: 500; font-size: 72px; line-height: 1.02; letter-spacing: -0.03em; margin-top: 56px; max-width: 1500px;">
+      Where we are, where we are going, and the four decisions we need your pushback on.
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; padding-top: 40px; border-top: 1px solid var(--c-rule);">
+    <div>
+      <div class="eyebrow" style="margin-bottom: 14px;">Directors</div>
+      <div style="font-size: 26px; color: var(--c-ink); line-height: 1.4;">
+        Fred Amaral<span style="color: var(--c-ink-3);"> &middot; CEO</span>&nbsp;&nbsp;
+        Monica Saggioro<span style="color: var(--c-ink-3);"> &middot; Maya Capital</span>&nbsp;&nbsp;
+        <span style="color: var(--c-ink-3);">3rd Director TBD</span>
+      </div>
+    </div>
+    <div>
+      <div class="eyebrow" style="margin-bottom: 14px;">Observers</div>
+      <div style="font-size: 26px; color: var(--c-ink); line-height: 1.4;">
+        Kevin Efrusy<span style="color: var(--c-ink-3);"> &middot; Ordinary</span>&nbsp;&nbsp;
+        Diego<span style="color: var(--c-ink-3);"> &middot; Supera</span>&nbsp;&nbsp;
+        Pedro Teo<span style="color: var(--c-ink-3);"> &middot; Norte</span>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- END ARCHETYPE: cover -->

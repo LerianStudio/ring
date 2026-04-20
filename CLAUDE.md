@@ -472,7 +472,7 @@ Ring is a comprehensive skills library and workflow system for AI agents that en
 
 **Active Plugins:**
 
-- **ring-default**: 23 core skills, 10 specialized agents
+- **ring-default**: 24 core skills, 10 specialized agents
 - **ring-dev-team**: 33 development skills, 15 developer agents (Backend Go, Backend TypeScript, DevOps, Frontend TypeScript, Frontend Designer, Frontend Engineer, Helm, Performance Reviewer, QA Backend, QA Frontend, SRE, UI Engineer, Prompt Quality Reviewer, Multi-Tenant Reviewer, lib-commons Reviewer)
 - **ring-pm-team**: 16 product management skills, 4 research agents (includes delivery planning + status tracking + Product Designer + Lerian Map Management)
 - **ring-pmo-team**: 9 PMO skills, 6 PMO agents (Portfolio Manager, Resource Planner, Risk Analyst, Governance Specialist, Executive Reporter, Delivery Reporter)
@@ -481,7 +481,7 @@ Ring is a comprehensive skills library and workflow system for AI agents that en
 
 **Note:** Plugin versions are managed in `.claude-plugin/marketplace.json`
 
-**Total: 94 skills (23 + 33 + 16 + 9 + 7 + 6) across 6 plugins**
+**Total: 95 skills (24 + 33 + 16 + 9 + 7 + 6) across 6 plugins**
 **Total: 41 agents (10 + 15 + 4 + 6 + 3 + 3) across 6 plugins**
 
 The architecture uses markdown-based skill definitions with YAML frontmatter, auto-discovered at session start via hooks, and executed through Claude Code's native Skill/Task tools.
@@ -502,7 +502,7 @@ See [README.md](README.md#installation) for detailed installation instructions.
 
 | Plugin           | Path           | Contents                         |
 | ---------------- | -------------- | -------------------------------- |
-| ring-default     | `default/`     | 23 skills, 10 agents              |
+| ring-default     | `default/`     | 24 skills, 10 agents              |
 | ring-dev-team    | `dev-team/`    | 33 skills, 15 agents              |
 | ring-pm-team     | `pm-team/`     | 16 skills, 4 agents               |
 | ring-pmo-team    | `pmo-team/`    | 9 skills, 6 agents                |
@@ -634,7 +634,7 @@ The system loads at SessionStart (from `default/` plugin):
 - Repository: Monorepo marketplace with multiple plugin collections
 - Active plugins: 6 (`ring-default`, `ring-dev-team`, `ring-pm-team`, `ring-pmo-team`, `ring-finops-team`, `ring-tw-team`)
 - Plugin versions: See `.claude-plugin/marketplace.json`
-- Core plugin: `default/` (23 skills, 10 agents)
+- Core plugin: `default/` (24 skills, 10 agents)
 - Developer agents: `dev-team/` (33 skills, 15 agents)
 - Product planning: `pm-team/` (16 skills, 4 agents)
 - PMO specialists: `pmo-team/` (9 skills, 6 agents)

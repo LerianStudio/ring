@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Presenter View</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: dark; }
+    html, body {
+      margin: 0; height: 100vh;
+      background: #0A0B0C; color: #FFF;
+      font-family: 'IBM Plex Serif', Georgia, serif;
+      overflow: hidden;
+    }
+
+    .status-banner {
+      position: fixed; top: 0; left: 0; right: 0;
+      padding: 8px; text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+      z-index: 10;
+      transition: transform 200ms;
+      transform: translateY(-100%);
+    }
+    .status-banner.visible { transform: translateY(0); }
+    .status-banner.error   { background: #FF6760; color: #191A1B; }
+    .status-banner.ok      { background: #50F769; color: #191A1B; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 60% 40%;
+      height: 100vh;
+    }
+
+    /* Left: current slide notes */
+    .notes-panel {
+      padding: 48px;
+      overflow-y: auto;
+      font-size: 32px;
+      line-height: 1.5;
+      font-weight: 500;
+    }
+    .notes-panel p { margin: 0 0 1em; }
+    .notes-panel .label {
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+      font-size: 13px; letter-spacing: 2px;
+      color: #FEED02;
+      margin-bottom: 16px;
+    }
+    .notes-panel .label .dim { color: #8B877C; }
+
+    /* Right: current + next thumbnails + timer */
+    .right-panel {
+      display: grid;
+      grid-template-rows: 1fr 1fr auto;
+      gap: 16px;
+      padding: 24px;
+      border-left: 1px solid #222;
+    }
+    .thumb-wrap {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #222;
+      background: #000;
+    }
+    .thumb-wrap .thumb-label {
+      position: absolute; top: 12px; left: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+      font-size: 11px; letter-spacing: 2px;
+      color: #FEED02;
+      background: rgba(10,11,12,0.8);
+      padding: 4px 8px;
+      z-index: 2;
+    }
+    .thumb-wrap iframe {
+      border: 0;
+      /* 1920 * 0.25 = 480 (fits typical presenter pane) — upscale via scale(0.25) */
+      width: 400%;
+      height: 400%;
+      transform: scale(0.25);
+      transform-origin: top left;
+      pointer-events: none;
+      background: #FFF;
+    }
+    .thumb-wrap.dimmed { opacity: 0.5; transition: opacity 200ms; }
+    .thumb-wrap.end .thumb-label { color: #8B877C; }
+
+    .timer {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 72px; font-weight: 500;
+      text-align: center;
+      padding: 24px;
+      letter-spacing: 4px;
+      border-top: 1px solid #222;
+    }
+    .timer .hint {
+      display: block;
+      margin-top: 10px;
+      font-size: 12px; letter-spacing: 2px;
+      color: #8B877C;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="status-banner" id="status-banner"></div>
+
+  <div class="layout">
+
+    <div class="notes-panel" id="notes-panel">
+      <div class="label">
+        Speaker Notes &middot;
+        Slide <span id="notes-index">1</span>
+        <span class="dim">/ <span id="notes-total">?</span></span>
+      </div>
+      <div id="notes-body">Loading notes from /deck.html &hellip;</div>
+    </div>
+
+    <div class="right-panel">
+      <div class="thumb-wrap" id="thumb-current-wrap">
+        <div class="thumb-label">Current</div>
+        <iframe id="thumb-current" src="/?export=true" title="Current slide"></iframe>
+      </div>
+      <div class="thumb-wrap" id="thumb-next-wrap">
+        <div class="thumb-label">Next</div>
+        <iframe id="thumb-next" src="/?export=true" title="Next slide"></iframe>
+      </div>
+      <div class="timer">
+        <span id="timer">00:00:00</span>
+        <span class="hint">Press R to reset</span>
+      </div>
+    </div>
+  </div>
+
+  <script src="/assets/sync-client.js"></script>
+  <script src="/assets/presenter-view.js"></script>
+</body>
+</html>

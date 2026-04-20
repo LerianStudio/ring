@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Deck Remote</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: dark; }
+    html, body {
+      margin: 0; min-height: 100vh;
+      background: #0A0B0C; color: #FFF;
+      font-family: 'Poppins', -apple-system, sans-serif;
+      touch-action: manipulation;
+      overscroll-behavior: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .app {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      height: 100dvh;
+      padding:
+        env(safe-area-inset-top)
+        env(safe-area-inset-right)
+        env(safe-area-inset-bottom)
+        env(safe-area-inset-left);
+      box-sizing: border-box;
+    }
+
+    header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #222;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header .title {
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+      font-size: 12px; letter-spacing: 2px;
+      color: #8B877C;
+    }
+    header .indicator {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px; font-weight: 500;
+    }
+    header .indicator .current {
+      color: #FEED02;
+      font-size: 18px;
+    }
+
+    main {
+      display: grid;
+      grid-template-rows: 1fr 1fr;
+      gap: 16px;
+      padding: 16px;
+    }
+
+    button {
+      font-family: 'Poppins', sans-serif;
+      border: 1px solid #222;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 20px;
+      color: #FFF;
+      background: #191A1B;
+      cursor: pointer;
+      transition: transform 80ms, background 120ms;
+      min-height: 96px;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    button:active { transform: scale(0.97); background: #222; }
+    button:focus-visible { outline: 2px solid #FEED02; outline-offset: 2px; }
+    button.primary {
+      background: #FEED02;
+      color: #191A1B;
+      border-color: #FEED02;
+    }
+    button.primary:active { background: #FFE000; }
+    button.danger.active {
+      background: #FF6760;
+      color: #191A1B;
+      border-color: #FF6760;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    footer {
+      padding: 12px 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      border-top: 1px solid #222;
+    }
+    footer button {
+      min-height: 56px;
+      font-size: 16px;
+    }
+
+    .status-banner {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      padding: 12px;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; letter-spacing: 2px; text-transform: uppercase;
+      z-index: 10;
+      transition: transform 200ms;
+      transform: translateY(-100%);
+    }
+    .status-banner.visible { transform: translateY(calc(env(safe-area-inset-top) + 0px)); }
+    .status-banner.error   { background: #FF6760; color: #191A1B; }
+    .status-banner.ok      { background: #50F769; color: #191A1B; }
+
+    button[disabled] { opacity: 0.4; cursor: not-allowed; }
+
+    #wakelock-status {
+      display: block;
+      margin-top: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: #8B877C;
+      min-height: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="status-banner" id="status-banner"></div>
+
+  <div class="app">
+
+    <header>
+      <div class="title">
+        Lerian Deck Remote
+        <span id="wakelock-status" aria-live="polite"></span>
+      </div>
+      <div class="indicator">
+        <span class="current" id="current-slide">&mdash;</span>
+        / <span id="total-slides">&mdash;</span>
+      </div>
+    </header>
+
+    <main>
+      <div class="row">
+        <button type="button" id="btn-prev"    aria-label="Previous slide">&larr; Prev</button>
+        <button type="button" id="btn-next" class="primary" aria-label="Next slide">Next &rarr;</button>
+      </div>
+      <div class="row">
+        <button type="button" id="btn-blank" class="danger" aria-label="Blank screen">Blank</button>
+        <button type="button" id="btn-goto"   aria-label="Go to slide number">Go to&hellip;</button>
+      </div>
+    </main>
+
+    <footer>
+      <button type="button" id="btn-first" aria-label="Go to first slide">&#8676; First</button>
+      <button type="button" id="btn-last"  aria-label="Go to last slide">Last &#8677;</button>
+    </footer>
+
+  </div>
+
+  <script src="/assets/sync-client.js"></script>
+  <script src="/assets/remote-control.js"></script>
+</body>
+</html>

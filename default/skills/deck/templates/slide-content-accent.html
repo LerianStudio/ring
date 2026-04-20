@@ -1,0 +1,47 @@
+<!-- ARCHETYPE: content-accent -->
+<!-- Use for: Punctuation slides. Amarelo background, black text. Full-slide single statement. -->
+<!-- Used sparingly. The reference uses .slide.accent almost exclusively for act dividers; -->
+<!-- this archetype extends the pattern to a full content slide when the moment deserves it. -->
+<section data-label="Appendix Transition" class="slide accent">
+  <div class="meta">
+    <div class="left"><span class="wordmark">lerian<span class="dot"></span></span></div>
+    <div class="right"><span class="num"><span class="page-num"></span> / <span class="page-total"></span></span></div>
+  </div>
+
+  <div class="body">
+    <div class="eyebrow">Strategic Moment</div>
+
+    <!-- Hero statement filling the canvas. flex:1 on the wrapper expands into .body. -->
+    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+      <div style="font-family: 'Poppins', sans-serif; font-size: 150px; font-weight: 500; line-height: 0.95; letter-spacing: -0.04em; color: var(--c-accent-ink);">
+        Billing Day One.<br/>Reported revenue = real cash.
+      </div>
+      <p class="lede" style="margin-top: 48px; max-width: 1400px; color: rgba(25,26,27,0.78);">
+        No grace period. No deferred recognition. Every client we sign starts paying the month the contract executes.
+      </p>
+    </div>
+
+    <!-- Three supporting proof points in a row. Content-sized, no forced heights. -->
+    <!-- Uses canonical .kpi.accent modifier — defined in deck.html primitives. -->
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 40px; padding-top: 32px; border-top: 1px solid rgba(25,26,27,0.18); flex-shrink: 0;">
+      <div class="kpi accent">
+        <div class="value">100%</div>
+        <div class="cap">of contracts billed Day One</div>
+      </div>
+      <div class="kpi accent">
+        <div class="value">0 days</div>
+        <div class="cap">Grace period &middot; deferred revenue</div>
+      </div>
+      <div class="kpi accent">
+        <div class="value">20&ndash;32 mo</div>
+        <div class="cap">Runway &middot; gross to net-of-revenue</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>Confidential &mdash; Lerian Board</div>
+    <div>April 22, 2026</div>
+  </div>
+</section>
+<!-- END ARCHETYPE: content-accent -->

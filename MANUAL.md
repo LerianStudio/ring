@@ -1,6 +1,6 @@
 # Ring Marketplace Manual
 
-Quick reference guide for the Ring skills library and workflow system. This monorepo provides 6 plugins with 94 skills and 41 agents for enforcing proven software engineering practices across the entire software delivery value chain.
+Quick reference guide for the Ring skills library and workflow system. This monorepo provides 6 plugins with 95 skills and 41 agents for enforcing proven software engineering practices across the entire software delivery value chain.
 
 ---
 
@@ -13,7 +13,7 @@ Quick reference guide for the Ring skills library and workflow system. This mono
 │                                                                                    │
 │  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐      │
 │  │ ring-default  │  │ ring-dev-team │  │ ring-pm-team  │  │ring-finops-   │      │
-│  │  Skills(23)   │  │  Skills(33)   │  │  Skills(16)   │  │  team         │      │
+│  │  Skills(24)   │  │  Skills(33)   │  │  Skills(16)   │  │  team         │      │
 │  │  Agents(10)   │  │  Agents(15)   │  │  Agents(4)    │  │  Skills(7)    │      │
 │  │               │  │               │  │               │  │  Agents(3)    │      │
 │  └───────────────┘  └───────────────┘  └───────────────┘  └───────────────┘      │
@@ -74,7 +74,7 @@ Ring is auto-loaded at session start. Two ways to invoke Ring capabilities:
 
 ## 💡 About Skills
 
-Skills (94) are the primary invocation mechanism for Ring. They can be invoked directly by users (`Skill tool: "ring:skill-name"`) or applied automatically by Claude Code when it detects they're applicable. They handle testing, debugging, verification, planning, code review enforcement, and more.
+Skills (95) are the primary invocation mechanism for Ring. They can be invoked directly by users (`Skill tool: "ring:skill-name"`) or applied automatically by Claude Code when it detects they're applicable. They handle testing, debugging, verification, planning, code review enforcement, and more.
 
 Examples: ring:test-driven-development, ring:systematic-debugging, ring:codereview, ring:production-readiness-audit (44-dimension audit, up to 10 explorers per batch, incremental report 0-430, max 440 with multi-tenant; see [default/skills/production-readiness-audit/SKILL.md](default/skills/production-readiness-audit/SKILL.md)), etc.
 
@@ -267,6 +267,22 @@ Runs in parallel:
 Consolidated report with recommendations
 ```
 
+### Creating a Lerian-branded presentation
+
+`ring:deck` scaffolds a self-contained Node project with dev server, presenter view, mobile remote, and PDF export. Use for board decks, investor updates, conference talks, all-hands presentations.
+
+**Trigger phrases:** "make a deck", "board deck", "investor deck", "slide deck"
+
+**Example:**
+
+> **User:** Build me a board deck for Q2 — 15 slides, strategic overview + financials + product roadmap.
+>
+> **Claude:** [invokes ring:deck, scaffolds `2026-q2-board/`, composes 15 slides across cover/agenda/act-divider/content/content-dark/appendix archetypes, embeds speaker notes, prints next-steps]
+
+**Output:** `<deck-name>/deck.html` + tooling. `pnpm dev` to present; `pnpm export` for PDF.
+
+See [default/skills/deck/SKILL.md](default/skills/deck/SKILL.md) for the full reference.
+
 ---
 
 ## 🎓 Mandatory Rules
@@ -342,7 +358,7 @@ These enforce quality standards:
 ### Session Startup
 
 1. SessionStart hook runs automatically
-2. All 94 skills are auto-discovered and available
+2. All 95 skills are auto-discovered and available
 3. `ring:using-ring` workflow is activated (skill checking is now mandatory)
 
 ### Agent Dispatching

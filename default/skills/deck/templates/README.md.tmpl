@@ -1,0 +1,54 @@
+# {{DECK_TITLE}}
+
+Lerian-branded editorial presentation. Scaffolded with [`ring:deck`](https://github.com/LerianStudio/ring).
+
+## Run
+
+```bash
+cd {{DECK_NAME}}
+pnpm install     # or: npm install
+pnpm dev         # boots http://localhost:7007
+```
+
+## Present
+
+- **Main deck:** <http://localhost:7007>
+- **Presenter view:** <http://localhost:7007/presenter> (open on second screen)
+- **Remote:** `http://<your-LAN-IP>:7007/remote` (open on phone, same Wi-Fi)
+
+### Keyboard controls (main deck)
+
+| Key | Action |
+| --- | --- |
+| `→` or `Space` | Next slide |
+| `←` | Previous slide |
+| `F` | Toggle fullscreen |
+| `S` | Toggle speaker notes overlay |
+| `G` | Go to slide number |
+| `B` | Blank screen |
+| `Esc` | Exit fullscreen / close overlay |
+
+### Phone remote
+
+Find your machine's LAN IP (`ipconfig` on Windows, `ifconfig` on macOS/Linux), open `http://<ip>:7007/remote` on a phone connected to the same Wi-Fi. Buttons: previous, next, blank, go-to.
+
+**Note:** local network only, no authentication. Do not expose port 7007 publicly.
+
+## Export to PDF
+
+```bash
+pnpm export              # uses bundled Chromium (~200MB first run)
+pnpm export:chrome       # uses system Chrome (~50MB, faster)
+```
+
+Output: `./deck.pdf` at 1920×1080 per page.
+
+## Editing
+
+- **Content:** edit `deck.html`. Save triggers live reload on all connected clients.
+- **Speaker notes:** update the `<script type="application/json" id="speaker-notes">` block in `deck.html`. One entry per slide, indexed in `<section>` order.
+- **Slides:** each `<section class="slide">` is one slide. Archetypes documented in `ring:deck`'s `references/slide-archetypes.md`.
+
+## License
+
+Apache License 2.0. See [LICENSE](./LICENSE).

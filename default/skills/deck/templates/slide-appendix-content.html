@@ -1,0 +1,63 @@
+<!-- ARCHETYPE: appendix-content -->
+<!-- Use for: Appendix body slides. Same grid discipline as slide-content.html, but: -->
+<!-- meta.right reads "A1 / 8" (letter-indexed, not integer) and meta.left prefixes "Appendix A1". -->
+<!-- Lettered pagination is STATIC; runtime does NOT overwrite this one. -->
+<!-- Typical content: 3-up card grid of dense summaries. -->
+<section data-label="A1 Side Letters" class="slide">
+  <div class="meta">
+    <div class="left">
+      <span class="wordmark">lerian<span class="dot"></span></span>
+      <span>&middot; Appendix A1</span>
+    </div>
+    <div class="right"><span>A1 / 8</span></div>
+  </div>
+
+  <div class="body">
+    <div class="eyebrow">Appendix A1</div>
+    <h1 style="margin-top: 28px; max-width: 1600px;">Side letters &mdash; detailed terms.</h1>
+
+    <!-- 3-card grid. flex:1 + min-height:0 + align-items:stretch = equal-height cards sized by content. -->
+    <div style="flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 64px; align-items: stretch;">
+
+      <div class="appendix-card">
+        <div class="eyebrow" style="margin-bottom: 18px;">Maya Capital</div>
+        <div class="appendix-card-title" style="font-size: 32px;">Board seat + Observer + Major Investor rights locked.</div>
+      </div>
+
+      <div class="appendix-card">
+        <div class="eyebrow" style="margin-bottom: 18px;">Norte Ventures</div>
+        <div class="appendix-card-title" style="font-size: 28px;">Put option at $1.00 &middot; ROFO &middot; Co-sale rights.</div>
+      </div>
+
+      <div class="appendix-card">
+        <div class="eyebrow" style="margin-bottom: 18px;">BTG</div>
+        <div class="appendix-card-title" style="font-size: 24px;">Put vs Company &amp; founders &middot; Credit line match &gt; $200K &middot; Anti-dilution &middot; Tag-along &middot; ICC S&atilde;o Paulo arbitration.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>Confidential &mdash; Lerian Board</div>
+    <div>April 22, 2026</div>
+  </div>
+
+  <!-- Archetype-local classes: prefix with archetype name to avoid collision -->
+  <style>
+    /* Appendix-card: paper-background summary block. Content drives height. */
+    .appendix-card {
+      background: var(--c-bg-2);
+      padding: 40px 36px;
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+    }
+    .appendix-card-title {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+      color: var(--c-ink);
+    }
+  </style>
+</section>
+<!-- END ARCHETYPE: appendix-content -->

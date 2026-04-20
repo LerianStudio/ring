@@ -325,7 +325,7 @@ No "should work" → Only "does work" with proof
 
 - `ring:gandalf-webhook` - Send tasks to Gandalf (AI team member) via webhook for Slack, Google Workspace, and Jira interactions
 
-**Session & Learning (5):**
+**Session & Learning (6):**
 
 - `ring:explore-codebase` - Two-phase codebase exploration
 - `ring:release-guide` - Generate Ops Update Guide from git diff analysis
@@ -544,7 +544,7 @@ ring/                                  # Monorepo root
 ├── .claude-plugin/
 │   └── marketplace.json              # Multi-plugin marketplace config (6 active plugins)
 ├── default/                          # Core Ring plugin (ring-default)
-│   ├── skills/                       # 23 core skills
+│   ├── skills/                       # 24 core skills
 │   │   ├── skill-name/
 │   │   │   └── SKILL.md             # Skill definition with frontmatter
 │   │   └── shared-patterns/         # Universal patterns (15 patterns)

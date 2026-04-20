@@ -1,0 +1,1092 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1920, initial-scale=1">
+  <title>{{DECK_TITLE}}</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Speaker notes: flat array of strings, indexed by <section> order.
+       Array length MUST match <section> count inside <deck-stage>.
+       See references/speaker-notes.md for schema and writing voice. -->
+  <script type="application/json" id="speaker-notes">
+  [
+    "Good morning. Before we step into the material, a quick frame on what today is. Ninety minutes, split roughly in half. The first half is report — portfolio, financials, GTM, the facts on the ground. The second half is debate — four strategic discussions where I actually need your pushback. The slides are the prop, not the point; the conversation is the point. Push back wherever something does not add up.",
+    "Map of where we are going. Five acts. Twenty minutes on traction and product, ten on financials, ten on GTM, forty-five on the four strategic discussions — that row is where I need your time — and five minutes at the end on capital strategy as an open question. I want to protect the debate window, so I will move fast through the report acts. Stop me if I skip something you want to dwell on.",
+    "Act one. Traction and product. The theme of this act is the portfolio baseline — where the core banking stack stands today, who is deploying it, and how we compare competitively. The objective is to put the you-do-not-have-product-X objection to bed so we can spend the real time on the forward-looking discussions. Five slides, roughly twenty minutes.",
+    "Let me show you what is actually shipping. Six core products in production — Midaz, Matcher, Tracer, Flowker, Fetcher, Reporter — that is the full core banking stack. Plus six plugins live today, including Pix Direto and TED Direto. The nine in the pipeline are the regulated Brazilian stack that takes time — Credit, Payments, BC Correios, SIMBA, BacenJud. Takeaway: twenty-one building blocks on one platform. The portfolio objection is dead.",
+    "Discussion one. We have been calling this Vercel for financial services. Client deploys our products plus their own applications on Lerian infrastructure — three tiers, from managed to full SaaS. Seventy percent of new logos already want this. The question is not whether. It is timing, positioning, and whether we should reframe the company around it. Three questions up on the right. Where are we wrong?",
+    "Capital strategy. This is an open question, not an ask. Runway is twenty months gross, thirty-two months net of revenue. Pipeline is five point nine million reais active. The Cloud thesis is at inflection. What I want your perspective on is timing — when does the next round make sense given where these three numbers are heading? I am not raising today. I want your read.",
+    "Billing day one. Reported revenue equals real cash. No grace period, no deferred recognition, every client we sign starts paying the month the contract executes. One hundred percent of contracts, zero days of grace, twenty to thirty-two months of runway depending on whether you strip revenue out. Different from most SaaS P and Ls you read. Worth internalizing before we get to the financials.",
+    "MRR composition. One point two million reais a month, and the story is the mix. Platform — our Cloud product — is already thirty-eight percent, up from four percent twelve months ago. Core products thirty-four. Plugins eighteen. Services ten and shrinking. Top five accounts on the right — JD Bank and BTG leading on platform, which is exactly the motion we want to scale. The Cloud thesis is not theoretical — it is already where the growth lives.",
+    "We are past the main deck. What follows is context available for questions — eight sections covering side letters, ESOP mechanics, pipeline detail, security posture, product roadmap, org structure, top risks, and governance. Not presented. Grab any section you want to dig into; the lettered pagination makes it navigable.",
+    "Appendix one — side letters. Three investors, three different sets of rights. Maya Capital holds a board seat plus observer plus major-investor rights — that is the most active protection in the stack. Norte Ventures has a put option at one dollar, right of first offer, and co-sale. BTG has put rights versus the company and founders, credit line match above two hundred thousand dollars, anti-dilution, tag-along, and ICC Sao Paulo arbitration. Grab any of these if the board wants to stress test."
+  ]
+  </script>
+
+  <style>
+    /* ============================================================
+       LERIAN STANDARD — DO NOT MODIFY ABOVE THIS LINE
+       Content authoring starts at <deck-stage> below.
+       Tokens, primitives, and chrome rules are canonical per
+       default/skills/deck/references/*.md. Drift is a gate failure.
+       ============================================================ */
+
+    /* -- Design tokens (mirrors references/design-tokens.md verbatim) -- */
+    :root {
+      /* Ink */
+      --c-ink:       #191A1B;
+      --c-ink-2:     #3E3C37;
+      --c-ink-3:     #8B877C;
+      --c-ink-inv:   #FFFFFF;
+
+      /* Surfaces */
+      --c-bg:        #FFFFFF;
+      --c-bg-2:      #F2F2F2;
+      --c-card:      #FFFFFF;
+      --c-panel:     #191A1B;
+
+      /* Rules */
+      --c-rule:      #CECECE;
+      --c-rule-2:    #F2F2F2;
+
+      /* Accent — Lerian Amarelo */
+      --c-accent:    #FEED02;
+      --c-accent-ink:#191A1B;
+      --c-accent-2:  #50F769;
+
+      /* Signal — canon tokens reserved for future archetypes; do NOT prune as lint dead-code */
+      --c-green:     #50F769;
+      --c-red:       #FF6760;
+      --c-blue:      #2ED8FE;
+
+      /* Type scale (1920x1080) — --t-display and --t-mega are canon, reserved for act dividers / hero statements */
+      --t-eyebrow:   22px;
+      --t-small:     22px;
+      --t-body:      28px;
+      --t-body-lg:   34px;
+      --t-h3:        44px;
+      --t-h2:        56px;
+      --t-h1:        88px;
+      --t-display:   150px;
+      --t-mega:      240px;
+
+      /* Spacing */
+      --pad-x:       100px;
+      --pad-y:       90px;
+    }
+
+    [data-density="compact"] {
+      --pad-x:    80px;
+      --pad-y:    72px;
+      --t-body:   26px;
+      --t-body-lg:30px;
+      --t-h2:     48px;
+      --t-h1:     72px;
+    }
+
+    /* -- Base reset -- */
+    html, body {
+      margin: 0; padding: 0;
+      background: var(--c-bg);
+      color: var(--c-ink);
+      font-family: 'IBM Plex Serif', 'Inter', -apple-system, sans-serif;
+      font-feature-settings: "tnum";
+      -webkit-font-smoothing: antialiased;
+    }
+    h1, h2, h3 {
+      font-family: 'Poppins', -apple-system, sans-serif;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin: 0;
+    }
+    h1 { font-size: var(--t-h1); line-height: 0.98; }
+    h2 { font-size: var(--t-h2); line-height: 1.02; }
+    h3 { font-size: var(--t-h3); line-height: 1.1; }
+    p  { margin: 0; }
+    p.lede { font-size: var(--t-body-lg); line-height: 1.35; color: var(--c-ink-2); }
+
+    /* -- Slide canvas: 1920x1080, fixed -- */
+    deck-stage {
+      display: block;
+      width: 1920px;
+      height: 1080px;
+      position: relative;
+      margin: 0 auto;
+    }
+    deck-stage > section {
+      width: 1920px;
+      height: 1080px;
+      position: relative;
+      box-sizing: border-box;
+      padding: 64px var(--pad-x) 48px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Slide variants */
+    .slide         { background: var(--c-bg);     color: var(--c-ink); }
+    .slide.paper   { background: var(--c-bg-2);   color: var(--c-ink); }
+    .slide.dark    { background: var(--c-panel);  color: var(--c-ink-inv); }
+    .slide.accent  { background: var(--c-accent); color: var(--c-accent-ink); }
+
+    /* -- Meta bar (top) -- */
+    .meta {
+      display: flex; align-items: center; justify-content: space-between;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: var(--t-eyebrow);
+      letter-spacing: 0.04em;
+      color: var(--c-ink-3);
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .meta .left, .meta .right { display: flex; align-items: center; gap: 14px; }
+    .meta .num { font-weight: 500; color: var(--c-ink); }
+    .slide.dark   .meta { color: rgba(255,255,255,0.55); }
+    .slide.dark   .meta .num { color: var(--c-ink-inv); }
+    .slide.accent .meta { color: rgba(25,26,27,0.62); }
+    .slide.accent .meta .num { color: var(--c-ink); }
+
+    /* Wordmark — inline SVG scales via CSS; no FOUC, no extra request */
+    .wordmark {
+      display: inline-flex; align-items: baseline;
+      font-family: 'Poppins', sans-serif; font-weight: 600;
+      font-size: var(--t-eyebrow); letter-spacing: -0.02em;
+      text-transform: lowercase; color: inherit;
+    }
+    .wordmark .dot {
+      display: inline-block; width: 8px; height: 8px;
+      border-radius: 999px; background: var(--c-accent);
+      margin-left: 4px; transform: translateY(-1px);
+    }
+    .slide.accent .wordmark .dot { background: var(--c-ink); }
+
+    /* -- Footer (bottom) -- */
+    .footer {
+      display: flex; justify-content: space-between; align-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px;
+      letter-spacing: 0.04em;
+      color: var(--c-ink-3);
+      text-transform: uppercase;
+      border-top: 1px solid var(--c-rule);
+      padding-top: 16px;
+      flex-shrink: 0;
+    }
+    .slide.dark   .footer { color: rgba(255,255,255,0.42); border-color: rgba(255,255,255,0.12); }
+    .slide.accent .footer { color: rgba(25,26,27,0.55); border-color: rgba(25,26,27,0.18); }
+
+    /* -- Body (main content region — expands into remaining vertical space) -- */
+    .body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding-top: 32px;
+      padding-bottom: 20px;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* ================= UI PRIMITIVES =================
+       See references/ui-primitives.md — canonical definitions.
+       MUST NOT redefine with new base styles. Inline style="" allowed for positioning. */
+
+    /* eyebrow */
+    .eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: var(--t-eyebrow);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--c-ink-3);
+    }
+    .slide.dark   .eyebrow { color: var(--c-accent); }
+    .slide.accent .eyebrow { color: rgba(25,26,27,0.72); }
+
+    /* pill */
+    .pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px; letter-spacing: 0.04em; text-transform: uppercase;
+      padding: 8px 14px; border-radius: 999px;
+      border: 1px solid var(--c-rule); background: transparent; color: var(--c-ink-2);
+    }
+    .pill.solid  { background: var(--c-ink);    color: var(--c-ink-inv);    border-color: transparent; }
+    .pill.accent { background: var(--c-accent); color: var(--c-accent-ink); border-color: transparent; }
+
+    /* kpi — canonical; .kpi.dark and .kpi.accent are modifier variants for inline KPI strips */
+    .kpi { display: flex; flex-direction: column; gap: 10px; }
+    .kpi .label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px; letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--c-ink-3);
+    }
+    .kpi .value {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500; font-size: 96px; line-height: 0.95; letter-spacing: -0.03em;
+      color: var(--c-ink);
+    }
+    .kpi .sub { font-size: 22px; color: var(--c-ink-3); }
+    .slide.dark .kpi .value { color: var(--c-ink-inv); }
+    .slide.dark .kpi .label,
+    .slide.dark .kpi .sub   { color: rgba(255,255,255,0.55); }
+
+    /* kpi.dark — inline dark-strip KPI: Poppins 34px, white ink. For use inside .slide.dark. */
+    .kpi.dark {
+      font-family: 'Poppins', sans-serif;
+      font-size: 34px; font-weight: 500;
+      color: var(--c-ink-inv);
+      margin-top: 6px; letter-spacing: -0.01em;
+      display: block;
+    }
+
+    /* kpi.accent — Amarelo-bg full-slide KPI pair: big number + mono caption. For use inside .slide.accent. */
+    .kpi.accent {
+      display: block;
+    }
+    .kpi.accent .value {
+      font-family: 'Poppins', sans-serif;
+      font-size: 72px; font-weight: 500;
+      line-height: 0.95; letter-spacing: -0.03em;
+      color: var(--c-accent-ink);
+    }
+    .kpi.accent .cap {
+      margin-top: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px; letter-spacing: 0.08em; text-transform: uppercase;
+      color: rgba(25,26,27,0.72);
+    }
+
+    /* ticks */
+    ul.ticks { list-style: none; padding: 0; margin: 0; }
+    ul.ticks li {
+      position: relative; padding-left: 28px;
+      font-size: 22px; line-height: 1.5; margin-bottom: 18px;
+    }
+    ul.ticks li::before {
+      content: ""; width: 10px; height: 10px;
+      background: var(--c-accent);
+      display: block; border-radius: 2px;
+      position: absolute; left: 0; top: 12px;
+    }
+
+    /* numbered — canonical; ul.numbered.questions is the dark-card variant for Questions-for-the-board blocks */
+    ul.numbered {
+      list-style: none; padding: 0; margin: 0;
+      display: flex; flex-direction: column; gap: 24px;
+    }
+    ul.numbered li {
+      display: grid; grid-template-columns: 60px 1fr; gap: 28px; align-items: baseline;
+      font-size: var(--t-body); line-height: 1.4;
+    }
+    ul.numbered li .n {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px; letter-spacing: 0.06em;
+      color: var(--c-ink-3); padding-top: 8px;
+    }
+    ul.numbered li .t {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+    }
+    ul.numbered li .b {
+      font-size: var(--t-small); line-height: 1.5;
+      color: var(--c-ink-2); margin-top: 6px;
+    }
+
+    /* ul.numbered.questions — tighter gap, narrower number column, Amarelo index, inverse body for dark cards */
+    ul.numbered.questions { gap: 24px; }
+    ul.numbered.questions li {
+      grid-template-columns: 40px 1fr; gap: 14px;
+    }
+    ul.numbered.questions li .n {
+      color: var(--c-accent); font-size: 16px; padding-top: 8px;
+    }
+    ul.numbered.questions li .t {
+      font-size: 24px; color: var(--c-ink-inv); line-height: 1.25;
+    }
+    ul.numbered.questions li .b {
+      font-size: 17px; color: rgba(255,255,255,0.75);
+    }
+
+    /* table.grid */
+    table.grid {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: var(--t-small);
+    }
+    table.grid th, table.grid td {
+      text-align: left; padding: 18px 20px;
+      border-top: 1px solid var(--c-rule);
+      color: var(--c-ink-2);
+      vertical-align: top;
+    }
+    table.grid th {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px; letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--c-ink-3); font-weight: 500;
+      border-top: none;
+      padding-bottom: 14px;
+    }
+    table.grid tr:last-child td        { border-bottom: 1px solid var(--c-rule); }
+    table.grid td.num                  { font-family: 'JetBrains Mono', monospace; font-variant-numeric: tabular-nums; color: var(--c-ink); }
+    table.grid tr.hl td                { background: var(--c-accent); color: var(--c-accent-ink); font-weight: 500; }
+    table.grid tr.hl td.num            { color: var(--c-accent-ink); }
+    table.grid.compact th,
+    table.grid.compact td              { padding: 10px 16px; }
+    table.grid.compact th              { font-size: 14px; padding-bottom: 8px; }
+    table.grid.compact.tight th,
+    table.grid.compact.tight td        { padding: 7px 14px; font-size: 18px; }
+    table.grid.compact.tight td:last-child { font-size: 17px; color: var(--c-ink-2); }
+
+    /* ================= CHART PRIMITIVES (optional) =================
+       Remove the block below if no slide in this deck uses charts.
+       See references/chart-primitives.md for usage. */
+
+    /* stacked-horizontal-bar */
+    .chart-stacked-hbar { display: flex; flex-direction: column; }
+    .chart-stacked-hbar .bar {
+      display: flex; width: 100%; height: 64px;
+      border-radius: 4px; overflow: hidden; margin-bottom: 28px;
+    }
+    .chart-stacked-hbar .legend {
+      display: flex; flex-direction: column; gap: 8px;
+      font-size: 20px; flex: 1; justify-content: space-between;
+    }
+    .chart-stacked-hbar .legend .row {
+      display: flex; justify-content: space-between;
+      padding: 8px 0; border-bottom: 1px solid var(--c-rule);
+    }
+    .chart-stacked-hbar .legend .row:last-child { border-bottom: none; }
+    .chart-stacked-hbar .legend .row.muted,
+    .chart-stacked-hbar .legend .row.muted .num { color: var(--c-ink-3); }
+    .chart-stacked-hbar .sw {
+      display: inline-block; width: 14px; height: 14px;
+      margin-right: 12px; vertical-align: middle;
+    }
+    .chart-stacked-hbar .num {
+      font-family: 'JetBrains Mono', monospace; color: var(--c-ink);
+    }
+
+    /* vertical-bar-chart */
+    .chart-vbar { display: flex; flex-direction: column; }
+    .chart-vbar .caption { color: var(--c-ink-inv); font-size: 22px; margin-bottom: 28px; }
+    .chart-vbar .bars {
+      flex: 1; display: grid; gap: 18px; align-items: end;
+      padding-bottom: 60px; position: relative;
+      border-bottom: 1px solid rgba(255,255,255,0.18);
+    }
+    .chart-vbar .bar {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: flex-end; height: 100%;
+    }
+    .chart-vbar .bar .v {
+      font-family: 'JetBrains Mono', monospace; font-size: 20px;
+      color: var(--c-ink-inv); margin-bottom: 12px;
+    }
+    .chart-vbar .bar .fill {
+      width: 100%; background: rgba(255,255,255,0.85);
+      border-radius: 2px 2px 0 0;
+    }
+    .chart-vbar .bar.highlight .fill { background: var(--c-accent); }
+    .chart-vbar .axis {
+      display: grid; gap: 18px; padding-top: 14px;
+      font-family: 'JetBrains Mono', monospace; font-size: 18px;
+      color: rgba(255,255,255,0.55); text-align: center;
+    }
+    .slide:not(.dark) .chart-vbar .bars    { border-bottom-color: var(--c-rule); }
+    .slide:not(.dark) .chart-vbar .bar .fill { background: var(--c-ink); }
+    .slide:not(.dark) .chart-vbar .bar .v    { color: var(--c-ink); }
+    .slide:not(.dark) .chart-vbar .axis      { color: var(--c-ink-3); }
+    .slide:not(.dark) .chart-vbar .caption   { color: var(--c-ink); }
+
+    /* 2x2-matrix */
+    .chart-2x2 { position: relative; padding: 0 0 60px 60px; display: flex; flex-direction: column; }
+    .chart-2x2 .y-axis {
+      position: absolute; left: 0; top: 50%;
+      transform: translateY(-50%) rotate(-90deg);
+      transform-origin: left center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--c-ink-3); white-space: nowrap;
+    }
+    .chart-2x2 .x-axis {
+      position: absolute; left: 60px; right: 0; bottom: 0;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 16px; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--c-ink-3);
+    }
+    .chart-2x2 .plot {
+      position: relative; flex: 1; min-height: 440px;
+      border-left: 1px solid var(--c-ink); border-bottom: 1px solid var(--c-ink);
+    }
+    .chart-2x2 .v-rule {
+      position: absolute; left: 50%; top: 0; bottom: 0;
+      border-left: 1px dashed var(--c-rule);
+    }
+    .chart-2x2 .h-rule {
+      position: absolute; left: 0; right: 0; top: 50%;
+      border-top: 1px dashed var(--c-rule);
+    }
+    .chart-2x2 .entity { position: absolute; transform: translate(-50%, 50%); }
+    .chart-2x2 .entity .dot {
+      width: 20px; height: 20px; background: var(--c-ink-3); border-radius: 999px;
+    }
+    .chart-2x2 .entity .name {
+      font-family: 'Poppins', sans-serif; font-weight: 500;
+      font-size: 22px; margin-top: 8px; white-space: nowrap;
+    }
+    .chart-2x2 .entity .meta        { font-size: 16px; color: var(--c-ink-3); }
+    .chart-2x2 .entity .meta.strong { color: var(--c-ink); font-weight: 500; font-size: 18px; }
+    .chart-2x2 .entity.highlight .dot {
+      width: 36px; height: 36px; background: var(--c-accent); border: 3px solid var(--c-ink);
+    }
+    .chart-2x2 .entity.highlight .name { font-weight: 600; font-size: 28px; margin-top: 10px; }
+
+    /* funnel */
+    .chart-funnel .stages {
+      display: grid; gap: 0;
+      border-top: 1px solid var(--c-ink); border-bottom: 1px solid var(--c-ink);
+    }
+    .chart-funnel .stage { padding: 44px 28px; border-right: 1px solid var(--c-rule); }
+    .chart-funnel .stage:last-child { border-right: none; }
+    .chart-funnel .stage .label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--c-ink-3);
+    }
+    .chart-funnel .stage .count {
+      font-family: 'Poppins', sans-serif;
+      font-size: 72px; font-weight: 500; letter-spacing: -0.02em;
+      margin-top: 14px; font-variant-numeric: tabular-nums;
+    }
+    .chart-funnel .stage .count.strong { font-weight: 600; }
+    .chart-funnel .stage.warm { background: #F0EFE9; }
+    .chart-funnel .stage.hot  { background: var(--c-ink); color: var(--c-ink-inv); }
+    .chart-funnel .stage.hot .label { color: var(--c-accent); }
+
+    /* ================= ANIMATION + EXPORT + PRINT ================= */
+
+    /* Slide-enter animation — deck-stage.js adds .slide-enter on nav and staggers children */
+    .slide-enter > *,
+    section.slide-enter > * {
+      animation: slide-enter 400ms cubic-bezier(.2,.8,.2,1) both;
+    }
+    @keyframes slide-enter {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* Exporting mode (Puppeteer): disable all motion for deterministic capture */
+    body.exporting section > *,
+    body.exporting .slide-enter > * {
+      animation: none !important;
+      transition: none !important;
+    }
+
+    /* Print / PDF: each <section> on its own page */
+    @media print {
+      html, body { margin: 0; padding: 0; background: #fff; }
+      deck-stage { width: 100%; height: 100vh; }
+      deck-stage > section {
+        display: flex !important;
+        page-break-after: always;
+      }
+      deck-stage > section:last-child { page-break-after: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <deck-stage>
+
+    <!-- ======================================================
+         SLIDE 1 — COVER
+         Archetype: cover (see templates/slide-cover.html)
+         ====================================================== -->
+    <section data-label="Cover" class="slide" style="padding: 64px 100px 40px;">
+      <div class="meta">
+        <div class="left">
+          <span class="wordmark">lerian<span class="dot"></span></span>
+          <span>&middot; Confidential</span>
+        </div>
+        <div class="right"><span>April 22, 2026</span></div>
+      </div>
+
+      <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding-top: 60px;">
+        <div class="eyebrow" style="margin-bottom: 40px;">Board Meeting &#8470; 01 &mdash; Session Materials</div>
+
+        <div style="display: flex; align-items: flex-end; gap: 56px;">
+          <svg viewBox="0 0 1090.88 280" fill="currentColor" xmlns="http://www.w3.org/2000/svg"
+               style="height: 220px; width: auto; display: block; color: var(--c-ink);">
+            <path fill-rule="evenodd" d="M619.42,29.69c0,15.43-10.87,27.93-27.93,27.93s-27.93-12.51-27.93-27.93,10.86-27.93,27.92-27.93,27.93,12.51,27.93,27.93h0ZM158.64,242.4v33.54H12.13v-33.55h48.36c3.16,0,5.73-2.57,5.73-5.73V87.77c0-3.16-2.57-5.73-5.73-5.73H7.85v-34.31h98.33v188.94c0,3.16,2.57,5.73,5.73,5.73h46.74ZM168.85,179.86c0,58.52,37.29,98.33,99.47,98.33,49.15,0,79.7-30.6,86.27-67.08h-40.69c-6.29,24.54-26.97,33.91-48.61,33.91-48.85,0-53.41-45.18-53.83-55-.04-1.02.77-1.87,1.79-1.87h143.61c.76-5.26,1.13-10.42,1.13-15.44,0-32.71-20.25-91.92-95.33-91.92-57.04,0-93.8,41.26-93.81,99.07ZM314.47,158.39l-99.49.02c-1.08,0-1.94-.96-1.78-2.02,4.49-31.28,30.98-42.82,50.98-42.82,33.88,0,48.71,21.59,52.08,42.79.17,1.08-.69,2.04-1.78,2.04h0ZM867.2,83.16h0s0,0,0,0h0ZM826.87,83.16h40.33v192.83h-40.32v-24.53c0-3.09-3.92-4.41-5.79-1.95-.18.23-.35.47-.53.71h0s0,.02,0,.02h0c-.11.16-.23.32-.35.47-7.92,10.56-20.68,27.53-56.24,27.53-60.83,0-91.19-46.33-91.19-98.7,0-61.42,40.37-98.72,91.17-98.72,36.73,0,48.44,15.73,56.64,26.75l.49.66c1.86,2.49,5.81,1.18,5.81-1.93v-23.14ZM770.75,115.48c34.78,0,56.14,27.81,56.14,64.8h0c0,42-26.32,63.68-56.14,63.68-34.83,0-56.14-27.43-56.14-64.43,0-42.07,26.11-64.05,56.14-64.05ZM1063.39,101.7c14.42,14.06,21.64,36.67,21.64,67.8v106.25h-41.06v-103.99c0-43.98-22.35-56.14-45.96-56.14-31.99,0-51.6,23.22-51.6,62.92v97.21h-40.68V83.15h39.93v25.07c0,3.11,3.95,4.4,5.82,1.92,8.55-11.4,26.72-29.52,55.98-29.52,37.55,0,55.75,20.88,55.93,21.08ZM657.42,275.94v-33.54h0s-37.37,0-37.37,0c-3.16,0-5.73-2.57-5.73-5.73V83.14h-81.34v34.31h37.54c3.16,0,5.73,2.57,5.73,5.73v113.48c0,3.16-2.57,5.73-5.73,5.73h-38.14v33.55h125.03ZM499.27,119.27c0,.13-.1.23-.23.23h0s-36.31,0-36.31,0c-28.68,0-28.65,24.99-28.64,43.62,0,.46,0,.92,0,1.37v111.24c0,.13-.1.23-.23.23h-41.01c-.13,0-.23-.1-.23-.23V83.27c0-.13.1-.23.23-.23h36.49c.13,0,.23.1.23.23v24.03c0,4.05,5.24,5.65,7.49,2.28.22-.32.43-.64.65-.97,8.18-12.25,18.71-28.02,52.51-28.02h9.05v38.68Z"/>
+          </svg>
+        </div>
+
+        <div style="font-family: 'Poppins', sans-serif; font-weight: 500; font-size: 72px; line-height: 1.02; letter-spacing: -0.03em; margin-top: 56px; max-width: 1500px;">
+          Where we are, where we are going, and the four decisions we need your pushback on.
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; padding-top: 40px; border-top: 1px solid var(--c-rule);">
+        <div>
+          <div class="eyebrow" style="margin-bottom: 14px;">Directors</div>
+          <div style="font-size: 26px; color: var(--c-ink); line-height: 1.4;">
+            Fred Amaral<span style="color: var(--c-ink-3);"> &middot; CEO</span>&nbsp;&nbsp;
+            Monica Saggioro<span style="color: var(--c-ink-3);"> &middot; Maya Capital</span>&nbsp;&nbsp;
+            <span style="color: var(--c-ink-3);">3rd Director TBD</span>
+          </div>
+        </div>
+        <div>
+          <div class="eyebrow" style="margin-bottom: 14px;">Observers</div>
+          <div style="font-size: 26px; color: var(--c-ink); line-height: 1.4;">
+            Kevin Efrusy<span style="color: var(--c-ink-3);"> &middot; Ordinary</span>&nbsp;&nbsp;
+            Diego<span style="color: var(--c-ink-3);"> &middot; Supera</span>&nbsp;&nbsp;
+            Pedro Teo<span style="color: var(--c-ink-3);"> &middot; Norte</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         SLIDE 2 — AGENDA
+         Archetype: agenda (see templates/slide-agenda.html)
+         ====================================================== -->
+    <section data-label="Agenda" class="slide">
+      <div class="meta">
+        <div class="left"><span class="wordmark">lerian<span class="dot"></span></span></div>
+        <div class="right">
+          <span>Board Meeting &#8470; 01</span>
+          <span class="num"><span class="page-num"></span> / <span class="page-total"></span></span>
+        </div>
+      </div>
+
+      <div class="body">
+        <div class="eyebrow">Agenda</div>
+        <h1 style="margin-top: 28px; max-width: 1500px;">
+          Ninety minutes. <span style="color: var(--c-ink-3);">Half of it on decisions, not reports.</span>
+        </h1>
+
+        <table class="grid" style="margin-top: 72px;">
+          <thead>
+            <tr>
+              <th style="width: 100px;">Act</th>
+              <th>Theme</th>
+              <th style="width: 160px; text-align: right;">Time</th>
+              <th style="width: 220px; text-align: right;">Format</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="num">01</td>
+              <td style="font-size: 28px; font-family: 'Poppins'; color: var(--c-ink);">Traction, Product &amp; Competitive Positioning</td>
+              <td class="num" style="text-align: right;">20 min</td>
+              <td style="text-align: right; color: var(--c-ink-3);">Report</td>
+            </tr>
+            <tr>
+              <td class="num">02</td>
+              <td style="font-size: 28px; font-family: 'Poppins'; color: var(--c-ink);">Financials</td>
+              <td class="num" style="text-align: right;">10 min</td>
+              <td style="text-align: right; color: var(--c-ink-3);">Report</td>
+            </tr>
+            <tr>
+              <td class="num">03</td>
+              <td style="font-size: 28px; font-family: 'Poppins'; color: var(--c-ink);">Go-to-Market</td>
+              <td class="num" style="text-align: right;">10 min</td>
+              <td style="text-align: right; color: var(--c-ink-3);">Report</td>
+            </tr>
+            <tr class="hl">
+              <td class="num">04</td>
+              <td style="font-size: 28px; font-family: 'Poppins';">Four Strategic Discussions <span style="opacity: 0.62; font-weight: 400;">&mdash; the core of this board</span></td>
+              <td class="num" style="text-align: right;">45 min</td>
+              <td style="text-align: right; font-weight: 600;">Debate</td>
+            </tr>
+            <tr>
+              <td class="num">05</td>
+              <td style="font-size: 28px; font-family: 'Poppins'; color: var(--c-ink);">Capital Strategy</td>
+              <td class="num" style="text-align: right;">5 min</td>
+              <td style="text-align: right; color: var(--c-ink-3);">Open question</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="footer">
+        <div>Confidential &mdash; Lerian Board</div>
+        <div>April 22, 2026</div>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         SLIDE 3 — ACT DIVIDER
+         Archetype: act-divider (see templates/slide-act-divider.html)
+         Uses canonical .pill.solid with inline number chip.
+         ====================================================== -->
+    <section data-label="Act 01 &mdash; Traction" class="slide accent">
+      <div class="meta">
+        <div class="left"><span class="wordmark">lerian<span class="dot"></span></span></div>
+        <div class="right"><span>01 / 05</span></div>
+      </div>
+
+      <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+        <div style="display: flex; align-items: baseline; gap: 18px; margin-bottom: 28px;">
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--c-ink);">Act 01</div>
+          <div style="flex: 1; height: 1px; background: var(--c-ink); opacity: 0.25;"></div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--c-ink); opacity: 0.55;">~20 min &middot; 5 slides</div>
+        </div>
+
+        <div style="font-family: 'Poppins', sans-serif; font-size: 180px; font-weight: 500; line-height: 0.95; letter-spacing: -0.04em; color: var(--c-ink);">Traction &amp;<br/>Product.</div>
+
+        <p class="lede" style="margin-top: 40px; max-width: 1400px; color: rgba(25,26,27,0.78);">
+          Where the portfolio stands, what ships, how clients deploy. Establishes the "we have product" baseline for the rest of the meeting.
+        </p>
+
+        <div style="margin-top: 56px; display: flex; gap: 14px; flex-wrap: wrap;">
+          <div class="pill solid" style="padding: 10px 18px 10px 12px; font-family: 'Poppins', sans-serif; font-size: 17px; text-transform: none; letter-spacing: normal;"><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; background: var(--c-ink-inv); color: var(--c-ink); padding: 3px 7px; border-radius: 999px; letter-spacing: 0.08em; font-weight: 600;">04</span>Portfolio</div>
+          <div class="pill solid" style="padding: 10px 18px 10px 12px; font-family: 'Poppins', sans-serif; font-size: 17px; text-transform: none; letter-spacing: normal;"><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; background: var(--c-ink-inv); color: var(--c-ink); padding: 3px 7px; border-radius: 999px; letter-spacing: 0.08em; font-weight: 600;">05</span>Discussion</div>
+          <div class="pill solid" style="padding: 10px 18px 10px 12px; font-family: 'Poppins', sans-serif; font-size: 17px; text-transform: none; letter-spacing: normal;"><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; background: var(--c-ink-inv); color: var(--c-ink); padding: 3px 7px; border-radius: 999px; letter-spacing: 0.08em; font-weight: 600;">06</span>Capital</div>
+          <div class="pill solid" style="padding: 10px 18px 10px 12px; font-family: 'Poppins', sans-serif; font-size: 17px; text-transform: none; letter-spacing: normal;"><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; background: var(--c-ink-inv); color: var(--c-ink); padding: 3px 7px; border-radius: 999px; letter-spacing: 0.08em; font-weight: 600;">07</span>Billing</div>
+          <div class="pill solid" style="padding: 10px 18px 10px 12px; font-family: 'Poppins', sans-serif; font-size: 17px; text-transform: none; letter-spacing: normal;"><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; background: var(--c-ink-inv); color: var(--c-ink); padding: 3px 7px; border-radius: 999px; letter-spacing: 0.08em; font-weight: 600;">08</span>Appendix</div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div>Confidential &mdash; Lerian Board</div>
+        <div>April 22, 2026</div>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         SLIDE 4 — CONTENT (default / white)
+         Archetype: content (see templates/slide-content.html)
+         Scoped class: .prod-tag
+         data-density="compact" demonstrates the opt-in density override token.
+         ====================================================== -->
+    <section data-label="Portfolio" class="slide" data-density="compact">
+      <div class="meta">
+        <div class="left">
+          <span class="wordmark">lerian<span class="dot"></span></span>
+          <span>&middot; Act 01 &mdash; Traction &amp; Product</span>
+        </div>
+        <div class="right"><span class="num"><span class="page-num"></span> / <span class="page-total"></span></span></div>
+      </div>
+
+      <div class="body">
+        <div class="eyebrow">Portfolio &mdash; Where We Stand</div>
+        <h1 style="margin-top: 28px; max-width: 1600px;">Complete portfolio for core banking in Brazil.</h1>
+        <p class="lede" style="margin-top: 24px; max-width: 1400px;">Eliminates the "you don't have product X" barrier in enterprise sales.</p>
+
+        <div style="flex: 1; min-height: 0; margin-top: 56px; display: flex; flex-direction: column;">
+          <div style="flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 1px solid var(--c-ink); border-bottom: 1px solid var(--c-rule); align-items: stretch;">
+
+            <div style="padding: 22px 28px 22px 0; border-right: 1px solid var(--c-rule); display: flex; flex-direction: column;">
+              <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 22px;">
+                <div style="font-family: 'Poppins', sans-serif; font-size: 72px; font-weight: 500; line-height: 1; letter-spacing: -0.03em;">6<span style="color: var(--c-accent-2);">.</span></div>
+                <div>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-accent-2);">&#9679; Core products</div>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-ink-3); margin-top: 2px;">Live in production</div>
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 11px; font-size: 22px;">
+                <div><strong>Midaz</strong> <span class="prod-tag">Ledger</span></div>
+                <div><strong>Matcher</strong> <span class="prod-tag">Reconciliation</span></div>
+                <div><strong>Tracer</strong> <span class="prod-tag">Risk</span></div>
+                <div><strong>Flowker</strong> <span class="prod-tag">Orchestration</span></div>
+                <div><strong>Fetcher</strong> <span class="prod-tag">Ingestion</span></div>
+                <div><strong>Reporter</strong> <span class="prod-tag">Regulatory</span></div>
+              </div>
+            </div>
+
+            <div style="padding: 22px 28px; border-right: 1px solid var(--c-rule); display: flex; flex-direction: column;">
+              <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 22px;">
+                <div style="font-family: 'Poppins', sans-serif; font-size: 72px; font-weight: 500; line-height: 1; letter-spacing: -0.03em;">6<span style="color: var(--c-accent-2);">.</span></div>
+                <div>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-accent-2);">&#9679; Plugins</div>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-ink-3); margin-top: 2px;">Shipping today</div>
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 11px; font-size: 22px;">
+                <div><strong>Pix Direto</strong> <span class="prod-tag">Lerian &middot; JD</span></div>
+                <div><strong>Pix Indireto</strong> <span class="prod-tag">via BTG</span></div>
+                <div><strong>TED Direto</strong> <span class="prod-tag">Lerian &middot; JD</span></div>
+                <div><strong>CRM</strong></div>
+                <div><strong>Fees</strong></div>
+                <div><strong>Identity &amp; Auth</strong></div>
+              </div>
+            </div>
+
+            <div style="padding: 22px 0 22px 28px; display: flex; flex-direction: column;">
+              <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 22px;">
+                <div style="font-family: 'Poppins', sans-serif; font-size: 72px; font-weight: 500; line-height: 1; letter-spacing: -0.03em; color: var(--c-ink-2);">9<span style="color: var(--c-ink-3);">.</span></div>
+                <div>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-ink-3);">&#9675; In pipeline</div>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-ink-3); margin-top: 2px;">Regulated BR stack</div>
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 10px; font-size: 22px; color: var(--c-ink-2);">
+                <div><strong style="color: var(--c-ink-2); font-weight: 600;">Credit</strong> <span class="prod-tag">Decisioning, via 3rd parties</span></div>
+                <div><strong style="color: var(--c-ink-2); font-weight: 600;">Payments</strong> <span class="prod-tag">Rails</span></div>
+                <div><strong style="color: var(--c-ink-2); font-weight: 600;">BC Correios</strong> <span class="prod-tag">BACEN</span></div>
+                <div><strong style="color: var(--c-ink-2); font-weight: 600;">SIMBA</strong> <span class="prod-tag">COAF</span></div>
+                <div><strong style="color: var(--c-ink-2); font-weight: 600;">BacenJud Direto</strong> <span class="prod-tag">Judicial</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 18px; font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--c-ink-3);">
+            <div>21 building blocks &middot; one platform</div>
+            <div>Core banking coverage <span style="color: var(--c-accent-2);">&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div>Confidential &mdash; Lerian Board</div>
+        <div>April 22, 2026</div>
+      </div>
+
+      <!-- Archetype-local classes: prefix with archetype name to avoid collision -->
+      <style>
+        .prod-tag {
+          color: var(--c-ink-3);
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase;
+        }
+      </style>
+    </section>
+
+    <!-- ======================================================
+         SLIDE 5 — CONTENT PAPER
+         Archetype: content-paper (see templates/slide-content-paper.html)
+         Uses canonical ul.numbered.questions for the dark Questions card.
+         ====================================================== -->
+    <section data-label="Discussion 01 &mdash; Cloud" class="slide paper">
+      <div class="meta">
+        <div class="left">
+          <span class="wordmark">lerian<span class="dot"></span></span>
+          <span>&middot; Act 04 &mdash; Strategic Discussion 01/04</span>
+        </div>
+        <div class="right"><span class="num"><span class="page-num"></span> / <span class="page-total"></span></span></div>
+      </div>
+
+      <div class="body">
+        <div style="display: flex; align-items: center; gap: 18px;">
+          <div class="eyebrow">Discussion 01</div>
+          <div style="height: 1px; flex: 1; background: var(--c-rule);"></div>
+          <div class="eyebrow">~12 min</div>
+        </div>
+
+        <h1 style="margin-top: 28px; max-width: 1700px;">Lerian Cloud &mdash; "Vercel for financial services."</h1>
+
+        <div style="display: grid; grid-template-columns: 1fr 1.15fr; gap: 56px; margin-top: 56px; flex: 1; min-height: 0;">
+
+          <div style="display: flex; flex-direction: column; padding-top: 4px;">
+            <div class="eyebrow" style="margin-bottom: 24px; color: var(--c-ink);">Context</div>
+            <ul class="ticks" style="flex: 1;">
+              <li><strong>70% of new logos</strong> enter directly through SaaS (vs. 100% BYOC 12 months ago).</li>
+              <li>Tenant-manager live since Q1/26. Clients deploy Lerian products <strong>and their own apps</strong> on Lerian infra &mdash; stickiness beyond traditional SaaS.</li>
+              <li><strong>No competitor offers this</strong> capability today.</li>
+              <li>BYOC clients already requesting migration to managed tiers &mdash; organic upsell motion.</li>
+            </ul>
+          </div>
+
+          <div style="background: var(--c-ink); color: var(--c-ink-inv); padding: 40px 44px; border-radius: 4px; display: flex; flex-direction: column; gap: 24px; justify-content: space-between;">
+            <div class="eyebrow" style="color: var(--c-accent);">Questions for the board</div>
+
+            <ul class="numbered questions">
+              <li>
+                <span class="n">01</span>
+                <div>
+                  <div class="t">Target profile &amp; reference case</div>
+                  <div class="b">Enterprise gravitates hybrid, mid-market accepts full SaaS. Which segment builds the reference case for the other?</div>
+                </div>
+              </li>
+              <li>
+                <span class="n">02</span>
+                <div>
+                  <div class="t">GTM timing</div>
+                  <div class="b">70% already choose SaaS. BYOC migrating up. Is this the signal to go-to-market with Cloud now &mdash; or do we need a larger proof base?</div>
+                </div>
+              </li>
+              <li>
+                <span class="n">03</span>
+                <div>
+                  <div class="t">Pricing strategy</div>
+                  <div class="b">Clients running their apps on Lerian infra creates platform lock-in. How do we price platform vs. product without cannibalizing either during transition?</div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div>Confidential &mdash; Lerian Board</div>
+        <div>April 22, 2026</div>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         SLIDE 6 — CONTENT DARK
+         Archetype: content-dark (see templates/slide-content-dark.html)
+         Uses canonical .kpi.dark modifier for dark-strip KPIs.
+         ====================================================== -->
+    <section data-label="Capital" class="slide dark">
+      <div class="meta">
+        <div class="left">
+          <span class="wordmark">lerian<span class="dot"></span></span>
+          <span>&middot; Act 05 &mdash; Capital Strategy</span>
+        </div>
+        <div class="right"><span class="num"><span class="page-num"></span> / <span class="page-total"></span></span></div>
+      </div>
+
+      <div class="body">
+        <div class="eyebrow">Capital Strategy &middot; Open Question</div>
+
+        <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; max-width: 1700px;">
+          <div style="font-family: 'Poppins', sans-serif; font-size: 110px; font-weight: 500; line-height: 1.0; letter-spacing: -0.03em; color: var(--c-ink-inv);">
+            When does the next round make sense<span style="color: var(--c-accent);">&mdash;</span>given the current pipeline and the Cloud thesis?
+          </div>
+          <p class="lede" style="margin-top: 48px; color: rgba(255,255,255,0.7);">
+            Advisory tone. Not an ask. We are not raising today &mdash; we're asking for your perspective on timing.
+          </p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; margin-top: 40px; padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.15); flex-shrink: 0;">
+          <div>
+            <div class="eyebrow" style="color: rgba(255,255,255,0.55);">Stage</div>
+            <div class="kpi dark">Post-Seed</div>
+          </div>
+          <div>
+            <div class="eyebrow" style="color: rgba(255,255,255,0.55);">Runway</div>
+            <div class="kpi dark">20 &ndash; 32 mo</div>
+          </div>
+          <div>
+            <div class="eyebrow" style="color: rgba(255,255,255,0.55);">Pipeline</div>
+            <div class="kpi dark">R$ 5.9M active</div>
+          </div>
+          <div>
+            <div class="eyebrow" style="color: var(--c-accent);">Cloud maturity</div>
+            <div class="kpi dark">Inflection</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div>Confidential &mdash; Lerian Board</div>
+        <div>April 22, 2026</div>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         SLIDE 7 — CONTENT ACCENT
+         Archetype: content-accent (see templates/slide-content-accent.html)
+         Uses canonical .kpi.accent modifier for Amarelo-bg KPI pairs.
+         ====================================================== -->
+    <section data-label="Billing Day One" class="slide accent">
+      <div class="meta">
+        <div class="left"><span class="wordmark">lerian<span class="dot"></span></span></div>
+        <div class="right"><span class="num"><span class="page-num"></span> / <span class="page-total"></span></span></div>
+      </div>
+
+      <div class="body">
+        <div class="eyebrow">Strategic Moment</div>
+
+        <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+          <div style="font-family: 'Poppins', sans-serif; font-size: 150px; font-weight: 500; line-height: 0.95; letter-spacing: -0.04em; color: var(--c-accent-ink);">
+            Billing Day One.<br/>Reported revenue = real cash.
+          </div>
+          <p class="lede" style="margin-top: 48px; max-width: 1400px; color: rgba(25,26,27,0.78);">
+            No grace period. No deferred recognition. Every client we sign starts paying the month the contract executes.
+          </p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 40px; padding-top: 32px; border-top: 1px solid rgba(25,26,27,0.18); flex-shrink: 0;">
+          <div class="kpi accent">
+            <div class="value">100%</div>
+            <div class="cap">of contracts billed Day One</div>
+          </div>
+          <div class="kpi accent">
+            <div class="value">0 days</div>
+            <div class="cap">Grace period &middot; deferred revenue</div>
+          </div>
+          <div class="kpi accent">
+            <div class="value">20&ndash;32 mo</div>
+            <div class="cap">Runway &middot; gross to net-of-revenue</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div>Confidential &mdash; Lerian Board</div>
+        <div>April 22, 2026</div>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         SLIDE 8 — CHART DEMO (stacked-horizontal-bar)
+         Exercises .chart-stacked-hbar primitive + .table.grid.compact variant.
+         Real-looking MRR mix data. See references/chart-primitives.md for the 3 other chart types.
+         ====================================================== -->
+    <section data-label="MRR Mix" class="slide dark">
+      <div class="meta">
+        <div class="left">
+          <span class="wordmark">lerian<span class="dot"></span></span>
+          <span>&middot; Act 02 &mdash; Financials</span>
+        </div>
+        <div class="right"><span class="num"><span class="page-num"></span> / <span class="page-total"></span></span></div>
+      </div>
+
+      <div class="body">
+        <div class="eyebrow">MRR Composition</div>
+        <h1 style="margin-top: 28px; max-width: 1600px; color: var(--c-ink-inv);">Revenue mix &mdash; where the R$ 1.2M/mo comes from.</h1>
+        <p class="lede" style="margin-top: 24px; max-width: 1400px; color: rgba(255,255,255,0.7);">Platform already 38% of MRR. Twelve months ago it was 4%. The Cloud thesis is not theoretical.</p>
+
+        <div style="flex: 1; min-height: 0; margin-top: 56px; display: grid; grid-template-columns: 1.1fr 1fr; gap: 72px; align-items: stretch;">
+
+          <!-- Stacked horizontal bar + legend -->
+          <div class="chart-stacked-hbar" style="display: flex; flex-direction: column; justify-content: center;">
+            <div class="bar" style="background: rgba(255,255,255,0.08);">
+              <div style="flex: 38; background: var(--c-accent);"></div>
+              <div style="flex: 34; background: var(--c-ink-inv);"></div>
+              <div style="flex: 18; background: rgba(255,255,255,0.55);"></div>
+              <div style="flex: 10; background: rgba(255,255,255,0.28);"></div>
+            </div>
+            <div class="legend" style="color: var(--c-ink-inv);">
+              <div class="row"><div><span class="sw" style="background: var(--c-accent);"></span>Platform (Cloud)</div><div class="num">R$ 456K &middot; 38%</div></div>
+              <div class="row"><div><span class="sw" style="background: var(--c-ink-inv);"></span>Core products</div><div class="num">R$ 408K &middot; 34%</div></div>
+              <div class="row"><div><span class="sw" style="background: rgba(255,255,255,0.55);"></span>Plugins</div><div class="num">R$ 216K &middot; 18%</div></div>
+              <div class="row muted"><div><span class="sw" style="background: rgba(255,255,255,0.28);"></span>Services</div><div class="num">R$ 120K &middot; 10%</div></div>
+            </div>
+          </div>
+
+          <!-- Compact table: top accounts breakdown. Exercises .grid.compact.tight. -->
+          <div style="display: flex; flex-direction: column; justify-content: center;">
+            <div class="eyebrow" style="color: var(--c-accent); margin-bottom: 18px;">Top 5 accounts &middot; April</div>
+            <table class="grid compact tight" style="color: var(--c-ink-inv);">
+              <thead>
+                <tr>
+                  <th style="color: rgba(255,255,255,0.55); border-color: rgba(255,255,255,0.15);">Client</th>
+                  <th style="color: rgba(255,255,255,0.55); border-color: rgba(255,255,255,0.15); text-align: right;">MRR</th>
+                  <th style="color: rgba(255,255,255,0.55); border-color: rgba(255,255,255,0.15); text-align: right;">Tier</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td style="color: var(--c-ink-inv); border-color: rgba(255,255,255,0.12);">JD Bank</td><td class="num" style="color: var(--c-ink-inv); text-align: right; border-color: rgba(255,255,255,0.12);">R$ 184K</td><td style="color: rgba(255,255,255,0.55); text-align: right; border-color: rgba(255,255,255,0.12);">Platform</td></tr>
+                <tr><td style="color: var(--c-ink-inv); border-color: rgba(255,255,255,0.12);">BTG Pactual</td><td class="num" style="color: var(--c-ink-inv); text-align: right; border-color: rgba(255,255,255,0.12);">R$ 142K</td><td style="color: rgba(255,255,255,0.55); text-align: right; border-color: rgba(255,255,255,0.12);">Platform</td></tr>
+                <tr><td style="color: var(--c-ink-inv); border-color: rgba(255,255,255,0.12);">Banco Inter</td><td class="num" style="color: var(--c-ink-inv); text-align: right; border-color: rgba(255,255,255,0.12);">R$ 96K</td><td style="color: rgba(255,255,255,0.55); text-align: right; border-color: rgba(255,255,255,0.12);">Core</td></tr>
+                <tr><td style="color: var(--c-ink-inv); border-color: rgba(255,255,255,0.12);">Pagbank</td><td class="num" style="color: var(--c-ink-inv); text-align: right; border-color: rgba(255,255,255,0.12);">R$ 74K</td><td style="color: rgba(255,255,255,0.55); text-align: right; border-color: rgba(255,255,255,0.12);">Core</td></tr>
+                <tr><td style="color: var(--c-ink-inv); border-color: rgba(255,255,255,0.12);">Supera</td><td class="num" style="color: var(--c-ink-inv); text-align: right; border-color: rgba(255,255,255,0.12);">R$ 52K</td><td style="color: rgba(255,255,255,0.55); text-align: right; border-color: rgba(255,255,255,0.12);">Plugins</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div>Confidential &mdash; Lerian Board</div>
+        <div>April 22, 2026</div>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         SLIDE 9 — APPENDIX INTRO
+         Archetype: appendix-intro (see templates/slide-appendix-intro.html)
+         Meta.right reads "Appendix" — not paginated.
+         ====================================================== -->
+    <section data-label="Appendix" class="slide accent">
+      <div class="meta">
+        <div class="left"><span class="wordmark">lerian<span class="dot"></span></span></div>
+        <div class="right"><span>Appendix</span></div>
+      </div>
+
+      <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+        <div class="eyebrow" style="margin-bottom: 32px;">Appendix &mdash; A1 through A8</div>
+
+        <div style="font-family: 'Poppins', sans-serif; font-size: 180px; font-weight: 500; line-height: 0.95; letter-spacing: -0.04em;">
+          Context,<br/>on demand.
+        </div>
+
+        <p class="lede" style="margin-top: 40px; max-width: 1400px; color: rgba(25,26,27,0.75);">
+          Not presented &mdash; available for questions. Eight sections: side letters, ESOP, pipeline detail, security, roadmap, org, risks, governance.
+        </p>
+      </div>
+
+      <div class="footer">
+        <div>Confidential &mdash; Lerian Board</div>
+        <div>April 22, 2026</div>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         SLIDE 10 — APPENDIX CONTENT
+         Archetype: appendix-content (see templates/slide-appendix-content.html)
+         Meta.right uses static letter pagination (A1 / 8), NOT .page-num.
+         Scoped classes: .appendix-card, .appendix-card-title
+         ====================================================== -->
+    <section data-label="A1 Side Letters" class="slide">
+      <div class="meta">
+        <div class="left">
+          <span class="wordmark">lerian<span class="dot"></span></span>
+          <span>&middot; Appendix A1</span>
+        </div>
+        <div class="right"><span>A1 / 8</span></div>
+      </div>
+
+      <div class="body">
+        <div class="eyebrow">Appendix A1</div>
+        <h1 style="margin-top: 28px; max-width: 1600px;">Side letters &mdash; detailed terms.</h1>
+
+        <div style="flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 64px; align-items: stretch;">
+
+          <div class="appendix-card">
+            <div class="eyebrow" style="margin-bottom: 18px;">Maya Capital</div>
+            <div class="appendix-card-title" style="font-size: 32px;">Board seat + Observer + Major Investor rights locked.</div>
+          </div>
+
+          <div class="appendix-card">
+            <div class="eyebrow" style="margin-bottom: 18px;">Norte Ventures</div>
+            <div class="appendix-card-title" style="font-size: 28px;">Put option at $1.00 &middot; ROFO &middot; Co-sale rights.</div>
+          </div>
+
+          <div class="appendix-card">
+            <div class="eyebrow" style="margin-bottom: 18px;">BTG</div>
+            <div class="appendix-card-title" style="font-size: 24px;">Put vs Company &amp; founders &middot; Credit line match &gt; $200K &middot; Anti-dilution &middot; Tag-along &middot; ICC S&atilde;o Paulo arbitration.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div>Confidential &mdash; Lerian Board</div>
+        <div>April 22, 2026</div>
+      </div>
+
+      <!-- Archetype-local classes: prefix with archetype name to avoid collision -->
+      <style>
+        .appendix-card {
+          background: var(--c-bg-2);
+          padding: 40px 36px;
+          border-radius: 4px;
+          display: flex;
+          flex-direction: column;
+        }
+        .appendix-card-title {
+          font-family: 'Poppins', sans-serif;
+          font-weight: 500;
+          line-height: 1.2;
+          letter-spacing: -0.01em;
+          color: var(--c-ink);
+        }
+      </style>
+    </section>
+
+  </deck-stage>
+
+  <script src="/assets/sync-client.js"></script>
+  <script src="/assets/deck-stage.js"></script>
+
+</body>
+</html>
