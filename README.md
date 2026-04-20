@@ -6,7 +6,7 @@
 
 **Proven engineering practices, enforced through skills.**
 
-Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **6 active plugins** and **95 skills** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
+Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **7 active plugins** and **97 skills** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
 
 ## ✨ Why Ring?
 
@@ -21,7 +21,7 @@ Without Ring, AI assistants often:
 Ring solves this by:
 
 - **Enforcing proven workflows** - Test-driven development, systematic debugging, proper planning
-- **Providing 95 specialized skills** (24 core + 33 dev-team + 16 product planning + 7 FinOps regulatory + 6 technical writing + 9 PMO)
+- **Providing 97 specialized skills** (24 core + 33 dev-team + 16 product planning + 7 FinOps regulatory + 6 technical writing + 9 PMO + 2 flowker-team)
 - **41 specialized agents** - 10 review/planning + 15 developer + 4 product research + 3 FinOps regulatory + 3 technical writing + 6 PMO
 - **Automating skill discovery** - Skills load automatically at session start
 - **Preventing common failures** - Built-in anti-patterns and mandatory checklists
@@ -292,7 +292,7 @@ Run command → Paste output → Then claim
 No "should work" → Only "does work" with proof
 ```
 
-## 📚 All 95 Skills (Across 6 Plugins)
+## 📚 All 97 Skills (Across 7 Plugins)
 
 ### Core Skills (ring-default plugin - 24 skills)
 
@@ -461,6 +461,15 @@ No "should work" → Only "does work" with proof
 - `ring:executive-summary` - Executive dashboards and board packages
 - `ring:portfolio-review` - Comprehensive portfolio review across projects
 
+### Core four Integration Skills (ring-flowker-team plugin - 2 skills)
+
+**Catalog Scaffolding:**
+
+- `ring:flowker-new-provider` - Scaffold a new Core four provider (HTTP-based external service) with executors, JSON Schema validation, auth wiring, and unit tests. 5 gates (interview → scaffold → schema → auth/InputBuilder → tests → review).
+- `ring:flowker-new-template` - Scaffold a new Core four workflow template (pre-built blueprint) with parameter schema, Build function, and unit tests. 4 gates (interview → scaffold → build+schema → tests → review).
+
+> These skills orchestrate `ring:backend-engineer-golang`, `ring:dev-unit-testing`, and `ring:codereview`. They target `github.com/LerianStudio/flowker` and depend on `ring-dev-team` plugin.
+
 ## 💡 Usage Examples
 
 ### Building a Feature
@@ -599,10 +608,14 @@ ring/                                  # Monorepo root
 │   │   └── delivery-reporter.md
 │   ├── skills/                       # 9 PMO skills
 │   └── hooks/                        # SessionStart hook
-└── tw-team/                         # Technical Writing plugin (ring-tw-team)
-    ├── skills/                      # 6 documentation skills
-    ├── agents/                      # 3 technical writing agents
-    └── hooks/                       # SessionStart hook
+├── tw-team/                         # Technical Writing plugin (ring-tw-team)
+│   ├── skills/                      # 6 documentation skills
+│   ├── agents/                      # 3 technical writing agents
+│   └── hooks/                       # SessionStart hook
+└── flowker-team/                    # Core four Integration plugin (ring-flowker-team)
+    └── skills/                      # 2 catalog scaffolding skills
+        ├── flowker-new-provider/   # Provider scaffold (5 gates)
+        └── flowker-new-template/   # Template scaffold (4 gates)
 ```
 
 ## 🤝 Contributing

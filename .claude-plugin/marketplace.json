@@ -138,7 +138,28 @@
         "agents",
         "content-quality"
       ]
+    },
+    {
+      "name": "ring-flowker-team",
+      "description": "Core four integration skills: scaffolds new providers (external HTTP services) and workflow templates in Core four (github.com/LerianStudio/flowker). 2 skills covering provider catalog registration with JSON Schema validation, auth wiring, unit tests, and workflow template creation with parameter validation and Build functions. Orchestrates ring:backend-engineer-golang, ring:dev-unit-testing, and ring:codereview for gate-based delivery.",
+      "version": "0.1.0",
+      "source": "./flowker-team",
+      "homepage": "https://github.com/lerianstudio/ring/tree/flowker-team",
+      "repository": "https://github.com/lerianstudio/ring/tree/flowker-team",
+      "license": "MIT",
+      "keywords": [
+        "flowker",
+        "workflow",
+        "orchestration",
+        "provider",
+        "template",
+        "scaffold",
+        "codegen",
+        "integration",
+        "catalog",
+        "golang"
+      ]
     }
   ],
-  "version": "0.334.0"
+  "version": "0.335.0"
 }
