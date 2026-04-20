@@ -1,5 +1,23 @@
 # Ring-default Changelog
 
+## [1.26.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.26.0)
+
+- **Features:**
+  - Added skill to scaffold Lerian-branded presentations.
+  - Updated skill counts and keywords for new deck skill.
+
+- **Improvements:**
+  - Refactored migration skill for lib-commons v5 API.
+
+- **Chore:**
+  - Removed obsolete caching and dev-cycle plan documents.
+
+Contributors: @fred
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.25.2...ring-default@1.26.0)
+
+---
+
 ## [1.25.2](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.25.2)
 
 - Improvements:
