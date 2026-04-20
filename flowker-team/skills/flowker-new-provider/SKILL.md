@@ -86,7 +86,7 @@ output_schema:
       values: [default, custom, N/A]
     - name: branch_name
       type: string
-      description: "Must match ^feature/flowker-provider-[a-z][a-z0-9-]{0,19}$"
+      description: "Must match ^feature/flowker-provider-[a-z][a-z0-9-]+$ (literal provider_id, unbounded length)"
     - name: pr_url
       type: string
       description: "https://github.com/LerianStudio/flowker/pull/<number>"
@@ -238,13 +238,13 @@ func Register(catalog executor.Catalog) error {
 
 	registrations := []executor.ExecutorRegistration{}
 	{{#each operations}}
-	{{operation_name}}Exec, err := new{{OperationNameCamel}}Executor()
+	{{OperationNameCamel}}Exec, err := new{{OperationNameCamel}}Executor()
 	if err != nil {
 		return fmt.Errorf("failed to create %s %s executor: %w", Name, "{{operation_id}}", err)
 	}
 	registrations = append(registrations, executor.ExecutorRegistration{
-		Executor: {{operation_name}}Exec,
-		Runner:   http.NewRunner({{operation_name}}Exec.ID(), nil),
+		Executor: {{OperationNameCamel}}Exec,
+		Runner:   http.NewRunner({{OperationNameCamel}}Exec.ID(), nil),
 	})
 	{{/each}}
 
@@ -354,7 +354,7 @@ Add the import and call. Example diff:
 ```diff
  import (
      "github.com/LerianStudio/flowker/pkg/executor"
-+    "github.com/LerianStudio/flowker/pkg/executors/{{provider_id}}"
++    {{provider_id_no_hyphens}} "github.com/LerianStudio/flowker/pkg/executors/{{provider_id}}"
      "github.com/LerianStudio/flowker/pkg/executors/midaz"
      "github.com/LerianStudio/flowker/pkg/executors/tracer"
  )

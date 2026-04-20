@@ -9,4 +9,4 @@
 
 Contributors: @lffranca
 
-[Compare changes](https://github.com/LerianStudio/ring/releases/tag/ring-flowker-team@0.1.0)
+[Release notes](https://github.com/LerianStudio/ring/releases/tag/ring-flowker-team@0.1.0)

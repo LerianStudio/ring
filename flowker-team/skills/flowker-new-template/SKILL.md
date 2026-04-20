@@ -81,7 +81,7 @@ output_schema:
       type: float
     - name: branch_name
       type: string
-      description: "Must match ^feature/flowker-template-[a-z][a-z0-9-]{0,19}$"
+      description: "Must match ^feature/flowker-template-[a-z][a-z0-9-]+$ (literal template_id, unbounded length)"
     - name: pr_url
       type: string
       description: "https://github.com/LerianStudio/flowker/pull/<number>"
@@ -288,6 +288,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	executorpkg "github.com/LerianStudio/flowker/pkg/executor"
+	"github.com/LerianStudio/flowker/pkg/model"
 	{{template_id_snake}} "github.com/LerianStudio/flowker/pkg/templates/{{template_id_snake}}"
 )
 

@@ -465,8 +465,8 @@ No "should work" → Only "does work" with proof
 
 **Catalog Scaffolding:**
 
-- `ring:flowker-new-provider` - Scaffold a new Core four provider (HTTP-based external service) with executors, JSON Schema validation, auth wiring, and unit tests. 5 gates (interview → scaffold → schema → auth/InputBuilder → tests → review).
-- `ring:flowker-new-template` - Scaffold a new Core four workflow template (pre-built blueprint) with parameter schema, Build function, and unit tests. 4 gates (interview → scaffold → build+schema → tests → review).
+- `ring:flowker-new-provider` - Scaffold a new Core four provider (HTTP-based external service) with executors, JSON Schema validation, auth wiring, and unit tests. 7 gates (interview → scaffold → schema → auth/InputBuilder → tests → review → delivery).
+- `ring:flowker-new-template` - Scaffold a new Core four workflow template (pre-built blueprint) with parameter schema, Build function, and unit tests. 6 gates (interview → scaffold → build+schema → tests → review → delivery).
 
 > These skills orchestrate `ring:backend-engineer-golang`, `ring:dev-unit-testing`, and `ring:codereview`. They target `github.com/LerianStudio/flowker` and depend on `ring-dev-team` plugin.
 
