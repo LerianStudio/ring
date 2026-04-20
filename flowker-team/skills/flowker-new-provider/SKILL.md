@@ -192,7 +192,7 @@ Custom InputBuilder needed?
   - true → ONLY when URL must change per-operation via template + provider config (Core one pattern)
 ```
 
-If user cannot answer, dispatch `ring:interviewing-user` to run a structured interview.
+If user cannot answer, dispatch `ring:interview-me` to run a structured interview.
 
 ## Gate 1 — Scaffold (Deterministic)
 

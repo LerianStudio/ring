@@ -614,8 +614,8 @@ ring/                                  # Monorepo root
 │   └── hooks/                       # SessionStart hook
 └── flowker-team/                    # Core four Integration plugin (ring-flowker-team)
     └── skills/                      # 2 catalog scaffolding skills
-        ├── flowker-new-provider/   # Provider scaffold (5 gates)
-        └── flowker-new-template/   # Template scaffold (4 gates)
+        ├── flowker-new-provider/   # Provider scaffold (7 gates)
+        └── flowker-new-template/   # Template scaffold (6 gates)
 ```
 
 ## 🤝 Contributing
