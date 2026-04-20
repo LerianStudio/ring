@@ -67,6 +67,9 @@ output_schema:
     - name: "Verification Report"
       pattern: "^## Verification Report"
       required: true
+    - name: "Delivery"
+      pattern: "^## Delivery"
+      required: true
     - name: "Handoff"
       pattern: "^## Handoff"
       required: true
@@ -81,6 +84,15 @@ output_schema:
     - name: input_builder
       type: enum
       values: [default, custom, N/A]
+    - name: branch_name
+      type: string
+      description: "Must match ^feature/flowker-provider-[a-z][a-z0-9-]{0,19}$"
+    - name: pr_url
+      type: string
+      description: "https://github.com/LerianStudio/flowker/pull/<number>"
+    - name: pr_base
+      type: string
+      description: "Must equal 'develop'"
 
 verification:
   automated:
@@ -93,9 +105,16 @@ verification:
       description: "Provider registers in catalog"
     - command: "make lint"
       description: "Lint passes"
+    - command: "git rev-parse --abbrev-ref HEAD"
+      description: "On a branch matching feature/flowker-provider-*"
+      success_pattern: '^feature/flowker-provider-[a-z][a-z0-9-]+$'
+    - command: "gh pr view --json baseRefName -q .baseRefName"
+      description: "PR targets develop"
+      success_pattern: '^develop$'
   manual:
     - "curl http://localhost:8080/v1/catalog/providers returns new provider"
     - "Provider config schema validates example payload"
+    - "PR title matches: ^feature\\([a-z][a-z0-9-]{0,19}\\): add .+ provider with \\d+ executors?$"
 
 ---
 
@@ -484,6 +503,173 @@ Security reviewer MUST verify:
 - Auth config not exposed in ExecutionResult.Data
 - Path params sanitized against injection (`..`, `/`, query-string smuggling)
 
+## Gate 6 — Delivery (Branch + Commit + PR)
+
+**This gate is fully prescriptive. No interpretation allowed. Follow exact commands.**
+
+<cannot_skip>
+- Base branch is ALWAYS `develop`, NEVER `main`
+- Branch name pattern is FIXED: `feature/flowker-provider-<provider_id>`
+- Commit message format is ENFORCED by Core four's commit-msg hook (regex-validated)
+- PR target is `develop`; release PR (`develop → main`) is OUT OF SCOPE
+</cannot_skip>
+
+### Step 1 — Pre-flight verification
+
+Before branch creation, verify locally that everything passes. If any fails, go back and fix — do NOT bypass hooks.
+
+```bash
+cd <flowker_repo_root>
+go build ./...
+go test ./pkg/executors/<provider_id>/... -cover -covermode=atomic
+go test ./pkg/executors/ -run TestRegisterDefaults -v
+make lint
+```
+
+All four must exit 0. Paste output into the Handoff section.
+
+### Step 2 — Branch creation (exact pattern)
+
+**Pattern:** `feature/flowker-provider-<provider_id>`
+
+Where `<provider_id>` is the **literal kebab-case string from Gate 0**. No transformation, no prefix variation, no extra words.
+
+```bash
+git fetch origin
+git checkout -b feature/flowker-provider-<provider_id> origin/develop
+```
+
+#### Branch naming — correct vs. wrong
+
+| provider_id | ✅ Correct branch | ❌ Wrong branch |
+|---|---|---|
+| `stripe` | `feature/flowker-provider-stripe` | `feat/stripe-provider` |
+| `example-kyc` | `feature/flowker-provider-example-kyc` | `feature/add-example-kyc` |
+| `aml-vendor` | `feature/flowker-provider-aml-vendor` | `feature/flowker/provider/aml-vendor` |
+| `kyc` | `feature/flowker-provider-kyc` | `feature/new-provider-kyc` |
+
+### Step 3 — Commit (format enforced by hook)
+
+Core four's commit-msg hook enforces this regex (see Core four `CLAUDE.md` — "Commit Message Format"):
+
+- `type`: one of `feature|fix|refactor|style|test|docs|build`
+- `scope`: 1-20 characters, lowercase, kebab-case
+- `description`: 1-100 characters
+
+For a new provider, the values are **always**:
+
+- `type` = `feature`
+- `scope` = `<provider_id>` (if `> 20 chars`, use first 20 chars; document the truncation in PR body)
+- `description` = `add <provider_name> provider with <N> executors`
+
+#### Commit message — correct vs. wrong
+
+| Input | ✅ Correct commit | ❌ Wrong |
+|---|---|---|
+| id=`stripe`, name=`Stripe Payments`, N=2 | `feature(stripe): add Stripe Payments provider with 2 executors` | `feat: add stripe` |
+| id=`example-kyc`, name=`Example KYC`, N=2 | `feature(example-kyc): add Example KYC provider with 2 executors` | `feature(kyc): new provider` |
+| id=`aml-vendor`, name=`AML Vendor`, N=1 | `feature(aml-vendor): add AML Vendor provider with 1 executor` | `chore(aml): add vendor` |
+
+Note: use `1 executor` (singular) when N=1, `N executors` otherwise.
+
+#### Commit command
+
+```bash
+git add pkg/executors/<provider_id>/ pkg/executors/register.go pkg/executors/register_test.go
+git commit -m "feature(<provider_id>): add <provider_name> provider with <N> executors"
+```
+
+**DO NOT** use `--no-verify`. If the commit-msg hook rejects, fix the message — do not bypass.
+
+### Step 4 — Push
+
+```bash
+git push -u origin feature/flowker-provider-<provider_id>
+```
+
+### Step 5 — PR creation (target = `develop`)
+
+**PR title** MUST be identical to the commit message.
+
+**PR base** MUST be `develop` (not `main`). The `--base develop` flag is required.
+
+**PR body** MUST use the template below, with all placeholders filled.
+
+```bash
+gh pr create \
+  --base develop \
+  --title "feature(<provider_id>): add <provider_name> provider with <N> executors" \
+  --body "$(cat <<'EOF'
+## Summary
+
+- Adds `<provider_name>` provider to Core four catalog at `pkg/executors/<provider_id>/`.
+- Registers <N> executors: <comma-separated list of ExecutorIDs, e.g., `example-kyc.verify-identity`, `example-kyc.get-result`>.
+- Auth: `<auth_type>`. InputBuilder: `<default|custom>`.
+
+## Files created
+
+| Path | Purpose |
+|---|---|
+| `pkg/executors/<provider_id>/provider.go` | Register + providerConfigSchema |
+| `pkg/executors/<provider_id>/<op>.go` × <N> | Executor per operation |
+| `pkg/executors/<provider_id>/input_builder.go` | Custom routing (if applicable; omit row otherwise) |
+| `pkg/executors/<provider_id>/<provider_id_no_hyphens>_test.go` | Unit tests |
+
+## Files modified
+
+| Path | Change |
+|---|---|
+| `pkg/executors/register.go` | `+` import, `+` `Register` call |
+| `pkg/executors/register_test.go` | `+` registration test |
+
+## Test plan
+
+- [x] `go test ./pkg/executors/<provider_id>/... -cover` — coverage ≥ 85%
+- [x] `go test ./pkg/executors/ -run TestRegisterDefaults -v` — passes
+- [x] `make lint` — clean
+- [ ] Manual: `curl /v1/catalog/providers | jq '.[].id'` lists `<provider_id>` (after `make up`)
+- [ ] Manual: create `provider_configuration` with real credentials and invoke one executor end-to-end
+
+## Scope note
+
+This PR adds the **catalog entry only**. It does not:
+- Create `provider_configurations` records (that is runtime data stored in MongoDB)
+- Reference this provider in any existing workflow
+- Modify authentication/authorization middleware
+- Change env vars or docker-compose
+
+## Out of scope
+
+Release PR (`develop → main`) is handled separately via `release/*` branches and is not part of this change.
+EOF
+)"
+```
+
+#### PR title — correct vs. wrong
+
+| ✅ Correct | ❌ Wrong |
+|---|---|
+| `feature(stripe): add Stripe Payments provider with 2 executors` | `Add stripe provider` |
+| `feature(example-kyc): add Example KYC provider with 2 executors` | `[KYC] New provider` |
+
+### Step 6 — Out of scope (DO NOT ATTEMPT)
+
+- **Do not merge the PR.** Merging requires human review per Core four's CODEOWNERS rules.
+- **Do not create a release PR** (`develop → main`). Core four handles releases via `release/*` branches in a separate workflow.
+- **Do not seed provider_configurations** in any environment — that is runtime data owned by operators.
+- **Do not create workflows that use the new provider** — that is a separate user action.
+- **Do not modify `.env`, `docker-compose.yml`, bootstrap DI, or Swagger** — provider registration does not require any of these.
+
+### Step 7 — Capture PR URL
+
+Extract the PR URL from `gh pr create` stdout and put it in the Handoff section:
+
+```text
+PR opened: https://github.com/LerianStudio/flowker/pull/<number>
+Base branch: develop
+Head branch: feature/flowker-provider-<provider_id>
+```
+
 ## Verification Commands (run from flowker repo root)
 
 ```bash
@@ -599,8 +785,16 @@ Emit this structured output when complete:
 [paste `curl /v1/catalog/providers/{{provider_id}}` output]
 ```
 
+## Delivery
+- **Branch:** `feature/flowker-provider-{{provider_id}}` (base: `develop`)
+- **Commit:** `feature({{provider_id}}): add {{provider_name}} provider with {{N}} executors`
+- **PR:** https://github.com/LerianStudio/flowker/pull/{{number}}
+- **PR base:** `develop`
+- **PR status:** OPEN (awaiting review; merge is out of this skill's scope)
+
 ## Handoff
 - Provider appears in catalog: YES
 - Ready for integration testing: YES
-- Next step: create provider config via `POST /v1/provider-configurations` with real credentials
+- Next step (post-merge): create provider config via `POST /v1/provider-configurations` with real credentials
+- Release PR (`develop → main`): out of scope — handled by Core four's release workflow
 ```

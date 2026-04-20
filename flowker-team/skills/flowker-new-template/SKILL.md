@@ -63,6 +63,9 @@ output_schema:
     - name: "Verification Report"
       pattern: "^## Verification Report"
       required: true
+    - name: "Delivery"
+      pattern: "^## Delivery"
+      required: true
     - name: "Handoff"
       pattern: "^## Handoff"
       required: true
@@ -76,6 +79,15 @@ output_schema:
       type: integer
     - name: test_coverage
       type: float
+    - name: branch_name
+      type: string
+      description: "Must match ^feature/flowker-template-[a-z][a-z0-9-]{0,19}$"
+    - name: pr_url
+      type: string
+      description: "https://github.com/LerianStudio/flowker/pull/<number>"
+    - name: pr_base
+      type: string
+      description: "Must equal 'develop'"
 
 verification:
   automated:
@@ -88,9 +100,16 @@ verification:
       description: "Template registers in catalog"
     - command: "make lint"
       description: "Lint passes"
+    - command: "git rev-parse --abbrev-ref HEAD"
+      description: "On a branch matching feature/flowker-template-*"
+      success_pattern: '^feature/flowker-template-[a-z][a-z0-9-]+$'
+    - command: "gh pr view --json baseRefName -q .baseRefName"
+      description: "PR targets develop"
+      success_pattern: '^develop$'
   manual:
     - "curl http://localhost:8080/v1/catalog/templates returns new template"
     - "curl -X POST /v1/workflows/from-template creates a valid workflow"
+    - "PR title matches: ^feature\\([a-z][a-z0-9-]{0,19}\\): add .+ workflow template$"
 
 ---
 
@@ -452,6 +471,167 @@ Business-logic reviewer MUST verify:
 - No cycles in edges (template workflows should be DAG)
 - ProviderConfigField bindings align with executor IDs used in nodes
 
+## Gate 5 — Delivery (Branch + Commit + PR)
+
+**This gate is fully prescriptive. No interpretation allowed. Follow exact commands.**
+
+<cannot_skip>
+- Base branch is ALWAYS `develop`, NEVER `main`
+- Branch name pattern is FIXED: `feature/flowker-template-<template_id>`
+- Commit message format is ENFORCED by Core four's commit-msg hook (regex-validated)
+- PR target is `develop`; release PR (`develop → main`) is OUT OF SCOPE
+</cannot_skip>
+
+### Step 1 — Pre-flight verification
+
+Before branch creation, all of these must exit 0:
+
+```bash
+cd <flowker_repo_root>
+go build ./...
+go test ./pkg/templates/<template_id_snake>/... -cover -covermode=atomic
+go test ./pkg/templates/ -run TestRegisterDefaults -v
+make lint
+```
+
+Paste output into Handoff section.
+
+### Step 2 — Branch creation (exact pattern)
+
+**Pattern:** `feature/flowker-template-<template_id>`
+
+Where `<template_id>` is the **literal kebab-case string from Gate 0**. No transformation.
+
+```bash
+git fetch origin
+git checkout -b feature/flowker-template-<template_id> origin/develop
+```
+
+#### Branch naming — correct vs. wrong
+
+| template_id | ✅ Correct branch | ❌ Wrong branch |
+|---|---|---|
+| `kyc-aml-check` | `feature/flowker-template-kyc-aml-check` | `feat/template-kyc` |
+| `payment-settlement` | `feature/flowker-template-payment-settlement` | `feature/add-payment-template` |
+| `onboarding` | `feature/flowker-template-onboarding` | `feature/flowker/template/onboarding` |
+
+### Step 3 — Commit (format enforced by hook)
+
+Core four's commit-msg hook enforces (see Core four `CLAUDE.md` — "Commit Message Format"):
+
+- `type`: one of `feature|fix|refactor|style|test|docs|build`
+- `scope`: 1-20 characters, lowercase, kebab-case
+- `description`: 1-100 characters
+
+For a new template, the values are **always**:
+
+- `type` = `feature`
+- `scope` = `<template_id>` (if `> 20 chars`, use first 20 chars; document the truncation in PR body)
+- `description` = `add <template_name> workflow template`
+
+#### Commit message — correct vs. wrong
+
+| Input | ✅ Correct commit | ❌ Wrong |
+|---|---|---|
+| id=`kyc-aml-check`, name=`KYC-AML Check` | `feature(kyc-aml-check): add KYC-AML Check workflow template` | `feat: add kyc template` |
+| id=`payment-settlement`, name=`Payment Settlement` | `feature(payment-settlement): add Payment Settlement workflow template` | `feature(template): add payment flow` |
+| id=`onboarding`, name=`Onboarding` | `feature(onboarding): add Onboarding workflow template` | `chore(onboarding): new template` |
+
+#### Commit command
+
+```bash
+git add pkg/templates/<template_id_snake>/ pkg/templates/register.go
+git commit -m "feature(<template_id>): add <template_name> workflow template"
+```
+
+**DO NOT** use `--no-verify`. If the commit-msg hook rejects, fix the message.
+
+### Step 4 — Push
+
+```bash
+git push -u origin feature/flowker-template-<template_id>
+```
+
+### Step 5 — PR creation (target = `develop`)
+
+**PR title** MUST be identical to the commit message.
+
+**PR base** MUST be `develop`.
+
+**PR body** MUST use the template below.
+
+```bash
+gh pr create \
+  --base develop \
+  --title "feature(<template_id>): add <template_name> workflow template" \
+  --body "$(cat <<'EOF'
+## Summary
+
+- Adds `<template_name>` workflow template to Core four catalog at `pkg/templates/<template_id_snake>/`.
+- Produces `*model.CreateWorkflowInput` with <N> nodes and <M> edges.
+- Category: `<category>`.
+- Parameters: <comma-separated list of param names>.
+- Referenced executor IDs (must already exist in catalog): <comma-separated list>.
+
+## Files created
+
+| Path | Purpose |
+|---|---|
+| `pkg/templates/<template_id_snake>/template.go` | Register + paramSchema + build function |
+| `pkg/templates/<template_id_snake>/template_test.go` | Unit tests (registration, validation, build) |
+
+## Files modified
+
+| Path | Change |
+|---|---|
+| `pkg/templates/register.go` | `+` import, `+` `Register` call |
+
+## Workflow structure
+
+```
+<trigger_node> → <executor_node_1> → <executor_node_2> → <terminal_node>
+```
+
+(Replace with actual node/edge diagram of the generated workflow.)
+
+## Test plan
+
+- [x] `go test ./pkg/templates/<template_id_snake>/... -cover` — coverage ≥ 85%
+- [x] `go test ./pkg/templates/ -run TestRegisterDefaults -v` — passes
+- [x] `make lint` — clean
+- [ ] Manual: `curl /v1/catalog/templates | jq '.[].id'` lists `<template_id>` (after `make up`)
+- [ ] Manual: `POST /v1/workflows/from-template` with valid params creates a workflow
+
+## Scope note
+
+This PR adds the **catalog entry only**. It does not:
+- Create any `workflows` records (templates are instantiated on demand via `POST /v1/workflows/from-template`)
+- Create `provider_configurations` for the referenced providers
+- Modify handlers, services, or bootstrap wiring
+
+## Out of scope
+
+Release PR (`develop → main`) is handled separately via `release/*` branches.
+EOF
+)"
+```
+
+### Step 6 — Out of scope (DO NOT ATTEMPT)
+
+- **Do not merge the PR.** Requires human review per CODEOWNERS.
+- **Do not create a release PR** (`develop → main`).
+- **Do not seed workflows** using this template in any environment.
+- **Do not create provider_configurations** for the referenced providers.
+- **Do not modify existing templates** — each template is independent.
+
+### Step 7 — Capture PR URL
+
+```text
+PR opened: https://github.com/LerianStudio/flowker/pull/<number>
+Base branch: develop
+Head branch: feature/flowker-template-<template_id>
+```
+
 ## Verification Commands (run from flowker repo root)
 
 ```bash
@@ -578,8 +758,16 @@ Emit this structured output when complete:
 [paste `POST /v1/workflows/from-template` success output]
 ```
 
+## Delivery
+- **Branch:** `feature/flowker-template-{{template_id}}` (base: `develop`)
+- **Commit:** `feature({{template_id}}): add {{template_name}} workflow template`
+- **PR:** https://github.com/LerianStudio/flowker/pull/{{number}}
+- **PR base:** `develop`
+- **PR status:** OPEN (awaiting review; merge is out of this skill's scope)
+
 ## Handoff
 - Template appears in catalog: YES
-- Workflow successfully created from template: YES
-- Next step: document template in project README / user-facing docs
+- Workflow successfully created from template: YES (manual verification)
+- Next step (post-merge): document template in project README / user-facing docs
+- Release PR (`develop → main`): out of scope — handled by Core four's release workflow
 ```
