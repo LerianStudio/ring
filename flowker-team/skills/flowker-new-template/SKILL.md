@@ -21,7 +21,7 @@ NOT_skip_when: |
   - "I don't need parameter validation" → JSON Schema validation prevents broken workflows at creation time, not runtime. Do it.
 
 sequence:
-  before: [ring:codereview]
+  before: [ring:dev-unit-testing, ring:codereview]
 
 related:
   similar: [ring:flowker-new-provider]
@@ -131,7 +131,7 @@ Creates a new **workflow template** in Core four — a reusable blueprint that a
 
 ## Prerequisites
 
-- Go 1.25.5
+- Go 1.25.8 (verify against Core four's `go.mod` at time of use)
 - Working directory = Core four repo root
 - All executor IDs referenced in template nodes MUST already exist in the catalog (verify via `GET /v1/catalog/providers/<provider_id>/executors`)
 - All trigger IDs referenced MUST exist (currently only `webhook`)

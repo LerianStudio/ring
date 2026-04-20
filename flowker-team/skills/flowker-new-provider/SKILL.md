@@ -135,7 +135,7 @@ Creates a new **static-catalog provider** in Core four with N executors, JSON Sc
 
 ## Prerequisites
 
-- Go 1.25.5 (Core four's language version)
+- Go 1.25.8 (verify against Core four's `go.mod` at time of use)
 - Working directory = Core four repo root
 - Provider's external API docs (endpoints, auth, request/response shapes)
 - Decision made: does this provider need a custom `InputBuilder`? (default: no — only needed for Core one-style per-operation URL routing or nested auth translation)
