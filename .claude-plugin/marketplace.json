@@ -9,7 +9,7 @@
     {
       "name": "ring-default",
       "description": "Core skills library for the Lerian Team: TDD, debugging, collaboration patterns, and proven techniques. Features parallel 10-reviewer code review system, systematic debugging, and workflow orchestration. 24 essential skills for software engineering excellence.",
-      "version": "1.25.2",
+      "version": "1.26.0",
       "source": "./default",
       "homepage": "https://github.com/lerianstudio/ring/tree/default",
       "repository": "https://github.com/lerianstudio/ring/tree/default",
@@ -32,7 +32,7 @@
     {
       "name": "ring-dev-team",
       "description": "15 specialized developer agents + 33 development skills: Backend 10-gate dev cycle + Frontend 9-gate dev cycle (accessibility, visual, E2E, performance) + Frontend refactoring + delivery verification + service discovery + cycle management. Go/TypeScript Backend specialists, DevOps Engineer, Frontend TypeScript specialist, Frontend Designer, QA Backend Analyst, QA Frontend Analyst, SRE, Multi-Tenant Reviewer, and lib-commons Reviewer. Complete development team coverage with TDD, observability, and security best practices.",
-      "version": "1.58.1",
+      "version": "1.59.0",
       "source": "./dev-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/dev-team",
       "repository": "https://github.com/lerianstudio/ring/tree/dev-team",
@@ -140,5 +140,5 @@
       ]
     }
   ],
-  "version": "0.333.0"
+  "version": "0.334.0"
 }
