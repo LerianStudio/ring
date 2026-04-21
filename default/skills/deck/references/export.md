@@ -2,7 +2,18 @@
 
 PDF export converts the live deck to a paginated PDF at pixel-perfect 1920×1080. The export script drives a headless Chromium via Puppeteer, navigates through every slide, and appends each page to a combined document via `pdf-lib`.
 
-Scope: **PDF only in v1.** See the PPTX footnote at the end.
+Scope: **PDF (two paths) + PPTX (screenshots mode) in v1.** Editable PPTX — text + shapes mapped from CSS — remains deferred; see the PPTX footnote at the end for why.
+
+## Toolbar
+
+Every deck has a floating toolbar on the bottom-center: Tweak / Presenter / PDF / PPTX / Remote.
+
+- **PDF and PPTX buttons** call the dev-server, which spawns the Puppeteer export and streams the result back for download. Takes 10-30s; the button shows a spinner while running.
+- **Tweak** opens a feedback panel that writes to `feedback.jsonl` (see `references/server.md` for the `/feedback` endpoint). The author then tells Claude "check tweaks" to review the captured notes.
+- **Presenter** opens `/presenter` in a new window.
+- **Remote** shows the LAN URL in a modal so the speaker can load `/remote` on a phone.
+- Toolbar auto-hides in fullscreen (presentation mode) and is never captured in exports (hidden when `body.exporting`).
+- **Keyboard:** `T` toggles the tweak panel, `H` toggles toolbar visibility.
 
 ## Two export paths
 
@@ -10,6 +21,7 @@ Two routes to PDF, same 1920×1080 geometry:
 
 - **Path A — `pnpm export` (Puppeteer, scripted/CI).** Driven by `scripts/export-pdf.mjs`: launches headless Chromium, per-slide navigation via `window.__deck.goto(n)`, awaits `document.fonts.ready` per slide, captures each slide with `page.pdf()`, merges via `pdf-lib`. Use this in CI, cron jobs, and anything non-interactive. Deterministic artifact — the exact bytes your dev loop produces.
 - **Path B — `Cmd+P → Save as PDF` (browser-native).** Works because `<deck-stage>` injects `@page { size: 1920px 1080px; margin: 0 }` into `document.head` on upgrade, and its shadow-DOM `@media print` un-stacks slides into native print-page flow. Fastest route for ad-hoc exports. **Caveat:** browser rasterization can subtly differ from Puppeteer (font-hinting, subpixel AA). For a deterministic artifact that matches what ran in your dev loop, use Path A.
+- **Path C — `pnpm export:pptx` (screenshots mode).** Driven by `scripts/export-pptx.mjs`: Puppeteer captures one PNG per slide at 1920×1080 full-bleed, then `pptxgenjs` assembles a `.pptx` with each PNG placed as a full-slide background and the matching speaker note attached via `addNotes()`. Produces `deck.pptx` in the project root. **Not editable in PowerPoint** — the slides are background images. Use when (a) the recipient requires a `.pptx` file, or (b) you need speaker notes embedded for handoff. If you want editable PowerPoint (text + shapes), export PDF + re-author — Ring doesn't support editable PPTX v1 (CSS layout doesn't map cleanly to PowerPoint shapes). `pnpm export:pptx:chrome` uses system Chrome; same fallback as PDF.
 
 ### The `noscale` attribute
 
@@ -211,22 +223,24 @@ import puppeteer from 'puppeteer-core';
 const browser = await puppeteer.launch({ channel: 'chrome', … });
 ```
 
-## PPTX Deferral (footnote)
+## PPTX Scope (footnote)
 
-**PPTX is explicitly out of scope for v1.** HTML → PPTX is lossy for:
+**v1 ships screenshots-mode PPTX only** (Path C). Each slide is a full-bleed PNG with the matching speaker note attached via `pptxgenjs` `addNotes()`. The deliverable opens in PowerPoint and plays correctly; the content is not editable inside PowerPoint because the slides are images, not native shapes.
+
+**Editable PPTX remains deferred.** HTML → native-PowerPoint shapes is lossy for:
 
 - **Absolute positioning** — `position: absolute` and nested flex layouts don't map to PowerPoint's slide-layout primitives.
 - **Custom grid layouts** — CSS grid with `align-items: stretch` becomes a manual table rebuild.
 - **CSS-based charts** — any chart drawn in divs or SVG becomes a flattened image, losing the native PowerPoint chart editability users expect.
 
-V2 may investigate `pptxgenjs` with graceful degradation:
+A v2 graceful-degradation path could map:
 
 - KPI tiles → text boxes.
 - 2×2 matrix → scatter chart.
 - Tables → native PowerPoint tables.
-- Everything else → flattened PNG per slide.
+- Everything else → flattened PNG per slide (which is what v1 already does for every slide).
 
-Until then, PDF is the contract. If the user asks for PPTX, the correct answer is "PDF now, PPTX in v2."
+Until then, if the user asks for an editable PPTX, the correct answer is "screenshots-mode PPTX now, editable PPTX when the content-shape mapping lands."
 
 ## Export Checklist
 

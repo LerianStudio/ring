@@ -1,6 +1,6 @@
 ---
 name: ring:deck
-description: Scaffold Lerian-branded HTML presentation projects with live-reload dev server, presenter view on second screen, phone-as-remote over WebSocket, auto-scaling canvas (authored at 1920×1080, fits any viewport), and PDF export via scripted Puppeteer or browser-native Cmd+P. Use when the user asks for a deck, presentation, board deck, investor deck, or slide deck.
+description: Scaffold Lerian-branded HTML presentation projects with live-reload dev server, presenter view on second screen, phone-as-remote over WebSocket, auto-scaling canvas (authored at 1920×1080, fits any viewport), in-browser toolbar (tweak/presenter/PDF/PPTX/remote), feedback-to-file loop for iterating with Claude, PPTX + PDF export (Puppeteer), browser-native PDF (Cmd+P), and `npm start` one-command bootstrap. Use when the user asks for a deck, presentation, board deck, investor deck, or slide deck.
 trigger: |
   - User asks to create a deck, presentation, board deck, investor deck, conference deck, all-hands deck, or any Lerian-branded slide deliverable
   - User says "make a deck", "build a deck", "new presentation", "slide deck"
@@ -166,7 +166,7 @@ STOP and report to the user if:
 | Missing Runtime             | Node not installed, or Node version < 18.0.0                                                               | STOP — user must install Node 18+ before proceeding                                   |
 | Directory Collision         | Target directory exists and is non-empty                                                                   | STOP and ask: overwrite, rename, or cancel                                            |
 | Unsupported Archetype       | User asks for timeline, quote, org-chart, image-hero                                                       | STOP — report these are v2 candidates; offer alternatives from the 9 archetypes       |
-| Unsupported Export          | User asks for PPTX export                                                                                  | STOP — report v1 is PDF-only; PPTX is deferred (lossy for CSS charts + absolute pos)  |
+| Unsupported Export          | User asks for editable-PowerPoint PPTX (text + shapes, not screenshots)                                    | STOP — report v1 PPTX is screenshots mode only (PNG per slide + speaker notes via `addNotes()`); editable PPTX is deferred because CSS layout doesn't map cleanly to PowerPoint shapes. Offer: PDF + re-author manually, or accept screenshots-mode PPTX. |
 | Theme Customization         | User asks for accent override, density toggle, font swap                                                   | STOP — report v1 is locked to Lerian editorial tokens; customization is v2            |
 | Auth on Remote              | User asks for PIN or auth on the remote control                                                            | STOP — report v1 is local-network trust model; PIN auth is v2                         |
 
@@ -210,13 +210,23 @@ Deck scaffolded at: ./<deck-name>/
 
 Next steps:
   cd <deck-name>
-  pnpm install              # or: npm install
-  pnpm dev                  # boots server on http://localhost:7007
+  npm start                 # one command: installs deps if needed, boots
+                            # dev server on http://localhost:7007, and
+                            # auto-opens the deck in your default browser.
+                            # (Suppress the auto-open with AUTO_OPEN=false.)
 
 During the presentation:
   - Main deck:   http://localhost:7007
   - Presenter:   http://localhost:7007/presenter  (open on second screen)
   - Remote:      http://<LAN-IP>:7007/remote      (open on phone, same Wi-Fi)
+
+In-browser toolbar (floating, bottom-center):
+  Tweak      capture feedback on the active slide — appended to
+             feedback.jsonl. Tell Claude "check tweaks" to review.
+  Presenter  opens /presenter in a new window
+  PDF        triggers Puppeteer export, streams deck.pdf for download
+  PPTX       same flow for deck.pptx (screenshots + speaker notes)
+  Remote     shows the LAN URL for the phone remote
 
 Keyboard controls (main deck):
   →/Space  next slide
@@ -225,17 +235,20 @@ Keyboard controls (main deck):
   S        toggle speaker notes overlay
   G        go to slide number
   B        blank screen
+  T        toggle tweak panel
+  H        toggle toolbar visibility
 
-Export to PDF:
-  pnpm export               # uses bundled Chromium (~200MB first time)
-  pnpm export:chrome        # uses system Chrome (~50MB, faster)
+Export from the terminal (optional — the toolbar buttons are easier):
+  npm run export            # PDF via bundled Chromium (~200MB first time)
+  npm run export:chrome     # PDF via system Chrome (~50MB, faster)
+  npm run export:pptx       # PPTX (screenshots + notes, not editable)
 
 Local network only — no auth. Don't expose port 7007 publicly.
 ```
 
 ## Future Work (v2 Candidates)
 
-- PPTX export via pptxgenjs with graceful degradation for CSS charts
+- Editable PPTX export (text + shapes mapped from CSS layout, not screenshots) — v1 ships screenshots mode only
 - Data-driven mode: YAML/JSON content files + template binding
 - Theme customization: accent override, density toggle
 - Additional archetypes: timeline, quote, org-chart, image-hero, photo-grid

@@ -157,6 +157,16 @@
     if (k === 'g' || k === 'G') { promptGoto(stage); e.preventDefault(); return; }
     if (k === 'b' || k === 'B') { setBlank(!state.blank); e.preventDefault(); return; }
     if (k === 'r' || k === 'R') { return; /* reserved for presenter timer reset */ }
+    if (k === 't' || k === 'T') {
+      if (window.__deckFeedback && window.__deckFeedback.toggle) window.__deckFeedback.toggle();
+      e.preventDefault();
+      return;
+    }
+    if (k === 'h' || k === 'H') {
+      if (window.__deckToolbar && window.__deckToolbar.toggle) window.__deckToolbar.toggle();
+      e.preventDefault();
+      return;
+    }
     if (k === 'Escape') {
       if (document.fullscreenElement) {
         const p = document.exitFullscreen && document.exitFullscreen();
@@ -299,6 +309,17 @@
     if (!state.exporting) {
       state.sync = connectSync(stage);
     }
+
+    // Notes and feedback panels share the bottom slot — close notes when
+    // feedback opens. Cross-module contract via CustomEvent so feedback-panel
+    // doesn't need to peek at controller state.
+    document.addEventListener('deck-feedback-opening', () => {
+      if (state.notesOpen) toggleNotes();
+    });
+
+    // Mount toolbar + feedback panel last (they depend on stage).
+    if (window.__deckToolbar && window.__deckToolbar.mount) window.__deckToolbar.mount(stage);
+    if (window.__deckFeedback && window.__deckFeedback.mount) window.__deckFeedback.mount(stage);
   }
 
   customElements.whenDefined('deck-stage').then(() => {

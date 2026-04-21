@@ -7,15 +7,20 @@
     "node": ">=18.0.0"
   },
   "scripts": {
+    "start": "node scripts/start.mjs",
     "dev": "node scripts/dev-server.mjs",
     "export": "node scripts/export-pdf.mjs",
-    "export:chrome": "node scripts/export-pdf.mjs --chrome"
+    "export:chrome": "node scripts/export-pdf.mjs --chrome",
+    "export:pptx": "node scripts/export-pptx.mjs",
+    "export:pptx:chrome": "node scripts/export-pptx.mjs --chrome"
   },
   "dependencies": {
     "express": "^5.2.1",
     "ws": "^8.20.0",
     "chokidar": "^5.0.0",
+    "open": "^10.0.0",
     "puppeteer": "^24.41.0",
-    "pdf-lib": "^1.17.1"
+    "pdf-lib": "^1.17.1",
+    "pptxgenjs": "^4.0.0"
   }
 }

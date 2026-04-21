@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<!--
+  TWEAKS STUDIO — full in-page editor reference
+  =============================================
+  One self-contained file that implements the full Tweaks contract:
+
+    • Design tokens   — fonts (Google Fonts, dynamic), color palette,
+                         spacing scale, radii, shadows, density/theme
+    • Element picker  — hover outlines in tweak mode; click to lock
+    • Inline editing  — double-click text, or use sidebar text field
+    • Comments        — 3 modes: pins, element-flags, draggable stickies
+    • Persistence     — everything lives inside the EDITMODE JSON block
+
+  Host contract (see the big comment block near the bottom):
+    1. register message listener
+    2. postMessage {type: '__edit_mode_available'}
+    3. on __activate_edit_mode / __deactivate_edit_mode → toggle UI
+    4. on any edit → postMessage {type: '__edit_mode_set_keys', edits}
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tweaks Studio — reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<style id="base-styles">
+  /* ─── Base reset ─────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif);
+    color: var(--color-text, #1a1a1a);
+    background: var(--color-bg, #fafaf7);
+    line-height: 1.5;
+    min-height: 100vh;
+    /* transitions for live token changes */
+    transition: background 200ms ease, color 200ms ease;
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display, inherit);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin: 0;
+    color: var(--color-heading, var(--color-text));
+  }
+  p { margin: 0; }
+  button { font-family: inherit; cursor: pointer; }
+
+  /* ─── Layout shell ───────────────────────────────────────── */
+  .shell {
+    display: grid;
+    grid-template-columns: 1fr 0;
+    min-height: 100vh;
+    transition: grid-template-columns 260ms cubic-bezier(.2,.7,.3,1);
+  }
+  body.tweaks-on .shell { grid-template-columns: 1fr 340px; }
+
+  .canvas {
+    min-width: 0;
+    overflow-x: hidden;
+    padding: calc(var(--space) * 6) calc(var(--space) * 4);
+    max-width: var(--max-width, 960px);
+    margin: 0 auto;
+  }
+
+  /* ─── Demo content styling ───────────────────────────────── */
+  .hero { margin-bottom: calc(var(--space) * 8); }
+  .hero .eyebrow {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-accent);
+    font-weight: 600;
+    margin-bottom: calc(var(--space) * 2);
+  }
+  .hero h1 {
+    font-size: clamp(40px, 7vw, 76px);
+    margin-bottom: calc(var(--space) * 3);
+    max-width: 18ch;
+  }
+  .hero .lede {
+    font-size: 18px;
+    max-width: 56ch;
+    opacity: 0.75;
+    margin-bottom: calc(var(--space) * 4);
+  }
+  .hero .cta-row { display: flex; gap: calc(var(--space) * 2); flex-wrap: wrap; }
+  .btn {
+    padding: calc(var(--space) * 1.5) calc(var(--space) * 3);
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    font-weight: 600;
+    font-size: 15px;
+    transition: transform .08s, box-shadow .15s, background .15s;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn.primary {
+    background: var(--color-accent);
+    color: var(--color-accent-on);
+    box-shadow: var(--shadow-md);
+  }
+  .btn.ghost {
+    background: transparent;
+    color: var(--color-text);
+    border-color: currentColor;
+    opacity: 0.7;
+  }
+  .btn.ghost:hover { opacity: 1; }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: calc(var(--space) * 3);
+    margin-bottom: calc(var(--space) * 8);
+  }
+  .card {
+    background: var(--color-surface);
+    padding: calc(var(--space) * 3);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--color-border);
+  }
+  .card h3 { font-size: 20px; margin-bottom: calc(var(--space) * 1); }
+  .card p  { font-size: 14px; opacity: 0.7; }
+
+  .article { max-width: 62ch; }
+  .article h2 {
+    font-size: 32px;
+    margin-top: calc(var(--space) * 6);
+    margin-bottom: calc(var(--space) * 2);
+  }
+  .article p {
+    margin-bottom: calc(var(--space) * 2);
+    font-size: 17px;
+    line-height: 1.7;
+  }
+
+  /* ─── Element-picker overlay (hover + locked) ────────────── */
+  .tw-hover-outline, .tw-locked-outline {
+    position: fixed;
+    pointer-events: none;
+    border-radius: 4px;
+    z-index: 9000;
+    transition: top .08s, left .08s, width .08s, height .08s;
+  }
+  .tw-hover-outline  { outline: 2px solid rgba(217,119,87,0.55); background: rgba(217,119,87,0.06); }
+  .tw-locked-outline { outline: 2px solid #D97757;               background: rgba(217,119,87,0.1); }
+  .tw-locked-outline::after {
+    content: attr(data-label);
+    position: absolute;
+    top: -22px; left: 0;
+    padding: 2px 6px;
+    background: #D97757; color: #fff;
+    font: 11px/1.4 -apple-system, system-ui;
+    border-radius: 3px;
+    letter-spacing: 0.02em;
+  }
+
+  /* ─── Inline-edit styling ────────────────────────────────── */
+  [contenteditable="true"] {
+    outline: none;
+    background: rgba(217,119,87,0.08);
+    box-shadow: 0 0 0 2px rgba(217,119,87,0.3);
+    border-radius: 3px;
+  }
+
+  /* ─── Comment UI ─────────────────────────────────────────── */
+  .tw-pin {
+    position: absolute;
+    width: 24px; height: 24px;
+    border-radius: 50% 50% 50% 0;
+    background: #D97757;
+    color: #fff;
+    transform: rotate(-45deg);
+    display: flex; align-items: center; justify-content: center;
+    font: 600 11px -apple-system, system-ui;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+    cursor: pointer;
+    z-index: 8000;
+  }
+  .tw-pin span { transform: rotate(45deg); }
+  .tw-flag {
+    position: absolute;
+    padding: 2px 6px 2px 4px;
+    background: #2B7FFF;
+    color: #fff;
+    font: 600 10px -apple-system, system-ui;
+    border-radius: 3px;
+    cursor: pointer;
+    z-index: 8000;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+    display: flex; align-items: center; gap: 3px;
+  }
+  .tw-flag::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%; background: #fff;
+  }
+  .tw-sticky {
+    position: absolute;
+    width: 180px;
+    min-height: 80px;
+    padding: 10px 12px;
+    background: #fef4a8;
+    color: #5a4a2a;
+    font: 13px/1.45 "Comic Sans MS", "Marker Felt", "Segoe Print", cursive;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
+    transform: rotate(-1.5deg);
+    z-index: 8000;
+    cursor: move;
+    border-radius: 2px;
+  }
+  .tw-sticky:focus-within { outline: 2px solid #D97757; }
+  .tw-sticky textarea {
+    width: 100%; border: none; background: transparent; resize: none;
+    font: inherit; color: inherit; outline: none; min-height: 60px;
+  }
+  .tw-sticky .close {
+    position: absolute; top: 2px; right: 4px;
+    background: none; border: none; color: #5a4a2a;
+    opacity: 0.4; font-size: 14px; cursor: pointer;
+  }
+  .tw-sticky .close:hover { opacity: 1; }
+
+  .tw-popover {
+    position: fixed;
+    z-index: 10000;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    padding: 10px;
+    width: 220px;
+  }
+  .tw-popover textarea {
+    width: 100%; height: 60px; border: 1px solid #e0e0e0;
+    border-radius: 4px; padding: 6px 8px; font: 13px/1.4 inherit;
+    resize: none; outline: none;
+  }
+  .tw-popover textarea:focus { border-color: #D97757; }
+  .tw-popover .row { display: flex; justify-content: flex-end; gap: 6px; margin-top: 6px; }
+  .tw-popover button {
+    padding: 4px 10px; border-radius: 4px; font-size: 12px; border: 1px solid transparent;
+  }
+  .tw-popover .primary { background: #D97757; color: #fff; }
+  .tw-popover .cancel  { background: transparent; color: #666; }
+
+  /* ─── Tweaks sidebar ─────────────────────────────────────── */
+  .tw-panel {
+    position: fixed;
+    top: 0; right: 0;
+    width: 340px;
+    height: 100vh;
+    background: #fff;
+    border-left: 1px solid #e8e4dc;
+    display: flex;
+    flex-direction: column;
+    font: 13px -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    color: #1a1a1a;
+    transform: translateX(100%);
+    transition: transform 260ms cubic-bezier(.2,.7,.3,1);
+    z-index: 9500;
+    box-shadow: -4px 0 24px rgba(0,0,0,0.06);
+  }
+  body.tweaks-on .tw-panel { transform: translateX(0); }
+
+  .tw-panel .header {
+    padding: 14px 16px;
+    border-bottom: 1px solid #eee;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .tw-panel .header .title {
+    font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: #888; font-weight: 600;
+  }
+  .tw-panel .tabs {
+    display: flex;
+    border-bottom: 1px solid #eee;
+  }
+  .tw-panel .tab {
+    flex: 1; padding: 10px 8px;
+    background: none; border: none;
+    font: inherit; color: #666;
+    border-bottom: 2px solid transparent;
+  }
+  .tw-panel .tab.active { color: #D97757; border-bottom-color: #D97757; }
+  .tw-panel .body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 14px 80px;
+  }
+  .tw-panel .body::-webkit-scrollbar { width: 6px; }
+  .tw-panel .body::-webkit-scrollbar-thumb { background: #ddd; border-radius: 3px; }
+
+  .tw-panel .section { margin-bottom: 18px; }
+  .tw-panel .section .label {
+    font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: #999; font-weight: 600; margin-bottom: 8px;
+  }
+  .tw-panel .row {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 8px;
+  }
+  .tw-panel .row label {
+    flex: 0 0 80px; color: #555; font-size: 12px;
+  }
+  .tw-panel .row input[type="range"] { flex: 1; min-width: 0; }
+  .tw-panel .row input[type="color"] {
+    width: 28px; height: 22px; border: 1px solid #ddd; border-radius: 3px;
+    padding: 0; background: none;
+  }
+  .tw-panel .row input[type="text"],
+  .tw-panel .row input[type="number"],
+  .tw-panel .row select,
+  .tw-panel .row textarea {
+    flex: 1; min-width: 0;
+    padding: 5px 8px; border: 1px solid #ddd; border-radius: 4px;
+    font: inherit; color: inherit; outline: none;
+  }
+  .tw-panel .row input:focus,
+  .tw-panel .row select:focus,
+  .tw-panel .row textarea:focus { border-color: #D97757; }
+  .tw-panel .row textarea { resize: vertical; min-height: 60px; }
+  .tw-panel .row .val {
+    flex: 0 0 38px; text-align: right; font-variant-numeric: tabular-nums;
+    color: #888; font-size: 11px;
+  }
+  .tw-panel .swatches {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px;
+    margin-top: 6px;
+  }
+  .tw-panel .swatches .sw {
+    aspect-ratio: 1; border-radius: 3px; cursor: pointer;
+    border: 1px solid rgba(0,0,0,0.08);
+  }
+  .tw-panel .swatches .sw.active { outline: 2px solid #1a1a1a; outline-offset: 1px; }
+
+  .tw-panel .switch {
+    width: 32px; height: 18px; border-radius: 9px; background: #d0d0d0;
+    position: relative; cursor: pointer; transition: background 150ms;
+    flex-shrink: 0;
+  }
+  .tw-panel .switch::after {
+    content: ""; position: absolute; top: 2px; left: 2px;
+    width: 14px; height: 14px; border-radius: 50%; background: #fff;
+    transition: transform 150ms; box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  .tw-panel .switch.on { background: #1a1a1a; }
+  .tw-panel .switch.on::after { transform: translateX(14px); }
+
+  .tw-panel .empty {
+    color: #aaa; font-size: 12px; text-align: center; padding: 40px 10px; line-height: 1.6;
+  }
+  .tw-panel .tool-row {
+    display: flex; gap: 6px; margin-bottom: 12px;
+  }
+  .tw-panel .tool-row button {
+    flex: 1;
+    padding: 8px 6px;
+    background: #f4f1eb;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    font: 500 11px inherit;
+    color: #555;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+  }
+  .tw-panel .tool-row button.active {
+    background: #fff; border-color: #D97757; color: #D97757;
+  }
+  .tw-panel .tool-row svg { width: 16px; height: 16px; }
+
+  .tw-panel .comment-list .item {
+    padding: 10px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 8px;
+    font-size: 12px; display: flex; gap: 8px;
+  }
+  .tw-panel .comment-list .badge {
+    width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; color: #fff; font-weight: 600;
+  }
+  .tw-panel .comment-list .badge.pin    { background: #D97757; }
+  .tw-panel .comment-list .badge.flag   { background: #2B7FFF; }
+  .tw-panel .comment-list .badge.sticky { background: #E8C547; color: #5a4a2a; }
+  .tw-panel .comment-list .body-text { flex: 1; }
+  .tw-panel .comment-list .del {
+    background: none; border: none; color: #ccc; font-size: 14px;
+    padding: 0; align-self: flex-start;
+  }
+  .tw-panel .comment-list .del:hover { color: #D97757; }
+
+  .tw-panel .element-meta {
+    background: #f8f5ef; padding: 8px 10px; border-radius: 5px;
+    font-size: 11px; color: #555; margin-bottom: 12px;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    word-break: break-all;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ DEMO CONTENT (what the user can tweak) ═══════════════ -->
+<div class="shell">
+  <main class="canvas" id="canvas">
+
+    <section class="hero" data-tw-id="hero">
+      <div class="eyebrow" data-tw-id="eyebrow" data-tw-editable>Design reference · v1</div>
+      <h1 data-tw-id="h1" data-tw-editable>A tweakable surface for everything on this page.</h1>
+      <p class="lede" data-tw-id="lede" data-tw-editable>Toggle Tweaks in the toolbar, then click any element to inspect and change it. Drop comments anywhere. Everything persists back into the file.</p>
+      <div class="cta-row">
+        <button class="btn primary" data-tw-id="cta1" data-tw-editable>Get started</button>
+        <button class="btn ghost"   data-tw-id="cta2" data-tw-editable>Read the docs</button>
+      </div>
+    </section>
+
+    <section class="card-grid">
+      <div class="card" data-tw-id="card1">
+        <h3 data-tw-id="card1-title" data-tw-editable>Tokens</h3>
+        <p data-tw-id="card1-body"  data-tw-editable>Fonts, colors, spacing, radii, shadows — all live in a single JSON block.</p>
+      </div>
+      <div class="card" data-tw-id="card2">
+        <h3 data-tw-id="card2-title" data-tw-editable>Picking</h3>
+        <p data-tw-id="card2-body"  data-tw-editable>Hover to hint, click to lock. The sidebar shows that element's properties.</p>
+      </div>
+      <div class="card" data-tw-id="card3">
+        <h3 data-tw-id="card3-title" data-tw-editable>Comments</h3>
+        <p data-tw-id="card3-body"  data-tw-editable>Pins, element flags, and draggable sticky notes. All anchored and persisted.</p>
+      </div>
+    </section>
+
+    <article class="article">
+      <h2 data-tw-id="a-h" data-tw-editable>Why bake the editor into the page?</h2>
+      <p data-tw-id="a-p1" data-tw-editable>A design file shouldn't need a separate editor app. When the tokens, the text, and the feedback all live in the same HTML, iteration gets trivial — reload, everything is where you left it.</p>
+      <p data-tw-id="a-p2" data-tw-editable>Double-click any paragraph to edit it in place. Or pick it, and edit in the sidebar. Either way, the new copy ends up in the JSON block at the bottom of the file.</p>
+    </article>
+
+  </main>
+</div>
+
+<!-- ═══ TWEAKS SIDEBAR ═══════════════════════════════════════ -->
+<aside class="tw-panel" id="tw-panel" aria-hidden="true">
+  <div class="header">
+    <div class="title">Tweaks</div>
+    <div class="switch" id="tw-master" title="Quick toggle (also controlled by toolbar)"></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="design">Design</button>
+    <button class="tab"        data-tab="element">Element</button>
+    <button class="tab"        data-tab="comments">Comments</button>
+  </div>
+
+  <div class="body" id="tw-body"></div>
+</aside>
+
+<!-- ═══ STATE + RUNTIME ══════════════════════════════════════ -->
+<script>
+/* ============================================================
+   1.  STATE — the single source of truth, persisted on disk
+   ============================================================
+   The EDITMODE block below is a plain JSON literal that the host
+   rewrites in-place whenever we send
+   __edit_mode_set_keys. Everything the user can change lives
+   here: design tokens, per-element text overrides, comments.
+
+   Shape:
+     tokens  — design-system tokens (fonts, colors, spacing, …)
+     texts   — { [dataTwId]: "overridden text content" }
+     comments — [{id, kind, anchor, text, x, y, ...}]
+================================================================ */
+const STATE = /*EDITMODE-BEGIN*/{
+  "tokens": {
+    "fontDisplay": "Inter",
+    "fontBody": "Inter",
+    "fontScale": 1,
+    "colorAccent": "#D97757",
+    "colorAccentOn": "#ffffff",
+    "colorBg": "#fafaf7",
+    "colorSurface": "#ffffff",
+    "colorText": "#1a1a1a",
+    "colorHeading": "#0f0f0f",
+    "colorBorder": "#ececec",
+    "spaceUnit": 8,
+    "radiusMd": 8,
+    "radiusLg": 16,
+    "shadowLevel": 1,
+    "maxWidth": 960,
+    "dark": false
+  },
+  "texts": {},
+  "comments": []
+}/*EDITMODE-END*/;
+
+/* ============================================================
+   2.  CURATED GOOGLE FONTS — loaded on demand
+   ============================================================ */
+const FONTS = [
+  "Inter", "Fraunces", "Instrument Serif", "DM Sans", "DM Serif Display",
+  "Space Grotesk", "Space Mono", "Playfair Display", "Crimson Pro",
+  "IBM Plex Sans", "IBM Plex Mono", "Manrope", "Work Sans", "Sora",
+  "Bricolage Grotesque", "Geist", "Geist Mono", "JetBrains Mono",
+  "Newsreader", "Lora", "Libre Caslon Text", "EB Garamond"
+];
+const loadedFonts = new Set();
+function loadFont(name) {
+  if (!name || loadedFonts.has(name)) return;
+  loadedFonts.add(name);
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(name)}:wght@400;500;600;700&display=swap`;
+  document.head.appendChild(link);
+}
+
+/* ============================================================
+   3.  APPLY — push state into the live DOM
+   ============================================================ */
+function applyTokens() {
+  const t = STATE.tokens;
+  loadFont(t.fontDisplay);
+  loadFont(t.fontBody);
+  const r = document.documentElement.style;
+  const quote = (f) => `"${f}", system-ui, sans-serif`;
+  r.setProperty("--font-display", quote(t.fontDisplay));
+  r.setProperty("--font-body",    quote(t.fontBody));
+  r.setProperty("--color-accent",    t.colorAccent);
+  r.setProperty("--color-accent-on", t.colorAccentOn);
+  r.setProperty("--color-bg",        t.dark ? "#111" : t.colorBg);
+  r.setProperty("--color-surface",   t.dark ? "#1a1a1a" : t.colorSurface);
+  r.setProperty("--color-text",      t.dark ? "#eee"   : t.colorText);
+  r.setProperty("--color-heading",   t.dark ? "#fff"   : t.colorHeading);
+  r.setProperty("--color-border",    t.dark ? "#2a2a2a" : t.colorBorder);
+  r.setProperty("--space", t.spaceUnit + "px");
+  r.setProperty("--radius-md", t.radiusMd + "px");
+  r.setProperty("--radius-lg", t.radiusLg + "px");
+  r.setProperty("--max-width", t.maxWidth + "px");
+  // font scale applies to body font-size
+  document.body.style.fontSize = (16 * t.fontScale) + "px";
+  // shadows
+  const shadows = [
+    { sm: "none", md: "none" },
+    { sm: "0 1px 2px rgba(0,0,0,0.06)",  md: "0 2px 6px rgba(0,0,0,0.08)"  },
+    { sm: "0 2px 4px rgba(0,0,0,0.08)",  md: "0 6px 18px rgba(0,0,0,0.12)" },
+    { sm: "0 4px 10px rgba(0,0,0,0.12)", md: "0 12px 32px rgba(0,0,0,0.18)"}
+  ][t.shadowLevel] || { sm:"none", md:"none" };
+  r.setProperty("--shadow-sm", shadows.sm);
+  r.setProperty("--shadow-md", shadows.md);
+}
+function applyTexts() {
+  for (const [id, text] of Object.entries(STATE.texts)) {
+    const el = document.querySelector(`[data-tw-id="${CSS.escape(id)}"]`);
+    if (el && el.textContent !== text) el.textContent = text;
+  }
+}
+
+/* ============================================================
+   4.  PERSISTENCE — send diffs to the host
+   ============================================================ */
+let saveTimer = null;
+function persist(partial) {
+  // merge locally
+  for (const k in partial) {
+    if (partial[k] && typeof partial[k] === "object" && !Array.isArray(partial[k])) {
+      STATE[k] = { ...(STATE[k] || {}), ...partial[k] };
+    } else {
+      STATE[k] = partial[k];
+    }
+  }
+  // debounce the send slightly so a slider drag doesn't thrash disk
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    window.parent.postMessage({ type: "__edit_mode_set_keys", edits: STATE }, "*");
+  }, 120);
+}
+
+/* ============================================================
+   5.  SIDEBAR RENDERING
+   ============================================================ */
+const body = document.getElementById("tw-body");
+const tabs = document.querySelectorAll(".tw-panel .tab");
+let activeTab = "design";
+let selectedEl = null;
+let activeTool = null; // 'pin' | 'flag' | 'sticky' | null
+
+tabs.forEach(t => t.addEventListener("click", () => {
+  activeTab = t.dataset.tab;
+  tabs.forEach(x => x.classList.toggle("active", x === t));
+  render();
+}));
+
+function render() {
+  if (activeTab === "design")   return renderDesign();
+  if (activeTab === "element")  return renderElement();
+  if (activeTab === "comments") return renderComments();
+}
+
+/* ─── Design tab ─────────────────────────────────────────── */
+function renderDesign() {
+  const t = STATE.tokens;
+  const fontOpts = FONTS.map(f => `<option ${f===t.fontDisplay?"selected":""}>${f}</option>`).join("");
+  const fontOpts2 = FONTS.map(f => `<option ${f===t.fontBody?"selected":""}>${f}</option>`).join("");
+
+  const palettes = [
+    ["#D97757","#2B7FFF","#0F9D58","#8E44AD","#E4572E","#111111"],
+    ["#F4A261","#E76F51","#2A9D8F","#264653","#E9C46A","#F1FAEE"]
+  ];
+  const paletteHtml = palettes.map((p, i) => `
+    <div class="swatches" data-palette="${i}">
+      ${p.map(c => `<div class="sw ${c===t.colorAccent?"active":""}" style="background:${c}" data-color="${c}"></div>`).join("")}
+    </div>`).join("");
+
+  body.innerHTML = `
+    <div class="section">
+      <div class="label">Typography</div>
+      <div class="row"><label>Display</label><select id="fd">${fontOpts}</select></div>
+      <div class="row"><label>Body</label><select id="fb">${fontOpts2}</select></div>
+      <div class="row"><label>Scale</label>
+        <input type="range" id="fs" min="0.8" max="1.4" step="0.02" value="${t.fontScale}">
+        <span class="val">${t.fontScale.toFixed(2)}×</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="label">Color</div>
+      <div class="row"><label>Accent</label><input type="color" id="ca" value="${t.colorAccent}"><input type="text" id="caTxt" value="${t.colorAccent}"></div>
+      <div class="row"><label>Background</label><input type="color" id="cb" value="${t.colorBg}"></div>
+      <div class="row"><label>Surface</label><input type="color" id="cs" value="${t.colorSurface}"></div>
+      <div class="row"><label>Text</label><input type="color" id="ct" value="${t.colorText}"></div>
+      <div class="row"><label>Dark mode</label>
+        <div class="switch ${t.dark?"on":""}" id="dk"></div>
+      </div>
+      <div class="label" style="margin-top:10px">Palette presets</div>
+      ${paletteHtml}
+    </div>
+
+    <div class="section">
+      <div class="label">Spacing & layout</div>
+      <div class="row"><label>Base unit</label>
+        <input type="range" id="su" min="4" max="16" step="1" value="${t.spaceUnit}">
+        <span class="val">${t.spaceUnit}px</span>
+      </div>
+      <div class="row"><label>Max width</label>
+        <input type="range" id="mw" min="560" max="1400" step="20" value="${t.maxWidth}">
+        <span class="val">${t.maxWidth}</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="label">Shape</div>
+      <div class="row"><label>Radius md</label>
+        <input type="range" id="rm" min="0" max="24" step="1" value="${t.radiusMd}">
+        <span class="val">${t.radiusMd}px</span>
+      </div>
+      <div class="row"><label>Radius lg</label>
+        <input type="range" id="rl" min="0" max="40" step="1" value="${t.radiusLg}">
+        <span class="val">${t.radiusLg}px</span>
+      </div>
+      <div class="row"><label>Shadow</label>
+        <input type="range" id="sh" min="0" max="3" step="1" value="${t.shadowLevel}">
+        <span class="val">${["none","sm","md","lg"][t.shadowLevel]}</span>
+      </div>
+    </div>
+  `;
+
+  // Wire up
+  const tok = (k, v) => { STATE.tokens[k] = v; applyTokens(); persist({tokens:{[k]:v}}); updateValLabels(); };
+  body.querySelector("#fd").onchange  = e => tok("fontDisplay", e.target.value);
+  body.querySelector("#fb").onchange  = e => tok("fontBody",    e.target.value);
+  body.querySelector("#fs").oninput   = e => tok("fontScale",   +e.target.value);
+  body.querySelector("#ca").oninput   = e => { body.querySelector("#caTxt").value = e.target.value; tok("colorAccent", e.target.value); };
+  body.querySelector("#caTxt").onchange = e => { body.querySelector("#ca").value = e.target.value; tok("colorAccent", e.target.value); };
+  body.querySelector("#cb").oninput   = e => tok("colorBg",      e.target.value);
+  body.querySelector("#cs").oninput   = e => tok("colorSurface", e.target.value);
+  body.querySelector("#ct").oninput   = e => tok("colorText",    e.target.value);
+  body.querySelector("#dk").onclick   = () => tok("dark", !STATE.tokens.dark);
+  body.querySelector("#su").oninput   = e => tok("spaceUnit",    +e.target.value);
+  body.querySelector("#mw").oninput   = e => tok("maxWidth",     +e.target.value);
+  body.querySelector("#rm").oninput   = e => tok("radiusMd",     +e.target.value);
+  body.querySelector("#rl").oninput   = e => tok("radiusLg",     +e.target.value);
+  body.querySelector("#sh").oninput   = e => tok("shadowLevel",  +e.target.value);
+  body.querySelectorAll(".sw").forEach(sw => sw.onclick = () => tok("colorAccent", sw.dataset.color));
+
+  function updateValLabels() {
+    body.querySelectorAll(".row").forEach(r => {
+      const inp = r.querySelector("input[type=range]");
+      const val = r.querySelector(".val");
+      if (!inp || !val) return;
+      if (inp.id === "fs") val.textContent = (+inp.value).toFixed(2)+"×";
+      else if (inp.id === "sh") val.textContent = ["none","sm","md","lg"][+inp.value];
+      else if (inp.id === "mw") val.textContent = inp.value;
+      else val.textContent = inp.value + (inp.id.startsWith("r")||inp.id==="su"?"px":"");
+    });
+    body.querySelector("#dk")?.classList.toggle("on", STATE.tokens.dark);
+  }
+}
+
+/* ─── Element tab ────────────────────────────────────────── */
+function renderElement() {
+  if (!selectedEl) {
+    body.innerHTML = `<div class="empty">Click any element on the page to inspect and edit it.<br><br><span style="opacity:.6">Hover = highlight · Click = lock</span></div>`;
+    return;
+  }
+  const id = selectedEl.dataset.twId || "(no id)";
+  const tag = selectedEl.tagName.toLowerCase();
+  const cls = (selectedEl.className || "").toString().split(" ").filter(Boolean).join(".");
+  const editable = selectedEl.hasAttribute("data-tw-editable");
+  const text = STATE.texts[id] ?? selectedEl.textContent;
+
+  body.innerHTML = `
+    <div class="element-meta">&lt;${tag}${cls?"."+cls:""}&gt;<br><span style="color:#888">id: ${id}</span></div>
+
+    ${editable ? `
+    <div class="section">
+      <div class="label">Text content</div>
+      <div class="row"><textarea id="etxt" rows="3">${text.replace(/</g,"&lt;")}</textarea></div>
+      <div style="font-size:11px;color:#999;margin-top:-4px">Tip: you can also double-click the element on the page.</div>
+    </div>` : `<div class="empty" style="padding:12px 6px">This element's text isn't marked editable.</div>`}
+
+    <div class="section">
+      <div class="label">Attach comment</div>
+      <div class="row"><button id="addflag" style="width:100%;padding:7px;border-radius:5px;border:1px solid #ddd;background:#fff">🏴 Flag this element</button></div>
+    </div>
+  `;
+
+  const ta = body.querySelector("#etxt");
+  if (ta) ta.oninput = () => {
+    selectedEl.textContent = ta.value;
+    STATE.texts[id] = ta.value;
+    persist({ texts: STATE.texts });
+    refreshOutlines();
+  };
+  const fl = body.querySelector("#addflag");
+  if (fl) fl.onclick = () => {
+    addComment({ kind: "flag", anchor: id, text: "" });
+  };
+}
+
+/* ─── Comments tab ───────────────────────────────────────── */
+function renderComments() {
+  const tools = `
+    <div class="tool-row">
+      <button data-tool="pin"    class="${activeTool==='pin'?'active':''}">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a5 5 0 00-5 5c0 3.5 5 11 5 11s5-7.5 5-11a5 5 0 00-5-5zm0 7a2 2 0 110-4 2 2 0 010 4z"/></svg>
+        Pin</button>
+      <button data-tool="flag"   class="${activeTool==='flag'?'active':''}">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 1v14h1.5v-5h9L11 6.5l1.5-4.5H2z"/></svg>
+        Flag</button>
+      <button data-tool="sticky" class="${activeTool==='sticky'?'active':''}">
+        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 2h12v9l-3 3H2V2z"/></svg>
+        Sticky</button>
+    </div>
+    <div style="font-size:11px;color:#888;margin-bottom:14px">
+      ${activeTool === "pin" ? "Click anywhere on the page to drop a pin." :
+        activeTool === "flag" ? "Click any element to flag it." :
+        activeTool === "sticky" ? "Click anywhere to drop a sticky note." :
+        "Pick a tool, then click on the page."}
+    </div>
+  `;
+
+  const list = STATE.comments.length === 0
+    ? `<div class="empty" style="padding:20px 6px">No comments yet.</div>`
+    : `<div class="comment-list">${STATE.comments.map(c => `
+        <div class="item" data-cid="${c.id}">
+          <div class="badge ${c.kind}">${c.kind[0].toUpperCase()}</div>
+          <div class="body-text">${(c.text || "(empty)").replace(/</g,"&lt;")}${c.anchor?`<div style="color:#999;margin-top:2px;font-size:10px">on #${c.anchor}</div>`:""}</div>
+          <button class="del" title="Delete">×</button>
+        </div>`).join("")}</div>`;
+
+  body.innerHTML = tools + list;
+
+  body.querySelectorAll(".tool-row button").forEach(b => b.onclick = () => {
+    activeTool = activeTool === b.dataset.tool ? null : b.dataset.tool;
+    document.body.style.cursor = activeTool ? "crosshair" : "";
+    renderComments();
+  });
+  body.querySelectorAll(".comment-list .item").forEach(el => {
+    const cid = el.dataset.cid;
+    el.onclick = (e) => {
+      if (e.target.classList.contains("del")) {
+        STATE.comments = STATE.comments.filter(c => c.id !== cid);
+        persist({ comments: STATE.comments });
+        renderCommentsOnCanvas();
+        renderComments();
+      }
+    };
+  });
+}
+
+/* ============================================================
+   6.  ELEMENT PICKER (hover + click-to-lock)
+   ============================================================ */
+const hoverOutline = document.createElement("div");
+hoverOutline.className = "tw-hover-outline";
+hoverOutline.style.display = "none";
+const lockOutline = document.createElement("div");
+lockOutline.className = "tw-locked-outline";
+lockOutline.style.display = "none";
+document.body.append(hoverOutline, lockOutline);
+
+function isTweakable(el) {
+  return el && el.closest && el.closest("[data-tw-id]") &&
+         !el.closest(".tw-panel") && !el.closest(".tw-pin") &&
+         !el.closest(".tw-flag") && !el.closest(".tw-sticky") &&
+         !el.closest(".tw-popover");
+}
+function outlineRect(el, out) {
+  const r = el.getBoundingClientRect();
+  out.style.display = "block";
+  out.style.top  = r.top + "px";
+  out.style.left = r.left + "px";
+  out.style.width  = r.width + "px";
+  out.style.height = r.height + "px";
+}
+function refreshOutlines() {
+  if (selectedEl) { outlineRect(selectedEl, lockOutline); lockOutline.dataset.label = selectedEl.dataset.twId || selectedEl.tagName.toLowerCase(); }
+}
+
+document.addEventListener("mousemove", (e) => {
+  if (!document.body.classList.contains("tweaks-on")) return;
+  if (activeTool) return;
+  const t = isTweakable(e.target) && e.target.closest("[data-tw-id]");
+  if (t && t !== selectedEl) outlineRect(t, hoverOutline);
+  else hoverOutline.style.display = "none";
+});
+
+document.addEventListener("click", (e) => {
+  if (!document.body.classList.contains("tweaks-on")) return;
+  if (e.target.closest(".tw-panel") || e.target.closest(".tw-popover")) return;
+
+  // Comment-tool paths
+  if (activeTool === "pin")    { dropPin(e);    return; }
+  if (activeTool === "sticky") { dropSticky(e); return; }
+  if (activeTool === "flag") {
+    const t = isTweakable(e.target) && e.target.closest("[data-tw-id]");
+    if (t) { addComment({ kind:"flag", anchor:t.dataset.twId, text:"" }); activeTool=null; document.body.style.cursor=""; renderComments(); }
+    return;
+  }
+
+  // Picking
+  const t = isTweakable(e.target) && e.target.closest("[data-tw-id]");
+  if (t) {
+    e.preventDefault();
+    selectedEl = t;
+    refreshOutlines();
+    activeTab = "element";
+    tabs.forEach(x => x.classList.toggle("active", x.dataset.tab === "element"));
+    render();
+  }
+});
+
+/* Inline-edit via dblclick */
+document.addEventListener("dblclick", (e) => {
+  if (!document.body.classList.contains("tweaks-on")) return;
+  const t = e.target.closest("[data-tw-editable]");
+  if (!t) return;
+  e.preventDefault();
+  t.setAttribute("contenteditable", "true");
+  t.focus();
+  const commit = () => {
+    t.removeAttribute("contenteditable");
+    const id = t.dataset.twId;
+    if (id) {
+      STATE.texts[id] = t.textContent;
+      persist({ texts: STATE.texts });
+    }
+    t.removeEventListener("blur", commit);
+    t.removeEventListener("keydown", onKey);
+    if (activeTab === "element" && selectedEl === t) render();
+  };
+  const onKey = (ev) => {
+    if (ev.key === "Enter" && !ev.shiftKey) { ev.preventDefault(); t.blur(); }
+    if (ev.key === "Escape") t.blur();
+  };
+  t.addEventListener("blur", commit);
+  t.addEventListener("keydown", onKey);
+});
+
+window.addEventListener("scroll", refreshOutlines, true);
+window.addEventListener("resize", refreshOutlines);
+
+/* ============================================================
+   7.  COMMENTS — pins, flags, stickies
+   ============================================================ */
+function uid() { return "c" + Math.random().toString(36).slice(2, 8); }
+
+function addComment(c) {
+  c.id = c.id || uid();
+  STATE.comments.push(c);
+  persist({ comments: STATE.comments });
+  renderCommentsOnCanvas();
+}
+function updateComment(id, patch) {
+  const c = STATE.comments.find(x => x.id === id);
+  if (!c) return;
+  Object.assign(c, patch);
+  persist({ comments: STATE.comments });
+}
+
+function dropPin(e) {
+  const scroll = { x: window.scrollX, y: window.scrollY };
+  addComment({ kind:"pin", x: e.clientX + scroll.x, y: e.clientY + scroll.y, text: "" });
+  activeTool = null; document.body.style.cursor = "";
+  renderComments();
+  // open popover for the new pin
+  const last = STATE.comments[STATE.comments.length - 1];
+  openPopover(last, e.clientX, e.clientY);
+}
+function dropSticky(e) {
+  addComment({ kind:"sticky", x: e.clientX + window.scrollX, y: e.clientY + window.scrollY, text: "Note…" });
+  activeTool = null; document.body.style.cursor = "";
+  renderComments();
+}
+
+function renderCommentsOnCanvas() {
+  document.querySelectorAll(".tw-pin, .tw-flag, .tw-sticky").forEach(n => n.remove());
+  for (const c of STATE.comments) {
+    if (c.kind === "pin")    renderPin(c);
+    if (c.kind === "flag")   renderFlag(c);
+    if (c.kind === "sticky") renderSticky(c);
+  }
+}
+
+function renderPin(c) {
+  const el = document.createElement("div");
+  el.className = "tw-pin";
+  el.style.left = c.x + "px";
+  el.style.top  = c.y + "px";
+  el.innerHTML = `<span>💬</span>`;
+  el.onclick = (e) => { e.stopPropagation(); openPopover(c, e.clientX, e.clientY); };
+  document.body.appendChild(el);
+}
+function renderFlag(c) {
+  const anchor = document.querySelector(`[data-tw-id="${CSS.escape(c.anchor)}"]`);
+  if (!anchor) return;
+  const r = anchor.getBoundingClientRect();
+  const el = document.createElement("div");
+  el.className = "tw-flag";
+  el.style.left = (r.left + window.scrollX + r.width - 10) + "px";
+  el.style.top  = (r.top + window.scrollY - 10) + "px";
+  el.textContent = c.text ? c.text.slice(0, 20) : "flag";
+  el.onclick = (e) => { e.stopPropagation(); openPopover(c, e.clientX, e.clientY); };
+  document.body.appendChild(el);
+}
+function renderSticky(c) {
+  const el = document.createElement("div");
+  el.className = "tw-sticky";
+  el.style.left = c.x + "px";
+  el.style.top  = c.y + "px";
+  const ta = document.createElement("textarea");
+  ta.value = c.text || "";
+  ta.oninput = () => updateComment(c.id, { text: ta.value });
+  const close = document.createElement("button");
+  close.className = "close"; close.textContent = "×";
+  close.onclick = () => {
+    STATE.comments = STATE.comments.filter(x => x.id !== c.id);
+    persist({ comments: STATE.comments });
+    renderCommentsOnCanvas();
+    renderComments();
+  };
+  el.append(close, ta);
+  // drag
+  let dragStart = null;
+  el.addEventListener("mousedown", (e) => {
+    if (e.target !== el) return;
+    dragStart = { x: e.clientX - c.x, y: e.clientY - c.y };
+    e.preventDefault();
+  });
+  document.addEventListener("mousemove", (e) => {
+    if (!dragStart) return;
+    c.x = e.clientX - dragStart.x;
+    c.y = e.clientY - dragStart.y;
+    el.style.left = c.x + "px"; el.style.top = c.y + "px";
+  });
+  document.addEventListener("mouseup", () => {
+    if (dragStart) { dragStart = null; updateComment(c.id, { x: c.x, y: c.y }); }
+  });
+  document.body.appendChild(el);
+}
+
+/* Popover for pin/flag comment text */
+let popover = null;
+function openPopover(c, cx, cy) {
+  closePopover();
+  popover = document.createElement("div");
+  popover.className = "tw-popover";
+  popover.style.left = Math.min(cx, window.innerWidth - 240) + "px";
+  popover.style.top  = Math.min(cy, window.innerHeight - 120) + "px";
+  popover.innerHTML = `
+    <textarea placeholder="Comment…">${(c.text || "").replace(/</g,"&lt;")}</textarea>
+    <div class="row">
+      <button class="cancel">Delete</button>
+      <button class="primary">Save</button>
+    </div>`;
+  const ta = popover.querySelector("textarea");
+  popover.querySelector(".primary").onclick = () => {
+    updateComment(c.id, { text: ta.value });
+    closePopover();
+    renderCommentsOnCanvas();
+    renderComments();
+  };
+  popover.querySelector(".cancel").onclick = () => {
+    STATE.comments = STATE.comments.filter(x => x.id !== c.id);
+    persist({ comments: STATE.comments });
+    closePopover();
+    renderCommentsOnCanvas();
+    renderComments();
+  };
+  document.body.appendChild(popover);
+  ta.focus();
+}
+function closePopover() { popover?.remove(); popover = null; }
+document.addEventListener("click", (e) => {
+  if (popover && !popover.contains(e.target) && !e.target.closest(".tw-pin") && !e.target.closest(".tw-flag"))
+    closePopover();
+}, true);
+
+window.addEventListener("scroll", renderCommentsOnCanvas, true);
+window.addEventListener("resize", renderCommentsOnCanvas);
+
+/* ============================================================
+   8.  HOST HANDSHAKE — listener first, THEN announce
+   ============================================================ */
+window.addEventListener("message", (e) => {
+  const m = e.data;
+  if (!m || typeof m !== "object") return;
+  if (m.type === "__activate_edit_mode") {
+    document.body.classList.add("tweaks-on");
+    document.getElementById("tw-panel").setAttribute("aria-hidden","false");
+    document.getElementById("tw-master").classList.add("on");
+  }
+  if (m.type === "__deactivate_edit_mode") {
+    document.body.classList.remove("tweaks-on");
+    document.getElementById("tw-panel").setAttribute("aria-hidden","true");
+    document.getElementById("tw-master").classList.remove("on");
+    selectedEl = null;
+    lockOutline.style.display = "none";
+    hoverOutline.style.display = "none";
+    closePopover();
+    activeTool = null; document.body.style.cursor = "";
+  }
+});
+
+// The in-panel master switch also lets you test without the toolbar
+document.getElementById("tw-master").onclick = () => {
+  const on = document.body.classList.toggle("tweaks-on");
+  document.getElementById("tw-master").classList.toggle("on", on);
+  if (!on) { selectedEl = null; lockOutline.style.display = "none"; hoverOutline.style.display = "none"; }
+};
+
+/* ============================================================
+   9.  BOOT
+   ============================================================ */
+applyTokens();
+applyTexts();
+renderCommentsOnCanvas();
+render();
+
+// Announce AFTER the listener is in place (required order).
+window.parent.postMessage({ type: "__edit_mode_available" }, "*");
+</script>
+</body>
+</html>

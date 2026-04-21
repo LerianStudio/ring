@@ -34,6 +34,34 @@ app.use('/assets',     express.static(path.join(root, 'assets')));
 
 **Why `/deck.html` is aliased:** the presenter view fetches the deck HTML as plain text to regex-extract the speaker-notes JSON block. Serving it as a static file at a predictable URL is simpler than exposing a separate `/api/notes` endpoint. See [`speaker-notes.md`](speaker-notes.md) for the extraction contract (including the `</script>` substring ban in note strings).
 
+## Dev-server endpoints
+
+The complete route surface area exposed by `scripts/dev-server.mjs`:
+
+| Route | Method | Serves | Notes |
+| --- | --- | --- | --- |
+| `/` | GET | `deck.html` | Main canvas |
+| `/presenter` | GET | `presenter.html` | Second-screen view |
+| `/remote` | GET | `remote.html` | Phone-friendly controller |
+| `/health` | GET | `{ok:true}` JSON | Liveness probe for the toolbar + start script |
+| `/lan-url` | GET | `{url:"http://IP:PORT/remote"}` | LAN URL surfaced by the toolbar's Remote modal |
+| `/assets/*` | GET | static files from `./assets/` | No caching headers in dev |
+| `/feedback` | POST | appends to `./feedback.jsonl` | Body: `{slideIndex:int, slideLabel:string, text:string}`. Returns `{ok:true}` |
+| `/export/pdf` | POST | `application/pdf` stream | Spawns `scripts/export-pdf.mjs` with `SKIP_DEV_SERVER=true`, streams the generated PDF back. Serialized — returns 429 if another export is in flight |
+| `/export/pptx` | POST | `application/vnd.openxmlformats-officedocument.presentationml.presentation` stream | Same pattern via `scripts/export-pptx.mjs` |
+
+The `/export/*` endpoints exist so the toolbar PDF/PPTX buttons can trigger an export without the user dropping to a terminal. They're serialized behind a single mutex — a second request while one is running gets `HTTP 429` rather than spawning a parallel Puppeteer.
+
+## Auto-open browser
+
+On `server.listen()`, the dev-server opens `http://localhost:${PORT}` in the user's default browser via the `open` npm package. Suppress with `AUTO_OPEN=false` when you're iterating quickly or running on a headless machine. This keeps onboarding frictionless for less-technical users running `npm start` — the deck appears without them looking up the URL.
+
+## `SKIP_DEV_SERVER` env convention
+
+`scripts/export-pdf.mjs` and `scripts/export-pptx.mjs` both spin up a dev-server if one isn't already running. When the dev-server invokes them via `POST /export/*`, it sets `SKIP_DEV_SERVER=true` so the child process reuses the running server instead of trying to bind the same port. Without this flag the export would fail with `EADDRINUSE`.
+
+The convention is one-directional: only the `/export/*` handler sets it. Authors running `pnpm export` or `pnpm export:pptx` from a terminal never touch this env — the script starts its own dev-server if needed and cleans up on exit.
+
 ## Deck script load order
 
 `deck.html` loads three scripts in order:

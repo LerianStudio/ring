@@ -2,10 +2,14 @@ import express from 'express';
 import { WebSocketServer } from 'ws';
 import chokidar from 'chokidar';
 import { createServer } from 'http';
-import { readFileSync } from 'fs';
+import { readFileSync, appendFileSync, createReadStream, existsSync, unlink } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { spawn } from 'child_process';
+import { randomBytes } from 'crypto';
+import { tmpdir } from 'os';
 import os from 'os';
+import open from 'open';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -58,6 +62,9 @@ if (lanIp) allowedOrigins.add(`http://${lanIp}:${PORT}`);
 
 const app = express();
 
+// Scoped JSON parsing — keep the attack surface minimal; only /feedback needs it.
+app.use('/feedback', express.json({ limit: '10kb' }));
+
 app.get('/health', (_req, res) => res.json({ ok: true }));
 app.get('/', (_req, res) => sendFile(res, 'deck.html'));
 app.get('/deck.html', (_req, res) => sendFile(res, 'deck.html'));
@@ -72,6 +79,96 @@ app.use(
 );
 // Note: /scripts is deliberately NOT mounted — no browser code fetches server
 // source, and exposing it over LAN leaked dev-server.mjs + export-pdf.mjs.
+
+app.post('/feedback', (req, res) => {
+  const { slideIndex, slideLabel, text } = req.body || {};
+  if (!Number.isInteger(slideIndex) || typeof text !== 'string' || text.trim() === '') {
+    return res.status(400).json({ ok: false, error: 'Invalid body: expected {slideIndex:int, slideLabel:string, text:string non-empty}' });
+  }
+  if (text.length > 4000) {
+    return res.status(400).json({ ok: false, error: 'Text too long (max 4000 chars)' });
+  }
+  const entry = {
+    ts: new Date().toISOString(),
+    slideIndex,
+    slideLabel: typeof slideLabel === 'string' ? slideLabel : '',
+    text: text.trim(),
+  };
+  try {
+    appendFileSync(join(ROOT, 'feedback.jsonl'), JSON.stringify(entry) + '\n');
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('[feedback] append failed:', err);
+    res.status(500).json({ ok: false, error: 'Server error writing feedback' });
+  }
+});
+
+app.get('/lan-url', (_req, res) => {
+  const host = lanIp || 'localhost';
+  res.json({ url: `http://${host}:${PORT}/remote` });
+});
+
+// Serialize exports — Puppeteer opens a headless Chromium per run, which shares state
+// with any other concurrent run in surprising ways. Serialize to sidestep that entirely.
+let exportInFlight = false;
+
+function runExport(kind, res) {
+  if (exportInFlight) {
+    return res.status(429).json({ ok: false, error: 'Another export is in progress' });
+  }
+  exportInFlight = true;
+
+  const isPdf = kind === 'pdf';
+  const scriptPath = join(ROOT, 'scripts', isPdf ? 'export-pdf.mjs' : 'export-pptx.mjs');
+  const outPath = join(tmpdir(), `deck-export-${randomBytes(6).toString('hex')}.${isPdf ? 'pdf' : 'pptx'}`);
+  const mime = isPdf
+    ? 'application/pdf'
+    : 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+  const filename = isPdf ? 'deck.pdf' : 'deck.pptx';
+
+  const env = { ...process.env, SKIP_DEV_SERVER: 'true', PORT: String(PORT), OUT: outPath };
+  const child = spawn('node', [scriptPath], { cwd: ROOT, env, stdio: ['ignore', 'pipe', 'pipe'] });
+
+  let stderr = '';
+  child.stdout.on('data', (b) => process.stdout.write(`[export:${kind}] ${b}`));
+  child.stderr.on('data', (b) => { stderr += b.toString(); process.stderr.write(`[export:${kind}] ${b}`); });
+
+  child.on('error', (err) => {
+    exportInFlight = false;
+    res.status(500).json({ ok: false, error: 'Spawn failed: ' + err.message });
+  });
+
+  child.on('exit', (code) => {
+    if (code !== 0 || !existsSync(outPath)) {
+      exportInFlight = false;
+      const msg = stderr.split('\n').filter(Boolean).slice(-5).join('\n') || `exit ${code}`;
+      return res.status(500).type('text/plain').send(msg);
+    }
+    res.setHeader('Content-Type', mime);
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    const stream = createReadStream(outPath);
+    stream.on('error', (err) => {
+      exportInFlight = false;
+      if (!res.headersSent) res.status(500).send('Stream error: ' + err.message);
+      else res.destroy();
+    });
+    stream.on('close', () => {
+      unlink(outPath, () => {});  // best-effort cleanup
+      exportInFlight = false;
+    });
+    stream.pipe(res);
+  });
+
+  // If client aborts mid-download, kill the child and clean up.
+  res.on('close', () => {
+    if (!child.killed) {
+      try { child.kill('SIGTERM'); } catch {}
+    }
+  });
+}
+
+app.post('/export/pdf', (_req, res) => runExport('pdf', res));
+app.post('/export/pptx', (_req, res) => runExport('pptx', res));
 
 const server = createServer(app);
 const wss = new WebSocketServer({
@@ -195,6 +292,12 @@ function printBanner() {
     `  Presenter:  http://localhost:${PORT}/presenter`,
     `  Remote:     http://${lan}:${PORT}/remote   ← open this on your phone`,
     '',
+    '  Endpoints:',
+    '    POST /feedback          append feedback.jsonl',
+    '    POST /export/pdf        trigger PDF export',
+    '    POST /export/pptx       trigger PPTX export',
+    '    GET  /lan-url           LAN URL for remote control',
+    '',
     '  Watching deck.html, presenter.html, remote.html, assets/, scripts/',
     '  Local network only — no authentication.',
     '',
@@ -223,6 +326,13 @@ server.on('error', (err) => {
 
 server.listen(PORT, HOST, () => {
   printBanner();
+  if (process.env.AUTO_OPEN !== 'false') {
+    const url = `http://localhost:${PORT}`;
+    open(url).catch((err) => {
+      console.warn(`[open] could not auto-open browser: ${err.message}`);
+      console.warn(`[open] open this URL manually: ${url}`);
+    });
+  }
 });
 
 async function shutdown(signal) {
