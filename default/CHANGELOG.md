@@ -1,5 +1,16 @@
 # Ring-default Changelog
 
+## [1.27.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.27.0)
+
+- **Features**
+  - Introduced extensive new UI primitives and archetypes.
+
+Contributors: @fred
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.26.0...ring-default@1.27.0)
+
+---
+
 ## [1.26.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.26.0)
 
 - **Features:**
