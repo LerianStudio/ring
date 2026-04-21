@@ -4,6 +4,17 @@ PDF export converts the live deck to a paginated PDF at pixel-perfect 1920×1080
 
 Scope: **PDF only in v1.** See the PPTX footnote at the end.
 
+## Two export paths
+
+Two routes to PDF, same 1920×1080 geometry:
+
+- **Path A — `pnpm export` (Puppeteer, scripted/CI).** Driven by `scripts/export-pdf.mjs`: launches headless Chromium, per-slide navigation via `window.__deck.goto(n)`, awaits `document.fonts.ready` per slide, captures each slide with `page.pdf()`, merges via `pdf-lib`. Use this in CI, cron jobs, and anything non-interactive. Deterministic artifact — the exact bytes your dev loop produces.
+- **Path B — `Cmd+P → Save as PDF` (browser-native).** Works because `<deck-stage>` injects `@page { size: 1920px 1080px; margin: 0 }` into `document.head` on upgrade, and its shadow-DOM `@media print` un-stacks slides into native print-page flow. Fastest route for ad-hoc exports. **Caveat:** browser rasterization can subtly differ from Puppeteer (font-hinting, subpixel AA). For a deterministic artifact that matches what ran in your dev loop, use Path A.
+
+### The `noscale` attribute
+
+`<deck-stage>` normally applies a `transform: scale()` to fit the canvas to the viewport. For Path A, that would distort Puppeteer's 1920×1080 capture. The controller sets `noscale` on `<deck-stage>` when it detects `?export=true`; `scripts/export-pdf.mjs` also sets it directly as belt-and-suspenders. With `noscale` present, the canvas renders at native 1920×1080 and Puppeteer captures a pixel-perfect frame.
+
 ## Entry Point
 
 ```bash

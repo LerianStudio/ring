@@ -1,304 +1,417 @@
 'use strict';
 
 (function () {
-  var state = {
-    slides: [],
-    paginated: [],
-    index: 0,
-    blank: false,
-    notes: [],
-    notesOpen: false,
-    exporting: false,
-    sync: null,
-    suppressSend: false,
-    helloTotal: 0,
-  };
+  if (typeof window === 'undefined') return;
+  if (window.customElements && customElements.get('deck-stage')) return;
 
-  function qs(sel, root) { return (root || document).querySelector(sel); }
-  function qsa(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+  const DEFAULT_W = 1920;
+  const DEFAULT_H = 1080;
+  const INPUT_TAG_RE = /^(INPUT|TEXTAREA|SELECT)$/;
 
-  function readNotes() {
-    var el = document.getElementById('speaker-notes');
-    if (!el) return [];
-    try { return JSON.parse(el.textContent || '[]'); }
-    catch (e) {
-      console.warn('[deck] speaker-notes JSON parse failed:', e);
-      return [];
+  const SHADOW_CSS = `
+    :host {
+      display: block;
+      position: relative;
+      overflow: hidden;
     }
-  }
 
-  function fillPagination() {
-    state.paginated = state.slides.filter(function (s) {
-      return s.querySelector('.page-num');
-    });
-    var total = state.paginated.length;
-    state.paginated.forEach(function (section, i) {
-      qsa('.page-num', section).forEach(function (n) { n.textContent = String(i + 1); });
-      qsa('.page-total', section).forEach(function (n) { n.textContent = String(total); });
-    });
-    // Safety: if slide count changed since last hello (e.g., hot-reload),
-    // re-announce total so the server-side state.total stays in sync.
-    if (state.sync && state.slides.length !== state.helloTotal) {
-      sendHello();
+    .canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: top left;
+      z-index: 2;
     }
-  }
 
-  function sendHello() {
-    if (!state.sync) return;
-    state.sync.send({ type: 'hello', total: state.slides.length });
-    state.helloTotal = state.slides.length;
-  }
-
-  function applyStagger(section) {
-    if (state.exporting) return;
-    section.classList.remove('slide-enter');
-    // reflow then re-add so animation restarts
-    void section.offsetWidth;
-    section.classList.add('slide-enter');
-    var children = qsa(':scope > *', section);
-    children.forEach(function (child, i) {
-      child.style.animationDelay = (i * 80) + 'ms';
-    });
-  }
-
-  function show(index) {
-    if (index < 0) index = 0;
-    if (index > state.slides.length - 1) index = state.slides.length - 1;
-    state.slides.forEach(function (section, i) {
-      section.style.display = i === index ? '' : 'none';
-      section.setAttribute('aria-hidden', i === index ? 'false' : 'true');
-    });
-    state.index = index;
-    var current = state.slides[index];
-    if (current) applyStagger(current);
-    updateNotesPanel();
-    updateHash();
-  }
-
-  function updateHash() {
-    if (state.exporting) return;
-    try {
-      var h = '#slide=' + (state.index + 1);
-      if (location.hash !== h) history.replaceState(null, '', h);
-    } catch (e) {
-      // ignore: history.replaceState fails in sandboxed iframe / data: URL
+    ::slotted(*) {
+      position: absolute !important;
+      inset: 0 !important;
+      visibility: hidden;
+      opacity: 0;
     }
-  }
 
-  function readHashSlide() {
-    var m = /#slide=(\d+)/.exec(location.hash || '');
-    if (!m) return null;
-    var n = parseInt(m[1], 10);
-    if (isNaN(n)) return null;
-    return Math.max(0, Math.min(state.slides.length - 1, n - 1));
-  }
-
-  function doubleRaf() {
-    return new Promise(function (resolve) {
-      requestAnimationFrame(function () { requestAnimationFrame(resolve); });
-    });
-  }
-
-  function gotoIndex(n, opts) {
-    opts = opts || {};
-    if (n === state.index) {
-      return state.exporting ? doubleRaf() : Promise.resolve();
+    ::slotted([data-deck-active]) {
+      visibility: visible;
+      opacity: 1;
     }
-    show(n);
-    if (!opts.silent && state.sync && !state.suppressSend) {
-      // Include total as belt-and-suspenders: server uses it to refresh state.total if changed.
-      state.sync.send({ type: 'nav', slide: state.index, total: state.slides.length });
+
+    /* Export mode (Puppeteer): flip to display-based hide/show so the
+       captured page only paints the active slide. Template slides use
+       display: flex, so the active rule restores that. */
+    :host([noscale]) ::slotted(*) {
+      display: none !important;
     }
-    // Double rAF: Puppeteer must await until the slide is actually painted,
-    // not just flagged display:block. Two frames guarantees layout + paint.
-    return state.exporting ? doubleRaf() : Promise.resolve();
-  }
-
-  function setBlank(on, opts) {
-    opts = opts || {};
-    state.blank = !!on;
-    var overlay = qs('#deck-blank-overlay');
-    if (!overlay) {
-      overlay = document.createElement('div');
-      overlay.id = 'deck-blank-overlay';
-      overlay.style.cssText = 'position:fixed;inset:0;background:#000;z-index:9998;display:none;';
-      document.body.appendChild(overlay);
+    :host([noscale]) ::slotted([data-deck-active]) {
+      display: flex !important;
     }
-    overlay.style.display = state.blank ? 'block' : 'none';
-    if (!opts.silent && state.sync && !state.suppressSend) {
-      state.sync.send({ type: 'blank', on: state.blank });
+
+    .tap {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 33.333%;
+      z-index: 1;
+      pointer-events: auto;
+      background: transparent;
     }
-  }
+    .tap-left  { left: 0; }
+    .tap-right { right: 0; }
 
-  function ensureNotesPanel() {
-    var panel = qs('#deck-notes-panel');
-    if (panel) return panel;
-    panel = document.createElement('div');
-    panel.id = 'deck-notes-panel';
-    panel.style.cssText = [
-      'position:fixed', 'left:0', 'right:0', 'bottom:0', 'height:25vh',
-      'background:rgba(0,0,0,0.88)', 'color:#fff',
-      "font-family:'IBM Plex Serif', Georgia, serif", 'font-size:22px', 'line-height:1.4',
-      'padding:24px 32px', 'overflow-y:auto', 'z-index:9997', 'display:none',
-      'box-sizing:border-box'
-    ].join(';') + ';';
-    document.body.appendChild(panel);
-    return panel;
-  }
+    @media (hover: hover) and (pointer: fine) {
+      .tap { display: none; }
+    }
 
-  function updateNotesPanel() {
-    if (!state.notesOpen) return;
-    var panel = ensureNotesPanel();
-    var raw = state.notes[state.index] || '';
-    var paragraphs = String(raw).split(/\n\n+/).map(function (p) {
-      var d = document.createElement('p');
-      d.textContent = p;
-      d.style.margin = '0 0 12px 0';
-      return d;
-    });
-    panel.innerHTML = '';
-    paragraphs.forEach(function (p) { panel.appendChild(p); });
-  }
+    @media print {
+      :host { overflow: visible; }
+      .canvas {
+        transform: none !important;
+        position: static;
+        width: 100%;
+        height: auto;
+      }
+      ::slotted(*) {
+        position: relative !important;
+        inset: auto !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        display: flex !important;
+        page-break-after: always;
+      }
+      ::slotted(*:last-child) { page-break-after: auto; }
+      .tap { display: none !important; }
+    }
+  `;
 
-  function toggleNotes() {
-    state.notesOpen = !state.notesOpen;
-    var panel = ensureNotesPanel();
-    panel.style.display = state.notesOpen ? 'block' : 'none';
-    if (state.notesOpen) updateNotesPanel();
-  }
+  class DeckStage extends HTMLElement {
+    static get observedAttributes() { return ['noscale']; }
 
-  function toggleFullscreen() {
-    if (!document.fullscreenElement) {
-      var p = document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
-      if (p && p.catch) p.catch(function () {
-        // ignore: fullscreen unavailable or denied by user gesture policy
-      });
-    } else {
-      if (document.exitFullscreen) document.exitFullscreen().catch(function () {
-        // ignore: fullscreen unavailable or denied by user gesture policy
+    constructor() {
+      super();
+      this._state = { slides: [], index: 0 };
+      this._width = DEFAULT_W;
+      this._height = DEFAULT_H;
+      this._built = false;
+      this._resizeObserver = null;
+      this._mutationObserver = null;
+      this._onKeydown = null;
+      this._onTapLeft = null;
+      this._onTapRight = null;
+      this._canvasEl = null;
+      this._tapLeftEl = null;
+      this._tapRightEl = null;
+    }
+
+    connectedCallback() {
+      this._width = this._readIntAttr('width', DEFAULT_W);
+      this._height = this._readIntAttr('height', DEFAULT_H);
+
+      this._buildShadow();
+      this._injectPageStyle();
+      this._collectSlides();
+
+      this._resizeObserver = new ResizeObserver(() => this._applyScale());
+      this._resizeObserver.observe(this);
+
+      this._mutationObserver = new MutationObserver(() => this._onLightDomMutation());
+      this._mutationObserver.observe(this, { childList: true });
+
+      this._onKeydown = (e) => this._handleKeydown(e);
+      document.addEventListener('keydown', this._onKeydown);
+
+      this._onTapLeft = (e) => { e.preventDefault(); this.prev('tap'); };
+      this._onTapRight = (e) => { e.preventDefault(); this.next('tap'); };
+      this._tapLeftEl.addEventListener('click', this._onTapLeft);
+      this._tapRightEl.addEventListener('click', this._onTapRight);
+
+      this._applyScale();
+
+      const initialIndex = Math.min(this._state.index, Math.max(0, this._state.slides.length - 1));
+      this._state.index = initialIndex;
+      const slide = this._state.slides[initialIndex] || null;
+      this._activate(initialIndex);
+      this._dispatchSlideChange({
+        index: initialIndex,
+        previousIndex: null,
+        slide: slide,
+        previousSlide: null,
+        reason: 'init',
       });
     }
-  }
 
-  function promptGoto() {
-    var input = window.prompt('Go to slide (1..' + state.slides.length + '):');
-    if (input == null || input === '') return;
-    var n = parseInt(input, 10);
-    if (isNaN(n)) return;
-    gotoIndex(Math.max(0, Math.min(state.slides.length - 1, n - 1)));
-  }
+    disconnectedCallback() {
+      if (this._resizeObserver) {
+        this._resizeObserver.disconnect();
+        this._resizeObserver = null;
+      }
+      if (this._mutationObserver) {
+        this._mutationObserver.disconnect();
+        this._mutationObserver = null;
+      }
+      if (this._onKeydown) {
+        document.removeEventListener('keydown', this._onKeydown);
+        this._onKeydown = null;
+      }
+      if (this._tapLeftEl && this._onTapLeft) {
+        this._tapLeftEl.removeEventListener('click', this._onTapLeft);
+      }
+      if (this._tapRightEl && this._onTapRight) {
+        this._tapRightEl.removeEventListener('click', this._onTapRight);
+      }
+      this._onTapLeft = null;
+      this._onTapRight = null;
+    }
 
-  function onKey(e) {
-    if (e.defaultPrevented) return;
-    if (e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
-    switch (e.key) {
-      case 'ArrowRight':
-      case ' ':
-      case 'Spacebar':
-        gotoIndex(state.index + 1); e.preventDefault(); break;
-      case 'ArrowLeft':
-        gotoIndex(state.index - 1); e.preventDefault(); break;
-      case 'f': case 'F':
-        toggleFullscreen(); e.preventDefault(); break;
-      case 's': case 'S':
-        toggleNotes(); e.preventDefault(); break;
-      case 'g': case 'G':
-        promptGoto(); e.preventDefault(); break;
-      case 'b': case 'B':
-        setBlank(!state.blank); e.preventDefault(); break;
-      case 'Escape':
-        if (document.fullscreenElement && document.exitFullscreen) {
-          document.exitFullscreen().catch(function () {
-            // ignore: fullscreen unavailable or denied by user gesture policy
+    attributeChangedCallback(name, _prev, _next) {
+      if (name === 'noscale' && this._built) {
+        this._applyScale();
+      }
+    }
+
+    get index()  { return this._state.index; }
+    get length() { return this._state.slides.length; }
+
+    goto(i, reason = 'api') {
+      const total = this._state.slides.length;
+      if (total === 0) return Promise.resolve();
+
+      const target = Math.max(0, Math.min(total - 1, i | 0));
+      const current = this._state.index;
+      const noOp = target === current;
+
+      const previousSlide = this._state.slides[current] || null;
+      const previousIndex = current;
+
+      if (!noOp) {
+        this._state.index = target;
+        this._activate(target);
+        this._dispatchSlideChange({
+          index: target,
+          previousIndex: previousIndex,
+          slide: this._state.slides[target] || null,
+          previousSlide: previousSlide,
+          reason: reason,
+        });
+      }
+
+      // Export mode awaits double rAF — Puppeteer's page.pdf() fires as soon
+      // as goto()'s promise resolves, and single-rAF occasionally paints the
+      // previous frame's layout. Double-rAF guarantees layout + paint of the
+      // new active slide before the PDF snapshot.
+      if (this.hasAttribute('noscale')) {
+        return new Promise((resolve) => {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => resolve());
           });
+        });
+      }
+      return new Promise((resolve) => {
+        requestAnimationFrame(() => resolve());
+      });
+    }
+
+    next(reason = 'api')  { return this.goto(this._state.index + 1, reason); }
+    prev(reason = 'api')  { return this.goto(this._state.index - 1, reason); }
+    reset(reason = 'api') { return this.goto(0, reason); }
+
+    _readIntAttr(name, fallback) {
+      const raw = this.getAttribute(name);
+      if (raw == null || raw === '') return fallback;
+      const n = parseInt(raw, 10);
+      return Number.isFinite(n) && n > 0 ? n : fallback;
+    }
+
+    _buildShadow() {
+      if (this._built) return;
+      const root = this.shadowRoot || this.attachShadow({ mode: 'open' });
+
+      const style = document.createElement('style');
+      style.textContent = SHADOW_CSS;
+
+      const canvas = document.createElement('div');
+      canvas.className = 'canvas';
+      canvas.style.width = this._width + 'px';
+      canvas.style.height = this._height + 'px';
+      const slot = document.createElement('slot');
+      canvas.appendChild(slot);
+
+      const tapLeft = document.createElement('div');
+      tapLeft.className = 'tap tap-left';
+      tapLeft.setAttribute('aria-hidden', 'true');
+
+      const tapRight = document.createElement('div');
+      tapRight.className = 'tap tap-right';
+      tapRight.setAttribute('aria-hidden', 'true');
+
+      root.appendChild(style);
+      root.appendChild(canvas);
+      root.appendChild(tapLeft);
+      root.appendChild(tapRight);
+
+      this._canvasEl = canvas;
+      this._tapLeftEl = tapLeft;
+      this._tapRightEl = tapRight;
+      this._built = true;
+    }
+
+    // @page must live in the document head, not the shadow tree — @page is
+    // scoped to the page context and shadow CSS cannot reach it. One style
+    // node per document is enough even with multiple <deck-stage> instances.
+    _injectPageStyle() {
+      if (!document || !document.head) return;
+      let node = document.head.querySelector('style[data-deck-stage-page]');
+      if (!node) {
+        node = document.createElement('style');
+        node.setAttribute('data-deck-stage-page', '');
+        document.head.appendChild(node);
+      }
+      node.textContent = '@page { size: ' + this._width + 'px ' + this._height + 'px; margin: 0; }';
+    }
+
+    _collectSlides() {
+      this._state.slides = Array.from(this.querySelectorAll(':scope > *'));
+    }
+
+    _onLightDomMutation() {
+      const previousActive = this._state.slides[this._state.index] || null;
+      const previousIndex = this._state.index;
+
+      this._collectSlides();
+
+      const total = this._state.slides.length;
+      if (total === 0) {
+        this._state.index = 0;
+        return;
+      }
+
+      let nextIndex;
+      if (previousActive && this._state.slides.indexOf(previousActive) !== -1) {
+        nextIndex = this._state.slides.indexOf(previousActive);
+      } else {
+        nextIndex = Math.max(0, Math.min(total - 1, previousIndex));
+      }
+
+      const nextActive = this._state.slides[nextIndex] || null;
+      const elementChanged = nextActive !== previousActive;
+
+      this._state.index = nextIndex;
+      this._activate(nextIndex);
+
+      if (elementChanged) {
+        this._dispatchSlideChange({
+          index: nextIndex,
+          previousIndex: previousIndex,
+          slide: nextActive,
+          previousSlide: previousActive,
+          reason: 'mutation',
+        });
+      }
+    }
+
+    _activate(i) {
+      const slides = this._state.slides;
+      for (let k = 0; k < slides.length; k++) {
+        const el = slides[k];
+        if (k === i) {
+          el.setAttribute('data-deck-active', '');
+          el.setAttribute('aria-hidden', 'false');
+        } else {
+          if (el.hasAttribute('data-deck-active')) el.removeAttribute('data-deck-active');
+          el.setAttribute('aria-hidden', 'true');
         }
-        if (state.notesOpen) toggleNotes();
-        if (state.blank) setBlank(false);
-        break;
+      }
+    }
+
+    _applyScale() {
+      if (!this._canvasEl) return;
+
+      if (this.hasAttribute('noscale')) {
+        this._canvasEl.style.transform = '';
+        this._canvasEl.style.left = '';
+        this._canvasEl.style.top = '';
+        return;
+      }
+
+      const hostW = this.clientWidth;
+      const hostH = this.clientHeight;
+      if (hostW === 0 || hostH === 0) return;
+
+      const s = Math.min(hostW / this._width, hostH / this._height);
+      const scaledW = this._width * s;
+      const scaledH = this._height * s;
+      const x = (hostW - scaledW) / 2;
+      const y = (hostH - scaledH) / 2;
+
+      this._canvasEl.style.left = '0px';
+      this._canvasEl.style.top = '0px';
+      this._canvasEl.style.transform = 'translate(' + x + 'px, ' + y + 'px) scale(' + s + ')';
+    }
+
+    _handleKeydown(e) {
+      // Input-guard: skip when focus is inside editable surfaces or the event
+      // was already handled by another listener. Controller layers handle
+      // their own keys (F/S/G/B/R/Escape) and we must not eat those.
+      if (e.defaultPrevented) return;
+      const t = e.target;
+      if (t && t.tagName && INPUT_TAG_RE.test(t.tagName)) return;
+      if (t && t.isContentEditable) return;
+
+      const key = e.key;
+      let handled = true;
+
+      switch (key) {
+        case 'ArrowRight':
+        case 'PageDown':
+        case ' ':
+        case 'Spacebar':
+          this.next('keyboard');
+          break;
+        case 'ArrowLeft':
+        case 'PageUp':
+          this.prev('keyboard');
+          break;
+        case 'Home':
+          this.goto(0, 'keyboard');
+          break;
+        case 'End':
+          this.goto(this._state.slides.length - 1, 'keyboard');
+          break;
+        case '0':
+          this.goto(9, 'keyboard');
+          break;
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+          this.goto(parseInt(key, 10) - 1, 'keyboard');
+          break;
+        default:
+          handled = false;
+      }
+
+      if (handled) e.preventDefault();
+    }
+
+    _dispatchSlideChange(detail) {
+      const evt = new CustomEvent('slidechange', {
+        bubbles: true,
+        composed: true,
+        detail: {
+          index: detail.index,
+          previousIndex: detail.previousIndex,
+          total: this._state.slides.length,
+          slide: detail.slide,
+          previousSlide: detail.previousSlide,
+          reason: detail.reason,
+        },
+      });
+      this.dispatchEvent(evt);
     }
   }
 
-  function onHashChange() {
-    var n = readHashSlide();
-    if (n != null && n !== state.index) gotoIndex(n, { silent: true });
-  }
-
-  function onPostMessage(event) {
-    if (event.origin !== window.location.origin) return;
-    var msg = event.data;
-    if (!msg || typeof msg !== 'object') return;
-    if (msg.type === 'nav' && Number.isInteger(msg.slide)) {
-      gotoIndex(msg.slide, { silent: true });
-    }
-  }
-
-  function init() {
-    state.slides = qsa('deck-stage > section');
-    state.notes = readNotes();
-    state.exporting = new URLSearchParams(location.search).get('export') === 'true';
-
-    if (state.slides.length === 0) {
-      console.error('[deck-stage] No <deck-stage> > <section> elements found — deck.html is empty or malformed.');
-      return;
-    }
-
-    if (state.exporting) {
-      document.body.classList.add('exporting');
-    }
-
-    fillPagination();
-
-    if (state.notes.length > 0 && state.notes.length !== state.slides.length) {
-      console.warn('[deck-stage] Speaker-notes length ' + state.notes.length + ' != slide count ' + state.slides.length + ' — presenter will show "(no notes)" for missing slides.');
-    }
-
-    var initial = readHashSlide();
-    show(initial == null ? 0 : initial);
-
-    window.__deck = {
-      goto: function (n) { return gotoIndex(n); },
-      next: function () { return gotoIndex(state.index + 1); },
-      prev: function () { return gotoIndex(state.index - 1); },
-      total: function () { return state.slides.length; },
-      current: function () { return state.index; },
-      blank: function (on) { setBlank(on); },
-    };
-
-    window.addEventListener('message', onPostMessage);
-    window.addEventListener('hashchange', onHashChange);
-
-    if (state.exporting) return;
-
-    document.addEventListener('keydown', onKey);
-
-    state.sync = window.DeckSync.connect('/ws', {
-      onOpen: function () {
-        sendHello();
-      },
-      onNav: function (msg) {
-        if (!Number.isInteger(msg.slide)) return;
-        state.suppressSend = true;
-        gotoIndex(msg.slide, { silent: true });
-        state.suppressSend = false;
-      },
-      onBlank: function (msg) {
-        state.suppressSend = true;
-        setBlank(!!msg.on, { silent: true });
-        state.suppressSend = false;
-      },
-      onState: function (msg) {
-        state.suppressSend = true;
-        if (typeof msg.slide === 'number') gotoIndex(msg.slide, { silent: true });
-        setBlank(!!msg.blank, { silent: true });
-        state.suppressSend = false;
-      },
-      onReload: function () { location.reload(); },
-    });
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+  customElements.define('deck-stage', DeckStage);
 })();

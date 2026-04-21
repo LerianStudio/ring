@@ -109,13 +109,15 @@
     p  { margin: 0; }
     p.lede { font-size: var(--t-body-lg); line-height: 1.35; color: var(--c-ink-2); }
 
-    /* -- Slide canvas: 1920x1080, fixed -- */
+    /* -- Slide canvas: viewport-sized host; component scales the inner 1920x1080 canvas to fit. -- */
     deck-stage {
       display: block;
-      width: 1920px;
-      height: 1080px;
+      width: 100vw;
+      height: 100vh;
       position: relative;
-      margin: 0 auto;
+      margin: 0;
+      overflow: hidden;
+      background: var(--c-bg-2);
     }
     deck-stage > section {
       width: 1920px;
@@ -487,21 +489,13 @@
       transition: none !important;
     }
 
-    /* Print / PDF: each <section> on its own page */
-    @media print {
-      html, body { margin: 0; padding: 0; background: #fff; }
-      deck-stage { width: 100%; height: 100vh; }
-      deck-stage > section {
-        display: flex !important;
-        page-break-after: always;
-      }
-      deck-stage > section:last-child { page-break-after: auto; }
-    }
+    /* Print / PDF: <deck-stage> Web Component owns @page + un-stacking rules
+       (injected into document.head + shadow-DOM @media print). See assets/deck-stage.js. */
   </style>
 </head>
 <body>
 
-  <deck-stage>
+  <deck-stage width="1920" height="1080">
 
     <!-- ======================================================
          SLIDE 1 — COVER
@@ -1087,6 +1081,7 @@
 
   <script src="/assets/sync-client.js"></script>
   <script src="/assets/deck-stage.js"></script>
+  <script src="/assets/deck-controller.js"></script>
 
 </body>
 </html>

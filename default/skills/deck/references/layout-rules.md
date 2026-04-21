@@ -243,6 +243,14 @@ The reference ships three slide backgrounds. Archetypes MUST pick one.
 
 `.slide.accent` is the rarest — use it for punctuation, not paragraphs.
 
+## Overlay Placement — `position: fixed` Inside a Slide Is Broken
+
+Slides are `position: absolute; inset: 0` inside the canvas — light-DOM children of `<deck-stage>`, positioned via shadow-DOM `::slotted()` rules. Inactive slides use `visibility: hidden; opacity: 0`; they remain laid out but invisible. This preserves state in `<video>`, `<iframe>`, embedded React trees, etc. across navigation — nothing tears down on slide switch.
+
+**Consequence for authors:** the canvas has `transform: scale(s)` applied to fit the viewport. Per CSS spec, a `transform` on an ancestor creates a new containing block for any `position: fixed` descendants. That means `position: fixed` inside a slide is scoped to the canvas, not the viewport — it no longer covers the full window.
+
+**The rule:** overlays that must cover the viewport (blank overlay, notes panel, modals, toast stacks) MUST live on `document.body`, not inside a slide. This is already how the controller handles `#deck-blank-overlay` and `#deck-notes-panel`. Follow the same convention for any new overlay.
+
 ## Canvas Self-Test
 
 Before shipping any slide, walk this checklist:

@@ -1,6 +1,6 @@
 ---
 name: ring:deck
-description: Scaffold Lerian-branded HTML presentation projects with live-reload dev server, presenter view on second screen, phone-as-remote over WebSocket, and Puppeteer PDF export. Use when the user asks for a deck, presentation, board deck, investor deck, or slide deck.
+description: Scaffold Lerian-branded HTML presentation projects with live-reload dev server, presenter view on second screen, phone-as-remote over WebSocket, auto-scaling canvas (authored at 1920×1080, fits any viewport), and PDF export via scripted Puppeteer or browser-native Cmd+P. Use when the user asks for a deck, presentation, board deck, investor deck, or slide deck.
 trigger: |
   - User asks to create a deck, presentation, board deck, investor deck, conference deck, all-hands deck, or any Lerian-branded slide deliverable
   - User says "make a deck", "build a deck", "new presentation", "slide deck"
@@ -105,6 +105,7 @@ Then create `<DECK_NAME>/` directory with these files (copy from the skill's `te
 | `scripts/*`                        | `scripts/*`                                  |
 | `templates/LICENSE.tmpl`           | `LICENSE` (substitute `{{YEAR}}`, `{{COPYRIGHT_HOLDER}}` — default `Lerian Studio`) |
 | `templates/README.md.tmpl`         | `README.md` (substitute `{{DECK_TITLE}}`, `{{DECK_NAME}}`) |
+| `templates/.gitignore.tmpl`        | `.gitignore` (no substitution)               |
 
 ### Phase 4: Compose slides in deck.html
 

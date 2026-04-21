@@ -34,6 +34,22 @@ app.use('/assets',     express.static(path.join(root, 'assets')));
 
 **Why `/deck.html` is aliased:** the presenter view fetches the deck HTML as plain text to regex-extract the speaker-notes JSON block. Serving it as a static file at a predictable URL is simpler than exposing a separate `/api/notes` endpoint. See [`speaker-notes.md`](speaker-notes.md) for the extraction contract (including the `</script>` substring ban in note strings).
 
+## Deck script load order
+
+`deck.html` loads three scripts in order:
+
+```html
+<script src="/assets/sync-client.js"></script>
+<script src="/assets/deck-stage.js"></script>
+<script src="/assets/deck-controller.js"></script>
+```
+
+- `sync-client.js` exports `window.DeckSync` — WebSocket client used by the controller to bridge `nav`/`blank`/`state`/`reload` to the server.
+- `deck-stage.js` defines the `<deck-stage>` custom element: auto-scaling canvas via `transform: scale()`, visibility-based slide switching, `slidechange` CustomEvent, component-owned keyboard shortcuts (arrows, space, home, end, pgup, pgdn, 0–9), and injected `@page` + shadow-DOM `@media print` rules.
+- `deck-controller.js` gates on `customElements.whenDefined('deck-stage')` and attaches Lerian behaviors: the public `window.__deck` API, hash sync, `#deck-blank-overlay` on `document.body`, notes panel, stagger, sync bridge, F/S/G/B/R (no-op) keys, Escape, `postMessage` listener, and speaker-notes parsing.
+
+Dev-server's chokidar already watches `assets/` as a directory, so `deck-controller.js` is hot-reloaded automatically with no server change.
+
 ## WebSocket Endpoint
 
 Single endpoint: `/ws`. Handled by the `ws` package on the same HTTP server.

@@ -1,10 +1,10 @@
-// Tested up to ~100 slides; memory usage scales linearly (~1.5MB/slide in V8 heap
-// via pdf-lib's in-memory DOM). For decks >200 slides, consider streaming merge.
+// Tested up to ~100 slides; memory usage scales linearly (~2MB/slide for 1920x1080
+// PNG captures held in-memory before pptxgenjs assembly). For decks >200 slides,
+// consider streaming the PPTX writer.
 
 import puppeteer from 'puppeteer';
-import { PDFDocument } from 'pdf-lib';
+import PptxGenJS from 'pptxgenjs';
 import { spawn } from 'child_process';
-import { writeFileSync } from 'fs';
 import { resolve } from 'path';
 
 // Requires Node >=18 for global fetch and AbortController.
@@ -12,7 +12,7 @@ import { resolve } from 'path';
 const PORT = parseInt(process.env.PORT || '7007', 10);
 const BASE = `http://localhost:${PORT}`;
 const USE_SYSTEM_CHROME = process.argv.includes('--chrome');
-const OUT_PATH = resolve(process.cwd(), process.env.OUT || './deck.pdf');
+const OUT_PATH = resolve(process.cwd(), process.env.OUT || './deck.pptx');
 
 let devServer = null;
 let browser = null;
@@ -167,41 +167,41 @@ async function main() {
     document.body.classList.add('exporting');
   });
 
+  // Fetch speaker notes once — they're rendered as a single JSON blob in the DOM.
+  const notes = await page.evaluate(() => {
+    const el = document.getElementById('speaker-notes');
+    if (!el) return [];
+    try { return JSON.parse(el.textContent || '[]'); } catch { return []; }
+  });
+
   log(`Exporting ${total} slides at 1920x1080...`);
-  const combined = await PDFDocument.create();
+
+  // PPTX units default to inches. 1920x1080 at 96 DPI = 20x11.25 inches (16:9).
+  const pptx = new PptxGenJS();
+  pptx.defineLayout({ name: 'LER_1920', width: 20, height: 11.25 });
+  pptx.layout = 'LER_1920';
 
   // NOTE: Serial per-slide export is intentional — parallelization risks font-state
   // race conditions between slides. Correctness > speed. Do not "optimize" into a
   // worker pool unless you've verified font.ready determinism per page.
   for (let i = 0; i < total; i++) {
-    log(`[${i + 1}/${total}] exporting slide ${i + 1}...`);
+    log(`[${i + 1}/${total}] capturing slide ${i + 1}...`);
     await page.evaluate((n) => window.__deck.goto(n), i);
     // Per-slide font-ready await — weights can be fetched lazily on navigation.
     await page.evaluateHandle('document.fonts.ready');
 
-    const buf = await page.pdf({
-      width: '1920px',
-      height: '1080px',
-      printBackground: true,
-      pageRanges: '1',
-      preferCSSPageSize: false,
+    const buf = await page.screenshot({
+      type: 'png',
+      fullPage: false,
+      clip: { x: 0, y: 0, width: 1920, height: 1080 },
     });
 
-    try {
-      const slideDoc = await PDFDocument.load(buf);
-      const [copied] = await combined.copyPages(slideDoc, [0]);
-      combined.addPage(copied);
-    } catch (e) {
-      // Fail fast with a clear slide-index hint — a half-merged PDF is worse than none.
-      console.error(
-        '[export] Failed to merge slide ' + (i + 1) + '/' + total + ': ' + e.message
-      );
-      throw e;
-    }
+    const slide = pptx.addSlide();
+    slide.background = { data: 'data:image/png;base64,' + buf.toString('base64') };
+    if (notes[i]) slide.addNotes(notes[i]);
   }
 
-  const bytes = await combined.save();
-  writeFileSync(OUT_PATH, bytes);
+  await pptx.writeFile({ fileName: OUT_PATH });
 
   const elapsed = ((Date.now() - startedAt) / 1000).toFixed(1);
   log(`\n✓ Exported ${total} slides → ${OUT_PATH}`);
@@ -220,7 +220,9 @@ async function cleanup() {
 
 process.on('exit', () => {
   // Synchronous best-effort kill — async cleanup already ran in finally.
-  killDevServer();
+  if (process.env.SKIP_DEV_SERVER !== 'true') {
+    killDevServer();
+  }
 });
 process.on('SIGINT', async () => { await cleanup(); process.exit(130); });
 process.on('SIGTERM', async () => { await cleanup(); process.exit(143); });
