@@ -4,6 +4,25 @@
 
 - **Features**
   - Added Test Gate and Contribution Gate to orchestrator.
+  - Updated using-finops-team docs and added pattern matching to analyzer.
+  - Added auto-save dictionary, batch approval, and reporter doc fetch in gate1.
+  - Added open template support in regulatory-templates-setup.
+  - Added DATA_SOURCES.md canonical data source reference.
+
+- **Fixes**
+  - Addressed CodeRabbit review comments.
+  - Activated evtCadDeclarante and marked registry as dynamic.
+
+Contributors: @gandalf,
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-finops-team@0.10.2...ring-finops-team@0.11.0)
+
+---
+
+## [0.11.0](https://github.com/LerianStudio/ring/releases/tag/ring-finops-team@0.11.0)
+
+- **Features**
+  - Added Test Gate and Contribution Gate to orchestrator.
   - Updated using-finops-team documentation and added pattern matching to analyzer.
   - Added auto-save dictionary, batch approval, and reporter document fetch in gate1.
   - Added open template support in regulatory-templates-setup.
