@@ -21,8 +21,18 @@ Every color used by the reference. MUST declare all of these on `:root`. Naming 
 | --- | --- | --- |
 | `--c-bg` | `#FFFFFF` | Page / default slide background |
 | `--c-bg-2` | `#F2F2F2` | Cinza Claro — secondary surface (paper slide variant) |
+| `--c-bg-warm` | `#F0EFE9` | Papel Quente — warm-paper surface with a hint of earth. Highlighted-but-not-primary. |
 | `--c-card` | `#FFFFFF` | Card background |
 | `--c-panel` | `#191A1B` | Dark panel background (act dividers, inverted slides) |
+
+**`--c-bg-warm` vs `--c-bg-2` — when to use which.** Both are "paper," not white. They are NOT interchangeable.
+
+| Token | Role | Use when |
+| --- | --- | --- |
+| `--c-bg-2` `#F2F2F2` | Neutral paper — cool, stylistically flat | Whole-slide `.slide.paper` background; soft row dividers (`--c-rule-2`); unemphasized secondary surface |
+| `--c-bg-warm` `#F0EFE9` | Warm paper — hint of earth, earning-attention | Highlighted rows inside a cooler surface (e.g., `.warm` funnel stages between default and `.hot`); accent-adjacent tint states; "this is still paper but the reader should notice it" |
+
+MUST NOT redefine `--c-bg-2` as warm, and MUST NOT use `--c-bg-warm` as the whole-slide paper surface. `.slide.paper` is cool-paper by convention; warming it breaks the pacing signal (see `slide-archetypes.md` — `content-paper` uses the cool `#F2F2F2` to say "pause and discuss").
 
 ### Rules (dividers)
 
@@ -201,6 +211,7 @@ Every deck template MUST paste this block verbatim at the top of its `<style>`.
   /* Surfaces */
   --c-bg:        #FFFFFF;
   --c-bg-2:      #F2F2F2;
+  --c-bg-warm:   #F0EFE9;
   --c-card:      #FFFFFF;
   --c-panel:     #191A1B;
 
@@ -263,6 +274,33 @@ The Lerian wordmark has two canonical copies and two usage patterns inside the d
 - **Inline SVG pattern (self-contained baseline).** `templates/deck.html` inlines the `<svg viewBox="0 0 1090.88 280" …>` directly in its own cover slide. Prefer this when shipping a single-file baseline deck that must render without an external asset pipeline.
 
 If Lerian rebrands, MUST update all three locations (the standalone SVG file, `deck.html`'s inline cover SVG, and visualize's inline copy). The viewBox (`0 0 1090.88 280`) and path data MUST match byte-for-byte across all three. Any drift is a compliance failure.
+
+## Derived Tints — `color-mix()` Technique
+
+When a slide needs a tint that sits *between* two canonical tokens (pale banner, soft ink, dark-with-accent-warmth), REQUIRED: derive it with `color-mix()` in the `oklab` color space rather than adding a new token. OKlab is perceptually uniform — a 40% mix reads as 40% to the eye, which sRGB gets wrong. This keeps the palette closed-set while allowing intermediate shades.
+
+**Canonical recipes:**
+
+| Recipe | CSS | Use |
+| --- | --- | --- |
+| Pale accent banner | `color-mix(in oklab, var(--c-accent) 40%, white)` | Unqualified / potential states (funnel monetary overlay, early-stage emphasis) |
+| Soft ink | `color-mix(in oklab, var(--c-ink) 60%, white)` | Secondary body text where `--c-ink-2` feels too heavy; hover-adjacent states |
+| Dark with accent warmth | `color-mix(in oklab, var(--c-accent) 20%, var(--c-ink))` | Near-black panel with a hint of editorial warmth — use sparingly |
+
+**HARD GATE:** MUST use `in oklab`, not `in srgb`. The sRGB interpolation flattens Amarelo mixes to a muddy yellow-green. OKlab keeps the hue true.
+
+```css
+/* Pale banner inside a funnel monetary overlay */
+background: color-mix(in oklab, var(--c-accent) 40%, white);
+color: var(--c-ink);
+
+/* Soft ink caption */
+color: color-mix(in oklab, var(--c-ink) 60%, white);
+```
+
+**Browser support is a deliberate non-concern.** The deck targets current Chrome via Puppeteer export (`references/export.md`) and evergreen browsers for the presenter runtime. `color-mix()` has been baseline-supported since 2023. MUST NOT add `@supports` fallbacks or inline the mixed hex — the whole point is avoiding token sprawl. If the runtime target changes, revisit this section.
+
+**Anti-pattern:** defining `--c-accent-pale: #FFF7A0` as a new token for one use. If the tint exists at a single point in the deck, derive it. If it shows up in 3+ places across archetypes, then promote it to a token and update this file.
 
 ## Provisional Home
 

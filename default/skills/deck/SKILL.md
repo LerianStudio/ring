@@ -54,8 +54,8 @@ Before writing any slide content, MUST read:
 1. `references/design-tokens.md` — all colors, fonts, spacing, radii
 2. `references/layout-rules.md` — **THE critical craft discipline** (vertical-canvas model, `flex: 1; min-height: 0`, no fixed-height cards, 24px text floor, dynamic pagination)
 3. `references/slide-archetypes.md` — when to use each of 9 archetypes
-4. `references/ui-primitives.md` — pill, kpi-tile, ticks-list, numbered-list, eyebrow, data-grid-table
-5. `references/chart-primitives.md` — stacked-horizontal-bar, vertical-bar-chart, 2x2-matrix, funnel
+4. `references/ui-primitives.md` — eyebrow, pill, kpi, ticks, numbered, table.grid, dashed-hairline, narrative-arc, transition-column, org-node-flag, dual-sided-argument, inline-mini-legend
+5. `references/chart-primitives.md` — stacked-horizontal-bar, vertical-bar-chart, 2x2-matrix, funnel (+ monetary overlay), inline-micro-chart
 6. `references/speaker-notes.md` — JSON schema + oral-delivery writing guidance
 
 Server + export references (read when tooling questions come up):
@@ -187,7 +187,7 @@ HARD BLOCK — cannot proceed:
 
 - **Lerian brand tokens** — Amarelo `#FEED02`, Poppins + IBM Plex Serif, JetBrains Mono
 - **Apache 2.0 license** on scaffolded deck
-- **Dynamic pagination** via `<span class="page-num">` + `<span class="page-total">`
+- **Dynamic pagination** via `<span class="page-num">` + `<span class="page-total">` (two documented exceptions: appendix letter pagination `A1 / 8` and main-deck companion letter-suffix `09b / 14` — both hardcoded without the `.page-num` class so the runtime leaves them alone, see [`references/slide-archetypes.md` → Pagination convention](references/slide-archetypes.md#pagination-convention))
 - **`flex: 1; min-height: 0`** on main content grids (layout-rules.md HARD GATE)
 - **Speaker-notes JSON structure** — flat array of strings
 - **WebSocket protocol** — 5 message types (`nav`, `blank`, `state`, `hello`, `reload`) in v1. `state` and `nav` carry a `total` field so the remote can render `N / M` once the main deck has announced totals. See `references/server.md` for the full protocol.

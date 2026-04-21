@@ -48,15 +48,44 @@ Per `ui-primitives.md`, `table.grid` is FORBIDDEN on `.slide.accent` (Amarelo bg
 
 ### Pagination convention
 
-Two numbering systems run in parallel:
+Three numbering systems run in parallel:
 
 | Range | Format | Example | Runtime behavior |
 | --- | --- | --- | --- |
 | Main deck | `NN / NN` numeric | `04 / 17` | `deck-stage.js` fills `.page-num` + `.page-total` spans |
+| Main deck companion | `NNb / NN` letter-suffix | `09b / 14` | Static — runtime does NOT overwrite. Hard-coded in HTML. |
 | Appendix | `AN / N` letter | `A1 / 8` | Static — runtime does NOT overwrite. Hard-coded in HTML. |
 
 **MUST NOT hardcode main-deck numeric pagination.** `.page-num` and `.page-total` spans stay empty in the source; runtime populates them.
+**MUST hardcode main-deck companion pagination.** Place `<span class="num">09b / 14</span>` in `meta.right` WITHOUT the `.page-num` class so the runtime leaves it alone. This is a deliberate exception to the dynamic-pagination HARD GATE in [`layout-rules.md`](layout-rules.md#dynamic-pagination).
 **MUST hardcode appendix letter pagination.** Place `<span>A1 / 8</span>` in `meta.right` without the `.page-num` class so the runtime leaves it alone.
+
+### Decimal / companion pagination
+
+When a slide is a "zoom-in" follow-on that belongs to the same topic as its predecessor, use a **letter suffix** on the predecessor's slot instead of bumping to a new one: `09 / 14` → `09b / 14`. The main-deck total stays `14` — the companion is *detail*, not a new topic.
+
+**Rules:**
+
+- **Letter suffix signals companion detail.** The audience reads `09b` and understands "this is 09 zoomed in," not "we've added a new section."
+- **Use sparingly.** One companion per host slide (`09` + `09b`). If you need a second companion, either the topic is big enough for its own slot (promote to `10`) or the companions belong in the appendix.
+- **Total count is unchanged.** Slide 09 and 09b both display the same denominator (`/ 14`). If you see the total bumped, someone confused companions with new slides.
+- **Distinct from appendix `AN / N`.** The appendix is reference material the presenter doesn't walk through. Companions are in-flow — the presenter DOES walk through them, and relegating to appendix would break the argument.
+- **Runtime override is manual.** The `.page-num` dynamic-fill script in `assets/deck-stage.js` fills `NN` by slide index. Companion slides MUST drop the `.page-num` class so the runtime leaves the hardcoded suffix alone. Author writes `<span class="num">09b / 14</span>` explicitly. See [`layout-rules.md`](layout-rules.md#dynamic-pagination) for the base rule this overrides.
+
+**Example meta.right for a companion slide:**
+
+```html
+<div class="meta">
+  <div class="left"> … </div>
+  <div class="right">
+    <span>Board Meeting № 01</span>
+    <!-- .num without .page-num — runtime leaves this alone -->
+    <span class="num">09b / 14</span>
+  </div>
+</div>
+```
+
+**Anti-pattern:** using letter-suffix as a shortcut to avoid re-paginating when the deck grows. If the new slide is a distinct topic, it's a new slot (`10 / 15`), not a companion (`09b / 14`). Letter suffix is semantic, not procedural.
 
 ### Compact density
 
@@ -229,6 +258,64 @@ The hero archetypes (`cover`, `act-divider`, `appendix-intro`, `content-accent`,
 - More than three numbered questions — the card grows too tall and crowds the context column. Split into a follow-up slide.
 - Using `ul.numbered` class inside the Questions card — the class exists (see `ui-primitives.md`) but the reference uses the scoped `.qblock` pattern for the Questions-card-on-dark composition. Keep them distinct: `ul.numbered` for light slides, `.qblock` inline pattern for dark cards on paper.
 - Putting `content-paper` early in the deck — paper belongs in the discussion act, not in the report acts where it breaks the rhythm.
+
+### Strategic-discussion scaffold
+
+**Sub-template of `content-paper`.** A four-part rhetorical structure for board-facing "we need your input" slides. MUST be used with `.slide.paper` and the dark Questions card — this is not a standalone archetype; it's the disciplined form that `content-paper` takes when a discussion slide asks the board to decide something.
+
+**When to use:**
+- Strategic discussions where the board is being asked to weigh in on a specific decision (e.g., Cloud go/no-go, GTM timing, pricing strategy)
+- Any slide where the thesis + evidence + punchline + questions sequence is the argument
+- When consistency across 2–4 discussion slides in the same act is editorially load-bearing (the reference uses this three times for Discussions 01/02/03 to create a rhetorical rhythm)
+
+**When NOT to use:**
+- Report slides — the scaffold's structure (questions card) doesn't apply
+- Discussion slides with no specific question to answer — if you can't name three questions the board can decide, you don't have a discussion slide
+- For 2 or 4 questions — the scaffold's rhythm is three. Two feels underbaked; four dilutes focus. See question-count rule below.
+
+**Four-part structure:**
+
+- **Left column** — *thesis (~1fr)*:
+  1. **Eyebrow:** "The thesis"
+  2. **Prose thesis:** 1–2 paragraphs in IBM Plex Serif, 24–28px body. States the position.
+  3. **Supporting block:** exactly one of — [`dual-sided-argument`](ui-primitives.md#dual-sided-argument) card ("Works both ways"), bulleted `ul.ticks` signals list, or an inline evidence block. MUST NOT stack two.
+  4. **Accent-colored punchline band:** Poppins 20px weight 600, `background: var(--c-accent); color: var(--c-accent-ink);`, padding `14px 20px`, one-line crystallization. NON-NEGOTIABLE — this is the take-home. Without it, the thesis is just prose.
+  5. **Optional market-signals grid:** 2-column, `→` arrow bullets in `var(--c-accent-2)` Verde. Use when the thesis wants external validation alongside the punchline.
+- **Right column** — *questions card (~1.1fr, dark)*:
+  - `background: var(--c-ink); color: var(--c-ink-inv); padding: 36px 40px; border-radius: 4px;`
+  - Eyebrow: "Questions for the board" in Amarelo (`style="color: var(--c-accent);"`)
+  - Exactly three questions, each with:
+    - `01` / `02` / `03` in JetBrains Mono Amarelo, 16px, padded top 8px
+    - Poppins 22px weight 500 title in full white
+    - IBM Plex Serif 16px body in `rgba(255,255,255,0.75)` with **bold key phrases** in full white (`color: var(--c-ink-inv); font-weight: 600;`)
+  - Dividers between questions: `height: 1px; background: rgba(255,255,255,0.12);`
+
+**HARD RULES:**
+
+- **Exactly three questions.** Not two, not four — three is the rhetorical rhythm the reference uses across three discussion slides deliberately. If there are four real questions, split into two discussion slides. If there are two, find the third or pick a different archetype.
+- **Each question ends with an actual question.** The body MUST terminate with a bolded question the board can answer ("**Do we migrate BYOC clients now, or wait?**"). Statements dressed as questions ("What do you think?" without specifics) are failed questions.
+- **Punchline band is NON-NEGOTIABLE.** The left column without an Amarelo punchline band is not a strategic-discussion scaffold — it's a content-paper slide that happens to have questions on the right. The punchline is the thesis crystallized.
+- **Reading order: thesis first, questions second.** Questions card ALWAYS on the right. Placing it on the left violates reading order — the board needs the thesis before the questions land.
+- **Max 12 minutes per discussion slide.** Time-boxed by the eyebrow-timer pattern at top of the slide (see `ui-primitives.md` timer-row).
+
+**Composition pattern:**
+- `.slide.paper` with the same `.meta` / `.body` / `.footer` scaffold as `content-paper`
+- Eyebrow-timer row at top: "Discussion 01" — hairline — "~12 min"
+- Main grid: `grid-template-columns: 1fr 1.1fr; gap: 60px;`
+- Left column: thesis eyebrow → prose → supporting block → Amarelo punchline band → (optional) market-signals grid
+- Right column: dark card with three numbered questions
+
+**Reference example:** `lerian-ppt-example.html` lines 1457–1512 (Discussion 01), 1513–1580 (Discussion 02), 1581–1650 (Discussion 03) — three consecutive slides using the scaffold with deliberate consistency.
+
+**Anti-patterns:**
+- "Questions" that are statements wearing a question mark — "What do you think?" without a specific decision is a failed question. Each question ends with a concrete ask.
+- Four questions — dilutes focus. The rhythm is three.
+- Skipping the Amarelo punchline band — without it, the thesis is prose without a take-home.
+- Questions card on the left — violates reading order.
+- Reusing the scaffold for report slides — it's for *decisions*, not *updates*.
+- Stacking two supporting blocks (e.g., a `ul.ticks` + a `dual-sided-argument`) — pick one. Two crowds the thesis column.
+
+Pairs with: [`dual-sided-argument`](ui-primitives.md#dual-sided-argument) (typical supporting block), [`ticks`](ui-primitives.md#ticks) (alternative supporting block), [`numbered`](ui-primitives.md#numbered) inline dark variant (the Questions card's numeral pattern).
 
 ---
 

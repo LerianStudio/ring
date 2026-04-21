@@ -15,6 +15,8 @@ Four chart types, all pure CSS/HTML — no Chart.js, no D3, no build step. Chart
 | 2 | [vertical-bar-chart](#vertical-bar-chart) | Time-series: MRR, headcount, revenue |
 | 3 | [2x2-matrix](#2x2-matrix) | Competitive map, strategic framework |
 | 4 | [funnel](#funnel) | Pipeline, conversion stages |
+| 4b | [funnel — monetary overlay](#funnel--monetary-overlay) | Extension of `funnel` showing monetary weight beneath the stages |
+| 5 | [inline-micro-chart](#inline-micro-chart) | Per-row mini stacked bars inside table cells — period-over-period mix |
 
 ---
 
@@ -531,6 +533,148 @@ Four chart types, all pure CSS/HTML — no Chart.js, no D3, no build step. Chart
 - Counts that increase left-to-right — this is not a funnel. If the metric genuinely grows through stages, use `vertical-bar-chart` instead.
 - Missing stage labels — a row of numbers is not a funnel, it's a number parade.
 - Using `.hot` styling on a non-final stage — breaks the temperature metaphor. Audiences expect the darkest cell at the far right.
+
+---
+
+## funnel — monetary overlay
+
+**Purpose:** extend the base [`funnel`](#funnel) with an overlay banner at the bottom of the stages strip showing monetary weight per zone. Turns a procedural funnel (stage counts) into a financial one (qualified ARR, closed revenue). The temperature progression in the base funnel stays — this overlay adds dollar anchors.
+
+**When to use:**
+- Pipeline slides where both *count* and *dollar weight* matter — "42 prospects, but the 12 qualified are R$ 8M of ARR"
+- Revenue-forecast decks where the funnel doubles as a capital-allocation argument
+- Board-facing pipelines where the count-only funnel would understate the real signal
+
+**When NOT to use:**
+- When monetary weight is the *only* message — use a table, not a funnel with overlay. The overlay complements; it doesn't replace.
+- When the funnel already has temperature stages (`.warm`, `.hot`) AND an accent banner above — three stacked signals is overload. Pick two.
+- For hiring or conversion funnels where dollars don't apply
+
+**HTML (overlay portion — parent `.chart-funnel` MUST be `position: relative`):**
+```html
+<div class="chart-funnel" style="position: relative;" role="img"
+     aria-label="Sales pipeline with monetary overlay. Potential ARR ~R$ 60M, Qualified ARR R$ 8.12M, Closed tracked separately.">
+
+  <!-- base funnel stages (from funnel primitive) -->
+  <div class="stages"> … </div>
+
+  <!-- monetary overlay banner -->
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; display: grid; grid-template-columns: 3fr 2fr 1fr; pointer-events: none;">
+    <div style="border-right: 3px solid var(--c-ink); padding: 10px 28px 12px; display: flex; align-items: baseline; gap: 14px; background: color-mix(in oklab, var(--c-accent) 40%, white); color: var(--c-ink);">
+      <div style="font-family: 'JetBrains Mono'; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--c-ink-2);">Potential ARR</div>
+      <div style="font-family: 'Poppins'; font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.01em;">~ R$ 60M</div>
+    </div>
+    <div style="padding: 10px 28px 12px; display: flex; align-items: baseline; gap: 14px; background: var(--c-accent); color: var(--c-accent-ink);">
+      <div style="font-family: 'JetBrains Mono'; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;">Qualified ARR</div>
+      <div style="font-family: 'Poppins'; font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -0.01em;">R$ 8.12M</div>
+    </div>
+    <div style="padding: 10px 28px 12px; background: var(--c-ink); color: var(--c-ink-inv); display: flex; align-items: baseline; gap: 14px;">
+      <div style="font-family: 'JetBrains Mono'; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--c-accent);">Closed</div>
+    </div>
+  </div>
+</div>
+```
+
+**Design calls:**
+
+- **Three-zone temperature, color-coded by qualification:**
+
+  | Zone | Background | Text | Signals |
+  | --- | --- | --- | --- |
+  | Potential / unqualified | `color-mix(in oklab, var(--c-accent) 40%, white)` (pale Amarelo) | `var(--c-ink)` | "Could be revenue, not yet committed" |
+  | Qualified | `var(--c-accent)` on `var(--c-accent-ink)` | `var(--c-ink)` | "Committed — real probability" |
+  | Closed | `var(--c-ink)` on `var(--c-ink-inv)` with Amarelo eyebrow | white | "Already revenue" |
+
+- **Color-mix for the pale banner.** Use `color-mix(in oklab, var(--c-accent) 40%, white)` — see [`design-tokens.md` → Derived Tints](design-tokens.md#derived-tints--color-mix-technique). MUST NOT use a hardcoded hex like `#FFF7A0`. OKlab keeps the Amarelo hue true in the mix.
+- **Grid ratios reflect monetary weighting, not stage count.** `grid-template-columns: 3fr 2fr 1fr` is the reference — potential is the biggest zone because the unqualified pipeline is the largest dollar bucket, qualified is middle, closed is narrowest. MUST NOT use `1fr 1fr 1fr` — equal columns erase the signal.
+- **Thicker divider between qualified and closed.** `border-right: 3px solid var(--c-ink)` on the middle (qualified) cell. This visually separates committed from closed — the boundary that matters for the board. The divider between potential and qualified is the cells' own background contrast; no extra border needed.
+- **`pointer-events: none`** on the overlay — the overlay sits on top of the funnel cells visually, but the funnel is not interactive anyway (deck is projection chrome). The attribute prevents accidental text-selection weirdness in browsers during presentation.
+- **Eyebrow inside the Closed zone is Amarelo on ink.** The only Amarelo on the dark zone — reads as a callout on the darkest background.
+
+**Accessibility:**
+- `aria-label` on the parent `.chart-funnel` MUST describe both the count funnel AND the monetary zones. Example: "Sales pipeline. Stages: Hunting 42, SAL 28, SQL 15. Monetary: Potential ARR ~R$ 60M, Qualified ARR R$ 8.12M, Closed tracked separately."
+- Numeric values are text, not graphic — screen readers read them.
+- Color is not the only signal — each zone has an UPPERCASE mono label AND a Poppins numeric value.
+
+**Anti-patterns:**
+- Equal grid columns (`1fr 1fr 1fr`) — erases the monetary-weight signal
+- Same color on all three zones — defeats the qualification temperature
+- Adding a fourth zone — the mental model is three (potential / qualified / closed). Four zones demands a different primitive.
+- Inline hex instead of `color-mix()` for the pale banner — creates a drift-prone tint. Derive it.
+- Overlay on a base funnel that already uses `.warm` and `.hot` temperature stages — three stacked signals is overload. Either use the base temperature OR the monetary overlay, not both.
+
+Pairs with: [`color-mix()` technique](design-tokens.md#derived-tints--color-mix-technique) for the pale banner; [`--c-bg-warm`](design-tokens.md#surfaces) is an alternative hardcoded surface when a single-use tint doesn't justify the mix.
+
+---
+
+## inline-micro-chart
+
+**Purpose:** per-row mini stacked bars inside table cells. A 2-segment vertical bar at 18px tall, wrapped N times across a `<td>` that spans the data columns of a `table.grid`. Use for period-over-period mix changes (monthly BYOC/SaaS split, quarterly product mix) where a full `stacked-horizontal-bar` chart would be overkill and a numeric-only row doesn't show the trend.
+
+**When to use:**
+- Inside a 12-month revenue table showing "% Mix" per month as tiny 2-segment bars
+- Inside a quarterly product-mix table showing segment evolution
+- As a caption-row under a numeric table, summarizing the mix the numbers describe
+- When the reader benefits from *seeing the shift* without reading the percentages
+
+**When NOT to use:**
+- For more than 2 segments per bar — use a full [`stacked-horizontal-bar`](#stacked-horizontal-bar) chart. Three segments in 18px of height is unreadable.
+- When absolute values (not percentages) are the story — the bars visualize share, not magnitude
+- Inside cells — labels at 10–12px inside 18px of height is illegible. Use an [`inline-mini-legend`](ui-primitives.md#inline-mini-legend) below the table instead.
+- Without a border on the bar — empty/near-zero segments disappear into the cell background
+
+**HTML (one cell — single 2-segment mini-bar):**
+```html
+<div style="display: flex; flex-direction: column; height: 18px; border: 1px solid var(--c-ink);">
+  <div style="flex: 70.1; background: transparent;"></div>
+  <div style="flex: 29.9; background: var(--c-ink);"></div>
+</div>
+```
+
+**Composition — N mini-bars inside a single `<td>` that spans the data columns:**
+```html
+<tr>
+  <td>% Mix</td>
+  <td colspan="12">
+    <div style="display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px;">
+      <!-- Jan -->
+      <div style="display: flex; flex-direction: column; height: 18px; border: 1px solid var(--c-ink);">
+        <div style="flex: 70.1; background: transparent;"></div>
+        <div style="flex: 29.9; background: var(--c-ink);"></div>
+      </div>
+      <!-- Feb -->
+      <div style="display: flex; flex-direction: column; height: 18px; border: 1px solid var(--c-ink);">
+        <div style="flex: 62.4; background: transparent;"></div>
+        <div style="flex: 37.6; background: var(--c-ink);"></div>
+      </div>
+      <!-- … continue for each period -->
+    </div>
+  </td>
+</tr>
+```
+
+**Design calls:**
+
+- **Fixed 18px height.** MUST NOT grow or shrink — this is the editorial scale for in-cell chart chrome. Taller breaks the row rhythm; shorter collapses the segments.
+- **`border: 1px solid var(--c-ink)` is REQUIRED.** The border frames the bar so the empty (transparent) segment remains readable even when its share is small. Without the border, a near-100% filled bar looks like a solid cell with no chart at all.
+- **Two segments maximum.** Top segment defaults to `background: transparent` (the "outline / empty / first category" state), bottom to `background: var(--c-ink)` (filled / second category). More segments fail at this scale — promote to a real chart.
+- **`flex:` values sum to 100.** Same pattern as [`stacked-horizontal-bar`](#stacked-horizontal-bar) — percentages go on `flex`, not on pixel widths. Lets the grid resize cleanly.
+- **Parent grid: `display: grid; grid-template-columns: repeat(N, 1fr); gap: 3px;`.** The 3px gap gives each period its own visual lane without crowding.
+- **No in-cell labels.** At 18px of height, any text becomes chrome noise. Pair with an [`inline-mini-legend`](ui-primitives.md#inline-mini-legend) below the table.
+
+**Accessibility:**
+- The parent `table.grid` carries the aria-label on the `<table>` or via a visible caption. Example caption: "Monthly revenue mix: BYOC (outlined) vs SaaS (filled). Jan 70/30, Feb 62/38, …"
+- The micro-chart row does NOT need its own `role="img"` — it's a data visualization inside a semantic table; screen readers read the surrounding `<th>` + `<td>` structure. Add `aria-hidden="true"` to the mini-bars if the caption already enumerates the data.
+- Legend MUST appear (as [`inline-mini-legend`](ui-primitives.md#inline-mini-legend)) within the same visual block — color-only signal fails WCAG 1.4.1.
+
+**Anti-patterns:**
+- More than 2 segments — unreadable at 18px; use a real chart
+- Labels inside the bars — too small; use a caption legend below
+- Bars without a border — empty/near-zero segments disappear
+- Variable heights across the row — breaks row rhythm; fix at 18px
+- Using for absolute-value comparison — this primitive shows *share*, not *magnitude*. If magnitude matters, the row above (numeric values) carries it.
+
+Pairs with: [`inline-mini-legend`](ui-primitives.md#inline-mini-legend) (typical pairing — micro-chart row + mini-legend caption, one visual unit).
 
 ---
 

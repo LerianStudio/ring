@@ -1,6 +1,6 @@
 # UI Primitives
 
-Six primitives that compose Lerian editorial slide content. All primitives use tokens from [`design-tokens.md`](design-tokens.md); don't reinvent colors, fonts, or spacing. Layout discipline (canvas size, flex, 24px floor) comes from [`layout-rules.md`](layout-rules.md) — primitives do not override it.
+Eleven primitives that compose Lerian editorial slide content. All primitives use tokens from [`design-tokens.md`](design-tokens.md); don't reinvent colors, fonts, or spacing. Layout discipline (canvas size, flex, 24px floor) comes from [`layout-rules.md`](layout-rules.md) — primitives do not override it.
 
 **HARD GATE:** primitives MUST NOT be redefined with new base styles. Inline `style=""` tweaks are allowed for one-off positioning (margin, width, color override) but the class-level rules below are canon.
 
@@ -14,6 +14,12 @@ Six primitives that compose Lerian editorial slide content. All primitives use t
 | 4 | [ticks](#ticks) | Bulleted list with 10×10 Amarelo squares instead of dots |
 | 5 | [numbered](#numbered) | Ordinal list with mono `01/02/03` gutter — steps, discussion questions |
 | 6 | [table.grid](#tablegrid) | Editorial data tables — agendas, P&L rows, side-by-side comps |
+| 7 | [dashed-hairline](#dashed-hairline) | "Related but secondary" divider — the soft cousin of `.rule` |
+| 8 | [narrative-arc](#narrative-arc) | Cross-slide threading callout — directional, names two slides by name |
+| 9 | [transition-column](#transition-column) | Semantic hinge between two cards — old→new, manual→automated, BYOC→Managed |
+| 10 | [org-node-flag](#org-node-flag) | Tab-style status badge hanging off the top edge of a card — PAIN POINT, NEW, HIRE |
+| 11 | [dual-sided-argument](#dual-sided-argument) | Two-column symmetric-benefit card — same argument, two stakeholder perspectives |
+| 12 | [inline-mini-legend](#inline-mini-legend) | Legend dots embedded inline inside a caption sentence — 2–3 categories |
 
 ---
 
@@ -495,6 +501,288 @@ The canonical instance — including the `tr.hl` highlight row — lives in `../
 
 ---
 
+## dashed-hairline
+
+**Purpose:** "related but secondary" divider. A softer cousin of the solid `.rule` hairline. The dashed edge reads as a semantic pause — "the thing below is connected to the thing above, but not continuous with it."
+
+**When to use:**
+- Separating a [`narrative-arc`](#narrative-arc) callout from the primary slide content
+- Marking a tangential footnote or caption that threads off the main argument
+- Between a card's main body and its "ownership" / "next steps" meta-row when a solid rule would feel too assertive
+
+**When NOT to use:**
+- For structural separation — use a solid `.rule` (1px `--c-rule`) or a table border
+- As a decorative accent — dashes are semantic, not chrome. Overuse flattens the signal.
+- On `.slide.accent` backgrounds — Amarelo eats the dash rhythm; use a solid rule or drop the divider
+
+**HTML:**
+```html
+<div style="border-top: 1px dashed var(--c-rule);"></div>
+```
+
+**Inline composition — above a narrative-arc callout:**
+```html
+<div style="margin-top: 26px; padding-top: 18px; border-top: 1px dashed var(--c-rule);">
+  <!-- narrative-arc block goes here -->
+</div>
+```
+
+**Dashed vs solid — pairing table:**
+
+| Style | CSS | Semantic role |
+| --- | --- | --- |
+| Solid `.rule` | `border-top: 1px solid var(--c-rule)` | Structural — "new section," column divider, footer border |
+| Dashed hairline | `border-top: 1px dashed var(--c-rule)` | Semantic pause — "related but secondary," threads a callout off the main argument |
+
+**HARD GATE:** MUST NOT mix dashed and solid hairlines inside a single card without a reason. Inconsistent hairlines read as sloppy, not editorial.
+
+**Anti-pattern:** using a dashed hairline as a generic "divider with visual interest" — it becomes noise. Reserve it for the callout-threading role.
+
+Pairs with: [`narrative-arc`](#narrative-arc) (dashed hairline sits directly above the arc callout).
+
+---
+
+## narrative-arc
+
+**Purpose:** cross-slide threading device. A small callout that names the current slide's relationship to another slide by name, letting the audience hold the deck's through-line across sections. One arc per slide at most.
+
+**When to use:**
+- A discussion slide that *depends on* a report slide from earlier acts — name both and the dependency relationship
+- A decision slide that *opens* an act the audience hasn't reached yet — name the forward link
+- A summary slide that *closes* a loop opened many slides earlier — name the callback
+
+**When NOT to use:**
+- For vague relationships ("related to X") — arcs MUST be directional and specific
+- To summarize the current slide — the arc threads a *relationship*, not a recap
+- On every slide — the arc is a pacing device; using it more than 2–3 times per deck neutralizes the signal
+- On `.slide.accent` or `.slide.dark` — the Amarelo pill + muted prose is tuned for light surfaces
+
+**Relationship vocabulary (REQUIRED — pick one):**
+
+| Word | Direction | Example |
+| --- | --- | --- |
+| **hinge** | Present slide is the pivot between two sections | "Discussion 01 · Cloud is the **hinge** into Act 05 · Capital Strategy." |
+| **continues** | Present slide extends an argument from earlier | "This **continues** 04 · Pricing — the unit-economics question asked there." |
+| **answers** | Present slide resolves a question opened earlier | "This **answers** Discussion 02 · GTM." |
+| **opens** | Present slide sets up a section ahead | "This **opens** Act 04 · Strategic Discussions." |
+| **closes** | Present slide resolves a loop opened earlier | "This **closes** the Cap-Table thread started at A1." |
+
+**HTML:**
+```html
+<div style="margin-top: 26px; padding-top: 18px; border-top: 1px dashed var(--c-rule); display: flex; align-items: flex-start; gap: 12px;">
+  <div style="font-family: 'JetBrains Mono'; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--c-accent-ink); background: var(--c-accent); padding: 3px 8px; border-radius: 2px; white-space: nowrap; font-weight: 600; flex-shrink: 0;">Narrative arc</div>
+  <div style="font-size: 14px; line-height: 1.45; color: var(--c-ink-2);">Discussion <strong style="color: var(--c-ink);">01 · Cloud</strong> is the hinge into <strong style="color: var(--c-ink);">Act 05 · Capital Strategy</strong>. If Cloud is go, the raise timing moves up.</div>
+</div>
+```
+
+**Composition rules:**
+
+- **Pill text is fixed.** Always "Narrative arc" (or the translated equivalent for non-English decks: `Arco narrativo`, `Fil narratif`). MUST NOT customize per slide — the label is the recognition pattern.
+- **Prose is subdued.** Body text at `var(--c-ink-2)` (14px IBM Plex Serif). Key slide names bolded in full `var(--c-ink)`. The bold is the only emphasis allowed — no italics, no underlines.
+- **Dashed hairline above is REQUIRED.** The dashed separator from `border-top: 1px dashed var(--c-rule)` tells the eye "this is related but secondary." A solid rule promotes the arc to primary content, which it is not.
+- **Directional statement.** The prose MUST name *both* slides and use one of the relationship words above. A non-directional arc ("related to slide 3") is a failed arc.
+- **One per slide.** Two arcs on a single slide overload the threading; split into sibling slides if both matter.
+
+**Anti-patterns:**
+- Vague connection — "See also Discussion 01" is a breadcrumb, not an arc
+- Summary-flavored arcs — "This slide covers cloud" is a lede, not a cross-reference
+- Arc above the dashed rule — the rule MUST sit above the arc to signal "threading off the main content"
+- Arc pill in outline form (`.pill`) — the Amarelo fill is load-bearing; an outlined pill reads as generic chrome
+
+Pairs with: [`dashed-hairline`](#dashed-hairline) (always sits above the arc).
+
+---
+
+## transition-column
+
+**Purpose:** a named narrow column that sits *between* two cards signaling a journey. Not a card, not a gap — a semantic hinge. The reader's eye crosses it and understands "the thing on the right is what the thing on the left becomes."
+
+**When to use:**
+- BYOC → Managed migration narratives
+- Old → New architecture comparisons where the *transition* is part of the story
+- Manual → Automated process diagrams
+- Any two-card pair where the relationship word ("migrating," "upgrading," "consolidating") is load-bearing
+
+**When NOT to use:**
+- For `vs.` comparisons — use the [`2x2-matrix`](chart-primitives.md#2x2-matrix) or a two-column `table.grid`. A transition column implies motion; comparisons don't move.
+- As a generic separator between any two cards — use a `.rule` or a grid `gap`
+- For three-way transitions (A → B → C) — the pattern is two-card only. Three stages is a [`funnel`](chart-primitives.md#funnel).
+- Inside columns narrower than ~80px — the arrow + dual-label stack collapses
+
+**HTML:**
+```html
+<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 14px; position: relative; min-width: 80px;">
+  <div style="font-family: 'JetBrains Mono'; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--c-ink-3); text-align: center; line-height: 1.3; white-space: nowrap;">Migrating</div>
+  <div style="font-size: 42px; color: var(--c-ink); margin-top: 4px; line-height: 1;">→</div>
+  <div style="font-family: 'JetBrains Mono'; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--c-ink-3); text-align: center; line-height: 1.3; margin-top: 4px; white-space: nowrap;">to managed</div>
+</div>
+```
+
+**Parent composition — three-cell grid with the transition column as the `auto` track:**
+```html
+<div style="display: grid; grid-template-columns: 1fr auto 1.15fr; gap: 0; align-items: stretch;">
+  <div class="card"> <!-- left card: current state --> </div>
+  <div> <!-- transition column HTML from above --> </div>
+  <div class="card"> <!-- right card: target state --> </div>
+</div>
+```
+
+**Composition rules:**
+
+- **`grid-template-columns: 1fr auto 1.15fr`.** Right card gets a slight size premium because it's the destination — the eye lands there. Adjust to `1fr auto 1fr` if both states carry equal weight.
+- **Arrow glyph is `→` at 42px.** Black arrow on white. MUST NOT substitute an SVG or an emoji — the Unicode arrow at 42px is the signature.
+- **Top and bottom mono labels answer "from what, to what."** Top label = verb/phase ("Migrating", "Upgrading", "Consolidating"). Bottom label = destination ("to managed", "to v5", "to one pipeline"). Both in JetBrains Mono 10px, `--c-ink-3`.
+- **Flanking cards share the paired-shape convention.** The left card rounds its outward corners (left-side) and squares its inward corners (right-side); the right card mirrors. Visual: the two cards read as one split shape with the transition column bridging. `border-radius: 4px 0 0 4px` on left, `0 4px 4px 0` on right, or use scoped classes.
+
+**Anti-patterns:**
+- Transition column as "vs." separator — violates the directional contract
+- Arrow pointing left or bidirectional — the column is one-way. If the relationship is reciprocal, use a [`dual-sided-argument`](#dual-sided-argument) card instead.
+- Missing top or bottom label — the arrow alone is ambiguous; both labels are REQUIRED
+- Using `.rule` styling (solid border) between the cards instead of the column — loses the "hinge" semantics
+
+---
+
+## org-node-flag
+
+**Purpose:** tab-style status badge, absolute-positioned above an org-chart (or any entity) card. Hangs off the top edge like a file-tab — drawing the eye to a single card that needs special attention inside a grid of siblings.
+
+**When to use:**
+- Org charts: flagging a role that's open to hire, at risk, or the critical path
+- Product matrices: flagging a product area that's a pain point or newly shipped
+- Roadmap grids: flagging the one quarter or swim-lane the slide is about
+- Any uniform grid where one card needs "read me first" treatment without becoming a hero
+
+**When NOT to use:**
+- On more than one card in a grid — two flags cancel each other. If two cards need attention, flag one and bold the other.
+- On hero slides — the flag is a grid-level signal; hero slides don't have siblings to contrast against
+- As a decorative tag — use `.pill.accent` for tags; the flag is structural
+
+**Suggested values (REQUIRED — ALL CAPS, one or two words):**
+
+| Value | Meaning |
+| --- | --- |
+| `PAIN POINT` | This card is the problem the slide is naming |
+| `NEW` | This card arrived since last review |
+| `AT RISK` | This card is slipping or under-resourced |
+| `CRITICAL PATH` | The plan depends on this card |
+| `HIRE` | Open role (org-chart use) |
+
+**HTML (badge + parent card):**
+```html
+<div style="background: var(--c-ink); color: var(--c-ink-inv); padding: 18px 20px; border-radius: 4px; text-align: center; position: relative; border: 2px solid var(--c-accent);">
+  <div style="position: absolute; top: -11px; left: 50%; transform: translateX(-50%); background: var(--c-accent); color: var(--c-ink); font-family: 'JetBrains Mono'; font-size: 10px; letter-spacing: 0.12em; padding: 3px 8px; border-radius: 2px; font-weight: 600; white-space: nowrap;">PAIN POINT</div>
+  <!-- card content -->
+</div>
+```
+
+**Composition rules:**
+
+- **Parent card MUST be `position: relative`.** The flag is absolute-positioned relative to its parent; non-relative parents break the layout.
+- **Parent card MUST gain `border: 2px solid var(--c-accent)`.** The Amarelo border visually binds the flag to the card. A flagged card without the accent border reads as a floating sticker.
+- **Flag text is ALL CAPS JetBrains Mono 10px.** Letter-spacing `0.12em`, font-weight 600. MUST NOT use mixed case or larger sizes — the tab shape depends on this density.
+- **Flag position is `top: -11px; left: 50%; transform: translateX(-50%)`.** The -11px offset hangs half the flag above the card edge, which is the "file-tab" signature. MUST NOT adjust to fully above or flush.
+- **Max one flag per card.** Two flags stack awkwardly and dilute the signal.
+
+**Anti-patterns:**
+- Flag without Amarelo card border — the tab floats, loses its binding
+- Lowercase or Title Case flag text — breaks the mono-tab aesthetic
+- More than one flag per card — the signal is "read this one"; two flags contradict
+- Flag on `.slide.accent` (Amarelo background) — the Amarelo flag disappears; swap the flag background to `var(--c-ink)` with white text, or pick a different primitive
+
+---
+
+## dual-sided-argument
+
+**Purpose:** a two-column symmetric-benefit card. The eyebrow on top names the relationship ("Works both ways"), two columns show the same argument from two stakeholder perspectives. Use when a decision genuinely cuts the same way for both sides.
+
+**When to use:**
+- Clients + Company benefits (pricing change that serves both)
+- Buyers + Sellers (marketplace decisions)
+- Devs + Ops (platform choices)
+- Present + Future (decision that compounds positively in both directions)
+
+**When NOT to use:**
+- When the benefits are asymmetric — forcing asymmetric content into symmetric columns creates false equivalence. Use a two-column layout with distinct eyebrows instead.
+- When one side has three bullets and the other has one — the visual weight mismatch undermines the "both ways" claim
+- For three or more stakeholders — the primitive is deliberately two-column. Three groups is a [`table.grid`](#tablegrid).
+- As a generic two-column comparison — this is a specific rhetorical device, not a layout primitive
+
+**HTML:**
+```html
+<div style="background: var(--c-card); border: 1px solid var(--c-rule); border-radius: 4px; padding: 14px 20px;">
+  <div class="eyebrow" style="margin-bottom: 6px;">Works both ways</div>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+    <div>
+      <div style="font-family: 'JetBrains Mono'; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--c-ink-3); margin-bottom: 3px;">For clients</div>
+      <div style="font-size: 16px; line-height: 1.35;">Enterprise-grade control without the ops burden.</div>
+    </div>
+    <div>
+      <div style="font-family: 'JetBrains Mono'; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--c-ink-3); margin-bottom: 3px;">For Lerian</div>
+      <div style="font-size: 16px; line-height: 1.35;">BYOC = N infras, N configs, N upgrade paths. Cloud = one pipeline, one stack, one environment we own.</div>
+    </div>
+  </div>
+</div>
+```
+
+**Composition rules:**
+
+- **Eyebrow text names the relationship.** "Works both ways" is the reference default. Alternatives: "Cuts both ways," "Serves both sides," "Both sides win." MUST NOT use a generic label like "Benefits."
+- **Sub-eyebrows name the two stakeholders.** "For clients" / "For Lerian" is the reference pattern. Sub-eyebrows are JetBrains Mono 11px `--c-ink-3` — smaller than the top eyebrow so the hierarchy reads as "one card, two sides."
+- **Columns are `1fr 1fr`.** Equal real estate. MUST NOT skew to `1fr 1.2fr` — asymmetric widths undermine the symmetric-benefit claim.
+- **Body text is 16px IBM Plex Serif.** This is below the 24px body floor — deliberate and documented, because this primitive is a supporting block inside a larger argument (strategic-discussion thesis column), not the primary content. Treat it as a chrome-density exception (see `layout-rules.md` Minimum Text Size).
+- **Each side is one sentence or one short paragraph.** If one side needs three bullets, this isn't a dual-sided argument — it's an asymmetric comparison. Pick a different primitive.
+
+**Anti-patterns:**
+- Asymmetric content forced into symmetric columns — defeats the whole point
+- Three or more columns — the primitive is two-column by construction
+- Wordy copy (>2 lines per side) — the card grows too tall; either trim or promote to a full-slide layout
+- Stakeholder labels in Title Case ("For Clients") — MUST be ALL CAPS mono to match eyebrow conventions
+
+---
+
+## inline-mini-legend
+
+**Purpose:** legend dots embedded directly inside a caption sentence, using inline-block spans. Compresses a typical multi-line legend block into a single line of prose. Ideal for tiny charts (e.g., inline micro-charts in table cells) where a full legend block would outweigh the chart.
+
+**When to use:**
+- Paired with [`inline-micro-chart` in table cells](chart-primitives.md#inline-micro-chart) — the canonical pairing
+- As a caption under a small `vertical-bar-chart` with 2 categories
+- For 2–3 categories where a stacked legend block would dominate visual weight
+
+**When NOT to use:**
+- For 4+ categories — readability breaks. Use a stacked legend block (see `chart-primitives.md` → `stacked-horizontal-bar` legend pattern).
+- When the chart is the slide's main content — a full legend with numeric values is clearer
+- Inside body paragraphs — this is caption chrome, not prose
+
+**HTML:**
+```html
+<div style="font-size: 14px; color: var(--c-ink-2);">
+  All figures R$ thousands ·
+  BYOC <span style="display: inline-block; width: 7px; height: 7px; border: 1.5px solid var(--c-ink); border-radius: 999px; margin: 0 3px -1px 3px; box-sizing: border-box;"></span>
+  SaaS <span style="display: inline-block; width: 7px; height: 7px; background: var(--c-ink); border-radius: 999px; margin: 0 3px -1px 3px;"></span>
+</div>
+```
+
+**Composition rules:**
+
+- **Dots are 7×7px, `border-radius: 999px` (circles).** Square dots read as data points; circles read as legend markers.
+- **Outline state: `border: 1.5px solid var(--c-ink)` with no background.** Use for the "empty/unfilled" category in a two-state split.
+- **Filled state: `background: var(--c-ink)` with no border.** Use for the "full/filled" category. MUST NOT add a border on the filled state — visually doubles the weight.
+- **Baseline alignment: `margin: 0 3px -1px 3px`.** The `-1px` bottom margin nudges the dot down so it sits on the text baseline. Without it, dots float above the line.
+- **`box-sizing: border-box` REQUIRED on the outline state.** Without it, the 1.5px border adds to the 7px width, making outlined dots visually larger than filled ones. (Filled dots need no `box-sizing` because they have no border.)
+- **Category name precedes the dot.** "BYOC ●" not "● BYOC" — the text anchors the dot semantically.
+- **Categories separated by ` · `.** Mid-dot on spaces, not commas. Matches the eyebrow and meta-row cadence.
+
+**Anti-patterns:**
+- 4+ categories inline — unreadable prose. Use a stacked legend.
+- Dot before label — flips reading order
+- Filled dot with border + outlined dot without `box-sizing` — size mismatch breaks the pairing
+- Using for a chart where segment sizes are the message — the inline legend has no numeric anchor; add `numeric %` or use a full legend
+
+Pairs with: [`inline-micro-chart` in table cells](chart-primitives.md#inline-micro-chart) (typical pairing — mini-chart in cells, mini-legend in the caption below).
+
+---
+
 ## Composition Rules
 
 - **eyebrow is the anchor.** Every content slide has at least one `.eyebrow`. Headline goes right under it. Missing eyebrow = orphan headline.
@@ -519,6 +807,12 @@ The canonical instance — including the `tr.hl` highlight row — lives in `../
 | ticks | yes | yes | yes (inherits 78% white body) | yes, but the Amarelo square on Amarelo bg is invisible — swap bullet to ink inline |
 | numbered | yes (class form) | yes | yes (the inline Questions pattern — numeral Amarelo, title white, sub 75% white) | avoid (same Amarelo-on-Amarelo problem) |
 | table.grid | yes | yes | needs inverted rules (`border-color: rgba(255,255,255,0.18)`) — not in reference canon | **FORBIDDEN** — Amarelo bg eats hairlines |
+| dashed-hairline | yes | yes | needs `border-color: rgba(255,255,255,0.18)` dashed | **FORBIDDEN** — Amarelo eats the dash rhythm |
+| narrative-arc | yes | yes | avoid — Amarelo pill on dark loses contrast; muted prose disappears | **FORBIDDEN** — pill + muted prose collapse |
+| transition-column | yes | yes | yes (labels inherit `rgba(255,255,255,0.55)`) | avoid — arrow on Amarelo reads as chrome |
+| org-node-flag | yes | yes | yes (flag Amarelo on dark card — strong contrast) | **FORBIDDEN** — Amarelo flag on Amarelo bg invisible |
+| dual-sided-argument | yes | yes | needs `background: rgba(255,255,255,0.06)` and inverted rule color | avoid — light card on Amarelo loses the card boundary |
+| inline-mini-legend | yes | yes | swap outline dot to `rgba(255,255,255,0.75)` border, filled dot to white | avoid — black dots on Amarelo read as noise |
 
 **HARD GATE:** if the pairing table says "avoid" or "FORBIDDEN," the archetype MUST pick a different primitive or a different slide variant. Do not patch with inline color overrides.
 
