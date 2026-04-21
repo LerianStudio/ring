@@ -2,6 +2,17 @@
 
 ## [0.25.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.25.1)
 
+- **Improvements:**
+  - Canonized environment variables by replacing `DB_*` with `POSTGRES_*` for better clarity and standardization.
+
+Contributors: @jefferson.comff
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
+
+---
+
+## [0.25.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.25.1)
+
 - Improvements:
   - Refactored environment variables to canonize `POSTGRES_*` instead of `DB_*`.
 
