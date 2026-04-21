@@ -14,16 +14,16 @@
        See references/speaker-notes.md for schema and writing voice. -->
   <script type="application/json" id="speaker-notes">
   [
-    "Good morning. Before we step into the material, a quick frame on what today is. Ninety minutes, split roughly in half. The first half is report — portfolio, financials, GTM, the facts on the ground. The second half is debate — four strategic discussions where I actually need your pushback. The slides are the prop, not the point; the conversation is the point. Push back wherever something does not add up.",
-    "Map of where we are going. Five acts. Twenty minutes on traction and product, ten on financials, ten on GTM, forty-five on the four strategic discussions — that row is where I need your time — and five minutes at the end on capital strategy as an open question. I want to protect the debate window, so I will move fast through the report acts. Stop me if I skip something you want to dwell on.",
-    "Act one. Traction and product. The theme of this act is the portfolio baseline — where the core banking stack stands today, who is deploying it, and how we compare competitively. The objective is to put the you-do-not-have-product-X objection to bed so we can spend the real time on the forward-looking discussions. Five slides, roughly twenty minutes.",
-    "Let me show you what is actually shipping. Six core products in production — Midaz, Matcher, Tracer, Flowker, Fetcher, Reporter — that is the full core banking stack. Plus six plugins live today, including Pix Direto and TED Direto. The nine in the pipeline are the regulated Brazilian stack that takes time — Credit, Payments, BC Correios, SIMBA, BacenJud. Takeaway: twenty-one building blocks on one platform. The portfolio objection is dead.",
-    "Discussion one. We have been calling this Vercel for financial services. Client deploys our products plus their own applications on Lerian infrastructure — three tiers, from managed to full SaaS. Seventy percent of new logos already want this. The question is not whether. It is timing, positioning, and whether we should reframe the company around it. Three questions up on the right. Where are we wrong?",
-    "Capital strategy. This is an open question, not an ask. Runway is twenty months gross, thirty-two months net of revenue. Pipeline is five point nine million reais active. The Cloud thesis is at inflection. What I want your perspective on is timing — when does the next round make sense given where these three numbers are heading? I am not raising today. I want your read.",
-    "Billing day one. Reported revenue equals real cash. No grace period, no deferred recognition, every client we sign starts paying the month the contract executes. One hundred percent of contracts, zero days of grace, twenty to thirty-two months of runway depending on whether you strip revenue out. Different from most SaaS P and Ls you read. Worth internalizing before we get to the financials.",
-    "MRR composition. One point two million reais a month, and the story is the mix. Platform — our Cloud product — is already thirty-eight percent, up from four percent twelve months ago. Core products thirty-four. Plugins eighteen. Services ten and shrinking. Top five accounts on the right — JD Bank and BTG leading on platform, which is exactly the motion we want to scale. The Cloud thesis is not theoretical — it is already where the growth lives.",
-    "We are past the main deck. What follows is context available for questions — eight sections covering side letters, ESOP mechanics, pipeline detail, security posture, product roadmap, org structure, top risks, and governance. Not presented. Grab any section you want to dig into; the lettered pagination makes it navigable.",
-    "Appendix one — side letters. Three investors, three different sets of rights. Maya Capital holds a board seat plus observer plus major-investor rights — that is the most active protection in the stack. Norte Ventures has a put option at one dollar, right of first offer, and co-sale. BTG has put rights versus the company and founders, credit line match above two hundred thousand dollars, anti-dilution, tag-along, and ICC Sao Paulo arbitration. Grab any of these if the board wants to stress test."
+    "Opening slide. Cover archetype &mdash; title, date, presenter, audience. The tagline under the logo is where the one-sentence framing of the deck lives. Keep it to a single idea; anything longer competes with the title. Replace the placeholder strings with your own content before presenting.",
+    "Agenda walkthrough. Five sections. The highlighted row marks the main content; the others frame it. Give the audience a map before going deep. This archetype uses a .grid table with a single .hl row &mdash; keep only one row highlighted per slide.",
+    "Act divider. Use this archetype whenever you want a visual pause between sections. The giant Poppins headline is the anchor; the lede underneath sets up what is about to be covered. The pills at the bottom are an optional nav hint showing which slides sit in this act.",
+    "Content slide with compact density. Three-column grid is useful when you have parallel categories to compare. The accent-green dots flag active columns; the muted third column signals an in-progress or future state. Replace the items with whatever fits your topic.",
+    "Discussion archetype. Paper background creates a visual pause. Two-column layout: context on the left as a ticks list, dark questions card on the right. Use this when you want the audience to debate, not just receive information. Three questions is the practical maximum.",
+    "Dark content slide. Big single-question layout for moments you want the room to feel the weight of one decision. The KPI strip at the bottom gives the question its data footing &mdash; four slots is the maximum before the numbers start to crowd.",
+    "Accent content slide. Amarelo is our boldest surface &mdash; reserve it for one slide per act at most. Mega Poppins statement at the top, KPI pair row below. Keep the headline to two short lines; a longer headline breaks the rhythm.",
+    "Chart slide. Stacked horizontal bar with legend on the left, compact data table on the right. Use this when you want the audience to see composition at a glance and have the detail ready when they ask. Swap the numbers for your own before presenting.",
+    "Appendix divider. Signals the main deck is done and what follows is available for questions but not presented. Use this to manage room energy &mdash; people stop taking notes when they see the appendix marker.",
+    "Appendix card layout. Three-card grid is a flexible container for supporting material. Each card has an eyebrow label plus a short title; title size varies with content density &mdash; shorter titles get larger type, longer titles scale down."
   ]
   </script>
 
@@ -275,7 +275,7 @@
       position: absolute; left: 0; top: 12px;
     }
 
-    /* numbered — canonical; ul.numbered.questions is the dark-card variant for Questions-for-the-board blocks */
+    /* numbered — canonical; ul.numbered.questions is the dark-card variant for Questions-for-the-audience blocks */
     ul.numbered {
       list-style: none; padding: 0; margin: 0;
       display: flex; flex-direction: column; gap: 24px;
@@ -500,18 +500,19 @@
     <!-- ======================================================
          SLIDE 1 — COVER
          Archetype: cover (see templates/slide-cover.html)
+         Replace: {{DECK_TITLE}}, date, presenter, audience.
          ====================================================== -->
     <section data-label="Cover" class="slide" style="padding: 64px 100px 40px;">
       <div class="meta">
         <div class="left">
           <span class="wordmark">lerian<span class="dot"></span></span>
-          <span>&middot; Confidential</span>
+          <span>&middot; Deck Scaffold</span>
         </div>
-        <div class="right"><span>April 22, 2026</span></div>
+        <div class="right"><span>Month DD, YYYY</span></div>
       </div>
 
       <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; padding-top: 60px;">
-        <div class="eyebrow" style="margin-bottom: 40px;">Board Meeting &#8470; 01 &mdash; Session Materials</div>
+        <div class="eyebrow" style="margin-bottom: 40px;">Session Materials &mdash; Template</div>
 
         <div style="display: flex; align-items: flex-end; gap: 56px;">
           <svg viewBox="0 0 1090.88 280" fill="currentColor" xmlns="http://www.w3.org/2000/svg"
@@ -521,25 +522,21 @@
         </div>
 
         <div style="font-family: 'Poppins', sans-serif; font-weight: 500; font-size: 72px; line-height: 1.02; letter-spacing: -0.03em; margin-top: 56px; max-width: 1500px;">
-          Where we are, where we are going, and the four decisions we need your pushback on.
+          {{DECK_TITLE}}<span style="color: var(--c-ink-3);"> &mdash; your single-sentence framing goes here.</span>
         </div>
       </div>
 
       <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px; padding-top: 40px; border-top: 1px solid var(--c-rule);">
         <div>
-          <div class="eyebrow" style="margin-bottom: 14px;">Directors</div>
+          <div class="eyebrow" style="margin-bottom: 14px;">Prepared by</div>
           <div style="font-size: 26px; color: var(--c-ink); line-height: 1.4;">
-            Fred Amaral<span style="color: var(--c-ink-3);"> &middot; CEO</span>&nbsp;&nbsp;
-            Monica Saggioro<span style="color: var(--c-ink-3);"> &middot; Maya Capital</span>&nbsp;&nbsp;
-            <span style="color: var(--c-ink-3);">3rd Director TBD</span>
+            Presenter Name<span style="color: var(--c-ink-3);"> &middot; Role</span>
           </div>
         </div>
         <div>
-          <div class="eyebrow" style="margin-bottom: 14px;">Observers</div>
+          <div class="eyebrow" style="margin-bottom: 14px;">For</div>
           <div style="font-size: 26px; color: var(--c-ink); line-height: 1.4;">
-            Kevin Efrusy<span style="color: var(--c-ink-3);"> &middot; Ordinary</span>&nbsp;&nbsp;
-            Diego<span style="color: var(--c-ink-3);"> &middot; Supera</span>&nbsp;&nbsp;
-            Pedro Teo<span style="color: var(--c-ink-3);"> &middot; Norte</span>
+            Audience or organization
           </div>
         </div>
       </div>
@@ -553,7 +550,7 @@
       <div class="meta">
         <div class="left"><span class="wordmark">lerian<span class="dot"></span></span></div>
         <div class="right">
-          <span>Board Meeting &#8470; 01</span>
+          <span>Deck Scaffold</span>
           <span class="num"><span class="page-num"></span> / <span class="page-total"></span></span>
         </div>
       </div>
@@ -561,7 +558,7 @@
       <div class="body">
         <div class="eyebrow">Agenda</div>
         <h1 style="margin-top: 28px; max-width: 1500px;">
-          Ninety minutes. <span style="color: var(--c-ink-3);">Half of it on decisions, not reports.</span>
+          Five sections. <span style="color: var(--c-ink-3);">Replace the titles with your own.</span>
         </h1>
 
         <table class="grid" style="margin-top: 72px;">
@@ -576,31 +573,31 @@
           <tbody>
             <tr>
               <td class="num">01</td>
-              <td style="font-size: 28px; font-family: 'Poppins'; color: var(--c-ink);">Traction, Product &amp; Competitive Positioning</td>
-              <td class="num" style="text-align: right;">20 min</td>
-              <td style="text-align: right; color: var(--c-ink-3);">Report</td>
+              <td style="font-size: 28px; font-family: 'Poppins'; color: var(--c-ink);">Section one title</td>
+              <td class="num" style="text-align: right;">15 min</td>
+              <td style="text-align: right; color: var(--c-ink-3);">Overview</td>
             </tr>
             <tr>
               <td class="num">02</td>
-              <td style="font-size: 28px; font-family: 'Poppins'; color: var(--c-ink);">Financials</td>
+              <td style="font-size: 28px; font-family: 'Poppins'; color: var(--c-ink);">Section two title</td>
               <td class="num" style="text-align: right;">10 min</td>
-              <td style="text-align: right; color: var(--c-ink-3);">Report</td>
+              <td style="text-align: right; color: var(--c-ink-3);">Update</td>
             </tr>
             <tr>
               <td class="num">03</td>
-              <td style="font-size: 28px; font-family: 'Poppins'; color: var(--c-ink);">Go-to-Market</td>
+              <td style="font-size: 28px; font-family: 'Poppins'; color: var(--c-ink);">Section three title</td>
               <td class="num" style="text-align: right;">10 min</td>
-              <td style="text-align: right; color: var(--c-ink-3);">Report</td>
+              <td style="text-align: right; color: var(--c-ink-3);">Update</td>
             </tr>
             <tr class="hl">
               <td class="num">04</td>
-              <td style="font-size: 28px; font-family: 'Poppins';">Four Strategic Discussions <span style="opacity: 0.62; font-weight: 400;">&mdash; the core of this board</span></td>
-              <td class="num" style="text-align: right;">45 min</td>
+              <td style="font-size: 28px; font-family: 'Poppins';">Main discussion <span style="opacity: 0.62; font-weight: 400;">&mdash; where the debate happens</span></td>
+              <td class="num" style="text-align: right;">30 min</td>
               <td style="text-align: right; font-weight: 600;">Debate</td>
             </tr>
             <tr>
               <td class="num">05</td>
-              <td style="font-size: 28px; font-family: 'Poppins'; color: var(--c-ink);">Capital Strategy</td>
+              <td style="font-size: 28px; font-family: 'Poppins'; color: var(--c-ink);">Closing</td>
               <td class="num" style="text-align: right;">5 min</td>
               <td style="text-align: right; color: var(--c-ink-3);">Open question</td>
             </tr>
@@ -609,8 +606,8 @@
       </div>
 
       <div class="footer">
-        <div>Confidential &mdash; Lerian Board</div>
-        <div>April 22, 2026</div>
+        <div>Your footer here</div>
+        <div>Month DD, YYYY</div>
       </div>
     </section>
 
@@ -619,7 +616,7 @@
          Archetype: act-divider (see templates/slide-act-divider.html)
          Uses canonical .pill.solid with inline number chip.
          ====================================================== -->
-    <section data-label="Act 01 &mdash; Traction" class="slide accent">
+    <section data-label="Act 01 &mdash; Overview" class="slide accent">
       <div class="meta">
         <div class="left"><span class="wordmark">lerian<span class="dot"></span></span></div>
         <div class="right"><span>01 / 05</span></div>
@@ -629,27 +626,26 @@
         <div style="display: flex; align-items: baseline; gap: 18px; margin-bottom: 28px;">
           <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--c-ink);">Act 01</div>
           <div style="flex: 1; height: 1px; background: var(--c-ink); opacity: 0.25;"></div>
-          <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--c-ink); opacity: 0.55;">~20 min &middot; 5 slides</div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--c-ink); opacity: 0.55;">~15 min &middot; 4 slides</div>
         </div>
 
-        <div style="font-family: 'Poppins', sans-serif; font-size: 180px; font-weight: 500; line-height: 0.95; letter-spacing: -0.04em; color: var(--c-ink);">Traction &amp;<br/>Product.</div>
+        <div style="font-family: 'Poppins', sans-serif; font-size: 180px; font-weight: 500; line-height: 0.95; letter-spacing: -0.04em; color: var(--c-ink);">Section one<br/>title.</div>
 
         <p class="lede" style="margin-top: 40px; max-width: 1400px; color: rgba(25,26,27,0.78);">
-          Where the portfolio stands, what ships, how clients deploy. Establishes the "we have product" baseline for the rest of the meeting.
+          A one- or two-sentence framing for this act. Sets up what is about to be covered and why it matters. Keep it readable at a glance &mdash; this slide is a visual pause, not a reading task.
         </p>
 
         <div style="margin-top: 56px; display: flex; gap: 14px; flex-wrap: wrap;">
-          <div class="pill solid" style="padding: 10px 18px 10px 12px; font-family: 'Poppins', sans-serif; font-size: 17px; text-transform: none; letter-spacing: normal;"><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; background: var(--c-ink-inv); color: var(--c-ink); padding: 3px 7px; border-radius: 999px; letter-spacing: 0.08em; font-weight: 600;">04</span>Portfolio</div>
-          <div class="pill solid" style="padding: 10px 18px 10px 12px; font-family: 'Poppins', sans-serif; font-size: 17px; text-transform: none; letter-spacing: normal;"><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; background: var(--c-ink-inv); color: var(--c-ink); padding: 3px 7px; border-radius: 999px; letter-spacing: 0.08em; font-weight: 600;">05</span>Discussion</div>
-          <div class="pill solid" style="padding: 10px 18px 10px 12px; font-family: 'Poppins', sans-serif; font-size: 17px; text-transform: none; letter-spacing: normal;"><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; background: var(--c-ink-inv); color: var(--c-ink); padding: 3px 7px; border-radius: 999px; letter-spacing: 0.08em; font-weight: 600;">06</span>Capital</div>
-          <div class="pill solid" style="padding: 10px 18px 10px 12px; font-family: 'Poppins', sans-serif; font-size: 17px; text-transform: none; letter-spacing: normal;"><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; background: var(--c-ink-inv); color: var(--c-ink); padding: 3px 7px; border-radius: 999px; letter-spacing: 0.08em; font-weight: 600;">07</span>Billing</div>
-          <div class="pill solid" style="padding: 10px 18px 10px 12px; font-family: 'Poppins', sans-serif; font-size: 17px; text-transform: none; letter-spacing: normal;"><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; background: var(--c-ink-inv); color: var(--c-ink); padding: 3px 7px; border-radius: 999px; letter-spacing: 0.08em; font-weight: 600;">08</span>Appendix</div>
+          <div class="pill solid" style="padding: 10px 18px 10px 12px; font-family: 'Poppins', sans-serif; font-size: 17px; text-transform: none; letter-spacing: normal;"><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; background: var(--c-ink-inv); color: var(--c-ink); padding: 3px 7px; border-radius: 999px; letter-spacing: 0.08em; font-weight: 600;">04</span>Topic one</div>
+          <div class="pill solid" style="padding: 10px 18px 10px 12px; font-family: 'Poppins', sans-serif; font-size: 17px; text-transform: none; letter-spacing: normal;"><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; background: var(--c-ink-inv); color: var(--c-ink); padding: 3px 7px; border-radius: 999px; letter-spacing: 0.08em; font-weight: 600;">05</span>Topic two</div>
+          <div class="pill solid" style="padding: 10px 18px 10px 12px; font-family: 'Poppins', sans-serif; font-size: 17px; text-transform: none; letter-spacing: normal;"><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; background: var(--c-ink-inv); color: var(--c-ink); padding: 3px 7px; border-radius: 999px; letter-spacing: 0.08em; font-weight: 600;">06</span>Topic three</div>
+          <div class="pill solid" style="padding: 10px 18px 10px 12px; font-family: 'Poppins', sans-serif; font-size: 17px; text-transform: none; letter-spacing: normal;"><span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; background: var(--c-ink-inv); color: var(--c-ink); padding: 3px 7px; border-radius: 999px; letter-spacing: 0.08em; font-weight: 600;">07</span>Topic four</div>
         </div>
       </div>
 
       <div class="footer">
-        <div>Confidential &mdash; Lerian Board</div>
-        <div>April 22, 2026</div>
+        <div>Your footer here</div>
+        <div>Month DD, YYYY</div>
       </div>
     </section>
 
@@ -659,19 +655,19 @@
          Scoped class: .prod-tag
          data-density="compact" demonstrates the opt-in density override token.
          ====================================================== -->
-    <section data-label="Portfolio" class="slide" data-density="compact">
+    <section data-label="Content Compact" class="slide" data-density="compact">
       <div class="meta">
         <div class="left">
           <span class="wordmark">lerian<span class="dot"></span></span>
-          <span>&middot; Act 01 &mdash; Traction &amp; Product</span>
+          <span>&middot; Act 01 &mdash; Overview</span>
         </div>
         <div class="right"><span class="num"><span class="page-num"></span> / <span class="page-total"></span></span></div>
       </div>
 
       <div class="body">
-        <div class="eyebrow">Portfolio &mdash; Where We Stand</div>
-        <h1 style="margin-top: 28px; max-width: 1600px;">Complete portfolio for core banking in Brazil.</h1>
-        <p class="lede" style="margin-top: 24px; max-width: 1400px;">Eliminates the "you don't have product X" barrier in enterprise sales.</p>
+        <div class="eyebrow">Content &mdash; Three-Column Demo</div>
+        <h1 style="margin-top: 28px; max-width: 1600px;">Headline statement in one short sentence.</h1>
+        <p class="lede" style="margin-top: 24px; max-width: 1400px;">Supporting lede that expands on the headline with context or an implication.</p>
 
         <div style="flex: 1; min-height: 0; margin-top: 56px; display: flex; flex-direction: column;">
           <div style="flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 1px solid var(--c-ink); border-bottom: 1px solid var(--c-rule); align-items: stretch;">
@@ -680,17 +676,17 @@
               <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 22px;">
                 <div style="font-family: 'Poppins', sans-serif; font-size: 72px; font-weight: 500; line-height: 1; letter-spacing: -0.03em;">6<span style="color: var(--c-accent-2);">.</span></div>
                 <div>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-accent-2);">&#9679; Core products</div>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-ink-3); margin-top: 2px;">Live in production</div>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-accent-2);">&#9679; Category one</div>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-ink-3); margin-top: 2px;">Active state</div>
                 </div>
               </div>
               <div style="display: flex; flex-direction: column; gap: 11px; font-size: 22px;">
-                <div><strong>Midaz</strong> <span class="prod-tag">Ledger</span></div>
-                <div><strong>Matcher</strong> <span class="prod-tag">Reconciliation</span></div>
-                <div><strong>Tracer</strong> <span class="prod-tag">Risk</span></div>
-                <div><strong>Flowker</strong> <span class="prod-tag">Orchestration</span></div>
-                <div><strong>Fetcher</strong> <span class="prod-tag">Ingestion</span></div>
-                <div><strong>Reporter</strong> <span class="prod-tag">Regulatory</span></div>
+                <div><strong>Item one</strong> <span class="prod-tag">Short label</span></div>
+                <div><strong>Item two</strong> <span class="prod-tag">Short label</span></div>
+                <div><strong>Item three</strong> <span class="prod-tag">Short label</span></div>
+                <div><strong>Item four</strong> <span class="prod-tag">Short label</span></div>
+                <div><strong>Item five</strong> <span class="prod-tag">Short label</span></div>
+                <div><strong>Item six</strong> <span class="prod-tag">Short label</span></div>
               </div>
             </div>
 
@@ -698,48 +694,48 @@
               <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 22px;">
                 <div style="font-family: 'Poppins', sans-serif; font-size: 72px; font-weight: 500; line-height: 1; letter-spacing: -0.03em;">6<span style="color: var(--c-accent-2);">.</span></div>
                 <div>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-accent-2);">&#9679; Plugins</div>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-ink-3); margin-top: 2px;">Shipping today</div>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-accent-2);">&#9679; Category two</div>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-ink-3); margin-top: 2px;">Active state</div>
                 </div>
               </div>
               <div style="display: flex; flex-direction: column; gap: 11px; font-size: 22px;">
-                <div><strong>Pix Direto</strong> <span class="prod-tag">Lerian &middot; JD</span></div>
-                <div><strong>Pix Indireto</strong> <span class="prod-tag">via BTG</span></div>
-                <div><strong>TED Direto</strong> <span class="prod-tag">Lerian &middot; JD</span></div>
-                <div><strong>CRM</strong></div>
-                <div><strong>Fees</strong></div>
-                <div><strong>Identity &amp; Auth</strong></div>
+                <div><strong>Item A</strong> <span class="prod-tag">Short label</span></div>
+                <div><strong>Item B</strong> <span class="prod-tag">Short label</span></div>
+                <div><strong>Item C</strong> <span class="prod-tag">Short label</span></div>
+                <div><strong>Item D</strong></div>
+                <div><strong>Item E</strong></div>
+                <div><strong>Item F</strong></div>
               </div>
             </div>
 
             <div style="padding: 22px 0 22px 28px; display: flex; flex-direction: column;">
               <div style="display: flex; align-items: baseline; gap: 12px; margin-bottom: 22px;">
-                <div style="font-family: 'Poppins', sans-serif; font-size: 72px; font-weight: 500; line-height: 1; letter-spacing: -0.03em; color: var(--c-ink-2);">9<span style="color: var(--c-ink-3);">.</span></div>
+                <div style="font-family: 'Poppins', sans-serif; font-size: 72px; font-weight: 500; line-height: 1; letter-spacing: -0.03em; color: var(--c-ink-2);">5<span style="color: var(--c-ink-3);">.</span></div>
                 <div>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-ink-3);">&#9675; In pipeline</div>
-                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-ink-3); margin-top: 2px;">Regulated BR stack</div>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-ink-3);">&#9675; Category three</div>
+                  <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--c-ink-3); margin-top: 2px;">Pending state</div>
                 </div>
               </div>
               <div style="display: flex; flex-direction: column; gap: 10px; font-size: 22px; color: var(--c-ink-2);">
-                <div><strong style="color: var(--c-ink-2); font-weight: 600;">Credit</strong> <span class="prod-tag">Decisioning, via 3rd parties</span></div>
-                <div><strong style="color: var(--c-ink-2); font-weight: 600;">Payments</strong> <span class="prod-tag">Rails</span></div>
-                <div><strong style="color: var(--c-ink-2); font-weight: 600;">BC Correios</strong> <span class="prod-tag">BACEN</span></div>
-                <div><strong style="color: var(--c-ink-2); font-weight: 600;">SIMBA</strong> <span class="prod-tag">COAF</span></div>
-                <div><strong style="color: var(--c-ink-2); font-weight: 600;">BacenJud Direto</strong> <span class="prod-tag">Judicial</span></div>
+                <div><strong style="color: var(--c-ink-2); font-weight: 600;">Item I</strong> <span class="prod-tag">Short label</span></div>
+                <div><strong style="color: var(--c-ink-2); font-weight: 600;">Item II</strong> <span class="prod-tag">Short label</span></div>
+                <div><strong style="color: var(--c-ink-2); font-weight: 600;">Item III</strong> <span class="prod-tag">Short label</span></div>
+                <div><strong style="color: var(--c-ink-2); font-weight: 600;">Item IV</strong> <span class="prod-tag">Short label</span></div>
+                <div><strong style="color: var(--c-ink-2); font-weight: 600;">Item V</strong> <span class="prod-tag">Short label</span></div>
               </div>
             </div>
           </div>
 
           <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 18px; font-family: 'JetBrains Mono', monospace; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--c-ink-3);">
-            <div>21 building blocks &middot; one platform</div>
-            <div>Core banking coverage <span style="color: var(--c-accent-2);">&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;</span></div>
+            <div>17 items &middot; one view</div>
+            <div>Coverage summary <span style="color: var(--c-accent-2);">&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;</span></div>
           </div>
         </div>
       </div>
 
       <div class="footer">
-        <div>Confidential &mdash; Lerian Board</div>
-        <div>April 22, 2026</div>
+        <div>Your footer here</div>
+        <div>Month DD, YYYY</div>
       </div>
 
       <!-- Archetype-local classes: prefix with archetype name to avoid collision -->
@@ -757,59 +753,59 @@
          Archetype: content-paper (see templates/slide-content-paper.html)
          Uses canonical ul.numbered.questions for the dark Questions card.
          ====================================================== -->
-    <section data-label="Discussion 01 &mdash; Cloud" class="slide paper">
+    <section data-label="Discussion Card" class="slide paper">
       <div class="meta">
         <div class="left">
           <span class="wordmark">lerian<span class="dot"></span></span>
-          <span>&middot; Act 04 &mdash; Strategic Discussion 01/04</span>
+          <span>&middot; Act 04 &mdash; Discussion</span>
         </div>
         <div class="right"><span class="num"><span class="page-num"></span> / <span class="page-total"></span></span></div>
       </div>
 
       <div class="body">
         <div style="display: flex; align-items: center; gap: 18px;">
-          <div class="eyebrow">Discussion 01</div>
+          <div class="eyebrow">Discussion</div>
           <div style="height: 1px; flex: 1; background: var(--c-rule);"></div>
           <div class="eyebrow">~12 min</div>
         </div>
 
-        <h1 style="margin-top: 28px; max-width: 1700px;">Lerian Cloud &mdash; "Vercel for financial services."</h1>
+        <h1 style="margin-top: 28px; max-width: 1700px;">Discussion topic &mdash; framing statement.</h1>
 
         <div style="display: grid; grid-template-columns: 1fr 1.15fr; gap: 56px; margin-top: 56px; flex: 1; min-height: 0;">
 
           <div style="display: flex; flex-direction: column; padding-top: 4px;">
             <div class="eyebrow" style="margin-bottom: 24px; color: var(--c-ink);">Context</div>
             <ul class="ticks" style="flex: 1;">
-              <li><strong>70% of new logos</strong> enter directly through SaaS (vs. 100% BYOC 12 months ago).</li>
-              <li>Tenant-manager live since Q1/26. Clients deploy Lerian products <strong>and their own apps</strong> on Lerian infra &mdash; stickiness beyond traditional SaaS.</li>
-              <li><strong>No competitor offers this</strong> capability today.</li>
-              <li>BYOC clients already requesting migration to managed tiers &mdash; organic upsell motion.</li>
+              <li>Supporting point one with <strong>emphasis on the key phrase</strong>.</li>
+              <li>Supporting point two giving additional context or a contrasting angle that sharpens the framing.</li>
+              <li>Supporting point three &mdash; a consequence or observation that narrows toward the decision.</li>
+              <li>Supporting point four closing the loop on what the audience needs to weigh in on.</li>
             </ul>
           </div>
 
           <div style="background: var(--c-ink); color: var(--c-ink-inv); padding: 40px 44px; border-radius: 4px; display: flex; flex-direction: column; gap: 24px; justify-content: space-between;">
-            <div class="eyebrow" style="color: var(--c-accent);">Questions for the board</div>
+            <div class="eyebrow" style="color: var(--c-accent);">Questions for the audience</div>
 
             <ul class="numbered questions">
               <li>
                 <span class="n">01</span>
                 <div>
-                  <div class="t">Target profile &amp; reference case</div>
-                  <div class="b">Enterprise gravitates hybrid, mid-market accepts full SaaS. Which segment builds the reference case for the other?</div>
+                  <div class="t">First question headline</div>
+                  <div class="b">One-sentence elaboration that sets up what decision or input is being sought.</div>
                 </div>
               </li>
               <li>
                 <span class="n">02</span>
                 <div>
-                  <div class="t">GTM timing</div>
-                  <div class="b">70% already choose SaaS. BYOC migrating up. Is this the signal to go-to-market with Cloud now &mdash; or do we need a larger proof base?</div>
+                  <div class="t">Second question headline</div>
+                  <div class="b">One-sentence elaboration. Keep each question to a single core ask &mdash; do not compound them.</div>
                 </div>
               </li>
               <li>
                 <span class="n">03</span>
                 <div>
-                  <div class="t">Pricing strategy</div>
-                  <div class="b">Clients running their apps on Lerian infra creates platform lock-in. How do we price platform vs. product without cannibalizing either during transition?</div>
+                  <div class="t">Third question headline</div>
+                  <div class="b">One-sentence elaboration. Three is the practical maximum for this archetype.</div>
                 </div>
               </li>
             </ul>
@@ -818,8 +814,8 @@
       </div>
 
       <div class="footer">
-        <div>Confidential &mdash; Lerian Board</div>
-        <div>April 22, 2026</div>
+        <div>Your footer here</div>
+        <div>Month DD, YYYY</div>
       </div>
     </section>
 
@@ -828,50 +824,50 @@
          Archetype: content-dark (see templates/slide-content-dark.html)
          Uses canonical .kpi.dark modifier for dark-strip KPIs.
          ====================================================== -->
-    <section data-label="Capital" class="slide dark">
+    <section data-label="Content Dark" class="slide dark">
       <div class="meta">
         <div class="left">
           <span class="wordmark">lerian<span class="dot"></span></span>
-          <span>&middot; Act 05 &mdash; Capital Strategy</span>
+          <span>&middot; Act 05 &mdash; Closing</span>
         </div>
         <div class="right"><span class="num"><span class="page-num"></span> / <span class="page-total"></span></span></div>
       </div>
 
       <div class="body">
-        <div class="eyebrow">Capital Strategy &middot; Open Question</div>
+        <div class="eyebrow">Strategic Moment &middot; Open Question</div>
 
         <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; max-width: 1700px;">
           <div style="font-family: 'Poppins', sans-serif; font-size: 110px; font-weight: 500; line-height: 1.0; letter-spacing: -0.03em; color: var(--c-ink-inv);">
-            When does the next round make sense<span style="color: var(--c-accent);">&mdash;</span>given the current pipeline and the Cloud thesis?
+            One big question on a dark surface<span style="color: var(--c-accent);">&mdash;</span>phrased as a single sentence.
           </div>
           <p class="lede" style="margin-top: 48px; color: rgba(255,255,255,0.7);">
-            Advisory tone. Not an ask. We are not raising today &mdash; we're asking for your perspective on timing.
+            Advisory tone. Sets up the room for open discussion without pre-loading the answer.
           </p>
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; margin-top: 40px; padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.15); flex-shrink: 0;">
           <div>
-            <div class="eyebrow" style="color: rgba(255,255,255,0.55);">Stage</div>
-            <div class="kpi dark">Post-Seed</div>
+            <div class="eyebrow" style="color: rgba(255,255,255,0.55);">Metric A</div>
+            <div class="kpi dark">Value A</div>
           </div>
           <div>
-            <div class="eyebrow" style="color: rgba(255,255,255,0.55);">Runway</div>
-            <div class="kpi dark">20 &ndash; 32 mo</div>
+            <div class="eyebrow" style="color: rgba(255,255,255,0.55);">Metric B</div>
+            <div class="kpi dark">Value B</div>
           </div>
           <div>
-            <div class="eyebrow" style="color: rgba(255,255,255,0.55);">Pipeline</div>
-            <div class="kpi dark">R$ 5.9M active</div>
+            <div class="eyebrow" style="color: rgba(255,255,255,0.55);">Metric C</div>
+            <div class="kpi dark">Value C</div>
           </div>
           <div>
-            <div class="eyebrow" style="color: var(--c-accent);">Cloud maturity</div>
-            <div class="kpi dark">Inflection</div>
+            <div class="eyebrow" style="color: var(--c-accent);">Highlight</div>
+            <div class="kpi dark">Value D</div>
           </div>
         </div>
       </div>
 
       <div class="footer">
-        <div>Confidential &mdash; Lerian Board</div>
-        <div>April 22, 2026</div>
+        <div>Your footer here</div>
+        <div>Month DD, YYYY</div>
       </div>
     </section>
 
@@ -880,7 +876,7 @@
          Archetype: content-accent (see templates/slide-content-accent.html)
          Uses canonical .kpi.accent modifier for Amarelo-bg KPI pairs.
          ====================================================== -->
-    <section data-label="Billing Day One" class="slide accent">
+    <section data-label="Content Accent" class="slide accent">
       <div class="meta">
         <div class="left"><span class="wordmark">lerian<span class="dot"></span></span></div>
         <div class="right"><span class="num"><span class="page-num"></span> / <span class="page-total"></span></span></div>
@@ -891,53 +887,54 @@
 
         <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
           <div style="font-family: 'Poppins', sans-serif; font-size: 150px; font-weight: 500; line-height: 0.95; letter-spacing: -0.04em; color: var(--c-accent-ink);">
-            Billing Day One.<br/>Reported revenue = real cash.
+            Your hero statement.<br/>Short. Memorable.
           </div>
           <p class="lede" style="margin-top: 48px; max-width: 1400px; color: rgba(25,26,27,0.78);">
-            No grace period. No deferred recognition. Every client we sign starts paying the month the contract executes.
+            Supporting lede that elaborates on the hero statement without repeating it. Reserve this surface for one slide per act at most &mdash; Amarelo is the boldest visual in the system.
           </p>
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; margin-top: 40px; padding-top: 32px; border-top: 1px solid rgba(25,26,27,0.18); flex-shrink: 0;">
           <div class="kpi accent">
-            <div class="value">100%</div>
-            <div class="cap">of contracts billed Day One</div>
+            <div class="value">Value A</div>
+            <div class="cap">Caption for metric A</div>
           </div>
           <div class="kpi accent">
-            <div class="value">0 days</div>
-            <div class="cap">Grace period &middot; deferred revenue</div>
+            <div class="value">Value B</div>
+            <div class="cap">Caption for metric B</div>
           </div>
           <div class="kpi accent">
-            <div class="value">20&ndash;32 mo</div>
-            <div class="cap">Runway &middot; gross to net-of-revenue</div>
+            <div class="value">Value C</div>
+            <div class="cap">Caption for metric C</div>
           </div>
         </div>
       </div>
 
       <div class="footer">
-        <div>Confidential &mdash; Lerian Board</div>
-        <div>April 22, 2026</div>
+        <div>Your footer here</div>
+        <div>Month DD, YYYY</div>
       </div>
     </section>
 
     <!-- ======================================================
          SLIDE 8 — CHART DEMO (stacked-horizontal-bar)
          Exercises .chart-stacked-hbar primitive + .table.grid.compact variant.
-         Real-looking MRR mix data. See references/chart-primitives.md for the 3 other chart types.
+         Replace sample segment labels and values with your own data.
+         See references/chart-primitives.md for the 3 other chart types.
          ====================================================== -->
-    <section data-label="MRR Mix" class="slide dark">
+    <section data-label="Chart Demo" class="slide dark">
       <div class="meta">
         <div class="left">
           <span class="wordmark">lerian<span class="dot"></span></span>
-          <span>&middot; Act 02 &mdash; Financials</span>
+          <span>&middot; Act 02 &mdash; Metrics</span>
         </div>
         <div class="right"><span class="num"><span class="page-num"></span> / <span class="page-total"></span></span></div>
       </div>
 
       <div class="body">
-        <div class="eyebrow">MRR Composition</div>
-        <h1 style="margin-top: 28px; max-width: 1600px; color: var(--c-ink-inv);">Revenue mix &mdash; where the R$ 1.2M/mo comes from.</h1>
-        <p class="lede" style="margin-top: 24px; max-width: 1400px; color: rgba(255,255,255,0.7);">Platform already 38% of MRR. Twelve months ago it was 4%. The Cloud thesis is not theoretical.</p>
+        <div class="eyebrow">Composition Breakdown</div>
+        <h1 style="margin-top: 28px; max-width: 1600px; color: var(--c-ink-inv);">Example metric mix &mdash; four segments.</h1>
+        <p class="lede" style="margin-top: 24px; max-width: 1400px; color: rgba(255,255,255,0.7);">Supporting lede explaining what the chart shows and why the mix matters.</p>
 
         <div style="flex: 1; min-height: 0; margin-top: 56px; display: grid; grid-template-columns: 1.1fr 1fr; gap: 72px; align-items: stretch;">
 
@@ -950,30 +947,30 @@
               <div style="flex: 10; background: rgba(255,255,255,0.28);"></div>
             </div>
             <div class="legend" style="color: var(--c-ink-inv);">
-              <div class="row"><div><span class="sw" style="background: var(--c-accent);"></span>Platform (Cloud)</div><div class="num">R$ 456K &middot; 38%</div></div>
-              <div class="row"><div><span class="sw" style="background: var(--c-ink-inv);"></span>Core products</div><div class="num">R$ 408K &middot; 34%</div></div>
-              <div class="row"><div><span class="sw" style="background: rgba(255,255,255,0.55);"></span>Plugins</div><div class="num">R$ 216K &middot; 18%</div></div>
-              <div class="row muted"><div><span class="sw" style="background: rgba(255,255,255,0.28);"></span>Services</div><div class="num">R$ 120K &middot; 10%</div></div>
+              <div class="row"><div><span class="sw" style="background: var(--c-accent);"></span>Segment A</div><div class="num">456 &middot; 38%</div></div>
+              <div class="row"><div><span class="sw" style="background: var(--c-ink-inv);"></span>Segment B</div><div class="num">408 &middot; 34%</div></div>
+              <div class="row"><div><span class="sw" style="background: rgba(255,255,255,0.55);"></span>Segment C</div><div class="num">216 &middot; 18%</div></div>
+              <div class="row muted"><div><span class="sw" style="background: rgba(255,255,255,0.28);"></span>Segment D</div><div class="num">120 &middot; 10%</div></div>
             </div>
           </div>
 
-          <!-- Compact table: top accounts breakdown. Exercises .grid.compact.tight. -->
+          <!-- Compact table: top-N breakdown. Exercises .grid.compact.tight. -->
           <div style="display: flex; flex-direction: column; justify-content: center;">
-            <div class="eyebrow" style="color: var(--c-accent); margin-bottom: 18px;">Top 5 accounts &middot; April</div>
+            <div class="eyebrow" style="color: var(--c-accent); margin-bottom: 18px;">Top 5 items &middot; Period</div>
             <table class="grid compact tight" style="color: var(--c-ink-inv);">
               <thead>
                 <tr>
-                  <th style="color: rgba(255,255,255,0.55); border-color: rgba(255,255,255,0.15);">Client</th>
-                  <th style="color: rgba(255,255,255,0.55); border-color: rgba(255,255,255,0.15); text-align: right;">MRR</th>
+                  <th style="color: rgba(255,255,255,0.55); border-color: rgba(255,255,255,0.15);">Item</th>
+                  <th style="color: rgba(255,255,255,0.55); border-color: rgba(255,255,255,0.15); text-align: right;">Value</th>
                   <th style="color: rgba(255,255,255,0.55); border-color: rgba(255,255,255,0.15); text-align: right;">Tier</th>
                 </tr>
               </thead>
               <tbody>
-                <tr><td style="color: var(--c-ink-inv); border-color: rgba(255,255,255,0.12);">JD Bank</td><td class="num" style="color: var(--c-ink-inv); text-align: right; border-color: rgba(255,255,255,0.12);">R$ 184K</td><td style="color: rgba(255,255,255,0.55); text-align: right; border-color: rgba(255,255,255,0.12);">Platform</td></tr>
-                <tr><td style="color: var(--c-ink-inv); border-color: rgba(255,255,255,0.12);">BTG Pactual</td><td class="num" style="color: var(--c-ink-inv); text-align: right; border-color: rgba(255,255,255,0.12);">R$ 142K</td><td style="color: rgba(255,255,255,0.55); text-align: right; border-color: rgba(255,255,255,0.12);">Platform</td></tr>
-                <tr><td style="color: var(--c-ink-inv); border-color: rgba(255,255,255,0.12);">Banco Inter</td><td class="num" style="color: var(--c-ink-inv); text-align: right; border-color: rgba(255,255,255,0.12);">R$ 96K</td><td style="color: rgba(255,255,255,0.55); text-align: right; border-color: rgba(255,255,255,0.12);">Core</td></tr>
-                <tr><td style="color: var(--c-ink-inv); border-color: rgba(255,255,255,0.12);">Pagbank</td><td class="num" style="color: var(--c-ink-inv); text-align: right; border-color: rgba(255,255,255,0.12);">R$ 74K</td><td style="color: rgba(255,255,255,0.55); text-align: right; border-color: rgba(255,255,255,0.12);">Core</td></tr>
-                <tr><td style="color: var(--c-ink-inv); border-color: rgba(255,255,255,0.12);">Supera</td><td class="num" style="color: var(--c-ink-inv); text-align: right; border-color: rgba(255,255,255,0.12);">R$ 52K</td><td style="color: rgba(255,255,255,0.55); text-align: right; border-color: rgba(255,255,255,0.12);">Plugins</td></tr>
+                <tr><td style="color: var(--c-ink-inv); border-color: rgba(255,255,255,0.12);">Item one</td><td class="num" style="color: var(--c-ink-inv); text-align: right; border-color: rgba(255,255,255,0.12);">184</td><td style="color: rgba(255,255,255,0.55); text-align: right; border-color: rgba(255,255,255,0.12);">Segment A</td></tr>
+                <tr><td style="color: var(--c-ink-inv); border-color: rgba(255,255,255,0.12);">Item two</td><td class="num" style="color: var(--c-ink-inv); text-align: right; border-color: rgba(255,255,255,0.12);">142</td><td style="color: rgba(255,255,255,0.55); text-align: right; border-color: rgba(255,255,255,0.12);">Segment A</td></tr>
+                <tr><td style="color: var(--c-ink-inv); border-color: rgba(255,255,255,0.12);">Item three</td><td class="num" style="color: var(--c-ink-inv); text-align: right; border-color: rgba(255,255,255,0.12);">96</td><td style="color: rgba(255,255,255,0.55); text-align: right; border-color: rgba(255,255,255,0.12);">Segment B</td></tr>
+                <tr><td style="color: var(--c-ink-inv); border-color: rgba(255,255,255,0.12);">Item four</td><td class="num" style="color: var(--c-ink-inv); text-align: right; border-color: rgba(255,255,255,0.12);">74</td><td style="color: rgba(255,255,255,0.55); text-align: right; border-color: rgba(255,255,255,0.12);">Segment B</td></tr>
+                <tr><td style="color: var(--c-ink-inv); border-color: rgba(255,255,255,0.12);">Item five</td><td class="num" style="color: var(--c-ink-inv); text-align: right; border-color: rgba(255,255,255,0.12);">52</td><td style="color: rgba(255,255,255,0.55); text-align: right; border-color: rgba(255,255,255,0.12);">Segment C</td></tr>
               </tbody>
             </table>
           </div>
@@ -981,8 +978,8 @@
       </div>
 
       <div class="footer">
-        <div>Confidential &mdash; Lerian Board</div>
-        <div>April 22, 2026</div>
+        <div>Your footer here</div>
+        <div>Month DD, YYYY</div>
       </div>
     </section>
 
@@ -1005,13 +1002,13 @@
         </div>
 
         <p class="lede" style="margin-top: 40px; max-width: 1400px; color: rgba(25,26,27,0.75);">
-          Not presented &mdash; available for questions. Eight sections: side letters, ESOP, pipeline detail, security, roadmap, org, risks, governance.
+          Not presented &mdash; available for questions. Use appendix sections to store supporting material without cluttering the main flow.
         </p>
       </div>
 
       <div class="footer">
-        <div>Confidential &mdash; Lerian Board</div>
-        <div>April 22, 2026</div>
+        <div>Your footer here</div>
+        <div>Month DD, YYYY</div>
       </div>
     </section>
 
@@ -1021,7 +1018,7 @@
          Meta.right uses static letter pagination (A1 / 8), NOT .page-num.
          Scoped classes: .appendix-card, .appendix-card-title
          ====================================================== -->
-    <section data-label="A1 Side Letters" class="slide">
+    <section data-label="A1 Appendix Content" class="slide">
       <div class="meta">
         <div class="left">
           <span class="wordmark">lerian<span class="dot"></span></span>
@@ -1032,30 +1029,30 @@
 
       <div class="body">
         <div class="eyebrow">Appendix A1</div>
-        <h1 style="margin-top: 28px; max-width: 1600px;">Side letters &mdash; detailed terms.</h1>
+        <h1 style="margin-top: 28px; max-width: 1600px;">Section title &mdash; detailed breakdown.</h1>
 
         <div style="flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-top: 64px; align-items: stretch;">
 
           <div class="appendix-card">
-            <div class="eyebrow" style="margin-bottom: 18px;">Maya Capital</div>
-            <div class="appendix-card-title" style="font-size: 32px;">Board seat + Observer + Major Investor rights locked.</div>
+            <div class="eyebrow" style="margin-bottom: 18px;">Label one</div>
+            <div class="appendix-card-title" style="font-size: 32px;">A short title fits comfortably in this card.</div>
           </div>
 
           <div class="appendix-card">
-            <div class="eyebrow" style="margin-bottom: 18px;">Norte Ventures</div>
-            <div class="appendix-card-title" style="font-size: 28px;">Put option at $1.00 &middot; ROFO &middot; Co-sale rights.</div>
+            <div class="eyebrow" style="margin-bottom: 18px;">Label two</div>
+            <div class="appendix-card-title" style="font-size: 28px;">A medium-length title can carry a bit more detail about the topic.</div>
           </div>
 
           <div class="appendix-card">
-            <div class="eyebrow" style="margin-bottom: 18px;">BTG</div>
-            <div class="appendix-card-title" style="font-size: 24px;">Put vs Company &amp; founders &middot; Credit line match &gt; $200K &middot; Anti-dilution &middot; Tag-along &middot; ICC S&atilde;o Paulo arbitration.</div>
+            <div class="eyebrow" style="margin-bottom: 18px;">Label three</div>
+            <div class="appendix-card-title" style="font-size: 24px;">A longer title covers multiple sub-points &middot; another sub-point &middot; a third dimension &middot; and a closing thought to round it out.</div>
           </div>
         </div>
       </div>
 
       <div class="footer">
-        <div>Confidential &mdash; Lerian Board</div>
-        <div>April 22, 2026</div>
+        <div>Your footer here</div>
+        <div>Month DD, YYYY</div>
       </div>
 
       <!-- Archetype-local classes: prefix with archetype name to avoid collision -->
