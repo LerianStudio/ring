@@ -725,7 +725,8 @@ The JSON provides a stable, predictable contract for programmatic consumers. Unl
       "aiEstimate": "2h",
       "adjusted": "3.0h",
       "calendar": "3.3h",
-      "days": "0.4d",
+      "days": 0.4,
+      "phase": "development",
       "tauraDays": 0,
       "dependencies": ["T-002"],
       "assignee": "Backend | Frontend | DevOps | QA",
@@ -797,7 +798,8 @@ The JSON provides a stable, predictable contract for programmatic consumers. Unl
 | `tasks[].aiEstimate` | string | yes | Original AI estimate from tasks.md. Format: `{number}h` (e.g., `"2h"`, `"4.5h"`) |
 | `tasks[].adjusted` | string | yes | After applying human validation multiplier. Format: `{number}h` (e.g., `"3.0h"`, `"6.75h"`) |
 | `tasks[].calendar` | string | yes | After applying capacity utilization. Format: `{number}h` (e.g., `"3.3h"`, `"7.5h"`) |
-| `tasks[].days` | string | yes | Calendar days (accounting for team size). Format: `{number}d` (e.g., `"0.4d"`, `"1.1d"`) |
+| `tasks[].days` | number | yes | Calendar days for planning arithmetic (accounting for team size). Used as numeric input for cycleCapacity.allocatedDays summation |
+| `tasks[].phase` | string | yes | Execution phase for this task. One of: `"development"`, `"quality"`, `"delivery"`. Planning is implicit and not selectable. Determines tauraDays: development/delivery = 0, quality = 5 or 10 |
 | `tasks[].tauraDays` | number | yes | Taura days added to calendar days. `0` for Development/Delivery tasks, `5` for standard Quality tasks, `10` for Quality tasks involving integration/restructuring |
 | `tasks[].dependencies` | array | yes | Task IDs this task depends on (empty array if none) |
 | `tasks[].assignee` | string | yes | Role assigned to this task |
@@ -823,7 +825,7 @@ The JSON provides a stable, predictable contract for programmatic consumers. Unl
 | `cycleCapacity.grossDays` | number | yes | Total working days in the cycle (team size × working days in period) |
 | `cycleCapacity.bugBufferDays` | number | yes | Days reserved for bug buffer (grossDays × L5_bugBuffer percentage) |
 | `cycleCapacity.availableDays` | number | yes | Gross minus buffer (grossDays − bugBufferDays) |
-| `cycleCapacity.allocatedDays` | number | yes | Sum of all tasks' `days` values (pre-bug-buffer) |
+| `cycleCapacity.allocatedDays` | number | yes | Sum of all numeric `tasks[].days` values (pre-bug-buffer) |
 | `cycleCapacity.slackDays` | number | yes | Available minus allocated (availableDays − allocatedDays). Negative value = over-committed |
 
 ### Validation Rules
@@ -844,6 +846,7 @@ MUST validate the JSON before writing:
 12. **`cycleCapacity` MUST be present** with all 5 fields: `grossDays`, `bugBufferDays`, `availableDays`, `allocatedDays`, `slackDays`
 13. **`cycleCapacity.availableDays` MUST equal `grossDays - bugBufferDays`** — consistency check
 14. **`cycleCapacity.slackDays` MUST equal `availableDays - allocatedDays`** — negative value indicates over-commitment (valid but MUST trigger a risk entry)
+15. **`tasks[].phase` MUST be one of `"development"`, `"quality"`, `"delivery"`** — and `tauraDays` MUST match: `0` for development/delivery, `5` or `10` for quality
 
 ### Continuous Cadence Rules
 
