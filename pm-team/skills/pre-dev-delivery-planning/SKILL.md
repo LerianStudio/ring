@@ -36,6 +36,10 @@ Creating unrealistic timelines creates:
 **Roadmaps answer**: When will working software be delivered to users?
 **Roadmaps never answer**: How fast could we go if everything goes perfectly (that's fantasy).
 
+## Phase Model
+
+Every task passes an implicit Planning phase and is then classified into exactly one execution phase (Development, Quality, or Delivery) based on task signals from tasks.md. Phase classification is automatic — the planner MUST NOT ask the user to classify phases.
+
 ## Mandatory Workflow
 
 | Phase | Activities |
@@ -236,6 +240,7 @@ After completing tasks, track actual multipliers:
 adjusted_hours = ai_estimate × multiplier
 calendar_hours = adjusted_hours ÷ 0.90
 calendar_days = calendar_hours ÷ 8 ÷ team_size
+task_days = calendar_days + taura_days
 
 Where:
 - ai_estimate = from tasks.md (AI-agent-hours)
@@ -243,6 +248,7 @@ Where:
 - 0.90 = capacity utilization (90%)
 - 8 = hours per working day
 - team_size = number of developers
+- taura_days = 0 (Development/Delivery tasks) | 5 (standard Quality tasks) | 10 (Quality tasks for integration/restructuring)
 ```
 
 ### Capacity Utilization: 90% (Fixed)
@@ -720,6 +726,7 @@ The JSON provides a stable, predictable contract for programmatic consumers. Unl
       "adjusted": "3.0h",
       "calendar": "3.3h",
       "days": "0.4d",
+      "tauraDays": 0,
       "dependencies": ["T-002"],
       "assignee": "Backend | Frontend | DevOps | QA",
       "status": "ready | blocked | in_progress | completed",
@@ -750,6 +757,13 @@ The JSON provides a stable, predictable contract for programmatic consumers. Unl
       "mitigation": "Start immediately, daily progress checks"
     }
   ],
+  "cycleCapacity": {
+    "grossDays": 28,
+    "bugBufferDays": 5.6,
+    "availableDays": 22.4,
+    "allocatedDays": 19.2,
+    "slackDays": 3.2
+  },
   "contingencyBuffer": {
     "percentage": 15,
     "days": 4
@@ -763,7 +777,7 @@ The JSON provides a stable, predictable contract for programmatic consumers. Unl
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `version` | string | yes | Schema version for forward compatibility. Currently `"1.0.0"` |
-| `gate` | number | yes | Gate number (9 for Full Track, 4 for Small Track) |
+| `gate` | number | yes | Gate number populated from invocation context (9 for Full Track, 4 for Small Track). MUST NOT be hardcoded — set by the orchestrator skill that invokes delivery planning |
 | `feature` | string | yes | Feature name matching the pre-dev folder name |
 | `generatedAt` | string | yes | ISO-8601 timestamp of generation |
 | `dates.startDate` | string | yes | Project start date (YYYY-MM-DD) |
@@ -784,6 +798,7 @@ The JSON provides a stable, predictable contract for programmatic consumers. Unl
 | `tasks[].adjusted` | string | yes | After applying human validation multiplier. Format: `{number}h` (e.g., `"3.0h"`, `"6.75h"`) |
 | `tasks[].calendar` | string | yes | After applying capacity utilization. Format: `{number}h` (e.g., `"3.3h"`, `"7.5h"`) |
 | `tasks[].days` | string | yes | Calendar days (accounting for team size). Format: `{number}d` (e.g., `"0.4d"`, `"1.1d"`) |
+| `tasks[].tauraDays` | number | yes | Taura days added to calendar days. `0` for Development/Delivery tasks, `5` for standard Quality tasks, `10` for Quality tasks involving integration/restructuring |
 | `tasks[].dependencies` | array | yes | Task IDs this task depends on (empty array if none) |
 | `tasks[].assignee` | string | yes | Role assigned to this task |
 | `tasks[].status` | string | yes | Current status |
@@ -804,6 +819,12 @@ The JSON provides a stable, predictable contract for programmatic consumers. Unl
 | `contingencyBuffer.percentage` | number | yes | Buffer percentage (10-20) |
 | `contingencyBuffer.days` | number | yes | Buffer in calendar days |
 | `confidenceScore` | number | yes | Confidence score (0-100) from scoring rubric |
+| `cycleCapacity` | object | yes | Cycle capacity summary showing how available time is allocated |
+| `cycleCapacity.grossDays` | number | yes | Total working days in the cycle (team size × working days in period) |
+| `cycleCapacity.bugBufferDays` | number | yes | Days reserved for bug buffer (grossDays × L5_bugBuffer percentage) |
+| `cycleCapacity.availableDays` | number | yes | Gross minus buffer (grossDays − bugBufferDays) |
+| `cycleCapacity.allocatedDays` | number | yes | Sum of all tasks' `days` values (pre-bug-buffer) |
+| `cycleCapacity.slackDays` | number | yes | Available minus allocated (availableDays − allocatedDays). Negative value = over-committed |
 
 ### Validation Rules
 
@@ -820,6 +841,9 @@ MUST validate the JSON before writing:
 9. **`milestones[].spillOvers` MUST reference valid task IDs** from `tasks[]`
 10. **`risks[].taskIds` MUST reference valid task IDs** from `tasks[]`
 11. **`velocity.teamSize` MUST be greater than 0** — zero team size causes division-by-zero
+12. **`cycleCapacity` MUST be present** with all 5 fields: `grossDays`, `bugBufferDays`, `availableDays`, `allocatedDays`, `slackDays`
+13. **`cycleCapacity.availableDays` MUST equal `grossDays - bugBufferDays`** — consistency check
+14. **`cycleCapacity.slackDays` MUST equal `availableDays - allocatedDays`** — negative value indicates over-commitment (valid but MUST trigger a risk entry)
 
 ### Continuous Cadence Rules
 
