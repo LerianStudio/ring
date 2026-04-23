@@ -99,7 +99,13 @@ https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards
 
 MUST WebFetch the URL above before any implementation work.
 
-See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-workflow.md) for:
+<fetch_required>
+https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/skills/shared-patterns/standards-workflow.md
+</fetch_required>
+
+MUST WebFetch the standards-workflow.md above. It defines the full loading process (PROJECT_RULES.md + WebFetch), precedence rules, missing/non-compliant handling, and anti-rationalization table.
+
+This covers:
 - Full loading process (PROJECT_RULES.md + WebFetch)
 - Precedence rules
 - Missing/non-compliant handling

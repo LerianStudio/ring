@@ -482,7 +482,13 @@ https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards
 
 WebFetch the appropriate URL based on project language before any test work.
 
-See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-workflow.md) for:
+<fetch_required>
+https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/skills/shared-patterns/standards-workflow.md
+</fetch_required>
+
+MUST WebFetch the standards-workflow.md above. It defines the full loading process (PROJECT_RULES.md + WebFetch), precedence rules, missing/non-compliant handling, and anti-rationalization table.
+
+This covers:
 
 - Full loading process (PROJECT_RULES.md + WebFetch)
 - Precedence rules
@@ -1073,11 +1079,11 @@ I have loaded [golang.md|typescript.md] standards via WebFetch.
 
 **If this acknowledgment is missing → Tests are INVALID.**
 
-See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-workflow.md) for complete loading process.
+Refer to standards-workflow.md (loaded via WebFetch above) for complete loading process.
 
 ## Handling Ambiguous Requirements
 
-See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-workflow.md) for:
+Refer to standards-workflow.md (loaded via WebFetch above) for:
 
 - Missing PROJECT_RULES.md handling (HARD BLOCK)
 - Non-compliant existing code handling

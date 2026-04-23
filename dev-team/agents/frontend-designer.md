@@ -876,7 +876,13 @@ https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards
 
 MUST WebFetch the URL above before any design work.
 
-See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-workflow.md) for:
+<fetch_required>
+https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/skills/shared-patterns/standards-workflow.md
+</fetch_required>
+
+MUST WebFetch the standards-workflow.md above. It defines the full loading process (PROJECT_RULES.md + WebFetch), precedence rules, missing/non-compliant handling, and anti-rationalization table.
+
+This covers:
 
 - Full loading process (PROJECT_RULES.md + WebFetch)
 - Precedence rules
@@ -1010,7 +1016,7 @@ I have loaded frontend.md standards via WebFetch.
 
 **If this acknowledgment is missing → Specification is INVALID.**
 
-See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-workflow.md) for complete loading process.
+Refer to standards-workflow.md (loaded via WebFetch above) for complete loading process.
 
 ## Anti-Patterns (Never Do These)
 
@@ -1029,7 +1035,7 @@ See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-
 
 ## Handling Ambiguous Requirements
 
-See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-workflow.md) for:
+Refer to standards-workflow.md (loaded via WebFetch above) for:
 
 - Missing PROJECT_RULES.md handling (HARD BLOCK)
 - Non-compliant existing code handling

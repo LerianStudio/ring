@@ -163,7 +163,11 @@ I will search for all patterns above using Grep tool.
 **Result:** ❌ FAIL - N FORBIDDEN patterns found
 ```
 
-See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-workflow.md) for complete loading process.
+<fetch_required>
+https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/skills/shared-patterns/standards-workflow.md
+</fetch_required>
+
+MUST WebFetch the standards-workflow.md above. It defines the full loading process (PROJECT_RULES.md + WebFetch), precedence rules, missing/non-compliant handling, and anti-rationalization table.
 
 **OUT OF SCOPE - Do not validate:**
 
@@ -325,7 +329,7 @@ See [shared-patterns/standards-compliance-detection.md](../skills/shared-pattern
 
 **⛔ CRITICAL: You CANNOT proceed without successfully loading standards via WebFetch.**
 
-See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-workflow.md) for:
+Refer to standards-workflow.md (loaded via WebFetch above) for:
 
 - Full loading process (PROJECT_RULES.md + WebFetch)
 - **If WebFetch fails → STOP IMMEDIATELY** (see workflow for error format)
@@ -403,7 +407,7 @@ _After rendering: if no row has Decision = "PROJECT_RULES (override)", append "N
 ```
 
 <gate>
-**Precedence Rules:** See [standards-workflow.md](../skills/shared-patterns/standards-workflow.md) for Ring vs PROJECT_RULES precedence semantics.
+**Precedence Rules:** Refer to standards-workflow.md (loaded via WebFetch above) for Ring vs PROJECT_RULES precedence semantics.
 
 STOP and ask user when neither Ring nor PROJECT_RULES covers the topic.
 </gate>
@@ -412,7 +416,7 @@ STOP and ask user when neither Ring nor PROJECT_RULES covers the topic.
 
 ## Handling Ambiguous Requirements
 
-See [shared-patterns/standards-workflow.md](../skills/shared-patterns/standards-workflow.md) for:
+Refer to standards-workflow.md (loaded via WebFetch above) for:
 
 - Missing PROJECT_RULES.md handling (HARD BLOCK)
 - Non-compliant existing code handling
