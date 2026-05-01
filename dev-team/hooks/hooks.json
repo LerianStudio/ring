@@ -12,6 +12,52 @@
         ]
       }
     ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/session-activity.sh"
+          }
+        ]
+      },
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "if": "Write(*current-cycle.json)",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/report-cycle-state.sh"
+          },
+          {
+            "type": "command",
+            "if": "Write(*current-work.json)",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/report-work-state.sh"
+          },
+          {
+            "type": "command",
+            "if": "Write(*token-log.jsonl)",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/report-token-log.sh"
+          },
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/session-heartbeat.sh"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/user-prompt-submit.sh",
+            "timeout": 2
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "matcher": "startup|resume",
@@ -19,6 +65,10 @@
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/session-start.sh"
+          },
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/session-tracker-start.sh"
           }
         ]
       },
@@ -28,6 +78,10 @@
           {
             "type": "command",
             "command": "${CLAUDE_PLUGIN_ROOT}/hooks/session-start.sh"
+          },
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/session-tracker-end.sh"
           }
         ]
       }

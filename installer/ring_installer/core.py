@@ -51,7 +51,7 @@ MAX_FILE_SIZE = 10 * 1024 * 1024
 
 
 def _build_codex_skill_name_map(
-    components: Dict[str, Dict[str, List[Path]]]
+    components: Dict[str, Dict[str, List[Path]]],
 ) -> tuple[Dict[tuple[str, str, str], str], Dict[str, str]]:
     """
     Build stable Codex skill names for Ring components.
@@ -118,7 +118,9 @@ def _discover_codex_support_dirs(
 ) -> Dict[str, List[Path]]:
     """Discover support directories that Codex-installed skills reference."""
     support_dirs: Dict[str, List[Path]] = {}
-    components = discover_ring_components(ring_path, plugin_names=plugin_names, exclude_plugins=exclude_plugins)
+    components = discover_ring_components(
+        ring_path, plugin_names=plugin_names, exclude_plugins=exclude_plugins
+    )
 
     for plugin_name in components:
         plugin_path = ring_path / plugin_name
@@ -136,7 +138,9 @@ def _discover_codex_support_dirs(
         if skills_dir.exists():
             for skill_subdir in skills_dir.glob("*/*"):
                 if skill_subdir.is_dir() and skill_subdir.name in (
-                    "references", "templates", "examples",
+                    "references",
+                    "templates",
+                    "examples",
                 ):
                     dirs.append(skill_subdir)
 
@@ -610,6 +614,127 @@ def _discover_plugin_components(plugin_path: Path) -> Dict[str, List[Path]]:
     return result
 
 
+def _install_opencode_runtime_plugins(
+    source_path: Path,
+    install_path: Path,
+    options: InstallOptions,
+    result: InstallResult,
+) -> None:
+    """Install OpenCode runtime plugins that are outside Ring components."""
+    from ring_installer.adapters.opencode import OpenCodeAdapter
+    from ring_installer.utils.fs import (
+        backup_existing,
+        create_directory_symlink,
+        ensure_directory,
+    )
+
+    source_plugins_dir = source_path / "platforms" / "opencode" / "plugins"
+    target_plugins_dir = install_path / "plugins"
+    telemetry_plugin_dir_name = "ring-telemetry"
+
+    def register_telemetry_plugin() -> None:
+        warning = OpenCodeAdapter({"install_path": str(install_path)}).register_local_plugin(
+            target_plugins_dir / telemetry_plugin_dir_name,
+            dry_run=options.dry_run,
+            install_path=install_path,
+        )
+        if warning:
+            result.warnings.append(warning)
+
+    if not source_plugins_dir.is_dir():
+        return
+
+    telemetry_plugin_source = source_plugins_dir / telemetry_plugin_dir_name
+
+    if options.link:
+        if options.dry_run:
+            result.warnings.append(
+                f"[DRY RUN] Would symlink {target_plugins_dir} -> {source_plugins_dir}"
+            )
+            result.add_success(source_plugins_dir, target_plugins_dir)
+            register_telemetry_plugin()
+            return
+
+        try:
+            create_directory_symlink(
+                link_path=target_plugins_dir,
+                target_path=source_plugins_dir,
+                force=options.force,
+                backup=options.backup,
+            )
+            result.add_success(source_plugins_dir, target_plugins_dir)
+            result.warnings.append(f"Symlinked {target_plugins_dir} -> {source_plugins_dir}")
+            register_telemetry_plugin()
+        except FileExistsError as e:
+            result.add_skip(
+                source_plugins_dir,
+                target_plugins_dir,
+                f"Runtime plugins symlink skipped: {e}. Use --force to replace existing directory.",
+            )
+        except Exception as e:
+            result.add_failure(
+                source_plugins_dir,
+                target_plugins_dir,
+                f"Runtime plugins symlink failed: {e}",
+                exc_info=e,
+            )
+        return
+
+    if target_plugins_dir.is_symlink():
+        if not options.force:
+            result.add_skip(
+                source_plugins_dir,
+                target_plugins_dir,
+                "Runtime plugins directory is a symlink (use --force to replace)",
+            )
+            return
+        if options.dry_run:
+            result.warnings.append(f"[DRY RUN] Would replace symlink {target_plugins_dir}")
+            result.add_success(source_plugins_dir, target_plugins_dir)
+            register_telemetry_plugin()
+            return
+        target_plugins_dir.unlink()
+
+    for source_file in source_plugins_dir.rglob("*"):
+        if not source_file.is_file():
+            continue
+
+        relative_path = source_file.relative_to(source_plugins_dir)
+        target_file = target_plugins_dir / relative_path
+
+        target_exists = target_file.exists() or target_file.is_symlink()
+        if target_exists and not options.force:
+            result.add_skip(source_file, target_file, "File exists (use --force to overwrite)")
+            continue
+
+        if options.dry_run:
+            result.warnings.append(f"[DRY RUN] Would install {source_file} -> {target_file}")
+            result.add_success(source_file, target_file)
+            if source_file == telemetry_plugin_source / "package.json":
+                register_telemetry_plugin()
+            continue
+
+        try:
+            backup_path = None
+            if target_file.is_symlink():
+                target_file.unlink()
+            elif target_file.exists() and options.backup:
+                backup_path = backup_existing(target_file)
+
+            ensure_directory(target_file.parent)
+            shutil.copy2(source_file, target_file)
+            result.add_success(source_file, target_file, backup_path)
+            if source_file == telemetry_plugin_source / "package.json":
+                register_telemetry_plugin()
+        except Exception as e:
+            result.add_failure(
+                source_file,
+                target_file,
+                f"Runtime plugin install failed: {e}",
+                exc_info=e,
+            )
+
+
 def install(
     source_path: Path,
     targets: List[InstallTarget],
@@ -980,6 +1105,9 @@ def install(
                             f"Symlink creation failed: {e}",
                             exc_info=e,
                         )
+
+        if adapter.platform_id == "opencode":
+            _install_opencode_runtime_plugins(source_path, install_path, options, result)
 
         # Roll back partial target installs when failures occur
         if not options.dry_run and options.rollback_on_failure:

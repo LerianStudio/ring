@@ -13,7 +13,7 @@
 
 ## Overview
 
-Ring is a **Claude Code plugin marketplace** that provides a comprehensive skills library and workflow system with **6 active plugins** (98 skills, 41 agents). It extends Claude Code's capabilities through structured, reusable patterns that enforce proven software engineering practices across the software delivery value chain: Product Planning → Development → Documentation.
+Ring is a **Claude Code plugin marketplace** and multi-platform skills library that provides a comprehensive workflow system with **6 active plugins** (98 skills, 41 agents). It extends AI development tools through structured, reusable patterns that enforce proven software engineering practices across the software delivery value chain: Product Planning → Development → Documentation.
 
 ### Architecture Philosophy
 
@@ -33,7 +33,7 @@ Ring operates on three core principles:
 │  │                          Ring Marketplace                                  │  │
 │  │  ┌──────────────────────┐  ┌──────────────────────┐                       │  │
 │  │  │ ring-default         │  │ ring-dev-team        │                       │  │
-│  │  │ Skills(23) Agents(10)│  │ Skills(36) Agents(15)│                       │  │
+│  │  │ Skills(24) Agents(10)│  │ Skills(36) Agents(15)│                       │  │
 │  │  │ Hooks/Lib            │  │                      │                       │  │
 │  │  └──────────────────────┘  └──────────────────────┘                       │  │
 │  │  ┌──────────────────────┐  ┌──────────────────────┐                       │  │
@@ -66,18 +66,20 @@ ring/                                  # Monorepo root
 └── tw-team/                          # Technical writing: ring-tw-team
 ```
 
+The local installer also transforms this source-of-truth marketplace for Claude Code, Codex, Factory AI, Cursor, Cline, and OpenCode. Platform-specific transformation code lives under `platforms/`, and installer commands live under `installer/`.
+
 ### Active Plugins
 
 _Versions managed in `.claude-plugin/marketplace.json`_
 
-| Plugin               | Description                          | Components                       |
-| -------------------- | ------------------------------------ | -------------------------------- |
-| **ring-default**     | Core skills library                  | 24 skills, 10 agents              |
-| **ring-dev-team**    | Developer agents                     | 36 skills, 15 agents              |
-| **ring-finops-team** | FinOps regulatory compliance         | 7 skills, 3 agents               |
-| **ring-pm-team**     | Product planning workflows           | 16 skills, 4 agents               |
-| **ring-pmo-team**    | PMO portfolio management specialists | 9 skills, 6 agents                |
-| **ring-tw-team**     | Technical writing specialists        | 6 skills, 3 agents                |
+| Plugin               | Version | Description                          | Components                       |
+| -------------------- | ------- | ------------------------------------ | -------------------------------- |
+| **ring-default**     | 1.29.2  | Core skills library                  | 24 skills, 10 agents              |
+| **ring-dev-team**    | 1.64.1  | Developer agents                     | 36 skills, 15 agents              |
+| **ring-pm-team**     | 0.26.0  | Product planning workflows           | 16 skills, 4 agents               |
+| **ring-pmo-team**    | 1.1.3   | PMO portfolio management specialists | 9 skills, 6 agents                |
+| **ring-finops-team** | 0.11.0  | FinOps regulatory compliance         | 7 skills, 3 agents                |
+| **ring-tw-team**     | 0.4.3   | Technical writing specialists        | 6 skills, 3 agents                |
 
 ## Component Hierarchy
 

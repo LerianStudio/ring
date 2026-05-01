@@ -24,6 +24,8 @@ skip_when: |
 related:
   similar: [ring:using-ring]
 
+---
+
 ## Runtime Version Resolution
 
 **IMPORTANT:** Always resolve lib-commons to the latest v5.x tag at runtime:
@@ -32,7 +34,6 @@ gh api repos/LerianStudio/lib-commons/releases/latest --jq '.tag_name'
 ```
 
 Do NOT hardcode specific patch versions (v5.0.2, etc). This ensures your work uses the most current lib-commons features and fixes.
----
 
 # Using Ring Developer Specialists
 

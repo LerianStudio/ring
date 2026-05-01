@@ -17,6 +17,7 @@ from ring_installer.core import _build_codex_skill_name_map, _discover_codex_sup
 # InstallStatus Tests
 # ==============================================================================
 
+
 class TestInstallStatus:
     """Tests for the InstallStatus enum."""
 
@@ -43,6 +44,7 @@ class TestInstallStatus:
 # InstallTarget Tests
 # ==============================================================================
 
+
 class TestInstallTarget:
     """Tests for the InstallTarget dataclass."""
 
@@ -61,9 +63,7 @@ class TestInstallTarget:
         from ring_installer.core import InstallTarget
 
         target = InstallTarget(
-            platform="factory",
-            path=Path("/custom/path"),
-            components=["agents", "skills"]
+            platform="factory", path=Path("/custom/path"), components=["agents", "skills"]
         )
 
         assert target.platform == "factory"
@@ -143,6 +143,7 @@ class TestCodexSupportDiscovery:
 # InstallOptions Tests
 # ==============================================================================
 
+
 class TestInstallOptions:
     """Tests for the InstallOptions dataclass."""
 
@@ -169,7 +170,7 @@ class TestInstallOptions:
             backup=False,
             verbose=True,
             plugin_names=["default"],
-            exclude_plugins=["test"]
+            exclude_plugins=["test"],
         )
 
         assert options.dry_run is True
@@ -184,6 +185,7 @@ class TestInstallOptions:
 # ComponentResult Tests
 # ==============================================================================
 
+
 class TestComponentResult:
     """Tests for the ComponentResult dataclass."""
 
@@ -194,7 +196,7 @@ class TestComponentResult:
         result = ComponentResult(
             source_path=Path("/source/file.md"),
             target_path=Path("/target/file.md"),
-            status=InstallStatus.SUCCESS
+            status=InstallStatus.SUCCESS,
         )
 
         assert result.source_path == Path("/source/file.md")
@@ -212,7 +214,7 @@ class TestComponentResult:
             target_path=Path("/target/file.md"),
             status=InstallStatus.FAILED,
             message="An error occurred",
-            backup_path=Path("/backup/file.md.bak")
+            backup_path=Path("/backup/file.md.bak"),
         )
 
         assert result.message == "An error occurred"
@@ -222,6 +224,7 @@ class TestComponentResult:
 # ==============================================================================
 # InstallResult Tests
 # ==============================================================================
+
 
 class TestInstallResult:
     """Tests for the InstallResult dataclass."""
@@ -345,6 +348,7 @@ class TestInstallResult:
 # load_manifest Tests
 # ==============================================================================
 
+
 class TestLoadManifest:
     """Tests for the load_manifest function."""
 
@@ -355,7 +359,7 @@ class TestLoadManifest:
         manifest_data = {
             "platforms": {
                 "claude": {"install_path": "~/.claude"},
-                "factory": {"install_path": "~/.factory"}
+                "factory": {"install_path": "~/.factory"},
             }
         }
 
@@ -399,11 +403,13 @@ class TestLoadManifest:
         # Check if bundled manifest exists before testing
         try:
             # Try to find the bundled manifest
-            if hasattr(importlib.resources, 'files'):
+            if hasattr(importlib.resources, "files"):
                 # Python 3.9+
-                pkg_files = importlib.resources.files('ring_installer')
-                manifest_file = pkg_files / 'data' / 'platforms.json'
-                manifest_exists = manifest_file.is_file() if hasattr(manifest_file, 'is_file') else False
+                pkg_files = importlib.resources.files("ring_installer")
+                manifest_file = pkg_files / "data" / "platforms.json"
+                manifest_exists = (
+                    manifest_file.is_file() if hasattr(manifest_file, "is_file") else False
+                )
             else:
                 manifest_exists = False
         except Exception:
@@ -419,6 +425,7 @@ class TestLoadManifest:
 # ==============================================================================
 # discover_ring_components Tests
 # ==============================================================================
+
 
 class TestDiscoverRingComponents:
     """Tests for the discover_ring_components function."""
@@ -495,6 +502,7 @@ class TestDiscoverRingComponents:
 # install Tests
 # ==============================================================================
 
+
 class TestInstall:
     """Tests for the install function."""
 
@@ -521,7 +529,7 @@ class TestInstall:
 
         targets = [
             InstallTarget(platform="claude", path=claude_dir),
-            InstallTarget(platform="factory", path=factory_dir)
+            InstallTarget(platform="factory", path=factory_dir),
         ]
         options = InstallOptions(force=True)
 
@@ -566,7 +574,9 @@ class TestInstall:
 
         # hooks.json should NOT exist - it's merged into settings.json instead
         hooks_json = factory_dir / "hooks" / "hooks.json"
-        assert not hooks_json.exists(), "hooks.json should be merged into settings.json, not installed as file"
+        assert not hooks_json.exists(), (
+            "hooks.json should be merged into settings.json, not installed as file"
+        )
 
         # Hook scripts should still be installed
         hooks_dir = factory_dir / "hooks"
@@ -575,8 +585,9 @@ class TestInstall:
         # settings.json should have hooks merged into it
         settings_path = factory_dir / "settings.json"
         assert settings_path.exists(), "settings.json should be created with merged hooks"
-        
+
         import json
+
         settings = json.loads(settings_path.read_text())
         assert "hooks" in settings
         assert settings.get("enableHooks") is True
@@ -654,7 +665,7 @@ class TestInstall:
         target = InstallTarget(
             platform="claude",
             path=tmp_install_dir,
-            components=["agents"]  # Only install agents
+            components=["agents"],  # Only install agents
         )
         options = InstallOptions(force=True)
 
@@ -683,6 +694,7 @@ class TestInstall:
 # ==============================================================================
 # update Tests
 # ==============================================================================
+
 
 class TestUpdate:
     """Tests for the update function."""
@@ -724,6 +736,7 @@ class TestUpdate:
 # ==============================================================================
 # uninstall Tests
 # ==============================================================================
+
 
 class TestUninstall:
     """Tests for the uninstall function."""
@@ -795,6 +808,7 @@ class TestUninstall:
 # list_installed Tests
 # ==============================================================================
 
+
 class TestListInstalled:
     """Tests for the list_installed function."""
 
@@ -846,6 +860,7 @@ class TestListInstalled:
 # UpdateCheckResult Tests
 # ==============================================================================
 
+
 class TestUpdateCheckResult:
     """Tests for the UpdateCheckResult dataclass."""
 
@@ -857,7 +872,7 @@ class TestUpdateCheckResult:
             platform="claude",
             installed_version="1.0.0",
             available_version="1.1.0",
-            update_available=True
+            update_available=True,
         )
 
         assert result.platform == "claude"
@@ -877,7 +892,7 @@ class TestUpdateCheckResult:
             platform="claude",
             installed_version="1.0.0",
             available_version="1.0.0",
-            update_available=False
+            update_available=False,
         )
         assert result.has_changes is False
 
@@ -887,7 +902,7 @@ class TestUpdateCheckResult:
             installed_version="1.0.0",
             available_version="1.1.0",
             update_available=True,
-            changed_files=["file.md"]
+            changed_files=["file.md"],
         )
         assert result.has_changes is True
 
@@ -897,7 +912,7 @@ class TestUpdateCheckResult:
             installed_version="1.0.0",
             available_version="1.1.0",
             update_available=True,
-            new_files=["new.md"]
+            new_files=["new.md"],
         )
         assert result.has_changes is True
 
@@ -907,7 +922,7 @@ class TestUpdateCheckResult:
             installed_version="1.0.0",
             available_version="1.1.0",
             update_available=True,
-            removed_files=["old.md"]
+            removed_files=["old.md"],
         )
         assert result.has_changes is True
 
@@ -916,6 +931,7 @@ class TestUpdateCheckResult:
 # check_updates Tests
 # ==============================================================================
 
+
 class TestCheckUpdates:
     """Tests for the check_updates function."""
 
@@ -923,9 +939,7 @@ class TestCheckUpdates:
         """check_updates() should return results for each target platform."""
         from ring_installer.core import InstallTarget, check_updates
 
-        targets = [
-            InstallTarget(platform="claude", path=tmp_install_dir)
-        ]
+        targets = [InstallTarget(platform="claude", path=tmp_install_dir)]
 
         with patch("ring_installer.core.check_for_updates") as mock_check:
             mock_check.return_value = MagicMock(
@@ -934,7 +948,7 @@ class TestCheckUpdates:
                 update_available=True,
                 changed_files=["file.md"],
                 new_files=[],
-                removed_files=[]
+                removed_files=[],
             )
 
             results = check_updates(tmp_ring_root, targets)
@@ -946,9 +960,7 @@ class TestCheckUpdates:
         """check_updates() should detect when no updates available."""
         from ring_installer.core import InstallTarget, check_updates
 
-        targets = [
-            InstallTarget(platform="claude", path=tmp_install_dir)
-        ]
+        targets = [InstallTarget(platform="claude", path=tmp_install_dir)]
 
         with patch("ring_installer.core.check_for_updates") as mock_check:
             mock_check.return_value = MagicMock(
@@ -957,7 +969,7 @@ class TestCheckUpdates:
                 update_available=False,
                 changed_files=[],
                 new_files=[],
-                removed_files=[]
+                removed_files=[],
             )
 
             results = check_updates(tmp_ring_root, targets)
@@ -968,6 +980,7 @@ class TestCheckUpdates:
 # ==============================================================================
 # update_with_diff Tests
 # ==============================================================================
+
 
 class TestUpdateWithDiff:
     """Tests for the update_with_diff function."""
@@ -1040,6 +1053,7 @@ class TestUpdateWithDiff:
 # SyncResult Tests
 # ==============================================================================
 
+
 class TestSyncResult:
     """Tests for the SyncResult dataclass."""
 
@@ -1060,6 +1074,7 @@ class TestSyncResult:
 # sync_platforms Tests
 # ==============================================================================
 
+
 class TestSyncPlatforms:
     """Tests for the sync_platforms function."""
 
@@ -1070,12 +1085,11 @@ class TestSyncPlatforms:
         claude_dir = tmp_path / "claude"
         claude_dir.mkdir()
 
-        targets = [
-            InstallTarget(platform="claude", path=claude_dir)
-        ]
+        targets = [InstallTarget(platform="claude", path=claude_dir)]
 
-        with patch("ring_installer.core.get_installed_version") as mock_version, \
-             patch("ring_installer.core.get_ring_version") as mock_ring:
+        with patch("ring_installer.core.get_installed_version") as mock_version, patch(
+            "ring_installer.core.get_ring_version"
+        ) as mock_ring:
             mock_version.return_value = "1.0.0"
             mock_ring.return_value = "1.1.0"
 
@@ -1095,7 +1109,7 @@ class TestSyncPlatforms:
 
         targets = [
             InstallTarget(platform="claude", path=claude_dir),
-            InstallTarget(platform="factory", path=factory_dir)
+            InstallTarget(platform="factory", path=factory_dir),
         ]
 
         result = sync_platforms(tmp_ring_root, targets, InstallOptions(force=True))
@@ -1109,6 +1123,7 @@ class TestSyncPlatforms:
 # uninstall_with_manifest Tests
 # ==============================================================================
 
+
 class TestUninstallWithManifest:
     """Tests for the uninstall_with_manifest function."""
 
@@ -1119,16 +1134,11 @@ class TestUninstallWithManifest:
         target = InstallTarget(platform="claude", path=tmp_install_dir)
 
         # Create mock manifest
-        manifest_data = {
-            "files": {
-                "agents/test.md": "hash123"
-            }
-        }
+        manifest_data = {"files": {"agents/test.md": "hash123"}}
 
-        with patch("ring_installer.core.InstallManifest") as mock_manifest_cls, \
-             patch("ring_installer.core.get_manifest_path") as mock_path, \
-             patch("ring_installer.core.safe_remove"):
-
+        with patch("ring_installer.core.InstallManifest") as mock_manifest_cls, patch(
+            "ring_installer.core.get_manifest_path"
+        ) as mock_path, patch("ring_installer.core.safe_remove"):
             mock_manifest = MagicMock()
             mock_manifest.files = manifest_data["files"]
             mock_manifest_cls.load.return_value = mock_manifest
@@ -1145,9 +1155,9 @@ class TestUninstallWithManifest:
 
         target = InstallTarget(platform="claude", path=tmp_install_dir)
 
-        with patch("ring_installer.core.InstallManifest") as mock_manifest_cls, \
-             patch("ring_installer.core.get_manifest_path"):
-
+        with patch("ring_installer.core.InstallManifest") as mock_manifest_cls, patch(
+            "ring_installer.core.get_manifest_path"
+        ):
             mock_manifest_cls.load.return_value = None
 
             result = uninstall_with_manifest([target], InstallOptions(backup=False))
@@ -1167,9 +1177,9 @@ class TestUninstallWithManifest:
         test_file = agents_dir / "test.md"
         test_file.write_text("content")
 
-        with patch("ring_installer.core.InstallManifest") as mock_manifest_cls, \
-             patch("ring_installer.core.get_manifest_path"):
-
+        with patch("ring_installer.core.InstallManifest") as mock_manifest_cls, patch(
+            "ring_installer.core.get_manifest_path"
+        ):
             mock_manifest = MagicMock()
             mock_manifest.files = {"agents/test.md": "hash123"}
             mock_manifest_cls.load.return_value = mock_manifest
@@ -1183,6 +1193,7 @@ class TestUninstallWithManifest:
 # ==============================================================================
 # Integration Tests
 # ==============================================================================
+
 
 class TestIntegration:
     """Integration tests for core functionality."""
@@ -1202,7 +1213,11 @@ class TestIntegration:
 
         # Install
         install_result = install(tmp_ring_root, [target], InstallOptions(force=True))
-        assert install_result.status in [InstallStatus.SUCCESS, InstallStatus.PARTIAL, InstallStatus.SKIPPED]
+        assert install_result.status in [
+            InstallStatus.SUCCESS,
+            InstallStatus.PARTIAL,
+            InstallStatus.SKIPPED,
+        ]
 
         # Update
         update_result = update(tmp_ring_root, [target])
@@ -1230,16 +1245,61 @@ class TestIntegration:
         for platform in platforms:
             assert platform in result.targets
 
+    def test_opencode_install_copies_runtime_plugins(self, tmp_ring_root, tmp_install_dir):
+        """OpenCode install should copy runtime plugins from platforms/opencode/plugins."""
+        from ring_installer.core import InstallOptions, InstallTarget, install
+
+        runtime_plugins = tmp_ring_root / "platforms" / "opencode" / "plugins"
+        telemetry_plugin = runtime_plugins / "ring-telemetry"
+        telemetry_plugin.mkdir(parents=True)
+        (telemetry_plugin / "package.json").write_text(
+            '{"exports":{"./server":"./server.js","./tui":"./tui.js"}}\n'
+        )
+        (telemetry_plugin / "server.js").write_text(
+            "export default { id: 'ring-telemetry', server: async () => ({}) };\n"
+        )
+        (telemetry_plugin / "tui.js").write_text(
+            "export default { id: 'ring-telemetry', tui: async () => {} };\n"
+        )
+
+        target = InstallTarget(platform="opencode", path=tmp_install_dir)
+
+        install(tmp_ring_root, [target], InstallOptions(force=True))
+
+        installed_plugin = tmp_install_dir / "plugins" / "ring-telemetry"
+        assert (installed_plugin / "package.json").exists()
+        assert (installed_plugin / "server.js").exists()
+        assert (installed_plugin / "tui.js").exists()
+        opencode_config = json.loads((tmp_install_dir / "opencode.jsonc").read_text())
+        assert installed_plugin.as_uri() in opencode_config["plugin"]
+
+    def test_opencode_link_symlinks_runtime_plugins(self, tmp_ring_root, tmp_install_dir):
+        """OpenCode link mode should symlink the runtime plugins directory."""
+        from ring_installer.core import InstallOptions, InstallTarget, install
+
+        runtime_plugins = tmp_ring_root / "platforms" / "opencode" / "plugins"
+        telemetry_plugin = runtime_plugins / "ring-telemetry"
+        telemetry_plugin.mkdir(parents=True)
+        (telemetry_plugin / "package.json").write_text(
+            '{"exports":{"./server":"./server.js","./tui":"./tui.js"}}\n'
+        )
+
+        target = InstallTarget(platform="opencode", path=tmp_install_dir)
+
+        install(tmp_ring_root, [target], InstallOptions(force=True, link=True))
+
+        plugins_link = tmp_install_dir / "plugins"
+        assert plugins_link.is_symlink()
+        assert plugins_link.resolve() == runtime_plugins.resolve()
+        opencode_config = json.loads((tmp_install_dir / "opencode.jsonc").read_text())
+        assert (plugins_link / "ring-telemetry").as_uri() in opencode_config["plugin"]
+
     def test_selective_component_install(self, tmp_ring_root, tmp_install_dir):
         """Test installing only specific component types."""
         from ring_installer.core import InstallOptions, InstallTarget, install
 
         # Install only agents
-        target = InstallTarget(
-            platform="claude",
-            path=tmp_install_dir,
-            components=["agents"]
-        )
+        target = InstallTarget(platform="claude", path=tmp_install_dir, components=["agents"])
 
         result = install(tmp_ring_root, [target], InstallOptions(force=True))
 
@@ -1253,10 +1313,7 @@ class TestIntegration:
         from ring_installer.core import InstallOptions, InstallTarget, install
 
         target = InstallTarget(platform="claude", path=tmp_install_dir)
-        options = InstallOptions(
-            force=True,
-            plugin_names=["default"]
-        )
+        options = InstallOptions(force=True, plugin_names=["default"])
 
         result = install(tmp_ring_root, [target], options)
 
@@ -1267,6 +1324,7 @@ class TestIntegration:
 # ==============================================================================
 # Edge Cases and Error Handling
 # ==============================================================================
+
 
 class TestEdgeCases:
     """Tests for edge cases and error handling."""
@@ -1308,7 +1366,7 @@ class TestEdgeCases:
         # Create source with unicode content
         agents_dir = tmp_path / "agents"
         agents_dir.mkdir()
-        (agents_dir / "unicode.md").write_text("# Agent \u4e2d\u6587 \U0001F600", encoding="utf-8")
+        (agents_dir / "unicode.md").write_text("# Agent \u4e2d\u6587 \U0001f600", encoding="utf-8")
 
         target = InstallTarget(platform="claude", path=tmp_install_dir)
 
@@ -1348,6 +1406,7 @@ class TestEdgeCases:
 # ==============================================================================
 # Progress Callback Tests
 # ==============================================================================
+
 
 class TestProgressCallback:
     """Tests for progress callback functionality."""

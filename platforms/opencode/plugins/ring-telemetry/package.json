@@ -1,0 +1,10 @@
+{
+  "name": "ring-telemetry",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./server": "./server.js",
+    "./tui": "./tui.js"
+  }
+}

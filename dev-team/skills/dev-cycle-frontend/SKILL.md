@@ -56,6 +56,18 @@ Fetch URLs above and extract: Agent Modification Verification requirements, Anti
 
 If any condition is true, STOP and report blocker. Cannot proceed without Ring standards.
 
+## Structured Tracking Contract (MANDATORY)
+
+MUST follow the canonical contract in [CLAUDE.md](../../../CLAUDE.md#structured-tracking-json-contract). Create or update `docs/ring-tracking/<workflow>/current-work.json`, maintain canonical `items[]`, and use this JSON as the only Kanban source. Mirror legacy `docs/ring:*/current-cycle.json` or `docs/ring-*/current-cycle.json` only for compatibility/debug. Kanban uses canonical tracking JSON only; tool usage and TodoWrite/TodoRead MUST NOT create cards.
+
+## Telemetry Reporting (MANDATORY)
+
+This is additive reporting, not a formal gate. It MUST NOT block gate execution.
+
+After each gate, task, and subtask, append one JSONL object to `docs/ring:dev-cycle-frontend/token-log.jsonl`.
+
+Each line SHOULD include known fields among `cycle_id`, `cycle_type`, `gate`, `task_id`, `subtask_id`, `agent`, `model`, `input_tokens`, `output_tokens`, `total_tokens`, and `notes`. MUST omit token fields that are unknown. If using an estimate, set `estimated: true`; estimated values are non-authoritative and must not be presented as exact usage. The telemetry hook reads these JSONL writes and reports `cycle.token_report` without adding a gate or changing pass/fail criteria.
+
 ## Overview
 
 The frontend development cycle orchestrator loads tasks/subtasks from PM team output (or manual task files) and executes through 9 gates (Gate 0-8) with **all gates executing per unit** (no deferred execution):

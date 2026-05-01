@@ -857,6 +857,142 @@ class OpenCodeAdapter(PlatformAdapter):
             return jsonc_path
         return json_path
 
+    def _get_plugin_config_path(self, install_path: Optional[Path] = None) -> Path:
+        """Return existing OpenCode config path, preferring jsonc for new files."""
+        base_path = install_path or self.get_install_path()
+        jsonc_path = base_path / "opencode.jsonc"
+        json_path = base_path / "opencode.json"
+
+        if jsonc_path.exists():
+            return jsonc_path
+        if json_path.exists():
+            return json_path
+        return jsonc_path
+
+    def _strip_jsonc_comments(self, content: str) -> str:
+        """Strip JSONC comments without treating comment markers inside strings as comments."""
+        result: List[str] = []
+        in_string = False
+        escape = False
+        line_comment = False
+        block_comment = False
+        i = 0
+
+        while i < len(content):
+            char = content[i]
+            next_char = content[i + 1] if i + 1 < len(content) else ""
+
+            if line_comment:
+                if char == "\n":
+                    line_comment = False
+                    result.append(char)
+                i += 1
+                continue
+
+            if block_comment:
+                if char == "*" and next_char == "/":
+                    block_comment = False
+                    i += 2
+                    continue
+                if char == "\n":
+                    result.append(char)
+                i += 1
+                continue
+
+            if in_string:
+                result.append(char)
+                if escape:
+                    escape = False
+                elif char == "\\":
+                    escape = True
+                elif char == '"':
+                    in_string = False
+                i += 1
+                continue
+
+            if char == '"':
+                in_string = True
+                result.append(char)
+            elif char == "/" and next_char == "/":
+                line_comment = True
+                i += 1
+            elif char == "/" and next_char == "*":
+                block_comment = True
+                i += 1
+            else:
+                result.append(char)
+            i += 1
+
+        return "".join(result)
+
+    def register_local_plugin(
+        self,
+        plugin_path: Path,
+        dry_run: bool = False,
+        install_path: Optional[Path] = None,
+    ) -> Optional[str]:
+        """
+        Register a local OpenCode plugin file or package directory under the config ``plugin`` array.
+
+        Returns:
+            Warning message when registration cannot be completed safely, else None.
+        """
+        config_path = self._get_plugin_config_path(install_path)
+        expanded_plugin_path = Path(plugin_path).expanduser()
+        if not expanded_plugin_path.is_absolute():
+            expanded_plugin_path = expanded_plugin_path.resolve()
+        plugin_uri = expanded_plugin_path.as_uri()
+        config: Dict[str, Any] = {}
+
+        if config_path.exists():
+            try:
+                content = config_path.read_text(encoding="utf-8")
+                if content.strip():
+                    config = json.loads(self._strip_jsonc_comments(content))
+            except Exception as e:
+                return f"Failed to read {config_path}: {e}"
+
+        if not isinstance(config, dict):
+            return f"OpenCode config {config_path} is not a JSON object; plugin not registered"
+
+        plugins = config.get("plugin", [])
+        if not isinstance(plugins, list):
+            return f"OpenCode config {config_path} has non-list 'plugin'; plugin not registered"
+
+        def is_legacy_ring_telemetry_plugin(value: Any) -> bool:
+            if not isinstance(value, str):
+                return False
+            return value == "plugins/ring-telemetry.mjs" or value.endswith("/ring-telemetry.mjs")
+
+        plugins = [plugin for plugin in plugins if not is_legacy_ring_telemetry_plugin(plugin)]
+
+        if plugin_uri in plugins:
+            config["plugin"] = plugins
+            if not dry_run:
+                try:
+                    config_path.parent.mkdir(parents=True, exist_ok=True)
+                    config_path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
+                except Exception as e:
+                    return f"Failed to write {config_path}: {e}"
+            return None
+
+        plugins.append(plugin_uri)
+        config["plugin"] = plugins
+
+        if dry_run:
+            logger.info(
+                "[DRY RUN] Would register OpenCode plugin %s in %s", plugin_uri, config_path
+            )
+            return None
+
+        try:
+            config_path.parent.mkdir(parents=True, exist_ok=True)
+            config_path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
+        except Exception as e:
+            return f"Failed to write {config_path}: {e}"
+
+        return None
+
     def merge_hooks_to_config(
         self,
         hooks_config: Dict[str, Any],

@@ -237,6 +237,81 @@ If any checkbox is no → Fix before committing.
 
 ---
 
+## Structured Tracking JSON Contract
+
+Ring telemetry has two separate planes. They MUST NOT be conflated.
+
+### Activity Plane
+
+The Activity Plane records ad-hoc session behavior from tool telemetry only:
+
+- `session.start`
+- `session.activity`
+- `session.heartbeat`
+- `session.end`
+
+TodoWrite and TodoRead are just tool activity. Tool usage alone MUST NOT create Kanban cards. TodoWrite/TodoRead MUST NOT be converted into structured work, tasks, subtasks, or board lanes.
+
+### Structured Work Plane
+
+The Structured Work Plane records Kanban state only from canonical tracking JSON written by structured Ring workflows.
+
+Canonical path:
+
+```text
+docs/ring-tracking/<workflow>/current-work.json
+```
+
+Canonical event:
+
+```text
+work.state_update
+```
+
+Workflows that want Kanban MUST write the canonical JSON file and maintain `items[]`. Kanban MUST derive only from this structured JSON. Tool usage, session activity, heartbeats, TodoWrite, TodoRead, and legacy cycle files without `items[]` MUST NOT create Kanban cards.
+
+Legacy compatibility paths remain accepted for debug and resume support:
+
+```text
+docs/ring:*/current-cycle.json
+docs/ring-*/current-cycle.json
+```
+
+Legacy `cycle.state_update` remains accepted and stored. It MUST NOT drive Kanban unless the state includes canonical `items[]`; in that case it may be treated as a transitional `work.state_update`.
+
+Canonical example:
+
+```json
+{
+  "workflow": "ring:dev-cycle",
+  "work_id": "cycle-2026-04-28-001",
+  "status": "in_progress",
+  "source_file": "docs/pre-dev/example/tasks.md",
+  "state_path": "docs/ring-tracking/ring:dev-cycle/current-work.json",
+  "legacy_state_path": "docs/ring:dev-cycle/current-cycle.json",
+  "items": [
+    {
+      "id": "task-1",
+      "parent_id": null,
+      "kind": "task",
+      "title": "Implement canonical tracking contract",
+      "status": "in_progress",
+      "lane": "in_progress",
+      "order": 10,
+      "current_gate": "implementation",
+      "progress": { "completed": 1, "total": 3 },
+      "gates": [
+        { "id": "implementation", "status": "in_progress" },
+        { "id": "unit_testing", "status": "pending" }
+      ],
+      "metadata": { "owner": "ring:dev-cycle" }
+    }
+  ]
+}
+```
+
+---
+
 ## Quick Navigation
 
 | Section                                                                                   | Content                                            |
@@ -245,6 +320,7 @@ If any checkbox is no → Fix before committing.
 | [CLAUDE.md ↔ AGENTS.md Sync](#6-claudemd--agentsmd-synchronization-automatic-via-symlink) | Symlink ensures sync                               |
 | [Content Duplication Prevention](#7-content-duplication-prevention-must-check)            | Canonical sources + reference pattern              |
 | [Reviewer-Pool Synchronization](#8-reviewer-pool-synchronization-must-check)              | Seven-file update rule for codereview pool changes |
+| [Structured Tracking JSON Contract](#structured-tracking-json-contract)                   | Activity vs structured work telemetry contract     |
 | [Anti-Rationalization Tables](#anti-rationalization-tables-mandatory-for-all-agents)      | Prevent AI from assuming/skipping                  |
 | [Lexical Salience Guidelines](#lexical-salience-guidelines-mandatory)                     | Selective emphasis for effective prompts           |
 | [Agent Modification Verification](#agent-modification-verification-mandatory)             | Checklist for agent changes                        |
@@ -472,14 +548,16 @@ Ring is a comprehensive skills library and workflow system for AI agents that en
 
 **Active Plugins:**
 
-- **ring-default**: 24 core skills, 10 specialized agents
-- **ring-dev-team**: 36 development skills, 15 developer agents (Backend Go, Backend TypeScript, DevOps, Frontend TypeScript, Frontend Designer, Frontend Engineer, Helm, Performance Reviewer, QA Backend, QA Frontend, SRE, UI Engineer, Prompt Quality Reviewer, Multi-Tenant Reviewer, lib-commons Reviewer)
-- **ring-pm-team**: 16 product management skills, 4 research agents (includes delivery planning + status tracking + Product Designer + Lerian Map Management)
-- **ring-pmo-team**: 9 PMO skills, 6 PMO agents (Portfolio Manager, Resource Planner, Risk Analyst, Governance Specialist, Executive Reporter, Delivery Reporter)
-- **ring-finops-team**: 7 regulatory skills, 3 FinOps agents (Analyzer, Automation, Infrastructure Cost Estimator)
-- **ring-tw-team**: 6 technical writing skills, 3 documentation agents (Functional Writer, API Writer, Docs Reviewer)
+| Plugin | Version | Source | Contents |
+| ------ | ------- | ------ | -------- |
+| **ring-default** | 1.29.2 | `default/` | 24 core skills, 10 specialized agents |
+| **ring-dev-team** | 1.64.1 | `dev-team/` | 36 development skills, 15 developer agents |
+| **ring-pm-team** | 0.26.0 | `pm-team/` | 16 product management skills, 4 research agents |
+| **ring-pmo-team** | 1.1.3 | `pmo-team/` | 9 PMO skills, 6 PMO agents |
+| **ring-finops-team** | 0.11.0 | `finops-team/` | 7 regulatory skills, 3 FinOps agents |
+| **ring-tw-team** | 0.4.3 | `tw-team/` | 6 technical writing skills, 3 documentation agents |
 
-**Note:** Plugin versions are managed in `.claude-plugin/marketplace.json`
+**Note:** Plugin versions are sourced from `.claude-plugin/marketplace.json`.
 
 **Total: 98 skills (24 + 36 + 16 + 9 + 7 + 6) across 6 plugins**
 **Total: 41 agents (10 + 15 + 4 + 6 + 3 + 3) across 6 plugins**
@@ -492,7 +570,9 @@ The architecture uses markdown-based skill definitions with YAML frontmatter, au
 
 See [README.md](README.md#installation) for detailed installation instructions.
 
-**Quick install:** `curl -fsSL https://raw.githubusercontent.com/lerianstudio/ring/main/install-ring.sh | bash`
+**Claude Code install:** use Claude Code's plugin commands: `/plugin marketplace add LerianStudio/ring`, then `/plugin install ring-default@ring` and any other Ring plugins you need.
+
+**Multi-platform/local install:** clone this repository and run `./installer/install-ring.sh`.
 
 ---
 
@@ -510,6 +590,10 @@ See [README.md](README.md#installation) for detailed installation instructions.
 | ring-tw-team     | `tw-team/`     | 6 skills, 3 agents                |
 
 Each plugin contains: `skills/`, `agents/`, `hooks/`
+
+**Installer-supported platforms:** Claude Code, Codex, Factory AI, Cursor, Cline, and OpenCode. Platform transformations live under `platforms/`; installer commands live under `installer/`.
+
+**Archived content:** `.archive/` contains full archived `finance-team`, `ops-team`, and `pmm-team` plugins plus archived single-skill directories for former `dev-team`, `pm-team`, `pmo-team`, and `tw-team` content.
 
 See [README.md](README.md#architecture) for full directory structure.
 
@@ -633,13 +717,14 @@ The system loads at SessionStart (from `default/` plugin):
 
 - Repository: Monorepo marketplace with multiple plugin collections
 - Active plugins: 6 (`ring-default`, `ring-dev-team`, `ring-pm-team`, `ring-pmo-team`, `ring-finops-team`, `ring-tw-team`)
-- Plugin versions: See `.claude-plugin/marketplace.json`
+- Plugin versions: `ring-default` 1.29.2, `ring-dev-team` 1.64.1, `ring-pm-team` 0.26.0, `ring-pmo-team` 1.1.3, `ring-finops-team` 0.11.0, `ring-tw-team` 0.4.3
 - Core plugin: `default/` (24 skills, 10 agents)
 - Developer agents: `dev-team/` (36 skills, 15 agents)
 - Product planning: `pm-team/` (16 skills, 4 agents)
 - PMO specialists: `pmo-team/` (9 skills, 6 agents)
 - FinOps regulatory: `finops-team/` (7 skills, 3 agents)
 - Technical writing: `tw-team/` (6 skills, 3 agents)
+- Installer-supported platforms: Claude Code, Codex, Factory AI, Cursor, Cline, OpenCode
 - Current git branch: `main`
 - Remote: `github.com/LerianStudio/ring`
 

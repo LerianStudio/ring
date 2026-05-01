@@ -476,6 +476,13 @@ if [[ -d "$SCRIPT_DIR/plugin" ]]; then
   echo "  Installed plugin/"
 fi
 
+# Runtime plugins for OpenCode's plugin loader
+if [[ -d "$SCRIPT_DIR/plugins" ]]; then
+  mkdir -p "$TARGET_ROOT/plugins"
+  rsync -a --checksum "$SCRIPT_DIR/plugins/" "$TARGET_ROOT/plugins/"
+  echo "  Installed plugins/"
+fi
+
 # Gate progression validator hook (shell script used by plugin)
 GATE_VALIDATOR="$RING_ROOT/dev-team/hooks/validate-gate-progression.sh"
 if [[ -f "$GATE_VALIDATOR" ]]; then

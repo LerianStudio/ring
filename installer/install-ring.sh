@@ -14,6 +14,46 @@ echo "Ring Multi-Platform Installer"
 echo "================================================"
 echo ""
 
+configure_ring_telemetry_defaults() {
+    local arg
+    for arg in "$@"; do
+        if [[ "$arg" == "--dry-run" ]]; then
+            return 0
+        fi
+    done
+
+    echo "Configuring Ring telemetry defaults..."
+    if ! mkdir -p "$HOME/.ring" 2>/dev/null; then
+        echo "Could not create ~/.ring; skipping telemetry defaults"
+        echo ""
+        return 0
+    fi
+    if [ ! -f "$HOME/.ring/telemetry.json" ]; then
+        if cat > "$HOME/.ring/telemetry.json" <<'EOF'
+{
+  "enabled": true,
+  "endpoint": "http://127.0.0.1:4800",
+  "developer_email": "auto",
+  "heartbeat_interval_writes": 10,
+  "heartbeat_interval_seconds": 300,
+  "activity_interval_tools": 5,
+  "activity_interval_seconds": 30,
+  "debug": false,
+  "api_token": "",
+  "allow_remote_http": false
+}
+EOF
+        then
+            echo "Created ~/.ring/telemetry.json"
+        else
+            echo "Could not write ~/.ring/telemetry.json; skipping telemetry defaults"
+        fi
+    else
+        echo "Existing ~/.ring/telemetry.json preserved"
+    fi
+    echo ""
+}
+
 # Colors (if terminal supports them)
 if [[ -t 1 ]] && command -v tput &>/dev/null; then
     GREEN=$(tput setaf 2)
@@ -110,10 +150,15 @@ if [ $# -gt 0 ]; then
     # Known subcommands are passed through as-is.
     cd "$RING_ROOT"
     case "$1" in
-        install|update|rebuild|check|sync|uninstall|list|detect|platforms)
+        install|update|rebuild|sync)
+            configure_ring_telemetry_defaults "$@"
+            exec "$PYTHON_CMD" -m installer.ring_installer "$@"
+            ;;
+        check|uninstall|list|detect|platforms)
             exec "$PYTHON_CMD" -m installer.ring_installer "$@"
             ;;
         *)
+            configure_ring_telemetry_defaults install "$@"
             exec "$PYTHON_CMD" -m installer.ring_installer install "$@"
             ;;
     esac
@@ -221,6 +266,7 @@ fi
 echo ""
 echo "${GREEN}=== Installing ===${RESET}"
 cd "$RING_ROOT"
+configure_ring_telemetry_defaults install --platforms "$PLATFORMS" "${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}"
 "$PYTHON_CMD" -m installer.ring_installer install --platforms "$PLATFORMS" "${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}"
 
 echo ""

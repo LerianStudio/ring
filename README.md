@@ -109,7 +109,7 @@ Ring solves this by:
 - `ring:executive-reporter` - Executive dashboards and stakeholder communications
 - `ring:delivery-reporter` - Delivery status reporting and tracking
 
-_Plugin versions are managed in `.claude-plugin/marketplace.json`_
+_Plugin versions are managed in `.claude-plugin/marketplace.json`._ Current active versions: `ring-default` 1.29.2, `ring-dev-team` 1.64.1, `ring-pm-team` 0.26.0, `ring-pmo-team` 1.1.3, `ring-finops-team` 0.11.0, and `ring-tw-team` 0.4.3.
 
 ### 📦 Archived Plugins
 
@@ -123,6 +123,8 @@ The following plugins have been archived and are not actively maintained. They r
 
 _To restore an archived plugin, move its folder from `.archive/` to the root directory and register it in `marketplace.json`._
 
+Additional archived single-skill directories are kept under `.archive/dev-team`, `.archive/pm-team`, `.archive/pmo-team`, and `.archive/tw-team` for historical reference.
+
 ## 🖥️ Supported Platforms
 
 Ring works across multiple AI development platforms:
@@ -130,16 +132,20 @@ Ring works across multiple AI development platforms:
 | Platform        | Format      | Status             | Features                        |
 | --------------- | ----------- | ------------------ | ------------------------------- |
 | **Claude Code** | Native      | ✅ Source of truth | Skills, agents, hooks           |
-| **Factory AI**  | Transformed | ✅ Supported       | Droids, skills                  |
+| **Codex**       | Transformed | ✅ Supported       | Skills                          |
+| **Factory AI**  | Transformed | ✅ Supported       | Droids, skills, hooks           |
 | **Cursor**      | Transformed | ✅ Supported       | Skills, agents                  |
 | **Cline**       | Transformed | ✅ Supported       | Prompts                         |
+| **OpenCode**    | Transformed | ✅ Supported       | Skills, agents, commands        |
 
 **Transformation Notes:**
 
 - Claude Code receives Ring content in its native format
+- Codex receives skills-only output
 - Factory AI: `agents` → `droids` terminology
 - Cursor: Skills → ~/.cursor/skills/, Agents → ~/.cursor/agents/
 - Cline: All content → structured prompts
+- OpenCode: Skills, agents, and commands install under `~/.config/opencode`; file hooks are not supported
 
 **Platform-Specific Guides:**
 
@@ -147,17 +153,26 @@ See the [installer README](installer/) for platform-specific setup and transform
 
 ## 🚀 Quick Start
 
-### Multi-Platform Installation (Recommended)
+### Claude Code Plugin Marketplace (Recommended for Claude Code)
+
+Claude Code installs Ring through its native plugin marketplace flow. In Claude Code, run:
+
+```text
+/plugin marketplace add LerianStudio/ring
+/plugin install ring-default@ring
+/plugin install ring-dev-team@ring
+```
+
+Install the other marketplace plugins the same way when needed: `ring-pm-team@ring`, `ring-pmo-team@ring`, `ring-finops-team@ring`, and `ring-tw-team@ring`.
+
+### Multi-Platform / Local Installation
 
 The Ring installer automatically detects installed platforms and transforms content appropriately.
 
 **Linux/macOS/Git Bash:**
 
 ```bash
-# Interactive installer (auto-detects platforms)
-curl -fsSL https://raw.githubusercontent.com/lerianstudio/ring/main/install-ring.sh | bash
-
-# Or clone and run locally
+# Clone and run locally
 git clone https://github.com/lerianstudio/ring.git ~/ring
 cd ~/ring
 ./installer/install-ring.sh
@@ -166,10 +181,7 @@ cd ~/ring
 **Windows PowerShell:**
 
 ```powershell
-# Interactive installer (auto-detects platforms)
-irm https://raw.githubusercontent.com/lerianstudio/ring/main/install-ring.ps1 | iex
-
-# Or clone and run locally
+# Clone and run locally
 git clone https://github.com/lerianstudio/ring.git $HOME\ring
 cd $HOME\ring
 .\installer\install-ring.ps1
@@ -185,6 +197,9 @@ Install to specific platforms without the interactive menu:
 
 # Install to Factory AI only (droids format)
 ./installer/install-ring.sh install --platforms factory
+
+# Install to OpenCode only
+./installer/install-ring.sh install --platforms opencode
 
 # Install to multiple platforms
 ./installer/install-ring.sh install --platforms claude,cursor,cline
@@ -218,15 +233,6 @@ Install to specific platforms without the interactive menu:
 ./installer/install-ring.sh detect
 ```
 
-### Claude Code Plugin Marketplace
-
-For Claude Code users, you can also install from the marketplace:
-
-- Open Claude Code
-- Go to Settings → Plugins
-- Search for "ring"
-- Click Install
-
 ### Manual Installation (Claude Code only)
 
 ```bash
@@ -252,8 +258,8 @@ When you start a new Claude Code session with Ring installed, you'll see:
 - ring:using-ring (Check for skills BEFORE any task)
 - ring:test-driven-development (RED-GREEN-REFACTOR cycle)
 - ring:systematic-debugging (4-phase root cause analysis)
-- ring:verification-before-completion (Evidence before claims)
-... and 89 more skills
+- ring:codereview (10 parallel reviewers)
+... and 94 more active skills
 ```
 
 ## 🎯 Core Skills
@@ -285,14 +291,14 @@ Phase 3: Test hypothesis (one at a time)
 Phase 4: Implement fix (with test)
 ```
 
-#### 4. **ring:verification-before-completion** - Prove It Works
+#### 4. **ring:codereview** - Ten Reviewers, One Parallel Gate
 
 ```
-Run command → Paste output → Then claim
-No "should work" → Only "does work" with proof
+Dispatch 10 reviewers → Aggregate findings → Fix Critical/High → Re-run
+No sequential review → One parallel gate with evidence-backed findings
 ```
 
-## 📚 All 96 Skills (Across 6 Plugins)
+## 📚 All 98 Skills (Across 6 Plugins)
 
 ### Core Skills (ring-default plugin - 24 skills)
 
@@ -309,7 +315,7 @@ No "should work" → Only "does work" with proof
 - `ring:interview-me` - Proactive requirements gathering through structured interview
 - `ring:write-plan` - Zero-context implementation plans
 - `ring:execute-plan` - Batch execution with checkpoints
-- `ring:codereview` - **Parallel 8-reviewer dispatch** with severity-based handling
+- `ring:codereview` - **Parallel 10-reviewer dispatch** with severity-based handling
 - `ring:pr-review-multi-source` - **PR-aware multi-source review** with CodeRabbit/CI comment integration
 - `ring:worktree` - Isolated development
 - `ring:commit` - Smart commit organization with atomic grouping, conventional commits, and trailers
@@ -474,8 +480,8 @@ Claude: I'm using the ring:brainstorm skill to design this feature...
         [Structured exploration of requirements]
 Claude: I'm using ring:test-driven-development to implement...
         [RED-GREEN-REFACTOR cycle for each component]
-Claude: I'm using ring:verification-before-completion to confirm...
-        [Runs tests, shows actual output]
+Claude: I'm using ring:codereview to confirm implementation quality...
+        [Runs tests, dispatches reviewers, shows actual output]
 ```
 
 ### Fixing a Bug

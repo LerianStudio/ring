@@ -15,6 +15,18 @@ skip_when: |
 
 Analyzes existing codebase against Ring/Lerian standards and generates refactoring tasks compatible with ring:dev-cycle.
 
+## Structured Tracking Contract (MANDATORY)
+
+MUST follow the canonical contract in [CLAUDE.md](../../../CLAUDE.md#structured-tracking-json-contract). Create or update `docs/ring-tracking/<workflow>/current-work.json`, maintain canonical `items[]`, and use this JSON as the only Kanban source. Mirror legacy `docs/ring:*/current-cycle.json` or `docs/ring-*/current-cycle.json` only for compatibility/debug. Kanban uses canonical tracking JSON only; tool usage and TodoWrite/TodoRead MUST NOT create cards.
+
+## Telemetry Reporting (MANDATORY)
+
+This is additive reporting, not a formal gate. It MUST NOT block refactor analysis or task generation.
+
+After each analysis batch, task generation step, and handoff-relevant subtask, append one JSONL object to `docs/ring:dev-refactor/token-log.jsonl`.
+
+Each line SHOULD include known fields among `cycle_id`, `cycle_type`, `gate`, `task_id`, `subtask_id`, `agent`, `model`, `input_tokens`, `output_tokens`, `total_tokens`, and `notes`. MUST omit token fields that are unknown. If using an estimate, set `estimated: true`; estimated values are non-authoritative and must not be presented as exact usage. The telemetry hook reads these JSONL writes and reports `cycle.token_report` without adding a gate or changing pass/fail criteria.
+
 ---
 
 ## ⛔ MANDATORY GAP PRINCIPLE (NON-NEGOTIABLE)
@@ -1159,5 +1171,3 @@ artifacts:
 traceability:
   Ring Standard → Agent Report → FINDING-XXX → REFACTOR-XXX → Implementation
 ```
-
-

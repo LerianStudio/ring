@@ -103,6 +103,10 @@ output_schema:
 
 # Multi-Tenant Development Cycle
 
+## Structured Tracking Contract (MANDATORY)
+
+MUST follow the canonical contract in [CLAUDE.md](../../../CLAUDE.md#structured-tracking-json-contract). Create or update `docs/ring-tracking/<workflow>/current-work.json`, maintain canonical `items[]`, and use this JSON as the only Kanban source. Mirror legacy `docs/ring:*/current-cycle.json` or `docs/ring-*/current-cycle.json` only for compatibility/debug. Kanban uses canonical tracking JSON only; tool usage and TodoWrite/TodoRead MUST NOT create cards.
+
 <cannot_skip>
 
 ## CRITICAL: This Skill ORCHESTRATES. Agents IMPLEMENT.

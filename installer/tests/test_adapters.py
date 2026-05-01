@@ -4,6 +4,7 @@ Tests for platform adapters.
 Tests ClaudeAdapter, FactoryAdapter, and the get_adapter() factory function.
 """
 
+import json
 from pathlib import Path
 
 import pytest
@@ -25,6 +26,7 @@ from ring_installer.adapters.codex import CodexAdapter as ImportedCodexAdapter
 # ==============================================================================
 # Tests for get_adapter() factory function
 # ==============================================================================
+
 
 class TestGetAdapter:
     """Tests for the get_adapter() factory function."""
@@ -83,11 +85,13 @@ class TestGetAdapter:
 # Tests for register_adapter()
 # ==============================================================================
 
+
 class TestRegisterAdapter:
     """Tests for custom adapter registration."""
 
     def test_register_custom_adapter(self):
         """register_adapter() should add a custom adapter to the registry."""
+
         class CustomAdapter(PlatformAdapter):
             platform_id = "custom"
             platform_name = "Custom Platform"
@@ -118,6 +122,7 @@ class TestRegisterAdapter:
 
     def test_register_adapter_requires_platform_adapter_subclass(self):
         """register_adapter() should reject non-PlatformAdapter classes."""
+
         class NotAnAdapter:
             pass
 
@@ -130,6 +135,7 @@ class TestRegisterAdapter:
 # ==============================================================================
 # Tests for list_platforms()
 # ==============================================================================
+
 
 class TestListPlatforms:
     """Tests for the list_platforms() function."""
@@ -186,7 +192,9 @@ class TestCodexAdapter:
         result = adapter.get_flat_filename("sample-agent.md", "agent", "default")
         assert result == "ring-default-sample-agent"
 
-    def test_transform_skill_rewrites_frontmatter_and_references(self, adapter, sample_skill_content):
+    def test_transform_skill_rewrites_frontmatter_and_references(
+        self, adapter, sample_skill_content
+    ):
         result = adapter.transform_skill(
             sample_skill_content,
             {
@@ -221,12 +229,16 @@ class TestCodexAdapter:
                 "codex_alias_map": {},
             },
         )
-        assert "../../ring/dev-team/skills/shared-patterns/" in result or "../skills/shared-patterns/" not in result
+        assert (
+            "../../ring/dev-team/skills/shared-patterns/" in result
+            or "../skills/shared-patterns/" not in result
+        )
 
 
 # ==============================================================================
 # Tests for ClaudeAdapter (passthrough)
 # ==============================================================================
+
 
 class TestClaudeAdapter:
     """Tests for ClaudeAdapter passthrough functionality."""
@@ -312,6 +324,7 @@ class TestClaudeAdapter:
 # Tests for FactoryAdapter (agent -> droid)
 # ==============================================================================
 
+
 class TestFactoryAdapter:
     """Tests for FactoryAdapter terminology transformation."""
 
@@ -353,7 +366,9 @@ class TestFactoryAdapter:
         # (except in ring: references which use a different pattern)
         assert "Droid" in result or "droid" in result
 
-    def test_transform_agent_frontmatter_preserves_subagent_type(self, adapter, minimal_agent_content):
+    def test_transform_agent_frontmatter_preserves_subagent_type(
+        self, adapter, minimal_agent_content
+    ):
         """transform_agent() should preserve subagent_type for Factory Task tool."""
         content = """---
 name: test-agent
@@ -496,7 +511,7 @@ Use WebFetch and mcp__context7__resolve-library-id.
 
         hook_entry = {
             "matcher": "startup",
-            "hooks": [{"type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/test.sh"}]
+            "hooks": [{"type": "command", "command": "${CLAUDE_PLUGIN_ROOT}/hooks/test.sh"}],
         }
 
         result = adapter._transform_hook_entry(hook_entry, install_path)
@@ -577,7 +592,7 @@ Read-only droid.
         """get_settings_path() should return path to settings.json."""
         monkeypatch.setenv("HOME", str(tmp_path))
         adapter._install_path = None  # Reset cached path
-        
+
         settings_path = adapter.get_settings_path()
         assert settings_path.name == "settings.json"
         assert ".factory" in str(settings_path)
@@ -586,11 +601,11 @@ Read-only droid.
         """merge_hooks_to_settings() should not write in dry_run mode."""
         monkeypatch.setenv("HOME", str(tmp_path))
         adapter._install_path = None  # Reset cached path
-        
+
         # Create .factory directory
         factory_dir = tmp_path / ".factory"
         factory_dir.mkdir()
-        
+
         hooks_config = {
             "hooks": {
                 "SessionStart": [
@@ -598,10 +613,10 @@ Read-only droid.
                 ]
             }
         }
-        
+
         result = adapter.merge_hooks_to_settings(hooks_config, dry_run=True)
         assert result is True
-        
+
         # settings.json should not exist in dry run
         settings_path = factory_dir / "settings.json"
         assert not settings_path.exists()
@@ -609,13 +624,14 @@ Read-only droid.
     def test_merge_hooks_to_settings_creates_new(self, adapter, tmp_path, monkeypatch):
         """merge_hooks_to_settings() should create settings.json if it doesn't exist."""
         import json
+
         monkeypatch.setenv("HOME", str(tmp_path))
         adapter._install_path = None  # Reset cached path
-        
+
         # Create .factory directory
         factory_dir = tmp_path / ".factory"
         factory_dir.mkdir()
-        
+
         hooks_config = {
             "hooks": {
                 "SessionStart": [
@@ -623,14 +639,14 @@ Read-only droid.
                 ]
             }
         }
-        
+
         result = adapter.merge_hooks_to_settings(hooks_config, dry_run=False)
         assert result is True
-        
+
         # Verify settings.json was created
         settings_path = factory_dir / "settings.json"
         assert settings_path.exists()
-        
+
         settings = json.loads(settings_path.read_text())
         assert settings["enableHooks"] is True
         assert "SessionStart" in settings["hooks"]
@@ -638,24 +654,25 @@ Read-only droid.
     def test_merge_hooks_to_settings_merges_with_existing(self, adapter, tmp_path, monkeypatch):
         """merge_hooks_to_settings() should merge with existing settings."""
         import json
+
         monkeypatch.setenv("HOME", str(tmp_path))
         adapter._install_path = None  # Reset cached path
-        
+
         # Create .factory directory with existing settings
         factory_dir = tmp_path / ".factory"
         factory_dir.mkdir()
-        
+
         existing_settings = {
             "model": "claude-opus",
             "hooks": {
                 "UserPromptSubmit": [
                     {"hooks": [{"type": "command", "command": "existing-hook.sh"}]}
                 ]
-            }
+            },
         }
         settings_path = factory_dir / "settings.json"
         settings_path.write_text(json.dumps(existing_settings))
-        
+
         hooks_config = {
             "hooks": {
                 "SessionStart": [
@@ -663,10 +680,10 @@ Read-only droid.
                 ]
             }
         }
-        
+
         result = adapter.merge_hooks_to_settings(hooks_config, dry_run=False)
         assert result is True
-        
+
         # Verify settings were merged
         settings = json.loads(settings_path.read_text())
         assert settings["model"] == "claude-opus"  # Original preserved
@@ -678,6 +695,7 @@ Read-only droid.
 # ==============================================================================
 # Tests for OpenCodeAdapter (near-native format)
 # ==============================================================================
+
 
 class TestOpenCodeAdapter:
     """Tests for OpenCodeAdapter (OhMyOpenCode) platform support."""
@@ -826,10 +844,97 @@ args: <target>
         config_path = opencode_dir / "opencode.json"
         assert not config_path.exists()
 
+    def test_register_local_plugin_creates_jsonc(self, adapter, tmp_path):
+        """register_local_plugin() should create opencode.jsonc when no config exists."""
+        install_path = tmp_path / "opencode"
+        plugin_path = install_path / "plugins" / "ring-telemetry"
+
+        warning = adapter.register_local_plugin(plugin_path, install_path=install_path)
+
+        assert warning is None
+        config = json.loads((install_path / "opencode.jsonc").read_text())
+        assert config["plugin"] == [plugin_path.as_uri()]
+
+    def test_register_local_plugin_appends_and_preserves_config(self, adapter, tmp_path):
+        """register_local_plugin() should preserve fields and existing plugin entries."""
+        install_path = tmp_path / "opencode"
+        install_path.mkdir()
+        existing_uri = "file:///existing-plugin"
+        plugin_path = install_path / "plugins" / "ring-telemetry"
+        (install_path / "opencode.jsonc").write_text(
+            json.dumps({"model": "anthropic/test", "plugin": [existing_uri]}),
+            encoding="utf-8",
+        )
+
+        warning = adapter.register_local_plugin(plugin_path, install_path=install_path)
+
+        assert warning is None
+        config = json.loads((install_path / "opencode.jsonc").read_text())
+        assert config["model"] == "anthropic/test"
+        assert config["plugin"] == [existing_uri, plugin_path.as_uri()]
+
+    def test_register_local_plugin_does_not_duplicate(self, adapter, tmp_path):
+        """register_local_plugin() should not duplicate an existing plugin URI."""
+        install_path = tmp_path / "opencode"
+        install_path.mkdir()
+        plugin_path = install_path / "plugins" / "ring-telemetry"
+        (install_path / "opencode.jsonc").write_text(
+            json.dumps({"plugin": [plugin_path.as_uri()]}),
+            encoding="utf-8",
+        )
+
+        warning = adapter.register_local_plugin(plugin_path, install_path=install_path)
+
+        assert warning is None
+        config = json.loads((install_path / "opencode.jsonc").read_text())
+        assert config["plugin"] == [plugin_path.as_uri()]
+
+    def test_register_local_plugin_uses_existing_json(self, adapter, tmp_path):
+        """register_local_plugin() should prefer existing opencode.json over new jsonc."""
+        install_path = tmp_path / "opencode"
+        install_path.mkdir()
+        plugin_path = install_path / "plugins" / "ring-telemetry"
+        (install_path / "opencode.json").write_text('{"theme": "dark"}', encoding="utf-8")
+
+        warning = adapter.register_local_plugin(plugin_path, install_path=install_path)
+
+        assert warning is None
+        assert not (install_path / "opencode.jsonc").exists()
+        config = json.loads((install_path / "opencode.json").read_text())
+        assert config["theme"] == "dark"
+        assert config["plugin"] == [plugin_path.as_uri()]
+
+    def test_register_local_plugin_dry_run_does_not_write(self, adapter, tmp_path):
+        """register_local_plugin() should not write config during dry_run."""
+        install_path = tmp_path / "opencode"
+        plugin_path = install_path / "plugins" / "ring-telemetry"
+
+        warning = adapter.register_local_plugin(
+            plugin_path, dry_run=True, install_path=install_path
+        )
+
+        assert warning is None
+        assert not (install_path / "opencode.jsonc").exists()
+
+    def test_register_local_plugin_warns_for_non_list_plugin(self, adapter, tmp_path):
+        """register_local_plugin() should not overwrite a non-list plugin field."""
+        install_path = tmp_path / "opencode"
+        install_path.mkdir()
+        plugin_path = install_path / "plugins" / "ring-telemetry"
+        (install_path / "opencode.jsonc").write_text('{"plugin": "bad"}', encoding="utf-8")
+
+        warning = adapter.register_local_plugin(plugin_path, install_path=install_path)
+
+        assert warning is not None
+        assert "non-list 'plugin'" in warning
+        config = json.loads((install_path / "opencode.jsonc").read_text())
+        assert config["plugin"] == "bad"
+
 
 # ==============================================================================
 # Tests for PlatformAdapter Base Class
 # ==============================================================================
+
 
 class TestPlatformAdapterBase:
     """Tests for PlatformAdapter base class methods."""
@@ -913,6 +1018,7 @@ invalid frontmatter without closing
 # ==============================================================================
 # Parametrized Tests for All Adapters
 # ==============================================================================
+
 
 @pytest.mark.parametrize("platform", SUPPORTED_PLATFORMS)
 class TestAllAdaptersCommon:

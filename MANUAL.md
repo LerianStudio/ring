@@ -2,6 +2,8 @@
 
 Quick reference guide for the Ring skills library and workflow system. This monorepo provides 6 plugins with 98 skills and 41 agents for enforcing proven software engineering practices across the entire software delivery value chain.
 
+Current plugin versions are sourced from `.claude-plugin/marketplace.json`: `ring-default` 1.29.2, `ring-dev-team` 1.64.1, `ring-pm-team` 0.26.0, `ring-pmo-team` 1.1.3, `ring-finops-team` 0.11.0, and `ring-tw-team` 0.4.3.
+
 ---
 
 ## 🏗️ Architecture Overview
@@ -77,6 +79,8 @@ Ring is auto-loaded at session start. Two ways to invoke Ring capabilities:
 Skills (98) are the primary invocation mechanism for Ring. They can be invoked directly by users (`Skill tool: "ring:skill-name"`) or applied automatically by Claude Code when it detects they're applicable. They handle testing, debugging, verification, planning, code review enforcement, and more.
 
 Examples: ring:test-driven-development, ring:systematic-debugging, ring:codereview, ring:production-readiness-audit (44-dimension audit, up to 10 explorers per batch, incremental report 0-430, max 440 with multi-tenant; see [default/skills/production-readiness-audit/SKILL.md](default/skills/production-readiness-audit/SKILL.md)), etc.
+
+Installer-supported platforms: Claude Code, Codex, Factory AI, Cursor, Cline, and OpenCode.
 
 ### Skill Selection Criteria
 
@@ -399,6 +403,10 @@ Consolidated report
 | Variable                | Default | Purpose                                                |
 | ----------------------- | ------- | ------------------------------------------------------ |
 | `CLAUDE_PLUGIN_ROOT`    | (auto)  | Path to installed plugin directory                     |
+
+### Installer Commands
+
+The multi-platform installer lives under `installer/` and supports `install`, `update`, `rebuild`, `check`, `sync`, `uninstall`, `list`, `detect`, and `platforms` commands. Platform transformations live under `platforms/`.
 
 ---
 
