@@ -108,119 +108,51 @@ The following plugins have been archived and are not actively maintained. They r
 
 _To restore an archived plugin, move its folder from `.archive/` to the root directory and register it in `marketplace.json`._
 
-## 🖥️ Supported Platforms
+## 🖥️ Supported Platform
 
-Ring works across multiple AI development platforms:
+Ring is currently distributed as a **Claude Code plugin marketplace**.
+The skills remain agent-agnostic, but the legacy multi-platform installer that copied and transformed assets for Factory AI, Cursor, Cline, Codex, and OpenCode has been removed.
 
-| Platform        | Format      | Status             | Features                        |
-| --------------- | ----------- | ------------------ | ------------------------------- |
-| **Claude Code** | Native      | ✅ Source of truth | Skills, agents, hooks           |
-| **Factory AI**  | Transformed | ✅ Supported       | Droids, skills                  |
-| **Cursor**      | Transformed | ✅ Supported       | Skills, agents                  |
-| **Cline**       | Transformed | ✅ Supported       | Prompts                         |
-
-**Transformation Notes:**
-
-- Claude Code receives Ring content in its native format
-- Factory AI: `agents` → `droids` terminology
-- Cursor: Skills → ~/.cursor/skills/, Agents → ~/.cursor/agents/
-- Cline: All content → structured prompts
-
-**Platform-Specific Guides:**
-
-See the [installer README](installer/) for platform-specific setup and transformation details.
+| Platform        | Format | Status             | Features              |
+| --------------- | ------ | ------------------ | --------------------- |
+| **Claude Code** | Native | ✅ Source of truth | Skills, agents, hooks |
 
 ## 🚀 Quick Start
 
-### Multi-Platform Installation (Recommended)
-
-The Ring installer automatically detects installed platforms and transforms content appropriately.
-
-**Linux/macOS/Git Bash:**
-
-```bash
-# Interactive installer (auto-detects platforms)
-curl -fsSL https://raw.githubusercontent.com/lerianstudio/ring/main/install-ring.sh | bash
-
-# Or clone and run locally
-git clone https://github.com/lerianstudio/ring.git ~/ring
-cd ~/ring
-./installer/install-ring.sh
-```
-
-**Windows PowerShell:**
-
-```powershell
-# Interactive installer (auto-detects platforms)
-irm https://raw.githubusercontent.com/lerianstudio/ring/main/install-ring.ps1 | iex
-
-# Or clone and run locally
-git clone https://github.com/lerianstudio/ring.git $HOME\ring
-cd $HOME\ring
-.\installer\install-ring.ps1
-```
-
-### Direct Platform Installation
-
-Install to specific platforms without the interactive menu:
-
-```bash
-# Install to Claude Code only (native format)
-./installer/install-ring.sh install --platforms claude
-
-# Install to Factory AI only (droids format)
-./installer/install-ring.sh install --platforms factory
-
-# Install to multiple platforms
-./installer/install-ring.sh install --platforms claude,cursor,cline
-
-# Install to all detected platforms
-./installer/install-ring.sh install --platforms auto
-
-# Dry run (preview changes without installing)
-./installer/install-ring.sh install --platforms auto --dry-run
-```
-
-### Installer Commands
-
-```bash
-# List installed platforms and versions
-./installer/install-ring.sh list
-
-# Update existing installation
-./installer/install-ring.sh update
-
-# Check for available updates
-./installer/install-ring.sh check
-
-# Sync (update only changed files)
-./installer/install-ring.sh sync
-
-# Uninstall from specific platform
-./installer/install-ring.sh uninstall --platforms cursor
-
-# Detect available platforms
-./installer/install-ring.sh detect
-```
-
 ### Claude Code Plugin Marketplace
 
-For Claude Code users, you can also install from the marketplace:
+```bash
+# Add the Ring marketplace
+claude plugin marketplace add lerianstudio/ring
+
+# Install the required core plugin
+claude plugin install ring-default
+```
+
+Optional plugin packs:
+
+```bash
+claude plugin install ring-dev-team
+claude plugin install ring-pm-team
+claude plugin install ring-tw-team
+```
+
+Update installed plugins:
+
+```bash
+claude plugin marketplace update ring
+claude plugin update ring-default
+claude plugin update ring-dev-team
+claude plugin update ring-pm-team
+claude plugin update ring-tw-team
+```
+
+You can also install from the Claude Code UI:
 
 - Open Claude Code
 - Go to Settings → Plugins
 - Search for "ring"
 - Click Install
-
-### Manual Installation (Claude Code only)
-
-```bash
-# Clone the marketplace repository
-git clone https://github.com/lerianstudio/ring.git ~/ring
-
-# Skills auto-load at session start via hooks
-# No additional configuration needed for Claude Code
-```
 
 ### Code Analysis Pipeline
 
@@ -613,7 +545,7 @@ ring/                                  # Monorepo root
 - [CLAUDE.md](CLAUDE.md) - Repository guide for Claude Code
 - [MANUAL.md](MANUAL.md) - Quick reference for all skills, agents, and workflows
 - [ARCHITECTURE.md](ARCHITECTURE.md) - Architecture diagrams and component relationships
-- [Installer](installer/) - Multi-platform installation and migration
+- [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json) - Plugin marketplace manifest and versions
 
 ## 🎯 Philosophy
 
