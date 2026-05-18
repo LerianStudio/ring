@@ -6,6 +6,7 @@ This module covers authentication, licensing, and secret protection.
 
 ---
 
+
 ## Table of Contents
 
 | # | Section | Description |
@@ -183,7 +184,7 @@ RBAC resource names **MUST** match the stable public route collection when the p
 
 Use singular resource names only for true singleton or non-collection surfaces whose route namespace is also singular, for example `/v1/admin/...` -> `"admin"`.
 
-**Forbidden:** protecting plural collection routes with singular RBAC resources such as `auth.Authorize(applicationName, "payment", "post")` for `POST /v1/payments`.
+**Forbidden:** protecting plural collection routes with singular RBAC resources such as `auth.Authorize(applicationName, "payments", "post")` for `POST /v1/payments`.
 
 ### Middleware Behavior
 
@@ -286,7 +287,10 @@ req.Header.Set("Authorization", "Bearer hardcoded-token-here")  // never
 f.Post("/v1/sensitive-data", handler.Create)  // Missing auth.Authorize
 
 // FORBIDDEN: Using wrong application name
-auth.Authorize("wrong-app-name", "resource", "post")  // Must match identity registration
+auth.Authorize("wrong-app-name", "resources", "post")  // Must match identity registration
+
+// FORBIDDEN: Singular resource for a collection route
+auth.Authorize(applicationName, "payment", "post")  // Route is /v1/payments, resource must be "payments"
 
 // FORBIDDEN: Singular RBAC resource for a plural route collection
 auth.Authorize(applicationName, "package", "post")  // /v1/packages requires "packages"

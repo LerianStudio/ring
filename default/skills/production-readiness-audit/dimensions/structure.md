@@ -96,6 +96,7 @@ return libHTTP.OK(c, pagination)
 ```
 ```
 
+
 ### Agent 2: Error Framework Auditor
 
 ```prompt
@@ -295,13 +296,16 @@ func NewHandler(deps ...interface{}) (*Handler, error) {
 2. (HARD GATE) Centralized route registration per module
 3. Handler constructors validate all dependencies
 4. Consistent URL patterns (v1, kebab-case, plural resources) per Ring conventions
-5. All routes use protected() wrapper (no public endpoints without explicit exemption)
-6. Clear separation: routes.go vs handlers.go per Ring directory structure
+5. Authorization resource names are plural and match the route collection (for example, `/v1/resources` -> `protected("resources", ...)`)
+6. Singular authorization resource names only appear for protected singleton/capability endpoints, with a local comment explaining the exception
+7. All routes use protected() wrapper (no public endpoints without explicit exemption)
+8. Clear separation: routes.go vs handlers.go per Ring directory structure
 
 **Severity Ratings:**
 - CRITICAL: Unprotected routes (missing auth middleware)
 - CRITICAL: HARD GATE violation — project does not follow hexagonal architecture per Ring standards
 - HIGH: Scattered route definitions
+- HIGH: Authorization resource name is singular for a collection route
 - MEDIUM: Handler accepts nil dependencies
 - LOW: Inconsistent URL naming conventions
 
