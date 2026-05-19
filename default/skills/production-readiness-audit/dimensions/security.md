@@ -42,9 +42,10 @@ if err != nil {
 1. (HARD GATE) All routes protected via Access Manager integration per security.md
 2. (HARD GATE) lib-auth used for JWT validation (not custom JWT parsing)
 3. Resource/action authorization granularity per Ring access control model
-4. Token expiration enforcement
-5. Tenant extraction from JWT claims
-6. Auth bypass for health/ready endpoints only
+4. RBAC resource names match public route collections when applicable (`/v1/payments` -> `"payments"`, not `"payment"`)
+5. Token expiration enforcement
+6. Tenant extraction from JWT claims
+7. Auth bypass for health/ready endpoints only
 
 **Severity Ratings:**
 - CRITICAL: Unprotected data endpoints (HARD GATE violation per Ring standards)
@@ -52,6 +53,7 @@ if err != nil {
 - CRITICAL: HARD GATE violation — not using lib-auth for access management
 - HIGH: Missing token expiration check
 - HIGH: Tenant claims not enforced
+- MEDIUM: Plural collection route protected by singular RBAC resource
 - MEDIUM: Overly broad permissions
 - LOW: Missing fine-grained actions
 
