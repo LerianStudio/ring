@@ -2686,7 +2686,7 @@ The service catalog enforces a maximum of 2 active keys per environment, so both
 
 **Version discovery (mandatory for agents):** before applying this section's recommendations, confirm the lib state your service is on by checking the `go.mod` of the target repo for the pinned `github.com/LerianStudio/lib-systemplane` version, then cross-reference the [latest release notes](https://github.com/LerianStudio/lib-systemplane/releases/latest) and [CHANGELOG](https://github.com/LerianStudio/lib-systemplane/blob/main/CHANGELOG.md). The architectural patterns below (Padrão A, compliance reads, migration seed, `Manager` binding) are version-agnostic; only the exact API surface and which sub-patterns apply depend on the pinned version.
 
-This section captures the historical asymmetry inside earlier `lib-systemplane` releases (cache + push hot-reload disabled in MT) and the consumer-side pattern that makes ST and MT behave identically from the caller's perspective regardless of which lib version a service runs. The asymmetry is closed by the `Manager` API; consult the latest [`lib-systemplane` release](https://github.com/LerianStudio/lib-systemplane/releases/latest) and its CHANGELOG to confirm which version your service is on and whether `Client.BindManager` is available.
+This section captures the historical asymmetry inside earlier `lib-systemplane` releases (cache + push hot-reload disabled in MT) and the consumer-side pattern that makes ST and MT behave identically from the caller's perspective regardless of which lib version a service runs. The asymmetry is closed by the `Manager` API; consult the latest [`lib-systemplane` release](https://github.com/LerianStudio/lib-systemplane/releases/latest) and its CHANGELOG to confirm which version your service is on and whether the `Manager` API (constructed via `NewManager`, which binds the Manager to the Client internally) is available.
 
 **Tenant cache and event listener are NOT in scope here.** Use the existing event-driven discovery pattern documented in §[Tenant Discovery and Cache Invalidation](#tenant-discovery-and-cache-invalidation) (`TenantCache` + `TenantEventListener` + `EventDispatcher` over `tenant-events:*` Pub/Sub) without modification. The systemplane patterns below sit on top of that infrastructure.
 
@@ -2817,7 +2817,7 @@ NON-COMPLIANT signs:
 
 ### Manager binding — preferred when available in the pinned lib version
 
-The `Manager` API in `lib-systemplane` restores the in-process cache and push hot-reload in MT mode by maintaining one LISTEN goroutine and one cache map per active tenant. Consult the lib's [latest release](https://github.com/LerianStudio/lib-systemplane/releases/latest) and CHANGELOG to confirm `Manager` and `Client.BindManager` are available in the version your service consumes. Once the consumer is on a lib version that exposes `Manager`, the seed migration becomes redundant (the `Manager.OnTenantActivated` lifecycle handler performs the same `INSERT ON CONFLICT DO NOTHING` natively) and may be retired in a follow-up migration. Retirement decision is per-service — keeping the seed migration as defence-in-depth is acceptable.
+The `Manager` API in `lib-systemplane` restores the in-process cache and push hot-reload in MT mode by maintaining one LISTEN goroutine and one cache map per active tenant. Consult the lib's [latest release](https://github.com/LerianStudio/lib-systemplane/releases/latest) and CHANGELOG to confirm `Manager` (constructed via `NewManager`, which binds the Manager to the Client internally) is available in the version your service consumes. Once the consumer is on a lib version that exposes `Manager`, the seed migration becomes redundant (the `Manager.OnTenantActivated` lifecycle handler performs the same `INSERT ON CONFLICT DO NOTHING` natively) and may be retired in a follow-up migration. Retirement decision is per-service — keeping the seed migration as defence-in-depth is acceptable.
 
 Required wiring in the consumer's bootstrap:
 
@@ -2834,11 +2834,15 @@ client, err := systemplane.NewPostgres(db, dsn,
     systemplane.WithMultiTenantEnabled(), // MT toggle
 )
 
-manager := systemplane.NewManager(client, pgMgr,
-    systemplane.WithManagerLogger(logger),
-    systemplane.WithManagerTelemetry(t),
+// NewManager binds the Manager to the Client INTERNALLY. There is no
+// separate public Client.BindManager method — once NewManager returns, the
+// client already routes MT OnChange callbacks through the Manager.
+mgr := systemplane.NewManager(client, pgMgr,
+    systemplane.WithManagerLogger(logger),       // lib-observability/log.Logger
+    systemplane.WithManagerTelemetry(telemetry), // *lib-observability/tracing.Telemetry
+    // optional: systemplane.WithManagerAggregateTenantThreshold(n int)
 )
-client.BindManager(manager) // OnChange MT-aware path goes live
+// mgr is ready; the OnChange MT-aware path is live.
 ```
 
 And in the consumer's existing tenant lifecycle handler (the wrapper that already routes `tenant-events:*` to `tenantIntegrationResolver`, message-queue consumers, etc.), add a fifth branch routing into the Manager:
@@ -2862,7 +2866,7 @@ No `lib-commons` change required — the integration lives entirely inside the c
 
 NON-COMPLIANT signs (once the pinned lib version exposes `Manager`):
 
-- `Client.BindManager(...)` not called when `WithMultiTenantEnabled()` is set.
+- `Manager` not constructed via `NewManager(client, pgMgr, ...)` (which binds the Manager to the Client internally) when `WithMultiTenantEnabled()` is set.
 - Lifecycle handler missing one or more of the four `OnTenant*` branches.
 - Manager managed via `lib-commons` `EventDispatcher.WithSystemplane(...)` — this option was rejected during design; integration belongs in the consumer's handler wrapper.
 
