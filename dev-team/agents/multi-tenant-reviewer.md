@@ -57,7 +57,7 @@ Emit `VERDICT: PASS` immediately when diff does NOT touch:
 | Backward Compat | `MULTI_TENANT_ENABLED=false` → single-tenant mode preserved |
 | Systemplane registration shape | Padrão A only: `ReadLive` keys MUST drop `Reads`/`AssignX`. Detect: `grep -A 5 "RuntimeClass: systemplaneKeyRuntimeClassReadLive" service_systemplane.go` followed by `grep "AssignString:\|AssignBool:\|AssignInt:\|AssignInt64:"` MUST return zero matches. |
 | Systemplane consumer reads | `spClient.GetX(ctx)` only. No `cfg.X` fallback in hot path. No `if singleTenant {…} else {…}` branching. Adapter packages MUST NOT import `lib-systemplane` directly — narrow per-consumer DI interface required. |
-| Systemplane cold-tenant resolution | Either (a) seed migration `000NNN_systemplane_defaults_seed.up.sql` (migration cadence is the convention — anyone editing the registration MUST also update this migration; there is no automated drift guard), OR (b) `Client.BindManager` once available in the lib version the service consumes (check `go.mod` and the lib CHANGELOG). NON-COMPLIANT if both are missing in MT. |
+| Systemplane cold-tenant resolution | Either (a) seed migration `000NNN_systemplane_defaults_seed.up.sql` (migration cadence is the convention — anyone editing the registration MUST also update this migration; there is no automated drift guard), OR (b) a `Manager` constructed via `NewManager` (which binds the Manager to the Client internally) once available in the lib version the service consumes (check `go.mod` and the lib CHANGELOG). NON-COMPLIANT if both are missing in MT. |
 
 ## Severity
 
