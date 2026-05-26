@@ -2769,8 +2769,8 @@ type WebhookKnobsReader interface {
 }
 
 // Hardcoded safe defaults mirrored from migration 000NNN_systemplane_defaults_seed.up.sql.
-// Drift guard: `make check-systemplane-seed` keeps the registration ↔ migration in sync;
-// the constants below must be reviewed alongside any change to either.
+// Migration cadence is the convention: any change to the registration MUST update the
+// seed migration; the constants below must be reviewed alongside any such change.
 const (
     safeWebhookTimeoutMS  int  = 5000
     safeWebhookMaxRetries int  = 3
@@ -2804,16 +2804,13 @@ The **only** approved mitigation is a versioned SQL seed migration that inserts 
 
 Required components:
 
-1. **Migration `migrations/000NNN_systemplane_defaults_seed.up.sql`** — one INSERT row per registered key, header comment documenting the relationship between seed values and the `DefaultValue` in the registration.
+1. **Migration `migrations/000NNN_systemplane_defaults_seed.up.sql`** — one INSERT row per registered key, header comment documenting the relationship between seed values and the `DefaultValue` in the registration. Migration cadence is the convention: anyone editing the registration MUST also update this migration so newly registered keys have a matching seed row. There is no automated drift guard.
 
 2. **Matching `.down.sql`** — `DELETE` only rows whose `value` still equals the seed default. Operator-set values MUST survive a rollback.
-
-3. **Drift guard `make check-systemplane-seed`** — bash script that greps the registrations in `service_systemplane.go` and asserts every key has a matching row in the seed migration. Wired into `check-generated-artifacts` so CI runs it on every PR. Example implementation: `plugin-br-bank-transfer/scripts/check-systemplane-seed.sh`.
 
 NON-COMPLIANT signs:
 
 - Runtime seed via Go code (`INSERT ... ON CONFLICT DO NOTHING` inside `Service` or any boot phase). Defaults belong in versioned migrations, not in runtime.
-- Seed migration without a corresponding drift guard — silently allows new registrations to ship without a seed row.
 - Down migration that deletes operator-set values along with default values.
 
 ### Manager binding (lib-systemplane v1.5.0+) — preferred when available
@@ -2887,5 +2884,4 @@ The consumer code is **mode-agnostic** in all three rows. The asymmetry exists i
 | "We can keep `Reads`/`AssignX` in the registration for now" | `AssignX` only fires from `OnChange`, which is broken in MT v1.4.0. The reconciler write-back is dead code in MT; in ST the cache covers it. Padrão B is non-compliant. | **MUST drop `Reads`/`AssignX` from every `ReadLive` registration** |
 | "The consumer can import `lib-systemplane` directly" | Adapter packages stay clean of platform-lib imports; only the bootstrap layer wires the concrete client. | **MUST declare a narrow per-consumer interface and inject from bootstrap** |
 | "We don't need the seed migration; the lib will handle it" | True only when bound to a v1.5.0+ Manager. On v1.4.0, the lib does NOT seed tenant DBs. | **MUST ship the seed migration until v1.5.0 is bound and the migration is explicitly retired** |
-| "We'll add the drift check later" | A registration added without a matching seed row produces silent cold-tenant zeros. CI must catch this at PR time. | **MUST add `make check-systemplane-seed` to `check-generated-artifacts`** |
 | "ST doesn't need this — only MT" | The compliance pattern is mode-agnostic by design. Mixed code paths break the symmetry guarantee that makes consumer code portable. | **Same `spClient.GetX(ctx)` code in ST and MT; no `if singleTenant` branches** |
