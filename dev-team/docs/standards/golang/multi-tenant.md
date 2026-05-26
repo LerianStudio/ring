@@ -18,7 +18,7 @@ This module covers multi-tenant patterns with Tenant Manager.
 | 24 | [Multi-Tenant Message Queue Consumers](#multi-tenant-message-queue-consumers) | Multi-tenant consumer initialization, on-demand connection, exponential backoff, cache invalidation, consumer lifecycle (StopConsumer) |
 | 25 | [M2M Credentials via Secret Manager](#m2m-credentials-via-secret-manager) | AWS Secrets Manager integration for service-to-service authentication per tenant |
 | 26 | [Service Authentication (MANDATORY)](#service-authentication-mandatory) | API key authentication for dispatch layer /settings endpoint via X-API-Key header |
-| 27 | [Systemplane in MT mode — compliance pattern (MANDATORY)](#systemplane-in-mt-mode--compliance-pattern-mandatory) | ReadLive Padrão A, no-fallback consumer reads, interface DI keeping adapters free of `lib-systemplane` import, migration-based default seeding, `Manager` binding for v1.5.0+ |
+| 27 | [Systemplane in MT mode — compliance pattern (MANDATORY)](#systemplane-in-mt-mode--compliance-pattern-mandatory) | ReadLive Padrão A, no-fallback consumer reads, interface DI keeping adapters free of `lib-systemplane` import, migration-based default seeding, `Manager` binding when available in the pinned lib version |
 
 ---
 
@@ -2684,7 +2684,9 @@ The service catalog enforces a maximum of 2 active keys per environment, so both
 
 **CONDITIONAL:** Applies when both `MULTI_TENANT_ENABLED=true` AND `lib-systemplane` is used for runtime configuration. Both conditions must hold; for ST-only services, the rules in this section are still safe to follow but the migration-based seed (below) is unnecessary because `lib-systemplane`'s in-process cache covers the cold case.
 
-This section captures the asymmetry in `lib-systemplane v1.4.0` (cache + push hot-reload disabled in MT) and the consumer-side pattern that makes ST and MT behave identically from the caller's perspective until `v1.5.0` ships the `Manager` and closes the asymmetry internally.
+**Version discovery (mandatory for agents):** before applying this section's recommendations, confirm the lib state your service is on by checking the `go.mod` of the target repo for the pinned `github.com/LerianStudio/lib-systemplane` version, then cross-reference the [latest release notes](https://github.com/LerianStudio/lib-systemplane/releases/latest) and [CHANGELOG](https://github.com/LerianStudio/lib-systemplane/blob/main/CHANGELOG.md). The architectural patterns below (Padrão A, compliance reads, migration seed, `Manager` binding) are version-agnostic; only the exact API surface and which sub-patterns apply depend on the pinned version.
+
+This section captures the historical asymmetry inside earlier `lib-systemplane` releases (cache + push hot-reload disabled in MT) and the consumer-side pattern that makes ST and MT behave identically from the caller's perspective regardless of which lib version a service runs. The asymmetry is closed by the `Manager` API; consult the latest [`lib-systemplane` release](https://github.com/LerianStudio/lib-systemplane/releases/latest) and its CHANGELOG to confirm which version your service is on and whether `Client.BindManager` is available.
 
 **Tenant cache and event listener are NOT in scope here.** Use the existing event-driven discovery pattern documented in §[Tenant Discovery and Cache Invalidation](#tenant-discovery-and-cache-invalidation) (`TenantCache` + `TenantEventListener` + `EventDispatcher` over `tenant-events:*` Pub/Sub) without modification. The systemplane patterns below sit on top of that infrastructure.
 
@@ -2707,7 +2709,7 @@ Every systemplane registration that previously declared `Reads` + `AssignBool`/`
 What is FORBIDDEN:
 
 - `Reads: func(cfg *config.Config) any { return cfg.X }` — removes the silent cfg/cache divergence path.
-- `AssignBool` / `AssignInt` / `AssignInt64` / `AssignString` — removes the reconciler-side write-back into `cfg` (which is broken in MT v1.4.0 anyway because `OnChange` returns `ErrNotSupportedInMultiTenant`).
+- `AssignBool` / `AssignInt` / `AssignInt64` / `AssignString` — removes the reconciler-side write-back into `cfg` (which is broken in MT on lib versions where `OnChange` returns `ErrNotSupportedInMultiTenant`; verify against the CHANGELOG for the version your service is pinned to).
 
 `verifyInvariants` and `applyOverrides` already skip keys without `Reads` (see `service_systemplane.go:2218-2228` for the canonical implementation in `plugin-br-bank-transfer`). Padrão A registrations integrate cleanly with both functions.
 
@@ -2749,7 +2751,7 @@ if w.singleTenant {
 }
 ```
 
-The same `spClient.GetX(ctx)` path MUST be used in ST and MT. In ST, the lib's in-process cache (seeded at `Client.Start`) returns the registration's `DefaultValue` when no operator value is set. In MT v1.4.0, the seed migration (below) guarantees the tenant DB has a row with the same `DefaultValue`. In both cases, `Get` returns `ok=true` with a sensible value, and the consumer reads identically.
+The same `spClient.GetX(ctx)` path MUST be used in ST and MT. In ST, the lib's in-process cache (seeded at `Client.Start`) returns the registration's `DefaultValue` when no operator value is set. In MT, on lib versions that disable the in-process cache (verify against your pinned version), the seed migration (below) guarantees the tenant DB has a row with the same `DefaultValue`. In both cases, `Get` returns `ok=true` with a sensible value, and the consumer reads identically.
 
 NON-COMPLIANT signs to look for during review:
 
@@ -2796,9 +2798,9 @@ Each defines a per-consumer interface, not a single shared `SystemplaneReader` �
 
 NON-COMPLIANT if any non-bootstrap package imports `github.com/LerianStudio/lib-systemplane`.
 
-### Cold-tenant resolution — migration-based seed (until lib v1.5.0 Manager ships)
+### Cold-tenant resolution — migration-based seed (stop-gap until Manager binding is available)
 
-In MT v1.4.0, a tenant that was activated but never had `Set` called for a registered key produces `(zero, false, nil)` from `Get`. The compliance pattern's "no `cfg.X` fallback" makes this a real risk: without an intervening mechanism, a cold tenant returns zero for every read.
+This stop-gap path applies to services pinned to versions of `lib-systemplane` that disable MT push hot-reload and the in-process cache — verify against your `go.mod` and the lib's CHANGELOG. On such versions, a tenant that was activated but never had `Set` called for a registered key produces `(zero, false, nil)` from `Get`. The compliance pattern's "no `cfg.X` fallback" makes this a real risk: without an intervening mechanism, a cold tenant returns zero for every read.
 
 The **only** approved mitigation is a versioned SQL seed migration that inserts every registered key's `DefaultValue` into each tenant DB via `INSERT ... ON CONFLICT (namespace, key) DO NOTHING`. Mirrors the existing `BACEN holidays seed` pattern (e.g. `migrations/000006_bacen_holidays_seed.up.sql`).
 
@@ -2813,9 +2815,9 @@ NON-COMPLIANT signs:
 - Runtime seed via Go code (`INSERT ... ON CONFLICT DO NOTHING` inside `Service` or any boot phase). Defaults belong in versioned migrations, not in runtime.
 - Down migration that deletes operator-set values along with default values.
 
-### Manager binding (lib-systemplane v1.5.0+) — preferred when available
+### Manager binding — preferred when available in the pinned lib version
 
-`lib-systemplane v1.5.0` introduces `systemplane.Manager`, which restores the in-process cache and push hot-reload in MT mode by maintaining one LISTEN goroutine and one cache map per active tenant. Once the consumer upgrades to `v1.5.0`, the seed migration becomes redundant (the `Manager.OnTenantActivated` lifecycle handler performs the same `INSERT ON CONFLICT DO NOTHING` natively) and may be retired in a follow-up migration. Retirement decision is per-service — keeping the seed migration as defence-in-depth is acceptable.
+The `Manager` API in `lib-systemplane` restores the in-process cache and push hot-reload in MT mode by maintaining one LISTEN goroutine and one cache map per active tenant. Consult the lib's [latest release](https://github.com/LerianStudio/lib-systemplane/releases/latest) and CHANGELOG to confirm `Manager` and `Client.BindManager` are available in the version your service consumes. Once the consumer is on a lib version that exposes `Manager`, the seed migration becomes redundant (the `Manager.OnTenantActivated` lifecycle handler performs the same `INSERT ON CONFLICT DO NOTHING` natively) and may be retired in a follow-up migration. Retirement decision is per-service — keeping the seed migration as defence-in-depth is acceptable.
 
 Required wiring in the consumer's bootstrap:
 
@@ -2858,7 +2860,7 @@ if s.spManager != nil {
 
 No `lib-commons` change required — the integration lives entirely inside the consumer's existing handler wrapper.
 
-NON-COMPLIANT signs (post-v1.5.0 upgrade):
+NON-COMPLIANT signs (once the pinned lib version exposes `Manager`):
 
 - `Client.BindManager(...)` not called when `WithMultiTenantEnabled()` is set.
 - Lifecycle handler missing one or more of the four `OnTenant*` branches.
@@ -2866,7 +2868,7 @@ NON-COMPLIANT signs (post-v1.5.0 upgrade):
 
 ### ST↔MT symmetry awareness
 
-| Aspect | ST (any lib version) | MT v1.4.0 (current) | MT v1.5.0+ (Manager bound) |
+| Aspect | ST (any lib version) | MT (pre-Manager lib versions) | MT (lib versions exposing `Manager`, bound) |
 |---|---|---|---|
 | In-process cache | ✅ Global, seeded at `Client.Start` | ❌ Disabled | ✅ Per-tenant, seeded by `Manager.OnTenantActivated` |
 | Push hot-reload | ✅ One LISTEN goroutine over LISTEN/NOTIFY | ❌ `OnChange` returns `ErrNotSupportedInMultiTenant` | ✅ One LISTEN goroutine per active tenant |
@@ -2874,14 +2876,14 @@ NON-COMPLIANT signs (post-v1.5.0 upgrade):
 | Cold-tenant handling | Cache returns `DefaultValue` from registration | Migration seed ensures DB row | Manager's `OnTenantActivated` seeds via `INSERT ON CONFLICT` |
 | Consumer code | Same (`spClient.GetX(ctx)`) | Same (`spClient.GetX(ctx)`) | Same (`spClient.GetX(ctx)`) |
 
-The consumer code is **mode-agnostic** in all three rows. The asymmetry exists internally to `lib-systemplane` v1.4.0 and is closed by v1.5.0. New services SHOULD bind a Manager once they're on v1.5.0; existing services on v1.4.0 SHOULD adopt Padrão A + the seed migration + compliance pattern now, and bind the Manager later when they upgrade.
+The consumer code is **mode-agnostic** in all three rows. The asymmetry exists internally to earlier `lib-systemplane` releases and is closed by the `Manager` API; check the CHANGELOG for the version that introduced it and verify your service's `go.mod`. New services SHOULD bind a Manager once they're on a lib version that exposes it; services on earlier versions SHOULD adopt Padrão A + the seed migration + compliance pattern now, and bind the Manager later when they upgrade.
 
 ### Anti-Rationalization
 
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
 | "We need a `cfg.X` fallback because `Get` might return zero" | The seed migration + lib cache guarantee `Get` returns a sensible value. `cfg.X` fallback re-creates the divergence path Padrão A explicitly removes. | **REMOVE the fallback; add the seed migration if missing** |
-| "We can keep `Reads`/`AssignX` in the registration for now" | `AssignX` only fires from `OnChange`, which is broken in MT v1.4.0. The reconciler write-back is dead code in MT; in ST the cache covers it. Padrão B is non-compliant. | **MUST drop `Reads`/`AssignX` from every `ReadLive` registration** |
+| "We can keep `Reads`/`AssignX` in the registration for now" | `AssignX` only fires from `OnChange`, which is broken in MT on lib versions that disable push hot-reload (verify against your pinned version). The reconciler write-back is dead code in MT there; in ST the cache covers it. Padrão B is non-compliant. | **MUST drop `Reads`/`AssignX` from every `ReadLive` registration** |
 | "The consumer can import `lib-systemplane` directly" | Adapter packages stay clean of platform-lib imports; only the bootstrap layer wires the concrete client. | **MUST declare a narrow per-consumer interface and inject from bootstrap** |
-| "We don't need the seed migration; the lib will handle it" | True only when bound to a v1.5.0+ Manager. On v1.4.0, the lib does NOT seed tenant DBs. | **MUST ship the seed migration until v1.5.0 is bound and the migration is explicitly retired** |
+| "We don't need the seed migration; the lib will handle it" | True only when bound to a `Manager` (available in the lib version that introduces it — check the CHANGELOG). On earlier versions, the lib does NOT seed tenant DBs. | **MUST ship the seed migration until a `Manager` is bound and the migration is explicitly retired** |
 | "ST doesn't need this — only MT" | The compliance pattern is mode-agnostic by design. Mixed code paths break the symmetry guarantee that makes consumer code portable. | **Same `spClient.GetX(ctx)` code in ST and MT; no `if singleTenant` branches** |
