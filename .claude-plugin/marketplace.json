@@ -30,7 +30,7 @@
     {
       "name": "ring-dev-team",
       "description": "18 specialized developer agents + 38 development skills: Backend 10-gate dev cycle + Frontend 9-gate dev cycle (accessibility, visual, E2E, performance) + Frontend refactoring + whole-codebase simplification sweep + delivery verification + service discovery + cycle management + lib-streaming end-to-end instrumentation. Go/TypeScript Backend specialists, DevOps Engineer, Frontend TypeScript specialist, Frontend Designer, QA Backend Analyst, QA Frontend Analyst, SRE, Multi-Tenant Reviewer, lib-commons Reviewer, lib-observability Reviewer, lib-systemplane Reviewer, and lib-streaming Reviewer. Complete development team coverage with TDD, observability, and security best practices.",
-      "version": "1.70.0",
+      "version": "1.71.0",
       "source": "./dev-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/dev-team",
       "repository": "https://github.com/lerianstudio/ring/tree/dev-team",
@@ -106,5 +106,5 @@
       ]
     }
   ],
-  "version": "0.362.0"
+  "version": "0.363.0"
 }
