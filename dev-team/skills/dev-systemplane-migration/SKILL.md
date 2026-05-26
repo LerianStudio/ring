@@ -68,6 +68,7 @@ Any key storing credentials MUST use `RedactFull`.
 - [[using-lib-systemplane]] — adoption sweep + API reference for the lib-systemplane module
 - [[using-lib-commons]] — non-observability lib-commons packages (lifecycle, outbox, tenancy)
 - [[using-lib-observability]] — tracing, metrics, logging, assert, runtime, redaction
+- For services running in **multi-tenant mode** (`MULTI_TENANT_ENABLED=true`), the consumer-side pattern (registration shape, no-fallback consumer reads, DI interface, seed migration, Manager binding when available in the pinned lib version) is documented in `dev-team/docs/standards/golang/multi-tenant.md` §27 "Systemplane in MT mode — compliance pattern (MANDATORY)". Load that section in addition to the general systemplane architecture below.
 
 ## Gate Overview
 
