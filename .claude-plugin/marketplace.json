@@ -9,7 +9,7 @@
     {
       "name": "ring-default",
       "description": "Core skills library for the Lerian Team: TDD, code review, collaboration patterns, and proven techniques. Features parallel code review orchestration with 9 default reviewers plus triggered conditional specialists. 14 essential skills for software engineering excellence.",
-      "version": "1.32.1",
+      "version": "1.32.2",
       "source": "./default",
       "homepage": "https://github.com/lerianstudio/ring/tree/default",
       "repository": "https://github.com/lerianstudio/ring/tree/default",
@@ -30,7 +30,7 @@
     {
       "name": "ring-dev-team",
       "description": "24 specialized developer agents + 37 development skills: Backend 10-gate dev cycle + Frontend 9-gate dev cycle (accessibility, visual, E2E, performance) + Frontend refactoring + whole-codebase simplification sweep + delivery verification + service discovery + cycle management + lib-streaming end-to-end instrumentation. Includes backend/frontend specialists, DevOps, QA, SRE, 9 default code-review reviewers, and 3 conditional stack specialists consolidated into the dev-team plugin. Complete development team coverage with TDD, observability, and security best practices.",
-      "version": "1.71.1",
+      "version": "1.71.2",
       "source": "./dev-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/dev-team",
       "repository": "https://github.com/lerianstudio/ring/tree/dev-team",
@@ -85,7 +85,7 @@
     {
       "name": "ring-tw-team",
       "description": "Technical writing specialists for functional and API documentation. 3 specialized agents (functional-writer, api-writer, docs-reviewer) and 6 documentation skills covering voice/tone, structure, API field descriptions, and quality review. Enforces clear, consistent documentation standards.",
-      "version": "0.4.6",
+      "version": "0.4.7",
       "source": "./tw-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/tw-team",
       "repository": "https://github.com/lerianstudio/ring/tree/tw-team",
@@ -104,5 +104,5 @@
       ]
     }
   ],
-  "version": "0.364.0"
+  "version": "0.365.0"
 }
