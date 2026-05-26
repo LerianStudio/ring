@@ -17,7 +17,7 @@ description: |
 ## Skip when
 - Writing code → use dev-team agents
 - Writing plans → use pm-team agents
-- General code review → use default plugin reviewers
+- General code review → use `ring:codereview` with dev-team reviewer agents
 
 ## Related
 **Similar:** ring:using-ring, ring:using-dev-team
@@ -124,4 +124,3 @@ Emit both Task calls in a SINGLE TURN as one atomic batch. If your runtime expos
 > ❌ "I'll manually write all the documentation myself."
 
 ---
-

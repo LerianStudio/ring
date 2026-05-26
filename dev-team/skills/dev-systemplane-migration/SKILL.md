@@ -84,7 +84,7 @@ Any key storing credentials MUST use `RedactFull`.
 | 6 | Admin HTTP Mount + Authorizer | Skip only if service has no admin surface (justify) | ring:backend-engineer-golang |
 | 7 | Wiring + Lifecycle + Backward Compat | Always — NEVER skippable | ring:backend-engineer-golang |
 | 8 | Tests | Always | ring:backend-engineer-golang |
-| 9 | Code Review | Always | 13 parallel reviewers |
+| 9 | Code Review | Always | 9 defaults + triggered specialists in parallel |
 | 10 | User Validation | Always | User |
 | 11 | Activation Guide | Always | Orchestrator |
 

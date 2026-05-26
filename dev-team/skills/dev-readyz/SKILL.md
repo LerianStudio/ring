@@ -5,7 +5,7 @@ description: |
   detects stack, audits existing /readyz compliance, dispatches language-specific engineers
   (Go / TypeScript / Next.js) to implement the canonical /readyz contract, ValidateSaaSTLS()
   enforcement, metrics emission, startup self-probe, graceful-drain coupling, circuit-breaker
-  integration, and multi-tenant carve-out — then runs 13 parallel reviewers.
+  integration, and multi-tenant carve-out — then runs 9 default reviewers plus triggered specialists in parallel.
 ---
 
 # Readyz & Self-Probe Development Cycle
@@ -36,7 +36,7 @@ TDD mandatory for all implementation gates (RED → GREEN → REFACTOR).
 | ring:frontend-bff-engineer-typescript | Next.js BFF |
 | ring:codebase-explorer | Gate 1 analysis |
 | ring:visualize | Gate 1.5 HTML preview |
-| 13 reviewers | Gate 9 |
+| 9 defaults + triggered specialists | Gate 9 |
 
 ## Readiness Architecture
 
@@ -121,7 +121,7 @@ INFO/ERROR are not used by the probe handler. Steady-state observability is the 
 | 6 | Circuit Breaker + Multi-Tenant Carve-Out | Skip only if no breakers AND single-tenant | ring:backend-engineer-{language} |
 | 7 | Startup Self-Probe + /health + Graceful Drain | Always — NEVER skippable | ring:backend-engineer-{language} |
 | 8 | Tests | Always | ring:backend-engineer-{language} |
-| 9 | Code Review | Always | 13 parallel reviewers |
+| 9 | Code Review | Always | 9 defaults + triggered specialists in parallel |
 | 10 | User Validation | Always | User |
 | 11 | Activation Guide | Always | Orchestrator |
 

@@ -44,8 +44,8 @@ These apply to ALL reviewers:
 | Requirement | Enforcement |
 |-------------|-------------|
 | **Critical issues = FAIL** | Automatic FAIL, no exceptions |
-| **3+ High issues = FAIL** | Automatic FAIL, no exceptions |
-| **All checklist categories verified** | Cannot skip any section |
+| **Any eligible finding = FAIL** | Automatic FAIL, no exceptions |
+| **Applicable checklist categories verified** | Cannot skip relevant sections; do not invent irrelevant review surface |
 | **File:line references for all issues** | Every issue must include location |
 | **Independent review** | Cannot assume other reviewers catch issues |
 | **Output schema compliance** | Must follow exact format |
@@ -56,8 +56,8 @@ These apply to ALL reviewers:
 
 | VERDICT | Condition | Requirements |
 |---------|-----------|--------------|
-| **PASS** | No blockers | 0 Critical, < 3 High, requirements met |
-| **FAIL** | Blockers found | 1+ Critical OR 3+ High issues |
+| **PASS** | No reportable findings | 0 eligible Critical, High, Medium, or Low issues |
+| **FAIL** | Reportable findings found | 1+ eligible Critical, High, Medium, or Low issue |
 | **NEEDS_DISCUSSION** | Cannot determine | Requirements unclear, need clarification |
 
 ---
@@ -68,14 +68,14 @@ Each reviewer has additional non-negotiable requirements:
 
 ### Code Reviewer
 - Critical issues (security, data corruption, core functionality) = FAIL
-- All checklist categories must be verified
+- Applicable checklist categories must be verified
 - AI slop detection must be performed
 
 ### Business Logic Reviewer
 - Mental Execution Analysis section REQUIRED (cannot skip)
 - Financial calculations MUST use Decimal types
 - State transitions MUST be validated
-- All 8 required output sections MUST be included
+- Required output sections MUST be included
 
 ### Security Reviewer
 - SQL injection, auth bypass, hardcoded secrets = CRITICAL, automatic FAIL

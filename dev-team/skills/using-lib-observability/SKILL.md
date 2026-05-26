@@ -1,6 +1,6 @@
 ---
 name: ring:using-lib-observability
-description: Dual-mode skill for github.com/LerianStudio/lib-observability v1.0.0, Lerian's OpenTelemetry foundation. Sweep Mode dispatches 5 parallel explorers to detect DIY logging/metrics/redaction/OTel-attribute usage that should route through lib-observability. Reference Mode catalogs the log, metrics, zap, redaction, and constants packages with verified API signatures. This library is the foundation: lib-commons v5, lib-systemplane, and lib-streaming all depend on it. Skip for non-Go services, frontend code, or Ring itself.
+description: "Dual-mode skill for github.com/LerianStudio/lib-observability v1.0.0, Lerian's OpenTelemetry foundation. Sweep Mode dispatches 5 parallel explorers to detect DIY logging/metrics/redaction/OTel-attribute usage that should route through lib-observability. Reference Mode catalogs the log, metrics, zap, redaction, and constants packages with verified API signatures. This library is the foundation: lib-commons v5, lib-systemplane, and lib-streaming all depend on it. Skip for non-Go services, frontend code, or Ring itself."
 ---
 
 # ring:using-lib-observability

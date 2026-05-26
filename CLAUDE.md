@@ -86,12 +86,12 @@ When adding/removing a code review agent in `ring:codereview` pool:
 
 | Plugin           | Path           | Skills | Agents |
 | ---------------- | -------------- | ------ | ------ |
-| ring-default     | `default/`     | 14     | 10     |
-| ring-dev-team    | `dev-team/`    | 37     | 18     |
+| ring-default     | `default/`     | 14     | 3      |
+| ring-dev-team    | `dev-team/`    | 37     | 24     |
 | ring-pm-team     | `pm-team/`     | 18     | 4      |
 | ring-tw-team     | `tw-team/`     | 6      | 3      |
 
-**Total: 75 skills, 35 agents across 4 plugins.** Plugin versions in `.claude-plugin/marketplace.json`.
+**Total: 75 skills, 34 agents across 4 plugins.** Plugin versions in `.claude-plugin/marketplace.json`.
 
 Each plugin contains: `skills/`, `agents/`, `hooks/`. See [README.md](README.md#architecture) for full directory structure.
 
@@ -104,7 +104,7 @@ Each plugin contains: `skills/`, `agents/`, `hooks/`. See [README.md](README.md#
 | Add skill | Create `*/skills/name/SKILL.md` with frontmatter per [Frontmatter Schema](docs/FRONTMATTER_SCHEMA.md) |
 | Add agent | Create `*/agents/name.md` → verify required sections per [Agent Design](docs/AGENT_DESIGN.md) |
 | Modify hooks | Edit `*/hooks/hooks.json` → test with `bash */hooks/session-start.sh` |
-| Code review | `ring:codereview` dispatches 13 parallel reviewers |
+| Code review | `ring:codereview` dispatches 9 default reviewers plus triggered conditional specialists |
 | Pre-dev (small) | `ring:pre-dev-feature` → 5-gate workflow |
 | Pre-dev (large) | `ring:pre-dev-full` → 10-gate workflow |
 | Dev cycle backend | `ring:dev-cycle` → 10-gate workflow |
@@ -123,9 +123,9 @@ See [docs/WORKFLOWS.md](docs/WORKFLOWS.md) for detailed instructions.
 - Only then write implementation (GREEN)
 
 # Review compliance (default/skills/codereview/SKILL.md)
-- All 13 reviewers must pass
+- All 9 default reviewers must pass; triggered conditional specialists must also pass
 - Critical findings = immediate fix required
-- Re-run all 13 reviewers after fixes
+- Re-run the selected review pool after fixes
 
 # Skill compliance (default/skills/using-ring/SKILL.md)
 - Check for applicable skills before any task

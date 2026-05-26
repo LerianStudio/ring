@@ -48,10 +48,12 @@ The agent's body `## Output Format` section MUST instruct the agent to produce:
 - `## VERDICT: PASS | FAIL | NEEDS_DISCUSSION` (heading line carries the verdict)
 - `## Summary`
 - `## Issues Found` (with optional `### Critical | High | Medium | Low` subsections)
-- `## What Was Done Well`
+- `## Standards Compliance Report`
 - `## Next Steps`
 
-**Used by:** `ring:code-reviewer`, `ring:business-logic-reviewer`, `ring:security-reviewer`, `ring:dead-code-reviewer`
+**Used by:** `ring:code-reviewer`, `ring:business-logic-reviewer`, `ring:security-reviewer`, `ring:test-reviewer`, `ring:nil-safety-reviewer`, `ring:dead-code-reviewer`, `ring:performance-reviewer`, `ring:multi-tenant-reviewer`, `ring:lib-commons-reviewer`, `ring:lib-observability-reviewer`, `ring:lib-systemplane-reviewer`, `ring:lib-streaming-reviewer`
+
+**Verdict contract:** `PASS` is allowed only with zero eligible findings. Any eligible issue means `FAIL`. Missing context means `NEEDS_DISCUSSION`. Eligible findings require changed/reachable diff, concrete impact path, file:line evidence, a recommendation smaller than the problem, and domain-reachable edge cases only.
 
 **Note:** `ring:business-logic-reviewer` and `ring:security-reviewer` extend the base Reviewer archetype with additional domain-specific sections:
 - `ring:business-logic-reviewer` adds: `## Mental Execution Analysis`, `## Business Requirements Coverage`, `## Edge Cases Analysis`
@@ -255,6 +257,7 @@ See [docs/PROMPT_ENGINEERING.md](PROMPT_ENGINEERING.md) for language guidelines 
 | **Blocker Criteria - STOP and Report**        | `## Blocker Criteria`            | MUST add with decision type table                                 |
 | **Positive `<example>` block**                | `<example>`                      | MUST add at least one block showing correct vs incorrect behavior |
 | **Standards Compliance Report** (dev-team)    | `## Standards Compliance Report` | MUST add for dev-team agents                                      |
+| **Output Format**                             | `## Output Format`               | MUST add body output schema                                        |
 
 **Step 2: Pre-Completion Checklist**
 

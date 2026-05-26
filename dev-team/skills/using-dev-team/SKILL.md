@@ -22,7 +22,7 @@ description: |
 - Migrating deprecated lib-commons observability shims to lib-observability → ring:migrate-observability
 
 ## Skip when
-- General code review → use default plugin reviewers
+- General code review → use `ring:codereview` with dev-team reviewer agents
 - Debugging → trace from logs / metrics / telemetry
 
 ## Related

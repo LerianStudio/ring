@@ -6,7 +6,7 @@
 
 **Proven engineering practices, enforced through skills.**
 
-Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **4 active plugins**, **69 skills**, and **35 agents** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
+Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **4 active plugins**, **75 skills**, and **34 agents** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
 
 ## ✨ Why Ring?
 
@@ -21,8 +21,8 @@ Without Ring, AI assistants often:
 Ring solves this by:
 
 - **Enforcing proven workflows** - Test-driven development, systematic debugging, proper planning
-- **Providing 69 specialized skills** (14 core + 31 dev-team + 18 product planning + 6 technical writing)
-- **35 specialized agents** - 10 review/planning + 18 developer + 4 product research + 3 technical writing
+- **Providing 75 specialized skills** (14 core + 37 dev-team + 18 product planning + 6 technical writing)
+- **34 specialized agents** - 3 planning/analysis + 24 developer/reviewer + 4 product research + 3 technical writing
 - **Automating skill discovery** - Skills load automatically at session start
 - **Preventing common failures** - Built-in anti-patterns and mandatory checklists
 
@@ -36,15 +36,8 @@ Ring solves this by:
 
 ## 🤖 Specialized Agents
 
-**Review & Planning Agents (default plugin):**
+**Planning & Analysis Agents (default plugin):**
 
-- `ring:code-reviewer` - Foundation review (architecture, code quality, design patterns)
-- `ring:business-logic-reviewer` - Correctness review (domain logic, requirements, edge cases)
-- `ring:security-reviewer` - Safety review (vulnerabilities, OWASP, authentication)
-- `ring:test-reviewer` - Test quality review (coverage, edge cases, assertions, test anti-patterns)
-- `ring:nil-safety-reviewer` - Nil/null safety review (traces pointer risks, missing guards, panic paths)
-- `ring:consequences-reviewer` - Ripple effect review (traces how changes propagate beyond modified files - caller chains, consumer contracts, downstream breakage)
-- `ring:dead-code-reviewer` - Dead code review (orphaned code detection, reachability analysis, dead dependency chains)
 - `ring:review-slicer` - Review slicer (groups large multi-themed PRs into thematic slices for focused parallel review)
 - `ring:write-plan` - Implementation planning agent
 - `ring:codebase-explorer` - Deep architecture analysis (deep-analysis, complements built-in Explore)
@@ -64,10 +57,16 @@ Ring solves this by:
 - `ring:sre` - Observability and reliability specialist
 - `ring:ui-engineer` - UI component specialist (design systems, accessibility)
 - `ring:helm-engineer` - Helm chart specialist (chart structure, security, Lerian conventions)
-- `ring:lib-commons-reviewer` - lib-commons non-observability package usage review (lifecycle, tenancy, http, idempotency, security, database, messaging, outbox-repo side; reinvented-wheel opportunities)
-- `ring:lib-observability-reviewer` - lib-observability adoption review (tracing, metrics, log, zap, runtime, assert, redaction, constants; raw OTel/Prometheus/zap/slog detection; deprecated lib-commons observability shims)
-- `ring:lib-streaming-reviewer` - lib-streaming adoption review (Builder/Emitter, outbox writer, CloudEvents, manifest, NoopEmitter fallback; raw kgo/sarama/amqp/watermill bypasses)
-- `ring:lib-systemplane-reviewer` - lib-systemplane adoption review (hot-reloadable runtime config, tenant-scoped knobs, admin authorizer, v4 residue, DIY config-watching)
+- `ring:code-reviewer` - Foundation review (architecture, code quality, design patterns)
+- `ring:business-logic-reviewer` - Correctness review (domain logic, requirements, edge cases)
+- `ring:security-reviewer` - Safety review (vulnerabilities, OWASP, authentication)
+- `ring:test-reviewer` - Test quality review (coverage, edge cases, assertions, test anti-patterns)
+- `ring:nil-safety-reviewer` - Nil/null safety review (traces pointer risks, missing guards, panic paths)
+- `ring:dead-code-reviewer` - Dead code review (orphaned code detection, reachability analysis, dead dependency chains)
+- `ring:lib-commons-reviewer` - lib-commons package usage review (lifecycle, tenancy, http, idempotency, security, database, messaging, outbox; reinvented-wheel opportunities)
+- `ring:lib-observability-reviewer` - Conditional specialist for tracing, metrics, logging, runtime recovery, redaction, constants, and SafeGo implications
+- `ring:lib-systemplane-reviewer` - Conditional specialist for runtime config, hot-reload knobs, admin config, tenant-scoped settings, and systemplane imports
+- `ring:lib-streaming-reviewer` - Conditional specialist for business events, outbox, producers, broker publishing, CloudEvents, manifests, and catalogs
 - `ring:multi-tenant-reviewer` - Multi-tenant usage review (lib-commons/multitenancy patterns, tenant isolation, JWT tenantId propagation)
 - `ring:performance-reviewer` - Performance review (code hotspots, infra misconfigurations, Go/TypeScript/Python)
 
@@ -239,9 +238,9 @@ When you start a new Claude Code session with Ring installed, you'll see:
 ## Available Skills:
 - ring:using-ring (Check for skills BEFORE any task)
 - ring:test-driven-development (RED-GREEN-REFACTOR cycle)
-- ring:codereview (Parallel 13-reviewer dispatch)
+- ring:codereview (9 defaults + conditional specialist dispatch)
 - ring:explore-codebase (Two-phase codebase exploration)
-... and 65 more skills
+... and 71 more skills
 ```
 
 ## 🎯 Core Skills
@@ -264,7 +263,7 @@ GREEN → Minimal code → Watch it pass
 REFACTOR → Clean up → Stay green
 ```
 
-## 📚 All 69 Skills (Across 4 Plugins)
+## 📚 All 75 Skills (Across 4 Plugins)
 
 ### Core Skills (ring-default plugin - 14 skills)
 
@@ -275,7 +274,7 @@ REFACTOR → Clean up → Stay green
 
 **Collaboration & Planning (3):**
 
-- `ring:codereview` - **Parallel 13-reviewer dispatch** with severity-based handling
+- `ring:codereview` - **Parallel 9 defaults + conditional specialist dispatch** with severity-based handling
 - `ring:worktree` - Isolated development
 - `ring:commit` - Smart commit organization with atomic grouping, conventional commits, and trailers
 
@@ -300,7 +299,7 @@ REFACTOR → Clean up → Stay green
 
 - `ring:production-readiness-audit` - 44-dimension production readiness audit; runs explorers in batches of up to 10, appends incrementally to a single report; output: scored report (0-430, max 440 with multi-tenant) with severity ratings. See [default/skills/production-readiness-audit/SKILL.md](default/skills/production-readiness-audit/SKILL.md) for invocation and implementation details.
 
-### Developer Skills (ring-dev-team plugin - 31 skills)
+### Developer Skills (ring-dev-team plugin - 37 skills)
 
 **Orchestration & Refactoring (7):**
 
@@ -406,7 +405,7 @@ Claude: I'm using ring:pre-dev-feature to scope this feature...
 Claude: I'm using ring:test-driven-development to implement...
         [RED-GREEN-REFACTOR cycle for each component]
 Claude: I'm using ring:codereview to validate...
-        [13-reviewer parallel dispatch]
+        [9 defaults + conditional specialist parallel dispatch]
 ```
 
 ### Fixing a Bug
@@ -431,47 +430,41 @@ Claude: I'll use the pre-dev workflow to plan this systematically...
         ... [Through all 10 gates]
 ```
 
-### Code Review (Parallel, 13 Reviewers!)
+### Code Review (Parallel, 9 Defaults + Conditional Specialists)
 
 ```
 User: "Review my authentication implementation"
-Claude: Dispatching all 13 reviewers in parallel...
+Claude: Dispatching all 9 default reviewers plus triggered conditional specialists in parallel...
         [Launches ring:code-reviewer, ring:business-logic-reviewer, ring:security-reviewer,
-         ring:test-reviewer, ring:nil-safety-reviewer, ring:consequences-reviewer,
+         ring:test-reviewer, ring:nil-safety-reviewer,
          ring:dead-code-reviewer, ring:performance-reviewer, ring:multi-tenant-reviewer,
-         ring:lib-commons-reviewer, ring:lib-observability-reviewer,
-         ring:lib-systemplane-reviewer, ring:lib-streaming-reviewer simultaneously]
+         ring:lib-commons-reviewer simultaneously]
+        Conditional specialists trigger only when the diff touches their stack:
+        lib-observability, lib-systemplane, or lib-streaming.
 
         Code reviewer: PASS. Clean architecture, good tests.
         Business reviewer: FAIL. Missing password reset flow (HIGH severity).
         Security reviewer: FAIL. JWT secret hardcoded (CRITICAL severity).
         Test reviewer: PASS. Good coverage, assertions well-structured.
         Nil-safety reviewer: PASS. No unguarded nil dereferences found.
-        Consequences reviewer: PASS. No downstream breakage detected.
         Performance reviewer: PASS. No hotspots or goroutine leaks found.
         Multi-tenant reviewer: PASS. No multi-tenant code in scope.
-        lib-commons reviewer: PASS. Correct usage of lib-commons/resilience, no reinvented wheels detected.
-        lib-observability reviewer: PASS. Tracing and metrics flow through lib-observability bootstrap.
-        lib-systemplane reviewer: PASS. No hot-reloadable knobs in scope.
-        lib-streaming reviewer: PASS. No event emission in scope.
+        lib-commons reviewer: PASS. Correct shared-library usage, no reinvented wheels detected.
 
         Aggregating issues by severity:
         - CRITICAL: JWT secret hardcoded in auth.ts:42
         - HIGH: Password reset flow missing from requirements
 
-        Dispatching fix subagent to address Critical/High issues...
-        [Fixes applied]
-
-        Re-running all 13 reviewers in parallel...
-        All reviewers: PASS. Ready for production.
+        Review report complete. No files changed by reviewers.
+        Fixes require a separate implementation step, then a new review run.
 ```
 
 **Key benefits:**
 
 - **All reviewers run simultaneously** (not sequential)
 - **Comprehensive** - Get all feedback at once, easier to prioritize
-- **Tech debt tracking** - Low/Cosmetic issues tracked with TODO/FIXME comments in code
-- **Model-specific** - All reviewers run on for deep analysis
+- **Report-only boundary** - Reviewers report findings; remediation is a separate step
+- **Specialized lanes** - Each reviewer owns a clear domain to avoid duplicate slop
 
 ## 🏗️ Architecture
 
@@ -490,20 +483,13 @@ ring/                                  # Monorepo root
 │   │   ├── hooks.json              # Hook configuration
 │   │   ├── session-start.sh        # Loads skills at startup
 │   │   └── generate-skills-ref.py  # Auto-generates quick reference
-│   ├── agents/                      # 10 specialized agents
-│   │   ├── code-reviewer.md             # Foundation review (`ring:code-reviewer`)
-│   │   ├── business-logic-reviewer.md   # Correctness review (`ring:business-logic-reviewer`)
-│   │   ├── security-reviewer.md         # Safety review (`ring:security-reviewer`)
-│   │   ├── test-reviewer.md             # Test quality review (`ring:test-reviewer`)
-│   │   ├── nil-safety-reviewer.md       # Nil/null safety review (`ring:nil-safety-reviewer`)
-│   │   ├── consequences-reviewer.md     # Ripple effect review (`ring:consequences-reviewer`)
-│   │   ├── dead-code-reviewer.md        # Dead code analysis (`ring:dead-code-reviewer`)
+│   ├── agents/                      # 3 planning/analysis agents
 │   │   ├── review-slicer.md             # Review slicing for large PRs (`ring:review-slicer`)
 │   │   ├── write-plan.md                # Implementation planning (`ring:write-plan`)
 │   │   └── codebase-explorer.md         # Deep architecture analysis (`ring:codebase-explorer`)
 │   └── docs/                       # Documentation
-├── dev-team/                      # Developer Agents plugin (ring-dev-team) - 31 skills, 18 agents
-│   └── agents/                      # 18 specialized developer agents
+├── dev-team/                      # Developer Agents plugin (ring-dev-team) - 37 skills, 24 agents
+│   └── agents/                      # 24 specialized developer/reviewer agents
 │       ├── backend-engineer-golang.md       # Go backend specialist (`ring:backend-engineer-golang`)
 │       ├── backend-engineer-typescript.md   # TypeScript/Node.js backend specialist (`ring:backend-engineer-typescript`)
 │       ├── frontend-bff-engineer-typescript.md # BFF & React/Next.js specialist (`ring:frontend-bff-engineer-typescript`)
@@ -511,10 +497,16 @@ ring/                                  # Monorepo root
 │       ├── frontend-designer.md             # Visual design specialist (`ring:frontend-designer`)
 │       ├── frontend-engineer.md             # Frontend engineer (`ring:frontend-engineer`)
 │       ├── helm-engineer.md                 # Helm chart specialist (`ring:helm-engineer`)
-│       ├── lib-commons-reviewer.md          # lib-commons non-observability usage review (`ring:lib-commons-reviewer`)
-│       ├── lib-observability-reviewer.md    # lib-observability adoption review (`ring:lib-observability-reviewer`)
-│       ├── lib-streaming-reviewer.md        # lib-streaming adoption review (`ring:lib-streaming-reviewer`)
-│       ├── lib-systemplane-reviewer.md      # lib-systemplane adoption review (`ring:lib-systemplane-reviewer`)
+│       ├── code-reviewer.md                 # Foundation review (`ring:code-reviewer`)
+│       ├── business-logic-reviewer.md       # Correctness review (`ring:business-logic-reviewer`)
+│       ├── security-reviewer.md             # Safety review (`ring:security-reviewer`)
+│       ├── test-reviewer.md                 # Test quality review (`ring:test-reviewer`)
+│       ├── nil-safety-reviewer.md           # Nil/null safety review (`ring:nil-safety-reviewer`)
+│       ├── dead-code-reviewer.md            # Dead code analysis (`ring:dead-code-reviewer`)
+│       ├── lib-commons-reviewer.md          # lib-commons usage review (`ring:lib-commons-reviewer`)
+│       ├── lib-observability-reviewer.md    # Conditional observability review (`ring:lib-observability-reviewer`)
+│       ├── lib-systemplane-reviewer.md      # Conditional runtime-config review (`ring:lib-systemplane-reviewer`)
+│       ├── lib-streaming-reviewer.md        # Conditional event producer review (`ring:lib-streaming-reviewer`)
 │       ├── multi-tenant-reviewer.md         # Multi-tenant usage review (`ring:multi-tenant-reviewer`)
 │       ├── performance-reviewer.md          # Performance review (`ring:performance-reviewer`)
 │       ├── prompt-quality-reviewer.md       # Agent quality reviewer (`ring:prompt-quality-reviewer`)

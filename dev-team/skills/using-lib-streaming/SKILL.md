@@ -45,7 +45,7 @@ Reference mode:
 1. *Where in this codebase are we doing event publication the wrong way?* (Sweep Mode)
 2. *What is the right lib-streaming API for the thing I am building right now?* (Reference Mode)
 
-`ring:dev-streaming-instrumentation` is the **end-to-end implementation orchestrator** — it consumes a validated instrumentation map, walks a 13-gate cycle (catalog, producer bootstrap, emit instrumentation, outbox wiring, HTTP manifest, NoopEmitter fallback, integration + chaos tests, 13-reviewer parallel review), and never lets the caller skip TDD. The two are complementary, not overlapping:
+`ring:dev-streaming-instrumentation` is the **end-to-end implementation orchestrator** — it consumes a validated instrumentation map, walks a 13-gate cycle (catalog, producer bootstrap, emit instrumentation, outbox wiring, HTTP manifest, NoopEmitter fallback, integration + chaos tests, 9 default reviewers plus triggered specialists), and never lets the caller skip TDD. The two are complementary, not overlapping:
 
 - **Sweep finds the work.** Outputs are file:line replacement candidates and a task backlog.
 - **Implementation does the work.** Consumes the catalog + map, drives gates, owns the agent dispatch.

@@ -118,7 +118,7 @@ Insert after every 3-5 tasks:
 ```markdown
 ### Task N: Code Review
 
-1. **REQUIRED SUB-SKILL:** Use ring:codereview — dispatch all reviewers in parallel
+1. **REQUIRED SUB-SKILL:** Use ring:codereview — dispatch 9 default reviewers plus triggered specialists in parallel
 2. **Handle findings by severity:** see ring:codereview severity rules
 3. **Proceed only when:** zero Critical/High/Medium issues remain
 ```

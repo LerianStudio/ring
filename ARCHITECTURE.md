@@ -13,7 +13,7 @@
 
 ## Overview
 
-Ring is a **Claude Code plugin marketplace** that provides a comprehensive skills library and workflow system with **4 active plugins** (69 skills, 35 agents). It extends Claude Code's capabilities through structured, reusable patterns that enforce proven software engineering practices across the software delivery value chain: Product Planning → Development → Documentation.
+Ring is a **Claude Code plugin marketplace** that provides a comprehensive skills library and workflow system with **4 active plugins** (75 skills, 34 agents). It extends Claude Code's capabilities through structured, reusable patterns that enforce proven software engineering practices across the software delivery value chain: Product Planning → Development → Documentation.
 
 ### Architecture Philosophy
 
@@ -33,7 +33,7 @@ Ring operates on three core principles:
 │  │                          Ring Marketplace                                  │  │
 │  │  ┌──────────────────────┐  ┌──────────────────────┐                       │  │
 │  │  │ ring-default         │  │ ring-dev-team        │                       │  │
-│  │  │ Skills(14) Agents(10)│  │ Skills(31) Agents(18)│                       │  │
+│  │  │ Skills(14) Agents(3) │  │ Skills(37) Agents(24)│                       │  │
 │  │  │ Hooks/Lib            │  │                      │                       │  │
 │  │  └──────────────────────┘  └──────────────────────┘                       │  │
 │  │  ┌──────────────────────┐  ┌──────────────────────┐                       │  │
@@ -66,8 +66,8 @@ _Versions managed in `.claude-plugin/marketplace.json`_
 
 | Plugin               | Description                          | Components                       |
 | -------------------- | ------------------------------------ | -------------------------------- |
-| **ring-default**     | Core skills library                  | 14 skills, 10 agents              |
-| **ring-dev-team**    | Developer agents                     | 31 skills, 18 agents              |
+| **ring-default**     | Core skills library                  | 14 skills, 3 agents               |
+| **ring-dev-team**    | Developer agents                     | 37 skills, 24 agents              |
 | **ring-pm-team**     | Product planning workflows           | 18 skills, 4 agents               |
 | **ring-tw-team**     | Technical writing specialists        | 6 skills, 3 agents                |
 
@@ -105,13 +105,6 @@ skills/
 
 ```
 default/agents/
-├── code-reviewer.md           # Foundation review (`ring:code-reviewer`)
-├── business-logic-reviewer.md # Correctness review (`ring:business-logic-reviewer`)
-├── security-reviewer.md       # Safety review (`ring:security-reviewer`)
-├── test-reviewer.md           # Test coverage and quality review (`ring:test-reviewer`)
-├── nil-safety-reviewer.md     # Null/nil safety analysis (`ring:nil-safety-reviewer`)
-├── consequences-reviewer.md   # Ripple effect review (`ring:consequences-reviewer`)
-├── dead-code-reviewer.md      # Dead code analysis (`ring:dead-code-reviewer`)
 ├── review-slicer.md           # Thematic file grouping for large PRs (`ring:review-slicer`)
 ├── write-plan.md              # Implementation planning (`ring:write-plan`)
 └── codebase-explorer.md       # Deep architecture analysis (`ring:codebase-explorer`)
@@ -128,10 +121,16 @@ dev-team/agents/
 ├── frontend-designer.md               # Visual design specialist (`ring:frontend-designer`)
 ├── frontend-engineer.md               # Frontend engineer (`ring:frontend-engineer`)
 ├── helm-engineer.md                   # Helm chart specialist (`ring:helm-engineer`)
-├── lib-commons-reviewer.md            # lib-commons non-observability usage review (`ring:lib-commons-reviewer`)
-├── lib-observability-reviewer.md      # lib-observability adoption review (`ring:lib-observability-reviewer`)
-├── lib-streaming-reviewer.md          # lib-streaming adoption review (`ring:lib-streaming-reviewer`)
-├── lib-systemplane-reviewer.md        # lib-systemplane adoption review (`ring:lib-systemplane-reviewer`)
+├── code-reviewer.md                   # Foundation review (`ring:code-reviewer`)
+├── business-logic-reviewer.md         # Correctness review (`ring:business-logic-reviewer`)
+├── security-reviewer.md               # Safety review (`ring:security-reviewer`)
+├── test-reviewer.md                   # Test coverage and quality review (`ring:test-reviewer`)
+├── nil-safety-reviewer.md             # Null/nil safety analysis (`ring:nil-safety-reviewer`)
+├── dead-code-reviewer.md              # Dead code analysis (`ring:dead-code-reviewer`)
+├── lib-commons-reviewer.md            # lib-commons usage review (`ring:lib-commons-reviewer`)
+├── lib-observability-reviewer.md      # Conditional observability review (`ring:lib-observability-reviewer`)
+├── lib-systemplane-reviewer.md        # Conditional runtime-config review (`ring:lib-systemplane-reviewer`)
+├── lib-streaming-reviewer.md          # Conditional event producer review (`ring:lib-streaming-reviewer`)
 ├── multi-tenant-reviewer.md           # Multi-tenant usage review (`ring:multi-tenant-reviewer`)
 ├── performance-reviewer.md              # Performance review (`ring:performance-reviewer`)
 ├── prompt-quality-reviewer.md         # Prompt quality specialist (`ring:prompt-quality-reviewer`)
@@ -145,7 +144,7 @@ dev-team/agents/
 
 - Invoked via Claude's `Task` tool with `subagent_type`
 - Invoked with specialized subagent_type for domain-specific analysis
-- Review agents run in parallel (13 reviewers dispatch simultaneously via `ring:codereview` skill)
+- Review agents run in parallel (9 defaults plus triggered specialists dispatch simultaneously via `ring:codereview` skill)
 - Developer agents provide specialized domain expertise
 - Return structured reports with severity-based findings
 
@@ -349,19 +348,15 @@ sequenceDiagram
     participant ring:security-reviewer
     participant ring:test-reviewer
     participant ring:nil-safety-reviewer
-    participant ring:consequences-reviewer
     participant DCR as ring:dead-code-reviewer
     participant PR as ring:performance-reviewer
     participant MTR as ring:multi-tenant-reviewer
     participant LCR as ring:lib-commons-reviewer
-    participant LOR as ring:lib-observability-reviewer
-    participant LSR as ring:lib-systemplane-reviewer
-    participant LST as ring:lib-streaming-reviewer
 
     User->>Claude: Use ring:codereview skill
     Note over Claude: Skill provides<br/>parallel review workflow
 
-    Claude->>Task Tool: Dispatch 13 parallel tasks
+    Claude->>Task Tool: Dispatch 9 default parallel tasks
 
     par Parallel Execution
         Task Tool->>ring:code-reviewer: Review architecture
@@ -374,8 +369,6 @@ sequenceDiagram
         and
         Task Tool->>ring:nil-safety-reviewer: Review nil safety
         and
-        Task Tool->>ring:consequences-reviewer: Review ripple effects
-        and
         Task Tool->>DCR: Review dead code
         and
         Task Tool->>PR: Review performance
@@ -383,12 +376,10 @@ sequenceDiagram
         Task Tool->>MTR: Review multi-tenant usage
         and
         Task Tool->>LCR: Review lib-commons usage
-        and
-        Task Tool->>LOR: Review lib-observability adoption
-        and
-        Task Tool->>LSR: Review lib-systemplane adoption
-        and
-        Task Tool->>LST: Review lib-streaming adoption
+    end
+
+    opt Conditional specialists triggered by changed stack
+        Task Tool->>Task Tool: Dispatch lib-observability/lib-systemplane/lib-streaming reviewers in same batch
     end
 
     ring:code-reviewer-->>Claude: Return findings
@@ -396,14 +387,10 @@ sequenceDiagram
     ring:security-reviewer-->>Claude: Return findings
     ring:test-reviewer-->>Claude: Return findings
     ring:nil-safety-reviewer-->>Claude: Return findings
-    ring:consequences-reviewer-->>Claude: Return findings
     DCR-->>Claude: Return findings
     PR-->>Claude: Return findings
     MTR-->>Claude: Return findings
     LCR-->>Claude: Return findings
-    LOR-->>Claude: Return findings
-    LSR-->>Claude: Return findings
-    LST-->>Claude: Return findings
 
     Note over Claude: Aggregate & prioritize by severity
     Claude->>User: Consolidated report
@@ -462,24 +449,24 @@ User Request → ring:using-ring check → Relevant skill?
 
 ```
 Review Request → ring:codereview skill → ring:review-slicer (classify)
-    ├─ Small/focused PR → 13 Tasks in parallel (full diff)
+    ├─ Small/focused PR → 9 default Tasks in parallel (full diff)
     └─ Large/multi-theme PR → For EACH slice:
         ├─ ring:code-reviewer            ─┐
         ├─ ring:business-logic-reviewer   │
         ├─ ring:security-reviewer         │
         ├─ ring:test-reviewer             │
         ├─ ring:nil-safety-reviewer       │
-        ├─ ring:dead-code-reviewer        │
-        ├─ ring:consequences-reviewer     ┼─→ Merge + dedup → Handle by severity
+        ├─ ring:dead-code-reviewer        ┼─→ Merge + dedup → Handle by severity
         ├─ ring:performance-reviewer      │
         ├─ ring:multi-tenant-reviewer     │
-        ├─ ring:lib-commons-reviewer      │
-        ├─ ring:lib-observability-reviewer│
-        ├─ ring:lib-systemplane-reviewer  │
-        └─ ring:lib-streaming-reviewer   ─┘
+        └─ ring:lib-commons-reviewer     ─┘
+
+        Conditional specialists join the same batch only when triggered:
+        ring:lib-observability-reviewer, ring:lib-systemplane-reviewer,
+        ring:lib-streaming-reviewer
 ```
 
-**Implementation:** The `ring:review-slicer` agent classifies files into thematic slices for large PRs (15+ files). For each slice, all 13 reviewers dispatch in parallel via a single message with 13 Task tool calls. Results are merged and deduplicated before consolidation. Small PRs skip slicing entirely (zero overhead).
+**Implementation:** The `ring:review-slicer` agent classifies files into thematic slices for large PRs (15+ files). For each slice, the diagrammed 9 default reviewers always dispatch in parallel via a single message. Conditional specialists (`ring:lib-observability-reviewer`, `ring:lib-systemplane-reviewer`, `ring:lib-streaming-reviewer`) join that same batch only when their triggers match. Results are merged and deduplicated before consolidation. Small PRs skip slicing entirely (zero overhead).
 
 ### Pattern 3: Progressive Skill Execution
 
@@ -700,15 +687,15 @@ _Component counts reflect current state; plugin versions managed in `.claude-plu
 | ------------------------- | ---------- | ---------------------- |
 | Active Plugins            | 4          | All plugin directories |
 | Skills (ring-default)     | 14         | `default/skills/`      |
-| Skills (ring-dev-team)    | 31         | `dev-team/skills/`     |
+| Skills (ring-dev-team)    | 37         | `dev-team/skills/`     |
 | Skills (ring-pm-team)     | 18         | `pm-team/skills/`      |
 | Skills (ring-tw-team)     | 6          | `tw-team/skills/`      |
-| **Total Skills**          | **69**     | **All plugins**        |
-| Agents (ring-default)     | 10         | `default/agents/`      |
-| Agents (ring-dev-team)    | 18         | `dev-team/agents/`     |
+| **Total Skills**          | **75**     | **All plugins**        |
+| Agents (ring-default)     | 3          | `default/agents/`      |
+| Agents (ring-dev-team)    | 24         | `dev-team/agents/`     |
 | Agents (ring-pm-team)     | 4          | `pm-team/agents/`      |
 | Agents (ring-tw-team)     | 3          | `tw-team/agents/`      |
-| **Total Agents**          | **35**     | **All plugins**        |
+| **Total Agents**          | **34**     | **All plugins**        |
 | Hooks                     | Per plugin | `{plugin}/hooks/`      |
 
 The system achieves these goals through clear component separation, structured workflows, automatic context management, and a modular marketplace architecture, creating a robust foundation for AI-assisted software development.

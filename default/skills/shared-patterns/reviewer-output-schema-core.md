@@ -18,7 +18,6 @@ All reviewers MUST include these sections in this order:
 | `## High Issues` | Detailed findings | If count > 0 |
 | `## Medium Issues` | Detailed findings | If count > 0 |
 | `## Low Issues` | Brief list | If count > 0 |
-| `## What Was Done Well` | Positive observations | YES |
 | `## Next Steps` | Actions based on verdict | YES |
 
 ---
@@ -84,14 +83,6 @@ All reviewers MUST include these sections in this order:
 
 ---
 
-## What Was Done Well
-
-[ALWAYS acknowledge good practices observed - this section is REQUIRED]
-- [Positive observation 1]
-- [Positive observation 2]
-
----
-
 ## Next Steps
 
 **If PASS:**
@@ -101,7 +92,7 @@ All reviewers MUST include these sections in this order:
 
 **If FAIL:**
 - Critical/High/Medium issues must be fixed
-- Low issues: track with TODO(review) comments
+- Low issues: include only if actionable and small enough to justify the reader's attention
 - Re-run ALL reviewers after fixes (not just this one)
 
 **If NEEDS DISCUSSION:**
@@ -131,11 +122,11 @@ Every issue MUST include:
 
 | Verdict | When to Use |
 |---------|-------------|
-| **PASS** | 0 Critical AND < 3 High issues |
-| **FAIL** | 1+ Critical OR 3+ High issues |
+| **PASS** | 0 eligible findings |
+| **FAIL** | 1+ eligible findings |
 | **NEEDS_DISCUSSION** | Cannot determine correctness without clarification |
 
-**HARD GATE:** You CANNOT mark PASS if there are Critical issues or 3+ High issues.
+**HARD GATE:** You CANNOT mark PASS if you report any Critical, High, Medium, or Low issue.
 
 ---
 

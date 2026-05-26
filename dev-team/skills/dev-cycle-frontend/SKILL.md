@@ -51,7 +51,7 @@ All code changes go through `Task(subagent_type=...)`. Announce at start: "Using
 | Gate | Cadence | Skill | Agent | Purpose |
 |------|---------|-------|-------|---------|
 | 0 | subtask | ring:dev-implementation | ring:frontend-engineer / ring:ui-engineer / ring:frontend-bff-engineer-typescript | TDD, coverage, accessibility, visual/E2E/perf checks, local runtime |
-| 7 | task | ring:codereview | 13 parallel reviewers via ring:codereview | Code review |
+| 7 | task | ring:codereview | 9 defaults + triggered specialists via ring:codereview | Code review |
 | 8 | subtask | ring:dev-validation | User | Acceptance sign-off |
 
 All listed gates are MANDATORY. No exceptions.
@@ -111,14 +111,14 @@ Sub-skill MUST be loaded before dispatching the agent.
 
 ## Gate 7: Reviewers
 
-Invoke `Skill("ring:codereview")`. The codereview skill dispatches its 13-reviewer pool in parallel and applies its own pass/fail rules.
+Invoke `Skill("ring:codereview")`. The codereview skill dispatches its 9 default reviewers plus triggered conditional specialists in parallel and applies its own pass/fail rules.
 
 ## Gate Completion Criteria
 
 | Gate | Required for COMPLETE |
 |------|-----------------------|
 | 0 | TDD RED captured (behavioral) + GREEN passes; visual: implementation complete |
-| 7 | ring:codereview PASS (all 13 reviewers) |
+| 7 | ring:codereview PASS (all 9 defaults and triggered specialists) |
 | 8 | Explicit "APPROVED" from user |
 
 Former Gates 1-6 checks are owned by Gate 0 implementation and local verification.

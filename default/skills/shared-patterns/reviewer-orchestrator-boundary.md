@@ -28,14 +28,10 @@ This document defines the mandatory separation of responsibilities between revie
 │ • ring:security-reviewer     │          │ • ring:frontend-engineer            │
 │ • ring:test-reviewer         │          │                                 │
 │ • ring:nil-safety-reviewer   │          │                                 │
-│ • ring:consequences-reviewer │          │                                 │
 │ • ring:dead-code-reviewer    │          │                                 │
 │ • ring:performance-reviewer  │          │                                 │
 │ • ring:multi-tenant-reviewer │          │                                 │
 │ • ring:lib-commons-reviewer  │          │                                 │
-│ • ring:lib-observability-reviewer│      │                                 │
-│ • ring:lib-systemplane-reviewer│        │                                 │
-│ • ring:lib-streaming-reviewer│          │                                 │
 │                             │          │                                 │
 │ OUTPUT: Report              │          │ OUTPUT: Code changes            │
 │ ACTION: NONE                │          │ ACTION: Edit, Create, Delete    │
@@ -91,7 +87,7 @@ This document defines the mandatory separation of responsibilities between revie
 - Enables proper accountability and learning
 
 ### 4. Parallel Execution
-- Reviewers run in parallel (code, business-logic, security, test, nil-safety, dead-code)
+- Reviewers run in parallel (code, business-logic, security, test, nil-safety, dead-code, performance, multi-tenant, lib-commons)
 - If reviewers also fixed, they'd need sequential execution
 - Separation enables faster review cycles
 
@@ -152,12 +148,12 @@ See [shared-patterns/reviewer-orchestrator-boundary.md](../skills/shared-pattern
 
 The `ring:dev-cycle` skill enforces this boundary at Gate 8 (Review):
 
-1. **Dispatch all 13 reviewers in parallel** (code, business-logic, security, test, nil-safety, consequences, dead-code, performance, multi-tenant, lib-commons, lib-observability, lib-systemplane, lib-streaming)
+1. **Dispatch the selected review pool in parallel**: all 9 default reviewers (code, business-logic, security, test, nil-safety, dead-code, performance, multi-tenant, lib-commons), plus triggered conditional specialists in the same batch
 2. **Collect structured reports** from each reviewer
 3. **If any reviewer returns FAIL:**
    - Extract issues from report
    - Dispatch appropriate implementation agent with fix instructions
-   - Re-run ALL reviewers after fix
-4. **Only proceed to Gate 9** when all reviewers return PASS
+   - Re-run the selected review pool after fix
+4. **Only proceed to Gate 9** when the selected review pool returns PASS
 
 This ensures fixes are always reviewed before proceeding.

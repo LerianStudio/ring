@@ -147,6 +147,10 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
           "iterations": 1,
           "timestamp": "ISO timestamp",
           "duration_ms": 0,
+          "default_reviewers_passed": "9/9",
+          "conditional_specialists_triggered": [],
+          "conditional_specialists_passed": "0/0",
+          "selected_reviewer_count": 9,
           "code_reviewer": {
             "agent": "ring:code-reviewer",
             "output": "...",
@@ -188,6 +192,72 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
               "non_compliant": 0,
               "gaps": []
             }
+          },
+          "test_reviewer": {
+            "agent": "ring:test-reviewer",
+            "output": "...",
+            "verdict": "PASS",
+            "timestamp": "...",
+            "issues": []
+          },
+          "nil_safety_reviewer": {
+            "agent": "ring:nil-safety-reviewer",
+            "output": "...",
+            "verdict": "PASS",
+            "timestamp": "...",
+            "issues": []
+          },
+          "dead_code_reviewer": {
+            "agent": "ring:dead-code-reviewer",
+            "output": "...",
+            "verdict": "PASS",
+            "timestamp": "...",
+            "issues": []
+          },
+          "performance_reviewer": {
+            "agent": "ring:performance-reviewer",
+            "output": "...",
+            "verdict": "PASS",
+            "timestamp": "...",
+            "issues": []
+          },
+          "multi_tenant_reviewer": {
+            "agent": "ring:multi-tenant-reviewer",
+            "output": "...",
+            "verdict": "PASS",
+            "timestamp": "...",
+            "issues": []
+          },
+          "lib_commons_reviewer": {
+            "agent": "ring:lib-commons-reviewer",
+            "output": "...",
+            "verdict": "PASS",
+            "timestamp": "...",
+            "issues": []
+          },
+          "lib_observability_reviewer": {
+            "agent": "ring:lib-observability-reviewer",
+            "optional": true,
+            "output": "...",
+            "verdict": "PASS",
+            "timestamp": "...",
+            "issues": []
+          },
+          "lib_systemplane_reviewer": {
+            "agent": "ring:lib-systemplane-reviewer",
+            "optional": true,
+            "output": "...",
+            "verdict": "PASS",
+            "timestamp": "...",
+            "issues": []
+          },
+          "lib_streaming_reviewer": {
+            "agent": "ring:lib-streaming-reviewer",
+            "optional": true,
+            "output": "...",
+            "verdict": "PASS",
+            "timestamp": "...",
+            "issues": []
           }
         },
         "validation": {

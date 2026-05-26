@@ -187,7 +187,7 @@ Status icons: PASS (>=7), WARN (4-6), FAIL (<4), N/A (conditional not active)
 
 ## Detailed Findings by Category
 
-> This section provides exhaustive per-dimension findings. every dimension MUST include: a score breakdown, all issues organized by severity (CRITICAL first, then HIGH, MEDIUM, LOW), code evidence for each issue, and positive findings. Do not skip any dimension.
+> This section provides exhaustive per-dimension findings. every dimension MUST include: a score breakdown, all issues organized by severity (CRITICAL first, then HIGH, MEDIUM, LOW), and code evidence for each issue. Do not skip any dimension.
 
 ---
 
@@ -268,18 +268,9 @@ Status icons: PASS (>=7), WARN (4-6), FAIL (<4), N/A (conditional not active)
 
 - **L1:** {One-line description with fix guidance}
 
-##### What Was Done Well
-
-{List positive findings. If the dimension is fully compliant, describe what was correctly implemented. Minimum 1 item.}
-
-- {Positive finding 1 — cite specific file or pattern}
-- {Positive finding 2}
-
----
-
 #### Dimension 2: Error Framework
 
-{SAME structure as Dimension 1 — property table, summary, severity-grouped issues, positive findings}
+{SAME structure as Dimension 1 — property table, summary, severity-grouped issues}
 
 ---
 
@@ -1030,4 +1021,3 @@ If either condition is missing, mark M2M section as N/A and do not deduct score.
 1. ...
 ```
 ```
-

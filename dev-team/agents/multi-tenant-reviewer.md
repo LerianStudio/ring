@@ -30,6 +30,20 @@ You are a Senior Multi-Tenant Reviewer auditing correct usage of Lerian's `lib-c
 For Go: Read `dev-team/docs/standards/golang/index.md` and load relevant sections per the index's "Load When" descriptions for multi-tenancy, dispatch layer, tenantId propagation, and tenant isolation.
 For TypeScript: Read `dev-team/docs/standards/typescript.md` (single monolith — load relevant `## ` sections per your scope).
 
+## Blocker Criteria
+
+| Situation | Action |
+|-----------|--------|
+| Possible cross-tenant data access | STOP. Flag CRITICAL. Cannot PASS. |
+| Tenant ownership cannot be proven from the diff/context | STOP and return `NEEDS_DISCUSSION` |
+| Finding lacks tenant leak scenario and file:line evidence | Do not report it |
+
+Verdict contract: `PASS` only with zero eligible findings; any eligible issue means `FAIL`; missing context means `NEEDS_DISCUSSION`. Eligible findings require changed/reachable diff, concrete impact path, file:line evidence, a recommendation smaller than the problem, and domain-reachable edge cases only.
+
+## Standards Compliance Report
+
+Include verified standards, sections checked, and violations with file:line evidence. Mark non-applicable sections `N/A` with a reason.
+
 ## When Review Is Not Needed (Skip Triggers)
 
 Emit `VERDICT: PASS` immediately when diff does NOT touch:
@@ -120,8 +134,10 @@ Emit `VERDICT: PASS` immediately when diff does NOT touch:
 | Gate 5.5: M2M Secret Manager | yes/no | COMPLIANT/NON/N/A |
 | Gate 6: RabbitMQ Two-Layer | yes/no | COMPLIANT/NON/N/A |
 
-## What Was Done Well
-- [Specific correct pattern with file:line]
+## Standards Compliance Report
+| Standard | Section | Status | Evidence |
+|----------|---------|--------|----------|
+| [index/module] | [section] | PASS/FAIL/N/A | [file:line or reason] |
 
 ## Next Steps
 [PASS: "No action required." | FAIL: ordered fix list with file:line]

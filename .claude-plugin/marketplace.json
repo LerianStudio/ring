@@ -1,6 +1,6 @@
 {
   "name": "ring",
-  "description": "Lerian Studio plugin marketplace: Core software engineering skills (TDD, debugging, code review), specialized developer agents (Backend, DevOps, Frontend, QA, SRE) plus 13 specialized code reviewers, product planning workflows (10-gate pre-dev system), and technical writing specialists for documentation.",
+  "description": "Lerian Studio plugin marketplace: Core software engineering skills (TDD, debugging, code review), specialized developer agents (Backend, DevOps, Frontend, QA, SRE) plus 12 code-review reviewers (9 default hard-gate reviewers and 3 conditional stack specialists), product planning workflows (10-gate pre-dev system), and technical writing specialists for documentation.",
   "owner": {
     "name": "Presenter Name",
     "email": "fred@fredamaral.com.br"
@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "ring-default",
-      "description": "Core skills library for the Lerian Team: TDD, code review, collaboration patterns, and proven techniques. Features parallel 13-reviewer code review system and workflow orchestration. 14 essential skills for software engineering excellence.",
+      "description": "Core skills library for the Lerian Team: TDD, code review, collaboration patterns, and proven techniques. Features parallel code review orchestration with 9 default reviewers plus triggered conditional specialists. 14 essential skills for software engineering excellence.",
       "version": "1.32.1",
       "source": "./default",
       "homepage": "https://github.com/lerianstudio/ring/tree/default",
@@ -29,7 +29,7 @@
     },
     {
       "name": "ring-dev-team",
-      "description": "18 specialized developer agents + 38 development skills: Backend 10-gate dev cycle + Frontend 9-gate dev cycle (accessibility, visual, E2E, performance) + Frontend refactoring + whole-codebase simplification sweep + delivery verification + service discovery + cycle management + lib-streaming end-to-end instrumentation. Go/TypeScript Backend specialists, DevOps Engineer, Frontend TypeScript specialist, Frontend Designer, QA Backend Analyst, QA Frontend Analyst, SRE, Multi-Tenant Reviewer, lib-commons Reviewer, lib-observability Reviewer, lib-systemplane Reviewer, and lib-streaming Reviewer. Complete development team coverage with TDD, observability, and security best practices.",
+      "description": "24 specialized developer agents + 37 development skills: Backend 10-gate dev cycle + Frontend 9-gate dev cycle (accessibility, visual, E2E, performance) + Frontend refactoring + whole-codebase simplification sweep + delivery verification + service discovery + cycle management + lib-streaming end-to-end instrumentation. Includes backend/frontend specialists, DevOps, QA, SRE, 9 default code-review reviewers, and 3 conditional stack specialists consolidated into the dev-team plugin. Complete development team coverage with TDD, observability, and security best practices.",
       "version": "1.71.1",
       "source": "./dev-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/dev-team",
@@ -57,9 +57,7 @@
         "simplify",
         "multi-tenant",
         "lib-commons",
-        "lib-observability",
-        "lib-systemplane",
-        "lib-streaming"
+        "code-review"
       ]
     },
     {

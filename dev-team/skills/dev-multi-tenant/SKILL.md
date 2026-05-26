@@ -71,7 +71,7 @@ Isolation: `tenantId` from JWT → dispatch layer middleware → database-per-te
 | 6 | RabbitMQ Multi-Tenant | Skip if no RabbitMQ | ring:backend-engineer-golang |
 | 7 | Metrics & Backward Compat | Always | ring:backend-engineer-golang |
 | 8 | Tests | Always | ring:backend-engineer-golang |
-| 9 | Code Review | Always | 13 parallel reviewers |
+| 9 | Code Review | Always | 9 defaults + triggered specialists in parallel |
 | 10 | User Validation | Always | User |
 | 11 | Activation Guide | Always | Orchestrator |
 

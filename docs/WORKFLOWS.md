@@ -149,9 +149,9 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 
 ## Creating Review Agents
 
-1. Add to `default/agents/your-reviewer.md` with a documented `## Output Format` body section (see [AGENT_DESIGN.md](AGENT_DESIGN.md))
+1. Add to `dev-team/agents/your-reviewer.md` with a documented `## Output Format` body section (see [AGENT_DESIGN.md](AGENT_DESIGN.md))
 
-2. Reference in `default/skills/codereview/SKILL.md` (Reviewers table, lines 33-46)
+2. Reference in `default/skills/codereview/SKILL.md` under `Default Reviewers` or `Conditional Specialist Reviewers`
 
 3. Dispatch via Task tool:
 
@@ -207,7 +207,7 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 - Gate 9 — Validation
 
 **Task cadence** (runs once per task, after all subtasks complete Gate 0 and Gate 9):
-- Gate 8 — Review (13 parallel reviewers on cumulative task diff)
+- Gate 8 — Review (9 default reviewers plus triggered specialists on cumulative task diff)
 
 **Cycle cadence** (runs once per cycle at the end):
 - Multi-Tenant Verify
@@ -220,7 +220,7 @@ Inputs for task-cadence gates receive UNION of changed files across all subtasks
 
 ## Parallel Code Review
 
-### Instead of sequential (260 min)
+### Instead of sequential (180 min)
 
 ```python
 review1  = Task("ring:code-reviewer")               # 20 min
@@ -228,14 +228,10 @@ review2  = Task("ring:business-logic-reviewer")     # 20 min
 review3  = Task("ring:security-reviewer")           # 20 min
 review4  = Task("ring:test-reviewer")               # 20 min
 review5  = Task("ring:nil-safety-reviewer")         # 20 min
-review6  = Task("ring:consequences-reviewer")       # 20 min
-review7  = Task("ring:dead-code-reviewer")          # 20 min
-review8  = Task("ring:performance-reviewer")        # 20 min
-review9  = Task("ring:multi-tenant-reviewer")       # 20 min
-review10 = Task("ring:lib-commons-reviewer")        # 20 min
-review11 = Task("ring:lib-observability-reviewer")  # 20 min
-review12 = Task("ring:lib-systemplane-reviewer")    # 20 min
-review13 = Task("ring:lib-streaming-reviewer")      # 20 min
+review6  = Task("ring:dead-code-reviewer")          # 20 min
+review7  = Task("ring:performance-reviewer")        # 20 min
+review8  = Task("ring:multi-tenant-reviewer")       # 20 min
+review9  = Task("ring:lib-commons-reviewer")        # 20 min
 ```
 
 ### Run parallel (20 min total)
@@ -245,22 +241,18 @@ Task.parallel([
     ("ring:code-reviewer", prompt),
     ("ring:business-logic-reviewer", prompt),
     ("ring:security-reviewer", prompt),
-    ("ring:nil-safety-reviewer", prompt),
     ("ring:test-reviewer", prompt),
-    ("ring:consequences-reviewer", prompt),
+    ("ring:nil-safety-reviewer", prompt),
     ("ring:dead-code-reviewer", prompt),
     ("ring:performance-reviewer", prompt),
     ("ring:multi-tenant-reviewer", prompt),
-    ("ring:lib-commons-reviewer", prompt),
-    ("ring:lib-observability-reviewer", prompt),
-    ("ring:lib-systemplane-reviewer", prompt),
-    ("ring:lib-streaming-reviewer", prompt)
-])  # Single message, 13 tool calls
+    ("ring:lib-commons-reviewer", prompt)
+])  # Single message, 9 default tool calls; add triggered specialists in same batch
 ```
 
 ### Key rule
 
-Always dispatch all 13 reviewers in a single message with multiple Task tool calls.
+Always dispatch all 9 default reviewers in a single message with multiple Task tool calls. Add `ring:lib-observability-reviewer`, `ring:lib-systemplane-reviewer`, or `ring:lib-streaming-reviewer` to that same batch only when their stack triggers match.
 
 ---
 
@@ -276,13 +268,15 @@ Always dispatch all 13 reviewers in a single message with multiple Task tool cal
 
 When adding or removing a code review agent in the `ring:codereview` pool:
 
-**⛔ FIVE-FILE UPDATE RULE:**
+**⛔ SEVEN-FILE REVIEWER-POOL SYNCHRONIZATION RULE:**
 
-1. Edit `default/skills/codereview/SKILL.md` — update dispatch step (add/remove Task block), state initialization (review_state.reviewers keys), count references ("N reviewers" throughout), output format Reviewer Verdicts table
-2. Edit frontmatter `description` in the new/removed reviewer agent itself (`default/agents/*-reviewer.md` or `dev-team/agents/*-reviewer.md`) — must end with "Runs in parallel with other reviewers" (the generic phrasing the pool uses today). Peer reviewers do NOT enumerate each other's names, so no cross-update sweep is needed
-3. Edit `dev-team/hooks/validate-gate-progression.sh` — reviewer array and count threshold
-4. Edit `dev-team/skills/dev-cycle/SKILL.md` — Gate 8 table, agent list, and "N reviewers" references throughout (~15 occurrences typical)
-5. Edit shared-patterns that enumerate reviewers — `default/skills/shared-patterns/reviewer-slicing-strategy.md`, `dev-team/skills/shared-patterns/shared-anti-rationalization.md`, `dev-team/skills/shared-patterns/gate-cadence-classification.md`, `dev-team/skills/shared-patterns/custom-prompt-validation.md`
+1. Edit `default/skills/codereview/SKILL.md` — default reviewer table, conditional trigger table, dynamic dispatch count, status semantics, output format Reviewer Verdicts table
+2. Edit `default/skills/codereview/reviewers/dispatch-prompts.md` — add/remove default Task blocks or conditional Task blocks, renumber default tasks, and update eligibility rules
+3. Edit reviewer agent files in `dev-team/agents/*-reviewer.md` — active code-review reviewers live only in the dev-team plugin
+4. Edit `dev-team/hooks/validate-gate-progression.sh` — 9 default reviewer verdict requirements plus optional conditional verdict requirements
+5. Edit `dev-team/skills/dev-cycle/SKILL.md` and `dev-team/skills/dev-cycle/gates/gate-8-review.md` — Gate 8 state shape and dynamic reviewer references
+6. Edit shared patterns that enumerate reviewers — `default/skills/shared-patterns/reviewer-slicing-strategy.md`, `default/skills/shared-patterns/reviewer-orchestrator-boundary.md`, `default/skills/shared-patterns/reviewer-quality-feedback.md`, `dev-team/skills/shared-patterns/shared-anti-rationalization.md`, `dev-team/skills/shared-patterns/gate-cadence-classification.md`, `dev-team/skills/shared-patterns/custom-prompt-validation.md`
+7. Edit public/plugin docs — `CLAUDE.md`, `README.md`, `MANUAL.md`, `ARCHITECTURE.md`, `.claude-plugin/marketplace.json`, and installer messages
 
 **All files in same commit** — MUST NOT update one without the others.
 
@@ -306,7 +300,7 @@ Before committing changes to the codereview pool:
 
 [ ] 1. Updated codereview/SKILL.md (dispatch + state + output format)?
 [ ] 2. Updated frontmatter description in the new/removed reviewer agent (generic "Runs in parallel with other reviewers")?
-[ ] 3. Updated validate-gate-progression.sh (array + threshold)?
+[ ] 3. Updated validate-gate-progression.sh (9 default verdicts + optional conditional verdicts)?
 [ ] 4. Updated dev-cycle/SKILL.md (Gate 8 + all "N reviewers" refs)?
 [ ] 5. Updated shared-patterns files enumerating reviewers?
 [ ] 6. Swept secondary consumers (using-ring, write-plan, docs, marketplace.json)?

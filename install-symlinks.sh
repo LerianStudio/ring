@@ -1064,7 +1064,7 @@ print_summary() {
     printf "  Try these commands:\n"
     printf "    ${BOLD}/ring:dev-cycle${NC}       — 10-gate development cycle\n"
     printf "    ${BOLD}/ring:pre-dev-feature${NC} — lightweight pre-dev workflow\n"
-    printf "    ${BOLD}/ring:codereview${NC}      — parallel code review (13 reviewers)\n"
+    printf "    ${BOLD}/ring:codereview${NC}      — parallel code review (9 defaults + conditionals)\n"
     printf "    ${BOLD}/ring:commit${NC}          — smart atomic commits\n\n"
   fi
 }

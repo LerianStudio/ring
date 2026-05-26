@@ -1,9 +1,10 @@
 ---
 name: ring:codereview
 description: |
-  Gate 8 of development cycle - dispatches 13 specialized reviewers (code, business-logic,
-  security, test, nil-safety, consequences, dead-code, performance, multi-tenant, lib-commons,
-  lib-observability, lib-systemplane, lib-streaming) in parallel and reports all findings by severity.
+  Gate 8 of development cycle - dispatches 9 default specialized reviewers in parallel
+  (code, business-logic, security, test, nil-safety, dead-code, performance,
+  multi-tenant, lib-commons), plus up to 3 conditional stack specialists when
+  their triggers match (lib-observability, lib-systemplane, lib-streaming).
   Runs at TASK cadence — reviewers see cumulative diff, not per-subtask fragments. Report-only: no automatic remediation.
 ---
 
@@ -27,13 +28,13 @@ description: |
 ## Related
 **Complementary:** ring:dev-cycle, ring:dev-implementation
 
-Dispatch all 13 reviewer subagents in **parallel** for fast, comprehensive feedback.
+Dispatch the 9 default reviewer subagents in **parallel**, plus any triggered conditional specialists. Dispatch count is dynamic: 9 + triggered specialists, max 12. Do not say or imply all 12 always dispatch.
 
-**Announce at start:** "Using ring:codereview to dispatch 13 reviewers in parallel."
+**Announce at start:** "Using ring:codereview to dispatch 9 default reviewers plus triggered conditional specialists."
 
-**Report-only boundary:** This skill does not remediate findings, dispatch implementation work, write comments into source files, generate external artifacts, invoke secondary review tools, or re-run reviewers automatically. It only dispatches the 13 reviewers once and reports their findings in the current session.
+**Report-only boundary:** This skill does not remediate findings, dispatch implementation work, write comments into source files, generate external artifacts, invoke secondary review tools, or re-run reviewers automatically. It only dispatches the selected reviewers once and reports their findings in the current session.
 
-## Reviewers
+## Default Reviewers (Hard Gate)
 
 | # | Agent | Focus |
 |---|-------|-------|
@@ -42,22 +43,28 @@ Dispatch all 13 reviewer subagents in **parallel** for fast, comprehensive feedb
 | 3 | `ring:security-reviewer` | Vulnerabilities, authentication, OWASP risks |
 | 4 | `ring:test-reviewer` | Test quality, coverage, edge cases, anti-patterns |
 | 5 | `ring:nil-safety-reviewer` | Nil/null pointer safety for Go and TypeScript |
-| 6 | `ring:consequences-reviewer` | Ripple effects, caller chain impact, downstream consequences |
-| 7 | `ring:dead-code-reviewer` | Orphaned code detection, reachability analysis |
-| 8 | `ring:performance-reviewer` | Performance hotspots, allocations, goroutine leaks, N+1 |
-| 9 | `ring:multi-tenant-reviewer` | Multi-tenant patterns, tenantId propagation, DB isolation |
-| 10 | `ring:lib-commons-reviewer` | lib-commons non-observability package usage and reinvented-wheel opportunities |
-| 11 | `ring:lib-observability-reviewer` | lib-observability adoption: tracing, metrics, log, zap, runtime, assert, redaction, constants |
-| 12 | `ring:lib-systemplane-reviewer` | lib-systemplane adoption: hot-reloadable config, tenant-scoped knobs, admin authorizer, v4 residue |
-| 13 | `ring:lib-streaming-reviewer` | lib-streaming adoption: event publishers, outbox writer, CloudEvents, manifest |
+| 6 | `ring:dead-code-reviewer` | Orphaned code detection, reachability analysis |
+| 7 | `ring:performance-reviewer` | Performance hotspots, allocations, goroutine leaks, N+1 |
+| 8 | `ring:multi-tenant-reviewer` | Multi-tenant patterns, tenantId propagation, DB isolation |
+| 9 | `ring:lib-commons-reviewer` | lib-commons package usage and reinvented-wheel opportunities |
 
-**Core principle:** All 13 reviewers run simultaneously in a single turn with 13 Task calls.
+Base hard gate: all 9 default reviewers must PASS.
+
+## Conditional Specialist Reviewers
+
+Run these only when the diff matches their trigger. If triggered, include the specialist in aggregation and require PASS for overall PASS.
+
+| Agent | Trigger |
+|-------|---------|
+| `ring:lib-observability-reviewer` | Diff touches tracing, metrics, logging, runtime recovery/panic safety, redaction, observability constants, or goroutines with recover/SafeGo implications. |
+| `ring:lib-systemplane-reviewer` | Diff touches runtime config, hot-reload knobs, admin config surface, tenant-scoped settings, or systemplane imports/config. |
+| `ring:lib-streaming-reviewer` | Diff touches business events, outbox, event producers, broker publishing, CloudEvents, or event manifests/catalogs. |
 
 ## Role Clarification
 
 | Who | Responsibility |
 |-----|----------------|
-| **This Skill** | Dispatch reviewers once, aggregate findings, report all severities in-session |
+| **This Skill** | Select triggered specialists, dispatch reviewers once, aggregate findings, report all severities in-session |
 | **Reviewer Agents** | Analyze code, report issues with severity |
 
 ## Step 1: Gather Context (Auto-Detect if Not Provided)
@@ -66,48 +73,42 @@ Auto-detect: `unit_id` (generate if missing), `base_sha` (git merge-base HEAD ma
 
 Display context banner before dispatching.
 
-## Step 2: Initialize Review State
+## Step 2: Select Reviewers and Initialize Review State
 
-Track: unit_id, base/head SHA, reviewer verdicts for all 13 reviewers, and aggregated issues by severity: Critical, High, Medium, Low.
+Start with the 9 default reviewers. Inspect changed files and diff content to decide which conditional specialists are triggered. Track unit_id, base/head SHA, selected reviewer list, reviewer verdicts, and aggregated issues by severity: Critical, High, Medium, Low.
 
-## Step 3: Dispatch All 13 Reviewers in Parallel
+## Step 3: Dispatch Selected Reviewers in Parallel
 
-### ⛔ STOP-CHECK BEFORE DISPATCH
+### STOP-CHECK BEFORE DISPATCH
 
 Before emitting any Task call, count the reviewers you intend to launch in this turn.
-- Count MUST equal 13.
-- If count < 13 → STOP. Do not partial-dispatch. Reconcile against the 13 reviewers listed in the Reviewers table above and try again.
-- The 13 reviewers are the canonical pool. No substitutions, no omissions.
+- Count MUST equal `9 + triggered_specialists`.
+- Count MUST be at least 9 and at most 12.
+- If count < 9 or count does not include every triggered specialist -> STOP. Reconcile against the default reviewer table and trigger table above.
 
-### ⛔ MUST NOT trickle-dispatch
+### MUST NOT trickle-dispatch
 
-All 13 reviewers leave in the SAME TURN, before reading any reviewer output.
+All selected reviewers leave in the SAME TURN, before reading any reviewer output.
 
 Forbidden sequences:
-- Dispatch reviewer 1 → read result → dispatch reviewer 2
-- Dispatch a subset → wait → dispatch the rest
-- Dispatch follow-up reviewers conditioned on partial output
+- Dispatch reviewer 1 -> read result -> dispatch reviewer 2
+- Dispatch a subset -> wait -> dispatch the rest
+- Dispatch conditional specialists after partial reviewer output
 - Loop sequentially over the reviewer list
 
-If you find yourself about to dispatch a reviewer in a turn AFTER any reviewer has already returned a result → STOP. You violated parallel dispatch. Report the violation to the user and mark the gate INCOMPLETE rather than completing the trickle.
+If you find yourself about to dispatch a reviewer in a turn AFTER any reviewer has already returned a result -> STOP. You violated parallel dispatch. Report the violation to the user and mark the gate INCOMPLETE rather than completing the trickle.
 
 ### Self-verify after dispatch
 
-After the dispatch turn, verify all 13 Task calls were emitted in that single turn. If fewer than 13 went out, the gate did NOT execute correctly. Mark the run INCOMPLETE and surface the dispatch failure — do NOT silently continue with a partial pool.
+After the dispatch turn, verify all selected Task calls were emitted in that single turn. If fewer than selected reviewers went out, the gate did NOT execute correctly. Mark the run INCOMPLETE and surface the dispatch failure.
 
 ### Parallel dispatch — atomic batch
 
-Emit all 13 Task calls in a SINGLE TURN, as one atomic batch.
+Emit all selected Task calls in a SINGLE TURN, as one atomic batch.
 
-**If your runtime exposes a `multi_tool_use.parallel` wrapper**, use it to dispatch the complete pool in one wrapped invocation. This is the canonical fan-out mechanism on OpenAI-style tool envelopes and on certain Anthropic SDK consumers — naming it explicitly activates parallel emission on runtimes where trickle-dispatch is the default behavior.
+If your runtime exposes a `multi_tool_use.parallel` wrapper, use it to dispatch the complete selected pool in one wrapped invocation. The STOP-CHECK, anti-trickle, and self-verify guards remain binding regardless of runtime.
 
-**If your runtime emits parallel tool_use blocks natively** (Claude Code with Claude models), `multi_tool_use.parallel` may not be needed — but naming it is harmless and serves as an enforcement anchor.
-
-The STOP-CHECK, anti-trickle, and self-verify guards above remain binding regardless of which mechanism your runtime uses.
-
-**⛔ ALL 13 dispatched in a SINGLE turn with 13 Task calls.**
-
-Read `reviewers/dispatch-prompts.md` for the full prompt templates for each reviewer. Inject:
+Read `reviewers/dispatch-prompts.md` for the prompt templates. Inject:
 - Task-level scope header (when `scope=task`)
 - `base_sha` / `head_sha` from cumulative_diff_range when task-level
 - Ring standards slice (cache-first per `shared-patterns/standards-cache-protocol.md`)
@@ -115,7 +116,7 @@ Read `reviewers/dispatch-prompts.md` for the full prompt templates for each revi
 
 ## Step 4: Wait and Parse Output
 
-Parse `VERDICT` and Issues for all 13 reviewers. Normalize every issue into one of four severity buckets: Critical, High, Medium, Low.
+Parse `VERDICT` and Issues for all selected reviewers. Normalize every issue into one of four severity buckets: Critical, High, Medium, Low.
 
 For each issue, preserve:
 - Severity
@@ -131,14 +132,14 @@ If a reviewer returns `COSMETIC`, map it to Low.
 
 Produce a detailed Markdown report in the current session. The report must include all Critical, High, Medium, and Low issues.
 
-**⛔ Do not dispatch any follow-up agent to remediate findings. Do not edit files. Do not create reports on disk. Do not open a browser. Report back only.**
+Do not dispatch any follow-up agent to remediate findings. Do not edit files. Do not create reports on disk. Do not open a browser. Report back only.
 
 ## Completion Rules
 
-- Complete after all 13 reviewer outputs are collected and summarized.
-- `PASS` means all 13 reviewers completed and reported zero issues.
-- `ISSUES_FOUND` means at least one Critical, High, Medium, or Low issue was reported.
-- `INCOMPLETE` means one or more reviewers did not return a parseable result.
+- Complete after all selected reviewer outputs are collected and summarized.
+- `PASS` means all 9 default reviewers completed with zero issues, and every triggered specialist also completed with zero issues.
+- `ISSUES_FOUND` means at least one Critical, High, Medium, or Low issue was reported by any selected reviewer.
+- `INCOMPLETE` means one or more selected reviewers did not return a parseable result.
 - Low issues are still reported; never omit them from the session report.
 - No automatic remediation, source-file changes, reviewer reruns, external artifacts, or secondary validation tools are part of this skill.
 
@@ -161,6 +162,8 @@ All of these mean: stop and produce the session report instead.
 **Base:** [base_sha]
 **Head:** [head_sha]
 **Scope:** [task|branch|provided]
+**Reviewers Dispatched:** [9-12]
+**Conditional Specialists Triggered:** [none|list]
 
 ## Issues by Severity
 | Severity | Count |
@@ -171,7 +174,6 @@ All of these mean: stop and produce the session report instead.
 | Low      | N |
 
 ## Critical Issues
-
 [List every Critical issue. If none: None.]
 
 | Issue | File:Line | Reviewer | Evidence | Recommendation |
@@ -179,37 +181,20 @@ All of these mean: stop and produce the session report instead.
 | [actual issue description] | [file:line] | [ring:xxx-reviewer] | [why it matters] | [recommended action] |
 
 ## High Issues
-
 [List every High issue. If none: None.]
 
-| Issue | File:Line | Reviewer | Evidence | Recommendation |
-|-------|-----------|----------|----------|----------------|
-| [actual issue description] | [file:line] | [ring:xxx-reviewer] | [why it matters] | [recommended action] |
-
 ## Medium Issues
-
 [List every Medium issue. If none: None.]
 
-| Issue | File:Line | Reviewer | Evidence | Recommendation |
-|-------|-----------|----------|----------|----------------|
-| [actual issue description] | [file:line] | [ring:xxx-reviewer] | [why it matters] | [recommended action] |
-
 ## Low Issues
-
 [List every Low issue. If none: None.]
-
-| Issue | File:Line | Reviewer | Evidence | Recommendation |
-|-------|-----------|----------|----------|----------------|
-| [actual issue description] | [file:line] | [ring:xxx-reviewer] | [why it matters] | [recommended action] |
 
 ## Reviewer Verdicts
 | Reviewer | Verdict | Issues |
 |----------|---------|--------|
 | ring:code-reviewer | PASS/FAIL/INCOMPLETE | N |
-[...13 rows]
+[...selected reviewer rows]
 
 ## Report Boundary
 No files were changed. No remediation agents were dispatched. No external report artifacts were generated.
-
-_If all reviewers passed with zero issues: "No issues found across all 13 reviewers."_
 ```

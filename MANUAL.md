@@ -1,6 +1,6 @@
 # Ring Marketplace Manual
 
-Quick reference guide for the Ring skills library and workflow system. This monorepo provides 4 plugins with 69 skills and 35 agents for enforcing proven software engineering practices across the entire software delivery value chain.
+Quick reference guide for the Ring skills library and workflow system. This monorepo provides 4 plugins with 75 skills and 34 agents for enforcing proven software engineering practices across the entire software delivery value chain.
 
 ---
 
@@ -13,8 +13,8 @@ Quick reference guide for the Ring skills library and workflow system. This mono
 │                                                                                    │
 │  ┌───────────────┐  ┌───────────────┐                                              │
 │  │ ring-default  │  │ ring-dev-team │                                              │
-│  │  Skills(14)   │  │  Skills(31)   │                                              │
-│  │  Agents(10)   │  │  Agents(18)   │                                              │
+│  │  Skills(14)   │  │  Skills(37)   │                                              │
+│  │  Agents(3)    │  │  Agents(24)   │                                              │
 │  └───────────────┘  └───────────────┘                                              │
 │  ┌───────────────┐  ┌───────────────┐                                              │
 │  │ ring-pm-team  │  │ ring-tw-team  │                                              │
@@ -72,7 +72,7 @@ Ring is auto-loaded at session start. Two ways to invoke Ring capabilities:
 
 ## 💡 About Skills
 
-Skills (69) are the primary invocation mechanism for Ring. They can be invoked directly by users (`Skill tool: "ring:skill-name"`) or applied automatically by Claude Code when it detects they're applicable. They handle testing, debugging, verification, planning, code review enforcement, and more.
+Skills (75) are the primary invocation mechanism for Ring. They can be invoked directly by users (`Skill tool: "ring:skill-name"`) or applied automatically by Claude Code when it detects they're applicable. They handle testing, debugging, verification, planning, code review enforcement, and more.
 
 Examples: ring:test-driven-development, ring:codereview, ring:production-readiness-audit (44-dimension audit, up to 10 explorers per batch, incremental report 0-430, max 440 with multi-tenant; see [default/skills/production-readiness-audit/SKILL.md](default/skills/production-readiness-audit/SKILL.md)), etc.
 
@@ -88,9 +88,9 @@ Claude Code matches user intent against the skill's `description` field at Sessi
 
 Invoke via `Task tool with subagent_type: "..."`.
 
-### Code Review pool (default + dev-team)
+### Code Review pool (dev-team)
 
-**Always dispatch all 13 in parallel** (single message, 13 Task calls):
+**Always dispatch all 9 defaults in parallel** (single message), plus triggered conditional specialists:
 
 | Agent                                | Purpose                                      |
 | ------------------------------------ | -------------------------------------------- |
@@ -99,16 +99,20 @@ Invoke via `Task tool with subagent_type: "..."`.
 | `ring:security-reviewer`             | Vulnerabilities, OWASP, auth, validation     |
 | `ring:test-reviewer`                 | Test coverage, quality, and completeness     |
 | `ring:nil-safety-reviewer`           | Nil/null pointer safety analysis             |
-| `ring:consequences-reviewer`         | Ripple effect, caller impact, downstream consequences |
 | `ring:dead-code-reviewer`            | Unused code, unreachable paths, dead exports          |
 | `ring:performance-reviewer`          | Performance hotspots, allocations, goroutine leaks, N+1 queries |
 | `ring:multi-tenant-reviewer`         | lib-commons/multitenancy patterns, tenant isolation, tenantId propagation |
-| `ring:lib-commons-reviewer`          | lib-commons non-observability package usage and reinvented-wheel opportunities |
-| `ring:lib-observability-reviewer`    | lib-observability adoption: tracing, metrics, log, zap, runtime, assert, redaction, constants |
-| `ring:lib-systemplane-reviewer`      | lib-systemplane adoption: hot-reloadable config, tenant-scoped knobs, admin authorizer, v4 residue |
-| `ring:lib-streaming-reviewer`        | lib-streaming adoption: event publishers, outbox writer, CloudEvents, manifest |
+| `ring:lib-commons-reviewer`          | lib-commons package usage and reinvented-wheel opportunities |
 
-**Example:** Before merging, run all 13 parallel reviewers via `ring:codereview` skill
+Conditional specialists run only when their stack is touched:
+
+| Agent | Trigger |
+| ----- | ------- |
+| `ring:lib-observability-reviewer` | tracing, metrics, logging, runtime recovery/panic safety, redaction, constants, SafeGo/recover implications |
+| `ring:lib-systemplane-reviewer` | runtime config, hot-reload knobs, admin config surface, tenant-scoped settings, systemplane imports/config |
+| `ring:lib-streaming-reviewer` | business events, outbox, event producers, broker publishing, CloudEvents, manifests/catalogs |
+
+**Example:** Before merging, run the 9 default reviewers plus any triggered specialists via `ring:codereview` skill
 
 ### Orchestration (ring-default)
 
@@ -142,10 +146,10 @@ Use when you need expert depth in specific domains:
 | `ring:sre`                              | SRE specialist               | Observability, reliability, SLOs, incident readiness |
 | `ring:performance-reviewer`             | Performance review           | Go, TypeScript, Python, GOMAXPROCS, GC tuning      |
 | `ring:multi-tenant-reviewer`            | Multi-tenant usage review    | lib-commons/multitenancy, tenant isolation, JWT tenantId |
-| `ring:lib-commons-reviewer`             | lib-commons non-observability usage review | lifecycle, tenancy, http, idempotency, security, database, messaging |
-| `ring:lib-observability-reviewer`       | lib-observability adoption review | tracing, metrics, log, zap, runtime, assert, redaction, constants |
-| `ring:lib-systemplane-reviewer`         | lib-systemplane adoption review | hot-reloadable config, tenant-scoped knobs, admin authorizer, v4 residue |
-| `ring:lib-streaming-reviewer`           | lib-streaming adoption review | Builder/Emitter, outbox writer, CloudEvents, manifest, NoopEmitter fallback |
+| `ring:lib-commons-reviewer`             | lib-commons usage review | lifecycle, tenancy, http, idempotency, security, database, messaging |
+| `ring:lib-observability-reviewer`       | Conditional observability review | tracing, metrics, logging, runtime, redaction |
+| `ring:lib-systemplane-reviewer`         | Conditional runtime-config review | lib-systemplane, hot reload, admin config, tenant settings |
+| `ring:lib-streaming-reviewer`           | Conditional event producer review | lib-streaming, outbox, CloudEvents, manifests |
 | `ring:ui-engineer`                      | UI component specialist      | Design systems, accessibility, React               |
 
 **Standards Compliance Output:** Refactor-capable ring-dev-team agents produce a `## Standards Compliance` output section with conditional requirement:
@@ -205,7 +209,7 @@ For documentation creation and review:
 1. **Plan** → Use `ring:pre-dev-feature` skill (or `ring:pre-dev-full` if complex)
 2. **Isolate** → Use `ring:worktree` skill
 3. **Implement** → Use `ring:test-driven-development` skill
-4. **Review** → Use `ring:codereview` skill (dispatches 13 reviewers)
+4. **Review** → Use `ring:codereview` skill (dispatches 9 defaults plus triggered specialists)
 5. **Commit** → Use `ring:commit` skill
 
 ### Bug Investigation
@@ -224,14 +228,13 @@ Runs in parallel:
   • ring:security-reviewer
   • ring:test-reviewer
   • ring:nil-safety-reviewer
-  • ring:consequences-reviewer
   • ring:dead-code-reviewer
   • ring:performance-reviewer
   • ring:multi-tenant-reviewer
   • ring:lib-commons-reviewer
-  • ring:lib-observability-reviewer
-  • ring:lib-systemplane-reviewer
-  • ring:lib-streaming-reviewer
+  • conditionally: ring:lib-observability-reviewer
+  • conditionally: ring:lib-systemplane-reviewer
+  • conditionally: ring:lib-streaming-reviewer
     ↓
 Consolidated report with recommendations
 ```
@@ -267,7 +270,7 @@ These enforce quality standards:
 
 | Need                              | Agent to Use                                |
 | --------------------------------- | ------------------------------------------- |
-| General code quality review       | 13 parallel reviewers via `ring:codereview` skill |
+| General code quality review       | 9 default reviewers plus triggered specialists via `ring:codereview` skill |
 | Large PR review (15+ files)       | Auto-sliced via `ring:review-slicer`        |
 | Implementation planning           | `ring:write-plan`                           |
 | Deep codebase analysis            | `ring:codebase-explorer`                    |
@@ -286,9 +289,6 @@ These enforce quality standards:
 | Performance review                | `ring:performance-reviewer`                 |
 | Multi-tenant usage review         | `ring:multi-tenant-reviewer`                |
 | lib-commons usage review          | `ring:lib-commons-reviewer`                 |
-| lib-observability adoption review | `ring:lib-observability-reviewer`           |
-| lib-systemplane adoption review   | `ring:lib-systemplane-reviewer`             |
-| lib-streaming adoption review     | `ring:lib-streaming-reviewer`               |
 | Best practices research           | `ring:best-practices-researcher`            |
 | Framework documentation research  | `ring:framework-docs-researcher`            |
 | Repository analysis               | `ring:repo-research-analyst`                |
@@ -304,7 +304,7 @@ These enforce quality standards:
 ### Session Startup
 
 1. SessionStart hook runs automatically
-2. All 69 skills are auto-discovered and available
+2. All 75 skills are auto-discovered and available
 3. `ring:using-ring` workflow is activated (skill checking is now mandatory)
 
 ### Agent Dispatching
@@ -322,21 +322,18 @@ Returns structured markdown output per the agent's documented sections
 ### Parallel Review Pattern
 
 ```
-Single message with 13 Task calls (not sequential):
+Single message with the selected review pool (not sequential):
 
 Task #1: ring:code-reviewer
 Task #2: ring:business-logic-reviewer
 Task #3: ring:security-reviewer
 Task #4: ring:test-reviewer
 Task #5: ring:nil-safety-reviewer
-Task #6: ring:consequences-reviewer
-Task #7: ring:dead-code-reviewer
-Task #8: ring:performance-reviewer
-Task #9: ring:multi-tenant-reviewer
-Task #10: ring:lib-commons-reviewer
-Task #11: ring:lib-observability-reviewer
-Task #12: ring:lib-systemplane-reviewer
-Task #13: ring:lib-streaming-reviewer
+Task #6: ring:dead-code-reviewer
+Task #7: ring:performance-reviewer
+Task #8: ring:multi-tenant-reviewer
+Task #9: ring:lib-commons-reviewer
+Conditional: ring:lib-observability-reviewer / ring:lib-systemplane-reviewer / ring:lib-streaming-reviewer when triggered
     ↓
 All run in parallel (saves ~15 minutes vs sequential)
     ↓
@@ -354,7 +351,7 @@ Consolidated report
 ## 📚 More Information
 
 - **Full Documentation** → `default/skills/*/SKILL.md` files
-- **Agent Definitions** → `default/agents/*.md` files
+- **Agent Definitions** → `default/agents/*.md` and `dev-team/agents/*.md` files
 - **Plugin Config** → `.claude-plugin/marketplace.json`
 - **CLAUDE.md** → Project-specific instructions (checked into repo)
 

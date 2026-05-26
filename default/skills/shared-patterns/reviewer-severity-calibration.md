@@ -25,7 +25,7 @@ All reviewers MUST use consistent severity classification:
 - 3 or more High issues found (NO EXCEPTIONS)
 
 **REVIEW PASSES if:**
-- 0 Critical issues (REQUIRED)
+- 0 eligible issues (REQUIRED)
 - Fewer than 3 High issues (REQUIRED)
 - All High issues have clear remediation plan
 

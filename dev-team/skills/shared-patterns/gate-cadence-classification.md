@@ -15,7 +15,7 @@ Runs for every subtask (or task itself if no subtasks). Input scoped to a single
 ### Task Cadence
 Runs once per task, after all subtasks complete their subtask-level gates. Input is
 UNION of all subtasks' changes.
-- Backend: Gate 8 (Review — 13 reviewers)
+- Backend: Gate 8 (Review — 9 default reviewers plus triggered specialists)
 - Frontend: Gate 7 (Review)
 
 ### Cycle Cadence

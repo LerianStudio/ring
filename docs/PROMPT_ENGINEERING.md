@@ -81,7 +81,7 @@ These provide context but dilute emphasis when capitalized:
 Examples:
 - MUST dispatch agent before proceeding to next gate
 - STOP and report if PROJECT_RULES.md is missing
-- HARD GATE: All 13 reviewers must pass before Gate 5
+- HARD GATE: All 9 default reviewers and any triggered conditional specialists must pass before Gate 8 completion
 - FORBIDDEN: Reading source code directly as orchestrator
 - REQUIRED: WebFetch Ring standards before implementation
 - MANDATORY: Save state after every gate transition

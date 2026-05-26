@@ -48,30 +48,28 @@ review_input = {
      gate0_handoffs: review_input.gate0_handoffs      # ARRAY of subtask handoffs
 
    The skill handles:
-   - Dispatching all 13 reviewers in PARALLEL (single message with 13 Task calls)
-   - ring:code-reviewer, ring:business-logic-reviewer, ring:security-reviewer, ring:nil-safety-reviewer, ring:test-reviewer, ring:consequences-reviewer, ring:dead-code-reviewer, ring:performance-reviewer, ring:multi-tenant-reviewer, ring:lib-commons-reviewer, ring:lib-observability-reviewer, ring:lib-systemplane-reviewer, ring:lib-streaming-reviewer
+   - Dispatching all 9 default reviewers plus triggered specialists in PARALLEL (single message)
+   - Defaults: ring:code-reviewer, ring:business-logic-reviewer, ring:security-reviewer, ring:test-reviewer, ring:nil-safety-reviewer, ring:dead-code-reviewer, ring:performance-reviewer, ring:multi-tenant-reviewer, ring:lib-commons-reviewer
+   - Conditional specialists: ring:lib-observability-reviewer, ring:lib-systemplane-reviewer, ring:lib-streaming-reviewer when their triggers match
    - Aggregating issues by severity (CRITICAL/HIGH/MEDIUM/LOW/COSMETIC)
-   - Dispatching fixes to implementation agent for blocking issues
-   - Re-running all 13 reviewers after fixes
-   - Iteration tracking (max 3 attempts)
-   - Adding TODO/FIXME comments for non-blocking issues
+   - Reporting findings only; remediation and re-review are orchestrator responsibilities after this skill returns
 
 3. Parse skill output for results:
    
    Expected output sections:
    - "## Review Summary" → status, iterations
    - "## Issues by Severity" → counts per severity level
-   - "## Reviewer Verdicts" → all 13 reviewers
-   - "## Handoff to Next Gate" → ready_for_validation: YES/NO
+   - "## Reviewer Verdicts" → all selected reviewers
 
-   if skill output contains "Status: PASS" and "Ready for Gate 9: YES":
-     → Gate 8 PASSED. Proceed to Step 10.3.
+   if skill output contains "Status: PASS":
+      → Gate 8 PASSED. Proceed to Step 10.3.
 
-   if skill output contains "Status: FAIL" or "Ready for Gate 9: NO":
-     → Gate 8 BLOCKED.
-     → Skill already dispatched fixes to implementation agent
-      → Skill already re-ran all 13 reviewers
-     → If "ESCALATION" in output: STOP and report to user
+   if skill output contains "Status: ISSUES_FOUND":
+      → Gate 8 BLOCKED.
+      → Dispatch fixes to the appropriate implementation agent, then re-run ring:codereview.
+
+   if skill output contains "Status: INCOMPLETE":
+      → Gate 8 INCOMPLETE. Fix dispatch/reviewer failure before proceeding.
 
 4. **MANDATORY: ⛔ Save state to file — Write tool → [state.state_path]**
 ```
@@ -82,7 +80,10 @@ review_input = {
 5. When ring:codereview skill returns PASS:
 
    Parse from skill output:
-   - reviewers_passed: extract from "## Reviewer Verdicts" (should be "13/13")
+   - default_reviewers_passed: extract default reviewer PASS count from "## Reviewer Verdicts" (must be "9/9")
+   - conditional_specialists_triggered: extract triggered conditional specialist names from "## Conditional Specialists Triggered"
+   - conditional_specialists_passed: extract conditional specialist PASS count from "## Reviewer Verdicts" ("0/0" when none triggered)
+   - selected_reviewer_count: 9 + conditional_specialists_triggered.length
    - issues_critical: extract count from "## Issues by Severity"
    - issues_high: extract count from "## Issues by Severity"
    - issues_medium: extract count from "## Issues by Severity"
@@ -94,7 +95,10 @@ review_input = {
        iterations: [count],
        timestamp: "[ISO timestamp]",
        duration_ms: [execution time],
-       reviewers_passed: "13/13",
+       default_reviewers_passed: "9/9",
+       conditional_specialists_triggered: [],
+       conditional_specialists_passed: "0/0",
+       selected_reviewer_count: 9,
        code_reviewer: {
          verdict: "PASS",
          issues_count: N,
@@ -120,11 +124,6 @@ review_input = {
          issues_count: N,
          issues: []
        },
-       consequences_reviewer: {
-         verdict: "PASS",
-         issues_count: N,
-         issues: []
-       },
        dead_code_reviewer: {
          verdict: "PASS",
          issues_count: N,
@@ -141,21 +140,6 @@ review_input = {
          issues: []
        },
        lib_commons_reviewer: {
-         verdict: "PASS",
-         issues_count: N,
-         issues: []
-       },
-       lib_observability_reviewer: {
-         verdict: "PASS",
-         issues_count: N,
-         issues: []
-       },
-       lib_systemplane_reviewer: {
-         verdict: "PASS",
-         issues_count: N,
-         issues: []
-       },
-       lib_streaming_reviewer: {
          verdict: "PASS",
          issues_count: N,
          issues: []
@@ -182,12 +166,15 @@ review_input = {
    **Issue tracking rules:**
    - all issues found across all iterations MUST be recorded
    - `fixed: true` + `fixed_in_iteration: N` for issues resolved during review
-   - `fixed: false` + `fixed_in_iteration: null` for LOW/COSMETIC (TODO/FIXME added)
+   - `fixed: false` + `fixed_in_iteration: null` for LOW/COSMETIC report items
    - This enables feedback-loop to analyze recurring issue patterns
 
 6. Update state:
    - gate_progress.review.status = "completed"
-   - gate_progress.review.reviewers_passed = "13/13"
+   - gate_progress.review.default_reviewers_passed = "9/9"
+   - gate_progress.review.conditional_specialists_triggered = []  // or triggered specialist names
+   - gate_progress.review.conditional_specialists_passed = "0/0"  // or N/N for triggered specialists
+   - gate_progress.review.selected_reviewer_count = 9  // 9 + triggered specialist count
 
 7. Proceed to Gate 9
 ```
@@ -196,21 +183,21 @@ review_input = {
 
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
-| "Only 1 MEDIUM issue, can proceed" | MEDIUM = MUST FIX. Quantity is irrelevant. | **Fix the issue, re-run all 13 reviewers** |
-| "Issue is cosmetic, not really MEDIUM" | Reviewer decided severity. Accept their judgment. | **Fix the issue, re-run all 13 reviewers** |
+| "Only 1 MEDIUM issue, can proceed" | MEDIUM = MUST FIX. Quantity is irrelevant. | **Fix the issue, re-run the selected review pool** |
+| "Issue is cosmetic, not really MEDIUM" | Reviewer decided severity. Accept their judgment. | **Fix the issue, re-run the selected review pool** |
 | "Will fix in next sprint" | Deferred fixes = technical debt = production bugs. | **Fix NOW before Gate 9** |
-| "User approved, can skip fix" | User approval ≠ reviewer override. Fixes are mandatory. | **Fix the issue, re-run all 13 reviewers** |
+| "User approved, can skip fix" | User approval ≠ reviewer override. Fixes are mandatory. | **Fix the issue, re-run the selected review pool** |
 | "Same issue keeps appearing, skip it" | Recurring issue = fix is wrong. Debug properly. | **Root cause analysis, then fix** |
-| "Only one reviewer found it" | One reviewer = valid finding. All findings matter. | **Fix the issue, re-run all 13 reviewers** |
+| "Only one reviewer found it" | One reviewer = valid finding. All findings matter. | **Fix the issue, re-run the selected review pool** |
 | "Iteration limit reached, just proceed" | Limit = escalate, not bypass. Quality is non-negotiable. | **Escalate to user, DO NOT proceed** |
-| "Tests pass, review issues don't matter" | Tests ≠ review. Different quality dimensions. | **Fix the issue, re-run all 13 reviewers** |
+| "Tests pass, review issues don't matter" | Tests ≠ review. Different quality dimensions. | **Fix the issue, re-run the selected review pool** |
 
 ### Gate 8 Pressure Resistance
 
 | User Says | Your Response |
 |-----------|---------------|
 | "Just skip this MEDIUM issue" | "MEDIUM severity issues are blocking by definition. I MUST dispatch a fix to the appropriate agent before proceeding. This protects code quality." |
-| "I'll fix it later, let's continue" | "Gate 8 is a HARD GATE. All CRITICAL/HIGH/MEDIUM issues must be resolved NOW. I'm dispatching the fix to [agent] and will re-run all 13 reviewers after." |
+| "I'll fix it later, let's continue" | "Gate 8 is a HARD GATE. All CRITICAL/HIGH/MEDIUM issues must be resolved NOW. I'm dispatching the fix to [agent] and will re-run the selected review pool after." |
 | "We're running out of time" | "Proceeding with known issues creates larger problems later. The fix dispatch is automated and typically takes 2-5 minutes. Quality gates exist to save time overall." |
 | "Override the gate, I approve" | "User approval cannot override reviewer findings. The gate ensures code quality. I'll dispatch the fix now." |
 | "It's just a style issue" | "If it's truly cosmetic, reviewers would mark it COSMETIC (non-blocking). MEDIUM means it affects maintainability or correctness. Fixing now." |
