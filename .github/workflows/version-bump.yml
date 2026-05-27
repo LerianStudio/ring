@@ -216,6 +216,27 @@ jobs:
                 exit 1
               fi
 
+              # Update version in per-harness native manifests (Codex and Cursor) in lockstep.
+              # OpenCode JS plugins don't carry a version field — OpenCode install spec pins
+              # versions via git tag, handled by the tag-creation step downstream.
+              for HARNESS_MANIFEST in ".codex-plugin/plugin.json" ".cursor-plugin/plugin.json"; do
+                MANIFEST_PATH="$PLUGIN_SOURCE/$HARNESS_MANIFEST"
+                if [ -f "$MANIFEST_PATH" ]; then
+                  jq --arg version "$NEW_VERSION" \
+                    '.version = $version' "$MANIFEST_PATH" > "${MANIFEST_PATH}.tmp"
+
+                  if jq empty "${MANIFEST_PATH}.tmp" 2>/dev/null; then
+                    mv "${MANIFEST_PATH}.tmp" "$MANIFEST_PATH"
+                    git add "$MANIFEST_PATH"
+                    echo "  Updated $MANIFEST_PATH → $NEW_VERSION"
+                  else
+                    echo "  ERROR: Generated invalid JSON in $MANIFEST_PATH"
+                    rm -f "${MANIFEST_PATH}.tmp"
+                    exit 1
+                  fi
+                fi
+              done
+
               # Track changes
               PLUGINS_CHANGED=true
               CHANGED_PLUGINS="$CHANGED_PLUGINS\n  - $PLUGIN_NAME: $CURRENT_VERSION → $NEW_VERSION ($BUMP_TYPE)"
