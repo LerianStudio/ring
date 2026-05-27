@@ -1,0 +1,40 @@
+{
+  "name": "ring-default",
+  "version": "1.32.2",
+  "description": "Core skills library for the Lerian Team: TDD, code review, collaboration patterns, and proven techniques. Features parallel code review orchestration with 9 default reviewers plus triggered conditional specialists. 16 essential skills for software engineering excellence, including plan authoring and execution.",
+  "author": {
+    "name": "Lerian Studio",
+    "email": "fred@lerian.studio",
+    "url": "https://github.com/lerianstudio"
+  },
+  "homepage": "https://github.com/lerianstudio/ring/tree/main/default",
+  "repository": "https://github.com/lerianstudio/ring",
+  "license": "MIT",
+  "keywords": [
+    "skills",
+    "tdd",
+    "debugging",
+    "collaboration",
+    "best-practices",
+    "workflows",
+    "orchestration",
+    "validation",
+    "code-review",
+    "parallel-review"
+  ],
+  "skills": "./skills/",
+  "agents": "./agents/",
+  "interface": {
+    "displayName": "Ring Default",
+    "shortDescription": "Core engineering skills for the Lerian team: TDD, code review, planning, debugging",
+    "longDescription": "Foundational skills library for Lerian's coding workflow: test-driven development, parallel code review orchestration (9 default reviewers plus triggered conditional specialists), plan authoring and execution, multi-phase codebase exploration, structured commits, and isolated worktree workflows.",
+    "developerName": "Lerian Studio",
+    "category": "Coding",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "defaultPrompt": [
+      "Help me plan and implement a feature using TDD.",
+      "Run a code review on the current branch."
+    ],
+    "websiteURL": "https://github.com/lerianstudio/ring"
+  }
+}

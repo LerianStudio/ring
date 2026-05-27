@@ -6,7 +6,7 @@
 
 **Proven engineering practices, enforced through skills.**
 
-Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **4 active plugins**, **75 skills**, and **34 agents** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
+Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **4 active plugins**, **77 skills**, and **34 agents** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
 
 ## ✨ Why Ring?
 
@@ -21,7 +21,7 @@ Without Ring, AI assistants often:
 Ring solves this by:
 
 - **Enforcing proven workflows** - Test-driven development, systematic debugging, proper planning
-- **Providing 75 specialized skills** (14 core + 37 dev-team + 18 product planning + 6 technical writing)
+- **Providing 77 specialized skills** (16 core + 37 dev-team + 18 product planning + 6 technical writing)
 - **34 specialized agents** - 3 planning/analysis + 24 developer/reviewer + 4 product research + 3 technical writing
 - **Automating skill discovery** - Skills load automatically at session start
 - **Preventing common failures** - Built-in anti-patterns and mandatory checklists
@@ -114,29 +114,54 @@ _To restore an archived plugin, move its folder from `.archive/` to the root dir
 
 Ring works across multiple AI development platforms:
 
-| Platform        | Format      | Status             | Features                        |
-| --------------- | ----------- | ------------------ | ------------------------------- |
-| **Claude Code** | Native      | ✅ Source of truth | Skills, agents, hooks           |
-| **Factory AI**  | Transformed | ✅ Supported       | Droids, skills                  |
-| **Cursor**      | Transformed | ✅ Supported       | Skills, agents                  |
-| **Cline**       | Transformed | ✅ Supported       | Prompts                         |
+| Platform        | Format                 | Status             | Features                        |
+| --------------- | ---------------------- | ------------------ | ------------------------------- |
+| **Claude Code** | Native (marketplace)   | ✅ Source of truth | Skills, agents, hooks           |
+| **Codex**       | Native (plugin.json)   | ✅ Supported       | Skills, agents                  |
+| **Cursor**      | Native + Transformed   | ✅ Supported       | Skills, agents, hooks           |
+| **OpenCode**    | Native (JS plugin)     | ✅ Supported       | Skills, bootstrap injection     |
+| **Factory AI**  | Transformed            | ✅ Supported       | Droids, skills                  |
+| **Cline**       | Transformed            | ✅ Supported       | Prompts                         |
 
-**Transformation Notes:**
+**Format Notes:**
 
-- Claude Code receives Ring content in its native format
-- Factory AI: `agents` → `droids` terminology
-- Cursor: Skills → ~/.cursor/skills/, Agents → ~/.cursor/agents/
-- Cline: All content → structured prompts
+- **Native** — the harness installs Ring directly from manifest files in this repo (no transformation). Each Ring plugin ships its own per-harness manifest under `<plugin>/.codex-plugin/`, `<plugin>/.cursor-plugin/`, and `<plugin>/.opencode/`.
+- **Transformed** — the multi-platform installer copies and adapts Ring content into the harness's local config (e.g., `~/.cursor/skills/`, droids for Factory AI, structured prompts for Cline).
 
 **Platform-Specific Guides:**
 
-See the [installer README](installer/) for platform-specific setup and transformation details.
+- For **native install** per harness, see the sub-section below (`Native plugin install (per harness)`).
+- For **transformed install** via the multi-platform installer, see the [installer README](installer/).
 
 ## 🚀 Quick Start
 
-### Multi-Platform Installation (Recommended)
+### Native plugin install (per harness)
 
-The Ring installer automatically detects installed platforms and transforms content appropriately.
+Each Ring plugin ships native manifests for Claude Code, Codex, Cursor, and OpenCode. The harness installs the plugin directly from this repo via its own package manager — no transformation step, no local installer.
+
+| Harness         | Mechanism                                | Per-plugin entry points |
+| --------------- | ---------------------------------------- | ----------------------- |
+| **Claude Code** | `.claude-plugin/marketplace.json` (root) | All 4 plugins enumerated in one marketplace file |
+| **Codex**       | `<plugin>/.codex-plugin/plugin.json`     | [default](default/.codex-plugin/plugin.json) · [dev-team](dev-team/.codex-plugin/plugin.json) · [pm-team](pm-team/.codex-plugin/plugin.json) · [tw-team](tw-team/.codex-plugin/plugin.json) |
+| **Cursor**      | `<plugin>/.cursor-plugin/plugin.json`    | [default](default/.cursor-plugin/plugin.json) · [dev-team](dev-team/.cursor-plugin/plugin.json) · [pm-team](pm-team/.cursor-plugin/plugin.json) · [tw-team](tw-team/.cursor-plugin/plugin.json) |
+| **OpenCode**    | `<plugin>/.opencode/` (INSTALL + JS plugin) | [default](default/.opencode/INSTALL.md) · [dev-team](dev-team/.opencode/INSTALL.md) · [pm-team](pm-team/.opencode/INSTALL.md) · [tw-team](tw-team/.opencode/INSTALL.md) |
+
+**`ring-default` is the foundation plugin** — install it alongside any other Ring plugin since it provides the `using-ring` bootstrap that orients agent behavior. Example for OpenCode:
+
+```json
+{
+  "plugin": [
+    "ring-default@git+https://github.com/lerianstudio/ring.git#main",
+    "ring-dev-team@git+https://github.com/lerianstudio/ring.git#main"
+  ]
+}
+```
+
+Each harness's INSTALL.md (for OpenCode) or `plugin.json` (for Codex/Cursor) carries the exact install command for that platform.
+
+### Multi-Platform Installation (Transformed)
+
+The Ring installer detects installed platforms and copies/transforms content into each harness's local config (used for Factory AI, Cline, and the transformed-mode Cursor flow).
 
 **Linux/macOS/Git Bash:**
 
@@ -475,7 +500,7 @@ ring/                                  # Monorepo root
 ├── .claude-plugin/
 │   └── marketplace.json              # Multi-plugin marketplace config (4 active plugins)
 ├── default/                          # Core Ring plugin (ring-default)
-│   ├── skills/                       # 14 core skills
+│   ├── skills/                       # 16 core skills
 │   │   ├── skill-name/
 │   │   │   └── SKILL.md             # Skill definition with frontmatter
 │   │   └── shared-patterns/         # Universal patterns (15 patterns)
