@@ -86,12 +86,12 @@ When adding/removing a code review agent in `ring:codereview` pool:
 
 | Plugin           | Path           | Skills | Agents |
 | ---------------- | -------------- | ------ | ------ |
-| ring-default     | `default/`     | 14     | 3      |
+| ring-default     | `default/`     | 16     | 3      |
 | ring-dev-team    | `dev-team/`    | 37     | 24     |
 | ring-pm-team     | `pm-team/`     | 18     | 4      |
 | ring-tw-team     | `tw-team/`     | 6      | 3      |
 
-**Total: 75 skills, 34 agents across 4 plugins.** Plugin versions in `.claude-plugin/marketplace.json`.
+**Total: 77 skills, 34 agents across 4 plugins.** Plugin versions in `.claude-plugin/marketplace.json`.
 
 Each plugin contains: `skills/`, `agents/`, `hooks/`. See [README.md](README.md#architecture) for full directory structure.
 
