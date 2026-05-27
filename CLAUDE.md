@@ -93,7 +93,7 @@ When adding/removing a code review agent in `ring:codereview` pool:
 
 **Total: 77 skills, 34 agents across 4 plugins.** Plugin versions in `.claude-plugin/marketplace.json`.
 
-Each plugin contains: `skills/`, `agents/`, `hooks/`. See [README.md](README.md#architecture) for full directory structure.
+Each plugin contains: `skills/`, `agents/`, `hooks/`, plus per-harness install manifests `.codex-plugin/`, `.cursor-plugin/`, and `.opencode/` (alongside the marketplace-wide `.claude-plugin/marketplace.json` at repo root). See [README.md](README.md#architecture) for full directory structure.
 
 ---
 

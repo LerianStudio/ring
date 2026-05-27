@@ -226,7 +226,7 @@ When you start a new Claude Code session with Ring installed, you'll see:
 - ring:test-driven-development (RED-GREEN-REFACTOR cycle)
 - ring:codereview (9 defaults + conditional specialist dispatch)
 - ring:explore-codebase (Two-phase codebase exploration)
-... and 71 more skills
+... and 73 more skills
 ```
 
 ## 🎯 Core Skills

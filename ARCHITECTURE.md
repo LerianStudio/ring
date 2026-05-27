@@ -13,7 +13,9 @@
 
 ## Overview
 
-Ring is a **Claude Code plugin marketplace** that provides a comprehensive skills library and workflow system with **4 active plugins** (75 skills, 34 agents). It extends Claude Code's capabilities through structured, reusable patterns that enforce proven software engineering practices across the software delivery value chain: Product Planning → Development → Documentation.
+Ring is a **Claude Code plugin marketplace** that provides a comprehensive skills library and workflow system with **4 active plugins** (77 skills, 34 agents). It extends Claude Code's capabilities through structured, reusable patterns that enforce proven software engineering practices across the software delivery value chain: Product Planning → Development → Documentation.
+
+Beyond Claude Code, each Ring plugin ships native install manifests for Codex (`<plugin>/.codex-plugin/`), Cursor (`<plugin>/.cursor-plugin/`), and OpenCode (`<plugin>/.opencode/`), plus a `ring-install.sh` symlink installer for local-dev workflows targeting Claude Code, Factory AI, OpenCode, and Codex.
 
 ### Architecture Philosophy
 
@@ -33,7 +35,7 @@ Ring operates on three core principles:
 │  │                          Ring Marketplace                                  │  │
 │  │  ┌──────────────────────┐  ┌──────────────────────┐                       │  │
 │  │  │ ring-default         │  │ ring-dev-team        │                       │  │
-│  │  │ Skills(14) Agents(3) │  │ Skills(37) Agents(24)│                       │  │
+│  │  │ Skills(16) Agents(3) │  │ Skills(37) Agents(24)│                       │  │
 │  │  │ Hooks/Lib            │  │                      │                       │  │
 │  │  └──────────────────────┘  └──────────────────────┘                       │  │
 │  │  ┌──────────────────────┐  ┌──────────────────────┐                       │  │
@@ -45,6 +47,8 @@ Ring operates on three core principles:
 │  Native Tools: Skill, Task, TodoWrite                                           │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
+
+> **Multi-harness install surface:** the diagram above shows Claude Code, the source-of-truth runtime. The same plugin tree is also installable in **Codex** (`<plugin>/.codex-plugin/plugin.json`), **Cursor** (`<plugin>/.cursor-plugin/plugin.json`), and **OpenCode** (`<plugin>/.opencode/plugins/ring-*.js` + `INSTALL.md`) via each harness's native package manager. For local-dev workflows, `ring-install.sh` symlinks the source tree into Claude Code, Factory AI, OpenCode, and Codex (with `.ring-build/` transformations for the latter two). See [README.md § Supported Platforms](README.md#-supported-platforms).
 
 ## Marketplace Structure
 
@@ -66,7 +70,7 @@ _Versions managed in `.claude-plugin/marketplace.json`_
 
 | Plugin               | Description                          | Components                       |
 | -------------------- | ------------------------------------ | -------------------------------- |
-| **ring-default**     | Core skills library                  | 14 skills, 3 agents               |
+| **ring-default**     | Core skills library                  | 16 skills, 3 agents               |
 | **ring-dev-team**    | Developer agents                     | 37 skills, 24 agents              |
 | **ring-pm-team**     | Product planning workflows           | 18 skills, 4 agents               |
 | **ring-tw-team**     | Technical writing specialists        | 6 skills, 3 agents                |
@@ -294,6 +298,32 @@ default/hooks/
   ]
 }
 ```
+
+### 5. Per-Harness Install Manifests
+
+**Purpose:** Native install surface for non-Claude harnesses. Each Ring plugin ships its own per-harness manifest, so Codex, Cursor, and OpenCode install the plugin directly via their package managers — no transformation step, no central installer required.
+
+**Structure (replicated under each of `default/`, `dev-team/`, `pm-team/`, `tw-team/`):**
+
+```
+<plugin>/
+├── .codex-plugin/
+│   └── plugin.json              # Codex manifest (name, version, skills/agents paths, interface)
+├── .cursor-plugin/
+│   └── plugin.json              # Cursor manifest (skills, agents, hooks paths)
+└── .opencode/
+    ├── INSTALL.md               # End-user install instructions for this plugin in OpenCode
+    └── plugins/
+        └── ring-<plugin>.js     # OpenCode runtime plugin (registers skills path; ring-default also injects using-ring bootstrap)
+```
+
+**Key Characteristics:**
+
+- **Decentralized vs `.claude-plugin/`:** Claude Code uses one root-level marketplace.json that enumerates all 4 plugins. Codex/Cursor/OpenCode use per-plugin manifests so each plugin is independently installable.
+- **OpenCode JS specifics:** `ring-default/.opencode/plugins/ring-default.js` is the only one that injects the `using-ring` bootstrap into the first user message of each session (mirrors Claude Code's session-start hook). The other three plugins' JS files only register their skills directory.
+- **Versioning:** all per-harness manifests carry the same version as `marketplace.json` (kept in sync via `.github/workflows/version-bump.yml`).
+
+**Local-dev alternative:** `ring-install.sh` at repo root provides symlink installs (per-file for Claude Code/Factory AI; transformed `.ring-build/` tree for Codex/OpenCode). Best for hot-reload local development against the source tree.
 
 ## Data & Control Flow
 
@@ -686,11 +716,11 @@ _Component counts reflect current state; plugin versions managed in `.claude-plu
 | Component                 | Count      | Location               |
 | ------------------------- | ---------- | ---------------------- |
 | Active Plugins            | 4          | All plugin directories |
-| Skills (ring-default)     | 14         | `default/skills/`      |
+| Skills (ring-default)     | 16         | `default/skills/`      |
 | Skills (ring-dev-team)    | 37         | `dev-team/skills/`     |
 | Skills (ring-pm-team)     | 18         | `pm-team/skills/`      |
 | Skills (ring-tw-team)     | 6          | `tw-team/skills/`      |
-| **Total Skills**          | **75**     | **All plugins**        |
+| **Total Skills**          | **77**     | **All plugins**        |
 | Agents (ring-default)     | 3          | `default/agents/`      |
 | Agents (ring-dev-team)    | 24         | `dev-team/agents/`     |
 | Agents (ring-pm-team)     | 4          | `pm-team/agents/`      |
