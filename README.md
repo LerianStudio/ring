@@ -114,24 +114,20 @@ _To restore an archived plugin, move its folder from `.archive/` to the root dir
 
 Ring works across multiple AI development platforms:
 
-| Platform        | Format                 | Status             | Features                        |
-| --------------- | ---------------------- | ------------------ | ------------------------------- |
-| **Claude Code** | Native (marketplace)   | ✅ Source of truth | Skills, agents, hooks           |
-| **Codex**       | Native (plugin.json)   | ✅ Supported       | Skills, agents                  |
-| **Cursor**      | Native + Transformed   | ✅ Supported       | Skills, agents, hooks           |
-| **OpenCode**    | Native (JS plugin)     | ✅ Supported       | Skills, bootstrap injection     |
-| **Factory AI**  | Transformed            | ✅ Supported       | Droids, skills                  |
-| **Cline**       | Transformed            | ✅ Supported       | Prompts                         |
+| Platform        | Native manifest        | Symlink installer       | Status             |
+| --------------- | ---------------------- | ----------------------- | ------------------ |
+| **Claude Code** | ✅ marketplace.json    | ✅ `--claude`           | Source of truth    |
+| **Codex**       | ✅ `.codex-plugin/`    | ✅ `--codex` (built)    | Both paths work    |
+| **OpenCode**    | ✅ `.opencode/`        | ✅ `--opencode` (built) | Both paths work    |
+| **Cursor**      | ✅ `.cursor-plugin/`   | ❌ not in installer     | Native only        |
+| **Factory AI**  | ❌                     | ✅ `--factory`          | Installer only     |
 
-**Format Notes:**
+**Two install mechanisms:**
 
-- **Native** — the harness installs Ring directly from manifest files in this repo (no transformation). Each Ring plugin ships its own per-harness manifest under `<plugin>/.codex-plugin/`, `<plugin>/.cursor-plugin/`, and `<plugin>/.opencode/`.
-- **Transformed** — the multi-platform installer copies and adapts Ring content into the harness's local config (e.g., `~/.cursor/skills/`, droids for Factory AI, structured prompts for Cline).
+- **Native manifest** — the harness installs Ring directly from this repo via its own package manager (`opencode.json`, Cursor plugin marketplace, Codex plugin manifest). No local build step, no manual symlink work. Best for end users and CI.
+- **Symlink installer** (`ring-install.sh`) — symlinks from your local harness config dir into a cloned Ring repo. For Codex/OpenCode, the installer builds a transformed tree at `.ring-build/` first (namespace + frontmatter rewrites). Best for local development with hot-reload against the source tree.
 
-**Platform-Specific Guides:**
-
-- For **native install** per harness, see the sub-section below (`Native plugin install (per harness)`).
-- For **transformed install** via the multi-platform installer, see the [installer README](installer/).
+See the [`Native plugin install`](#native-plugin-install-per-harness) and [`Symlink installer`](#symlink-installer-local-dev) sub-sections below for usage.
 
 ## 🚀 Quick Start
 
@@ -159,76 +155,41 @@ Each Ring plugin ships native manifests for Claude Code, Codex, Cursor, and Open
 
 Each harness's INSTALL.md (for OpenCode) or `plugin.json` (for Codex/Cursor) carries the exact install command for that platform.
 
-### Multi-Platform Installation (Transformed)
+### Symlink installer (local dev)
 
-The Ring installer detects installed platforms and copies/transforms content into each harness's local config (used for Factory AI, Cline, and the transformed-mode Cursor flow).
+`ring-install.sh` symlinks your harness's local config dir into this cloned Ring repo. For Codex and OpenCode, it first builds a transformed tree at `.ring-build/` (namespace + frontmatter rewrites required by those tools).
 
-**Linux/macOS/Git Bash:**
+**Supported targets:** Claude Code, Factory AI, OpenCode, Codex.
+**Not supported by the installer:** Cursor (use the [native plugin install above](#native-plugin-install-per-harness)).
 
 ```bash
-# Interactive installer (auto-detects platforms)
-curl -fsSL https://raw.githubusercontent.com/lerianstudio/ring/main/install-ring.sh | bash
-
-# Or clone and run locally
+# Clone the repo
 git clone https://github.com/lerianstudio/ring.git ~/ring
 cd ~/ring
-./installer/install-ring.sh
+
+# Interactive menu (lets you pick targets)
+bash ring-install.sh
+
+# Or target specific harnesses without the prompt:
+bash ring-install.sh --claude               # Claude Code (per-file symlinks)
+bash ring-install.sh --factory              # Factory AI (per-file symlinks)
+bash ring-install.sh --opencode             # OpenCode (builds .ring-build/opencode/ first)
+bash ring-install.sh --codex                # Codex    (builds .ring-build/codex/ first)
+bash ring-install.sh --all                  # All four supported targets
 ```
 
-**Windows PowerShell:**
-
-```powershell
-# Interactive installer (auto-detects platforms)
-irm https://raw.githubusercontent.com/lerianstudio/ring/main/install-ring.ps1 | iex
-
-# Or clone and run locally
-git clone https://github.com/lerianstudio/ring.git $HOME\ring
-cd $HOME\ring
-.\installer\install-ring.ps1
-```
-
-### Direct Platform Installation
-
-Install to specific platforms without the interactive menu:
+#### Installer subcommands
 
 ```bash
-# Install to Claude Code only (native format)
-./installer/install-ring.sh install --platforms claude
-
-# Install to Factory AI only (droids format)
-./installer/install-ring.sh install --platforms factory
-
-# Install to multiple platforms
-./installer/install-ring.sh install --platforms claude,cursor,cline
-
-# Install to all detected platforms
-./installer/install-ring.sh install --platforms auto
-
-# Dry run (preview changes without installing)
-./installer/install-ring.sh install --platforms auto --dry-run
+bash ring-install.sh install --opencode --codex   # install symlinks for selected targets
+bash ring-install.sh remove                        # remove all Ring symlinks
+bash ring-install.sh build                         # rebuild .ring-build/{opencode,codex} only
+bash ring-install.sh clean                         # remove .ring-build/ outputs
+bash ring-install.sh doctor                        # verify install + build outputs
+bash ring-install.sh all --all -y                  # clean + build + install for all targets, no prompt
 ```
 
-### Installer Commands
-
-```bash
-# List installed platforms and versions
-./installer/install-ring.sh list
-
-# Update existing installation
-./installer/install-ring.sh update
-
-# Check for available updates
-./installer/install-ring.sh check
-
-# Sync (update only changed files)
-./installer/install-ring.sh sync
-
-# Uninstall from specific platform
-./installer/install-ring.sh uninstall --platforms cursor
-
-# Detect available platforms
-./installer/install-ring.sh detect
-```
+**Flags:** `--yes` / `-y` (skip confirmation), `--dry-run` (preview without changes), `--force` (back up non-symlink collisions), `--verbose`.
 
 ### Claude Code Plugin Marketplace
 
@@ -288,20 +249,22 @@ GREEN → Minimal code → Watch it pass
 REFACTOR → Clean up → Stay green
 ```
 
-## 📚 All 75 Skills (Across 4 Plugins)
+## 📚 All 77 Skills (Across 4 Plugins)
 
-### Core Skills (ring-default plugin - 14 skills)
+### Core Skills (ring-default plugin - 16 skills)
 
 **Testing & Quality (2):**
 
 - `ring:test-driven-development` - Write test first, watch fail, minimal code
 - `ring:lint` - Parallel lint fixing with agent dispatch
 
-**Collaboration & Planning (3):**
+**Collaboration & Planning (5):**
 
 - `ring:codereview` - **Parallel 9 defaults + conditional specialist dispatch** with severity-based handling
 - `ring:worktree` - Isolated development
 - `ring:commit` - Smart commit organization with atomic grouping, conventional commits, and trailers
+- `ring:writing-plans` - Author bite-sized TDD-shaped implementation plans from a spec, ready for inline or subagent execution
+- `ring:executing-plans` - Inline execution of a written plan with verification checkpoints (TDD enforced per task)
 
 **Meta Skills (3):**
 

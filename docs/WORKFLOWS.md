@@ -286,7 +286,7 @@ When adding or removing a code review agent in the `ring:codereview` pool:
 
 - `default/skills/using-ring/SKILL.md` — entry-point skill reminder
 - `default/agents/write-plan.md` — output format instructing plans to dispatch reviewers
-- `install-symlinks.sh` — user-facing install advertisement (interactive menu + `--claude` / `--factory` / `--opencode` / `--codex` / `--all`)
+- `ring-install.sh` — user-facing install advertisement (interactive menu + `--claude` / `--factory` / `--opencode` / `--codex` / `--all`)
 - `docs/PROMPT_ENGINEERING.md` — canonical example of strong language
 - `docs/WORKFLOWS.md` — workflow documentation
 - `MANUAL.md`, `README.md`, `ARCHITECTURE.md` — public-facing docs
