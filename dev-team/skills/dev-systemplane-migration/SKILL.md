@@ -1,6 +1,6 @@
 ---
 name: ring:dev-systemplane-migration
-description: Migrates Lerian Go services from .env/YAML configuration of operational knobs (log levels, feature flags, rate limits, timeouts) to the lib-systemplane runtime config client — a hot-reloadable plane using Postgres LISTEN/NOTIFY or MongoDB change streams. Use when adding hot-reloadable runtime configuration or migrating from v4 systemplane (formerly lib-commons/v5/commons/systemplane). Detects deleted v4 residue (Supervisor, BundleFactory, SYSTEMPLANE_* env vars).
+description: Migrates Lerian Go services from .env/YAML configuration of operational knobs (log levels, feature flags, rate limits, timeouts) to the lib-systemplane runtime config client — a hot-reloadable plane using Postgres LISTEN/NOTIFY or MongoDB change streams. Wires the standard `make systemplane-ddl` migration-only provisioning pipeline (generator + manifest + drift guard) — runtime DDL is forbidden in v1.6.0+. Use when adding hot-reloadable runtime configuration or migrating from v4 systemplane (formerly lib-commons/v5/commons/systemplane). Detects deleted v4 residue (Supervisor, BundleFactory, SYSTEMPLANE_* env vars) and runtime DDL anti-patterns.
 ---
 
 # Systemplane Migration (lib-systemplane)
@@ -35,11 +35,13 @@ Three-step lifecycle:
 
 | Alias | Import Path | Purpose |
 |-------|-------------|---------|
-| `systemplane` | `github.com/LerianStudio/lib-systemplane` | Client, constructors, options |
+| `systemplane` | `github.com/LerianStudio/lib-systemplane` | Client, constructors, options, `SchemaSQL()` / `DefaultSeedSQL()` provisioning artifacts |
 | `admin` | `github.com/LerianStudio/lib-systemplane/admin` | HTTP admin routes |
 | `systemplanetest` | `github.com/LerianStudio/lib-systemplane/systemplanetest` | Contract test suite |
 
 **Legacy paths are DELETED** — do not use `lib-commons/v4/...` or `lib-commons/v5/commons/systemplane` (extracted to its own module), and do not use `Supervisor`, `BundleFactory`, `ApplyBehavior`.
+
+**Provisioning is migration-only.** lib-systemplane publishes `systemplane.SchemaSQL()` + `systemplane.DefaultSeedSQL()` as public artifacts and consumers MUST fold them into the service's own SQL migration pipeline via the `make systemplane-ddl` generator pattern (Gate 3.5). Runtime DDL provisioning is FORBIDDEN — least-privilege tenant-manager roles cannot run DDL anyway, and any boot-time `runSchema`-style hook is a CRITICAL deviation.
 
 **Scope: operational knobs only** — values that can mutate in-place (log levels, feature flags, rate limits, timeouts, poll intervals).
 NOT for settings requiring resource teardown: DSNs, TLS material, listen addresses → keep in env vars + restart.
@@ -61,6 +63,7 @@ Any key storing credentials MUST use `RedactFull`.
 > WebFetch `https://raw.githubusercontent.com/LerianStudio/lib-systemplane/main/doc.go`.
 > Use only canonical `github.com/LerianStudio/lib-systemplane` import paths. v4 packages and the legacy `lib-commons/v5/commons/systemplane` path no longer exist.
 > systemplane is for operational knobs only — not DSNs, TLS, or listen addresses.
+> Provisioning is migration-only (Gate 3.5). Wire `cmd/generate-systemplane-ddl/` + `make systemplane-ddl` + `check-systemplane-ddl-drift` + `migrations/systemplane_ddl_manifest.json` and a bootstrap seam returning `[]SystemplaneSeedEntry`. NEVER call `SchemaSQL()` at boot. NEVER hand-edit generated `migrations/NNN_systemplane_*.sql`. See multi-tenant.md §27 "Cold-tenant resolution" for the canonical reference.
 > TDD: RED → GREEN → REFACTOR for every gate.
 
 ## Related Skills
@@ -68,7 +71,7 @@ Any key storing credentials MUST use `RedactFull`.
 - [[using-lib-systemplane]] — adoption sweep + API reference for the lib-systemplane module
 - [[using-lib-commons]] — non-observability lib-commons packages (lifecycle, outbox, tenancy)
 - [[using-lib-observability]] — tracing, metrics, logging, assert, runtime, redaction
-- For services running in **multi-tenant mode** (`MULTI_TENANT_ENABLED=true`), the consumer-side pattern (registration shape, no-fallback consumer reads, DI interface, seed migration, Manager binding when available in the pinned lib version) is documented in `dev-team/docs/standards/golang/multi-tenant.md` §27 "Systemplane in MT mode — compliance pattern (MANDATORY)". Load that section in addition to the general systemplane architecture below.
+- For services running in **multi-tenant mode** (`MULTI_TENANT_ENABLED=true`), the consumer-side pattern (registration shape, no-fallback consumer reads, DI interface, `make systemplane-ddl` provisioning generator, Manager binding when available in the pinned lib version) is documented in `dev-team/docs/standards/golang/multi-tenant.md` §27 "Systemplane in MT mode — compliance pattern (MANDATORY)". Load that section — particularly the "Cold-tenant resolution — `make systemplane-ddl` generator" subsection — in addition to the general systemplane architecture below.
 
 ## Gate Overview
 
@@ -79,6 +82,7 @@ Any key storing credentials MUST use `RedactFull`.
 | 1.5 | Implementation Preview | Always | ring:visualize |
 | 2 | lib-commons v5 Upgrade + v4 Removal | Skip only if v5 in go.mod AND zero v4 imports | ring:backend-engineer-golang |
 | 3 | Client Construction + Key Registration | Always | ring:backend-engineer-golang |
+| 3.5 | DDL Provisioning (`make systemplane-ddl`) | Always — STANDARD provisioning mechanism | ring:backend-engineer-golang |
 | 4 | OnChange Subscriptions | Always unless zero hot-reloadable keys (justify) | ring:backend-engineer-golang |
 | 5 | Config Bridge | Skip if no Config struct reads need live values | ring:backend-engineer-golang |
 | 6 | Admin HTTP Mount + Authorizer | Skip only if service has no admin surface (justify) | ring:backend-engineer-golang |
@@ -104,6 +108,13 @@ grep "mongodb\|mongo" go.mod
 # Non-canonical:
 grep -rn "fsnotify\|viper.Watch\|Supervisor\|BundleFactory\|ApplyBehavior" internal/
 grep -rn "lib-commons/v5/commons/systemplane\|lib-commons/v4" internal/  # legacy paths
+# DDL provisioning seam + manifest (Gate 3.5):
+ls cmd/generate-systemplane-ddl/                              # generator presence
+ls migrations/systemplane_ddl_manifest.json                    # append-only manifest
+grep -n "systemplane-ddl\|check-systemplane-ddl-drift" Makefile  # make targets
+grep -rn "SystemplaneSeedEntries\|buildSystemplaneRegistrations" internal/bootstrap/  # seam
+# Runtime DDL anti-pattern (CRITICAL):
+grep -rn "runSchema\|SchemaSQL()\|CREATE TABLE.*systemplane_entries" internal/  # MUST be migration-only
 ```
 
 **Phase 2: Compliance Audit** (if systemplane code detected)
@@ -112,17 +123,23 @@ grep -rn "lib-commons/v5/commons/systemplane\|lib-commons/v4" internal/  # legac
 - `OnChange` wired for hot-reloadable keys
 - `admin.Mount` with `admin.WithAuthorizer`
 - Lifecycle: `client.Start(ctx)` registered with `commons.Launcher`
+- `cmd/generate-systemplane-ddl/` generator present AND `migrations/systemplane_ddl_manifest.json` committed
+- `make systemplane-ddl` + `check-systemplane-ddl-drift` wired in Makefile and called from `check-generated-artifacts`
+- Bootstrap exposes the seam `SystemplaneSeedEntries() ([]SystemplaneSeedEntry, error)` derived from the same `buildSystemplaneRegistrations` (or equivalent) the client uses at boot
+- ZERO runtime DDL — no `runSchema`, no `SchemaSQL()` at boot, no `CREATE TABLE ... systemplane_entries` outside `migrations/`
 
 **Phase 3: Non-Canonical Detection**
 - Any `fsnotify` / `viper.WatchConfig` / `envconfig.Watch` for runtime config → MUST replace
 - Any v4 sub-packages (`domain/`, `ports/`, `registry/`, `service/`, `bootstrap/`) → MUST remove
 - Any `lib-commons/v5/commons/systemplane` imports → MUST migrate to `lib-systemplane`
+- Runtime DDL provisioning (boot-time `SchemaSQL()` execution) → MUST replace with the `make systemplane-ddl` migration pipeline (Gate 3.5)
+- Hand-written `migrations/NNN_systemplane_*.sql` files NOT emitted by the generator → MUST be re-emitted via `make systemplane-ddl` (drift-guarded)
 
 ## Severity Reference
 
 | Severity | Criteria |
 |----------|----------|
-| CRITICAL | Legacy import (`lib-commons/v4/...` or `lib-commons/v5/commons/systemplane`); `admin.Mount` without authorizer; secret with `RedactNone` |
-| HIGH | No `Register` before `Start`; no `OnChange` for live key; `SYSTEMPLANE_*` env vars in code |
-| MEDIUM | Missing `WithLogger`/`WithTelemetry`; no validator on numeric range |
+| CRITICAL | Legacy import (`lib-commons/v4/...` or `lib-commons/v5/commons/systemplane`); `admin.Mount` without authorizer; secret with `RedactNone`; runtime DDL provisioning (boot-time `SchemaSQL()` or `CREATE TABLE systemplane_entries` outside `migrations/`) |
+| HIGH | No `Register` before `Start`; no `OnChange` for live key; `SYSTEMPLANE_*` env vars in code; missing `cmd/generate-systemplane-ddl/` generator or `systemplane_ddl_manifest.json`; `make systemplane-ddl` not wired into `check-generated-artifacts` |
+| MEDIUM | Missing `WithLogger`/`WithTelemetry`; no validator on numeric range; hand-edited generated `migrations/NNN_systemplane_*.sql` (would fail the drift guard) |
 | LOW | Missing `WithDescription`; inconsistent namespace naming |
