@@ -1,6 +1,6 @@
 ---
 name: ring:using-lib-systemplane
-description: Dual-mode skill for github.com/LerianStudio/lib-systemplane, Lerian's dual-backend (Postgres LISTEN/NOTIFY or MongoDB change streams) hot-reload runtime configuration plane. Sweep Mode dispatches 7 parallel explorers to detect DIY runtime-config wiring (env reload via SIGHUP, fsnotify/viper.WatchConfig, raw pgx LISTEN, hand-rolled change-stream watchers, manual tenant-scoping, hand-built admin CRUD UIs, v4 systemplane residue). Reference Mode catalogs the API by lifecycle (construct → register → start → read/write/subscribe → close), including tenant-scoped overrides, the Fiber admin surface, redaction policies, and the test harness. For end-to-end migration use ring:dev-systemplane-migration. Skip for non-Go or frontend code.
+description: Dual-mode skill for github.com/LerianStudio/lib-systemplane, Lerian's dual-backend (Postgres LISTEN/NOTIFY or MongoDB change streams) hot-reload runtime configuration plane. Sweep Mode dispatches 7 parallel explorers to detect DIY runtime-config wiring (env reload via SIGHUP, fsnotify/viper.WatchConfig, raw pgx LISTEN, hand-rolled change-stream watchers, manual tenant-scoping, hand-built admin CRUD UIs, v4 systemplane residue + runtime DDL provisioning anti-pattern). Reference Mode catalogs the API by lifecycle (construct → register → start → read/write/subscribe → close), the migration-only provisioning artifacts (`SchemaSQL()` + `DefaultSeedSQL()` vendored via `make systemplane-ddl`), tenant-scoped overrides, the Fiber admin surface, redaction policies, and the test harness. For end-to-end migration use ring:dev-systemplane-migration. Skip for non-Go or frontend code.
 ---
 
 # ring:using-lib-systemplane
@@ -53,6 +53,7 @@ Reference mode:
 - **Tenant context:** `github.com/LerianStudio/lib-commons/v5 v5.0.2` (via `tenant-manager/core`)
 - **Observability:** `github.com/LerianStudio/lib-observability v1.0.0` (`log.Logger`, `tracing.Telemetry`, `runtime.RecoverAndLog`)
 - **Dual backend:** Postgres 13+ (LISTEN/NOTIFY) **or** MongoDB 4.4+ (change streams; polling fallback for standalone deployments)
+- **Provisioning:** migration-only via `systemplane.SchemaSQL()` + `systemplane.DefaultSeedSQL()` public artifacts. Runtime DDL hook (`runSchema`) was removed in v1.6.0. Consumers vendor the artifacts into their own SQL migration pipeline via the `make systemplane-ddl` generator pattern — see [[ring:dev-systemplane-migration]] Gate 3.5 and `multi-tenant.md` §27 "Cold-tenant resolution"
 - **License:** Elastic 2.0
 - **Scope:** runtime-mutable knobs only — never bootstrap-only material (DSNs, TLS, listen addresses, secrets)
 
@@ -211,7 +212,7 @@ If no findings: write file with empty findings array and summary
 
 **Severity rationale:** Default-deny is the safe-by-default property. Hand-built admin routes routinely ship with weaker authorization than the lib-commons-backed reference implementation.
 
-### Angle 7 — v4 systemplane residue (CRITICAL)
+### Angle 7 — v4 systemplane residue + runtime DDL provisioning (CRITICAL)
 
 **DIY patterns to grep:**
 - `github.com/LerianStudio/lib-commons/v[34]/commons/systemplane` imports
@@ -219,10 +220,13 @@ If no findings: write file with empty findings array and summary
 - `SYSTEMPLANE_*` environment variables (the v4-era runtime knobs)
 - Sub-packages from the v4 layout: `domain/`, `ports/`, `registry/`, `service/`, `bootstrap/` under any `systemplane/` tree
 - `lib-commons/v5/commons/systemplane` imports (the v5 package was **extracted** to the standalone `lib-systemplane` module; `lib-commons/v5/commons/systemplane` is the pre-extraction location and signals an out-of-date pin)
+- Runtime DDL provisioning: `systemplane.SchemaSQL()` called at boot, `runSchema`-style hooks, `CREATE TABLE systemplane_entries` executed outside `migrations/`, missing `cmd/generate-systemplane-ddl/` + `migrations/systemplane_ddl_manifest.json`, missing `make systemplane-ddl` / `check-systemplane-ddl-drift` Make targets
 
-**Replacement:** Switch to the standalone module `github.com/LerianStudio/lib-systemplane`. Delete the v4 sub-packages outright; v5 has no equivalent layers because the API surface is flat.
+**Replacement:**
+- v4/v5-extracted paths → switch to the standalone module `github.com/LerianStudio/lib-systemplane`; delete the v4 sub-packages outright (v5 has no equivalent layers — the API surface is flat).
+- Runtime DDL → migration-only provisioning via the `make systemplane-ddl` generator (canonical scaffold: `go-boilerplate-ddd` once its systemplane-ddl PR lands; reference implementation in `plugin-br-bank-transfer` at `cmd/generate-systemplane-ddl/`, `migrations/000011_systemplane_schema.{up,down}.sql` → `000013_systemplane_project_seed.{up,down}.sql`, `migrations/systemplane_ddl_manifest.json`, and the bootstrap seam `SystemplaneSeedEntries() ([]SystemplaneSeedEntry, error)` at `internal/bootstrap/systemplane_ddl_gen.go`).
 
-**Severity rationale:** v4 packages are **deleted** from current lib-commons; any surviving import will fail the build under a clean module cache. Surfacing this in the sweep prevents a CI surprise.
+**Severity rationale:** v4 packages and the runtime DDL hook are **deleted** from current lib-systemplane; any surviving call site will fail the build (v4) or fail at boot (runtime DDL under a least-privilege tenant-manager role). Surfacing both in the sweep prevents a CI/runtime surprise.
 
 ## Phase 4: Consolidated Report
 
@@ -523,11 +527,29 @@ For contract testing against a real backend, see `systemplanetest` in the librar
 | `lib-observability/runtime` | `runtime.RecoverAndLog` wraps the subscribe goroutine **and** every OnChange / OnTenantChange callback dispatch. |
 | `lib-commons/v5/commons/net/http` | The admin package uses `commonshttp.RespondError` for uniform error responses. |
 
-## 12. Scope Reminder (locked)
+## 12. Provisioning Artifacts (`SchemaSQL` / `DefaultSeedSQL`) — migration-only
+
+lib-systemplane v1.6.0+ publishes the DDL it needs as two public functions and removes the runtime `runSchema` hook. Consumers MUST fold the artifacts into their own SQL migration pipeline; provisioning at boot is FORBIDDEN.
+
+| Artifact | Returns | Folds into |
+|---|---|---|
+| `systemplane.SchemaSQL() string` | Byte-faithful DDL for `systemplane_entries` table + `systemplane_notify_v3` function + 2 triggers (fully idempotent: `CREATE TABLE IF NOT EXISTS` / `CREATE OR REPLACE` / `DROP TRIGGER IF EXISTS`). Channel `systemplane_changes`, table `systemplane_entries` are fixed (no placeholders). | `migrations/NNN_systemplane_schema.up.sql` (`down` = drop triggers + function, never the table) |
+| `systemplane.DefaultSeedSQL() string` | `INSERT ... ON CONFLICT (namespace, key) DO NOTHING` over the universal default keys (the lib's own runtime knobs). | `migrations/NNN+1_systemplane_default_seed.up.sql` (`down` = value-guarded DELETE of the universal keys) |
+
+**Canonical scaffold:** `make systemplane-ddl` (generator under `cmd/generate-systemplane-ddl/`) vendors both artifacts into append-only migrations + a `migrations/systemplane_ddl_manifest.json`, then emits a third project-seed migration derived from the service's own registrations via a bootstrap seam returning `[]SystemplaneSeedEntry`. The full pattern (seam contract, manifest, drift guard, MT/ST symmetry) is normative in `multi-tenant.md` §27 "Cold-tenant resolution" and operational in [[ring:dev-systemplane-migration]] Gate 3.5. Reference implementation: `plugin-br-bank-transfer` (`cmd/generate-systemplane-ddl/`, `internal/bootstrap/systemplane_ddl_gen.go`, `migrations/000011..000013_systemplane_*`).
+
+**Invariants (locked):**
+
+- NEVER call `SchemaSQL()` or `DefaultSeedSQL()` at boot. Runtime DDL is a CRITICAL deviation — least-privilege tenant-manager roles cannot execute it.
+- NEVER hand-edit a generated `migrations/NNN_systemplane_*.sql`. The generator is the only writer; `check-systemplane-ddl-drift` enforces this.
+- ALWAYS expose the seam — same signature (`SystemplaneSeedEntries() ([]SystemplaneSeedEntry, error)` or equivalent) across services. The generator depends on it; ad-hoc per-project shapes break the scaffold contract.
+- ST and MT use the SAME migration pipeline (single-tenant `migrate-up` or multi-tenant tenant-manager provisioning — same `.sql` files).
+
+## 13. Scope Reminder (locked)
 
 Systemplane is for **runtime-mutable knobs only**. Bootstrap-only configuration (DB DSNs, secrets, TLS material, telemetry endpoints, server identity, listen addresses) belongs in environment variables or a secret manager — **never** in the systemplane plane. Anything requiring resource teardown to apply (reopening a DB pool, rotating a TLS cert) violates the hot-reload contract by definition.
 
-## 13. Cross-references
+## 14. Cross-references
 
 - [[ring:dev-systemplane-migration]] — gated end-to-end migration cycle (stack detection → v5 upgrade → register → subscribe → admin mount → tests → review). Use after this skill identifies adoption opportunities.
 - [[ring:using-lib-commons]] — tenant-manager/core, idempotency, DLQ, webhook delivery, and the broader v5 surface that composes with systemplane.
