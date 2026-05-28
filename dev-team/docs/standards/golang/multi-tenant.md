@@ -19,6 +19,7 @@ This module covers multi-tenant patterns with Tenant Manager.
 | 25 | [M2M Credentials via Secret Manager](#m2m-credentials-via-secret-manager) | AWS Secrets Manager integration for service-to-service authentication per tenant |
 | 26 | [Service Authentication (MANDATORY)](#service-authentication-mandatory) | API key authentication for dispatch layer /settings endpoint via X-API-Key header |
 | 27 | [Systemplane in MT mode — compliance pattern (MANDATORY)](#systemplane-in-mt-mode--compliance-pattern-mandatory) | ReadLive Padrão A, no-fallback consumer reads, interface DI keeping adapters free of `lib-systemplane` import, migration-based default seeding, `Manager` binding when available in the pinned lib version |
+| 28 | [Bootstrap Resource Requirements in MT (MANDATORY)](#bootstrap-resource-requirements-in-mt-mandatory) | What infrastructure the process is allowed to require at startup in MT vs ST. Bootstrap MUST NOT fail-fast on per-tenant resources; only the multi-tenant Redis is required at boot. Postgres/Mongo/RabbitMQ/secrets resolve per-tenant at runtime via the dispatch layer |
 
 ---
 
@@ -2891,3 +2892,49 @@ The consumer code is **mode-agnostic** in all three rows. The asymmetry exists i
 | "The consumer can import `lib-systemplane` directly" | Adapter packages stay clean of platform-lib imports; only the bootstrap layer wires the concrete client. | **MUST declare a narrow per-consumer interface and inject from bootstrap** |
 | "We don't need the seed migration; the lib will handle it" | True only when bound to a `Manager` (available in the lib version that introduces it — check the CHANGELOG). On earlier versions, the lib does NOT seed tenant DBs. | **MUST ship the seed migration until a `Manager` is bound and the migration is explicitly retired** |
 | "ST doesn't need this — only MT" | The compliance pattern is mode-agnostic by design. Mixed code paths break the symmetry guarantee that makes consumer code portable. | **Same `spClient.GetX(ctx)` code in ST and MT; no `if singleTenant` branches** |
+---
+
+## Bootstrap Resource Requirements in MT (MANDATORY)
+
+**CONDITIONAL:** Applies whenever `MULTI_TENANT_ENABLED=true` is supported by the service, including services that ship dual-mode binaries (ST + MT from the same image). Pairs with §27 — the same service that uses runtime configuration per tenant must also resolve its data-plane infrastructure per tenant. Do not implement one without the other.
+
+This section defines what the process is **allowed to require at boot** in MT versus ST. The rule exists because every per-tenant resource that the bootstrap (the process-init path: `cmd/app/main.go`, `internal/bootstrap/service*.go`, the config validator) tries to touch synchronously becomes a global single point of failure for the multi-tenant pod — and most per-tenant infrastructure does not even exist at boot time (credentials live in the tenant-manager, databases are provisioned per tenant, secrets fetch is per-tenant).
+
+The contract:
+
+**In MT mode, the multi-tenant Redis is the only infrastructure that MUST be reachable for the process to start. Postgres, Mongo, RabbitMQ, vendor secrets (JD/M2M), and every other per-tenant resource MUST be resolved at runtime via the dispatch layer (`tmcore.GetPGContext` / `tmcore.GetMBContext` / `tmrabbitmq.Manager.GetChannel` / `secretsmanager.GetM2MCredentials`) and MUST NOT block bootstrap.**
+
+In ST mode the rule inverts: the bootstrap pool **is** the real connection, so Postgres + Mongo (when enabled) MUST remain fail-fast at boot.
+
+### Failure modes this pattern prevents
+
+The compliance rule above is anchored in four production failure modes observed in `plugin-br-bank-transfer` D9 (`docs/plans/D9-systemplane-mt-hot-reload-plan.md` and the post-mortem comments in `internal/bootstrap/service_infrastructure.go:154-165`):
+
+| Failure mode | Root cause | What this rule prevents |
+|---|---|---|
+| `postgres: ping: connection refused` at MT pod start | Bootstrap pinged an app-level PG that does not exist in MT | Skip the bootstrap PG ping in MT entirely |
+| `/health/live` flapping in a healthy MT pod | Startup self-probe gated `/health/live` on bootstrap PG/Mongo, both unreachable in MT → SelfProbeOK never flips → K8s liveness crash-loop | Self-probe skips bootstrap PG/Mongo in MT |
+| Bootstrap-time secret-fetch race | JD/M2M secrets were fetched globally during init under `context.Background()` and no tenant scope | Secrets are per-tenant and MUST be fetched lazily inside a request/worker that carries the tenant ID on `ctx` |
+| `tenant database missing from context` from a global init | A startup hook touched a per-tenant resource (PG, Mongo, RabbitMQ, secrets) without a tenant-scoped `ctx` | Per-tenant resources are NEVER touched at boot; only at runtime under a `ctx` produced by `TenantMiddleware` or the per-tenant worker scheduler |
+
+The pattern is also a defence-in-depth control for the §[Redis-isolation invariant — two distinct Redis clusters](#redis-isolation-invariant--two-distinct-redis-clusters) below: a bootstrap that does not fail-fast on per-tenant resources also has no opportunity to accidentally publish tenant-lifecycle events on the app Redis (or write app data to the tenant Pub/Sub Redis) because the two Redis clients are wired in distinct code paths.
+
+### Redis-isolation invariant — two distinct Redis clusters
+
+MT services run **two** distinct Redis clusters with non-overlapping responsibilities. Conflating them is FORBIDDEN.
+
+| Config | Env var | Purpose | Stores app data? | Carries Pub/Sub? | Required at bootstrap? |
+|---|---|---|---|---|---|
+| App Redis | `REDIS_HOST` | Idempotency, dedup, locks, rate limits — per application, per-tenant via key prefix (`tenant:{tenantId}:...` resolved through `valkey.GetKeyContext`) | ✅ Yes | ❌ No | ✅ Yes (data plane) |
+| Tenant Pub/Sub Redis | `MULTI_TENANT_REDIS_HOST` | Shared transport for `tenant-events:*` lifecycle events between tenant-manager and consumers | ❌ No (transport only, no persistence) | ✅ Yes | ✅ Yes (the only **hard MT-specific** bootstrap requirement) |
+
+Bootstrap MUST NOT write app keys to the tenant Pub/Sub Redis nor publish app-domain events on it. New components (including any `systemplane.Manager` integration from §27) follow this split: the data path stays on Postgres/app-Redis; the tenant Pub/Sub Redis is consumed only for tenant lifecycle signals.
+
+`tenantId` is treated as opaque by every Redis path — the `tenant:{tenantId}:...` prefix is a literal string concatenation. Do **not** parse it as a UUID or any other structured type.
+
+### Bootstrap initialisation — the ALWAYS / NEVER list
+
+**ALWAYS:**
+
+- Initialize the multi-tenant Tenant Manager HTTP client (`client.NewClient(...)` with `client.WithCircuitBreaker` and `client.WithServiceAPIKey` from §1 and §26) — REQUIRED.
+- Connect to the tenant Pub/Sub Redis (`MULTI_TENANT_REDIS_HOST`) and start the event listener / tenant cache (§Tenant Discovery and Cache Invalidation) — REQUIRED.
