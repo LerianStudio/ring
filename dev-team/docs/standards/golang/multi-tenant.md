@@ -158,6 +158,7 @@ go build ./...
 | `MULTI_TENANT_REDIS_PORT` | Redis port for Pub/Sub | `6379` | If multi-tenant |
 | `MULTI_TENANT_REDIS_PASSWORD` | Redis password for Pub/Sub | - | If multi-tenant |
 | `MULTI_TENANT_REDIS_TLS` | Enable TLS for Pub/Sub Redis connection (AWS ElastiCache/Valkey) | `false` | If multi-tenant |
+| `MULTI_TENANT_REDIS_CA_CERT` | Base64-encoded PEM bundle for the tenant Pub/Sub Redis cluster CA. Threaded through `TenantPubSubRedisConfig.CACertBase64`. Required when `MULTI_TENANT_REDIS_TLS=true` AND the cluster's CA is not in the runtime image's system trust pool (managed AWS/GCP/Azure issuers, macOS dev workstations). See §[`MULTI_TENANT_REDIS_CA_CERT`](#multi_tenant_redis_ca_cert--required-for-tls-enabled-per-tenant-pubsub-redis). | - | No (optional; required when `MULTI_TENANT_REDIS_TLS=true` and CA isn't in system trust) |
 | `MULTI_TENANT_MAX_TENANT_POOLS` | Soft limit for tenant connection pools (LRU eviction) | `100` | No |
 | `MULTI_TENANT_IDLE_TIMEOUT_SEC` | Seconds before idle tenant connection is eviction-eligible | `300` | No |
 | `MULTI_TENANT_TIMEOUT` | HTTP client timeout for dispatch layer API calls (seconds). Passed to `tmclient.WithTimeout`. | `30` | No |
@@ -176,6 +177,7 @@ MULTI_TENANT_REDIS_HOST=redis
 MULTI_TENANT_REDIS_PORT=6379
 MULTI_TENANT_REDIS_PASSWORD=
 MULTI_TENANT_REDIS_TLS=false
+# MULTI_TENANT_REDIS_CA_CERT=  # base64-encoded PEM bundle; set when MULTI_TENANT_REDIS_TLS=true and the cluster CA isn't in system trust
 MULTI_TENANT_MAX_TENANT_POOLS=100
 MULTI_TENANT_IDLE_TIMEOUT_SEC=300
 MULTI_TENANT_TIMEOUT=30
@@ -200,6 +202,7 @@ type Config struct {
     MultiTenantRedisPort                string `env:"MULTI_TENANT_REDIS_PORT" default:"6379"`
     MultiTenantRedisPassword            string `env:"MULTI_TENANT_REDIS_PASSWORD"`
     MultiTenantRedisTLS                 bool   `env:"MULTI_TENANT_REDIS_TLS"`
+    MultiTenantRedisCACert              string `env:"MULTI_TENANT_REDIS_CA_CERT"` // base64-encoded PEM; optional, required when MULTI_TENANT_REDIS_TLS=true and CA isn't in system trust
     MultiTenantMaxTenantPools           int    `env:"MULTI_TENANT_MAX_TENANT_POOLS" default:"100"`
     MultiTenantIdleTimeoutSec           int    `env:"MULTI_TENANT_IDLE_TIMEOUT_SEC" default:"300"`
     MultiTenantTimeout                  int    `env:"MULTI_TENANT_TIMEOUT" default:"30"`
@@ -1593,6 +1596,7 @@ MULTI_TENANT_ENABLED=true MULTI_TENANT_URL=http://dispatch layer:4003 go test ./
 - [ ] `MULTI_TENANT_REDIS_PORT` in config struct (default: `6379`)
 - [ ] `MULTI_TENANT_REDIS_PASSWORD` in config struct
 - [ ] `MULTI_TENANT_REDIS_TLS` in config struct (default: `false`)
+- [ ] `MULTI_TENANT_REDIS_CA_CERT` in config struct (OPTIONAL; required when `MULTI_TENANT_REDIS_TLS=true` and the cluster CA isn't in system trust — see §28)
 - [ ] `MULTI_TENANT_MAX_TENANT_POOLS` in config struct (default: `100`)
 - [ ] `MULTI_TENANT_IDLE_TIMEOUT_SEC` in config struct (default: `300`)
 - [ ] `MULTI_TENANT_CIRCUIT_BREAKER_THRESHOLD` in config struct (default: `5`)
@@ -2932,12 +2936,80 @@ Bootstrap MUST NOT write app keys to the tenant Pub/Sub Redis nor publish app-do
 
 `tenantId` is treated as opaque by every Redis path — the `tenant:{tenantId}:...` prefix is a literal string concatenation. Do **not** parse it as a UUID or any other structured type.
 
+### `MULTI_TENANT_REDIS_CA_CERT` — required for TLS-enabled per-tenant Pub/Sub Redis
+
+**CONDITIONAL:** Applies when `MULTI_TENANT_REDIS_TLS=true` AND the tenant Pub/Sub Redis endpoint is fronted by a managed cloud provider (AWS ElastiCache, AWS MemoryDB, managed Valkey, GCP Memorystore, etc.) whose CA is not in the deployment image's system trust store by default. Pairs with the app-Redis `REDIS_CA_CERT` documented in [[bootstrap.md]] §Config struct.
+
+Empirically reproduced in `plugin-br-bank-transfer` D9 against AWS ElastiCache for Valkey: with `MULTI_TENANT_REDIS_TLS=true` and no CA cert injected, the tenant Pub/Sub client crashes at boot with `tls: failed to verify certificate: x509: "<endpoint>" certificate is not standards compliant`. The same endpoint connects successfully when the cluster's CA bundle is passed in via `TenantPubSubRedisConfig.CACertBase64`. Root cause: Go's macOS-side x509 verifier (Security Framework) returns `errSecCertificateNotStandardsCompliant` for AWS-issued certs when no explicit `RootCAs` pool is set; the pure-Go verifier WITH an explicit `RootCAs` pool accepts the same chain. Linux deployments using the distro CA bundle generally tolerate this, but cross-platform consistency requires the cert to be injected via config rather than relying on the system trust pool.
+
+The contract:
+
+**`MULTI_TENANT_REDIS_CA_CERT` is an OPTIONAL base64-encoded PEM bundle (single-line) that the consumer service MUST thread into `lib-commons/tenant-manager/redis.TenantPubSubRedisConfig.CACertBase64` whenever `MULTI_TENANT_REDIS_TLS=true` and the cluster's CA is not in the runtime image's system trust pool. Mirrors the existing `REDIS_CA_CERT` pattern for app Redis — see [[bootstrap.md]] §Config struct.**
+
+The config-struct addition (next to the existing `MultiTenantRedisTLS` field in §[Configuration](#configuration)):
+
+```go
+MultiTenantRedisTLS    bool   `env:"MULTI_TENANT_REDIS_TLS"`
+MultiTenantRedisCACert string `env:"MULTI_TENANT_REDIS_CA_CERT"` // base64-encoded PEM bundle; OPTIONAL
+```
+
+The wiring site (`initEventDrivenDiscovery` or equivalent — the only bootstrap call that constructs `TenantPubSubRedisConfig`):
+
+```go
+pubSubClient, err := tmredis.NewTenantPubSubRedisClient(ctx, tmredis.TenantPubSubRedisConfig{
+    Host:         cfg.MultiTenantRedisHost,
+    Port:         cfg.MultiTenantRedisPort,
+    Password:     cfg.MultiTenantRedisPassword,
+    TLS:          cfg.MultiTenantRedisTLS,
+    CACertBase64: cfg.MultiTenantRedisCACert, // MUST be threaded through; lib falls back to system trust when empty
+})
+```
+
+**ALWAYS:**
+
+- Set `MULTI_TENANT_REDIS_CA_CERT` whenever `MULTI_TENANT_REDIS_TLS=true` AND the Pub/Sub Redis endpoint is hosted by a managed cloud provider whose CA isn't in the deployment image's system trust by default (AWS ElastiCache/MemoryDB/Valkey, GCP Memorystore, Azure Cache, CloudAMQP-fronted Redis, etc.).
+- Thread `cfg.MultiTenantRedisCACert` directly into `TenantPubSubRedisConfig.CACertBase64` at the wiring site. The lib decodes base64 → PEM → `tls.Config.RootCAs` internally; the consumer MUST NOT decode the bundle itself.
+- Mirror the symmetry with the app-Redis side: services that already set `REDIS_CA_CERT` for `REDIS_HOST` against the same managed provider SHOULD set `MULTI_TENANT_REDIS_CA_CERT` for `MULTI_TENANT_REDIS_HOST` even when the two endpoints share a CA — the env vars are independent contracts.
+
+**NEVER:**
+
+- Assume system trust alone is sufficient on developer macOS workstations. The macOS Security Framework verifier rejects AWS-issued ElastiCache/Valkey certs that the pure-Go verifier with an explicit `RootCAs` pool accepts. Reproducible regression — do not paper over with `InsecureSkipVerify`.
+- Embed `-----BEGIN CERTIFICATE-----` / `-----END CERTIFICATE-----` markers as raw newlines in `.env`. Makefile env loaders read line-by-line; multi-line PEM blocks corrupt the env var. Base64-encode the **entire** PEM bundle into a single line, or use `\n` escape literals with a Helm-side decoder.
+- Set `InsecureSkipVerify=true` as a "temporary" workaround. The lib does not expose this knob on `TenantPubSubRedisConfig` deliberately — fix the trust path, do not bypass it.
+- Reuse the lib-commons `commons/security/tls` helpers' assumption that a system-trust fallback is operationally acceptable. Tenant Pub/Sub is on the boot-critical path (§Bootstrap initialisation — the ALWAYS / NEVER list below) — a TLS handshake failure here means the event listener never starts and the pod is effectively single-tenant-blind.
+
+**NON-COMPLIANT signs:**
+
+- `tls: failed to verify certificate: x509: "<endpoint>" certificate is not standards compliant` at process startup against a managed Pub/Sub endpoint. The pod will keep restarting until the cert env is set.
+- `MULTI_TENANT_REDIS_TLS=true` declared without a corresponding `MULTI_TENANT_REDIS_CA_CERT` entry in the config struct, `.env.example`, or Helm values, AND the cluster is fronted by a managed cert issuer.
+- `TenantPubSubRedisConfig` constructed without the `CACertBase64` field (zero-value falls back to system trust — acceptable only on Linux deployments where the system CA bundle covers the managed provider).
+- A consumer-side decode of the base64 PEM (`base64.StdEncoding.DecodeString` + `x509.NewCertPool().AppendCertsFromPEM`) instead of passing the raw base64 string through `CACertBase64`. The lib owns decoding; consumer-side decoding is duplicate logic that drifts.
+
+**Reference implementation:**
+
+| File | What it shows |
+|---|---|
+| `plugin-br-bank-transfer/internal/bootstrap/multi_tenant.go::initEventDrivenDiscovery` | Wiring site — `TenantPubSubRedisConfig` constructed with `CACertBase64: cfg.MultiTenantRedisCACert`. |
+| `lib-commons/commons/tenant-manager/redis/client.go::BuildOptions` / `buildTLSConfig` | Lib side — `CACertBase64` decoded into `tls.Config.RootCAs`; empty value leaves `RootCAs` nil and falls back to the system trust pool. |
+| `bootstrap.md` §Config struct (`REDIS_CA_CERT` / `RedisCACert`) | App-Redis precedent for the same pattern; structurally identical contract. |
+
+**Anti-Rationalization:**
+
+| Rationalization | Why It's WRONG | Required Action |
+|---|---|---|
+| "Plain TCP works in `nc host 6379`, so TLS isn't strictly required" | A successful TCP handshake on port 6379 means the listener is reachable — it does NOT mean Redis will accept commands on a plain socket. Managed Pub/Sub clusters typically force TLS at the listener and reject `AUTH`/`PING`/`SUBSCRIBE` over plain TCP even though the connect succeeds. | **Verify the protocol with a TLS-aware probe**: `(printf "AUTH <password>\r\nPING\r\nQUIT\r\n"; sleep 1) \| openssl s_client -connect host:6379 -quiet`. Treat the cleartext-`nc`-works observation as a noise signal, not evidence. |
+| "System trust on Linux is fine, so we don't need `MULTI_TENANT_REDIS_CA_CERT`" | True in production on a stock Debian/Alpine image with `ca-certificates` installed — but macOS dev workstations and minimal `scratch`/`distroless` images do not carry the same trust pool. Mixed environments require the cert injected via config for consistency. | **Set `MULTI_TENANT_REDIS_CA_CERT` regardless of the target image** when the cluster is fronted by a managed issuer. The empty fallback (`CACertBase64 == ""`) stays available for in-cluster Redis with a private CA already in the trust pool. |
+| "We'll just set `InsecureSkipVerify=true` for staging" | `TenantPubSubRedisConfig` deliberately does not expose `InsecureSkipVerify`. Re-adding it to bypass the trust path would re-open the gap and remove the regression's primary forcing function. | **Fix the trust path with `CACertBase64`**, not by disabling verification. If staging is using a self-signed CA, base64-encode that CA's PEM and ship it as `MULTI_TENANT_REDIS_CA_CERT` for the staging environment. |
+| "The app Redis side already has `REDIS_CA_CERT`; the Pub/Sub side can inherit it" | The two clusters are independent infra (§Redis-isolation invariant). Reusing `REDIS_CA_CERT` for `MULTI_TENANT_REDIS_HOST` couples two env contracts that the rest of this section keeps explicitly separate. | **Declare `MULTI_TENANT_REDIS_CA_CERT` as an independent env var**, even when the two clusters share a CA in practice. |
+
+Cross-reference: §27 (Systemplane in MT mode — compliance pattern) for the runtime-config consumer that depends on this same event-driven Pub/Sub transport; the app-Redis `REDIS_CA_CERT` pattern in [[bootstrap.md]] §Config struct for the structurally identical contract.
+
 ### Bootstrap initialisation — the ALWAYS / NEVER list
 
 **ALWAYS:**
 
 - Initialize the multi-tenant Tenant Manager HTTP client (`client.NewClient(...)` with `client.WithCircuitBreaker` and `client.WithServiceAPIKey` from §1 and §26) — REQUIRED.
-- Connect to the tenant Pub/Sub Redis (`MULTI_TENANT_REDIS_HOST`) and start the event listener / tenant cache (§Tenant Discovery and Cache Invalidation) — REQUIRED.
+- Connect to the tenant Pub/Sub Redis (`MULTI_TENANT_REDIS_HOST`) and start the event listener / tenant cache (§Tenant Discovery and Cache Invalidation) — REQUIRED. When `MULTI_TENANT_REDIS_TLS=true` against a managed cloud issuer, thread `MULTI_TENANT_REDIS_CA_CERT` through `TenantPubSubRedisConfig.CACertBase64` (see §[`MULTI_TENANT_REDIS_CA_CERT` — required for TLS-enabled per-tenant Pub/Sub Redis](#multi_tenant_redis_ca_cert--required-for-tls-enabled-per-tenant-pubsub-redis)).
 - Connect to the app Redis (`REDIS_HOST`) — REQUIRED (data plane).
 - Initialize `tmpostgres.Manager`, `tmmongo.Manager`, `tmrabbitmq.Manager` as **lazy** managers. These hold a configuration handle and a per-tenant connection cache; they MUST NOT eagerly dial any tenant DB.
 - Construct application services with **lazy / context-bound** access to the per-tenant resources (every repo method takes `ctx` and resolves the connection via `tmcore.GetPGContext(ctx)` / `tmcore.GetMBContext(ctx)`).
