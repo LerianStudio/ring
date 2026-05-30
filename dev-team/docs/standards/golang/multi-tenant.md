@@ -19,6 +19,7 @@ This module covers multi-tenant patterns with Tenant Manager.
 | 25 | [M2M Credentials via Secret Manager](#m2m-credentials-via-secret-manager) | AWS Secrets Manager integration for service-to-service authentication per tenant |
 | 26 | [Service Authentication (MANDATORY)](#service-authentication-mandatory) | API key authentication for dispatch layer /settings endpoint via X-API-Key header |
 | 27 | [Systemplane in MT mode — compliance pattern (MANDATORY)](#systemplane-in-mt-mode--compliance-pattern-mandatory) | ReadLive Padrão A, no-fallback consumer reads, interface DI keeping adapters free of `lib-systemplane` import, migration-based default seeding, `Manager` binding when available in the pinned lib version |
+| 28 | [Bootstrap Resource Requirements in MT (MANDATORY)](#bootstrap-resource-requirements-in-mt-mandatory) | What infrastructure the process is allowed to require at startup in MT vs ST. Bootstrap MUST NOT fail-fast on per-tenant resources; only the multi-tenant Redis is required at boot. Postgres/Mongo/RabbitMQ/secrets resolve per-tenant at runtime via the dispatch layer |
 
 ---
 
@@ -157,6 +158,7 @@ go build ./...
 | `MULTI_TENANT_REDIS_PORT` | Redis port for Pub/Sub | `6379` | If multi-tenant |
 | `MULTI_TENANT_REDIS_PASSWORD` | Redis password for Pub/Sub | - | If multi-tenant |
 | `MULTI_TENANT_REDIS_TLS` | Enable TLS for Pub/Sub Redis connection (AWS ElastiCache/Valkey) | `false` | If multi-tenant |
+| `MULTI_TENANT_REDIS_CA_CERT` | Base64-encoded PEM bundle for the tenant Pub/Sub Redis cluster CA. Threaded through `TenantPubSubRedisConfig.CACertBase64`. Required when `MULTI_TENANT_REDIS_TLS=true` AND the cluster's CA is not in the runtime image's system trust pool (managed AWS/GCP/Azure issuers, macOS dev workstations). See §[`MULTI_TENANT_REDIS_CA_CERT`](#multi_tenant_redis_ca_cert--required-for-tls-enabled-per-tenant-pubsub-redis). | - | No (optional; required when `MULTI_TENANT_REDIS_TLS=true` and CA isn't in system trust) |
 | `MULTI_TENANT_MAX_TENANT_POOLS` | Soft limit for tenant connection pools (LRU eviction) | `100` | No |
 | `MULTI_TENANT_IDLE_TIMEOUT_SEC` | Seconds before idle tenant connection is eviction-eligible | `300` | No |
 | `MULTI_TENANT_TIMEOUT` | HTTP client timeout for dispatch layer API calls (seconds). Passed to `tmclient.WithTimeout`. | `30` | No |
@@ -175,6 +177,7 @@ MULTI_TENANT_REDIS_HOST=redis
 MULTI_TENANT_REDIS_PORT=6379
 MULTI_TENANT_REDIS_PASSWORD=
 MULTI_TENANT_REDIS_TLS=false
+# MULTI_TENANT_REDIS_CA_CERT=  # base64-encoded PEM bundle; set when MULTI_TENANT_REDIS_TLS=true and the cluster CA isn't in system trust
 MULTI_TENANT_MAX_TENANT_POOLS=100
 MULTI_TENANT_IDLE_TIMEOUT_SEC=300
 MULTI_TENANT_TIMEOUT=30
@@ -199,6 +202,7 @@ type Config struct {
     MultiTenantRedisPort                string `env:"MULTI_TENANT_REDIS_PORT" default:"6379"`
     MultiTenantRedisPassword            string `env:"MULTI_TENANT_REDIS_PASSWORD"`
     MultiTenantRedisTLS                 bool   `env:"MULTI_TENANT_REDIS_TLS"`
+    MultiTenantRedisCACert              string `env:"MULTI_TENANT_REDIS_CA_CERT"` // base64-encoded PEM; optional, required when MULTI_TENANT_REDIS_TLS=true and CA isn't in system trust
     MultiTenantMaxTenantPools           int    `env:"MULTI_TENANT_MAX_TENANT_POOLS" default:"100"`
     MultiTenantIdleTimeoutSec           int    `env:"MULTI_TENANT_IDLE_TIMEOUT_SEC" default:"300"`
     MultiTenantTimeout                  int    `env:"MULTI_TENANT_TIMEOUT" default:"30"`
@@ -1592,6 +1596,7 @@ MULTI_TENANT_ENABLED=true MULTI_TENANT_URL=http://dispatch layer:4003 go test ./
 - [ ] `MULTI_TENANT_REDIS_PORT` in config struct (default: `6379`)
 - [ ] `MULTI_TENANT_REDIS_PASSWORD` in config struct
 - [ ] `MULTI_TENANT_REDIS_TLS` in config struct (default: `false`)
+- [ ] `MULTI_TENANT_REDIS_CA_CERT` in config struct (OPTIONAL; required when `MULTI_TENANT_REDIS_TLS=true` and the cluster CA isn't in system trust — see §28)
 - [ ] `MULTI_TENANT_MAX_TENANT_POOLS` in config struct (default: `100`)
 - [ ] `MULTI_TENANT_IDLE_TIMEOUT_SEC` in config struct (default: `300`)
 - [ ] `MULTI_TENANT_CIRCUIT_BREAKER_THRESHOLD` in config struct (default: `5`)
@@ -2891,3 +2896,275 @@ The consumer code is **mode-agnostic** in all three rows. The asymmetry exists i
 | "The consumer can import `lib-systemplane` directly" | Adapter packages stay clean of platform-lib imports; only the bootstrap layer wires the concrete client. | **MUST declare a narrow per-consumer interface and inject from bootstrap** |
 | "We don't need the seed migration; the lib will handle it" | True only when bound to a `Manager` (available in the lib version that introduces it — check the CHANGELOG). On earlier versions, the lib does NOT seed tenant DBs. | **MUST ship the seed migration until a `Manager` is bound and the migration is explicitly retired** |
 | "ST doesn't need this — only MT" | The compliance pattern is mode-agnostic by design. Mixed code paths break the symmetry guarantee that makes consumer code portable. | **Same `spClient.GetX(ctx)` code in ST and MT; no `if singleTenant` branches** |
+---
+
+## Bootstrap Resource Requirements in MT (MANDATORY)
+
+**CONDITIONAL:** Applies whenever `MULTI_TENANT_ENABLED=true` is supported by the service, including services that ship dual-mode binaries (ST + MT from the same image). Pairs with §27 — the same service that uses runtime configuration per tenant must also resolve its data-plane infrastructure per tenant. Do not implement one without the other.
+
+This section defines what the process is **allowed to require at boot** in MT versus ST. The rule exists because every per-tenant resource that the bootstrap (the process-init path: `cmd/app/main.go`, `internal/bootstrap/service*.go`, the config validator) tries to touch synchronously becomes a global single point of failure for the multi-tenant pod — and most per-tenant infrastructure does not even exist at boot time (credentials live in the tenant-manager, databases are provisioned per tenant, secrets fetch is per-tenant).
+
+The contract:
+
+**In MT mode, the multi-tenant Redis is the only infrastructure that MUST be reachable for the process to start. Postgres, Mongo, RabbitMQ, vendor secrets (JD/M2M), and every other per-tenant resource MUST be resolved at runtime via the dispatch layer (`tmcore.GetPGContext` / `tmcore.GetMBContext` / `tmrabbitmq.Manager.GetChannel` / `secretsmanager.GetM2MCredentials`) and MUST NOT block bootstrap.**
+
+In ST mode the rule inverts: the bootstrap pool **is** the real connection, so Postgres + Mongo (when enabled) MUST remain fail-fast at boot.
+
+### Failure modes this pattern prevents
+
+The compliance rule above is anchored in four production failure modes observed in `plugin-br-bank-transfer` D9 (`docs/plans/D9-systemplane-mt-hot-reload-plan.md` and the post-mortem comments in `internal/bootstrap/service_infrastructure.go:154-165`):
+
+| Failure mode | Root cause | What this rule prevents |
+|---|---|---|
+| `postgres: ping: connection refused` at MT pod start | Bootstrap pinged an app-level PG that does not exist in MT | Skip the bootstrap PG ping in MT entirely |
+| `/health/live` flapping in a healthy MT pod | Startup self-probe gated `/health/live` on bootstrap PG/Mongo, both unreachable in MT → SelfProbeOK never flips → K8s liveness crash-loop | Self-probe skips bootstrap PG/Mongo in MT |
+| Bootstrap-time secret-fetch race | JD/M2M secrets were fetched globally during init under `context.Background()` and no tenant scope | Secrets are per-tenant and MUST be fetched lazily inside a request/worker that carries the tenant ID on `ctx` |
+| `tenant database missing from context` from a global init | A startup hook touched a per-tenant resource (PG, Mongo, RabbitMQ, secrets) without a tenant-scoped `ctx` | Per-tenant resources are NEVER touched at boot; only at runtime under a `ctx` produced by `TenantMiddleware` or the per-tenant worker scheduler |
+
+The pattern is also a defence-in-depth control for the §[Redis-isolation invariant — two distinct Redis clusters](#redis-isolation-invariant--two-distinct-redis-clusters) below: a bootstrap that does not fail-fast on per-tenant resources also has no opportunity to accidentally publish tenant-lifecycle events on the app Redis (or write app data to the tenant Pub/Sub Redis) because the two Redis clients are wired in distinct code paths.
+
+### Redis-isolation invariant — two distinct Redis clusters
+
+MT services run **two** distinct Redis clusters with non-overlapping responsibilities. Conflating them is FORBIDDEN.
+
+| Config | Env var | Purpose | Stores app data? | Carries Pub/Sub? | Required at bootstrap? |
+|---|---|---|---|---|---|
+| App Redis | `REDIS_HOST` | Idempotency, dedup, locks, rate limits — per application, per-tenant via key prefix (`tenant:{tenantId}:...` resolved through `valkey.GetKeyContext`) | ✅ Yes | ❌ No | ✅ Yes (data plane) |
+| Tenant Pub/Sub Redis | `MULTI_TENANT_REDIS_HOST` | Shared transport for `tenant-events:*` lifecycle events between tenant-manager and consumers | ❌ No (transport only, no persistence) | ✅ Yes | ✅ Yes (the only **hard MT-specific** bootstrap requirement) |
+
+Bootstrap MUST NOT write app keys to the tenant Pub/Sub Redis nor publish app-domain events on it. New components (including any `systemplane.Manager` integration from §27) follow this split: the data path stays on Postgres/app-Redis; the tenant Pub/Sub Redis is consumed only for tenant lifecycle signals.
+
+`tenantId` is treated as opaque by every Redis path — the `tenant:{tenantId}:...` prefix is a literal string concatenation. Do **not** parse it as a UUID or any other structured type.
+
+### `MULTI_TENANT_REDIS_CA_CERT` — required for TLS-enabled per-tenant Pub/Sub Redis
+
+**CONDITIONAL:** Applies when `MULTI_TENANT_REDIS_TLS=true` AND the tenant Pub/Sub Redis endpoint is fronted by a managed cloud provider (AWS ElastiCache, AWS MemoryDB, managed Valkey, GCP Memorystore, etc.) whose CA is not in the deployment image's system trust store by default. Pairs with the app-Redis `REDIS_CA_CERT` documented in [[bootstrap.md]] §Config struct.
+
+Empirically reproduced in `plugin-br-bank-transfer` D9 against AWS ElastiCache for Valkey: with `MULTI_TENANT_REDIS_TLS=true` and no CA cert injected, the tenant Pub/Sub client crashes at boot with `tls: failed to verify certificate: x509: "<endpoint>" certificate is not standards compliant`. The same endpoint connects successfully when the cluster's CA bundle is passed in via `TenantPubSubRedisConfig.CACertBase64`. Root cause: Go's macOS-side x509 verifier (Security Framework) returns `errSecCertificateNotStandardsCompliant` for AWS-issued certs when no explicit `RootCAs` pool is set; the pure-Go verifier WITH an explicit `RootCAs` pool accepts the same chain. Linux deployments using the distro CA bundle generally tolerate this, but cross-platform consistency requires the cert to be injected via config rather than relying on the system trust pool.
+
+The contract:
+
+**`MULTI_TENANT_REDIS_CA_CERT` is an OPTIONAL base64-encoded PEM bundle (single-line) that the consumer service MUST thread into `lib-commons/tenant-manager/redis.TenantPubSubRedisConfig.CACertBase64` whenever `MULTI_TENANT_REDIS_TLS=true` and the cluster's CA is not in the runtime image's system trust pool. Mirrors the existing `REDIS_CA_CERT` pattern for app Redis — see [[bootstrap.md]] §Config struct.**
+
+The config-struct addition (next to the existing `MultiTenantRedisTLS` field in §[Configuration](#configuration)):
+
+```go
+MultiTenantRedisTLS    bool   `env:"MULTI_TENANT_REDIS_TLS"`
+MultiTenantRedisCACert string `env:"MULTI_TENANT_REDIS_CA_CERT"` // base64-encoded PEM bundle; OPTIONAL
+```
+
+The wiring site (`initEventDrivenDiscovery` or equivalent — the only bootstrap call that constructs `TenantPubSubRedisConfig`):
+
+```go
+pubSubClient, err := tmredis.NewTenantPubSubRedisClient(ctx, tmredis.TenantPubSubRedisConfig{
+    Host:         cfg.MultiTenantRedisHost,
+    Port:         cfg.MultiTenantRedisPort,
+    Password:     cfg.MultiTenantRedisPassword,
+    TLS:          cfg.MultiTenantRedisTLS,
+    CACertBase64: cfg.MultiTenantRedisCACert, // MUST be threaded through; lib falls back to system trust when empty
+})
+```
+
+**ALWAYS:**
+
+- Set `MULTI_TENANT_REDIS_CA_CERT` whenever `MULTI_TENANT_REDIS_TLS=true` AND the Pub/Sub Redis endpoint is hosted by a managed cloud provider whose CA isn't in the deployment image's system trust by default (AWS ElastiCache/MemoryDB/Valkey, GCP Memorystore, Azure Cache, CloudAMQP-fronted Redis, etc.).
+- Thread `cfg.MultiTenantRedisCACert` directly into `TenantPubSubRedisConfig.CACertBase64` at the wiring site. The lib decodes base64 → PEM → `tls.Config.RootCAs` internally; the consumer MUST NOT decode the bundle itself.
+- Mirror the symmetry with the app-Redis side: services that already set `REDIS_CA_CERT` for `REDIS_HOST` against the same managed provider SHOULD set `MULTI_TENANT_REDIS_CA_CERT` for `MULTI_TENANT_REDIS_HOST` even when the two endpoints share a CA — the env vars are independent contracts.
+
+**NEVER:**
+
+- Assume system trust alone is sufficient on developer macOS workstations. The macOS Security Framework verifier rejects AWS-issued ElastiCache/Valkey certs that the pure-Go verifier with an explicit `RootCAs` pool accepts. Reproducible regression — do not paper over with `InsecureSkipVerify`.
+- Embed `-----BEGIN CERTIFICATE-----` / `-----END CERTIFICATE-----` markers as raw newlines in `.env`. Makefile env loaders read line-by-line; multi-line PEM blocks corrupt the env var. Base64-encode the **entire** PEM bundle into a single line, or use `\n` escape literals with a Helm-side decoder.
+- Set `InsecureSkipVerify=true` as a "temporary" workaround. The lib does not expose this knob on `TenantPubSubRedisConfig` deliberately — fix the trust path, do not bypass it.
+- Reuse the lib-commons `commons/security/tls` helpers' assumption that a system-trust fallback is operationally acceptable. Tenant Pub/Sub is on the boot-critical path (§Bootstrap initialisation — the ALWAYS / NEVER list below) — a TLS handshake failure here means the event listener never starts and the pod is effectively single-tenant-blind.
+
+**NON-COMPLIANT signs:**
+
+- `tls: failed to verify certificate: x509: "<endpoint>" certificate is not standards compliant` at process startup against a managed Pub/Sub endpoint. The pod will keep restarting until the cert env is set.
+- `MULTI_TENANT_REDIS_TLS=true` declared without a corresponding `MULTI_TENANT_REDIS_CA_CERT` entry in the config struct, `.env.example`, or Helm values, AND the cluster is fronted by a managed cert issuer.
+- `TenantPubSubRedisConfig` constructed without the `CACertBase64` field (zero-value falls back to system trust — acceptable only on Linux deployments where the system CA bundle covers the managed provider).
+- A consumer-side decode of the base64 PEM (`base64.StdEncoding.DecodeString` + `x509.NewCertPool().AppendCertsFromPEM`) instead of passing the raw base64 string through `CACertBase64`. The lib owns decoding; consumer-side decoding is duplicate logic that drifts.
+
+**Reference implementation:**
+
+| File | What it shows |
+|---|---|
+| `plugin-br-bank-transfer/internal/bootstrap/multi_tenant.go::initEventDrivenDiscovery` | Wiring site — `TenantPubSubRedisConfig` constructed with `CACertBase64: cfg.MultiTenantRedisCACert`. |
+| `lib-commons/commons/tenant-manager/redis/client.go::BuildOptions` / `buildTLSConfig` | Lib side — `CACertBase64` decoded into `tls.Config.RootCAs`; empty value leaves `RootCAs` nil and falls back to the system trust pool. |
+| `bootstrap.md` §Config struct (`REDIS_CA_CERT` / `RedisCACert`) | App-Redis precedent for the same pattern; structurally identical contract. |
+
+**Anti-Rationalization:**
+
+| Rationalization | Why It's WRONG | Required Action |
+|---|---|---|
+| "Plain TCP works in `nc host 6379`, so TLS isn't strictly required" | A successful TCP handshake on port 6379 means the listener is reachable — it does NOT mean Redis will accept commands on a plain socket. Managed Pub/Sub clusters typically force TLS at the listener and reject `AUTH`/`PING`/`SUBSCRIBE` over plain TCP even though the connect succeeds. | **Verify the protocol with a TLS-aware probe**: `(printf "AUTH <password>\r\nPING\r\nQUIT\r\n"; sleep 1) \| openssl s_client -connect host:6379 -quiet`. Treat the cleartext-`nc`-works observation as a noise signal, not evidence. |
+| "System trust on Linux is fine, so we don't need `MULTI_TENANT_REDIS_CA_CERT`" | True in production on a stock Debian/Alpine image with `ca-certificates` installed — but macOS dev workstations and minimal `scratch`/`distroless` images do not carry the same trust pool. Mixed environments require the cert injected via config for consistency. | **Set `MULTI_TENANT_REDIS_CA_CERT` regardless of the target image** when the cluster is fronted by a managed issuer. The empty fallback (`CACertBase64 == ""`) stays available for in-cluster Redis with a private CA already in the trust pool. |
+| "We'll just set `InsecureSkipVerify=true` for staging" | `TenantPubSubRedisConfig` deliberately does not expose `InsecureSkipVerify`. Re-adding it to bypass the trust path would re-open the gap and remove the regression's primary forcing function. | **Fix the trust path with `CACertBase64`**, not by disabling verification. If staging is using a self-signed CA, base64-encode that CA's PEM and ship it as `MULTI_TENANT_REDIS_CA_CERT` for the staging environment. |
+| "The app Redis side already has `REDIS_CA_CERT`; the Pub/Sub side can inherit it" | The two clusters are independent infra (§Redis-isolation invariant). Reusing `REDIS_CA_CERT` for `MULTI_TENANT_REDIS_HOST` couples two env contracts that the rest of this section keeps explicitly separate. | **Declare `MULTI_TENANT_REDIS_CA_CERT` as an independent env var**, even when the two clusters share a CA in practice. |
+
+Cross-reference: §27 (Systemplane in MT mode — compliance pattern) for the runtime-config consumer that depends on this same event-driven Pub/Sub transport; the app-Redis `REDIS_CA_CERT` pattern in [[bootstrap.md]] §Config struct for the structurally identical contract.
+
+### Bootstrap initialisation — the ALWAYS / NEVER list
+
+**ALWAYS:**
+
+- Initialize the multi-tenant Tenant Manager HTTP client (`client.NewClient(...)` with `client.WithCircuitBreaker` and `client.WithServiceAPIKey` from §1 and §26) — REQUIRED.
+- Connect to the tenant Pub/Sub Redis (`MULTI_TENANT_REDIS_HOST`) and start the event listener / tenant cache (§Tenant Discovery and Cache Invalidation) — REQUIRED. When `MULTI_TENANT_REDIS_TLS=true` against a managed cloud issuer, thread `MULTI_TENANT_REDIS_CA_CERT` through `TenantPubSubRedisConfig.CACertBase64` (see §[`MULTI_TENANT_REDIS_CA_CERT` — required for TLS-enabled per-tenant Pub/Sub Redis](#multi_tenant_redis_ca_cert--required-for-tls-enabled-per-tenant-pubsub-redis)).
+- Connect to the app Redis (`REDIS_HOST`) — REQUIRED (data plane).
+- Initialize `tmpostgres.Manager`, `tmmongo.Manager`, `tmrabbitmq.Manager` as **lazy** managers. These hold a configuration handle and a per-tenant connection cache; they MUST NOT eagerly dial any tenant DB.
+- Construct application services with **lazy / context-bound** access to the per-tenant resources (every repo method takes `ctx` and resolves the connection via `tmcore.GetPGContext(ctx)` / `tmcore.GetMBContext(ctx)`).
+
+**NEVER:**
+
+- Ping the bootstrap (app-level) Postgres pool. The lazy `otelsql.Open` handle exists for legacy single-tenant code paths but the ping MUST be skipped in MT.
+- Open or ping a bootstrap (app-level) Mongo client. The MT path uses the per-tenant `tmmongo.Manager`; the static `s.Mongo` field stays nil.
+- Dial a bootstrap RabbitMQ connection from a global env var.
+- Fetch any vendor secret (JD signing artifacts, M2M client credentials, target-service API keys) at boot under `context.Background()`. Secrets are per-tenant — fetch them lazily inside a request handler or per-tenant worker that already carries `tenantId` on `ctx`.
+- Run schema migrations against the app-level Postgres in MT. Per-tenant migrations are owned by the tenant-manager provisioning lane, not by the consumer service's bootstrap.
+
+### Validator behaviour (config validation MUST early-return in MT)
+
+The configuration validator runs before any infrastructure init. It MUST relax per-resource requirements in MT, otherwise a missing `MONGO_URI` (or similar) would still reject startup even though MT never touches the bootstrap Mongo.
+
+| Validator | ST behaviour | MT behaviour |
+|---|---|---|
+| `validateMongoConfig` (or equivalent) | Require `MONGO_URI` + `MONGO_DATABASE`; if production, enforce TLS via `validateMongoProductionURI` | **MUST early-return with `nil`.** `MONGO_ENABLED=false` is acceptable; the bootstrap never opens a Mongo client. |
+| Bootstrap `validatePostgresConfig` (driver/SSL/pool checks) | Required | Pool sizing / driver checks still apply when `POSTGRES_*` is set (some MT services keep an app-level pool for legacy/admin paths), but missing values MUST NOT block startup if the rest of the MT stack is configured. |
+| Production-mode database password (`POSTGRES_PASSWORD` non-empty) | Required | **KNOWN GAP — see §[`validateProductionDatabaseConfig` MT-prod password — known gap](#validateproductiondatabaseconfig-mt-prod-password--known-gap) below.** Implementations MUST treat this as an MT-conditional check; the canonical reference does not yet. |
+| `validateMultiTenantConfig` | n/a (returns `nil` when `MULTI_TENANT_ENABLED=false`) | REQUIRED. Enforces `MULTI_TENANT_URL`, `MULTI_TENANT_SERVICE_API_KEY`, `MULTI_TENANT_REDIS_HOST`, and the 13 canonical env vars (§Environment Variables). This is the only validator that may reject MT startup based on infra config. |
+
+In all cases the MT branch validates **MT-specific** requirements (tenant-manager URL, service API key, tenant Pub/Sub Redis) and lets the dispatch layer own everything else.
+
+### Self-probe scope in MT (the startup health probe, NOT `/readyz`)
+
+The self-probe is the boot-time health check that gates `/health/live`. It runs once after init and sets a process-wide flag; until that flag flips, `/health/live` returns 503 and Kubernetes liveness can restart the pod.
+
+| Probe | ST | MT |
+|---|---|---|
+| App Redis (`REDIS_HOST`) | ✅ Probe | ✅ Probe (data plane is required) |
+| Bootstrap Postgres | ✅ Probe | ❌ **Skip** (no bootstrap PG to probe; per-tenant PG is resolved at runtime) |
+| Bootstrap Mongo (when `MONGO_ENABLED=true`) | ✅ Probe | ❌ **Skip** (no bootstrap Mongo client) |
+| Tenant Pub/Sub Redis (`MULTI_TENANT_REDIS_HOST`) | n/a | ✅ Probe (recommended — it is the only hard MT bootstrap requirement). At minimum, the event listener's first connect failure MUST be surfaced as a probe failure or boot error so it does not silently hang. |
+
+Skipping the bootstrap PG/Mongo probes in MT is **not optional** — it prevents the K8s liveness crash-loop documented above.
+
+`/readyz` is **out of scope for this pattern.** It is a separate, deferred concern (per-dependency latency reporting, tenant-routing status, worker liveness) and is not redesigned here. The rule here is narrower: the self-probe MUST NOT gate `/health/live` on resources that do not exist in MT. Whatever `/readyz` does about MT carve-outs is decided in its own surface, not in the bootstrap-resource-requirement pattern.
+
+### Startup banner (infra log line) — omit per-tenant lines in MT
+
+The startup banner is the structured-log block the service emits right before it starts accepting traffic, advertising which dependencies it is wired to. It MUST be mode-aware:
+
+- **ST:** include `PostgreSQL : <host>:<port>` and `MongoDB : <host>:<port>` lines for the bootstrap pool/client.
+- **MT:** **omit** the `PostgreSQL` and `MongoDB` lines (they would be misleading — there is no bootstrap PG/Mongo to log) and replace them with a single `Databases : per-tenant (tenant-manager)` line.
+
+Both modes still log app Redis, license server, telemetry endpoint, and any other process-global dependency. The discriminator is exclusively per-tenant resources.
+
+### Background workers (per-tenant, never bootstrap-backed)
+
+Background workers (TED IN poller, reconciliation worker, devolution scanner, holiday refresher, outbox dispatcher, etc.) MUST always operate per-tenant via the tenant manager. They MUST NOT hold a reference to the bootstrap Postgres/Mongo handle.
+
+The pattern:
+
+- A per-tenant scheduler (built on top of `TenantCache` + `TenantEventListener` from §Tenant Discovery and Cache Invalidation) starts one logical worker per active tenant on `EventTenantActivated`, stops it on `EventTenantSuspended` / `EventTenantDeleted`.
+- The worker receives a `ctx` already scoped to its `tenantId` (the scheduler injects it). Every PG/Mongo/RabbitMQ call inside the worker resolves through `tmcore.GetPGContext(ctx)` / `tmcore.GetMBContext(ctx)` / `tmrabbitmq.Manager.GetChannel(ctx)`.
+- In ST the same workers run against the bootstrap pool. Mode-aware constructors are acceptable; mode-aware **business logic** is not (§27 ST↔MT symmetry).
+
+Organisation resolution for workers without an HTTP request scope is documented per-service (e.g. plugin-br-bank-transfer uses `ORGANIZATION_ID` in ST and `tenancy.ispb_organization_bindings` from systemplane in MT). The rule here is structural: the worker's per-iteration `ctx` MUST carry both `tenantId` and the organisation identifier before any per-tenant resource is touched.
+
+### `validateProductionDatabaseConfig` MT-prod password — known gap
+
+**Known gap from `plugin-br-bank-transfer` D9 (Phase 6, validator hardening).** Documented here so downstream services do not inherit the same defect when they follow this pattern.
+
+The current canonical implementation in `internal/bootstrap/config/validate_persistence.go:83-106` (`validateProductionDatabaseConfig`) **unconditionally requires `POSTGRES_PASSWORD`** in production:
+
+```go
+func (cfg *Config) validateProductionDatabaseConfig(ctx context.Context, asserter *obsassert.Asserter) error {
+    if err := asserter.NotEmpty(ctx, strings.TrimSpace(cfg.Postgres.PrimaryPassword), "POSTGRES_PASSWORD is required in production"); err != nil {
+        return fmt.Errorf("config validation: %w", err)
+    }
+    // ... SSL mode checks ...
+}
+```
+
+This contradicts the rule above: in MT-prod there is no bootstrap Postgres password — credentials are resolved per-tenant from the tenant-manager `/connections` endpoint at runtime. A service running MT-prod with no app-level PG still has to set a placeholder `POSTGRES_PASSWORD` today to pass validation, which is a foot-gun (operators have to either set a fake value or wire a real password that is never used).
+
+**Required action when adopting this pattern in a new service:**
+
+```go
+func (cfg *Config) validateProductionDatabaseConfig(ctx context.Context, asserter *obsassert.Asserter) error {
+    // MT-prod: per-tenant PG credentials come from tenant-manager at runtime.
+    // The bootstrap pool is either absent (lazy otelsql handle never pinged)
+    // or only used by legacy/admin paths. POSTGRES_PASSWORD is not a hard
+    // production requirement in MT.
+    if cfg.MultiTenant.Enabled {
+        return nil
+    }
+    if err := asserter.NotEmpty(ctx, strings.TrimSpace(cfg.Postgres.PrimaryPassword), "POSTGRES_PASSWORD is required in production"); err != nil {
+        return fmt.Errorf("config validation: %w", err)
+    }
+    // ... SSL mode checks (these stay — when a PG is configured at all, prod TLS rules apply) ...
+}
+```
+
+The deferral in `plugin-br-bank-transfer` D9 was intentional: the team chose to ship the MT bootstrap carve-out without also changing the prod-validator surface, since the workaround (set a placeholder env var) is operational and the corrective fix touches a hot validator with broad test coverage. Treat this entry as the heads-up — when you build a new MT service or harden an existing one, apply the early-return.
+
+### ST↔MT symmetry awareness
+
+| Aspect | ST | MT |
+|---|---|---|
+| Bootstrap Postgres ping | ✅ Required (the bootstrap pool IS the real connection) | ❌ Skipped (lazy `otelsql` handle returned; per-tenant PG resolved at runtime) |
+| Bootstrap Mongo init | ✅ Required when `MONGO_ENABLED=true` | ❌ Skipped (per-tenant Mongo resolved via `tmmongo.Manager`) |
+| Bootstrap RabbitMQ dial | ✅ Allowed for the single connection | ❌ Per-tenant via `tmrabbitmq.Manager.GetChannel(ctx)`; no bootstrap dial |
+| Vendor secret fetch (JD, M2M) | ✅ At init under `context.Background()` is acceptable (single tenant scope) | ❌ Lazy per-tenant fetch under a `ctx` carrying `tenantId` |
+| `validateMongoConfig` | ✅ Required fields enforced | ❌ Early-return `nil` |
+| `validateProductionDatabaseConfig` (`POSTGRES_PASSWORD`) | ✅ Required | ❌ Early-return `nil` (**known gap** — see §[`validateProductionDatabaseConfig` MT-prod password — known gap](#validateproductiondatabaseconfig-mt-prod-password--known-gap)) |
+| Self-probe → `/health/live` | Probes bootstrap PG / Mongo / app Redis | Probes app Redis (+ tenant Pub/Sub Redis); skips bootstrap PG / Mongo |
+| Startup banner | Prints `PostgreSQL` + `MongoDB` lines | Omits per-tenant lines; prints `Databases : per-tenant (tenant-manager)` instead |
+| Background workers | Run against the bootstrap pool | Run per-tenant via scheduler + dispatch layer |
+| Hard bootstrap requirement | Bootstrap PG (and Mongo when enabled) + app Redis | App Redis + tenant Pub/Sub Redis only |
+
+The consumer-facing code (repositories, services, workers) is **mode-agnostic** in MT-ready services: it always takes `ctx` and resolves the connection through `tmcore.*` helpers. The asymmetry lives entirely inside bootstrap and the validator surface, which is precisely where this section's compliance pattern applies.
+
+### NON-COMPLIANT signs (consolidated)
+
+A `ring:dev-multi-tenant` Gate 0 audit (or any equivalent compliance sweep) MUST flag any of the following:
+
+- `PingContext` / `.Ping(` calls inside `internal/bootstrap/` that are NOT gated behind `if !cfg.MultiTenant.Enabled` (or behind a per-tenant resolver). Reference: `internal/bootstrap/service_infrastructure.go:154-172`.
+- Bootstrap Mongo init call sites without an `cfg.Mongo.Enabled && !cfg.MultiTenant.Enabled` gate. Reference: `internal/bootstrap/service_infrastructure.go:79-93`.
+- `validateMongoConfig` (or equivalent) that asserts `MONGO_URI` / `MONGO_DATABASE` without first checking `cfg.MultiTenant.Enabled`. Reference: `internal/bootstrap/config/validate_persistence.go:120-132`.
+- `validateProductionDatabaseConfig` (or equivalent) that asserts `POSTGRES_PASSWORD` non-empty without an MT early-return. Reference: `internal/bootstrap/config/validate_persistence.go:83-106` (this is the known gap).
+- Self-probe code that calls `s.probePostgres` / `s.probeMongo` unconditionally in MT, or whose "check skipped" path lacks a structured-log line reviewers can grep for. Reference: `internal/bootstrap/readyz_handlers.go:583-640`.
+- Startup banner that prints `PostgreSQL` / `MongoDB` lines in MT, or that omits the `Databases : per-tenant (tenant-manager)` line. Reference: `internal/bootstrap/service.go:724-790`; tests in `internal/bootstrap/service_internal_test.go:451-509`.
+- Direct use of a global `s.Postgres` / `s.Mongo` / `s.RabbitMQ` handle inside business code, instead of `tmcore.GetPGContext(ctx)` / `tmcore.GetMBContext(ctx)` / `tmrabbitmq.Manager.GetChannel(ctx)`.
+- Global secret fetch under `context.Background()` (`secretsmanager.Get*`, `aws.SecretsManager`, vendor SDK secret loaders in bootstrap code). Secret retrieval MUST be lazy and inside a tenant-scoped call site.
+- A single Redis client variable serving both `REDIS_HOST` and `MULTI_TENANT_REDIS_HOST`, or any cross-publish between them.
+- A worker constructor that captures the bootstrap `*sql.DB` or `*mongo.Client`, or a worker whose iteration `ctx` is `context.Background()` / `context.TODO()` derived.
+
+### Anti-Rationalization
+
+| Rationalization | Why It's WRONG | Required Action |
+|---|---|---|
+| "Pinging the bootstrap Postgres at boot is a free smoke test" | In MT there is no bootstrap PG. The ping always fails; `SelfProbeOK` never flips; `/health/live` returns 503; K8s liveness restarts the healthy pod. | **Skip the bootstrap PG ping in MT**; rely on `tmpostgres.Manager` per-tenant validation. |
+| "We should fetch vendor secrets at startup so failures surface early" | Secrets are per-tenant. A "global" fetch either uses the wrong scope or fails on every tenant that isn't the operator's own. Boot-time secret fetch also creates a `tenant database missing from context` race when the secret-loader implicitly touches PG/Mongo. | **Fetch secrets lazily inside a tenant-scoped call site**; cache per-tenant. |
+| "We need to require `MONGO_URI` in MT for safety" | `validateMongoConfig` enforces ST-only requirements. In MT the bootstrap Mongo client is never wired; requiring a URI forces operators to set a fake value or wire a database that the service never uses. | **Early-return `validateMongoConfig` in MT.** |
+| "`/health/live` should reflect the database the same way as `/readyz`" | They have different purposes. `/health/live` answers "is this process recoverable" — gating it on a resource that does not exist in MT makes the answer permanently No. `/readyz` is the per-dependency latency surface, where MT carve-outs are a separate design discussion. | **Decouple the self-probe from `/readyz`**; skip bootstrap PG/Mongo in the self-probe under MT. |
+| "We can colocate the tenant Pub/Sub on the app Redis to save infra" | The two Redis clusters have different durability, latency, and capacity profiles — and conflating them removes the defence-in-depth around tenant lifecycle event leakage. | **MUST keep `REDIS_HOST` and `MULTI_TENANT_REDIS_HOST` as separate clients.** |
+| "We'll start workers against the bootstrap PG handle and switch to per-tenant later" | The bootstrap handle has no tenant context. The worker's first call resolves to a `tenant database missing from context` error or, worse, to the wrong tenant's data. | **Workers MUST run per-tenant from day one**, scheduled by the tenant-cache lifecycle handler from §Tenant Discovery and Cache Invalidation. |
+| "Production validators are language-of-record; they should require POSTGRES_PASSWORD always" | In MT-prod the bootstrap PG either does not exist or is admin-only. Forcing a non-empty password creates a placeholder that audits can't distinguish from a real credential. See §[`validateProductionDatabaseConfig` MT-prod password — known gap](#validateproductiondatabaseconfig-mt-prod-password--known-gap). | **`validateProductionDatabaseConfig` MUST early-return in MT**, like `validateMongoConfig` does. |
+
+### Reference implementation
+
+These files in `plugin-br-bank-transfer` are the canonical reference for this pattern. Use them as a diff target when implementing the rule in a new service:
+
+| File | What it shows |
+|---|---|
+| `internal/bootstrap/service_infrastructure.go:79-93` | Bootstrap Mongo init gated on `!cfg.MultiTenant.Enabled`. |
+| `internal/bootstrap/service_infrastructure.go:154-172` | Bootstrap Postgres ping skipped in MT (`if cfg.MultiTenant.Enabled { return db, nil }`); the lazy `otelsql` handle is returned without `PingContext`. |
+| `internal/bootstrap/config/validate_persistence.go:120-132` | `validateMongoConfig` early-returns when `MultiTenant.Enabled`. |
+| `internal/bootstrap/config/validate_persistence.go:83-106` | `validateProductionDatabaseConfig` — **the known gap** described above. Read this implementation as the "before" picture; the snippet in §[`validateProductionDatabaseConfig` MT-prod password — known gap](#validateproductiondatabaseconfig-mt-prod-password--known-gap) is the "after". |
+| `internal/bootstrap/readyz_handlers.go:583-640` | `RunSelfProbe` skips bootstrap PG/Mongo in MT and probes the app Redis only; emits structured "check skipped" log lines so reviewers can confirm the carve-out. |
+| `internal/bootstrap/service.go:724-790` | Startup banner is mode-aware: ST prints `PostgreSQL` + `MongoDB` lines, MT prints `Databases : per-tenant (tenant-manager)` instead. |
+| `internal/bootstrap/service_internal_test.go:451-509` | Banner tests pinning the ST/MT contract — copy this test shape into new services. |
+| `internal/bootstrap/readyz_self_probe_mt_test.go` | Self-probe MT carve-out regression tests. |
+
+Cross-reference: §27 (Systemplane in MT mode — compliance pattern) for the runtime-config side of the same dual-mode discipline. `ring:dev-systemplane-migration` orchestrates the systemplane-side migration; the bootstrap-resource-requirement rule documented here MUST be in place before that migration is enabled in MT-prod.

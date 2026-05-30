@@ -40,14 +40,18 @@ Include verified standards, sections checked, and violations with file:line evid
 | missing `Close()` in lifecycle owner | shutdown through service lifecycle |
 | tenant ID parsed manually for config read paths | `GetForTenant` / tenant-aware APIs |
 | `SYSTEMPLANE_*`, `Supervisor`, `BundleFactory`, `lib-commons/v4` residue | lib-systemplane client migration |
+| `systemplane.SchemaSQL()` / `DefaultSeedSQL()` at boot, `runSchema` hook, `CREATE TABLE systemplane_entries` outside `migrations/` | `make systemplane-ddl` generator (multi-tenant.md §27 "Cold-tenant resolution") |
+| missing `cmd/generate-systemplane-ddl/`, `migrations/systemplane_ddl_manifest.json`, or `make systemplane-ddl` / `check-systemplane-ddl-drift` while systemplane is wired | scaffold the generator per multi-tenant.md §27 |
+| hand-edited `migrations/NNN_systemplane_*.sql` | re-run `make systemplane-ddl`; the generator is the only writer |
+| bootstrap seam diverges from `SystemplaneSeedEntries() ([]SystemplaneSeedEntry, error)` | align to the canonical signature — the generator depends on it |
 
 ## Severity
 
 | Severity | Examples |
 |----------|----------|
-| **CRITICAL** | v4 systemplane import, silent tenant fallback to global, admin mount without required authorizer, DIY pgx/Mongo config feed. |
-| **HIGH** | Reads before start, missing close, SIGHUP/fsnotify/viper watcher still wired for runtime knobs. |
-| **MEDIUM** | Bootstrap-only setting incorrectly moved to systemplane, missing validator/debounce on mutable numeric knob. |
+| **CRITICAL** | v4 systemplane import, silent tenant fallback to global, admin mount without required authorizer, DIY pgx/Mongo config feed, runtime DDL provisioning (`SchemaSQL()` at boot or `CREATE TABLE systemplane_entries` outside `migrations/`). |
+| **HIGH** | Reads before start, missing close, SIGHUP/fsnotify/viper watcher still wired for runtime knobs, missing `cmd/generate-systemplane-ddl/` + manifest + Make targets while systemplane is wired. |
+| **MEDIUM** | Bootstrap-only setting incorrectly moved to systemplane, missing validator/debounce on mutable numeric knob, hand-edited generated `migrations/NNN_systemplane_*.sql`. |
 | **LOW** | Missing descriptions, namespace naming drift, logger/telemetry option omitted when otherwise available. |
 
 ## Output Format

@@ -732,6 +732,7 @@ MultiTenantRedisHost                   string `env:"MULTI_TENANT_REDIS_HOST"`
 MultiTenantRedisPort                   string `env:"MULTI_TENANT_REDIS_PORT" default:"6379"`
 MultiTenantRedisPassword               string `env:"MULTI_TENANT_REDIS_PASSWORD"`
 MultiTenantRedisTLS                    bool   `env:"MULTI_TENANT_REDIS_TLS"`
+MultiTenantRedisCACert                 string `env:"MULTI_TENANT_REDIS_CA_CERT"` // OPTIONAL base64-encoded PEM; required when MULTI_TENANT_REDIS_TLS=true and the cluster CA isn't in system trust
 MultiTenantMaxTenantPools              int    `env:"MULTI_TENANT_MAX_TENANT_POOLS" default:"100"`
 MultiTenantIdleTimeoutSec              int    `env:"MULTI_TENANT_IDLE_TIMEOUT_SEC" default:"300"`
 MultiTenantTimeout                     int    `env:"MULTI_TENANT_TIMEOUT" default:"30"`
@@ -886,7 +887,7 @@ WARNINGS (does not zero the score, but flagged as HIGH):
 5. (WARNING) Non-canonical source implementation files detected: custom tenant resolvers, manual pool managers, or wrapper middleware in source paths (internal/, pkg/, cmd/) outside canonical lib-commons integration paths. Excludes docs, tests, fixtures, vendored code.
 
 Canonical Environment Variables:
-6. APPLICATION_NAME always required (used for Tenant Manager settings resolution regardless of mode). When MULTI_TENANT_ENABLED=true, all 14 MULTI_TENANT_* env vars must also be declared in the config struct with exact names: MULTI_TENANT_ENABLED, MULTI_TENANT_URL, MULTI_TENANT_REDIS_HOST, MULTI_TENANT_REDIS_PORT, MULTI_TENANT_REDIS_PASSWORD, MULTI_TENANT_REDIS_TLS, MULTI_TENANT_MAX_TENANT_POOLS, MULTI_TENANT_IDLE_TIMEOUT_SEC, MULTI_TENANT_TIMEOUT, MULTI_TENANT_CIRCUIT_BREAKER_THRESHOLD, MULTI_TENANT_CIRCUIT_BREAKER_TIMEOUT_SEC, MULTI_TENANT_SERVICE_API_KEY, MULTI_TENANT_CACHE_TTL_SEC, MULTI_TENANT_CONNECTIONS_CHECK_INTERVAL_SEC. Single-tenant mode (MULTI_TENANT_ENABLED=false or absent) must work without any MULTI_TENANT_* vars set.
+6. APPLICATION_NAME always required (used for Tenant Manager settings resolution regardless of mode). When MULTI_TENANT_ENABLED=true, all 14 required MULTI_TENANT_* env vars must also be declared in the config struct with exact names: MULTI_TENANT_ENABLED, MULTI_TENANT_URL, MULTI_TENANT_REDIS_HOST, MULTI_TENANT_REDIS_PORT, MULTI_TENANT_REDIS_PASSWORD, MULTI_TENANT_REDIS_TLS, MULTI_TENANT_MAX_TENANT_POOLS, MULTI_TENANT_IDLE_TIMEOUT_SEC, MULTI_TENANT_TIMEOUT, MULTI_TENANT_CIRCUIT_BREAKER_THRESHOLD, MULTI_TENANT_CIRCUIT_BREAKER_TIMEOUT_SEC, MULTI_TENANT_SERVICE_API_KEY, MULTI_TENANT_CACHE_TTL_SEC, MULTI_TENANT_CONNECTIONS_CHECK_INTERVAL_SEC. A 15th OPTIONAL env var, MULTI_TENANT_REDIS_CA_CERT (base64-encoded PEM bundle threaded through `TenantPubSubRedisConfig.CACertBase64`), is required when MULTI_TENANT_REDIS_TLS=true AND the tenant Pub/Sub Redis cluster's CA isn't in the runtime image's system trust pool (managed AWS/GCP/Azure issuers, macOS dev workstations) — see multi-tenant.md §28 §`MULTI_TENANT_REDIS_CA_CERT`. Single-tenant mode (MULTI_TENANT_ENABLED=false or absent) must work without any MULTI_TENANT_* vars set.
 7. No non-canonical env var names for tenant configuration (e.g., TENANT_MANAGER_URL, TENANT_ENABLED, MULTI_TENANT_ENVIRONMENT are violations — APPLICATION_NAME is valid)
 
 Middleware & Routing:
