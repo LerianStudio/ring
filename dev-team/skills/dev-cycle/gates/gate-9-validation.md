@@ -15,7 +15,7 @@ For the current task:
      * The delivery-verification evidence already written at Gate 0:
        `state.tasks[i].subtasks[j].gate_progress.implementation`
        (delivery_verified, and the requirements_delivered mapping produced by
-        ring:dev-implementation Step 7 — the Delivery Verification Exit Check)
+        ring:dev-implementation's Delivery Verification Exit Check)
    - If the task itself carries task-level acceptance_criteria, include those too.
    - ⛔ Every subtask's criteria MUST appear in the aggregated set. A criterion
      defined on any subtask of the task that is dropped here is a silent bug.

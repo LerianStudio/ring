@@ -35,7 +35,7 @@ This is a **HARD GATE** — not a suggestion.
 
 | Context | Check Point |
 |---------|-------------|
-| **ring:dev-cycle Gate 0** | After implementation agent completes — verify no file exceeds 1500 lines; 1001-1500 = cohesion review; >1500 = hard block. Delivery verification exit check (ring:dev-implementation Step 7) MUST run file-size verification. |
+| **ring:dev-cycle Gate 0** | After implementation agent completes — verify no file exceeds 1500 lines; 1001-1500 = cohesion review; >1500 = hard block. The Delivery Verification Exit Check (ring:dev-implementation) MUST run file-size verification. |
 | **ring:dev-cycle Gate 8** | Code reviewers MUST flag any file > 1000 lines as a MEDIUM+ issue (apply cohesion judgment); files > 1500 lines are CRITICAL. |
 | **ring:dev-refactor Step 4** | Agents MUST flag files > 1000 lines as ISSUE-XXX (HIGH; cohesion override allowed). Files > 1500 lines = CRITICAL. |
 | **ring:dev-implementation** | Agent MUST NOT create files > 1500 lines. Files in the 1001-1500 band require cohesion justification or proactive split. |

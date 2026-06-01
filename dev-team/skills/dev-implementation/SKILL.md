@@ -47,91 +47,57 @@ Check `PROJECT_RULES.md` exists at `project_rules_path` → STOP if not found.
 | typescript | api, worker | ring:backend-engineer-typescript |
 | typescript | frontend, bff | ring:frontend-bff-engineer-typescript |
 
-## Step 3: Gate 0.1 — TDD-RED (Write Failing Test)
+## Step 3: Gate 0 — TDD (RED → GREEN)
 
-Dispatch selected agent:
+Dispatch the selected agent ONCE. The agent writes the failing test, captures the RED failure output as evidence, then implements to GREEN — in one turn.
 
 ```yaml
 Task:
   subagent_type: "{selected_agent}"
-  description: "TDD-RED: Write failing test for {unit_id}"
+  description: "Gate 0 TDD (RED→GREEN) for {unit_id}"
   prompt: |
-    ## TDD-RED PHASE: Write a FAILING Test
+    ## TDD: write a failing test, then make it pass
 
     unit_id: {unit_id}
     requirements: {requirements}
     language: {language}
     service_type: {service_type}
 
-    Standards: Load via state.cached_standards or WebFetch Ring standards for language.
+    Standards: load via state.cached_standards or WebFetch Ring standards for the language.
     Project rules: {project_rules_path}
 
-    ## Frontend TDD Policy (React/Next.js only)
-    Visual-only components (layout, styling, animations): TDD-RED not required.
-    Report "Visual-only component → TDD-RED skipped; frontend visual checks apply in frontend flow."
-    Behavioral components (hooks, validation, state, conditional rendering, API): MUST use TDD-RED.
-
-    ## Your Task
-    1. Write a test that captures expected behavior
-    2. Test MUST FAIL (no implementation yet)
-    3. Run test and capture FAILURE output
-
-    ## Required Output
-    - Test file path + code
-    - Test command
-    - Failure output (MANDATORY — include actual failure text)
-```
-
-Validate output: failure_output must contain "FAIL". Re-dispatch if missing.
-
-## Step 4: Gate 0.2 — TDD-GREEN (Implementation)
-
-Prerequisite: TDD-RED status = completed.
-
-Dispatch selected agent:
-
-```yaml
-Task:
-  subagent_type: "{selected_agent}"
-  description: "TDD-GREEN: Implement code to pass test for {unit_id}"
-  prompt: |
-    ## TDD-GREEN PHASE: Make the Test PASS
-
-    unit_id: {unit_id}
-    requirements: {requirements}
-    TDD-RED test file: {tdd_red.test_file}
-    TDD-RED failure output: {tdd_red.failure_output}
-
-    Standards: Load via state.cached_standards or WebFetch.
-    Project rules: {project_rules_path}
+    ## Frontend TDD policy (React/Next.js only)
+    Visual-only components (layout, styling, animations): RED not required — report
+    "Visual-only → RED skipped; visual checks apply in the frontend flow."
+    Behavioral components (hooks, validation, state, conditional rendering, API): RED required.
 
     ## Multi-Tenant (Go only)
     Implement DUAL-MODE from the start. Use resolvers for all resources
     (tmcore.GetPGContext, tmcore.GetMBContext, etc.) — they work transparently
-    in single-tenant and multi-tenant mode.
-    Load multi-tenant.md for patterns.
+    in single-tenant and multi-tenant mode. Load multi-tenant.md for patterns.
 
-    ## Your Task
-    1. Implement minimum code to make tests pass
-    2. Run tests — all must pass
-    3. Enforce coverage threshold (Ring minimum 85%, PROJECT_RULES may raise it)
-    4. Create/update docker-compose and .env.example when the service needs local dependencies
-    5. Verify local runtime starts cleanly enough for the changed service path
-    6. Verify basic health/observability expectations for the changed code
-    7. Write delivery verification results
-    8. Commit with message: "{feat|fix|test|chore}(scope): description"
+    ## Your task
+    1. Write a test capturing expected behavior; run it; it MUST fail (no implementation yet); capture the failure output.
+    2. Implement the minimum code to make the test pass; run tests — all pass.
+    3. Enforce coverage threshold (Ring minimum 85%, PROJECT_RULES may raise it).
+    4. Create/update docker-compose and .env.example when the service needs local dependencies.
+    5. Verify local runtime starts cleanly for the changed service path; verify basic health/observability for the changed code.
+    6. Write delivery verification results.
+    7. Commit: "{feat|fix|test|chore}(scope): description".
 
-    ## Required Output
-    - Implementation files created/modified
-    - Test execution output (must show PASS)
+    ## Required output
+    - RED: test file path + the actual failure output (MANDATORY — must contain FAIL)
+    - GREEN: implementation files + test pass output
     - Coverage report (must meet threshold)
-    - Local runtime verification: docker-compose/.env.example status or explicit "not required"
+    - Local runtime: docker-compose/.env.example status or explicit "not required"
     - Basic health/observability verification
-    - Delivery verification: requirements delivered, dead code check, files changed
+    - Delivery verification: requirements delivered, dead-code check, files changed
     - Git commit SHA
 ```
 
-## Step 5: Gate 0 Exit — Delivery Verification
+Validate output: the RED failure output must contain "FAIL" (evidence the test failed before implementation existed), and the GREEN output must show PASS with coverage ≥ threshold. Re-dispatch if RED evidence is missing or tests do not pass.
+
+## Step 4: Gate 0 Exit — Delivery Verification
 
 After TDD-GREEN passes, verify delivery:
 

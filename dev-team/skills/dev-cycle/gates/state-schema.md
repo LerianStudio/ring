@@ -291,8 +291,7 @@ Write tool:
 | Checkpoint | Cadence | MUST Update | MUST Write File |
 |------------|---------|-------------|-----------------|
 | **Before Gate 0 (task start)** | Task | `task.status = "in_progress"` in JSON **+ tasks.md Status → `🔄 Doing`** | ✅ YES |
-| Gate 0.1 (TDD-RED) | Subtask | `state.tasks[i].subtasks[j].gate_progress.implementation.tdd_red.status` + `.failure_output` | ✅ YES |
-| Gate 0.2 (TDD-GREEN) | Subtask | `state.tasks[i].subtasks[j].gate_progress.implementation.tdd_green.status` + `.implementation.status` | ✅ YES |
+| Gate 0 TDD (RED→GREEN) | Subtask | `state.tasks[i].subtasks[j].gate_progress.implementation.tdd_red` (status + failure_output), `.tdd_green` (status + test_pass_output), `.implementation.status` | ✅ YES |
 | Gate 0 exit (Quality + Delivery Verification) | Subtask | `state.tasks[i].subtasks[j].gate_progress.implementation.delivery_verified = true` + `.standards_compliance` + `.coverage_actual` + `.coverage_threshold` + `.local_runtime_verified` | ✅ YES |
 | Step 2.4 (Subtask Checkpoint) | Subtask | `status = "paused_for_approval"` (subtask-level checkpoint; set only when `execution_mode = manual_per_subtask`; fires after Gate 0) | ✅ YES |
 | Gate 8 (Review) | Task | `state.tasks[i].gate_progress.review.status` + `agent_outputs.review` (reviewers see cumulative task diff) | ✅ YES |

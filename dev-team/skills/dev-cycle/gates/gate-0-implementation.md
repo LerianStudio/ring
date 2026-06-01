@@ -42,7 +42,7 @@ See [shared-patterns/file-size-enforcement.md](../../shared-patterns/file-size-e
 **Summary:** Soft limit 1000 lines per file; hard block at 1500 lines. Files in the 1001-1500 band require cohesion review — keep if coherent (state machine, parser, schema, table-driven tests, tightly-coupled domain logic), split if fragmentable without artificial boundaries. Files > 1500 lines are hard-blocked unless explicit cohesion justification is documented in the PR description. Enforcement points:
 
 - **Gate 0:** Implementation agent receives file-size instructions; orchestrator runs verification command after agent completes. Files 1001-1500 → cohesion review; files > 1500 → hard block.
-- **Gate 0 exit check (inline in ring:dev-implementation Step 7):** Delivery verification runs 7 checks as exit criteria: (A) file-size, (B) license headers, (C) linting, (D) migration safety, (E) vulnerability scanning, (F) API backward compatibility, (G) multi-tenant dual-mode. Any FAIL → ring:dev-implementation re-iterates with specific fix instructions.
+- **Gate 0 exit check (inline in ring:dev-implementation's Delivery Verification Exit Check):** Delivery verification runs 7 checks as exit criteria: (A) file-size, (B) license headers, (C) linting, (D) migration safety, (E) vulnerability scanning, (F) API backward compatibility, (G) multi-tenant dual-mode. Any FAIL → ring:dev-implementation re-iterates with specific fix instructions.
 - **Gate 8:** Code reviewers MUST flag any file > 1000 lines as a MEDIUM+ issue (apply cohesion judgment); files > 1500 lines are CRITICAL.
 
 ### Step 2.1: Prepare Input for ring:dev-implementation Skill
@@ -84,8 +84,7 @@ implementation_input = {
 
    The skill handles:
    - Selecting appropriate agent (Go/TS/Frontend based on language)
-   - TDD-RED phase (writing failing test, capturing failure output)
-   - TDD-GREEN phase (implementing code to pass test)
+   - TDD RED→GREEN in one dispatch (failing test with captured failure output, then implementation to pass)
    - Standards compliance verification (iteration loop, max 3 attempts)
    - Re-dispatching agent for compliance fixes
    - Outputting Standards Coverage Table with evidence
@@ -168,8 +167,8 @@ implementation_input = {
 ### Step 2.3.1: Delivery Verification Exit Check (MANDATORY before Gate 0 completion)
 
 After Gate 0 PASS, delivery verification runs AS EXIT CRITERIA (not as a separate gate).
-This check is performed inside `ring:dev-implementation` as its Step 7 (Delivery
-Verification Exit Check). The orchestrator DOES NOT dispatch a separate skill.
+This check is performed inside `ring:dev-implementation` as its Delivery Verification
+Exit Check. The orchestrator DOES NOT dispatch a separate skill.
 
 Verify that the dev-implementation handoff includes `delivery_verification` field:
 
