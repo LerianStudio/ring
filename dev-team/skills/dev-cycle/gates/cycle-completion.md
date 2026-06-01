@@ -139,33 +139,22 @@ state.gate_progress.migration_safety_verification = {
 
 ---
 
-### Step 12.1: Final Commit
+### Step 12.1: Cycle Report + Final Commit
 
-0. **FINAL COMMIT CHECK (before completion):**
-   - if `commit_timing == "at_end"`:
-     - Execute `/ring:commit` command with message: `feat({cycle_id}): complete dev cycle for {feature_name}`
-     - Include all changed files from the entire cycle
-   - else: Already committed per subtask or per task
+1. **Calculate metrics:** total_duration_ms, average gate durations, review iterations, pass/fail ratio.
 
-1. **Calculate metrics:** total_duration_ms, average gate durations, review iterations, pass/fail ratio
-2. **Update state:** `status = "completed"`, `completed_at = timestamp`
-3. **Generate report:** Task | Subtasks | Duration | Review Iterations | Status | Commit Status
+2. **⛔ MANDATORY: Run ring:dev-report skill (the ONE AND ONLY dispatch).**
 
-4. **⛔ MANDATORY: Run ring:dev-report skill for cycle metrics**
-
-   **IMPORTANT:** This is the ONE AND ONLY ring:dev-report dispatch in the cycle. ring:dev-report reads `accumulated_metrics` from ALL tasks in state and generates aggregate analysis.
+   ring:dev-report reads `accumulated_metrics` from ALL tasks in state and writes aggregate feedback to `docs/feedbacks/cycle-YYYY-MM-DD/`. It manages its own TodoWrite tracking.
 
    ```yaml
    Skill tool:
      skill: "ring:dev-report"
    ```
 
-   **Note:** ring:dev-report manages its own TodoWrite tracking internally.
+   After it completes, set `feedback_loop_completed = true` at cycle level.
 
-   **After feedback-loop completes, update state:**
-   - Set `feedback_loop_completed = true` at cycle level in state file
-
-   **⛔ HARD GATE: Cycle incomplete until feedback-loop executes.**
+   **⛔ HARD GATE: cycle incomplete until the feedback-loop executes.**
 
    | Rationalization | Why It's WRONG | Required Action |
    |-----------------|----------------|-----------------|
@@ -173,4 +162,11 @@ state.gate_progress.migration_safety_verification = {
    | "Will run feedback next session" | Next session = never. Run NOW. | **Execute Skill tool** |
    | "All tasks passed, no insights" | Pass patterns need documentation too | **Execute Skill tool** |
 
-5. **Report:** "Cycle completed. Tasks X/X, Subtasks Y, Time Xh Xm, Review iterations X"
+3. **Finalize state:** `status = "completed"`, `completed_at = timestamp`. Save state.
+
+4. **FINAL COMMIT** (runs regardless of `commit_timing` — the cycle-metadata commit captures the dev-report feedback and finalized state, so nothing is left dangling):
+   - `commit_timing == "at_end"`: include all changed files from the entire cycle (feature code + dev-report feedback + final state).
+   - `commit_timing == "per_task"` / `"per_subtask"`: feature code already committed; this commit captures the cycle-end artifacts (dev-report feedback, finalized state).
+   - Execute `/ring:commit` with message: `feat({cycle_id}): complete dev cycle for {feature_name}`.
+
+5. **Report:** "Cycle completed. Tasks X/X, Subtasks Y, Time Xh Xm, Review iterations X."

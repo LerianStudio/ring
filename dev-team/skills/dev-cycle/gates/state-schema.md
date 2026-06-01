@@ -275,7 +275,7 @@ else if gate == 8:
   state.tasks[current_task_index].gate_progress.review.status = "completed"
   state.tasks[current_task_index].gate_progress.review.completed_at = "[ISO timestamp]"
   state.tasks[current_task_index].agent_outputs.review = [all reviewer outputs]
-state.current_gate = [next_gate_number]
+state.current_gate = [next gate per the "current_gate Transitions and Resume" table below]
 state.updated_at = "[ISO timestamp]"
 
 # Step 2: Write to file (MANDATORY - use Write tool)
@@ -283,6 +283,24 @@ Write tool:
   file_path: [state.state_path]  # Use state_path from state object
   content: [full JSON state]
 ```
+
+### `current_gate` Transitions and Resume
+
+`current_gate ∈ {0, 8, 9}` — the gate active within the CURRENT task. It is meaningful only during the per-task loop; the Cycle Completion phase (Steps 12.x) is driven by `status`, not `current_gate`.
+
+| After | Outcome | Set |
+|-------|---------|-----|
+| Gate 0 (subtask) | more subtasks remain | `current_gate = 0`, `current_subtask_index += 1` |
+| Gate 0 (subtask) | last subtask of the task done | `current_gate = 8` |
+| Gate 8 (task) | review passed | `current_gate = 9` |
+| Gate 9 (task) | criterion FAIL (Step 11) | `current_gate = 0`, `current_subtask_index = failing subtask` |
+| Gate 9 (task) | approved, Continue (Step 11.1) | `current_gate = 0`, `current_task_index += 1`, `current_subtask_index = 0` |
+| Gate 9 (task) | approved, last task | leave the task loop → Cycle Completion (status-driven; `current_gate` is not consulted there) |
+
+**Resume** reads `status` + `current_task_index` + `current_subtask_index` + `current_gate` jointly:
+- `status` gives the macro-state (`in_progress` / `paused_*` / `completed`).
+- `current_gate` + the two indices pinpoint the exact resume point inside the task loop.
+- A paused cycle (`paused` or `paused_for_task_approval`) with `current_gate == 9` means validation passed and the task awaits the human advance decision — re-enter the Step 11.1 checkpoint. `status == paused` with `current_gate == 0` instead resumes at the Gate 0 subtask given by the indices.
 
 ### State Persistence Checkpoints
 
