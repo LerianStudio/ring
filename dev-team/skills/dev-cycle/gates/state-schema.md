@@ -55,11 +55,12 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
   "gate_progress": {
     "migration_safety_verification": {
       "status": "pending|completed|skipped|blocked|acknowledged",
+      "reason": null,
       "files_checked": [],
       "findings": {
-        "BLOCKING": 0,
-        "WARN": 0,
-        "ACKNOWLEDGE": 0
+        "BLOCKING": [],
+        "WARN": [],
+        "ACKNOWLEDGE": []
       },
       "user_acknowledgment": null,
       "started_at": null,
@@ -71,6 +72,7 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
       "id": "T-001",
       "title": "Task title",
       "status": "pending|in_progress|completed|failed|blocked",
+      "base_sha": "git HEAD SHA captured at task start, before the first subtask's Gate 0; lower bound of the Gate 8 cumulative review diff",
       "feedback_loop_completed": false,
       "_comment_accumulated_metrics": "Populated at Step 11.1 (Task Approval Checkpoint). Aggregated at cycle end by ring:dev-report (Step 12.1).",
       "accumulated_metrics": {
@@ -110,7 +112,8 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
               "delivery_verified": false,
               "coverage_actual": 0.0,
               "coverage_threshold": 85,
-              "local_runtime_verified": false
+              "local_runtime_verified": false,
+              "files_changed": []
             }
           }
         }
@@ -300,7 +303,10 @@ Write tool:
 **Resume** reads `status` + `current_task_index` + `current_subtask_index` + `current_gate` jointly:
 - `status` gives the macro-state (`in_progress` / `paused_*` / `completed`).
 - `current_gate` + the two indices pinpoint the exact resume point inside the task loop.
-- A paused cycle (`paused` or `paused_for_task_approval`) with `current_gate == 9` means validation passed and the task awaits the human advance decision — re-enter the Step 11.1 checkpoint. `status == paused` with `current_gate == 0` instead resumes at the Gate 0 subtask given by the indices.
+- Pause states resume by `current_gate` + the two indices:
+  - `paused` / `paused_for_task_approval` with `current_gate == 9` → validation passed; the task (still `in_progress`) awaits the human advance decision — re-enter the Step 11.1 checkpoint.
+  - `paused_for_approval` / `paused_for_testing` with `current_gate == 0` → subtask-level pause after Gate 0 — resume at the Gate 0 subtask given by the indices.
+  - `paused_for_integration_testing` with `current_gate == 9` and the current task already `completed` → integration test ran out-of-band; resume by advancing past it (`current_task_index += 1`, `current_subtask_index = 0`, `current_gate = 0`) into the next task's Gate 0, or Cycle Completion if it was the last task.
 
 ### State Persistence Checkpoints
 
@@ -308,14 +314,14 @@ Write tool:
 
 | Checkpoint | Cadence | MUST Update | MUST Write File |
 |------------|---------|-------------|-----------------|
-| **Before Gate 0 (task start)** | Task | `task.status = "in_progress"` in JSON **+ tasks.md Status → `🔄 Doing`** | ✅ YES |
+| **Before Gate 0 (task start)** | Task | `task.status = "in_progress"` + `task.base_sha = current HEAD SHA` (review-diff lower bound) in JSON **+ tasks.md Status → `🔄 Doing`** | ✅ YES |
 | Gate 0 TDD (RED→GREEN) | Subtask | `state.tasks[i].subtasks[j].gate_progress.implementation.tdd_red` (status + failure_output), `.tdd_green` (status + test_pass_output), `.implementation.status` | ✅ YES |
-| Gate 0 exit (Quality + Delivery Verification) | Subtask | `state.tasks[i].subtasks[j].gate_progress.implementation.delivery_verified = true` + `.standards_compliance` + `.coverage_actual` + `.coverage_threshold` + `.local_runtime_verified` | ✅ YES |
+| Gate 0 exit (Quality + Delivery Verification) | Subtask | `state.tasks[i].subtasks[j].gate_progress.implementation.delivery_verified = true` + `.standards_compliance` + `.coverage_actual` + `.coverage_threshold` + `.local_runtime_verified` + `.files_changed` (union consumed by Gate 8) | ✅ YES |
 | Step 2.4 (Subtask Checkpoint) | Subtask | `status = "paused_for_approval"` (subtask-level checkpoint; set only when `execution_mode = manual_per_subtask`; fires after Gate 0) | ✅ YES |
 | Gate 8 (Review) | Task | `state.tasks[i].gate_progress.review.status` + `agent_outputs.review` (reviewers see cumulative task diff) | ✅ YES |
 | Gate 9 (Validation) | Task | `state.tasks[i].gate_progress.validation.status` + `.result` + `.criteria_results` (aggregated across ALL subtasks; runs after Gate 8 passes) | ✅ YES |
 | Step 11.1 (Task Approval) | Task | `task.status = "completed"` in JSON **+ tasks.md Status → `✅ Done`** + `task.accumulated_metrics` populated (gate_durations_ms, review_iterations, testing_iterations, issues_by_severity); NO dev-report dispatch here (runs ONCE at Step 12.1) | ✅ YES |
-| Step 12.0.5b (Gate 0.5D — Migration Safety, conditional) | Cycle | `state.gate_progress.migration_safety_verification = {status: "completed" \| "skipped" \| "blocked" \| "acknowledged", files_checked, findings: {BLOCKING, WARN, ACKNOWLEDGE}, user_acknowledgment}` | ✅ YES |
+| Step 12.0.5b (Gate 0.5D — Migration Safety, conditional) | Cycle | `state.gate_progress.migration_safety_verification = {status: "completed" \| "skipped" \| "blocked" \| "acknowledged", reason, files_checked, findings: {BLOCKING: [], WARN: [], ACKNOWLEDGE: []}, user_acknowledgment}` | ✅ YES |
 | Step 12.1 (Cycle end — dev-report) | Cycle | `state.feedback_loop_completed = true` after the ONE AND ONLY `ring:dev-report` dispatch | ✅ YES |
 | HARD BLOCK (any gate) | Task | `task.status = "failed"` in JSON **+ tasks.md Status → `❌ Failed`** | ✅ YES |
 
