@@ -54,8 +54,8 @@ for each task:
   for each subtask:
     Gate 9
 
-# CYCLE-END (once, after all tasks done)
-Multi-Tenant Verify → dev-report → Final Commit
+# CYCLE-END (once, after all tasks done) — see "Cycle Completion" section; read gates/cycle-completion.md
+Final Test Confirmation → Multi-Tenant Verify → Migration Safety (Gate 0.5D, conditional) → dev-report → Final Commit
 ```
 
 ## Gate Execution Workflow
@@ -106,6 +106,19 @@ Before starting any gate execution, verify `docs/PROJECT_RULES.md` exists.
 For the full verification process and template creation flow, read `gates/project-rules-check.md` from this skill directory.
 
 If PROJECT_RULES.md doesn't exist → create it using the Ring template before proceeding.
+
+## Cycle Completion
+
+When the task loop in Execution Order finishes (last task passed all its gates), the cycle is NOT done — a completion phase runs once.
+
+Read `gates/cycle-completion.md` from this skill directory and execute Steps 12.0–12.1 in order:
+
+1. **Step 12.0** — Final Test Confirmation (HARD GATE: every Gate 0 handoff has passing tests, coverage ≥ threshold, local runtime verified)
+2. **Step 12.0.5** — Multi-tenant dual-mode verification (post-cycle sanity check)
+3. **Step 12.0.5b** — Gate 0.5D Migration Safety (conditional: runs only when SQL migration files appear in the cycle diff vs `origin/main`)
+4. **Step 12.1** — Final Commit + the one-and-only `ring:dev-report` dispatch
+
+⛔ The cycle is incomplete until Step 12.1 finishes. Do NOT declare the cycle done from the Execution Order summary alone — the detailed, mandatory steps live in `gates/cycle-completion.md`.
 
 ## Execution Modes
 
