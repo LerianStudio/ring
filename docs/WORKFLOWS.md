@@ -137,7 +137,7 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
   - ring:functional-writer (guides)
   - ring:api-writer (API reference)
   - ring:docs-reviewer (quality review)
-- Commands: write-guide, write-api, review-docs
+- Commands: review-docs
 
 ### Hook Configuration
 

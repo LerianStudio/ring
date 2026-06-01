@@ -1,7 +1,7 @@
 {
   "name": "ring-tw-team",
   "version": "0.4.7",
-  "description": "Technical writing specialists for functional and API documentation. 3 specialized agents (functional-writer, api-writer, docs-reviewer) and 6 documentation skills covering voice/tone, structure, API field descriptions, and quality review. Enforces clear, consistent documentation standards.",
+  "description": "Technical writing specialists for functional and API documentation. 3 specialized agents (functional-writer, api-writer, docs-reviewer) and 4 documentation skills covering voice/tone, structure, API field descriptions, and quality review. Enforces clear, consistent documentation standards.",
   "author": {
     "name": "Lerian Studio",
     "email": "fred@lerian.studio",
@@ -32,7 +32,7 @@
     "category": "Writing",
     "capabilities": ["Interactive", "Read", "Write"],
     "defaultPrompt": [
-      "Write a guide for this feature using ring:write-guide.",
+      "Write a guide for this feature using the functional-writer agent.",
       "Review this API documentation for voice and accuracy."
     ],
     "websiteURL": "https://github.com/lerianstudio/ring"

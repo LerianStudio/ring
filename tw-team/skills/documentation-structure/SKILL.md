@@ -14,11 +14,11 @@ description: |
 - Creating navigation patterns
 
 ## Skip when
-- Writing content → use write-guide or write-api
+- Writing content → dispatch the functional-writer or api-writer agent
 - Checking voice → use voice-and-tone
 
 ## Related
-**Complementary:** ring:write-guide, ring:write-api
+**Complementary:** ring:voice-and-tone, ring:review-docs
 
 Good structure helps users find what they need quickly. Organize content by user tasks and mental models, not by internal system organization.
 

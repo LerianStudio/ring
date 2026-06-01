@@ -6,7 +6,7 @@
 
 **Proven engineering practices, enforced through skills.**
 
-Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **4 active plugins**, **77 skills**, and **34 agents** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
+Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **4 active plugins**, **75 skills**, and **34 agents** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
 
 ## ✨ Why Ring?
 
@@ -21,7 +21,7 @@ Without Ring, AI assistants often:
 Ring solves this by:
 
 - **Enforcing proven workflows** - Test-driven development, systematic debugging, proper planning
-- **Providing 77 specialized skills** (16 core + 37 dev-team + 18 product planning + 6 technical writing)
+- **Providing 75 specialized skills** (16 core + 37 dev-team + 18 product planning + 4 technical writing)
 - **34 specialized agents** - 3 planning/analysis + 24 developer/reviewer + 4 product research + 3 technical writing
 - **Automating skill discovery** - Skills load automatically at session start
 - **Preventing common failures** - Built-in anti-patterns and mandatory checklists
@@ -367,13 +367,11 @@ REFACTOR → Clean up → Stay green
 - `ring:delivery-status` - Delivery progress tracking against roadmap
 - `ring:deep-doc-review` - Deep cross-reference review of pre-dev documentation artifacts
 
-### Technical Writing Skills (ring-tw-team plugin - 6 skills)
+### Technical Writing Skills (ring-tw-team plugin - 4 skills)
 
 **Documentation Creation:**
 
 - `ring:using-tw-team` - Introduction to technical writing specialists
-- `ring:write-guide` - Patterns for guides, tutorials, conceptual docs
-- `ring:write-api` - API reference documentation patterns
 - `ring:documentation-structure` - Document hierarchy and organization
 - `ring:voice-and-tone` - Voice and tone guidelines (assertive, encouraging, human)
 - `ring:review-docs` - Quality checklist and review process
@@ -502,7 +500,7 @@ ring/                                  # Monorepo root
 │   └── skills/                      # 18 product planning skills
 │       └── pre-dev-*/              # PRD, TRD, API, Data, Tasks
 └── tw-team/                         # Technical Writing plugin (ring-tw-team)
-    ├── skills/                      # 6 documentation skills
+    ├── skills/                      # 4 documentation skills
     ├── agents/                      # 3 technical writing agents
     └── hooks/                       # SessionStart hook
 ```

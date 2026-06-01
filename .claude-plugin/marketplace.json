@@ -84,7 +84,7 @@
     },
     {
       "name": "ring-tw-team",
-      "description": "Technical writing specialists for functional and API documentation. 3 specialized agents (functional-writer, api-writer, docs-reviewer) and 6 documentation skills covering voice/tone, structure, API field descriptions, and quality review. Enforces clear, consistent documentation standards.",
+      "description": "Technical writing specialists for functional and API documentation. 3 specialized agents (functional-writer, api-writer, docs-reviewer) and 4 documentation skills covering voice/tone, structure, API field descriptions, and quality review. Enforces clear, consistent documentation standards.",
       "version": "0.5.0",
       "source": "./tw-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/main/tw-team",

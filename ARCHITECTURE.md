@@ -13,7 +13,7 @@
 
 ## Overview
 
-Ring is a **Claude Code plugin marketplace** that provides a comprehensive skills library and workflow system with **4 active plugins** (77 skills, 34 agents). It extends Claude Code's capabilities through structured, reusable patterns that enforce proven software engineering practices across the software delivery value chain: Product Planning → Development → Documentation.
+Ring is a **Claude Code plugin marketplace** that provides a comprehensive skills library and workflow system with **4 active plugins** (75 skills, 34 agents). It extends Claude Code's capabilities through structured, reusable patterns that enforce proven software engineering practices across the software delivery value chain: Product Planning → Development → Documentation.
 
 Beyond Claude Code, each Ring plugin ships native install manifests for Codex (`<plugin>/.codex-plugin/`), Cursor (`<plugin>/.cursor-plugin/`), and OpenCode (`<plugin>/.opencode/`), plus a `ring-install.sh` symlink installer for local-dev workflows targeting Claude Code, Factory AI, OpenCode, and Codex.
 
@@ -73,7 +73,7 @@ _Versions managed in `.claude-plugin/marketplace.json`_
 | **ring-default**     | Core skills library                  | 16 skills, 3 agents               |
 | **ring-dev-team**    | Developer agents                     | 37 skills, 24 agents              |
 | **ring-pm-team**     | Product planning workflows           | 18 skills, 4 agents               |
-| **ring-tw-team**     | Technical writing specialists        | 6 skills, 3 agents                |
+| **ring-tw-team**     | Technical writing specialists        | 4 skills, 3 agents                |
 
 ## Component Hierarchy
 
@@ -719,8 +719,8 @@ _Component counts reflect current state; plugin versions managed in `.claude-plu
 | Skills (ring-default)     | 16         | `default/skills/`      |
 | Skills (ring-dev-team)    | 37         | `dev-team/skills/`     |
 | Skills (ring-pm-team)     | 18         | `pm-team/skills/`      |
-| Skills (ring-tw-team)     | 6          | `tw-team/skills/`      |
-| **Total Skills**          | **77**     | **All plugins**        |
+| Skills (ring-tw-team)     | 4          | `tw-team/skills/`      |
+| **Total Skills**          | **75**     | **All plugins**        |
 | Agents (ring-default)     | 3          | `default/agents/`      |
 | Agents (ring-dev-team)    | 24         | `dev-team/agents/`     |
 | Agents (ring-pm-team)     | 4          | `pm-team/agents/`      |

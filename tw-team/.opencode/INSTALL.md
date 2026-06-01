@@ -25,15 +25,14 @@ Verify by asking: "Which Ring technical writing skills are available?"
 ## What This Plugin Adds
 
 - **3 specialist agents:** functional-writer, api-writer, docs-reviewer
-- **6 documentation skills:** write-guide, write-api, voice-and-tone, documentation-structure, review-docs, using-tw-team
+- **4 documentation skills:** voice-and-tone, documentation-structure, review-docs, using-tw-team
 
 ## Usage
 
 Use OpenCode's native `skill` tool:
 
 ```
-use skill tool to load ring:write-guide
-use skill tool to load ring:write-api
+use skill tool to load ring:voice-and-tone
 ```
 
 ## Updating

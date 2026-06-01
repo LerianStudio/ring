@@ -14,11 +14,11 @@ description: |
 - Ensuring style guide compliance
 
 ## Skip when
-- Writing new documentation → use write-guide or write-api
+- Writing new documentation → dispatch the functional-writer or api-writer agent
 - Only checking voice → use voice-and-tone
 
 ## Sequence
-**Runs after:** ring:write-guide, ring:write-api
+**Runs after:** functional-writer, api-writer (agents)
 
 ## Related
 **Complementary:** ring:voice-and-tone, ring:documentation-structure

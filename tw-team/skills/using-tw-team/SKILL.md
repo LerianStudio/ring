@@ -89,16 +89,11 @@ Emit both Task calls in a SINGLE TURN as one atomic batch. If your runtime expos
 
 **Skills:**
 - using-tw-team: Plugin introduction
-- write-guide: Functional doc patterns
-- write-api: API reference patterns
 - documentation-structure: Hierarchy and organization
 - voice-and-tone: Voice guidelines
 - review-docs: Quality checklist
-- write-api: Also includes detailed field description patterns (merged from api-field-descriptions)
 
 **Commands:**
-- /write-guide: Start functional guide
-- /write-api: Start API documentation
 - /review-docs: Review existing docs
 
 ---
