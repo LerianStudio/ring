@@ -452,4 +452,4 @@ MUST dispatch all listed agents simultaneously in one message.
 
 - [CLAUDE.md](../CLAUDE.md) - Main project instructions (references this document)
 - [AGENT_DESIGN.md](AGENT_DESIGN.md) - Agent output schemas and requirements
-- [WORKFLOWS.md](WORKFLOWS.md) - Workflows (skills, pre-dev, 6-gate dev-cycle, code review)
+- [WORKFLOWS.md](WORKFLOWS.md) - Workflows (skills, pre-dev, lean dev-cycle, code review)

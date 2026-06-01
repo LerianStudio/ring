@@ -15,7 +15,7 @@ description: |
 
 ## Skip when
 - Plan doesn't exist yet — use ring:writing-plans first
-- Production-grade work requiring the full review pool — use ring:dev-cycle instead (10-gate backend cycle dispatches specialists in parallel)
+- Production-grade work requiring the full review pool — use ring:dev-cycle instead (lean backend cycle, Gate 0/8/9, dispatches specialists in parallel)
 - Plan covers multiple independent subsystems — split into separate plans before executing
 
 ## Sequence

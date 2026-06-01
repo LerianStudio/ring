@@ -188,7 +188,7 @@ After saving the plan, offer execution choice:
 >
 > **1. Inline Execution (this session)** — Use ring:executing-plans for task-by-task execution with verification checkpoints. Best for fast iteration, small-to-medium plans.
 >
-> **2. Subagent-Orchestrated (ring:dev-cycle)** — 10-gate backend cycle with parallel specialist dispatch (backend-engineer-golang/typescript, qa-analyst, code-reviewer, etc.). Best for production work that must pass through the full review pool.
+> **2. Subagent-Orchestrated (ring:dev-cycle)** — lean backend cycle (Gate 0/8/9) with parallel specialist dispatch (backend-engineer-golang/typescript, qa-analyst, code-reviewer, etc.). Best for production work that must pass through the full review pool.
 >
 > Which approach?
 

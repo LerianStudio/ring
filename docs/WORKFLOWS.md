@@ -198,7 +198,7 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 
 ---
 
-## Development Cycle (10-gate — cadence-classified)
+## Development Cycle (lean — cadence-classified)
 
 `ring:dev-cycle` is now a lean backend flow. Backend implementation owns TDD, coverage, docker-compose/local runtime, basic health/observability checks, and delivery verification in Gate 0.
 

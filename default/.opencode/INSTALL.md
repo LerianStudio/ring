@@ -24,7 +24,7 @@ OpenCode uses its own plugin install. If you also use Claude Code, Codex, or ano
 
 `ring-default` provides the foundational `using-ring` bootstrap. The other Lerian plugins assume it is installed:
 
-- `ring-dev-team` — backend/frontend specialist agents and the 10-gate dev cycle
+- `ring-dev-team` — backend/frontend specialist agents and the lean dev cycle
 - `ring-pm-team` — pre-dev planning workflows
 - `ring-tw-team` — technical writing specialists
 
