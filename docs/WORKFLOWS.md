@@ -275,7 +275,7 @@ When adding or removing a code review agent in the `ring:codereview` pool:
 3. Edit reviewer agent files in `dev-team/agents/*-reviewer.md` — active code-review reviewers live only in the dev-team plugin
 4. Edit `dev-team/hooks/validate-gate-progression.sh` — 9 default reviewer verdict requirements plus optional conditional verdict requirements
 5. Edit `dev-team/skills/dev-cycle/SKILL.md` and `dev-team/skills/dev-cycle/gates/gate-8-review.md` — Gate 8 state shape and dynamic reviewer references
-6. Edit shared patterns that enumerate reviewers — `default/skills/shared-patterns/reviewer-slicing-strategy.md`, `default/skills/shared-patterns/reviewer-orchestrator-boundary.md`, `default/skills/shared-patterns/reviewer-quality-feedback.md`, `dev-team/skills/shared-patterns/shared-anti-rationalization.md`, `dev-team/skills/shared-patterns/gate-cadence-classification.md`, `dev-team/skills/shared-patterns/custom-prompt-validation.md`
+6. Edit shared patterns that enumerate reviewers — `default/skills/shared-patterns/reviewer-slicing-strategy.md`, `default/skills/shared-patterns/reviewer-orchestrator-boundary.md`, `dev-team/skills/shared-patterns/shared-anti-rationalization.md`, `dev-team/skills/shared-patterns/gate-cadence-classification.md`
 7. Edit public/plugin docs — `CLAUDE.md`, `README.md`, `MANUAL.md`, `ARCHITECTURE.md`, `.claude-plugin/marketplace.json`, and installer messages
 
 **All files in same commit** — MUST NOT update one without the others.

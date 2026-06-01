@@ -309,10 +309,6 @@ REFACTOR → Clean up → Stay green
 - `ring:dev-readyz` - Comprehensive readiness probes (/readyz) with per-dependency status and TLS validation
 - `ring:dev-streaming-instrumentation` - Wire lib-streaming event emission from a validated instrumentation map
 
-**Deprecated Skills (Reference Only):**
-
-- `ring:dev-delivery-verification` - DEPRECATED: delivery verification merged into ring:dev-implementation Step 7 (Gate 0 exit criterion). Skill preserved for reference only.
-
 **Testing & Validation:**
 
 - `ring:dev-goroutine-leak-testing` - Goroutine leak detection and regression testing
