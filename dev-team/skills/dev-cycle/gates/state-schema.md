@@ -84,7 +84,7 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
           "LOW": 0
         }
       },
-      "_comment_subtask_gate_progress": "Subtask-level gate_progress holds ONLY implementation (Gate 0). Gate 0 includes TDD, coverage, local docker-compose/runtime, and delivery verification. Task-level review (Gate 8) AND validation (Gate 9) live in task.gate_progress, not here.",
+      "_comment_subtask_gate_progress": "Subtask-level gate_progress holds ONLY implementation (Gate 0). Gate 0 includes TDD, coverage, local docker-compose/runtime, and delivery verification. Task-level review (Gate 8) AND validation (Gate 9) live in task.gate_progress, not here. A task with no subtasks of its own carries one synthetic subtask entry (the task-itself unit), so every Gate 0 handoff lives under subtasks[] uniformly.",
       "subtasks": [
         {
           "id": "ST-001-01",

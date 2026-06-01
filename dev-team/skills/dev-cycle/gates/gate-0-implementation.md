@@ -196,7 +196,7 @@ IF delivery_verification.result == "PARTIAL" or "FAIL":
 Anti-Rationalization:
 | Rationalization | Why It's WRONG | Required Action |
 |---|---|---|
-| "Gate 0.5 still exists, just renamed" | Gate 0.5 was DELETED as a separate dispatch. Checks now run inline in Gate 0. | **Read `delivery_verification` from Gate 0 handoff; do NOT dispatch a separate skill.** |
+| "There's a separate Gate 0.5 / delivery-verification dispatch" | Delivery verification is a sub-check inside Gate 0, not a separate dispatch. | **Read `delivery_verification` from the Gate 0 handoff; do NOT dispatch a separate skill.** |
 | "I'll just skip this check if Gate 0 passed" | Gate 0 passing without `delivery_verification` means Gate 0 is incomplete. | **Verify `delivery_verification` exists in handoff. If absent → Gate 0 failed.** |
 
 No separate `state.gate_progress.delivery_verification` field — delivery verification is a sub-check of implementation, tracked inline.

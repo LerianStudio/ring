@@ -9,10 +9,9 @@ Iterate `state.tasks` once and assert both cycle-exit invariants. Both are HARD 
    and docker-compose/local runtime verification when required.
    → Any missing/failed quality check: HARD BLOCK, return to Gate 0 for the affected unit.
 
-2. Multi-tenant dual-mode — implemented at Gate 0, verified at Gate 0.5G; confirm it held:
-   for each unit: if gate_progress.delivery_verification.mt_dualmode != "PASS"
-   → HARD BLOCK: "Unit [unit_id] failed MT dual-mode verification at Gate 0.5G"
-   (Gate 0.5G blocks progression, so this should never trip.)
+2. Multi-tenant dual-mode — verified at Gate 0 as delivery-verification check (G); confirm it held:
+   for each unit: if subtasks[j].gate_progress.implementation.delivery_verified != true
+   → HARD BLOCK: "Unit [unit_id] failed Gate 0 delivery verification (includes multi-tenant dual-mode, check G)"
 
 3. Display to user:
    ┌─────────────────────────────────────────────────┐
@@ -26,7 +25,7 @@ Iterate `state.tasks` once and assert both cycle-exit invariants. Both are HARD 
 4. **MANDATORY: ⛔ Save state to file — Write tool → [state.state_path]**
 ```
 
-**Note:** The full ring:dev-multi-tenant skill (12 gates) targets legacy single-tenant codebases being migrated to dual-mode. For new development via dev-cycle, multi-tenant compliance is handled inline by Gate 0 (implementation) + Gate 0.5G (verification).
+**Note:** The standalone `ring:dev-multi-tenant` skill converts whole single-tenant codebases to dual-mode. dev-cycle handles multi-tenant compliance inline at Gate 0 (implementation plus delivery-verification check G).
 
 ### Step 12.0 Anti-Rationalization
 
@@ -42,9 +41,9 @@ See [shared-patterns/shared-anti-rationalization.md](../../shared-patterns/share
 
 ### Step 12.0.5b: Gate 0.5D — Migration Safety Verification (Conditional, Post-Cycle)
 
-**CADENCE:** Post-cycle, conditional. Runs ONCE per cycle if SQL migration files are detected in the cycle diff. Parallel to Gate 0.5G.
+**CADENCE:** Post-cycle, conditional. Runs ONCE per cycle if SQL migration files are detected in the cycle diff.
 
-**Purpose:** Static analysis on SQL migration files introduced by the cycle, per [migration-safety.md](../../docs/standards/golang/migration-safety.md) and [shared-patterns/migration-safety-checks.md](../../shared-patterns/migration-safety-checks.md). Gate 0.5D is orthogonal to Gate 0.5G — 0.5G checks multi-tenant Go code safety; 0.5D checks SQL schema evolution safety.
+**Purpose:** Static analysis on SQL migration files introduced by the cycle, per [migration-safety.md](../../../docs/standards/golang/migration-safety.md) and [shared-patterns/migration-safety-checks.md](../../shared-patterns/migration-safety-checks.md). SQL schema evolution safety is orthogonal to the multi-tenant dual-mode check (Step 12.0): different domains, both required.
 
 **Trigger detection:**
 
@@ -58,7 +57,7 @@ else:
   → Proceed to Gate 0.5D checks below
 ```
 
-**Check categories (from [migration-safety.md § Dangerous Operations](../../docs/standards/golang/migration-safety.md#dangerous-operations-detection) + [shared-patterns/migration-safety-checks.md](../../shared-patterns/migration-safety-checks.md)):**
+**Check categories (from [migration-safety.md § Dangerous Operations](../../../docs/standards/golang/migration-safety.md#dangerous-operations-detection) + [shared-patterns/migration-safety-checks.md](../../shared-patterns/migration-safety-checks.md)):**
 
 1. **BLOCKING** — `ADD COLUMN ... NOT NULL` without `DEFAULT` (ACCESS EXCLUSIVE lock, table rewrite)
 2. **BLOCKING** — `DROP COLUMN` (breaks services still reading; requires expand-contract)
@@ -71,7 +70,7 @@ else:
 9. **ACKNOWLEDGE** — Intentional `DROP COLUMN` that is the contract phase of a prior expand-contract sequence (author must confirm expand phase was already deployed)
 10. **ACKNOWLEDGE** — `ALTER TYPE` on tables documented as > 100k rows (author must confirm maintenance plan)
 
-**Execution (inline, mirrors verification commands in [migration-safety.md § Verification Commands](../../docs/standards/golang/migration-safety.md#verification-commands)):**
+**Execution (inline, mirrors verification commands in [migration-safety.md § Verification Commands](../../../docs/standards/golang/migration-safety.md#verification-commands)):**
 
 ```text
 1. Record gate start timestamp.
@@ -133,7 +132,7 @@ state.gate_progress.migration_safety_verification = {
 |-----------------|----------------|-----------------|
 | "This migration looks simple, skip the check" | Simple migrations cause incidents too. Gate 0.5D only fires on BLOCKING patterns — if it fires, it's not simple. | **MUST run whenever migration files present in cycle diff.** |
 | "ACKNOWLEDGE findings are informational, just log them" | ACKNOWLEDGE means the author MUST confirm intent. Silent acknowledgment is not acknowledgment. | **MUST pause cycle and require explicit user phrase.** |
-| "Gate 0.5D and Gate 0.5G are redundant" | Different domains: 0.5G = multi-tenant Go code safety; 0.5D = SQL schema evolution safety. Orthogonal. | **MUST run both gates; they check different properties.** |
+| "Migration safety duplicates the multi-tenant check" | Different domains: multi-tenant dual-mode = Go code safety (Gate 0 check G); migration safety = SQL schema evolution. Orthogonal. | **Both run; they check different properties.** |
 | "Delivery-verification already covers migrations at Gate 0" | Gate 0's delivery verification is per-subtask on application code, not cycle-wide SQL. Cycle-level diff can only be assessed post-cycle. | **MUST run 0.5D post-cycle on the full cycle diff.** |
 | "Migration was in an early task, already committed per-task" | 0.5D inspects cumulative cycle diff vs origin/main. Per-task commits don't exempt cycle-level safety. | **MUST check against origin/main, not per-task boundary.** |
 | "BLOCKING will cause rework, let's downgrade to WARN" | Severity is set by migration-safety.md. Downgrading violates the standard. | **MUST HARD BLOCK on BLOCKING; use ACKNOWLEDGE only for documented expand-contract.** |

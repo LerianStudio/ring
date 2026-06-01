@@ -54,6 +54,7 @@ for each task:
 
   # 5. TASK-LEVEL validation (once per task, after review passes)
   Gate 9  # validate whole task — aggregate EVERY subtask's acceptance criteria + ONE human approval
+          # criterion FAIL → back to Gate 0 for that subtask, then re-review (step 2) → re-validate
 
   # 6. "Proceed to next task?" checkpoint → reopens step 1 for the next task
 
