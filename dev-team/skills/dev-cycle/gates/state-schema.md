@@ -115,9 +115,9 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
           }
         }
       ],
-      "_comment_task_gate_progress": "Task-level gate_progress holds review (Gate 8) AND validation (Gate 9). The only subtask-cadence gate (0) lives in each subtask's gate_progress. Gate 9 aggregates every subtask's acceptance criteria; criteria_results is keyed by subtask.",
+      "_comment_task_gate_progress": "Task-level gate_progress holds review (Gate 8) AND validation (Gate 9). The only subtask-cadence gate (0) lives in each subtask's gate_progress. Gate 9 aggregates every subtask's acceptance criteria; criteria_results is keyed by subtask. gate_progress.review is the Gate 8 VERDICT only (status + completed_at); reviewer detail — iterations, pass counts, per-reviewer outputs — lives in agent_outputs.review, never duplicated here.",
       "gate_progress": {
-        "review": {"status": "pending"},
+        "review": {"status": "pending", "completed_at": null},
         "validation": {
           "status": "pending|in_progress|completed",
           "result": "pending|approved|rejected",

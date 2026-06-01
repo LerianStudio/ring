@@ -24,7 +24,8 @@ For the current task:
    For each criterion in the aggregated set:
      - PASS if its owning subtask's Gate 0 delivery verification marked the
        requirement delivered (delivery_verified == true and the requirement
-       appears in requirements_delivered), AND Gate 8 review for the task PASSED.
+       appears in requirements_delivered), AND Gate 8 review for the task passed
+       (`gate_progress.review.status == "completed"`).
      - FAIL otherwise.
    Read the verdicts Gate 0 and Gate 8 already wrote to state. Gate 9 does NOT
    recompute test results, coverage, or review findings.
@@ -66,7 +67,7 @@ For the current task:
 1. **Accumulate task metrics into state** (always, independent of mode — NO dev-report dispatch here):
    Write into `state.tasks[current_task_index].accumulated_metrics`:
    - `gate_durations_ms`: {gate_name: duration_ms for each completed gate}
-   - `review_iterations`: `state.tasks[current].gate_progress.review.iterations`
+   - `review_iterations`: `state.tasks[current].agent_outputs.review.iterations`
    - `testing_iterations`: implementation-owned TDD/coverage iterations from Gate 0
    - `issues_by_severity`: {CRITICAL, HIGH, MEDIUM, LOW counts from Gate 8 output}
 

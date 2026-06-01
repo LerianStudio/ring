@@ -171,10 +171,10 @@ review_input = {
 
 6. Update state:
    - gate_progress.review.status = "completed"
-   - gate_progress.review.default_reviewers_passed = "9/9"
-   - gate_progress.review.conditional_specialists_triggered = []  // or triggered specialist names
-   - gate_progress.review.conditional_specialists_passed = "0/0"  // or N/N for triggered specialists
-   - gate_progress.review.selected_reviewer_count = 9  // 9 + triggered specialist count
+   - gate_progress.review.completed_at = "[ISO timestamp]"
+   (gate_progress.review is the gate verdict — status only. Reviewer pass counts,
+    iterations, and per-reviewer outputs live in agent_outputs.review from step 5;
+    do not duplicate them here.)
 
 7. Proceed to Gate 9
 ```
