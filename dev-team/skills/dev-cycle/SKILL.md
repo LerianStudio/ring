@@ -3,7 +3,7 @@ name: ring:dev-cycle
 description: |
   Lean backend development cycle orchestrator with implementation-owned quality.
   Backend engineers own TDD, coverage, docker-compose/local runtime, and delivery verification.
-  Task-level review stays separate; user validation closes each subtask.
+  Task-level review stays separate; user validation closes each task.
 ---
 
 # Development Cycle Orchestrator
@@ -33,7 +33,7 @@ Load tasks from PM output and execute the lean backend cycle. Backend implementa
 |------|---------------|-------------------|---------|------|
 | 0 | ring:dev-implementation | ring:backend-engineer-* | Per subtask | Write + Run |
 | 8 | ring:codereview | 9 default reviewers + triggered specialists in parallel | Per task | Run |
-| 9 | ring:dev-validation | N/A (verification) | Per subtask | Run |
+| 9 | ring:dev-validation | N/A (verification) | Per task | Run |
 
 Gate 0 includes TDD RED/GREEN, coverage threshold enforcement, docker-compose/local runtime updates, basic health/observability verification, and delivery verification. Do not dispatch separate QA, SRE, or DevOps gates as part of this cycle.
 
@@ -42,19 +42,22 @@ Gate 0 includes TDD RED/GREEN, coverage threshold enforcement, docker-compose/lo
 ```yaml
 for each task:
 
-  # SUBTASK-LEVEL implementation (per subtask, or task-itself if no subtasks)
+  # 1. SUBTASK-LEVEL build (per subtask, or task-itself if no subtasks)
   for each subtask:
-    Gate 0
+    Gate 0  # build subtask
     [checkpoint if manual_per_subtask mode]
 
-  # TASK-LEVEL review (once per task, after all subtasks are ready for review)
-  Gate 8
+  # 2. TASK-LEVEL review (once per task, after all subtasks are built)
+  Gate 8  # review whole task — 9 parallel reviewers see cumulative diff
 
-  # SUBTASK-LEVEL validation (after task review passes)
-  for each subtask:
-    Gate 9
+  # 3-4. Fix CRITICAL/HIGH/MEDIUM, then re-review until clean (inside Gate 8)
 
-# CYCLE-END (once, after all tasks done) — see "Cycle Completion" section; read gates/cycle-completion.md
+  # 5. TASK-LEVEL validation (once per task, after review passes)
+  Gate 9  # validate whole task — aggregate EVERY subtask's acceptance criteria + ONE human approval
+
+  # 6. "Proceed to next task?" checkpoint → reopens step 1 for the next task
+
+# 7. CYCLE-END (once, after all tasks done) — see "Cycle Completion" section; read gates/cycle-completion.md
 Final Test Confirmation → Multi-Tenant Verify → Migration Safety (Gate 0.5D, conditional) → dev-report → Final Commit
 ```
 
@@ -169,7 +172,7 @@ Convention: `feat|fix|test|chore(scope): description` — keep commits atomic pe
 A gate is complete ONLY when ALL components succeed:
 - Gate 0: TDD RED + GREEN + coverage ≥ 85% + all acceptance criteria tested + docker-compose/local runtime verified + delivery verification (all requirements delivered, 0 dead code)
 - Gate 8: all 9 default reviewers pass, and any triggered conditional specialist also passes.
-- Gate 9: Explicit "APPROVED" from user
+- Gate 9 (per task): every subtask's acceptance criteria aggregated and marked PASS + explicit "APPROVED" from user
 
 ## Severity of Issues
 

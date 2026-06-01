@@ -1,69 +1,56 @@
-## Step 11: Gate 9 - Validation (Per Execution Unit)
+## Step 11: Gate 9 - Validation (Per Task)
 
-ℹ️ **CADENCE:** Subtask-level. Runs after Gate 0 for the current subtask (or task-itself when no subtasks). Writes to `state.tasks[i].subtasks[j].gate_progress.validation`. Task-level Gate 8 only runs AFTER every subtask of the task has passed Gates 0 and 9.
+⛔ **CADENCE:** Task-level. Runs ONCE per task, AFTER Gate 8 (Review) passes for that task. Writes to `state.tasks[i].gate_progress.validation` (alongside `review`). This gate aggregates the acceptance criteria of EVERY subtask of the task into a single validation + one human approval.
+
+**Gate 8 vs Gate 9:** Gate 8 (Review) verifies the code is *well-built* (defects, security, quality). Gate 9 (Validate) verifies it is *the right thing* (acceptance criteria + human judgment of intent). These are DIFFERENT gates — Gate 9 runs AFTER review passes, at task cadence. Do NOT merge Gate 9 into Gate 8.
 
 ```text
-For current execution unit:
+For the current task:
 
 1. Record gate start timestamp
-2. Verify acceptance criteria:
-   For each criterion in acceptance_criteria:
-     - Check if implemented
-     - Check if tested
-     - Mark as PASS/FAIL
 
-3. Run final verification:
-   - All tests pass?
-   - No Critical/High/Medium review issues?
-   - All acceptance criteria met?
+2. Aggregate acceptance criteria across ALL subtasks of the task:
+   - Build the criteria set by reading, for EACH subtask of the task:
+     * The subtask's acceptance_criteria, AND
+     * The delivery-verification evidence already written at Gate 0:
+       `state.tasks[i].subtasks[j].gate_progress.implementation`
+       (delivery_verified, and the requirements_delivered mapping produced by
+        ring:dev-implementation Step 7 — the Delivery Verification Exit Check)
+   - If the task itself carries task-level acceptance_criteria, include those too.
+   - ⛔ Every subtask's criteria MUST appear in the aggregated set. A criterion
+     defined on any subtask of the task that is dropped here is a silent bug.
 
-4. If validation fails:
-   - Log failure reasons
-   - Determine which gate to revisit
-   - Loop back to appropriate gate
+3. Mark PASS/FAIL per aggregated criterion — DO NOT re-run tests or review:
+   For each criterion in the aggregated set:
+     - PASS if its owning subtask's Gate 0 delivery verification marked the
+       requirement delivered (delivery_verified == true and the requirement
+       appears in requirements_delivered), AND Gate 8 review for the task PASSED.
+     - FAIL otherwise.
+   Read the verdicts Gate 0 and Gate 8 already wrote to state. Gate 9 does NOT
+   recompute test results, coverage, or review findings.
 
-5. If validation passes:
-   - Set unit status = "completed"
+4. If any criterion is FAIL:
+   - Log which subtask + criterion failed and why.
+   - Loop back to Gate 0 (Build) for the affected subtask with remediation
+     instructions. (Re-build → re-review → re-validate.)
+
+5. If all criteria PASS:
    - Record gate end timestamp
    - agent_outputs.validation = {
-       result: "approved",
+       result: "pending_approval",
        timestamp: "[ISO timestamp]",
-       criteria_results: [{criterion, status}]
+       criteria_results: [{subtask_id, criterion, status}]
      }
-   - Proceed to Step 11.1 (Execution Unit Approval)
+   - Proceed to Step 11.1 (Task Approval Checkpoint)
 ```
 
-## Step 11.1: Execution Unit Approval (Conditional)
-
-**Checkpoint depends on `execution_mode`:** `manual_per_subtask` → Execute | `manual_per_task` / `automatic` → Skip
-
-0. **COMMIT CHECK (before checkpoint):**
-   - if `commit_timing == "per_subtask"`:
-     - Execute `/ring:commit` command with message: `feat({unit_id}): {unit_title}`
-     - Include all changed files from this subtask
-   - else: Skip commit (will happen at task or cycle end)
-
-0b. **VISUAL CHANGE REPORT (subtask-level — OPT-IN ONLY):**
-   - Default: SKIP per-subtask visual report. Task-level aggregate report is generated in Step 11.2.
-   - Opt-in: If `state.visual_report_granularity == "subtask"`, generate per-subtask report.
-     Default value is "task".
-   - Rationale: Task-level aggregate covers all subtasks' diffs; per-subtask reports are
-     rarely consumed and cost one visualize dispatch each.
-
-1. Set `status = "paused_for_approval"`, save state
-2. Present summary: Unit ID, Parent Task, Gate 0 + Gate 9 status, Criteria X/X, Duration, Files Changed, Commit Status
-3. **AskUserQuestion:** "Ready to proceed?" Options: (a) Continue (b) Test First (c) Stop Here
-4. **Handle response:**
-
-| Response | Action |
-|----------|--------|
-| Continue | Set in_progress, move to next unit (or Step 11.2 if last) |
-| Test First | Set `paused_for_testing`, STOP, output resume command |
-| Stop Here | Set `paused`, STOP, output resume command |
-
-## Step 11.2: Task Approval Checkpoint (Conditional)
+## Step 11.1: Task Approval Checkpoint (Conditional)
 
 **Checkpoint depends on `execution_mode`:** `manual_per_subtask` / `manual_per_task` → Execute | `automatic` → Skip
+
+⛔ **This is THE single human approval for the task.** It is mandatory and explicit when the checkpoint executes: the user MUST respond APPROVED (Continue / Integration Test) or REJECTED (Stop Here). Self-approval by the orchestrator is PROHIBITED — the orchestrator never approves on the user's behalf. A REJECTED task loops back to Gate 0 (Build) for the affected subtask.
+
+> The per-subtask pause for `manual_per_subtask` mode lives after Gate 0 (see the `[checkpoint if manual_per_subtask mode]` step in the Execution Order). There is NO per-subtask validation pause here — Gate 9 validation is task-level only.
 
 0. **COMMIT CHECK (before task checkpoint):**
    - if `commit_timing == "per_task"`:
@@ -88,14 +75,14 @@ For current execution unit:
    - Tell the user the file path
    - See [shared-patterns/anti-rationalization-visual-report.md](../../shared-patterns/anti-rationalization-visual-report.md) for anti-rationalization table
 
-1. Set task `status = "completed"`, cycle `status = "paused_for_task_approval"`, save state, and update tasks.md Status → `✅ Done` (per Step 11.2 row in State Persistence Checkpoints table)
+1. Set task `status = "completed"`, cycle `status = "paused_for_task_approval"`, save state, and update tasks.md Status → `✅ Done` (per Step 11.1 row in State Persistence Checkpoints table)
 
-2. Present summary: Task ID, Subtasks X/X, Total Duration, Review Iterations, Files Changed, Commit Status
+2. Present aggregated AC evidence + summary: Task ID, Subtasks X/X, aggregated acceptance criteria PASS count (every subtask's criteria), Total Duration, Review Iterations, Files Changed, Commit Status
 3. **AskUserQuestion:** "Task complete. Ready for next?" Options: (a) Continue (b) Integration Test (c) Stop Here
 4. **Handle response:**
 
 ```text
-After completing all subtasks of a task:
+After completing all subtasks of a task (built, reviewed, and validated):
 
 0. Check execution_mode from state:
    - If "automatic": Still run feedback, then skip to next task
@@ -136,6 +123,8 @@ After completing all subtasks of a task:
    │   ✓ ST-001-01: [title]                          │
    │   ✓ ST-001-02: [title]                          │
    │   ✓ ST-001-03: [title]                          │
+   │                                                  │
+   │ Acceptance Criteria (all subtasks): X/X PASS    │
    │                                                  │
    │ Total Duration: Xh Xm                           │
    │ Total Review Iterations: N                      │
@@ -201,4 +190,4 @@ After completing all subtasks of a task:
      - STOP execution
 ```
 
-**Note:** Tasks without subtasks execute both 7.1 and 7.2 in sequence.
+**Note:** Tasks without subtasks treat the task-itself as a single subtask; their aggregated criteria set is just that one unit's acceptance criteria.

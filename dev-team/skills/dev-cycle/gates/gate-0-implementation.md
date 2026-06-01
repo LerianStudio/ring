@@ -213,4 +213,32 @@ No separate `state.gate_progress.delivery_verification` field — delivery verif
 | "I'll dispatch the agent and verify output myself" | Self-verification skips the skill's re-dispatch loop. | **Invoke Skill("ring:dev-implementation")** |
 | "Agent already did TDD internally" | Internal ≠ verified by skill. Skill validates output structure. | **Invoke Skill("ring:dev-implementation")** |
 
+### Step 2.4: Subtask Checkpoint (Conditional — `manual_per_subtask` only)
+
+**Checkpoint depends on `execution_mode`:** `manual_per_subtask` → Execute | `manual_per_task` / `automatic` → Skip
+
+This is the ONLY per-subtask pause. It fires after the subtask's Gate 0 completes (the `[checkpoint if manual_per_subtask mode]` step in the Execution Order). Task review (Gate 8) and task validation (Gate 9) run later, once per task.
+
+0. **COMMIT CHECK (before checkpoint):**
+   - if `commit_timing == "per_subtask"`:
+     - Execute `/ring:commit` command with message: `feat({subtask_id}): {subtask_title}`
+     - Include all changed files from this subtask
+   - else: Skip commit (will happen at task or cycle end)
+
+0b. **VISUAL CHANGE REPORT (subtask-level — OPT-IN ONLY):**
+   - Default: SKIP per-subtask visual report. The task-level aggregate report is generated at the Task Approval Checkpoint (gate-9-validation.md Step 11.1).
+   - Opt-in: If `state.visual_report_granularity == "subtask"`, generate per-subtask report. Default value is "task".
+   - Rationale: Task-level aggregate covers all subtasks' diffs; per-subtask reports are rarely consumed and cost one visualize dispatch each.
+
+1. Set `status = "paused_for_approval"`, save state
+2. Present summary: Subtask ID, Parent Task, Gate 0 status, Duration, Files Changed, Commit Status
+3. **AskUserQuestion:** "Ready to proceed?" Options: (a) Continue (b) Test First (c) Stop Here
+4. **Handle response:**
+
+| Response | Action |
+|----------|--------|
+| Continue | Set in_progress, move to next subtask (or to Gate 8 if this was the last subtask of the task) |
+| Test First | Set `paused_for_testing`, STOP, output resume command |
+| Stop Here | Set `paused`, STOP, output resume command |
+
 ---

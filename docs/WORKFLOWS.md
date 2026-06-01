@@ -204,10 +204,10 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 
 **Subtask cadence** (runs for each subtask, or for the task itself if no subtasks):
 - Gate 0 — Implementation (includes Delivery Verification exit check inline)
-- Gate 9 — Validation
 
-**Task cadence** (runs once per task, after all subtasks complete Gate 0 and Gate 9):
+**Task cadence** (runs once per task, after all subtasks complete Gate 0):
 - Gate 8 — Review (9 default reviewers plus triggered specialists on cumulative task diff)
+- Gate 9 — Validation (aggregates EVERY subtask's acceptance criteria + one human approval, after Gate 8 passes)
 
 **Cycle cadence** (runs once per cycle at the end):
 - Multi-Tenant Verify
