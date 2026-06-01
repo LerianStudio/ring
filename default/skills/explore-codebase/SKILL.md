@@ -21,7 +21,7 @@ description: |
 - Reading error message from known file location
 
 ## Sequence
-**Runs before:** ring:write-plan
+**Runs before:** ring:writing-plans
 
 ## Related
 **Similar:** dispatching-parallel-agents
@@ -182,7 +182,7 @@ Integrate findings into a unified document:
 ## Phase 5: Action Recommendations
 
 Context-aware next steps based on user's goal:
-- **Implementation** → suggest ring:write-plan with discovered entry points
+- **Implementation** → suggest ring:writing-plans with discovered entry points
 - **Debugging** → investigation starting points with file:line
 - **Learning** → reading path through key files
 

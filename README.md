@@ -6,7 +6,7 @@
 
 **Proven engineering practices, enforced through skills.**
 
-Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **4 active plugins**, **71 skills**, and **34 agents** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
+Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **4 active plugins**, **71 skills**, and **33 agents** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
 
 ## ✨ Why Ring?
 
@@ -22,7 +22,7 @@ Ring solves this by:
 
 - **Enforcing proven workflows** - Test-driven development, systematic debugging, proper planning
 - **Providing 71 specialized skills** (16 core + 33 dev-team + 18 product planning + 4 technical writing)
-- **34 specialized agents** - 3 planning/analysis + 24 developer/reviewer + 4 product research + 3 technical writing
+- **33 specialized agents** - 2 planning/analysis + 24 developer/reviewer + 4 product research + 3 technical writing
 - **Automating skill discovery** - Skills load automatically at session start
 - **Preventing common failures** - Built-in anti-patterns and mandatory checklists
 
@@ -39,7 +39,6 @@ Ring solves this by:
 **Planning & Analysis Agents (default plugin):**
 
 - `ring:review-slicer` - Review slicer (groups large multi-themed PRs into thematic slices for focused parallel review)
-- `ring:write-plan` - Implementation planning agent
 - `ring:codebase-explorer` - Deep architecture analysis (deep-analysis, complements built-in Explore)
 - Use `ring:codereview` skill to orchestrate parallel review workflow
 
@@ -462,9 +461,8 @@ ring/                                  # Monorepo root
 │   │   ├── hooks.json              # Hook configuration
 │   │   ├── session-start.sh        # Loads skills at startup
 │   │   └── generate-skills-ref.py  # Auto-generates quick reference
-│   ├── agents/                      # 3 planning/analysis agents
+│   ├── agents/                      # 2 planning/analysis agents
 │   │   ├── review-slicer.md             # Review slicing for large PRs (`ring:review-slicer`)
-│   │   ├── write-plan.md                # Implementation planning (`ring:write-plan`)
 │   │   └── codebase-explorer.md         # Deep architecture analysis (`ring:codebase-explorer`)
 │   └── docs/                       # Documentation
 ├── dev-team/                      # Developer Agents plugin (ring-dev-team) - 33 skills, 24 agents

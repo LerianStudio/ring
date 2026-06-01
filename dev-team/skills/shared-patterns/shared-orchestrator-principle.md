@@ -68,7 +68,6 @@ This principle is NON-NEGOTIABLE for all dev-team skills.
 ✅ Task(subagent_type="ring:code-reviewer", ...)
 ✅ Task(subagent_type="ring:business-logic-reviewer", ...)
 ✅ Task(subagent_type="ring:security-reviewer", ...)
-✅ Task(subagent_type="ring:write-plan", ...)
 ```
 
 ### ring-pm-team Agents (Research)
@@ -176,7 +175,6 @@ See `shared-patterns/gate-cadence-classification.md` for the full classification
 
 | Task Type | Agent to Dispatch |
 |-----------|-------------------|
-| Implementation planning | `ring:write-plan` |
 | Prompt/agent quality analysis | `ring:prompt-quality-reviewer` |
 
 ## Agent Responsibilities (Implementation)

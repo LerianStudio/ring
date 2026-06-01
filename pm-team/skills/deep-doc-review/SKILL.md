@@ -25,7 +25,7 @@ description: |
 
 ## Sequence
 
-**Runs before:** ring:dev-cycle, ring:write-plan
+**Runs before:** ring:dev-cycle, ring:writing-plans
 **Runs after:** ring:pre-dev-feature, ring:pre-dev-full
 
 ## Related

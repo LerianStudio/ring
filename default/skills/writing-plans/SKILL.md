@@ -35,6 +35,22 @@ Write the plan assuming the engineer is skilled but has zero context for this co
 **Default save path:** `docs/plans/YYYY-MM-DD-<feature-name>.md`
 (User preferences override.)
 
+## Standards
+
+Do NOT fetch standards documents while planning — standards compliance is enforced by the implementation agents and reviewers downstream. Plans reference DRY, YAGNI, and TDD generically.
+
+## Blocker — STOP and Report
+
+Do not write a plan on a shaky foundation. STOP and ask when:
+
+| Situation | Action |
+|-----------|--------|
+| Vague requirements ("make it better", "add feature") | STOP. Ask: "What specific behavior should change?" |
+| Missing success criteria | STOP. Ask: "How do we verify this works?" |
+| Unknown codebase structure (can't locate files) | STOP. Run ring:explore-codebase first, then plan |
+| Conflicting constraints | STOP. Ask: "Which constraint takes priority?" |
+| Multiple valid architectures without guidance | STOP. Ask: "Which pattern should we use?" |
+
 ## Scope Check
 
 If the spec covers multiple independent subsystems, suggest breaking it into separate plans — one per subsystem. Each plan must produce working, testable software on its own.
@@ -192,3 +208,81 @@ Before marking the plan complete:
 - [ ] Self-review checklist applied
 - [ ] Plan saved to `docs/plans/YYYY-MM-DD-<feature-name>.md`
 - [ ] Execution handoff offered
+
+## Worked Example
+
+<example title="Complete task for adding a new service method">
+### Task 3: Implement GetTransactionByID service method
+
+**Files:**
+- Modify: `internal/service/transaction_service.go`
+- Modify: `internal/service/transaction_service_test.go`
+
+**Prerequisites:**
+- `TransactionRepository` interface must exist at `internal/domain/repository.go:15`
+
+- [ ] **Step 1: Write the failing test**
+
+```go
+func TestTransactionService_GetByID_Found(t *testing.T) {
+    mockRepo := &mockTransactionRepo{}
+    svc := NewTransactionService(mockRepo)
+
+    expected := &domain.Transaction{ID: "txn-123", Amount: decimal.NewFromInt(100)}
+    mockRepo.On("GetByID", mock.Anything, "txn-123").Return(expected, nil)
+
+    result, err := svc.GetByID(context.Background(), "txn-123")
+    require.NoError(t, err)
+    assert.Equal(t, "txn-123", result.ID)
+    assert.True(t, decimal.NewFromInt(100).Equal(result.Amount))
+}
+
+func TestTransactionService_GetByID_NotFound(t *testing.T) {
+    mockRepo := &mockTransactionRepo{}
+    svc := NewTransactionService(mockRepo)
+    mockRepo.On("GetByID", mock.Anything, "missing").Return(nil, domain.ErrNotFound)
+
+    _, err := svc.GetByID(context.Background(), "missing")
+    assert.ErrorIs(t, err, domain.ErrNotFound)
+}
+```
+
+- [ ] **Step 2: Verify tests fail**
+
+Run: `go test ./internal/service/... -run TestTransactionService_GetByID -v`
+Expected: `FAIL: TestTransactionService_GetByID_Found — method GetByID undefined`
+
+- [ ] **Step 3: Implement**
+
+```go
+func (s *transactionService) GetByID(ctx context.Context, id string) (*domain.Transaction, error) {
+    logger, tracer, _, _ := observability.NewTrackingFromContext(ctx)
+    ctx, span := tracer.Start(ctx, "service.transaction.get_by_id")
+    defer span.End()
+
+    logger.Infof("Getting transaction: id=%s", id)
+
+    txn, err := s.repo.GetByID(ctx, id)
+    if err != nil {
+        libOpentelemetry.HandleSpanError(&span, "failed to get transaction", err)
+        return nil, err
+    }
+
+    return txn, nil
+}
+```
+
+- [ ] **Step 4: Verify tests pass**
+
+Run: `go test ./internal/service/... -run TestTransactionService_GetByID -v`
+Expected: `PASS: TestTransactionService_GetByID_Found` and `PASS: TestTransactionService_GetByID_NotFound`
+
+- [ ] **Step 5: Commit**
+
+Use ring:commit skill to stage and commit changes.
+
+**If Task Fails:**
+1. Compile errors → check `go build ./...` for missing imports
+2. Mock not working → verify mock implements the interface: `go vet ./...`
+3. Test still fails → `git stash`, re-read the repository interface at `internal/domain/repository.go:15`
+</example>

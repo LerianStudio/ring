@@ -25,11 +25,11 @@ description: |
 
 ## Sequence
 
-**Runs before:** ring:write-plan, ring:dev-cycle
+**Runs before:** ring:writing-plans, ring:dev-cycle
 
 ## Related
 
-**Complementary:** ring:pre-dev-feature, ring:write-plan, ring:worktree
+**Complementary:** ring:pre-dev-feature, ring:writing-plans, ring:worktree
 **Skills orchestrated:**
 - ring:pre-dev-research
 - ring:pre-dev-prd-creation

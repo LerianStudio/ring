@@ -1,6 +1,6 @@
 # Ring Marketplace Manual
 
-Quick reference guide for the Ring skills library and workflow system. This monorepo provides 4 plugins with 71 skills and 34 agents for enforcing proven software engineering practices across the entire software delivery value chain.
+Quick reference guide for the Ring skills library and workflow system. This monorepo provides 4 plugins with 71 skills and 33 agents for enforcing proven software engineering practices across the entire software delivery value chain.
 
 ---
 
@@ -14,7 +14,7 @@ Quick reference guide for the Ring skills library and workflow system. This mono
 │  ┌───────────────┐  ┌───────────────┐                                              │
 │  │ ring-default  │  │ ring-dev-team │                                              │
 │  │  Skills(16)   │  │  Skills(33)   │                                              │
-│  │  Agents(3)    │  │  Agents(24)   │                                              │
+│  │  Agents(2)    │  │  Agents(24)   │                                              │
 │  └───────────────┘  └───────────────┘                                              │
 │  ┌───────────────┐  ┌───────────────┐                                              │
 │  │ ring-pm-team  │  │ ring-tw-team  │                                              │
@@ -128,7 +128,6 @@ Conditional specialists run only when their stack is touched:
 
 | Agent                    | Purpose                                                  |
 | ------------------------ | -------------------------------------------------------- |
-| `ring:write-plan`        | Generate implementation plans for zero-context execution |
 | `ring:codebase-explorer` | Deep architecture analysis (vs `Explore` for speed)      |
 
 ### Developer Specialists (ring-dev-team)
@@ -266,7 +265,7 @@ These enforce quality standards:
 | ------------------------------------------------------ | ------------------------------ |
 | Feature will take < 2 days                             | `ring:pre-dev-feature` (skill) |
 | Feature will take ≥ 2 days or has complex dependencies | `ring:pre-dev-full` (skill)    |
-| Need implementation tasks                              | `ring:write-plan` (skill)      |
+| Need implementation tasks                              | `ring:writing-plans` (skill)   |
 | Before merging code                                    | `ring:codereview` (skill)      |
 | Start development cycle                                | `ring:dev-cycle` (skill)       |
 
@@ -276,7 +275,7 @@ These enforce quality standards:
 | --------------------------------- | ------------------------------------------- |
 | General code quality review       | 9 default reviewers plus triggered specialists via `ring:codereview` skill |
 | Large PR review (15+ files)       | Auto-sliced via `ring:review-slicer`        |
-| Implementation planning           | `ring:write-plan`                           |
+| Implementation planning           | `ring:writing-plans`                        |
 | Deep codebase analysis            | `ring:codebase-explorer`                    |
 | Go backend expertise              | `ring:backend-engineer-golang`              |
 | TypeScript/Node.js backend        | `ring:backend-engineer-typescript`          |

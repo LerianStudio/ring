@@ -89,7 +89,7 @@ The agent's body `## Output Format` section MUST instruct the agent to produce:
 - `**Global Prerequisites:**` line
 - One `### Task N:` heading per task
 
-**Used by:** `ring:write-plan`
+**Used by:** `ring:writing-plans`
 
 ---
 

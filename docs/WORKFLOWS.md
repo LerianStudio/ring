@@ -285,7 +285,7 @@ When adding or removing a code review agent in the `ring:codereview` pool:
 **⛔ ADDITIONAL SWEEP (secondary consumers, should also update same commit):**
 
 - `default/skills/using-ring/SKILL.md` — entry-point skill reminder
-- `default/agents/write-plan.md` — output format instructing plans to dispatch reviewers
+- `default/skills/writing-plans/SKILL.md` — plan output format instructing plans to dispatch reviewers
 - `ring-install.sh` — user-facing install advertisement (interactive menu + `--claude` / `--factory` / `--opencode` / `--codex` / `--all`)
 - `docs/PROMPT_ENGINEERING.md` — canonical example of strong language
 - `docs/WORKFLOWS.md` — workflow documentation
@@ -303,7 +303,7 @@ Before committing changes to the codereview pool:
 [ ] 3. Updated validate-gate-progression.sh (9 default verdicts + optional conditional verdicts)?
 [ ] 4. Updated dev-cycle/SKILL.md (Gate 8 + all "N reviewers" refs)?
 [ ] 5. Updated shared-patterns files enumerating reviewers?
-[ ] 6. Swept secondary consumers (using-ring, write-plan, docs, marketplace.json)?
+[ ] 6. Swept secondary consumers (using-ring, writing-plans, docs, marketplace.json)?
 [ ] 7. Grep sanity: grep -rn "N reviewer|all N" --include="*.md" --include="*.sh" returns zero stale counts?
 
 If any checkbox is no → Fix before committing.
