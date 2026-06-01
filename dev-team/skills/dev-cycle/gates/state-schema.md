@@ -151,6 +151,7 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
           "conditional_specialists_triggered": [],
           "conditional_specialists_passed": "0/0",
           "selected_reviewer_count": 9,
+          "_comment_reviewer_shape": "Each reviewer is an object with the shape shown by code_reviewer below. The 9 defaults (code_reviewer, business_logic_reviewer, security_reviewer, test_reviewer, nil_safety_reviewer, dead_code_reviewer, performance_reviewer, multi_tenant_reviewer, lib_commons_reviewer) all use this shape. Conditional specialists (lib_observability_reviewer, lib_systemplane_reviewer, lib_streaming_reviewer) use the same shape AND add \"optional\": true. Only reviewers that produce a Standards Coverage Table populate standards_compliance.",
           "code_reviewer": {
             "agent": "ring:code-reviewer",
             "output": "...",
@@ -164,100 +165,6 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
               "non_compliant": 0,
               "gaps": []
             }
-          },
-          "business_logic_reviewer": {
-            "agent": "ring:business-logic-reviewer",
-            "output": "...",
-            "verdict": "PASS",
-            "timestamp": "...",
-            "issues": [],
-            "standards_compliance": {
-              "total_sections": 8,
-              "compliant": 8,
-              "not_applicable": 0,
-              "non_compliant": 0,
-              "gaps": []
-            }
-          },
-          "security_reviewer": {
-            "agent": "ring:security-reviewer",
-            "output": "...",
-            "verdict": "PASS",
-            "timestamp": "...",
-            "issues": [],
-            "standards_compliance": {
-              "total_sections": 10,
-              "compliant": 10,
-              "not_applicable": 0,
-              "non_compliant": 0,
-              "gaps": []
-            }
-          },
-          "test_reviewer": {
-            "agent": "ring:test-reviewer",
-            "output": "...",
-            "verdict": "PASS",
-            "timestamp": "...",
-            "issues": []
-          },
-          "nil_safety_reviewer": {
-            "agent": "ring:nil-safety-reviewer",
-            "output": "...",
-            "verdict": "PASS",
-            "timestamp": "...",
-            "issues": []
-          },
-          "dead_code_reviewer": {
-            "agent": "ring:dead-code-reviewer",
-            "output": "...",
-            "verdict": "PASS",
-            "timestamp": "...",
-            "issues": []
-          },
-          "performance_reviewer": {
-            "agent": "ring:performance-reviewer",
-            "output": "...",
-            "verdict": "PASS",
-            "timestamp": "...",
-            "issues": []
-          },
-          "multi_tenant_reviewer": {
-            "agent": "ring:multi-tenant-reviewer",
-            "output": "...",
-            "verdict": "PASS",
-            "timestamp": "...",
-            "issues": []
-          },
-          "lib_commons_reviewer": {
-            "agent": "ring:lib-commons-reviewer",
-            "output": "...",
-            "verdict": "PASS",
-            "timestamp": "...",
-            "issues": []
-          },
-          "lib_observability_reviewer": {
-            "agent": "ring:lib-observability-reviewer",
-            "optional": true,
-            "output": "...",
-            "verdict": "PASS",
-            "timestamp": "...",
-            "issues": []
-          },
-          "lib_systemplane_reviewer": {
-            "agent": "ring:lib-systemplane-reviewer",
-            "optional": true,
-            "output": "...",
-            "verdict": "PASS",
-            "timestamp": "...",
-            "issues": []
-          },
-          "lib_streaming_reviewer": {
-            "agent": "ring:lib-streaming-reviewer",
-            "optional": true,
-            "output": "...",
-            "verdict": "PASS",
-            "timestamp": "...",
-            "issues": []
           }
         },
         "validation": {
@@ -319,30 +226,6 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
   "suggestion": "Use fmt.Errorf(\"failed to create user: %w\", err)",
   "fixed": false,
   "fixed_in_iteration": null
-}
-```
-
-#### DevOps Verification Error Schema
-
-```json
-{
-  "check": "docker_build",
-  "status": "FAIL",
-  "error": "COPY failed: file not found in build context: go.sum",
-  "suggestion": "Ensure go.sum exists and is not in .dockerignore"
-}
-```
-
-#### SRE Validation Error Schema
-
-```json
-{
-  "check": "structured_logging",
-  "status": "FAIL",
-  "file": "internal/handler/user.go",
-  "line": 32,
-  "error": "Using fmt.Printf instead of structured logger",
-  "suggestion": "Use logger.Info().Str(\"user_id\", id).Msg(\"user created\")"
 }
 ```
 
