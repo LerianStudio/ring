@@ -1,6 +1,6 @@
 # Ring Marketplace Manual
 
-Quick reference guide for the Ring skills library and workflow system. This monorepo provides 4 plugins with 75 skills and 34 agents for enforcing proven software engineering practices across the entire software delivery value chain.
+Quick reference guide for the Ring skills library and workflow system. This monorepo provides 4 plugins with 71 skills and 34 agents for enforcing proven software engineering practices across the entire software delivery value chain.
 
 ---
 
@@ -13,12 +13,12 @@ Quick reference guide for the Ring skills library and workflow system. This mono
 │                                                                                    │
 │  ┌───────────────┐  ┌───────────────┐                                              │
 │  │ ring-default  │  │ ring-dev-team │                                              │
-│  │  Skills(16)   │  │  Skills(37)   │                                              │
+│  │  Skills(16)   │  │  Skills(33)   │                                              │
 │  │  Agents(3)    │  │  Agents(24)   │                                              │
 │  └───────────────┘  └───────────────┘                                              │
 │  ┌───────────────┐  ┌───────────────┐                                              │
 │  │ ring-pm-team  │  │ ring-tw-team  │                                              │
-│  │  Skills(18)   │  │  Skills(6)    │                                              │
+│  │  Skills(18)   │  │  Skills(4)    │                                              │
 │  │  Agents(4)    │  │  Agents(3)    │                                              │
 │  └───────────────┘  └───────────────┘                                              │
 └────────────────────────────────────────────────────────────────────────────────────┘
@@ -76,7 +76,7 @@ Beyond Claude Code (source of truth), Ring is installable in Codex, Cursor, and 
 
 ## 💡 About Skills
 
-Skills (77) are the primary invocation mechanism for Ring. They can be invoked directly by users (`Skill tool: "ring:skill-name"`) or applied automatically by Claude Code when it detects they're applicable. They handle testing, debugging, verification, planning, code review enforcement, and more.
+Skills (71) are the primary invocation mechanism for Ring. They can be invoked directly by users (`Skill tool: "ring:skill-name"`) or applied automatically by Claude Code when it detects they're applicable. They handle testing, debugging, verification, planning, code review enforcement, and more.
 
 Examples: ring:test-driven-development, ring:codereview, ring:production-readiness-audit (44-dimension audit, up to 10 explorers per batch, incremental report 0-430, max 440 with multi-tenant; see [default/skills/production-readiness-audit/SKILL.md](default/skills/production-readiness-audit/SKILL.md)), etc.
 
@@ -308,7 +308,7 @@ These enforce quality standards:
 ### Session Startup
 
 1. SessionStart hook runs automatically
-2. All 75 skills are auto-discovered and available
+2. All 71 skills are auto-discovered and available
 3. `ring:using-ring` workflow is activated (skill checking is now mandatory)
 
 ### Agent Dispatching

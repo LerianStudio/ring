@@ -30,7 +30,7 @@ Verify by asking: "Which Ring backend specialists are available?"
   - **Infrastructure (3):** devops-engineer, helm-engineer, sre
   - **QA (2 × modes):** qa-analyst (6 modes: unit, fuzz, property, integration, chaos, goroutine-leak), qa-analyst-frontend (5 modes: unit, accessibility, visual, e2e, performance)
   - **Code review pool (13):** code-reviewer, business-logic-reviewer, security-reviewer, test-reviewer, nil-safety-reviewer, dead-code-reviewer, performance-reviewer, multi-tenant-reviewer, lib-commons-reviewer, lib-observability-reviewer, lib-streaming-reviewer, lib-systemplane-reviewer, prompt-quality-reviewer
-- **37 dev-cycle skills:** backend 10-gate cycle, frontend 9-gate cycle, refactoring, simplification, delivery verification, observability migration, lib-streaming instrumentation, lib-systemplane migration, security audits
+- **33 dev-cycle skills:** backend 10-gate cycle, lean frontend cycle (Gate 0, 7, 8) with quality checks, refactoring, simplification, delivery verification, observability migration, lib-streaming instrumentation, lib-systemplane migration, security audits
 
 ## Usage
 
