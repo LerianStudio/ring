@@ -1,17 +1,32 @@
 ## Step 12: Cycle Completion
 
-### Step 12.0: Final Test Confirmation
+### Step 12.0: Cycle Exit Verification
+
+Iterate `state.tasks` once and assert both cycle-exit invariants. Both are HARD GATES; neither implements or adapts code.
 
 ```text
-1. Confirm every Gate 0 handoff includes passing tests, coverage >= threshold,
+1. Final test confirmation — for every Gate 0 handoff: passing tests, coverage ≥ threshold,
    and docker-compose/local runtime verification when required.
+   → Any missing/failed quality check: HARD BLOCK, return to Gate 0 for the affected unit.
 
-2. if any required Gate 0 quality check is missing or failed:
-   → HARD BLOCK. Cannot complete cycle.
-   → Return to Gate 0 for the affected unit.
+2. Multi-tenant dual-mode — implemented at Gate 0, verified at Gate 0.5G; confirm it held:
+   for each unit: if gate_progress.delivery_verification.mt_dualmode != "PASS"
+   → HARD BLOCK: "Unit [unit_id] failed MT dual-mode verification at Gate 0.5G"
+   (Gate 0.5G blocks progression, so this should never trip.)
 
-3. **MANDATORY: ⛔ Save state to file — Write tool → [state.state_path]**
+3. Display to user:
+   ┌─────────────────────────────────────────────────┐
+   │ ✓ CYCLE EXIT VERIFIED                          │
+   ├─────────────────────────────────────────────────┤
+   │ Gate 0 quality:        PASS for all units       │
+   │ Multi-tenant dual-mode: PASS for all units      │
+   │ Resources Covered: [PG/Mongo/Redis/RMQ/S3]      │
+   └─────────────────────────────────────────────────┘
+
+4. **MANDATORY: ⛔ Save state to file — Write tool → [state.state_path]**
 ```
+
+**Note:** The full ring:dev-multi-tenant skill (12 gates) targets legacy single-tenant codebases being migrated to dual-mode. For new development via dev-cycle, multi-tenant compliance is handled inline by Gate 0 (implementation) + Gate 0.5G (verification).
 
 ### Step 12.0 Anti-Rationalization
 
@@ -22,33 +37,6 @@ See [shared-patterns/shared-anti-rationalization.md](../../shared-patterns/share
 | "Gate 0 said PASS but coverage is missing" | Gate 0 is incomplete without coverage evidence. | **Return to Gate 0** |
 | "docker-compose can wait" | Backend owns local runtime in this flow. | **Return to Gate 0 if local dependencies exist** |
 | "CI will catch it" | CI is backup, not replacement. Verify locally first. | **Return to Gate 0** |
-
-### Step 12.0.5: Multi-Tenant Verification (Post-Cycle — Verification Only)
-
-**Multi-tenant dual-mode is now implemented during Gate 0 and verified at Gate 0.5G.** This post-cycle step is a final sanity check only — it does NOT implement or adapt any code.
-
-```text
-1. Verify Gate 0.5G passed for ALL units:
-   for each task in state.tasks:
-     for each unit in task.units:
-       if unit.gate_progress.delivery_verification.mt_dualmode != "PASS":
-         → HARD BLOCK: "Unit [unit_id] failed MT dual-mode verification at Gate 0.5G"
-         → This should never happen (Gate 0.5G blocks progression)
-
-2. Display to user:
-   ┌─────────────────────────────────────────────────┐
-   │ ✓ MULTI-TENANT DUAL-MODE VERIFIED              │
-   ├─────────────────────────────────────────────────┤
-   │ Mode: Dual-mode (implemented at Gate 0)         │
-   │ Verification: Gate 0.5G PASS for all units      │
-   │ Resources Covered: [PG/Mongo/Redis/RMQ/S3]      │
-   │ Backward Compat: Resolvers handle single-tenant │
-   └─────────────────────────────────────────────────┘
-
-3. MANDATORY: ⛔ Save state to file — Write tool → [state.state_path]
-```
-
-**Note:** The full ring:dev-multi-tenant skill (12 gates) targets legacy single-tenant codebases being migrated to dual-mode. For new development via dev-cycle, multi-tenant compliance is handled inline by Gate 0 (implementation) + Gate 0.5G (verification).
 
 ---
 

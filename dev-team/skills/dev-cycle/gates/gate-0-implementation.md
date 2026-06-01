@@ -224,10 +224,9 @@ This is the ONLY per-subtask pause. It fires after the subtask's Gate 0 complete
      - Include all changed files from this subtask
    - else: Skip commit (will happen at task or cycle end)
 
-0b. **VISUAL CHANGE REPORT (subtask-level — OPT-IN ONLY):**
-   - Default: SKIP per-subtask visual report. The task-level aggregate report is generated at the Task Approval Checkpoint (gate-9-validation.md Step 11.1).
-   - Opt-in: If `state.visual_report_granularity == "subtask"`, generate per-subtask report. Default value is "task".
-   - Rationale: Task-level aggregate covers all subtasks' diffs; per-subtask reports are rarely consumed and cost one visualize dispatch each.
+0b. **VISUAL CHANGE REPORT (opt-in):**
+   - If `state.visual_report_granularity == "subtask"`: invoke `Skill("ring:visualize")` for a per-subtask code-diff and tell the user the path.
+   - Default (`"none"`): skip.
 
 1. Set `status = "paused_for_approval"`, save state
 2. Present summary: Subtask ID, Parent Task, Gate 0 status, Duration, Files Changed, Commit Status

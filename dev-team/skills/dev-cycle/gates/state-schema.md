@@ -37,8 +37,8 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
   "commit_timing": "per_subtask|per_task|at_end",
   "_comment_cached_standards": "Populated by Step 1.5 (Standards Pre-Cache). Dictionary of URL → {fetched_at, content}. Sub-skills MUST read from here instead of calling WebFetch.",
   "cached_standards": {},
-  "_comment_visual_report_granularity": "Default 'task' (generate visual report once per task). Opt-in 'subtask' to generate per-subtask reports.",
-  "visual_report_granularity": "task",
+  "_comment_visual_report_granularity": "Opt-in code-diff report via ring:visualize: 'none' (default, no report) | 'task' (aggregate per task) | 'subtask' (per subtask).",
+  "visual_report_granularity": "none",
   "custom_prompt": {
     "type": "string",
     "optional": true,

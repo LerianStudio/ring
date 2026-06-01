@@ -116,10 +116,9 @@ When the task loop in Execution Order finishes (last task passed all its gates),
 
 Read `gates/cycle-completion.md` from this skill directory and execute Steps 12.0–12.1 in order:
 
-1. **Step 12.0** — Final Test Confirmation (HARD GATE: every Gate 0 handoff has passing tests, coverage ≥ threshold, local runtime verified)
-2. **Step 12.0.5** — Multi-tenant dual-mode verification (post-cycle sanity check)
-3. **Step 12.0.5b** — Gate 0.5D Migration Safety (conditional: runs only when SQL migration files appear in the cycle diff vs `origin/main`)
-4. **Step 12.1** — Final Commit + the one-and-only `ring:dev-report` dispatch
+1. **Step 12.0** — Cycle Exit Verification (HARD GATE: every Gate 0 handoff has passing tests, coverage ≥ threshold, local runtime; plus multi-tenant dual-mode verified for all units)
+2. **Step 12.0.5b** — Gate 0.5D Migration Safety (conditional: runs only when SQL migration files appear in the cycle diff vs `origin/main`)
+3. **Step 12.1** — Final Commit + the one-and-only `ring:dev-report` dispatch
 
 ⛔ The cycle is incomplete until Step 12.1 finishes. Do NOT declare the cycle done from the Execution Order summary alone — the detailed, mandatory steps live in `gates/cycle-completion.md`.
 

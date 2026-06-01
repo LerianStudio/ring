@@ -59,21 +59,9 @@ For the current task:
    - else if `commit_timing == "per_subtask"`: Already committed per subtask
    - else: Skip commit (will happen at cycle end)
 
-0b. **VISUAL CHANGE REPORT (MANDATORY - before task checkpoint):**
-   - MANDATORY: Invoke `Skill("ring:visualize")` to generate an aggregate code-diff HTML report for all subtasks in this task
-   - Read `default/skills/visualize/templates/code-diff.html` to absorb the patterns before generating
-   - Content aggregated from all subtask executions:
-     * **Task Overview:** Task ID, title, all subtask IDs and their gate statuses
-     * **Combined File Changes:** All files modified across all subtasks with before/after diff panels
-     * **Aggregate Metrics:** Total tests added, total review iterations, total lines changed
-   - Save to: `docs/ring:dev-cycle/reports/task-{task_id}-report.html`
-   - Open in browser:
-     ```text
-     macOS: open docs/ring:dev-cycle/reports/task-{task_id}-report.html
-     Linux: xdg-open docs/ring:dev-cycle/reports/task-{task_id}-report.html
-     ```
-   - Tell the user the file path
-   - See [shared-patterns/anti-rationalization-visual-report.md](../../shared-patterns/anti-rationalization-visual-report.md) for anti-rationalization table
+0b. **VISUAL CHANGE REPORT (opt-in):**
+   - If `state.visual_report_granularity == "task"`: invoke `Skill("ring:visualize")` for an aggregate code-diff of all subtasks in the task, save to `docs/ring:dev-cycle/reports/task-{task_id}-report.html`, and tell the user the path.
+   - Default (`"none"`): skip.
 
 1. Set task `status = "completed"`, cycle `status = "paused_for_task_approval"`, save state, and update tasks.md Status → `✅ Done` (per Step 11.1 row in State Persistence Checkpoints table)
 
