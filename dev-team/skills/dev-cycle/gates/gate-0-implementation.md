@@ -17,7 +17,7 @@ CANNOT proceed to sub-steps 2.1–2.3 without completing this checkpoint.
 
 ### ⛔ MANDATORY: Invoke ring:dev-implementation Skill (not inline execution)
 
-See [shared-patterns/shared-orchestrator-principle.md](../shared-patterns/shared-orchestrator-principle.md) for full details.
+See [shared-patterns/shared-orchestrator-principle.md](../../shared-patterns/shared-orchestrator-principle.md) for full details.
 
 **⛔ FORBIDDEN: Executing TDD-RED/GREEN logic directly from this step.**
 MUST invoke the ring:dev-implementation skill via the Skill tool; it handles all TDD phases, agent selection, agent dispatch, standards verification, and fix iteration.
@@ -37,7 +37,7 @@ After ring:dev-implementation completes, verify generated code:
 
 ### ⛔ File Size Enforcement (MANDATORY — All Gates)
 
-See [shared-patterns/file-size-enforcement.md](../shared-patterns/file-size-enforcement.md) for thresholds, cohesion judgment, verification commands, split strategies, and agent instructions.
+See [shared-patterns/file-size-enforcement.md](../../shared-patterns/file-size-enforcement.md) for thresholds, cohesion judgment, verification commands, split strategies, and agent instructions.
 
 **Summary:** Soft limit 1000 lines per file; hard block at 1500 lines. Files in the 1001-1500 band require cohesion review — keep if coherent (state machine, parser, schema, table-driven tests, tightly-coupled domain logic), split if fragmentable without artificial boundaries. Files > 1500 lines are hard-blocked unless explicit cohesion justification is documented in the PR description. Enforcement points:
 

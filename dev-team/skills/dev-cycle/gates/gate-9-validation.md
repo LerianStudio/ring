@@ -86,7 +86,7 @@ For current execution unit:
      Linux: xdg-open docs/ring:dev-cycle/reports/task-{task_id}-report.html
      ```
    - Tell the user the file path
-   - See [shared-patterns/anti-rationalization-visual-report.md](../shared-patterns/anti-rationalization-visual-report.md) for anti-rationalization table
+   - See [shared-patterns/anti-rationalization-visual-report.md](../../shared-patterns/anti-rationalization-visual-report.md) for anti-rationalization table
 
 1. Set task `status = "completed"`, cycle `status = "paused_for_task_approval"`, save state, and update tasks.md Status → `✅ Done` (per Step 11.2 row in State Persistence Checkpoints table)
 

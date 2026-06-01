@@ -414,6 +414,8 @@ STOP EXECUTION. Do not proceed to Step 1.
 
 ### Step 0 Anti-Rationalization
 
+See [shared-patterns/shared-anti-rationalization.md](../../shared-patterns/shared-anti-rationalization.md) for universal rationalizations. These are specific to the PROJECT_RULES.md gate:
+
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
 | "Skip PM docs, I'll add them later" | Later = never. No PM docs = no project context = agents guessing. | **Run /ring:pre-dev-full or /ring:pre-dev-feature NOW** |

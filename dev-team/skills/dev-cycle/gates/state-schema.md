@@ -321,6 +321,8 @@ Use Edit tool on state.source_file (tasks.md):
 
 ### Anti-Rationalization for State Persistence
 
+See [shared-patterns/shared-anti-rationalization.md](../../shared-patterns/shared-anti-rationalization.md) for universal rationalizations. These are specific to state persistence:
+
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
 | "I'll save state at the end" | Crash/timeout loses all progress | **Save after each gate** |

@@ -15,6 +15,8 @@
 
 ### Step 12.0 Anti-Rationalization
 
+See [shared-patterns/shared-anti-rationalization.md](../../shared-patterns/shared-anti-rationalization.md) for universal rationalizations. These are specific to cycle completion:
+
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
 | "Gate 0 said PASS but coverage is missing" | Gate 0 is incomplete without coverage evidence. | **Return to Gate 0** |
@@ -54,7 +56,7 @@
 
 **CADENCE:** Post-cycle, conditional. Runs ONCE per cycle if SQL migration files are detected in the cycle diff. Parallel to Gate 0.5G.
 
-**Purpose:** Static analysis on SQL migration files introduced by the cycle, per [migration-safety.md](../../docs/standards/golang/migration-safety.md) and [shared-patterns/migration-safety-checks.md](../shared-patterns/migration-safety-checks.md). Gate 0.5D is orthogonal to Gate 0.5G — 0.5G checks multi-tenant Go code safety; 0.5D checks SQL schema evolution safety.
+**Purpose:** Static analysis on SQL migration files introduced by the cycle, per [migration-safety.md](../../docs/standards/golang/migration-safety.md) and [shared-patterns/migration-safety-checks.md](../../shared-patterns/migration-safety-checks.md). Gate 0.5D is orthogonal to Gate 0.5G — 0.5G checks multi-tenant Go code safety; 0.5D checks SQL schema evolution safety.
 
 **Trigger detection:**
 
@@ -68,7 +70,7 @@ else:
   → Proceed to Gate 0.5D checks below
 ```
 
-**Check categories (from [migration-safety.md § Dangerous Operations](../../docs/standards/golang/migration-safety.md#dangerous-operations-detection) + [shared-patterns/migration-safety-checks.md](../shared-patterns/migration-safety-checks.md)):**
+**Check categories (from [migration-safety.md § Dangerous Operations](../../docs/standards/golang/migration-safety.md#dangerous-operations-detection) + [shared-patterns/migration-safety-checks.md](../../shared-patterns/migration-safety-checks.md)):**
 
 1. **BLOCKING** — `ADD COLUMN ... NOT NULL` without `DEFAULT` (ACCESS EXCLUSIVE lock, table rewrite)
 2. **BLOCKING** — `DROP COLUMN` (breaks services still reading; requires expand-contract)

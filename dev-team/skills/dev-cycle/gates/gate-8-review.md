@@ -179,16 +179,14 @@ review_input = {
 7. Proceed to Gate 9
 ```
 
-### Gate 8 Anti-Rationalization Table
+### Gate 8 Anti-Rationalization
+
+See [shared-patterns/shared-anti-rationalization.md](../../shared-patterns/shared-anti-rationalization.md) — the "Review Anti-Rationalizations" and "Universal" sections cover the common cases (low issue count, "one reviewer is enough", sequential review, "fix it later", user-authorized skip). Gate-8-specific cases below still apply:
 
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
-| "Only 1 MEDIUM issue, can proceed" | MEDIUM = MUST FIX. Quantity is irrelevant. | **Fix the issue, re-run the selected review pool** |
 | "Issue is cosmetic, not really MEDIUM" | Reviewer decided severity. Accept their judgment. | **Fix the issue, re-run the selected review pool** |
-| "Will fix in next sprint" | Deferred fixes = technical debt = production bugs. | **Fix NOW before Gate 9** |
-| "User approved, can skip fix" | User approval ≠ reviewer override. Fixes are mandatory. | **Fix the issue, re-run the selected review pool** |
 | "Same issue keeps appearing, skip it" | Recurring issue = fix is wrong. Debug properly. | **Root cause analysis, then fix** |
-| "Only one reviewer found it" | One reviewer = valid finding. All findings matter. | **Fix the issue, re-run the selected review pool** |
 | "Iteration limit reached, just proceed" | Limit = escalate, not bypass. Quality is non-negotiable. | **Escalate to user, DO NOT proceed** |
 | "Tests pass, review issues don't matter" | Tests ≠ review. Different quality dimensions. | **Fix the issue, re-run the selected review pool** |
 
