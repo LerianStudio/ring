@@ -81,7 +81,7 @@ These provide context but dilute emphasis when capitalized:
 Examples:
 - MUST dispatch agent before proceeding to next gate
 - STOP and report if PROJECT_RULES.md is missing
-- HARD GATE: All 10 reviewers must pass before Gate 5
+- HARD GATE: All 9 default reviewers and any triggered conditional specialists must pass before Gate 8 completion
 - FORBIDDEN: Reading source code directly as orchestrator
 - REQUIRED: WebFetch Ring standards before implementation
 - MANDATORY: Save state after every gate transition
@@ -326,7 +326,7 @@ For EACH issue, output MUST include:
 ```{language}
 // file: {path}:{start_line}-{new_end_line}
 // ✅ Ring Standard: {Pattern Name} ({standards_file}:{section})
-{transformed code using lib-commons patterns}
+{transformed code using lib-observability patterns}
 ```
 
 ### Standard References
@@ -452,4 +452,4 @@ MUST dispatch all listed agents simultaneously in one message.
 
 - [CLAUDE.md](../CLAUDE.md) - Main project instructions (references this document)
 - [AGENT_DESIGN.md](AGENT_DESIGN.md) - Agent output schemas and requirements
-- [WORKFLOWS.md](WORKFLOWS.md) - Workflows (skills, pre-dev, 6-gate dev-cycle, code review)
+- [WORKFLOWS.md](WORKFLOWS.md) - Workflows (skills, pre-dev, lean dev-cycle, code review)

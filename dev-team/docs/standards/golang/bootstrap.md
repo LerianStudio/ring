@@ -20,7 +20,9 @@ This module covers application initialization, observability, graceful shutdown,
 
 ## Observability
 
-All services **MUST** integrate OpenTelemetry using lib-commons.
+All services **MUST** integrate OpenTelemetry using `lib-observability`.
+
+> **Provenance**: Observability packages (`log`, `zap`, `tracing`, `metrics`, `assert`, `runtime`, `redaction`, `constants`) live in `github.com/LerianStudio/lib-observability` as of v1.0.0 — the `lib-commons/v5/commons/{log,zap,opentelemetry,metrics,assert,runtime}` shims are deprecated and MUST NOT be used in new code.
 
 ### Distributed Tracing Architecture
 
@@ -46,7 +48,7 @@ Understanding how traces propagate is critical for proper instrumentation.
 │     → If no traceparent: creates new root span                              │
 │  2. tracer.Start(ctx, "GET /api/resource") - creates HTTP ROOT SPAN         │
 │  3. Sets span attributes: http.method, http.url, http.route, etc.           │
-│  4. ContextWithCore three(ctx, tracer) - injects tracer into context            │
+│  4. ContextWithTracer(ctx, tracer) - injects tracer into context            │
 │  5. ContextWithMetricFactory(ctx, factory) - injects metrics factory        │
 │  6. c.SetUserContext(ctx) - makes enriched context available to handlers    │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -55,7 +57,7 @@ Understanding how traces propagate is critical for proper instrumentation.
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │  HANDLER LAYER (optional child spans - for complex handlers)                │
 │                                                                             │
-│  logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)             │
+│  logger, tracer, _, _ := observability.NewTrackingFromContext(ctx)             │
 │  ctx, span := tracer.Start(ctx, "handler.create_tenant")                    │
 │  defer span.End()                                                           │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -64,7 +66,7 @@ Understanding how traces propagate is critical for proper instrumentation.
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │  SERVICE LAYER (MANDATORY child spans for all methods)                      │
 │                                                                             │
-│  logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)             │
+│  logger, tracer, _, _ := observability.NewTrackingFromContext(ctx)             │
 │  ctx, span := tracer.Start(ctx, "service.tenant.create")                    │
 │  defer span.End()                                                           │
 │                                                                             │
@@ -72,10 +74,10 @@ Understanding how traces propagate is critical for proper instrumentation.
 │  logger.Infof("Creating tenant: name=%s", req.Name)                         │
 │                                                                             │
 │  // Business errors → AddEvent (span status stays OK)                       │
-│  libOpentelemetry.HandleSpanBusinessErrorEvent(&span, "Validation", err)    │
+│  libTracing.HandleSpanBusinessErrorEvent(&span, "Validation", err)    │
 │                                                                             │
 │  // Technical errors → SetStatus ERROR + RecordError                        │
-│  libOpentelemetry.HandleSpanError(&span, "DB connection failed", err)       │
+│  libTracing.HandleSpanError(&span, "DB connection failed", err)       │
 └─────────────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
@@ -90,13 +92,13 @@ Understanding how traces propagate is critical for proper instrumentation.
 │  OUTGOING CALLS (HTTP, gRPC, Queue) - PROPAGATE TRACE CONTEXT               │
 │                                                                             │
 │  // HTTP Client: Inject traceparent/tracestate into outgoing headers        │
-│  libOpentelemetry.InjectHTTPContext(&req.Header, ctx)                       │
+│  libTracing.InjectHTTPContext(&req.Header, ctx)                       │
 │                                                                             │
 │  // gRPC Client: Inject into outgoing metadata                              │
-│  ctx = libOpentelemetry.InjectGRPCContext(ctx)                              │
+│  ctx = libTracing.InjectGRPCContext(ctx)                              │
 │                                                                             │
 │  // Queue/Message: Inject into message headers for async trace continuation │
-│  headers := libOpentelemetry.PrepareQueueHeaders(ctx, baseHeaders)          │
+│  headers := libTracing.PrepareQueueHeaders(ctx, baseHeaders)          │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -105,7 +107,7 @@ Understanding how traces propagate is critical for proper instrumentation.
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │ 1. BOOTSTRAP (config.go)                                        │
-│    telemetry := libOpentelemetry.InitializeTelemetry(&config)   │
+│    telemetry, err := libTracing.NewTelemetry(cfg)          │
 │    → Creates OpenTelemetry provider once at startup             │
 │    → Sets global TextMapPropagator for W3C TraceContext         │
 └──────────────────────────┬──────────────────────────────────────┘
@@ -113,7 +115,7 @@ Understanding how traces propagate is critical for proper instrumentation.
                            ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │ 2. ROUTER (routes.go)                                           │
-│    tlMid := libHTTP.NewTelemetryMiddleware(tl)                  │
+│    tlMid := libMiddleware.NewTelemetryMiddleware(tl)            │
 │    f.Use(tlMid.WithTelemetry(tl))      ← Creates root span      │
 │    ...routes...                                                  │
 │    f.Use(tlMid.EndTracingSpans)        ← Closes root spans      │
@@ -122,7 +124,7 @@ Understanding how traces propagate is critical for proper instrumentation.
                            ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │ 3. any LAYER (handlers, services, repositories)                 │
-│    logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)│
+│    logger, tracer, _, _ := observability.NewTrackingFromContext(ctx)│
 │    ctx, span := tracer.Start(ctx, "operation_name")             │
 │    defer span.End()                                              │
 │    logger.Infof("Processing...")   ← Logger from same context   │
@@ -146,12 +148,12 @@ Understanding how traces propagate is critical for proper instrumentation.
 
 | # | Step | Code Pattern | Purpose |
 |---|------|--------------|---------|
-| 1 | Extract tracking from context | `logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)` | Get logger/tracer injected by middleware |
+| 1 | Extract tracking from context | `logger, tracer, _, _ := observability.NewTrackingFromContext(ctx)` | Get logger/tracer injected by middleware |
 | 2 | Create child span | `ctx, span := tracer.Start(ctx, "service.{domain}.{operation}")` | Create traceable operation |
 | 3 | Defer span end | `defer span.End()` | Ensure span closes even on panic |
 | 4 | Use structured logger | `logger.Infof/Errorf/Warnf(...)` | Logs correlated with trace |
-| 5 | Handle business errors | `libOpentelemetry.HandleSpanBusinessErrorEvent(&span, msg, err)` | Expected errors (validation, not found) |
-| 6 | Handle technical errors | `libOpentelemetry.HandleSpanError(&span, msg, err)` | Unexpected errors (DB, network) |
+| 5 | Handle business errors | `libTracing.HandleSpanBusinessErrorEvent(&span, msg, err)` | Expected errors (validation, not found) |
+| 6 | Handle technical errors | `libTracing.HandleSpanError(&span, msg, err)` | Unexpected errors (DB, network) |
 | 7 | Pass ctx downstream | All calls receive `ctx` with span | Trace propagation |
 
 ---
@@ -175,7 +177,7 @@ Understanding how traces propagate is critical for proper instrumentation.
 ```go
 func (s *myService) DoSomething(ctx context.Context, req *Request) (*Response, error) {
     // 1. Extract logger and tracer from context (injected by WithTelemetry middleware)
-    logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)
+    logger, tracer, _, _ := observability.NewTrackingFromContext(ctx)
 
     // 2. Create child span for this operation
     ctx, span := tracer.Start(ctx, "service.my_service.do_something")
@@ -187,7 +189,7 @@ func (s *myService) DoSomething(ctx context.Context, req *Request) (*Response, e
     // 4. Input validation - BUSINESS error (expected, span stays OK)
     if req.Name == "" {
         logger.Warn("Validation failed: empty name")
-        libOpentelemetry.HandleSpanBusinessErrorEvent(&span, "Validation failed", ErrInvalidInput)
+        libTracing.HandleSpanBusinessErrorEvent(&span, "Validation failed", ErrInvalidInput)
         return nil, fmt.Errorf("%w: name is required", ErrInvalidInput)
     }
 
@@ -197,13 +199,13 @@ func (s *myService) DoSomething(ctx context.Context, req *Request) (*Response, e
         // Check if it's a "not found" type error (business) vs DB failure (technical)
         if errors.Is(err, ErrNotFound) {
             logger.Warnf("Entity not found: %s", req.ID)
-            libOpentelemetry.HandleSpanBusinessErrorEvent(&span, "Entity not found", err)
+            libTracing.HandleSpanBusinessErrorEvent(&span, "Entity not found", err)
             return nil, err
         }
 
         // TECHNICAL error - unexpected failure, span marked ERROR
         logger.Errorf("Failed to create entity: %v", err)
-        libOpentelemetry.HandleSpanError(&span, "Repository create failed", err)
+        libTracing.HandleSpanError(&span, "Repository create failed", err)
         return nil, fmt.Errorf("failed to create: %w", err)
     }
 
@@ -311,15 +313,15 @@ When making outgoing calls to other services, **MUST** inject trace context:
 ```go
 // HTTP Client - Inject traceparent/tracestate headers
 req, _ := http.NewRequestWithContext(ctx, "POST", url, body)
-libOpentelemetry.InjectHTTPContext(&req.Header, ctx)
+libTracing.InjectHTTPContext(&req.Header, ctx)
 resp, err := client.Do(req)
 
 // gRPC Client - Inject into outgoing metadata
-ctx = libOpentelemetry.InjectGRPCContext(ctx)
+ctx = libTracing.InjectGRPCContext(ctx)
 resp, err := grpcClient.SomeMethod(ctx, req)
 
 // Queue/Message Publisher - Inject into message headers
-headers := libOpentelemetry.PrepareQueueHeaders(ctx, map[string]any{
+headers := libTracing.PrepareQueueHeaders(ctx, map[string]any{
     "content-type": "application/json",
 })
 // Use headers when publishing to RabbitMQ/Kafka
@@ -336,17 +338,17 @@ headers := libOpentelemetry.PrepareQueueHeaders(ctx, map[string]any{
 
 | Anti-Pattern | Problem | Correct Pattern |
 |--------------|---------|-----------------|
-| `import "go.opentelemetry.io/otel"` | Direct OTel usage bypasses lib-commons wrappers | Use `libCommons.NewTrackingFromContext(ctx)` |
-| `import "go.opentelemetry.io/otel/trace"` | Direct tracer access without lib-commons | Use `libOpentelemetry` package from lib-commons |
-| `otel.Core three("name")` | Creates standalone tracer, no context integration | Use tracer from `NewTrackingFromContext(ctx)` |
-| `trace.SpanFromContext(ctx)` | Raw OTel API, inconsistent with lib-commons | Use `libCommons.NewTrackingFromContext(ctx)` |
+| `import "go.opentelemetry.io/otel"` | Direct OTel usage bypasses lib-observability helpers | Use `observability.NewTrackingFromContext(ctx)` |
+| `import "go.opentelemetry.io/otel/trace"` | Direct tracer access without lib-observability | Use `libTracing` package from `lib-observability` |
+| `otel.Tracer("name")` | Creates standalone tracer, no context integration | Use tracer from `NewTrackingFromContext(ctx)` |
+| `trace.SpanFromContext(ctx)` | Raw OTel API, inconsistent with lib-observability | Use `observability.NewTrackingFromContext(ctx)` |
 | `c.JSON(status, data)` | Direct Fiber response, no standard format | Use `libHTTP.OK(c, data)` or `libHTTP.Created(c, data)` |
 | `c.Status(code).JSON(err)` | Inconsistent error responses | Use `libHTTP.WithError(c, err)` |
 | Custom error handler | Inconsistent error format across services | Use `libHTTP.HandleFiberError` in fiber.Config |
 | Manual pagination logic | Reinvents cursor/offset pagination | Use `libHTTP.Pagination`, `libHTTP.CursorPagination` |
 | `c.SendString()` / `c.Send()` | No standard response wrapper | Use `libHTTP.OK()`, `libHTTP.Created()`, `libHTTP.NoContent()` |
-| Custom logging middleware | Inconsistent request logging | Use `libHTTP.WithHTTPLogging(libHTTP.WithCustomLogger(lg))` |
-| Manual telemetry middleware | Missing trace context injection | Use `libHTTP.NewTelemetryMiddleware(tl).WithTelemetry(tl)` |
+| Custom logging middleware | Inconsistent request logging | Use `libMiddleware.WithHTTPLogging(libMiddleware.WithCustomLogger(lg))` |
+| Manual telemetry middleware | Missing trace context injection | Use `libMiddleware.NewTelemetryMiddleware(tl).WithTelemetry(tl)` |
 | `log.Printf("[Service] msg")` | No trace correlation, no structured logging | `logger.Infof("msg")` from context |
 | No span in service method | Operation not traceable | Always create child span |
 | `return err` without span handling | Error not attributed to trace | Call `HandleSpanError` or `HandleSpanBusinessErrorEvent` |
@@ -356,7 +358,7 @@ headers := libOpentelemetry.PrepareQueueHeaders(ctx, map[string]any{
 | Calling downstream without ctx | Trace chain breaks | Pass ctx to all downstream calls |
 | Not injecting trace context for outgoing HTTP/gRPC | Remote traces disconnected | Use `InjectHTTPContext` / `InjectGRPCContext` |
 
-> **⛔ CRITICAL:** Direct imports of `go.opentelemetry.io/otel`, `go.opentelemetry.io/otel/trace`, `go.opentelemetry.io/otel/attribute`, or `go.opentelemetry.io/otel/codes` are **FORBIDDEN** in application code. All telemetry MUST go through lib-commons wrappers (`libCommons`, `libOpentelemetry`). The only exception is if lib-commons doesn't provide a required OTel feature - in that case, open an issue to add it to lib-commons.
+> **⛔ CRITICAL:** Direct imports of `go.opentelemetry.io/otel`, `go.opentelemetry.io/otel/trace`, `go.opentelemetry.io/otel/attribute`, or `go.opentelemetry.io/otel/codes` are **FORBIDDEN** in application code. All telemetry MUST go through lib-observability helpers (`observability`, `libTracing`). The only exception is if lib-observability does not provide a required OTel feature — in that case, open an issue to add it to lib-observability.
 
 > **⛔ CRITICAL:** Direct Fiber response methods (`c.JSON()`, `c.Status().JSON()`, `c.SendString()`) are **FORBIDDEN**. All HTTP responses MUST use `libHTTP` wrappers (`libHTTP.OK()`, `libHTTP.Created()`, `libHTTP.WithError()`, etc.) to ensure consistent response format, proper error handling, and telemetry integration across all Lerian services.
 
@@ -371,10 +373,17 @@ func InitServers() (*Service, error) {
     }
 
     // Initialize logger FIRST (zap package for initialization in bootstrap)
-    logger := libZap.InitializeLogger()
+    logger, err := libZap.New(libZap.Config{
+        Environment:     libZap.Environment(cfg.EnvName),
+        Level:           cfg.LogLevel,
+        OTelLibraryName: cfg.OtelLibraryName,
+    })
+    if err != nil {
+        return nil, fmt.Errorf("failed to initialize logger: %w", err)
+    }
 
     // Initialize telemetry with config
-    telemetry := libOpentelemetry.InitializeTelemetry(&libOpentelemetry.TelemetryConfig{
+    telemetry, err := libTracing.NewTelemetry(libTracing.TelemetryConfig{
         LibraryName:               cfg.OtelLibraryName,
         ServiceName:               cfg.OtelServiceName,
         ServiceVersion:            cfg.OtelServiceVersion,
@@ -383,6 +392,9 @@ func InitServers() (*Service, error) {
         EnableTelemetry:           cfg.EnableTelemetry,
         Logger:                    logger,
     })
+    if err != nil {
+        return nil, fmt.Errorf("failed to initialize telemetry: %w", err)
+    }
 
     // Pass telemetry to router...
 }
@@ -393,9 +405,10 @@ func InitServers() (*Service, error) {
 ```go
 // adapters/http/in/routes.go
 import (
-    libLog "github.com/LerianStudio/lib-commons/v5/commons/log"
+    libLog "github.com/LerianStudio/lib-observability/log"
     libHTTP "github.com/LerianStudio/lib-commons/v5/commons/net/http"
-    libOpentelemetry "github.com/LerianStudio/lib-commons/v5/commons/opentelemetry"
+    libMiddleware "github.com/LerianStudio/lib-observability/middleware"
+    libTracing "github.com/LerianStudio/lib-observability/tracing"
     "github.com/gofiber/contrib/otelfiber/v2"
     "github.com/gofiber/fiber/v2"
     "github.com/gofiber/fiber/v2/middleware/recover"
@@ -411,7 +424,7 @@ func skipTelemetryPaths(c *fiber.Ctx) bool {
     }
 }
 
-func NewRouter(lg libLog.Logger, tl *libOpentelemetry.Telemetry, ...) *fiber.App {
+func NewRouter(lg libLog.Logger, tl *libTracing.Telemetry, ...) *fiber.App {
     f := fiber.New(fiber.Config{
         DisableStartupMessage: true,
         ErrorHandler: func(ctx *fiber.Ctx, err error) error {
@@ -420,13 +433,13 @@ func NewRouter(lg libLog.Logger, tl *libOpentelemetry.Telemetry, ...) *fiber.App
     })
 
     // Create telemetry middleware
-    tlMid := libHTTP.NewTelemetryMiddleware(tl)
+    tlMid := libMiddleware.NewTelemetryMiddleware(tl)
 
     // Middleware setup - ORDER MATTERS
     f.Use(tlMid.WithTelemetry(tl))                                    // 1. Must be first - injects tracer+logger into context
     f.Use(recover.New())                                              // 2. Panic recovery
     f.Use(otelfiber.Middleware(otelfiber.WithNext(skipTelemetryPaths))) // 3. OpenTelemetry metrics
-    f.Use(libHTTP.WithHTTPLogging(libHTTP.WithCustomLogger(lg)))      // 4. HTTP logging
+    f.Use(libMiddleware.WithHTTPLogging(libMiddleware.WithCustomLogger(lg))) // 4. HTTP logging
 
     // ... define routes ...
 
@@ -463,7 +476,7 @@ go get github.com/gofiber/contrib/otelfiber/v2
 | Option | Purpose |
 |--------|---------|
 | `WithNext(func)` | Skip instrumentation for certain paths |
-| `WithCore threeProvider(tp)` | Custom tracer provider |
+| `WithTracerProvider(tp)` | Custom tracer provider |
 | `WithMeterProvider(mp)` | Custom meter provider |
 | `WithSpanNameFormatter(func)` | Custom span naming |
 
@@ -473,13 +486,13 @@ go get github.com/gofiber/contrib/otelfiber/v2
 - No custom code to maintain
 - Compatible with any OpenTelemetry backend (Jaeger, Zipkin, Grafana, etc.)
 
-### 3. Recovering Logger & Core three (Any Layer)
+### 3. Recovering Logger & Tracer (Any Layer)
 
 ```go
 // any file in any layer (handler, service, repository)
 func (s *Service) ProcessEntity(ctx context.Context, id string) error {
     // Single call recovers BOTH logger and tracer from context
-    logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)
+    logger, tracer, _, _ := observability.NewTrackingFromContext(ctx)
 
     // Create child span for this operation
     ctx, span := tracer.Start(ctx, "service.process_entity")
@@ -498,14 +511,14 @@ func (s *Service) ProcessEntity(ctx context.Context, id string) error {
 ```go
 // For technical errors (unexpected failures)
 if err != nil {
-    libOpentelemetry.HandleSpanError(&span, "Failed to connect database", err)
+    libTracing.HandleSpanError(&span, "Failed to connect database", err)
     logger.Errorf("Database error: %v", err)
     return nil, err
 }
 
 // For business errors (expected validation failures)
 if err != nil {
-    libOpentelemetry.HandleSpanBusinessErrorEvent(&span, "Validation failed", err)
+    libTracing.HandleSpanBusinessErrorEvent(&span, "Validation failed", err)
     logger.Warnf("Validation error: %v", err)
     return nil, err
 }
@@ -519,7 +532,7 @@ type Server struct {
     app           *fiber.App
     serverAddress string
     logger        libLog.Logger
-    telemetry     libOpentelemetry.Telemetry
+    telemetry     libTracing.Telemetry
 }
 
 func (s *Server) Run(l *libCommons.Launcher) error {
@@ -579,10 +592,10 @@ import (
 
     libCommons "github.com/LerianStudio/lib-commons/v5/commons"
     libMongo "github.com/LerianStudio/lib-commons/v5/commons/mongo"
-    libOpentelemetry "github.com/LerianStudio/lib-commons/v5/commons/opentelemetry"
+    libTracing "github.com/LerianStudio/lib-observability/tracing"
     libPostgres "github.com/LerianStudio/lib-commons/v5/commons/postgres"
     libRedis "github.com/LerianStudio/lib-commons/v5/commons/redis"
-    libZap "github.com/LerianStudio/lib-commons/v5/commons/zap"
+    libZap "github.com/LerianStudio/lib-observability/zap"
 
     // Internal imports
     httpin "github.com/LerianStudio/your-service/internal/adapters/http/in"
@@ -671,11 +684,18 @@ func InitServers() (*Service, error) {
 
     // 2. INITIALIZE LOGGER
     // Must be first after config - all subsequent components need logging
-    logger := libZap.InitializeLogger()
+    logger, err := libZap.New(libZap.Config{
+        Environment:     libZap.Environment(cfg.EnvName),
+        Level:           cfg.LogLevel,
+        OTelLibraryName: cfg.OtelLibraryName,
+    })
+    if err != nil {
+        return nil, fmt.Errorf("failed to initialize logger: %w", err)
+    }
 
     // 3. INITIALIZE TELEMETRY
     // OpenTelemetry provider for distributed tracing
-    telemetry := libOpentelemetry.InitializeTelemetry(&libOpentelemetry.TelemetryConfig{
+    telemetry, err := libTracing.NewTelemetry(libTracing.TelemetryConfig{
         LibraryName:               cfg.OtelLibraryName,
         ServiceName:               cfg.OtelServiceName,
         ServiceVersion:            cfg.OtelServiceVersion,
@@ -684,6 +704,9 @@ func InitServers() (*Service, error) {
         EnableTelemetry:           cfg.EnableTelemetry,
         Logger:                    logger,
     })
+    if err != nil {
+        return nil, fmt.Errorf("failed to initialize telemetry: %w", err)
+    }
 
     // 4. INITIALIZE DATABASE CONNECTIONS
     // PostgreSQL connection with primary/replica support
@@ -802,8 +825,8 @@ package bootstrap
 
 import (
     libCommons "github.com/LerianStudio/lib-commons/v5/commons"
-    libLog "github.com/LerianStudio/lib-commons/v5/commons/log"
-    libOpentelemetry "github.com/LerianStudio/lib-commons/v5/commons/opentelemetry"
+    libLog "github.com/LerianStudio/lib-observability/log"
+    libTracing "github.com/LerianStudio/lib-observability/tracing"
     libCommonsServer "github.com/LerianStudio/lib-commons/v5/commons/server"
     "github.com/gofiber/fiber/v2"
 )
@@ -813,7 +836,7 @@ type Server struct {
     app           *fiber.App
     serverAddress string
     logger        libLog.Logger
-    telemetry     libOpentelemetry.Telemetry
+    telemetry     libTracing.Telemetry
 }
 
 // ServerAddress returns the server's listen address.
@@ -822,7 +845,7 @@ func (s *Server) ServerAddress() string {
 }
 
 // NewServer creates a new Server instance.
-func NewServer(cfg *Config, app *fiber.App, logger libLog.Logger, telemetry *libOpentelemetry.Telemetry) *Server {
+func NewServer(cfg *Config, app *fiber.App, logger libLog.Logger, telemetry *libTracing.Telemetry) *Server {
     return &Server{
         app:           app,
         serverAddress: cfg.ServerAddress,
@@ -861,7 +884,7 @@ package bootstrap
 
 import (
     libCommons "github.com/LerianStudio/lib-commons/v5/commons"
-    libLog "github.com/LerianStudio/lib-commons/v5/commons/log"
+    libLog "github.com/LerianStudio/lib-observability/log"
 )
 
 // Service is the application glue where we put all top level components to be used.
@@ -1117,6 +1140,36 @@ f.Get("/readyz", func(c *fiber.Ctx) error {
 ```
 
 If the project's libHTTP does not provide `ServiceUnavailable`, use the project's equivalent wrapper that returns 503 with the same error payload (e.g. a custom helper or domain error mapped to 503 in the error handler).
+
+### Probe Logging (MANDATORY)
+
+Kubernetes hits `/readyz` every 5s (`periodSeconds: 5` below) — ≈17,280 calls/day per pod. INFO on probe success is FORBIDDEN.
+
+| Outcome | Level |
+|---------|-------|
+| All checks `up` | DEBUG |
+| Any check `down`/`degraded` | WARN |
+
+Access-log middleware MUST exclude `/readyz`, `/health`, `/metrics` from request logging. On `lib-observability`, both the logging and telemetry middlewares apply this automatically via `defaultLogExcludedRoutes` (`middleware/logging.go`) — append project-specific paths with `middleware.WithExcludedRoutes(...)`. Services not on `lib-observability` must keep the manual `skipTelemetryPaths` filter; confirm with `grep -n 'skipTelemetryPaths\|WithExcludedRoutes\|/readyz' internal/`. Inside the handler, log per check at DEBUG on success, WARN on failure:
+
+```go
+f.Get("/readyz", func(c *fiber.Ctx) error {
+    ctx := c.UserContext()
+    logger, _, _, _ := observability.NewTrackingFromContext(ctx)
+
+    if err := postgresConn.PingContext(ctx); err != nil {
+        logger.Warn("readyz check failed", "dependency", "postgres", "error", err.Error())
+        return libHTTP.ServiceUnavailable(c, "NOT_READY", "Service Unavailable", "postgres: "+err.Error())
+    }
+    logger.Debug("readyz check ok", "dependency", "postgres")
+
+    // ... repeat for each dependency ...
+
+    return libHTTP.OK(c, fiber.Map{"status": "ready"})
+})
+```
+
+Steady-state observability lives in the readyz metrics (Gate 5 of `ring:dev-readyz`): `readyz_check_status`, `readyz_check_duration`, `readyz_aggregate_status`. Logs are diagnostic, not aggregation.
 
 ### Kubernetes Configuration (REQUIRED)
 
@@ -1394,4 +1447,3 @@ grep -rn "redis.NewClient" --include="*.go" -A 5 | grep -v "PoolSize"
 | "Client per request is clearer" | Client per request = socket exhaustion. | **Reuse HTTP clients** |
 
 ---
-

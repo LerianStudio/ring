@@ -299,7 +299,7 @@ Used for onboarding entities (organizations, ledgers, accounts, etc.) where data
 ```go
 func (h *Handler) GetAllOrganizations(c *fiber.Ctx) error {
     ctx := c.UserContext()
-    logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)
+    logger, tracer, _, _ := observability.NewTrackingFromContext(ctx)
 
     ctx, span := tracer.Start(ctx, "handler.get_all_organizations")
     defer span.End()
@@ -398,7 +398,7 @@ func CalculateCursor(isFirstPage, hasPagination, pointsNext bool, firstID, lastI
 ```go
 func (h *Handler) GetAllTransactions(c *fiber.Ctx) error {
     ctx := c.UserContext()
-    logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)
+    logger, tracer, _, _ := observability.NewTrackingFromContext(ctx)
 
     ctx, span := tracer.Start(ctx, "handler.get_all_transactions")
     defer span.End()

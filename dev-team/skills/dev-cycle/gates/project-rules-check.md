@@ -52,23 +52,7 @@ Read tool:
 
 #### Ask the User
 
-Use AskUserQuestion:
-
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│ 📋 PROJECT_RULES.md not FOUND                                   │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│ I need to create docs/PROJECT_RULES.md to understand your       │
-│ project's specific conventions and domain.                      │
-│                                                                 │
-│ First, I need to know: Is this a LEGACY project?                │
-│                                                                 │
-│ A legacy project is one that was created WITHOUT using the      │
-│ PM team workflow (no PRD, TRD, or Feature Map documents).       │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+Use AskUserQuestion. Context to convey: `docs/PROJECT_RULES.md` is missing and is needed to understand the project's conventions and domain. First determine whether this is a LEGACY project — one created WITHOUT the PM team workflow (no PRD, TRD, or Feature Map).
 
 #### Question
 
@@ -90,24 +74,11 @@ Go to Step 0.3 (Check for PM Documents)
 
 #### Overview
 
-For legacy projects, analyze codebase for TECHNICAL information only:
+For legacy projects, analyze the codebase for TECHNICAL information only (business rules belong in PRD/product docs, not here):
 
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│ 📋 LEGACY PROJECT ANALYSIS                                      │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│ Since this is a legacy project, I'll analyze the codebase       │
-│ for TECHNICAL information (not business rules).                 │
-│                                                                 │
-│ Step 1: Automated analysis (ring:codebase-explorer)                  │
-│ Step 2: Ask for project-specific tech not in Ring Standards     │
-│ Step 3: Generate PROJECT_RULES.md (deduplicated)                │
-│                                                                 │
-│ Note: Business rules belong in PRD/product docs, not here.      │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+1. Automated analysis via `ring:codebase-explorer`
+2. Ask for project-specific tech not in Ring Standards
+3. Generate PROJECT_RULES.md (deduplicated)
 
 #### Step 0.2.1a: Automated Codebase Analysis (MANDATORY)
 
@@ -189,18 +160,7 @@ After agent completes, confirm:
 
 #### Post-Analysis Questions
 
-After agents complete, ask only what they couldn't determine from code:
-
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│ ✓ Codebase Analysis Complete                                    │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│ I've analyzed your codebase. Now I need a few details that      │
-│ only you can provide (not visible in the code).                 │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+After agents complete, ask only what they couldn't determine from code — a few details only the user can provide (not visible in the code).
 
 #### Questions to Ask
 
@@ -218,33 +178,44 @@ Use AskUserQuestion for each:
 
 #### Combine Agent Outputs and User Answers
 
+**⛔ CANONICAL TEMPLATE** — both the legacy branch (here) and the PM-docs branch (Step 0.3.1) generate `docs/PROJECT_RULES.md` from this single template. Only the provenance footer and section sources differ between branches.
+
 ```yaml
 Create tool:
   file_path: "docs/PROJECT_RULES.md"
   content: |
     # Project Rules
     
-    > Ring Standards apply automatically. This file documents only what Ring does not cover.
-    > For error handling, logging, testing, architecture, lib-commons → See Ring Standards (auto-loaded by agents)
-    > Generated from legacy project analysis.
+    > Ring Standards are loaded by agents via WebFetch — the dev-cycle orchestrator pre-caches them at cycle start (SKILL.md Step 1.5). They are NOT applied implicitly.
+    > This file documents ONLY what Ring Standards do not cover. Do not duplicate Ring content here.
+    >
+    > Ring Standards URLs:
+    > - Go: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang.md
+    > - TypeScript: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md
     
-    ## What Ring Standards Already Cover (DO not ADD HERE)
+    ## What Ring Standards Cover (DO not DUPLICATE HERE)
     
     The following are defined in Ring Standards and MUST not be duplicated:
     - Error handling patterns (no panic, wrap errors)
-    - Logging standards (structured JSON, zerolog/zap)
+    - Logging standards (structured JSON via lib-observability `log`/`zap` adapters)
     - Testing patterns (table-driven tests, mocks)
     - Architecture patterns (Hexagonal, Clean Architecture)
-    - Observability (OpenTelemetry, trace correlation)
-    - lib-commons usage and patterns
-    - API directory structure
+    - Observability (OpenTelemetry tracing/metrics, panic recovery, assertions, redaction) — via lib-observability
+    - lib-commons / lib-common-js usage and patterns (lifecycle, outbox repository, circuit breakers, tenant management, HTTP, idempotency)
+    - lib-observability usage and patterns (tracing, metrics, logging, assert, runtime, redaction) — see [[using-lib-observability]]
+    - lib-systemplane usage and patterns (hot-reloadable runtime config: log levels, feature flags, rate limits, timeouts) — see [[using-lib-systemplane]]
+    - lib-streaming usage and patterns (past-tense business event emission to per-tenant SaaS subscribers) — see [[using-lib-streaming]]
+    - API directory structure (Lerian pattern)
+    - Database connections (PostgreSQL, MongoDB, Redis via lib-commons)
+    - Bootstrap pattern (config.go, service.go, server.go)
+    
+    **Agents MUST WebFetch Ring Standards and output a Standards Coverage Table.**
     
     ---
     
     ## Tech Stack (Not in Ring Standards)
     
-    [From ring:codebase-explorer: Technologies not covered by Ring Standards]
-    [e.g., specific message broker, specific cache, DB if not PostgreSQL]
+    [Technologies not covered by Ring Standards — e.g., specific message broker, specific cache, DB if not PostgreSQL]
     
     | Technology | Purpose | Notes |
     |------------|---------|-------|
@@ -252,8 +223,7 @@ Create tool:
     
     ## Non-Standard Directory Structure
     
-    [From ring:codebase-explorer: Directories that deviate from Ring's standard API structure]
-    [e.g., workers/, consumers/, polling/]
+    [Directories that deviate from Ring's standard API structure — e.g., workers/, consumers/, polling/]
     
     | Directory | Purpose | Pattern |
     |-----------|---------|---------|
@@ -261,7 +231,7 @@ Create tool:
     
     ## External Integrations
     
-    [From ring:codebase-explorer: Third-party services specific to this project]
+    [Third-party services specific to this project]
     
     | Service | Purpose | Docs |
     |---------|---------|------|
@@ -269,7 +239,7 @@ Create tool:
     
     ## Environment Configuration
     
-    [From ring:codebase-explorer: Project-specific env vars not covered by Ring]
+    [Project-specific env vars not covered by Ring]
     
     | Variable | Purpose | Example |
     |----------|---------|---------|
@@ -277,7 +247,7 @@ Create tool:
     
     ## Domain Terminology
     
-    [From codebase analysis: Technical names used in this codebase]
+    [Technical names used in this codebase]
     
     | Term | Definition | Used In |
     |------|------------|---------|
@@ -292,28 +262,7 @@ Create tool:
 
 #### Present to User
 
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│ ✓ PROJECT_RULES.md Generated for Legacy Project                 │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│ I analyzed your codebase using:                                 │
-│   • ring:codebase-explorer (technical patterns, stack, structure)    │
-│                                                                 │
-│ Combined with your input on:                                    │
-│   • Current development goal                                    │
-│   • External integrations                                       │
-│   • Project-specific technology                                 │
-│                                                                 │
-│ Generated: docs/PROJECT_RULES.md                                │
-│                                                                 │
-│ Note: Ring Standards (error handling, logging, testing, etc.)   │
-│ are not duplicated - agents load them automatically via WebFetch│
-│                                                                 │
-│ Please review the file and make any corrections needed.         │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+Tell the user: PROJECT_RULES.md was generated from `ring:codebase-explorer` (technical patterns, stack, structure) combined with their input (current goal, external integrations, project-specific tech). Ring Standards content is not duplicated — agents load it via WebFetch. Ask them to review and correct as needed.
 
 #### Ask for Approval
 
@@ -329,23 +278,7 @@ Proceed to Step 1
 
 #### Check for PM Documents
 
-For NEW projects (not legacy), ask about PM documents:
-
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│ 📋 NEW PROJECT - PM DOCUMENTS CHECK                             │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│ Since this is a new project following Ring workflow, you        │
-│ should have PM documents from the pre-dev workflow.             │
-│                                                                 │
-│ Do you have any of these PM documents?                          │
-│   • PRD (Product Requirements Document)                         │
-│   • TRD (Technical Requirements Document)                       │
-│   • Feature Map (from ring:pre-dev-feature-map skill)                │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+For NEW projects (not legacy), ask about PM documents. Context: a new project following the Ring workflow should have PM documents from pre-dev — PRD (Product Requirements), TRD (Technical Requirements), or Feature Map (from `ring:pre-dev-feature-map`).
 
 #### Question
 
@@ -437,83 +370,15 @@ Read tool:
 
 #### Generate PROJECT_RULES.md
 
-```yaml
-Create tool:
-  file_path: "docs/PROJECT_RULES.md"
-  content: |
-    # Project Rules
-    
-    > ⛔ IMPORTANT: Ring Standards are not automatic. Agents MUST WebFetch them before implementation.
-    > This file documents only project-specific information not covered by Ring Standards.
-    > Generated from PM documents (PRD/TRD/Feature Map).
-    >
-    > Ring Standards URLs:
-    > - Go: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang.md
-    > - TypeScript: https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md
-    
-    ## What Ring Standards Cover (DO not DUPLICATE HERE)
-    
-    The following are defined in Ring Standards and MUST not be duplicated in this file:
-    - Error handling patterns (no panic, wrap errors)
-    - Logging standards (structured JSON via lib-commons)
-    - Testing patterns (table-driven tests, mocks)
-    - Architecture patterns (Hexagonal, Clean Architecture)
-    - Observability (OpenTelemetry via lib-commons)
-    - lib-commons / lib-common-js usage and patterns
-    - API directory structure (Lerian pattern)
-    - Database connections (PostgreSQL, MongoDB, Redis via lib-commons)
-    - Bootstrap pattern (config.go, service.go, server.go)
-    
-    **Agents MUST WebFetch Ring Standards and output Standards Coverage Table.**
-    
-    ---
-    
-    ## Tech Stack (Not in Ring Standards)
-    
-    [From TRD/Feature Map: only technologies not covered by Ring Standards]
-    
-    | Technology | Purpose | Notes |
-    |------------|---------|-------|
-    | [detected] | [purpose] | [notes] |
-    
-    ## Non-Standard Directory Structure
-    
-    [From TRD: Directories that deviate from Ring's standard API structure]
-    
-    | Directory | Purpose | Pattern |
-    |-----------|---------|---------|
-    | [detected] | [purpose] | [pattern] |
-    
-    ## External Integrations
-    
-    [From TRD/PRD: Third-party services specific to this project]
-    
-    | Service | Purpose | Docs |
-    |---------|---------|------|
-    | [detected] | [purpose] | [link] |
-    
-    ## Environment Configuration
-    
-    [From TRD: Project-specific env vars not covered by Ring]
-    
-    | Variable | Purpose | Example |
-    |----------|---------|---------|
-    | [detected] | [purpose] | [example] |
-    
-    ## Domain Terminology
-    
-    [From PRD: Technical names used in this codebase]
-    
-    | Term | Definition | Used In |
-    |------|------------|---------|
-    | [detected] | [definition] | [location] |
-    
-    ---
-    
-    *Generated from: [PRD path], [TRD path], [Feature Map path]*
-    *Ring Standards Version: [version from WebFetch]*
-    *Generated: [ISO timestamp]*
-```
+Generate `docs/PROJECT_RULES.md` using the **canonical template in Step 0.2.1c above**, with these branch-specific differences:
+
+- **Section sources** (per the extraction tables above): Tech Stack and Non-Standard Directories from TRD/Feature Map; External Integrations from TRD/PRD; Domain Terminology from PRD. Apply the deduplication rule — extract only what Ring Standards do NOT cover.
+- **Provenance footer** — replace the legacy footer with:
+  ```
+  *Generated from: [PRD path], [TRD path], [Feature Map path]*
+  *Ring Standards Version: [version from WebFetch]*
+  *Generated: [ISO timestamp]*
+  ```
 
 #### Check for Missing Information
 
@@ -536,34 +401,20 @@ Present to user for review, then proceed to Step 1.
 
 #### When User Has No PM Documents
 
-```text
-┌─────────────────────────────────────────────────────────────────┐
-│ ⛔ CANNOT PROCEED - PM DOCUMENTS REQUIRED                       │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│ Development cannot start without PM documents.                  │
-│                                                                 │
-│ You MUST create PRD, TRD, and/or Feature Map documents first    │
-│ using PM team skills:                                           │
-│                                                                 │
-│   /ring:pre-dev-full     → For features ≥2 days (9 gates)           │
-│   /ring:pre-dev-feature  → For features <2 days (4 gates)           │
-│                                                                 │
-│ These commands will guide you through creating:                 │
-│   • PRD (Product Requirements Document)                         │
-│   • TRD (Technical Requirements Document)                       │
-│   • Feature Map (technology choices, feature relationships)     │
-│                                                                 │
-│ After completing pre-dev workflow, run /ring:dev-cycle again.        │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
-```
+⛔ **CANNOT PROCEED — PM DOCUMENTS REQUIRED.** Development cannot start without PM documents. The user MUST create PRD, TRD, and/or Feature Map first using PM team skills:
+
+- `/ring:pre-dev-full` → features ≥2 days (9 gates)
+- `/ring:pre-dev-feature` → features <2 days (4 gates)
+
+These guide creation of the PRD, TRD, and Feature Map (technology choices, feature relationships). After completing pre-dev, run `/ring:dev-cycle` again.
 
 #### Action
 
 STOP EXECUTION. Do not proceed to Step 1.
 
 ### Step 0 Anti-Rationalization
+
+See [shared-patterns/shared-anti-rationalization.md](../../shared-patterns/shared-anti-rationalization.md) for universal rationalizations. These are specific to the PROJECT_RULES.md gate:
 
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
@@ -587,4 +438,3 @@ STOP EXECUTION. Do not proceed to Step 1.
 | "I'll fill in PROJECT_RULES.md myself" | "That works! Create `docs/PROJECT_RULES.md` with: Tech Stack (not in Ring), External Integrations, Domain Terminology. Do not duplicate Ring Standards content. Then run `/ring:dev-cycle` again." |
 
 ---
-

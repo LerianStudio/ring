@@ -1,6 +1,6 @@
 {
   "name": "ring",
-  "description": "Lerian Studio plugin marketplace: Core software engineering skills (TDD, debugging, code review), specialized developer agents (Backend, DevOps, Frontend, QA, SRE), product planning workflows (10-gate pre-dev system), and technical writing specialists for documentation.",
+  "description": "Lerian Studio plugin marketplace: Core software engineering skills (TDD, debugging, code review), specialized developer agents (Backend, DevOps, Frontend, QA, SRE) plus 12 code-review reviewers (9 default hard-gate reviewers and 3 conditional stack specialists), product planning workflows (10-gate pre-dev system), and technical writing specialists for documentation.",
   "owner": {
     "name": "Presenter Name",
     "email": "fred@fredamaral.com.br"
@@ -8,11 +8,11 @@
   "plugins": [
     {
       "name": "ring-default",
-      "description": "Core skills library for the Lerian Team: TDD, code review, collaboration patterns, and proven techniques. Features parallel 10-reviewer code review system and workflow orchestration. 14 essential skills for software engineering excellence.",
-      "version": "1.30.1",
+      "description": "Core skills library for the Lerian Team: TDD, code review, collaboration patterns, and proven techniques. Features parallel code review orchestration with 9 default reviewers plus triggered conditional specialists. 16 essential skills for software engineering excellence, including plan authoring and execution.",
+      "version": "1.33.1",
       "source": "./default",
-      "homepage": "https://github.com/lerianstudio/ring/tree/default",
-      "repository": "https://github.com/lerianstudio/ring/tree/default",
+      "homepage": "https://github.com/lerianstudio/ring/tree/main/default",
+      "repository": "https://github.com/lerianstudio/ring/tree/main/default",
       "license": "MIT",
       "keywords": [
         "skills",
@@ -29,11 +29,11 @@
     },
     {
       "name": "ring-dev-team",
-      "description": "15 specialized developer agents + 38 development skills: Backend 10-gate dev cycle + Frontend 9-gate dev cycle (accessibility, visual, E2E, performance) + Frontend refactoring + whole-codebase simplification sweep + delivery verification + service discovery + cycle management + lib-streaming end-to-end instrumentation. Go/TypeScript Backend specialists, DevOps Engineer, Frontend TypeScript specialist, Frontend Designer, QA Backend Analyst, QA Frontend Analyst, SRE, Multi-Tenant Reviewer, and lib-commons Reviewer. Complete development team coverage with TDD, observability, and security best practices.",
-      "version": "1.67.0",
+      "description": "24 specialized developer agents + 33 development skills: Backend 10-gate dev cycle + lean frontend cycle (Gate 0, 7, 8) with quality checks (accessibility, visual, E2E, performance) + Frontend refactoring + whole-codebase simplification sweep + delivery verification + service discovery + cycle management + lib-streaming end-to-end instrumentation. Includes backend/frontend specialists, DevOps, QA, SRE, 9 default code-review reviewers, and 3 conditional stack specialists consolidated into the dev-team plugin. Complete development team coverage with TDD, observability, and security best practices.",
+      "version": "1.72.1",
       "source": "./dev-team",
-      "homepage": "https://github.com/lerianstudio/ring/tree/dev-team",
-      "repository": "https://github.com/lerianstudio/ring/tree/dev-team",
+      "homepage": "https://github.com/lerianstudio/ring/tree/main/dev-team",
+      "repository": "https://github.com/lerianstudio/ring/tree/main/dev-team",
       "license": "MIT",
       "keywords": [
         "agents",
@@ -56,16 +56,17 @@
         "refactoring",
         "simplify",
         "multi-tenant",
-        "lib-commons"
+        "lib-commons",
+        "code-review"
       ]
     },
     {
       "name": "ring-pm-team",
       "description": "Product team workflow: 18 skills + 4 research agents. Pre-dev planning with 5-gate (small features) and 10-gate (large features) orchestrators, delivery roadmap generation, delivery status tracking for evidence-based progress reporting, plus standalone streaming-event-mapping discovery. Includes parallel research agents, specialized code analysis, and Product Designer.",
-      "version": "0.28.2",
+      "version": "0.30.1",
       "source": "./pm-team",
-      "homepage": "https://github.com/lerianstudio/ring/tree/pm-team",
-      "repository": "https://github.com/lerianstudio/ring/tree/pm-team",
+      "homepage": "https://github.com/lerianstudio/ring/tree/main/pm-team",
+      "repository": "https://github.com/lerianstudio/ring/tree/main/pm-team",
       "license": "MIT",
       "keywords": [
         "skills",
@@ -83,11 +84,11 @@
     },
     {
       "name": "ring-tw-team",
-      "description": "Technical writing specialists for functional and API documentation. 3 specialized agents (functional-writer, api-writer, docs-reviewer) and 6 documentation skills covering voice/tone, structure, API field descriptions, and quality review. Enforces clear, consistent documentation standards.",
-      "version": "0.4.5",
+      "description": "Technical writing specialists for functional and API documentation. 3 specialized agents (functional-writer, api-writer, docs-reviewer) and 4 documentation skills covering voice/tone, structure, API field descriptions, and quality review. Enforces clear, consistent documentation standards.",
+      "version": "0.5.0",
       "source": "./tw-team",
-      "homepage": "https://github.com/lerianstudio/ring/tree/tw-team",
-      "repository": "https://github.com/lerianstudio/ring/tree/tw-team",
+      "homepage": "https://github.com/lerianstudio/ring/tree/main/tw-team",
+      "repository": "https://github.com/lerianstudio/ring/tree/main/tw-team",
       "license": "MIT",
       "keywords": [
         "technical-writing",
@@ -103,5 +104,5 @@
       ]
     }
   ],
-  "version": "0.357.0"
+  "version": "0.367.0"
 }

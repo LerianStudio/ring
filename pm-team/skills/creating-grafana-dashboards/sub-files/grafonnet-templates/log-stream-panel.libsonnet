@@ -1,5 +1,5 @@
 // Log stream panel using LogQL (Loki).
-// Templated for lib-commons/v5/commons/log structured emissions.
+// Templated for lib-observability/log structured emissions.
 //
 // Required Loki datasource configuration:
 //   - derivedFields with trace_id link to Tempo (so log lines link to traces)

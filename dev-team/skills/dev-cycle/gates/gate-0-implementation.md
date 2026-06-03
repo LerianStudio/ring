@@ -17,7 +17,7 @@ CANNOT proceed to sub-steps 2.1–2.3 without completing this checkpoint.
 
 ### ⛔ MANDATORY: Invoke ring:dev-implementation Skill (not inline execution)
 
-See [shared-patterns/shared-orchestrator-principle.md](../shared-patterns/shared-orchestrator-principle.md) for full details.
+See [shared-patterns/shared-orchestrator-principle.md](../../shared-patterns/shared-orchestrator-principle.md) for full details.
 
 **⛔ FORBIDDEN: Executing TDD-RED/GREEN logic directly from this step.**
 MUST invoke the ring:dev-implementation skill via the Skill tool; it handles all TDD phases, agent selection, agent dispatch, standards verification, and fix iteration.
@@ -37,12 +37,12 @@ After ring:dev-implementation completes, verify generated code:
 
 ### ⛔ File Size Enforcement (MANDATORY — All Gates)
 
-See [shared-patterns/file-size-enforcement.md](../shared-patterns/file-size-enforcement.md) for thresholds, cohesion judgment, verification commands, split strategies, and agent instructions.
+See [shared-patterns/file-size-enforcement.md](../../shared-patterns/file-size-enforcement.md) for thresholds, cohesion judgment, verification commands, split strategies, and agent instructions.
 
 **Summary:** Soft limit 1000 lines per file; hard block at 1500 lines. Files in the 1001-1500 band require cohesion review — keep if coherent (state machine, parser, schema, table-driven tests, tightly-coupled domain logic), split if fragmentable without artificial boundaries. Files > 1500 lines are hard-blocked unless explicit cohesion justification is documented in the PR description. Enforcement points:
 
 - **Gate 0:** Implementation agent receives file-size instructions; orchestrator runs verification command after agent completes. Files 1001-1500 → cohesion review; files > 1500 → hard block.
-- **Gate 0 exit check (inline in ring:dev-implementation Step 7):** Delivery verification runs 7 checks as exit criteria: (A) file-size, (B) license headers, (C) linting, (D) migration safety, (E) vulnerability scanning, (F) API backward compatibility, (G) multi-tenant dual-mode. Any FAIL → ring:dev-implementation re-iterates with specific fix instructions.
+- **Gate 0 exit check (inline in ring:dev-implementation's Delivery Verification Exit Check):** Delivery verification runs 7 checks as exit criteria: (A) file-size, (B) license headers, (C) linting, (D) migration safety, (E) vulnerability scanning, (F) API backward compatibility, (G) multi-tenant dual-mode. Any FAIL → ring:dev-implementation re-iterates with specific fix instructions.
 - **Gate 8:** Code reviewers MUST flag any file > 1000 lines as a MEDIUM+ issue (apply cohesion judgment); files > 1500 lines are CRITICAL.
 
 ### Step 2.1: Prepare Input for ring:dev-implementation Skill
@@ -84,8 +84,7 @@ implementation_input = {
 
    The skill handles:
    - Selecting appropriate agent (Go/TS/Frontend based on language)
-   - TDD-RED phase (writing failing test, capturing failure output)
-   - TDD-GREEN phase (implementing code to pass test)
+   - TDD RED→GREEN in one dispatch (failing test with captured failure output, then implementation to pass)
    - Standards compliance verification (iteration loop, max 3 attempts)
    - Re-dispatching agent for compliance fixes
    - Outputting Standards Coverage Table with evidence
@@ -168,8 +167,8 @@ implementation_input = {
 ### Step 2.3.1: Delivery Verification Exit Check (MANDATORY before Gate 0 completion)
 
 After Gate 0 PASS, delivery verification runs AS EXIT CRITERIA (not as a separate gate).
-This check is performed inside `ring:dev-implementation` as its Step 7 (Delivery
-Verification Exit Check). The orchestrator DOES NOT dispatch a separate skill.
+This check is performed inside `ring:dev-implementation` as its Delivery Verification
+Exit Check. The orchestrator DOES NOT dispatch a separate skill.
 
 Verify that the dev-implementation handoff includes `delivery_verification` field:
 
@@ -197,7 +196,7 @@ IF delivery_verification.result == "PARTIAL" or "FAIL":
 Anti-Rationalization:
 | Rationalization | Why It's WRONG | Required Action |
 |---|---|---|
-| "Gate 0.5 still exists, just renamed" | Gate 0.5 was DELETED as a separate dispatch. Checks now run inline in Gate 0. | **Read `delivery_verification` from Gate 0 handoff; do NOT dispatch a separate skill.** |
+| "There's a separate Gate 0.5 / delivery-verification dispatch" | Delivery verification is a sub-check inside Gate 0, not a separate dispatch. | **Read `delivery_verification` from the Gate 0 handoff; do NOT dispatch a separate skill.** |
 | "I'll just skip this check if Gate 0 passed" | Gate 0 passing without `delivery_verification` means Gate 0 is incomplete. | **Verify `delivery_verification` exists in handoff. If absent → Gate 0 failed.** |
 
 No separate `state.gate_progress.delivery_verification` field — delivery verification is a sub-check of implementation, tracked inline.
@@ -212,5 +211,32 @@ No separate `state.gate_progress.delivery_verification` field — delivery verif
 | "Skill adds overhead for simple tasks" | Overhead = compliance checks. Simple ≠ exempt. | **Invoke Skill("ring:dev-implementation")** |
 | "I'll dispatch the agent and verify output myself" | Self-verification skips the skill's re-dispatch loop. | **Invoke Skill("ring:dev-implementation")** |
 | "Agent already did TDD internally" | Internal ≠ verified by skill. Skill validates output structure. | **Invoke Skill("ring:dev-implementation")** |
+
+### Step 2.4: Subtask Checkpoint (Conditional — `manual_per_subtask` only)
+
+**Checkpoint depends on `execution_mode`:** `manual_per_subtask` → Execute | `manual_per_task` / `automatic` → Skip
+
+This is the ONLY per-subtask pause. It fires after the subtask's Gate 0 completes (the `[checkpoint if manual_per_subtask mode]` step in the Execution Order). Task review (Gate 8) and task validation (Gate 9) run later, once per task.
+
+0. **COMMIT CHECK (before checkpoint):**
+   - if `commit_timing == "per_subtask"`:
+     - Execute `/ring:commit` command with message: `feat({subtask_id}): {subtask_title}`
+     - Include all changed files from this subtask
+   - else: Skip commit (will happen at task or cycle end)
+
+0b. **VISUAL CHANGE REPORT (opt-in):**
+   - If `state.visual_report_granularity == "subtask"`: invoke `Skill("ring:visualize")` for a per-subtask code-diff and tell the user the path.
+   - Default (`"none"`): skip.
+
+1. Set `status = "paused_for_approval"`, save state
+2. Present summary: Subtask ID, Parent Task, Gate 0 status, Duration, Files Changed, Commit Status
+3. **AskUserQuestion:** "Ready to proceed?" Options: (a) Continue (b) Test First (c) Stop Here
+4. **Handle response:**
+
+| Response | Action |
+|----------|--------|
+| Continue | Set in_progress, move to next subtask (or to Gate 8 if this was the last subtask of the task) |
+| Test First | Set `paused_for_testing`, STOP, output resume command |
+| Stop Here | Set `paused`, STOP, output resume command |
 
 ---

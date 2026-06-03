@@ -19,7 +19,7 @@ verbatim into the explorer prompt.
 - Long-lived consumer goroutines (RabbitMQ, Kafka, internal channels) launched raw
 - Background workers launched from `init()`, `main()`, or package-level `func` without recovery
 
-**lib-commons Replacement:**
+**lib-observability Replacement:**
 - `runtime.SafeGo(logger, name, policy, fn)` — fire-and-forget with policy
 - `runtime.SafeGoWithContext(ctx, logger, name, policy, fn)` — carries ctx into fn
 - `runtime.SafeGoWithContextAndComponent(ctx, logger, component, name, policy, fn)` —
@@ -47,7 +47,7 @@ go func() {
     }
 }()
 
-// lib-commons (AFTER):
+// lib-observability (AFTER):
 runtime.SafeGoWithContextAndComponent(ctx, logger, "outbound-webhook-consumer",
     "amqp-consumer-loop", runtime.KeepRunning,
     func(ctx context.Context) {
@@ -87,7 +87,7 @@ runtime.SafeGoWithContextAndComponent(ctx, logger, "outbound-webhook-consumer",
 - Recovery branches that format `r` into an error and return it without also firing the
   observability trident — the caller sees an error, but dashboards never see the panic
 
-**lib-commons Replacement:**
+**lib-observability Replacement:**
 - `runtime.RecoverWithPolicyAndContext(ctx, logger, component, operation, policy)` —
   preferred: carries ctx so the active span receives the `panic.recovered` event
 - `runtime.RecoverWithPolicy(logger, component, operation, policy)` — when no ctx is
@@ -112,7 +112,7 @@ func createOrder(ctx context.Context, req CreateOrderRequest) (*Order, error) {
     return processOrder(ctx, req)
 }
 
-// lib-commons (AFTER):
+// lib-observability (AFTER):
 func createOrder(ctx context.Context, req CreateOrderRequest) (*Order, error) {
     defer runtime.RecoverWithPolicyAndContext(ctx, logger,
         "order-service", "createOrder", runtime.KeepRunning)
@@ -152,7 +152,7 @@ func createOrder(ctx context.Context, req CreateOrderRequest) (*Order, error) {
 1. `grep -r "runtime.SafeGo\|runtime.RecoverWith" --include="*.go"` → presence
 2. `grep -r "runtime.InitPanicMetrics" --include="*.go"` → absence → FINDING
 
-**lib-commons Replacement:**
+**lib-observability Replacement:**
 - Add `runtime.InitPanicMetrics(tl.MetricsFactory, logger)` after telemetry setup,
   before any SafeGo launches — canonical location is right after `tl.ApplyGlobals()`
 
@@ -167,16 +167,16 @@ never fire. You get half the trident.
 ```go
 // DIY (BEFORE): bootstrap never wires panic metrics
 logger, _ := zap.New(zapCfg)
-tl, _ := opentelemetry.NewTelemetry(otelCfg)
+tl, _ := tracing.NewTelemetry(otelCfg)
 _ = tl.ApplyGlobals()
 
 // launches SafeGo goroutines — metric never emits because factory not registered
 runtime.SafeGoWithContextAndComponent(ctx, logger, "worker", "loop",
     runtime.KeepRunning, workerFn)
 
-// lib-commons (AFTER):
+// lib-observability (AFTER):
 logger, _ := zap.New(zapCfg)
-tl, _ := opentelemetry.NewTelemetry(otelCfg)
+tl, _ := tracing.NewTelemetry(otelCfg)
 _ = tl.ApplyGlobals()
 
 runtime.InitPanicMetrics(tl.MetricsFactory, logger)   // <-- wire metrics first
@@ -189,7 +189,7 @@ runtime.SafeGoWithContextAndComponent(ctx, logger, "worker", "loop",
 **Explorer Dispatch Prompt Template:**
 
 > Sweep the target repo for missing `runtime.InitPanicMetrics` initialization. First,
-> confirm the service actually uses `commons/runtime` by grep'ing for `runtime.SafeGo`,
+> confirm the service actually uses `lib-observability/runtime` (or the lib-commons shim) by grep'ing for `runtime.SafeGo`,
 > `runtime.RecoverWith`, `runtime.HandlePanicValue`. If the service uses runtime, MUST
 > check for a call to `runtime.InitPanicMetrics` in bootstrap files (`main.go`,
 > `cmd/*/main.go`, `internal/bootstrap/`, `internal/app/`). If the call is missing,
@@ -213,7 +213,7 @@ runtime.SafeGoWithContextAndComponent(ctx, logger, "worker", "loop",
 - `SetProductionMode(true)` called but then later in bootstrap `SetProductionMode(false)`
   is also called (rare but catches test scaffolding leaking into main)
 
-**lib-commons Replacement:**
+**lib-observability Replacement:**
 - `runtime.SetProductionMode(cfg.Env == "production")` — read from standard config, set
   deterministically once at startup, before any SafeGo launches
 
@@ -232,13 +232,13 @@ runtime.SafeGoWithContextAndComponent(ctx, logger, "worker", "loop",
 ```go
 // DIY (BEFORE): no production-mode switch — panic values leak to span events verbatim
 logger, _ := zap.New(zapCfg)
-tl, _ := opentelemetry.NewTelemetry(otelCfg)
+tl, _ := tracing.NewTelemetry(otelCfg)
 runtime.InitPanicMetrics(tl.MetricsFactory, logger)
 // missing: SetProductionMode
 
-// lib-commons (AFTER):
+// lib-observability (AFTER):
 logger, _ := zap.New(zapCfg)
-tl, _ := opentelemetry.NewTelemetry(otelCfg)
+tl, _ := tracing.NewTelemetry(otelCfg)
 runtime.InitPanicMetrics(tl.MetricsFactory, logger)
 runtime.SetProductionMode(cfg.Env == "production")  // panic values redacted, stack capped
 ```
@@ -273,7 +273,7 @@ runtime.SetProductionMode(cfg.Env == "production")  // panic values redacted, st
 - Handler libraries that swallow panics silently (e.g., `defer func() { _ = recover() }()`
   inside an interceptor — the framework logs nothing, the trident fires nothing)
 
-**lib-commons Replacement:**
+**lib-observability Replacement:**
 - Fiber: wire `StackTraceHandler` → `runtime.HandlePanicValue(c.UserContext(), logger, e,
   "api", c.Path())`
 - gRPC: `defer runtime.RecoverWithPolicyAndContext(ctx, logger, "grpc", info.FullMethod,
@@ -295,7 +295,7 @@ app.Use(recover.New(recover.Config{
     },
 }))
 
-// lib-commons (AFTER):
+// lib-observability (AFTER):
 app.Use(recover.New(recover.Config{
     EnableStackTrace: true,
     StackTraceHandler: func(c *fiber.Ctx, e interface{}) {
@@ -336,7 +336,7 @@ app.Use(recover.New(recover.Config{
   check (e.g., "verify DB schema matches expected version") — silently continuing past
   a failed invariant check is worse than crashing
 
-**lib-commons Replacement:**
+**lib-observability Replacement:**
 - Apply the Reference Mode decision tree (Section 2). No mechanical rewrite — this is a
   **judgment call** per goroutine.
 
@@ -358,7 +358,8 @@ runtime.SafeGoWithContextAndComponent(ctx, logger, "migrator", "apply-schema",
         }
     })
 
-// lib-commons (AFTER): flip to CrashProcess so k8s restarts the pod on failure.
+// lib-observability (AFTER): flip to CrashProcess so k8s restarts the pod on failure.
+//   (Import path: github.com/LerianStudio/lib-observability/runtime — same symbol names.)
 // Mirror fix for the opposite case: request-handler fan-out using CrashProcess flips
 // to KeepRunning so one bad request doesn't DoS the service replica.
 runtime.SafeGoWithContextAndComponent(ctx, logger, "migrator", "apply-schema",

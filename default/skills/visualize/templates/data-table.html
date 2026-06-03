@@ -3,15 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Requirements Audit — Lerian Studio</title>
+<title>Requirements audit - Lerian Studio</title>
 <!--
   Reference template for the visual-explainer skill: data tables.
-  Lerian sunglow palette — brand-aligned with the standard foundation.
+  Pattern reference only. Start generated artifacts from standard.html,
+  then adapt this structure to the user's source data. Do not copy this
+  sample title, requirements, metrics, statuses, or rows unless present in
+  the user request or source material.
+
+  Lerian sunglow palette - brand-aligned with the standard foundation.
   Key patterns demonstrated:
   - Sunglow brand palette with semantic status colors
-  - KPI summary cards above the table (visual hook before the data)
+  - Optional source-backed summary cells above the table, only when metrics exist
   - Collapsible <details> section (replaces static callout)
-  - Depth tiers: elevated KPIs, default table, collapsible for secondary
+  - Depth tiers: elevated source summary, default table, collapsible for secondary
   - Real <table> element with sticky header, alternating rows
   - Status indicator badges (match, gap, partial)
   - Text wrapping in wide columns, code references in cells
@@ -41,53 +46,53 @@
   --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', ui-monospace, monospace;
 
   /* --- Backgrounds --- */
-  --bg: #F4F4F5;                          /* page background (zinc-100) */
-  --surface: #FFFFFF;                      /* cards, panels */
-  --surface-elevated: #FFFFFF;             /* modals, popovers */
-  --surface-muted: #E4E4E7;               /* subtle backgrounds, muted areas */
+  --bg: oklch(96.7% 0.001 286.4);          /* page background (zinc-100) */
+  --surface: oklch(99% 0.002 286.4);       /* cards, panels */
+  --surface-elevated: oklch(98.5% 0.003 286.4); /* modals, popovers */
+  --surface-muted: oklch(91.9% 0.004 286.3); /* subtle backgrounds, muted areas */
 
   /* --- Text --- */
-  --text: #27272A;                         /* primary text (zinc-800) */
-  --text-secondary: #52525B;               /* secondary text (zinc-600) */
-  --text-muted: #A1A1AA;                   /* placeholder, meta (zinc-400) */
-  --text-inverse: #F4F4F5;                 /* text on dark backgrounds */
+  --text: oklch(27.4% 0.006 286.0);        /* primary text (zinc-800) */
+  --text-secondary: oklch(44.2% 0.017 285.8); /* secondary text (zinc-600) */
+  --text-muted: oklch(70.5% 0.015 286.1);  /* placeholder, meta (zinc-400) */
+  --text-inverse: oklch(96.7% 0.001 286.4); /* text on dark backgrounds */
 
   /* --- Brand Accent (Sunglow) --- */
-  --accent: #FDCB28;                       /* primary brand yellow */
+  --accent: oklch(84.8% 0.166 88.9);       /* primary brand yellow */
   --accent-dim: rgba(253, 203, 40, 0.15);
   --accent-hover: rgba(253, 203, 40, 0.7);
-  --accent-text: #27272A;                  /* text color on accent bg */
+  --accent-text: oklch(27.4% 0.006 286.0); /* text color on accent bg */
 
   /* --- Semantic Status --- */
-  --success: #16A34A;
-  --success-bg: #f0fdf4;
+  --success: oklch(62.7% 0.194 149.2);
+  --success-bg: oklch(98.2% 0.018 155.8);
   --success-dim: rgba(22, 163, 74, 0.12);
-  --warning: #EAB308;
-  --warning-bg: #fefce8;
+  --warning: oklch(79.5% 0.162 86.0);
+  --warning-bg: oklch(98.7% 0.026 102.2);
   --warning-dim: rgba(234, 179, 8, 0.15);
-  --error: #EF4444;
-  --error-bg: #fef2f2;
+  --error: oklch(63.7% 0.208 25.3);
+  --error-bg: oklch(97.1% 0.013 17.4);
   --error-dim: rgba(239, 68, 68, 0.12);
-  --info: #2563EB;
-  --info-bg: #eff6ff;
+  --info: oklch(54.6% 0.215 262.9);
+  --info-bg: oklch(97% 0.014 254.6);
   --info-dim: rgba(37, 99, 235, 0.12);
 
   /* --- Extended Palette (diagram variety) --- */
-  --sunglow-400: #FDCB28;
-  --sunglow-500: #EDAC05;
-  --sunglow-100: #FFF8C2;
-  --de-york-400: #5BCD86;
-  --de-york-600: #26934F;
-  --de-york-100: #E0F8E8;
-  --tangerine-400: #FAA589;
-  --tangerine-500: #F06E43;
-  --tangerine-100: #FEE9E2;
-  --cod-gray-400: #927E81;
-  --cod-gray-600: #655557;
+  --sunglow-400: oklch(84.8% 0.166 88.9);
+  --sunglow-500: oklch(76.7% 0.159 83.8);
+  --sunglow-100: oklch(96.8% 0.083 96.6);
+  --de-york-400: oklch(75.6% 0.147 150.0);
+  --de-york-600: oklch(55% 0.138 149.0);
+  --de-york-100: oklch(95% 0.052 150.0);
+  --tangerine-400: oklch(78.4% 0.106 43.7);
+  --tangerine-500: oklch(66.5% 0.176 38.6);
+  --tangerine-100: oklch(93.6% 0.039 42.4);
+  --cod-gray-400: oklch(59.3% 0.025 13.0);
+  --cod-gray-600: oklch(43.7% 0.023 13.6);
 
   /* --- Borders --- */
-  --border: #E4E4E7;                       /* default border (zinc-200) */
-  --border-strong: #D4D4D8;               /* input borders (zinc-300) */
+  --border: oklch(91.9% 0.004 286.3);     /* default border (zinc-200) */
+  --border-strong: oklch(87.1% 0.006 286.3); /* input borders (zinc-300) */
   --border-subtle: rgba(0, 0, 0, 0.05);   /* very faint separators */
 
   /* --- Shadows (product-console) --- */
@@ -108,22 +113,22 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #27272A;
-    --surface: #3F3F46;
-    --surface-elevated: #52525B;
-    --surface-muted: #52525B;
+    --bg: oklch(27.4% 0.006 286.0);
+    --surface: oklch(37% 0.013 285.8);
+    --surface-elevated: oklch(44.2% 0.017 285.8);
+    --surface-muted: oklch(44.2% 0.017 285.8);
 
-    --text: #F4F4F5;
-    --text-secondary: #A1A1AA;
-    --text-muted: #71717A;
-    --text-inverse: #27272A;
+    --text: oklch(96.7% 0.001 286.4);
+    --text-secondary: oklch(70.5% 0.015 286.1);
+    --text-muted: oklch(55.2% 0.016 285.9);
+    --text-inverse: oklch(27.4% 0.006 286.0);
 
-    --accent: #FDCB28;
+    --accent: oklch(84.8% 0.166 88.9);
     --accent-dim: rgba(253, 203, 40, 0.2);
-    --accent-text: #27272A;
+    --accent-text: oklch(27.4% 0.006 286.0);
 
-    --border: #52525B;
-    --border-strong: #71717A;
+    --border: oklch(44.2% 0.017 285.8);
+    --border-strong: oklch(55.2% 0.016 285.9);
     --border-subtle: rgba(255, 255, 255, 0.06);
 
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
@@ -448,16 +453,16 @@ h1 {
 }
 
 
-/* ========== KPI SUMMARY ========== */
+/* ========== SOURCE-BACKED SUMMARY ========== */
 
-.kpi-row {
+.source-summary-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 14px;
   margin-bottom: 20px;
 }
 
-.kpi-card {
+.source-summary-card {
   background: var(--surface-elevated, var(--surface));
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -465,7 +470,7 @@ h1 {
   box-shadow: var(--shadow-sm);
 }
 
-.kpi-card__value {
+.source-summary-card__value {
   font-family: var(--font-body);
   font-size: 32px;
   font-weight: 700;
@@ -473,11 +478,11 @@ h1 {
   font-variant-numeric: tabular-nums;
 }
 
-.kpi-card__value--green { color: var(--success); }
-.kpi-card__value--red { color: var(--error); }
-.kpi-card__value--orange { color: var(--warning); }
+.source-summary-card__value--green { color: var(--success); }
+.source-summary-card__value--red { color: var(--error); }
+.source-summary-card__value--orange { color: var(--warning); }
 
-.kpi-card__label {
+.source-summary-card__label {
   font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 600;
@@ -667,13 +672,13 @@ details.collapsible .collapsible__body code {
 
 @media print {
   body {
-    background: #fff;
-    color: #000;
+    background: oklch(98.8% 0.004 92);
+    color: oklch(24% 0.012 70);
     padding: 20px;
   }
 
   .table-wrap,
-  .kpi-card,
+  .source-summary-card,
   details.collapsible {
     box-shadow: none;
     border: 1px solid #ddd;
@@ -689,7 +694,7 @@ details.collapsible .collapsible__body code {
     left: 0;
     right: 0;
     border-top: 1px solid #ddd;
-    background: #fff;
+    background: oklch(98.8% 0.004 92);
     padding: 12px 20px;
   }
 
@@ -729,25 +734,26 @@ details.collapsible .collapsible__body code {
   </header>
 
 
-  <h1 class="animate" style="--i:0">Requirements Audit</h1>
-  <p class="subtitle animate" style="--i:1">victoria's email vs. implementation plan &mdash; point-by-point review</p>
+  <h1 class="animate" style="--i:0">Requirements audit</h1>
+  <p class="subtitle animate" style="--i:1">source requirements vs. implementation plan: point-by-point review</p>
 
-  <div class="kpi-row animate" style="--i:2">
-    <div class="kpi-card">
-      <div class="kpi-card__value">14</div>
-      <div class="kpi-card__label">Items Reviewed</div>
+  <!-- Source-backed demo summary slots. Replace values and labels with facts from the source material, or remove this row. -->
+  <div class="source-summary-row animate" style="--i:2">
+    <div class="source-summary-card">
+      <div class="source-summary-card__value">14</div>
+      <div class="source-summary-card__label">Items reviewed</div>
     </div>
-    <div class="kpi-card">
-      <div class="kpi-card__value kpi-card__value--green">13</div>
-      <div class="kpi-card__label">Match</div>
+    <div class="source-summary-card">
+      <div class="source-summary-card__value source-summary-card__value--green">13</div>
+      <div class="source-summary-card__label">Match</div>
     </div>
-    <div class="kpi-card">
-      <div class="kpi-card__value kpi-card__value--red">1</div>
-      <div class="kpi-card__label">Gap</div>
+    <div class="source-summary-card">
+      <div class="source-summary-card__value source-summary-card__value--red">1</div>
+      <div class="source-summary-card__label">Gap</div>
     </div>
-    <div class="kpi-card">
-      <div class="kpi-card__value" style="color:var(--accent)">93%</div>
-      <div class="kpi-card__label">Coverage</div>
+    <div class="source-summary-card">
+      <div class="source-summary-card__value" style="color:var(--accent)">93%</div>
+      <div class="source-summary-card__label">Coverage</div>
     </div>
   </div>
 
@@ -769,22 +775,22 @@ details.collapsible .collapsible__body code {
         </thead>
         <tbody>
           <tr style="--i:4">
-            <td class="wide">Template: <code>yoth-special-edition</code> only</td>
-            <td class="wide">Plan scopes everything to this template.</td>
+            <td class="wide">Scope: <code>product-detail-template</code> only</td>
+            <td class="wide">Plan limits all changes to the named template.</td>
             <td><span class="status status--match">Match</span></td>
           </tr>
           <tr style="--i:5">
-            <td class="wide">EOD tomorrow (Friday), Tuesday AM launch</td>
-            <td class="wide">Plan header says same.</td>
+            <td class="wide">Target delivery window captured in source brief</td>
+            <td class="wide">Plan header repeats the same delivery window.</td>
             <td><span class="status status--match">Match</span></td>
           </tr>
           <tr style="--i:6">
-            <td class="wide">Update BIS button label and pop up text</td>
+            <td class="wide">Update notification button label and modal text</td>
             <td class="wide">Button text + modal description configurable via settings.</td>
             <td><span class="status status--match">Match</span></td>
           </tr>
           <tr style="--i:7">
-            <td class="wide">Use Stoq's API to trigger events</td>
+            <td class="wide">Use the vendor SDK to trigger notification events</td>
             <td class="wide">Uses <code>openInlineForm</code>, <code>openModal</code>, <code>removeInlineForm</code>.</td>
             <td><span class="status status--match">Match</span></td>
           </tr>
@@ -794,38 +800,38 @@ details.collapsible .collapsible__body code {
             <td><span class="status status--match">Match</span></td>
           </tr>
           <tr style="--i:9">
-            <td class="wide">Default values = current behavior when empty</td>
-            <td class="wide">Blank settings = Stoq default "Notify Me" behavior.</td>
+            <td class="wide">Default values preserve current behavior when empty</td>
+            <td class="wide">Blank settings keep the existing notification behavior.</td>
             <td><span class="status status--match">Match</span></td>
           </tr>
           <tr style="--i:10">
-            <td class="wide">Only display for OOS variants</td>
+            <td class="wide">Only display for unavailable variants</td>
             <td class="wide">DOM-based sold-out detection.</td>
             <td><span class="status status--match">Match</span></td>
           </tr>
           <tr style="--i:11">
-            <td class="wide">Exclude products with <code>excludebis</code> tag</td>
+            <td class="wide">Exclude products with <code>exclude-notify</code> tag</td>
             <td class="wide">Checked in both PDP and PLP Liquid.</td>
             <td><span class="status status--match">Match</span></td>
           </tr>
           <tr style="--i:12">
-            <td class="wide"><code>openInlineForm</code> to load Stoq form in modal</td>
+            <td class="wide"><code>openInlineForm</code> loads the vendor form in the modal</td>
             <td class="wide">PDP modal uses <code>openInlineForm</code>.</td>
             <td><span class="status status--match">Match</span></td>
           </tr>
           <tr style="--i:13">
-            <td class="wide">Updated Button Label: "Join the waitlist"</td>
+            <td class="wide">Updated button label from the source brief</td>
             <td class="wide">Pre-populated in template JSON.</td>
             <td><span class="status status--match">Match</span></td>
           </tr>
           <tr style="--i:14">
-            <td class="wide">Updated Pop Up Text: "Sign up to be notified when we restock this or other embroidered styles."</td>
+            <td class="wide">Updated modal copy from the source brief</td>
             <td class="wide"><code>bis_modal_description</code> setting.</td>
             <td><span class="status status--match">Match</span></td>
           </tr>
           <tr style="--i:15">
-            <td class="wide">Theme: Huha 2.0 - Giddy Up Collection D2C Launch</td>
-            <td class="wide">Clone ID <code>145580556374</code>.</td>
+            <td class="wide">Deployment target named in the source brief</td>
+            <td class="wide">Environment ID is included as a placeholder value.</td>
             <td><span class="status status--match">Match</span></td>
           </tr>
           <tr style="--i:16">
@@ -834,9 +840,9 @@ details.collapsible .collapsible__body code {
             <td><span class="status status--match">Match</span></td>
           </tr>
           <tr style="--i:17">
-            <td class="wide">Run <code>stoq:restock-modal:submitted</code> when form is submitted</td>
+            <td class="wide">Run <code>vendor:notify-modal:submitted</code> when form is submitted</td>
             <td class="wide">Not mentioned in plan.
-              <small>When using <code>openInlineForm</code> inside a custom modal, unclear if Stoq fires this event automatically or if manual dispatch is needed.</small>
+              <small>When using <code>openInlineForm</code> inside a custom modal, unclear if the vendor SDK fires this event automatically or if manual dispatch is needed.</small>
             </td>
             <td><span class="status status--gap">Gap</span></td>
           </tr>
@@ -853,10 +859,10 @@ details.collapsible .collapsible__body code {
   </div>
 
   <details class="collapsible animate" style="--i:19">
-    <summary>Gap Analysis Detail</summary>
+    <summary>Gap analysis detail</summary>
     <div class="collapsible__body">
-      <strong>Gap: <code>stoq:restock-modal:submitted</code> event.</strong>
-      Michael explicitly requests firing this event on form submission. The plan uses Stoq's <code>openInlineForm</code> inside a custom modal, but doesn't address whether Stoq dispatches this event automatically in that context. If other integrations (Klaviyo, analytics, theme JS) listen for it, missing it could silently break the submission pipeline. Recommend adding an explicit <code>dispatchEvent</code> call as a safety net.
+      <strong>Gap: <code>vendor:notify-modal:submitted</code> event.</strong>
+      The source brief requires an event on form submission. The plan uses <code>openInlineForm</code> inside a custom modal, but does not address whether the vendor SDK dispatches this event automatically in that context. If analytics or downstream automations listen for it, missing it could silently break the submission pipeline. Recommend adding an explicit <code>dispatchEvent</code> call as a safety net.
     </div>
   </details>
 
@@ -875,7 +881,7 @@ details.collapsible .collapsible__body code {
         </div>
       </div>
       <div class="footer-meta">
-        <span class="footer-generated">Generated with <strong>Ring</strong></span>
+        <span class="footer-generated"><strong>Generated with Ring</strong></span>
         <span class="footer-date"></span>
       </div>
     </div>

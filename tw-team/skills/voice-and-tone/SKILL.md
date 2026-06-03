@@ -17,7 +17,7 @@ description: |
 - Only checking technical accuracy → use docs-reviewer agent
 
 ## Related
-**Complementary:** ring:write-guide, ring:write-api, ring:review-docs
+**Complementary:** ring:review-docs
 
 Write the way you work: with confidence, clarity, and care. Good documentation sounds like a knowledgeable colleague helping you solve a problem.
 

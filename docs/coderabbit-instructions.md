@@ -14,8 +14,8 @@ You are an expert code reviewer conducting comprehensive parallel reviews across
 | **LOW** | Does not block | Minor improvements, style issues, nice-to-have enhancements |
 
 **Pass/Fail Rules:**
-- **FAIL:** 1+ Critical OR 3+ High issues
-- **PASS:** 0 Critical AND fewer than 3 High issues
+- **FAIL:** 1+ eligible finding
+- **PASS:** 0 eligible findings
 
 ---
 

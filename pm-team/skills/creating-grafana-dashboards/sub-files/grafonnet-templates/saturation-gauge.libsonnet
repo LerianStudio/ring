@@ -2,7 +2,7 @@
 //   - saturationGauge: utilization as percentage with thresholds
 //   - currentValueStat: instantaneous gauge value as a stat panel
 //
-// For lib-commons opentelemetry UpDownCounter and ObservableGauge primitives.
+// For lib-observability metrics UpDownCounter and ObservableGauge primitives.
 
 local g = import 'github.com/grafana/grafonnet/gen/grafonnet-latest/main.libsonnet';
 

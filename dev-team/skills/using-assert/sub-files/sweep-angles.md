@@ -17,7 +17,7 @@ verbatim into the explorer prompt.
 - Custom `Must*` helper calls (e.g., `MustParseDecimal`, `MustConnect`) in non-test code
 - **Exception (allowed):** `regexp.MustCompile` with a compile-time **string literal constant** is the only sanctioned exception to the zero-panic policy. If the argument is a variable or computed at runtime, it is a violation.
 
-**commons/assert Replacement:**
+**lib-observability/assert Replacement:**
 - `asserter.That(ctx, condition, "message", keysAndValues...)` — returns error, observability trident fires
 - `asserter.NotNil(ctx, value, "message", keysAndValues...)` — for nil-receiver guards
 - `asserter.NoError(ctx, err, "message", keysAndValues...)` — when wrapping an existing error
@@ -76,7 +76,7 @@ func postEntry(ctx context.Context, a *assert.Asserter, amount decimal.Decimal) 
 
 **Important distinction:** NOT every `if err != nil { return err }` is wrong. Expected failure paths — user input validation, external I/O failure, context cancellation — are normal error returns and do NOT need asserter coverage. This angle targets **invariant** paths: internal state that the caller/callee contract guarantees will be valid, where a violation is a bug, not a user error.
 
-**commons/assert Replacement:**
+**lib-observability/assert Replacement:**
 - `asserter.NotNil(ctx, x, "x must not be nil at this boundary", keys...)` — for nil-at-invariant
 - `asserter.NotEmpty(ctx, s, "tenant ID required at this boundary")` — for empty-string invariants
 - `asserter.NoError(ctx, err, "internal call must not fail", keys...)` — for "should never error" paths
@@ -137,13 +137,13 @@ func postToLedger(ctx context.Context, a *assert.Asserter, txnID string, account
 - Custom transaction-status switch statements exhaustively enumerating CREATED/APPROVED/PENDING/CANCELED/NOTED (duplicates `assert.ValidTransactionStatus`)
 - Hand-rolled status-transition lookup tables (duplicates `assert.TransactionCanTransitionTo`)
 
-**commons/assert Replacement:** Delete the DIY predicate, compose asserter with the canonical predicate:
+**lib-observability/assert Replacement:** Delete the DIY predicate, compose asserter with the canonical predicate:
 
 | DIY Predicate                  | Canonical Replacement                          |
 | ------------------------------ | ---------------------------------------------- |
 | `isPositive(n int64)`          | `assert.Positive(n)`                           |
 | `isNonNegative(n int64)`       | `assert.NonNegative(n)`                        |
-| `isInRange(n, min, max)`       | `assert.InRange(n, min, max)`                  |
+| `isInRange(n, min, max)`       | `assert.InRange(n, minVal, maxVal)`            |
 | `isPositiveAmount(d decimal)`  | `assert.PositiveDecimal(d)`                    |
 | `isNonNegativeAmount(d)`       | `assert.NonNegativeDecimal(d)`                 |
 | `isValidAmount(d)`             | `assert.ValidAmount(d)`                        |
@@ -191,7 +191,7 @@ func process(ctx context.Context, a *assert.Asserter, txnID, status string) erro
 **Explorer Dispatch Prompt Template:**
 
 > Sweep the target repo for hand-rolled domain predicates that duplicate
-> `commons/assert` canonical predicates. Search for functions named `isPositive*`,
+> `lib-observability/assert` canonical predicates. Search for functions named `isPositive*`,
 > `isValidAmount*`, `isValidTransactionStatus*`, `canTransition*`, `isValidUUID*`,
 > `isValidPort*`, `debitsEqualCredits*`, `isInRange*`, and similar patterns. Also
 > search for inline equivalents — switch statements enumerating
@@ -221,12 +221,12 @@ Presence:  grep -r 'assert.New\|assertion.That\|a.That\|a.NotNil\|a.NotEmpty\|a.
 Absence:   grep -r 'assert.InitAssertionMetrics' → returns no results
 ```
 
-**commons/assert Replacement:**
+**lib-observability/assert Replacement:**
 
 Add to the bootstrap sequence, AFTER telemetry is set up, ALONGSIDE `runtime.InitPanicMetrics`:
 
 ```go
-// After: tl, _ := opentelemetry.NewTelemetry(...)
+// After: tl, _ := tracing.NewTelemetry(...)
 runtime.InitPanicMetrics(tl.MetricsFactory, logger)
 assert.InitAssertionMetrics(tl.MetricsFactory)  // add this
 ```
@@ -237,19 +237,19 @@ assert.InitAssertionMetrics(tl.MetricsFactory)  // add this
 
 ```go
 // BEFORE — metrics factory wired, panic metrics initialized, assert metrics forgotten:
-tl, _ := opentelemetry.NewTelemetry(telemetryConfig)
+tl, _ := tracing.NewTelemetry(telemetryConfig)
 runtime.InitPanicMetrics(tl.MetricsFactory, logger)
 // assertion_failed_total counter will never fire even when assertions do
 
 // AFTER:
-tl, _ := opentelemetry.NewTelemetry(telemetryConfig)
+tl, _ := tracing.NewTelemetry(telemetryConfig)
 runtime.InitPanicMetrics(tl.MetricsFactory, logger)
 assert.InitAssertionMetrics(tl.MetricsFactory)
 ```
 
 **Explorer Dispatch Prompt Template:**
 
-> Sweep the target repo to determine whether `commons/assert` is used without
+> Sweep the target repo to determine whether `lib-observability/assert` is used without
 > `InitAssertionMetrics` being called during bootstrap. First, grep for any usage
 > of `assert.New(` or asserter methods (`.That(`, `.NotNil(`, `.NotEmpty(`,
 > `.NoError(`, `.Never(`) across the codebase — this establishes that the service
@@ -280,7 +280,7 @@ assert.InitAssertionMetrics(tl.MetricsFactory)
 
 **Why this matters:** The test confirms the invariant holds under the test's inputs. The production code path can still **receive** inputs that violate the invariant (e.g., a bug upstream produces unbalanced debits) and silently corrupt ledger state. The invariant lives in the test, not in the production code, so CI stays green while production drifts.
 
-**commons/assert Replacement:**
+**lib-observability/assert Replacement:**
 
 Mirror the test assertion into the production code path:
 
@@ -372,7 +372,7 @@ against the limits of test coverage.
 - HTTP middleware error-logging paths that lose the structured AssertionError context
 - Any `logger.Error("handler failed", "error", err)` at an error boundary — when `err` may be an AssertionError, the structural context (Component, Operation, Assertion) is flattened into the opaque error string
 
-**commons/assert Replacement:**
+**lib-observability/assert Replacement:**
 
 At error boundaries, unwrap and log the structural context:
 

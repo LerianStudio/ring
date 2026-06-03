@@ -316,10 +316,10 @@ if err := pub.Publish(ctx, payload); err != nil {
 - Hand-rolled request ID / correlation ID propagation
 - Manual `otel.Tracer(...).Start(...)` wrapping handler logic
 
-**lib-commons Replacement:**
+**lib-commons + lib-observability Replacement:**
 - `commons/net/http.WithCORS` — configurable CORS with safe defaults
-- `commons/net/http.WithHTTPLogging` — structured request logging via zap
-- `commons/net/http.NewTelemetryMiddleware` — OTel span per request + metrics emission
+- `lib-observability/middleware.WithHTTPLogging` — structured request logging via `lib-observability/zap`
+- `lib-observability/middleware.NewTelemetryMiddleware` — OTel span per request + metrics emission
 
 **Migration Complexity:** trivial
 
@@ -339,10 +339,10 @@ app.Use(func(c *fiber.Ctx) error {
     return err
 })
 
-// lib-commons (AFTER):
+// lib-commons + lib-observability (AFTER):
 app.Use(http.WithCORS(http.CORSConfig{AllowedOrigins: cfg.AllowedOrigins}))
-app.Use(http.WithHTTPLogging(logger))
-app.Use(http.NewTelemetryMiddleware(tracer, meter))
+app.Use(middleware.WithHTTPLogging(middleware.WithCustomLogger(logger)))
+app.Use(middleware.NewTelemetryMiddleware(tl).WithTelemetry(tl))
 ```
 
 **Explorer Dispatch Prompt Template:**
@@ -699,21 +699,24 @@ ciphertext, err := c.Encrypt(plaintext) // GCM + HMAC
 
 ---
 
-#### Angle 14: Observability setup DIY
+#### Angle 14: Observability setup DIY *(canonical home: lib-observability)*
 
 **Severity:** HIGH
 
+**Scope note:** The observability layer moved to `lib-observability` v1.0.0. This angle still runs in the lib-commons sweep, but its detection logic now flags **both** raw DIY **and** continued use of the deprecated lib-commons shim paths. The replacement target is `lib-observability/{log,zap,tracing,metrics}`. For deep audits, prefer `ring:using-lib-observability` and `ring:using-tracing` over this single-angle breadth pass.
+
 **DIY Patterns to Detect:**
-- Custom `zap.NewProduction()` / `zap.NewDevelopment()` without `commons/zap` wrapper
+- Custom `zap.NewProduction()` / `zap.NewDevelopment()` without a Lerian wrapper
 - Manual `otel.Tracer(...)` / `otel.Meter(...)` creation without centralized factory
 - Hardcoded OTLP exporter endpoints in app code
 - Metrics created ad-hoc (`meter.Int64Counter(...)`) without a `MetricsFactory`
 - No trace context propagation between services
+- **Deprecated shim imports**: `github.com/LerianStudio/lib-commons/v5/commons/{log,zap,opentelemetry,opentelemetry/metrics}` — these still compile via shims but new code MUST use `lib-observability` instead
 
-**lib-commons Replacement:**
-- `commons/zap.New(cfg)` — structured logger with standard fields
-- `commons/opentelemetry.NewTelemetry(cfg)` — tracer + meter + propagator setup
-- `tl.MetricsFactory` — pre-registered metric builders with standard labels
+**Replacement (lib-observability):**
+- `lib-observability/zap.New(cfg)` — structured logger with standard fields
+- `lib-observability/tracing.NewTelemetry(cfg)` — tracer + meter + propagator setup
+- `lib-observability/metrics` — `MetricsFactory` with pre-registered metric builders and standard labels
 
 **Migration Complexity:** moderate
 
@@ -727,9 +730,14 @@ tp := sdktrace.NewTracerProvider(sdktrace.WithBatcher(exp))
 otel.SetTracerProvider(tp)
 tracer := otel.Tracer("my-service")
 
-// lib-commons (AFTER):
+// lib-observability (AFTER):
+import (
+    "github.com/LerianStudio/lib-observability/zap"
+    "github.com/LerianStudio/lib-observability/tracing"
+)
+
 logger := zap.New(zap.Config{ServiceName: "my-service", Env: cfg.Env})
-tl, err := opentelemetry.NewTelemetry(opentelemetry.Config{
+tl, err := tracing.NewTelemetry(tracing.Config{
     ServiceName: "my-service",
     OTLPEndpoint: cfg.OTLPEndpoint,
 })
@@ -745,15 +753,17 @@ metrics := tl.MetricsFactory()
 > Sweep the target repo for observability DIY. Search for `zap.NewProduction()`,
 > `zap.NewDevelopment()`, `otel.Tracer(`, `otel.Meter(`, direct OTLP exporter setup, and
 > ad-hoc metric creation without a factory. MUST flag hardcoded exporter endpoints. MUST
-> flag logger instantiation outside `commons/zap`. For each finding record file:line and
-> the instrumentation component (logger, tracer, meter, exporter). Severity HIGH —
-> inconsistent instrumentation cripples observability in production.
+> also flag any import of `github.com/LerianStudio/lib-commons/v5/commons/{log,zap,opentelemetry,opentelemetry/metrics}` — these are deprecated shims; the canonical home is `github.com/LerianStudio/lib-observability/{log,zap,tracing,metrics}`. For each finding record file:line, the instrumentation component (logger, tracer, meter, exporter), and whether the issue is raw DIY or a deprecated shim import. Severity HIGH — inconsistent instrumentation cripples observability in production.
+
+> **Scope note:** This is the breadth-first single-angle sweep. For a dedicated deep audit of the observability stack, dispatch `ring:using-lib-observability` (top-level) or `ring:using-tracing` (TracerProvider lifecycle specifically). Those produce richer findings than this single-angle pass.
 
 ---
 
-#### Angle 15: Panic handling DIY
+#### Angle 15: Panic handling DIY *(canonical home: lib-observability/runtime)*
 
 **Severity:** CRITICAL
+
+**Scope note:** The `runtime` panic-recovery package moved to `lib-observability/runtime` v1.0.0. This angle still runs in the lib-commons sweep, but its detection logic now flags **both** raw DIY **and** continued use of the deprecated `commons/runtime` shim. The replacement target is `lib-observability/runtime`. For a 6-angle deep audit, dispatch `ring:using-runtime` instead of relying on this single-angle pass.
 
 **DIY Patterns to Detect:**
 - Raw `defer func() { if r := recover(); r != nil { ... } }()` without emitting a metric,
@@ -762,13 +772,12 @@ metrics := tl.MetricsFactory()
   (silent crashes — goroutine dies, process keeps running, work is lost)
 - Goroutine launches inside hot paths (HTTP handlers, message consumers) without
   `SafeGo` equivalent
+- **Deprecated shim imports**: `github.com/LerianStudio/lib-commons/v5/commons/runtime` — still compiles but the canonical path is `github.com/LerianStudio/lib-observability/runtime`
 
-**lib-commons Replacement:**
-- `commons/runtime.SafeGo(fn)` — wraps goroutine with recovery + observability
-- `commons/runtime.SafeGoWithContextAndComponent(ctx, component, fn)` — attaches
-  contextual metadata to panic reports
-- `commons/runtime.RecoverWithPolicyAndContext(ctx, policy)` — deferred recovery inside
-  existing functions with policy-driven response
+**Replacement (lib-observability/runtime):**
+- `runtime.SafeGo(fn)` — wraps goroutine with recovery + observability
+- `runtime.SafeGoWithContextAndComponent(ctx, component, fn)` — attaches contextual metadata to panic reports
+- `runtime.RecoverWithPolicyAndContext(ctx, policy)` — deferred recovery inside existing functions with policy-driven response
 
 **Migration Complexity:** moderate
 
@@ -782,7 +791,9 @@ go func() {
     }
 }()
 
-// lib-commons (AFTER):
+// lib-observability (AFTER):
+import "github.com/LerianStudio/lib-observability/runtime"
+
 runtime.SafeGoWithContextAndComponent(ctx, "msg-consumer", func(ctx context.Context) {
     for msg := range consumer.Messages() {
         process(ctx, msg) // panic → recovered, logged, metric emitted, traced
@@ -801,20 +812,21 @@ reliability baseline.
 **Explorer Dispatch Prompt Template:**
 
 > Sweep the target repo for panic-handling DIY. MUST find every `go func()` and
-> `go someFunction(...)` in the codebase that isn't wrapped by `commons/runtime.SafeGo`
-> or equivalent. MUST find every `defer recover()` that lacks observability emission
-> (metric, log, span). For each finding record file:line and whether the goroutine is
-> long-lived (consumer loop, worker) or short-lived (request fan-out). Severity CRITICAL
-> — silent goroutine crashes are the highest-signal reliability defect this sweep
-> catches.
+> `go someFunction(...)` in the codebase that isn't wrapped by a `SafeGo` equivalent.
+> MUST find every `defer recover()` that lacks observability emission (metric, log, span).
+> MUST also flag any import of `github.com/LerianStudio/lib-commons/v5/commons/runtime` —
+> that path is a deprecated shim; the canonical home is `github.com/LerianStudio/lib-observability/runtime`.
+> For each finding record file:line, whether the goroutine is long-lived (consumer loop, worker) or short-lived (request fan-out), and whether the issue is raw DIY or a deprecated shim import. Severity CRITICAL — silent goroutine crashes are the highest-signal reliability defect this sweep catches.
 
-> **Scope note:** This is the breadth-first single-angle sweep. For a dedicated 6-angle deep audit of commons/runtime (naked goroutines, unobservable recover, missing InitPanicMetrics, production mode, framework integration, policy mismatch), dispatch `ring:using-runtime` in Sweep Mode.
+> **Scope note:** This is the breadth-first single-angle sweep. For a dedicated 6-angle deep audit of the runtime package (naked goroutines, unobservable recover, missing InitPanicMetrics, production mode, framework integration, policy mismatch), dispatch `ring:using-runtime` in Sweep Mode.
 
 ---
 
-#### Angle 16: Assertions DIY
+#### Angle 16: Assertions DIY *(canonical home: lib-observability/assert)*
 
 **Severity:** HIGH
+
+**Scope note:** The `assert` package moved to `lib-observability/assert` v1.0.0. This angle still runs in the lib-commons sweep, but its detection logic now flags **both** raw DIY **and** continued use of the deprecated `commons/assert` shim. The replacement target is `lib-observability/assert`. For a 6-angle deep audit, dispatch `ring:using-assert` instead of relying on this single-angle pass.
 
 **DIY Patterns to Detect:**
 - Inline `if x == nil { return errors.New("nil x") }` defensive checks without metric
@@ -824,9 +836,10 @@ reliability baseline.
 - Invalid-state propagation (function returns silently when invariant is broken, caller
   proceeds with corrupt state)
 - Hand-rolled domain predicates (`func isPositiveDecimal(d decimal.Decimal) bool`)
+- **Deprecated shim imports**: `github.com/LerianStudio/lib-commons/v5/commons/assert` — still compiles but the canonical path is `github.com/LerianStudio/lib-observability/assert`
 
-**lib-commons Replacement:**
-- `commons/assert.New(logger, metrics)` — assertion handler with observability
+**Replacement (lib-observability/assert):**
+- `assert.New(logger, metrics)` — assertion handler with observability
 - Domain predicates: `PositiveDecimal`, `NonNegativeDecimal`, `DebitsEqualCredits`,
   `ValidTransactionStatus`, `NotEmpty`, etc.
 
@@ -843,7 +856,9 @@ if debits != credits {
     return errors.New("unbalanced") // no metric, no trace, silent in dashboards
 }
 
-// lib-commons (AFTER):
+// lib-observability (AFTER):
+import "github.com/LerianStudio/lib-observability/assert"
+
 a := assert.New(logger, metrics)
 if err := a.PositiveDecimal(ctx, "amount", amount); err != nil {
     return err
@@ -858,11 +873,14 @@ if err := a.DebitsEqualCredits(ctx, debits, credits); err != nil {
 > Sweep the target repo for assertion DIY. MUST find every `panic(`, `log.Fatal(`,
 > `log.Panic(`, and `.Must*(` helper call in non-test code (zero-panic policy violation —
 > only `regexp.MustCompile` with compile-time constants is allowed). MUST find inline
-> invariant checks that return errors without metric emission. For each finding record
-> file:line and the invariant being checked. Severity HIGH — panics crash services,
-> silent invariant violations corrupt state.
+> invariant checks that return errors without metric emission. MUST also flag any import
+> of `github.com/LerianStudio/lib-commons/v5/commons/assert` — that path is a deprecated
+> shim; the canonical home is `github.com/LerianStudio/lib-observability/assert`.
+> For each finding record file:line, the invariant being checked, and whether the issue
+> is raw DIY or a deprecated shim import. Severity HIGH — panics crash services, silent
+> invariant violations corrupt state.
 
-> **Scope note:** This is the breadth-first single-angle sweep. For a dedicated 6-angle deep audit of commons/assert (panic in non-test code, defensive checks without metrics, hand-rolled predicates, missing InitAssertionMetrics, test-only invariants, AssertionError unwrapping), dispatch `ring:using-assert` in Sweep Mode.
+> **Scope note:** This is the breadth-first single-angle sweep. For a dedicated 6-angle deep audit of the assert package (panic in non-test code, defensive checks without metrics, hand-rolled predicates, missing InitAssertionMetrics, test-only invariants, AssertionError unwrapping), dispatch `ring:using-assert` in Sweep Mode.
 
 ---
 

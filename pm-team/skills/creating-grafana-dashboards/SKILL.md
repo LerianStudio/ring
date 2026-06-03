@@ -1,14 +1,15 @@
 ---
 name: ring:creating-grafana-dashboards
 description: |
-  Author Grafana dashboards for Lerian Go services rooted in real lib-commons/opentelemetry
-  telemetry. Three phases — Sweep (telemetry inventory), Iterate (PM deliberation on SLIs/SLOs
-  and alerts), Author (Grafonnet libsonnet → JSON in CI) — and installs a blocking CI drift gate.
-  Use when scaffolding dashboards, building a telemetry dictionary, or auditing observability.
-  Skip if service is non-Go, emits no telemetry, or task is just folder organization.
+  Author Grafana dashboards for Lerian Go services rooted in real lib-observability
+  telemetry (tracing, metrics, log, constants). Three phases — Sweep (telemetry inventory),
+  Iterate (PM deliberation on SLIs/SLOs and alerts), Author (Grafonnet libsonnet → JSON in CI)
+  — and installs a blocking CI drift gate. Use when scaffolding dashboards, building a
+  telemetry dictionary, or auditing observability. Skip if service is non-Go, emits no
+  telemetry, or task is just folder organization.
 ---
 
-# Creating Grafana Dashboards (lib-commons/opentelemetry, PM-team)
+# Creating Grafana Dashboards (lib-observability, PM-team)
 
 ## When to use
 
@@ -27,7 +28,7 @@ Reference mode:
 
 ## Skip when
 
-- Service is not a Go project (lib-commons opentelemetry is Go-only at this skill's scope)
+- Service is not a Go project (lib-observability is Go-only at this skill's scope)
 - Service emits no telemetry (pre-instrumentation; instrument the service before dashboard authoring, then use ring:dev-implementation to verify observability checks pass)
 - Task is purely Grafana folder organization or dashboard import (no authoring)
 - Service is consumer-only sidecar with no metrics surface
@@ -38,12 +39,12 @@ Reference mode:
 
 ## Related
 
-**Complementary:** ring:dev-implementation, ring:codebase-explorer, ring:streaming-event-mapping
+**Complementary:** ring:dev-implementation, ring:codebase-explorer, ring:streaming-event-mapping, ring:using-lib-observability, ring:using-tracing
 **Similar:** ring:using-runtime, ring:using-assert
 
 ## Prerequisites
 
-- Go service with lib-commons/v5 opentelemetry initialized in bootstrap
+- Go service with lib-observability initialized in bootstrap (`tracing.NewTelemetry`, `metrics.NewFactory`, `zap.NewLogger`)
 - At least one metric, span, or structured log emission point present
 - docs/ directory writable
 - Grafonnet toolchain available in CI (jsonnet + grafonnet-lib) — installer instructions in ci-drift-check.md
@@ -64,16 +65,24 @@ Orchestrates a 3-phase, 8-gate workflow to produce Grafana dashboards grounded i
 
 # SWEEP MODE
 
-## Telemetry Architecture (lib-commons/opentelemetry)
+## Telemetry Architecture (lib-observability)
 
-Lerian Go services emit telemetry through `github.com/LerianStudio/lib-commons/v5/commons/opentelemetry`:
-- **Metrics** via `meter.Int64Counter`, `meter.Float64Histogram`, `meter.Int64UpDownCounter`, `meter.Int64ObservableGauge`
-- **Traces** via `tracer.Start(ctx, name, opts...)` returning `context.Context, trace.Span`
-- **Logs** via `commons/log` with structured fields, automatically correlated with active span via `trace_id`/`span_id`
+Lerian Go services emit telemetry through `github.com/LerianStudio/lib-observability`:
+- **Tracing** via `lib-observability/tracing` — `tracer.Start(ctx, name, opts...)` returning `context.Context, trace.Span`
+- **Metrics** via `lib-observability/metrics` — fluent factory producing `meter.Int64Counter`, `meter.Float64Histogram`, `meter.Int64UpDownCounter`, `meter.Int64ObservableGauge`
+- **Logs** via `lib-observability/log` (interface) and `lib-observability/zap` (implementation) — structured fields, automatically correlated with active span via `trace_id`/`span_id`
+- **OTel attribute / metric / event names** via `lib-observability/constants` — canonical string constants; dashboards reference these for label and metric names
 - **Cross-cutting** — `tenant_id` propagation through context, error attribution via `span.RecordError` + `span.SetStatus`
 
-**WebFetch canonical docs:** `https://raw.githubusercontent.com/LerianStudio/lib-commons/main/commons/opentelemetry/doc.go`
-**WebFetch changelog:** `https://raw.githubusercontent.com/LerianStudio/lib-commons/main/CHANGELOG.md`
+> **Deprecated shims:** `lib-commons/v5/commons/{opentelemetry,zap,log,metrics}` still compile but route through lib-observability. New emission sites MUST import lib-observability directly. The sweep detects both canonical and shim imports.
+
+**WebFetch canonical docs (lib-observability — develop branch; main has only LICENSE + README):**
+- Tracing: `https://raw.githubusercontent.com/LerianStudio/lib-observability/develop/tracing/doc.go`
+- Metrics: `https://raw.githubusercontent.com/LerianStudio/lib-observability/develop/metrics/doc.go`
+- Log: `https://raw.githubusercontent.com/LerianStudio/lib-observability/develop/log/doc.go`
+- Constants: `https://raw.githubusercontent.com/LerianStudio/lib-observability/develop/constants/doc.go`
+
+**WebFetch changelog:** `https://raw.githubusercontent.com/LerianStudio/lib-observability/develop/CHANGELOG.md`
 
 ## Authoring Format: Grafonnet (Mandatory)
 
@@ -120,19 +129,22 @@ Orchestrator executes directly. Detect in parallel:
 
 ```
 1. Go version:                grep "^go " go.mod | head -1
-2. lib-commons version:       grep "lib-commons" go.mod
-3. OTel package present:      grep -rn "lib-commons/v5/commons/opentelemetry" internal/ cmd/
-4. Meter init:                grep -rn "Meter(\|NewMeter\|meter.Int64Counter\|meter.Float64Histogram" internal/ cmd/
-5. Tracer init:               grep -rn "Tracer(\|NewTracer\|tracer.Start" internal/ cmd/
-6. Log emission:              grep -rn "lib-commons/v5/commons/log" internal/ cmd/
-7. HTTP framework:            grep -rn "gofiber/fiber\|labstack/echo\|gin-gonic" go.mod
-8. gRPC server:               grep -rn "grpc.NewServer" internal/ cmd/
-9. RabbitMQ consumers:        grep -rn "lib-commons/v5/commons/rabbitmq" internal/ cmd/
-10. Tenant source:            grep -rn "tmcore.GetTenantIDContext\|GetTenantID" internal/
-11. Existing dictionary:      test -f docs/dashboards/telemetry-dictionary.md
-12. Existing dashboards:      ls docs/dashboards/ 2>/dev/null
-13. Grafonnet in CI:          test -f .github/workflows/telemetry-drift.yml
-14. Service identity:         cat go.mod | grep "^module"
+2. lib-observability version: grep "lib-observability" go.mod
+3. lib-commons version:       grep "lib-commons" go.mod
+4. Tracing package present:   grep -rn "lib-observability/tracing\|lib-commons/v5/commons/opentelemetry" internal/ cmd/   # canonical + deprecated shim
+5. Metrics package present:   grep -rn "lib-observability/metrics\|lib-commons/v5/commons/opentelemetry" internal/ cmd/   # canonical + deprecated shim
+6. Meter init:                grep -rn "Meter(\|NewMeter\|meter.Int64Counter\|meter.Float64Histogram" internal/ cmd/
+7. Tracer init:               grep -rn "Tracer(\|NewTracer\|tracer.Start" internal/ cmd/
+8. Log emission:              grep -rn "lib-observability/log\|lib-observability/zap\|lib-commons/v5/commons/log\|lib-commons/v5/commons/zap" internal/ cmd/   # canonical + deprecated shim
+9. HTTP framework:            grep -rn "gofiber/fiber\|labstack/echo\|gin-gonic" go.mod
+10. gRPC server:              grep -rn "grpc.NewServer" internal/ cmd/
+11. RabbitMQ command consumers: grep -rn "lib-commons/v5/commons/rabbitmq" internal/ cmd/   # command queues; event emission goes through lib-streaming
+12. lib-streaming present:    grep "lib-streaming" go.mod
+13. Tenant source:            grep -rn "tmcore.GetTenantIDContext\|GetTenantID" internal/
+14. Existing dictionary:      test -f docs/dashboards/telemetry-dictionary.md
+15. Existing dashboards:      ls docs/dashboards/ 2>/dev/null
+16. Grafonnet in CI:          test -f .github/workflows/telemetry-drift.yml
+17. Service identity:         cat go.mod | grep "^module"
 ```
 
 Emit `/tmp/dashboards-recon.json`:
@@ -140,14 +152,18 @@ Emit `/tmp/dashboards-recon.json`:
 {
   "service_name": "...",
   "go_version": "...",
+  "lib_observability_version": "...",
   "lib_commons_version": "...",
-  "otel_initialized": true,
+  "lib_streaming_present": false,
+  "tracing_initialized": true,
+  "metrics_initialized": true,
   "metric_emission_present": true,
   "trace_emission_present": true,
   "structured_log_present": true,
+  "deprecated_shim_imports": ["lib-commons/v5/commons/opentelemetry"],
   "http_framework": "fiber|echo|gin|none",
   "grpc_server_present": true,
-  "rabbitmq_consumers_present": true,
+  "rabbitmq_command_consumers_present": true,
   "tenant_source": "tmcore.GetTenantIDContext",
   "existing_dictionary": true,
   "existing_themes": ["transactions", "ledger"],
@@ -157,10 +173,43 @@ Emit `/tmp/dashboards-recon.json`:
 
 **HARD GATE:**
 - If not Go → STOP.
-  - If no opentelemetry package usage detected → STOP, surface "service is not instrumented; instrument the service before dashboard authoring, then use ring:dev-implementation to verify observability checks pass" to user.
+  - If no lib-observability tracing/metrics usage detected (canonical or deprecated shim) → STOP, surface "service is not instrumented; instrument the service before dashboard authoring, then use ring:dev-implementation to verify observability checks pass" to user.
 - If service has < 3 metric/trace/log emissions → STOP, surface "insufficient telemetry surface for dashboards".
 
 ## Gate 1: Telemetry Sweep (7 Parallel Angles)
+
+### ⛔ STOP-CHECK BEFORE DISPATCH
+
+Before emitting any Task call, count the explorers you intend to launch in this turn.
+- Count MUST equal 7.
+- If count < 7 → STOP. Do not partial-dispatch. Reconcile against the 7 angles below and try again.
+- The 7 angles are the canonical sweep. No substitutions, no omissions.
+
+### ⛔ MUST NOT trickle-dispatch
+
+All 7 explorers leave in the SAME TURN, before reading any explorer output.
+
+Forbidden sequences:
+- Dispatch explorer 1 → read result → dispatch explorer 2
+- Dispatch a subset → wait → dispatch the rest
+- Dispatch follow-up explorers conditioned on partial output
+- Loop sequentially over the angle list
+
+If you find yourself about to dispatch an explorer in a turn AFTER any explorer has already returned a result → STOP. You violated parallel dispatch. Report the violation and mark the gate INCOMPLETE rather than completing the trickle.
+
+### Self-verify after dispatch
+
+After the dispatch turn, verify all 7 Task calls were emitted in that single turn. If fewer than 7 went out, the gate did NOT execute correctly. Mark INCOMPLETE and surface the dispatch failure — do NOT silently continue with a partial pool.
+
+### Parallel dispatch — atomic batch
+
+Emit all 7 Task calls in a SINGLE TURN, as one atomic batch.
+
+**If your runtime exposes a `multi_tool_use.parallel` wrapper**, use it to dispatch the complete pool in one wrapped invocation. This is the canonical fan-out mechanism on OpenAI-style tool envelopes and on certain Anthropic SDK consumers — naming it explicitly activates parallel emission on runtimes where trickle-dispatch is the default behavior.
+
+**If your runtime emits parallel tool_use blocks natively** (Claude Code with Claude models), `multi_tool_use.parallel` may not be needed — but naming it is harmless and serves as an enforcement anchor.
+
+The STOP-CHECK, anti-trickle, and self-verify guards above remain binding regardless of which mechanism your runtime uses.
 
 Dispatch all 7 angles in **one parallel batch**. Wait for all before Gate 2.
 

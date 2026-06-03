@@ -58,7 +58,7 @@ For TypeScript: Read `dev-team/docs/standards/typescript.md` (single monolith �
 
 _If infrastructure configs not provided: "No infra configs provided for Layer 2. Provide K8s manifests or Dockerfile for runtime review."_
 
-## Blockers — STOP and Report
+## Blocker Criteria
 
 | Condition | Action |
 |-----------|--------|
@@ -67,16 +67,32 @@ _If infrastructure configs not provided: "No infra configs provided for Layer 2.
 | CFS throttling inevitable from config | STOP. Flag CRITICAL. Cannot PASS. |
 | Event loop blocking on hot endpoint | STOP. Flag CRITICAL. Cannot PASS. |
 
+Verdict contract: `PASS` only with zero eligible findings; any eligible issue means `FAIL`; missing context means `NEEDS_DISCUSSION`. Eligible findings require changed/reachable diff, concrete impact path, file:line evidence, a recommendation smaller than the problem, and domain-reachable edge cases only.
+
+## Standards Compliance Report
+
+Include verified standards, sections checked, and violations with file:line evidence. Mark non-applicable sections `N/A` with a reason.
+
 ## Output Format
 
 ```markdown
 ## Performance Review Summary
 
+## VERDICT: [PASS | FAIL | NEEDS_DISCUSSION]
+
 **Mode:** [PR Review | Standalone Audit]
 **Language(s):** [Go | TypeScript | Multi-language]
-**Verdict:** [PASS | FAIL | NEEDS_DISCUSSION]
 
 [2-3 sentences on overall performance posture]
+
+## Summary
+[2-3 sentences on overall performance posture]
+
+## Issues Found
+- Critical: [N]
+- High: [N]
+- Medium: [N]
+- Low: [N]
 
 ## Layer 1: Code-Level Findings
 
@@ -104,6 +120,14 @@ _If infrastructure configs not provided: "No infra configs provided for Layer 2.
 
 1. **[Action]** — Fixes [ID]. Expected improvement: [quantitative].
 2. **[Action]** — Fixes [ID].
+
+## Standards Compliance Report
+| Standard | Section | Status | Evidence |
+|----------|---------|--------|----------|
+| [index/module] | [section] | PASS/FAIL/N/A | [file:line or reason] |
+
+## Next Steps
+[Based on verdict]
 ```
 
 <example title="Go service review with critical findings">
@@ -111,7 +135,7 @@ _If infrastructure configs not provided: "No infra configs provided for Layer 2.
 
 **Mode:** PR Review
 **Language(s):** Go
-**Verdict:** FAIL
+## VERDICT: FAIL
 
 Two critical findings: goroutine leak in event processor and N+1 query in list endpoint.
 

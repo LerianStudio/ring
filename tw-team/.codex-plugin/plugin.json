@@ -1,0 +1,40 @@
+{
+  "name": "ring-tw-team",
+  "version": "0.4.7",
+  "description": "Technical writing specialists for functional and API documentation. 3 specialized agents (functional-writer, api-writer, docs-reviewer) and 4 documentation skills covering voice/tone, structure, API field descriptions, and quality review. Enforces clear, consistent documentation standards.",
+  "author": {
+    "name": "Lerian Studio",
+    "email": "fred@lerian.studio",
+    "url": "https://github.com/lerianstudio"
+  },
+  "homepage": "https://github.com/lerianstudio/ring/tree/main/tw-team",
+  "repository": "https://github.com/lerianstudio/ring",
+  "license": "MIT",
+  "keywords": [
+    "technical-writing",
+    "documentation",
+    "api-docs",
+    "guides",
+    "tutorials",
+    "voice-tone",
+    "style-guide",
+    "docs-review",
+    "agents",
+    "content-quality"
+  ],
+  "skills": "./skills/",
+  "agents": "./agents/",
+  "interface": {
+    "displayName": "Ring TW Team",
+    "shortDescription": "Technical writing specialists for functional guides and API reference",
+    "longDescription": "Documentation specialists for the Lerian docs surface: a functional-writer for guides, tutorials, and conceptual content; an api-writer for endpoint reference and schemas; a docs-reviewer for voice, tone, structure, and accuracy. Skills enforce consistent voice/tone, structure, and quality across all Lerian documentation.",
+    "developerName": "Lerian Studio",
+    "category": "Writing",
+    "capabilities": ["Interactive", "Read", "Write"],
+    "defaultPrompt": [
+      "Write a guide for this feature using the functional-writer agent.",
+      "Review this API documentation for voice and accuracy."
+    ],
+    "websiteURL": "https://github.com/lerianstudio/ring"
+  }
+}

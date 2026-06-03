@@ -19,7 +19,7 @@ This module covers logging, linting, configuration validation, and container sec
 
 | #   | [Section Name](#anchor-link)                                                                            | Description                                               |
 | --- | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
-| 1   | [Logging](#logging)                                                                                     | Structured logging with lib-commons                       |
+| 1   | [Logging](#logging)                                                                                     | Structured logging with lib-observability                 |
 | 2   | [Linting](#linting)                                                                                     | Import ordering, magic numbers, .golangci.yml requirement |
 | 3   | [Migration Guidance for Mandatory Linter Promotion](#migration-guidance-for-mandatory-linter-promotion) | Phased rollout and per-linter fix examples                |
 | 4   | [Production Config Validation](#production-config-validation-mandatory)                                 | Startup validation and fail-fast                          |
@@ -29,7 +29,7 @@ This module covers logging, linting, configuration validation, and container sec
 
 ## Logging
 
-**HARD GATE:** All Go services MUST use lib-commons structured logging. Unstructured logging is FORBIDDEN.
+**HARD GATE:** All Go services MUST use lib-observability structured logging. Unstructured logging is FORBIDDEN.
 
 ### FORBIDDEN Logging Patterns (CRITICAL - Automatic FAIL)
 
@@ -54,11 +54,11 @@ grep -rn "fmt.Println\|fmt.Printf\|log.Println\|log.Printf\|log.Fatal\|println("
 # Expected output: (nothing - no matches)
 ```
 
-### Using lib-commons Logger (REQUIRED Pattern)
+### Using lib-observability Logger (REQUIRED Pattern)
 
 ```go
 // CORRECT: Recover logger from context
-logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)
+logger, tracer, _, _ := observability.NewTrackingFromContext(ctx)
 
 // CORRECT: Log with context correlation
 logger.Infof("Processing entity: %s", entityID)
@@ -72,19 +72,19 @@ logger.Errorf("Failed to save entity: %v", err)
 // ❌ FORBIDDEN: fmt.Println
 fmt.Println("Starting server...")
 
-// ✅ REQUIRED: lib-commons logger
+// ✅ REQUIRED: lib-observability logger
 logger.Info("Starting server")
 
 // ❌ FORBIDDEN: fmt.Printf
 fmt.Printf("Processing user: %s\n", userID)
 
-// ✅ REQUIRED: lib-commons logger
+// ✅ REQUIRED: lib-observability logger
 logger.Infof("Processing user: %s", userID)
 
 // ❌ FORBIDDEN: log.Printf
 log.Printf("[ERROR] Failed to connect: %v", err)
 
-// ✅ REQUIRED: lib-commons logger with span error
+// ✅ REQUIRED: lib-observability logger with span error
 logger.Errorf("Failed to connect: %v", err)
 libOpentelemetry.HandleSpanError(&span, "Connection failed", err)
 
@@ -117,13 +117,13 @@ linters-settings:
   forbidigo:
     forbid:
       - p: ^fmt\.Print.*$
-        msg: "FORBIDDEN: Use lib-commons logger instead of fmt.Print*"
+        msg: "FORBIDDEN: Use lib-observability logger instead of fmt.Print*"
       - p: ^log\.(Print|Fatal|Panic).*$
-        msg: "FORBIDDEN: Use lib-commons logger instead of standard log package"
+        msg: "FORBIDDEN: Use lib-observability logger instead of standard log package"
       - p: ^print$
-        msg: "FORBIDDEN: Use lib-commons logger instead of print builtin"
+        msg: "FORBIDDEN: Use lib-observability logger instead of print builtin"
       - p: ^println$
-        msg: "FORBIDDEN: Use lib-commons logger instead of println builtin"
+        msg: "FORBIDDEN: Use lib-observability logger instead of println builtin"
 
 linters:
   enable:
@@ -186,9 +186,9 @@ linters-settings:
   forbidigo:
     forbid:
       - p: ^fmt\.Print.*$
-        msg: "FORBIDDEN: Use lib-commons logger"
+        msg: "FORBIDDEN: Use lib-observability logger"
       - p: ^log\.(Print|Fatal|Panic).*$
-        msg: "FORBIDDEN: Use lib-commons logger"
+        msg: "FORBIDDEN: Use lib-observability logger"
 ```
 
 ---
@@ -342,7 +342,7 @@ func GetUser(id string) (*User, error) {
 // ❌ forbidigo: fmt.Println forbidden
 fmt.Println("Starting server on port", port)
 
-// ✅ Fixed: Use lib-commons logger
+// ✅ Fixed: Use lib-observability logger
 logger.Infof("Starting server on port %d", port)
 ```
 

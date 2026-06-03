@@ -1,0 +1,40 @@
+{
+  "name": "ring-dev-team",
+  "displayName": "Ring Dev Team",
+  "description": "24 specialized developer agents + 33 development skills. Backend (Go/TypeScript) and frontend (React/Next.js) dev cycles, DevOps, QA, SRE, and the parallel code-review pool.",
+  "version": "1.72.1",
+  "author": {
+    "name": "Lerian Studio",
+    "email": "fred@lerian.studio"
+  },
+  "homepage": "https://github.com/lerianstudio/ring/tree/main/dev-team",
+  "repository": "https://github.com/lerianstudio/ring",
+  "license": "MIT",
+  "keywords": [
+    "agents",
+    "developers",
+    "golang",
+    "backend",
+    "devops",
+    "frontend",
+    "react",
+    "nextjs",
+    "qa",
+    "testing",
+    "accessibility",
+    "e2e",
+    "playwright",
+    "performance",
+    "sre",
+    "reliability",
+    "infrastructure",
+    "refactoring",
+    "simplify",
+    "multi-tenant",
+    "lib-commons",
+    "code-review"
+  ],
+  "skills": "./skills/",
+  "agents": "./agents/",
+  "hooks": "./hooks/hooks.json"
+}

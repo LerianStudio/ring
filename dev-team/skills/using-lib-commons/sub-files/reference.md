@@ -1,7 +1,7 @@
 # REFERENCE MODE
 
 Sections 1–15 below catalog lib-commons latest v5.x packages, APIs, and initialization
-patterns. Resolve the actual latest version at runtime via `gh api repos/LerianStudio/lib-commons/releases/latest --jq .tag_name`. Read the sections relevant to your current task. Sweep Mode explorers receive
+patterns. Observability APIs are intentionally documented as the companion `github.com/LerianStudio/lib-observability` module, not as lib-commons packages. Resolve the actual latest lib-commons version at runtime via `gh api repos/LerianStudio/lib-commons/releases/latest --jq .tag_name`. Read the sections relevant to your current task. Sweep Mode explorers receive
 extracts from these sections as context for their angle.
 
 ## 1. Package Catalog (Quick Reference)
@@ -35,15 +35,25 @@ extracts from these sections as context for their angle.
 | `license` | `commons/license` | License validation failure handling with fail-open/fail-closed policies |
 | `certificate` | `commons/certificate` | **v5.0.0**: Thread-safe TLS certificate manager with hot reload (PKCS#8/PKCS#1/EC keys, DER chain support, zero-downtime `Rotate`) |
 
-### Observability & Runtime
+### Observability & Runtime *(moved to lib-observability v1.0.0)*
+
+| Package | New Home | Sub-skill |
+|---|---|---|
+| `log` (Logger interface) | `lib-observability/log` | [[using-lib-observability]] |
+| `zap` (Logger implementation) | `lib-observability/zap` | [[using-lib-observability]] |
+| `tracing` / OTel TracerProvider lifecycle | `lib-observability/tracing` | [[using-tracing]] |
+| `metrics` (Counter / Gauge / Histogram factory) | `lib-observability/metrics` | [[using-lib-observability]] |
+| `runtime` (SafeGo, panic recovery, production mode) | `lib-observability/runtime` | [[using-runtime]] |
+| `assert` (production runtime assertions) | `lib-observability/assert` | [[using-assert]] |
+| `redaction` (sensitive-value scrubbing) | `lib-observability/redaction` | [[using-lib-observability]] |
+| OTel attribute / event name constants | `lib-observability/constants` | [[using-lib-observability]] |
+
+lib-commons v5 still ships deprecated shims at the old import paths so existing code keeps compiling — but new code, refactors, and reviews MUST target the lib-observability paths. The detailed APIs for these packages live in those sub-skills, not here.
+
+### Lifecycle (Still in lib-commons)
 
 | Package | Import Path Suffix | Purpose |
 |---|---|---|
-| `log` | `commons/log` | Logger interface (`Logger`) — the universal logging contract across all packages |
-| `zap` | `commons/zap` | Zap-backed Logger implementation with OTel log bridge, runtime level adjustment. **v4.3.0+**: timestamp field changed from `"ts"` (Unix epoch) to `"timestamp"` (ISO 8601) |
-| `opentelemetry` | `commons/opentelemetry` | Full OTel lifecycle — TracerProvider, MeterProvider, LoggerProvider, OTLP exporters, redaction. Registers noop global providers when collector endpoint is empty |
-| `opentelemetry/metrics` | `commons/opentelemetry/metrics` | Thread-safe metrics factory with builders (Counter, Gauge, Histogram) |
-| `runtime` | `commons/runtime` | Safe goroutine launching, panic recovery, production mode, error reporter integration |
 | `server` | `commons/server` | HTTP (Fiber) + gRPC graceful shutdown manager with ordered teardown |
 | `cron` | `commons/cron` | 5-field cron expression parser, computes next execution time |
 
@@ -51,7 +61,7 @@ extracts from these sections as context for their angle.
 
 | Package | Import Path Suffix | Purpose |
 |---|---|---|
-| `net/http` | `commons/net/http` | Fiber HTTP toolkit: middleware (CORS, logging, telemetry, basic auth), validation, 3 cursor pagination styles, health checks, SSRF-safe reverse proxy, ownership verification, response helpers, tenant-scoped ID parsing |
+| `net/http` | `commons/net/http` | Fiber HTTP toolkit: CORS, basic auth, validation, 3 cursor pagination styles, health checks, SSRF-safe reverse proxy, ownership verification, response helpers, tenant-scoped ID parsing. Use `lib-observability/middleware` for logging and telemetry middleware. |
 | `net/http/ratelimit` | `commons/net/http/ratelimit` | Redis-backed distributed fixed-window rate limiting with atomic Lua script, tiered presets, dynamic tier selection, identity extractors, fail-open/fail-closed policy, `X-RateLimit-*` headers |
 | `net/http/idempotency` | `commons/net/http/idempotency` | **v5.0.0**: Fiber middleware for best-effort at-most-once request semantics via Redis SetNX, tenant-scoped keys, faithful response replay (status/headers/body), fail-open on Redis outage |
 
@@ -71,8 +81,8 @@ extracts from these sections as context for their angle.
 | `errgroup` | `commons/errgroup` | Error group with first-error cancellation and panic-to-error recovery |
 | `safe` | `commons/safe` | Panic-free division, bounds-checked slice access, cached regex compilation |
 | `pointers` | `commons/pointers` | Pointer-to-literal helpers (`String`, `Bool`, `Time`, `Int64`, `Float64`) |
-| `assert` | `commons/assert` | Production runtime assertions with OTel span events + metrics on failure |
-| `constants` | `commons/constants` | Shared constants (headers, error codes, pagination defaults, OTel attributes) |
+| `assert` *(moved)* | `lib-observability/assert` | Production runtime assertions — **moved to lib-observability**; see [[using-assert]] |
+| `constants` *(partially moved)* | `commons/constants` (non-observability) + `lib-observability/constants` (OTel attribute/event names) | HTTP headers, error codes, pagination defaults stay in lib-commons; OTel attribute/event-name constants moved to lib-observability — see [[using-lib-observability]] |
 
 ### Multi-Tenancy (Major Subsystem)
 
@@ -104,10 +114,10 @@ extracts from these sections as context for their angle.
 
 ## 2. Common Initialization Pattern
 
-Most Lerian services follow this bootstrap sequence. The order matters — each layer depends on the previous one.
+Most Lerian services follow this bootstrap sequence. The order matters — each layer depends on the previous one. **Observability bootstrap (steps 1–4) now lives in lib-observability** — the imports below come from `github.com/LerianStudio/lib-observability/...`. See [[using-lib-observability]] for the canonical reference.
 
 ```go
-// 1. Logger — first because everything else logs
+// 1. Logger — first because everything else logs (from lib-observability/zap)
 logger, _ := zap.New(zap.Config{
     Environment:     zap.EnvironmentProduction,
     OTelLibraryName: "my-service",
@@ -115,9 +125,10 @@ logger, _ := zap.New(zap.Config{
 defer logger.Sync(ctx)
 
 // 2. Telemetry — second because DB/HTTP packages emit traces and metrics
+//    (from lib-observability/tracing — see [[using-tracing]])
 //    When CollectorExporterEndpoint is empty, noop global providers are registered
 //    so trace/metric calls are no-ops instead of errors.
-tl, _ := opentelemetry.NewTelemetry(opentelemetry.TelemetryConfig{
+tl, _ := tracing.NewTelemetry(tracing.TelemetryConfig{
     LibraryName:               "my-service",
     ServiceName:               "my-service",
     ServiceVersion:            "1.0.0",
@@ -129,14 +140,14 @@ tl, _ := opentelemetry.NewTelemetry(opentelemetry.TelemetryConfig{
 _ = tl.ApplyGlobals()
 defer tl.ShutdownTelemetry()
 
-// 3. Runtime — panic metrics and production mode
+// 3. Runtime — panic metrics and production mode (from lib-observability/runtime — see [[using-runtime]])
 runtime.InitPanicMetrics(tl.MetricsFactory, logger)
 runtime.SetProductionMode(true)
 
-// 4. Assert metrics — production assertions with OTel
+// 4. Assert metrics — production assertions with OTel (from lib-observability/assert — see [[using-assert]])
 assert.InitAssertionMetrics(tl.MetricsFactory)
 
-// 5. PostgreSQL
+// 5. PostgreSQL (lib-commons — stays here)
 pgClient, _ := postgres.New(postgres.Config{
     PrimaryDSN:     os.Getenv("PRIMARY_DSN"),
     ReplicaDSN:     os.Getenv("REPLICA_DSN"),
@@ -182,8 +193,8 @@ defer rmqConn.Close()
 // 9. Fiber App with middleware
 app := fiber.New(fiber.Config{ErrorHandler: http.FiberErrorHandler})
 app.Use(http.WithCORS())
-app.Use(http.WithHTTPLogging(http.WithCustomLogger(logger)))
-tm := http.NewTelemetryMiddleware(tl)
+app.Use(middleware.WithHTTPLogging(middleware.WithCustomLogger(logger)))
+tm := middleware.NewTelemetryMiddleware(tl)
 app.Use(tm.WithTelemetry(tl, "/health", "/version"))
 app.Get("/health", http.HealthWithDependencies(...))
 app.Get("/version", http.Version)
@@ -306,8 +317,8 @@ CORS → Logging → Telemetry → Rate Limit → Auth → Handler
 | Middleware | Constructor | Purpose |
 |-----------|------------|---------|
 | CORS | `http.WithCORS()` | Cross-origin resource sharing |
-| Logging | `http.WithHTTPLogging(http.WithCustomLogger(logger))` | Request/response logging |
-| Telemetry | `http.NewTelemetryMiddleware(tl).WithTelemetry(tl, skipPaths...)` | OTel span creation, metrics |
+| Logging | `middleware.WithHTTPLogging(middleware.WithCustomLogger(logger))` | Request/response logging |
+| Telemetry | `middleware.NewTelemetryMiddleware(tl).WithTelemetry(tl, skipPaths...)` | OTel span creation, metrics |
 | Rate Limit | `ratelimit.WithDefaultRateLimit(redisConn)` | Distributed rate limiting (one-liner setup) |
 | Basic Auth | `http.WithBasicAuth(username, password)` | HTTP Basic authentication |
 
@@ -530,279 +541,21 @@ All pagination helpers return a standard `CursorPagination` response with `next`
 
 ---
 
-## 5. Observability
-
-### Logger (`commons/log` + `commons/zap`)
-
-**Interface**: Always program against `log.Logger`. This is the universal logging contract — every package in lib-commons accepts it.
-
-**Implementation**: Use `zap.New(config)` for production. It provides:
-
-- Structured JSON logging
-- OTel log bridge (logs appear as OTel log records)
-- Runtime level adjustment (`logger.SetLevel("debug")`)
-- `logger.Sync(ctx)` flushes buffered logs on shutdown
-- **v4.3.0+**: Timestamp field changed from `"ts"` (Unix epoch float) to `"timestamp"` (ISO 8601 string). If you parse logs programmatically, update your parsers.
-- **Multi-tenant**: In multi-tenant contexts, `tenant_id` is automatically injected into log entries when the tenant context is present.
-
-### Tracing (`commons/opentelemetry`)
-
-Every I/O package in lib-commons auto-creates OTel spans. You rarely need to create spans manually.
-
-**Error recording**: Use `opentelemetry.HandleSpanError(&span, err)` to record errors on spans. This sets the span status and adds the error as an event.
-
-**Redaction**: The OTel setup automatically redacts sensitive fields from span attributes using the `security` package.
-
-**Noop providers**: When `CollectorExporterEndpoint` is empty, `NewTelemetry` registers noop global TracerProvider, MeterProvider, and LoggerProvider. This means services can always call `otel.Tracer()` and `otel.Meter()` without checking whether telemetry is configured — calls simply no-op.
-
-### Metrics (`commons/opentelemetry/metrics`)
-
-`tl.MetricsFactory` provides thread-safe builders:
-
-| Builder | Method | Use Case |
-|---------|--------|----------|
-| Counter | `metrics.NewCounter(name, desc)` | Monotonic counts (requests, errors) |
-| Gauge | `metrics.NewGauge(name, desc)` | Point-in-time values (connections, queue depth) |
-| Histogram | `metrics.NewHistogram(name, desc)` | Distributions (latency, payload sizes) |
-
-**Pre-defined metrics** (emitted by various packages):
-
-- `*_connection_failures_total` — every infrastructure package
-- `runtime_panic_recovered_total` — `runtime.SafeGo`
-- `assertion_failures_total` — `assert`
-
-### Panic Recovery (`commons/runtime`) — Defense-in-Depth Crown Jewel
-
-The `runtime` package is not just "safe goroutine launching" — it's a **complete panic observability pipeline** that ensures no panic ever goes unnoticed in production. Every recovered panic triggers a three-layer response:
-
-1. **Structured log** with stack trace, goroutine name, component label
-2. **OTel span event** (`panic.recovered`) on the active trace, with sanitized value + stack + component attributes, span status set to `Error`
-3. **Metric increment** on `panic_recovered_total` counter, labeled by component and goroutine name
-4. **Error reporter callback** (optional, e.g., Sentry) via `SetErrorReporter`
-
-**MUST launch goroutines with `runtime.SafeGo`**:
-
-```go
-// Context-aware variant (preferred) — carries trace context into the goroutine
-runtime.SafeGoWithContextAndComponent(ctx, logger, "transaction-service", "balance-updater",
-    runtime.KeepRunning, func(ctx context.Context) {
-        // your goroutine logic — ctx carries the parent trace
-    },
-)
-
-// Simple variant
-runtime.SafeGo(logger, "worker-name", runtime.KeepRunning, func() {
-    // your goroutine logic
-})
-```
-
-**Panic Policies** — choose per goroutine:
-
-| Policy | Behavior | Use When |
-|--------|----------|----------|
-| `runtime.KeepRunning` | Recover, log, continue | HTTP/gRPC handlers, background workers |
-| `runtime.CrashProcess` | Recover, log, re-panic | Critical invariant violations where continuing is unsafe |
-
-**For defer-based recovery** (inside your own goroutines or framework handlers):
-
-```go
-func handleRequest(ctx context.Context) {
-    defer runtime.RecoverWithPolicyAndContext(ctx, logger, "api", "handleRequest", runtime.KeepRunning)
-    // ... handler logic
-}
-```
-
-**For framework integration** (Fiber, gRPC interceptors that recover panics themselves):
-
-```go
-// Fiber's recover.New() catches the panic — pass the recovered value into the pipeline
-app.Use(recover.New(recover.Config{
-    EnableStackTrace: true,
-    StackTraceHandler: func(c *fiber.Ctx, e interface{}) {
-        runtime.HandlePanicValue(c.UserContext(), logger, e, "api", c.Path())
-    },
-}))
-```
-
-**Production mode** — controls data sensitivity:
-
-```go
-runtime.SetProductionMode(true)
-// Effect: panic values are replaced with "panic recovered (details redacted)"
-// in span events and logs. Stack traces are truncated to 4096 bytes.
-// Sensitive patterns (password=, token=, api_key=) are always redacted regardless of mode.
-```
-
-**Error reporter integration** — plug in external error tracking (Sentry, Bugsnag, etc.):
-
-```go
-runtime.SetErrorReporter(mySentryReporter) // implements ErrorReporter interface
-// Every panic now also calls: reporter.CaptureException(ctx, err, tags)
-```
-
-**Startup initialization** (required once, after telemetry is set up):
-
-```go
-runtime.InitPanicMetrics(tl.MetricsFactory, logger)
-runtime.SetProductionMode(true)
-runtime.SetErrorReporter(myReporter) // optional
-```
-
-**For deep patterns, framework integration, testing approaches, and a dedicated 6-angle audit mode for this package, see `ring:using-runtime`.**
-
-### Assertions (`commons/assert`) — Defense-in-Depth Crown Jewel
-
-The `assert` package provides **production-grade runtime assertions** — not test assertions, not debug-only checks. These assertions are designed to remain **permanently enabled in production** and fire a **three-layer observability trident** on every failure:
-
-1. **Structured log** with assertion type, message, component, operation, and key-value context
-2. **OTel span event** (`assertion.failed`) on the active trace with all attributes
-3. **Metric increment** on `assertion_failed_total` counter, labeled by component, operation, and assertion type
-
-Assertions **never panic** — they return errors, making them safe for production hot paths.
-
-**Creating an asserter** — scoped to a component and operation for observability labeling:
-
-```go
-a := assert.New(ctx, logger, "transaction-service", "create-posting")
-```
-
-**Assertion methods** — each fires the full observability trident on failure:
-
-```go
-// General condition check
-if err := a.That(ctx, amount.IsPositive(), "amount must be positive",
-    "amount", amount.String(), "account_id", accountID); err != nil {
-    return err
-}
-
-// Nil check (handles typed nils via reflect — catches (*MyStruct)(nil) in interfaces)
-if err := a.NotNil(ctx, dbConn, "database connection is nil",
-    "tenant_id", tenantID); err != nil {
-    return err
-}
-
-// Empty string check
-if err := a.NotEmpty(ctx, tenantID, "tenant ID is empty"); err != nil {
-    return err
-}
-
-// Error check — auto-includes error type in context
-if err := a.NoError(ctx, dbErr, "database query failed",
-    "query", "SELECT balance", "account_id", accountID); err != nil {
-    return err
-}
-
-// Unreachable code — always fails, use for impossible states
-if err := a.Never(ctx, "reached impossible branch",
-    "status", status, "operation", op); err != nil {
-    return err
-}
-
-// Goroutine halt — calls runtime.Goexit() (defers still run, other goroutines unaffected)
-a.Halt(err) // only halts if err != nil
-```
-
-**Domain predicates** — composable pure functions for financial validations:
-
-```go
-// Numeric
-assert.Positive(n)                    // int64 > 0
-assert.NonNegative(n)                 // int64 >= 0
-assert.InRange(n, min, max)           // min <= n <= max
-
-// Financial (shopspring/decimal)
-assert.PositiveDecimal(amount)        // amount > 0
-assert.NonNegativeDecimal(amount)     // amount >= 0
-assert.ValidAmount(amount)            // exponent in [-18, 18]
-assert.ValidScale(scale)              // 0 <= scale <= 18
-assert.DebitsEqualCredits(d, c)       // double-entry bookkeeping invariant
-assert.NonZeroTotals(d, c)            // both sides are non-zero
-assert.BalanceSufficientForRelease(onHold, releaseAmt)
-
-// Transaction state machine
-assert.ValidTransactionStatus(status)             // CREATED, APPROVED, PENDING, CANCELED, NOTED
-assert.TransactionCanTransitionTo(current, target) // e.g., PENDING → APPROVED OK, APPROVED → CREATED NOT OK
-assert.TransactionCanBeReverted(status, hasParent) // only APPROVED + no parent
-assert.TransactionHasOperations(ops)
-assert.TransactionOperationsContain(ops, allowed)  // subset check
-
-// Network / infrastructure
-assert.ValidUUID(s)
-assert.ValidPort(port)                // "1" to "65535"
-assert.ValidSSLMode(mode)             // PostgreSQL SSL modes
-
-// Time
-assert.DateNotInFuture(date)
-assert.DateAfter(date, reference)
-```
-
-**Composing predicates with assertions** — the predicates return `bool`, the asserter provides observability:
-
-```go
-a := assert.New(ctx, logger, "ledger", "post-transaction")
-
-if err := a.That(ctx, assert.DebitsEqualCredits(totalDebits, totalCredits),
-    "double-entry violation: debits != credits",
-    "debits", totalDebits.String(), "credits", totalCredits.String(),
-    "transaction_id", txnID); err != nil {
-    return err // observability trident already fired
-}
-
-if err := a.That(ctx, assert.TransactionCanTransitionTo(currentStatus, targetStatus),
-    "invalid status transition",
-    "from", currentStatus, "to", targetStatus); err != nil {
-    return err
-}
-```
-
-**How the observability trident works** — a single assertion failure produces:
-
-```
-// 1. Structured log:
-ERROR assertion failed: double-entry violation: debits != credits
-  component=ledger operation=post-transaction assertion=That
-  debits=150.00 credits=149.50 transaction_id=abc-123
-
-// 2. OTel span event (on the active trace):
-Event: assertion.failed
-  assertion.type = "That"
-  assertion.message = "double-entry violation: debits != credits"
-  assertion.component = "ledger"
-  assertion.operation = "post-transaction"
-  // + all key-value pairs as attributes
-
-// 3. Metric:
-assertion_failed_total{component="ledger", operation="post-transaction", assertion="That"} += 1
-```
-
-**Production mode behavior:**
-- Stack traces are **suppressed** in assertion failure logs and span events (controlled by `runtime.SetProductionMode(true)` or `ENV=production`)
-- In development mode, stack traces are included for debugging
-
-**The `AssertionError` type** — rich, unwrappable error:
-
-```go
-var assertErr *assert.AssertionError
-if errors.As(err, &assertErr) {
-    fmt.Println(assertErr.Component)  // "ledger"
-    fmt.Println(assertErr.Operation)  // "post-transaction"
-    fmt.Println(assertErr.Assertion)  // "That"
-}
-// Also: errors.Is(err, assert.ErrAssertionFailed) == true
-```
-
-**Why this matters for every Lerian service:**
-- Every `nil` receiver in lib-commons fires an assertion — so nil-pointer bugs are visible in metrics dashboards before they become incidents
-- Financial invariants (debits == credits, valid status transitions) are continuously verified in production, not just in tests
-- The metric `assertion_failed_total` is an early warning system — a spike means a code path hit an unexpected state
-
-**Startup initialization** (required once, after telemetry is set up):
-
-```go
-assert.InitAssertionMetrics(tl.MetricsFactory)
-```
-
-**For the full domain predicate catalog (double-entry, transaction state machine, financial validations), AssertionError unwrapping patterns, panic-vs-assert-vs-error decision tree, and a dedicated 6-angle audit mode for this package, see `ring:using-assert`.**
+## 5. Observability *(moved to lib-observability)*
+
+**Moved to lib-observability** — the entire observability surface (Logger, Tracing, Metrics, Panic Recovery, Assertions, Redaction, OTel attribute constants) is now documented in dedicated skills:
+
+| Concern | Package | Skill |
+|---|---|---|
+| Logger interface + zap implementation | `lib-observability/log`, `lib-observability/zap` | [[using-lib-observability]] |
+| OTel TracerProvider lifecycle | `lib-observability/tracing` | [[using-tracing]] |
+| Metrics factory (Counter / Gauge / Histogram) | `lib-observability/metrics` | [[using-lib-observability]] |
+| Panic recovery (`SafeGo`, `RecoverWithPolicy`, panic-metric trident) | `lib-observability/runtime` | [[using-runtime]] |
+| Production runtime assertions (`assert.New`, domain predicates, observability trident) | `lib-observability/assert` | [[using-assert]] |
+| Sensitive-value redaction | `lib-observability/redaction` | [[using-lib-observability]] |
+| OTel attribute / event name constants | `lib-observability/constants` | [[using-lib-observability]] |
+
+lib-commons v5 still ships deprecated shims at `commons/log`, `commons/zap`, `commons/opentelemetry`, `commons/runtime`, `commons/assert` so existing services compile. New code, refactors, and reviews MUST target `github.com/LerianStudio/lib-observability/...`. The Sweep Mode angles for panic handling (Angle 15), observability setup (Angle 14), and assertions (Angle 16) now flag both raw DIY **and** continued use of the deprecated lib-commons shim paths.
 
 ---
 
@@ -872,14 +625,18 @@ entity := &Entity{
 }
 ```
 
-### Constants (`commons/constants`)
+### Constants (`commons/constants` + `lib-observability/constants`)
 
-Shared constants used across Lerian services:
+Shared constants used across Lerian services. Split across two libraries as of lib-observability v1.0.0:
 
+**Still in `commons/constants`** (lib-commons):
 - HTTP headers (e.g., `X-Request-ID`, `X-Tenant-ID`)
 - Error codes
 - Pagination defaults
-- OTel attribute keys
+
+**Moved to `lib-observability/constants`** — see [[using-lib-observability]]:
+- OTel attribute keys (span/metric/log attribute names)
+- OTel event names
 
 ---
 
@@ -1761,7 +1518,8 @@ Use this decision tree to find the right package quickly:
 | Publish messages to RabbitMQ | `rabbitmq` (ConfirmablePublisher) |
 | Consume messages from RabbitMQ (multi-tenant) | `rabbitmq` + `tenant-manager/consumer` |
 | **HTTP** | |
-| Add HTTP middleware (CORS, logging, telemetry) | `net/http` |
+| Add HTTP middleware (CORS/basic auth/validation) | `net/http` |
+| Add HTTP logging/telemetry middleware | `lib-observability/middleware` |
 | Rate-limit HTTP endpoints | `net/http/ratelimit` |
 | Enforce idempotency on mutating endpoints | `net/http/idempotency` (v5.0.0) |
 | Paginate API responses | `net/http` (offset, UUID cursor, timestamp cursor, sort cursor) |
@@ -1772,7 +1530,7 @@ Use this decision tree to find the right package quickly:
 | **Resilience** | |
 | Add circuit breakers | `circuitbreaker` |
 | Add retry logic with backoff | `backoff` (compute delay) + your own loop |
-| Launch goroutines safely | `runtime` (`SafeGo`) |
+| Launch goroutines safely | `lib-observability/runtime` (`SafeGo`) — see [[using-runtime]] |
 | Run concurrent tasks with error handling | `errgroup` (panic-safe, first-error cancellation) |
 | Do safe math (no panics) | `safe` (DivideOrZero, First, CachedRegexp) |
 | **Security** | |
@@ -1798,12 +1556,12 @@ Use this decision tree to find the right package quickly:
 | **Transactions** | |
 | Process financial transactions | `transaction` (intent planning, balance posting) |
 | Implement transactional outbox | `outbox` + `outbox/postgres` |
-| **Observability** | |
-| Add structured logging | `log` (interface) + `zap` (implementation) |
-| Set up OpenTelemetry | `opentelemetry` (tracer, meter, logger providers) |
-| Build custom metrics | `opentelemetry/metrics` (Counter, Gauge, Histogram builders) |
-| Add production-safe assertions | `assert` (with OTel observability) |
-| Manage graceful shutdown | `server` (ServerManager) |
+| **Observability** *(moved to lib-observability — see [[using-lib-observability]])* | |
+| Add structured logging | `lib-observability/log` (interface) + `lib-observability/zap` (implementation) |
+| Set up OpenTelemetry | `lib-observability/tracing` (tracer, meter, logger providers) — see [[using-tracing]] |
+| Build custom metrics | `lib-observability/metrics` (Counter, Gauge, Histogram builders) |
+| Add production-safe assertions | `lib-observability/assert` — see [[using-assert]] |
+| Manage graceful shutdown | `commons/server` (ServerManager) — stays in lib-commons |
 | **Root Package Utilities** | |
 | Generate UUIDv7 | `commons` (`GenerateUUIDv7`) |
 | Map business errors to HTTP status | `commons` (`ValidateBusinessError`) |
@@ -1825,12 +1583,23 @@ Use this decision tree to find the right package quickly:
 
 This section documents breaking changes across lib-commons releases. Consult when upgrading.
 
+### lib-observability v1.0.0 extraction *(post-v5)*
+
+The observability surface was extracted from lib-commons into a new module: `github.com/LerianStudio/lib-observability`. Affected packages: `log`, `zap`, `opentelemetry` (renamed to `tracing`), `opentelemetry/metrics` (now `metrics`), `runtime`, `assert`, `redaction`, and the OTel attribute/event-name subset of `constants`.
+
+| Change | Migration |
+|---|---|
+| Observability imports | Replace `github.com/LerianStudio/lib-commons/v5/commons/{log,zap,opentelemetry,opentelemetry/metrics,runtime,assert}` with `github.com/LerianStudio/lib-observability/{log,zap,tracing,metrics,runtime,assert}`. Deprecated shims remain in lib-commons v5 for back-compat — `go vet` / staticcheck will surface the deprecations. |
+| OTel attribute constants | Move OTel attribute/event-name imports from `commons/constants` to `lib-observability/constants`. HTTP headers, error codes, pagination defaults stay in `commons/constants`. |
+| `opentelemetry.NewTelemetry` | Now `tracing.NewTelemetry` — same config struct, new package. See [[using-tracing]]. |
+| Reference | Use [[using-lib-observability]] (top-level) and the sub-skills [[using-tracing]] / [[using-runtime]] / [[using-assert]] as the canonical references for these packages — not this skill. |
+
 ### v5.0.2
 
 Patch release — no API changes. Hotfixes:
 
 - `commons/rabbitmq`: Close leaked connections on concurrent reconnect in `EnsureChannelContext`
-- `commons/net/http` telemetry: Copy Fiber context strings before `c.Next()` to prevent `UnsafeString` race (caused corrupted span attributes like `GET` → `GETT`)
+- `lib-observability/middleware` telemetry: Copy Fiber context strings before `c.Next()` to prevent `UnsafeString` race (caused corrupted span attributes like `GET` → `GETT`)
 
 ### v5.0.1
 
@@ -1858,7 +1627,7 @@ Patch release — no API changes. Internal test improvements and minor fixes.
 | `commons/tenant-manager/cache` | `ConfigCache` interface + `InMemoryCache` default implementation for the TM client |
 | `commons/tenant-manager/log` | `TenantAwareLogger` — wraps a `log.Logger` and auto-injects `tenant_id` from context |
 
-No packages were renamed. No public APIs changed signatures — the v5 core (postgres, mongo, redis, rabbitmq, opentelemetry, tenant-manager middleware/consumer/event/core, etc.) is source-compatible with v4.6.0 after the module-path bump.
+No non-observability packages were renamed. No public APIs changed signatures for the v5 lib-commons core (postgres, mongo, redis, rabbitmq, tenant-manager middleware/consumer/event/core, etc.) after the module-path bump. Observability packages should be imported from `github.com/LerianStudio/lib-observability`.
 
 ### v4.6.0
 

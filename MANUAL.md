@@ -1,6 +1,6 @@
 # Ring Marketplace Manual
 
-Quick reference guide for the Ring skills library and workflow system. This monorepo provides 4 plugins with 69 skills and 32 agents for enforcing proven software engineering practices across the entire software delivery value chain.
+Quick reference guide for the Ring skills library and workflow system. This monorepo provides 4 plugins with 71 skills and 33 agents for enforcing proven software engineering practices across the entire software delivery value chain.
 
 ---
 
@@ -13,12 +13,12 @@ Quick reference guide for the Ring skills library and workflow system. This mono
 │                                                                                    │
 │  ┌───────────────┐  ┌───────────────┐                                              │
 │  │ ring-default  │  │ ring-dev-team │                                              │
-│  │  Skills(14)   │  │  Skills(31)   │                                              │
-│  │  Agents(10)   │  │  Agents(15)   │                                              │
+│  │  Skills(16)   │  │  Skills(33)   │                                              │
+│  │  Agents(2)    │  │  Agents(24)   │                                              │
 │  └───────────────┘  └───────────────┘                                              │
 │  ┌───────────────┐  ┌───────────────┐                                              │
 │  │ ring-pm-team  │  │ ring-tw-team  │                                              │
-│  │  Skills(18)   │  │  Skills(6)    │                                              │
+│  │  Skills(18)   │  │  Skills(4)    │                                              │
 │  │  Agents(4)    │  │  Agents(3)    │                                              │
 │  └───────────────┘  └───────────────┘                                              │
 └────────────────────────────────────────────────────────────────────────────────────┘
@@ -68,11 +68,15 @@ Ring is auto-loaded at session start. Two ways to invoke Ring capabilities:
 1. **Skills** – `Skill tool: "ring:skill-name"` (primary invocation method)
 2. **Agents** – `Task tool with subagent_type: "ring:agent-name"`
 
+### Multi-harness install
+
+Beyond Claude Code (source of truth), Ring is installable in Codex, Cursor, and OpenCode via per-plugin native manifests (`<plugin>/.codex-plugin/`, `<plugin>/.cursor-plugin/`, `<plugin>/.opencode/`). For local-dev symlinks across Claude Code, Factory AI, OpenCode, and Codex, use `bash ring-install.sh` at repo root. See [README § Supported Platforms](README.md#-supported-platforms) and [README § Quick Start](README.md#-quick-start) for full instructions.
+
 ---
 
 ## 💡 About Skills
 
-Skills (69) are the primary invocation mechanism for Ring. They can be invoked directly by users (`Skill tool: "ring:skill-name"`) or applied automatically by Claude Code when it detects they're applicable. They handle testing, debugging, verification, planning, code review enforcement, and more.
+Skills (71) are the primary invocation mechanism for Ring. They can be invoked directly by users (`Skill tool: "ring:skill-name"`) or applied automatically by Claude Code when it detects they're applicable. They handle testing, debugging, verification, planning, code review enforcement, and more.
 
 Examples: ring:test-driven-development, ring:codereview, ring:production-readiness-audit (44-dimension audit, up to 10 explorers per batch, incremental report 0-430, max 440 with multi-tenant; see [default/skills/production-readiness-audit/SKILL.md](default/skills/production-readiness-audit/SKILL.md)), etc.
 
@@ -88,24 +92,31 @@ Claude Code matches user intent against the skill's `description` field at Sessi
 
 Invoke via `Task tool with subagent_type: "..."`.
 
-### Code Review pool (default + dev-team)
+### Code Review pool (dev-team)
 
-**Always dispatch all 10 in parallel** (single message, 10 Task calls):
+**Always dispatch all 9 defaults in parallel** (single message), plus triggered conditional specialists:
 
-| Agent                          | Purpose                                      |
-| ------------------------------ | -------------------------------------------- |
-| `ring:code-reviewer`           | Architecture, patterns, maintainability      |
-| `ring:business-logic-reviewer` | Domain correctness, edge cases, requirements |
-| `ring:security-reviewer`       | Vulnerabilities, OWASP, auth, validation     |
-| `ring:test-reviewer`           | Test coverage, quality, and completeness     |
-| `ring:nil-safety-reviewer`     | Nil/null pointer safety analysis             |
-| `ring:consequences-reviewer`   | Ripple effect, caller impact, downstream consequences |
-| `ring:dead-code-reviewer`      | Unused code, unreachable paths, dead exports          |
-| `ring:performance-reviewer`    | Performance hotspots, allocations, goroutine leaks, N+1 queries |
-| `ring:multi-tenant-reviewer`   | lib-commons/multitenancy patterns, tenant isolation, tenantId propagation |
-| `ring:lib-commons-reviewer`    | lib-commons package usage and reinvented-wheel opportunities |
+| Agent                                | Purpose                                      |
+| ------------------------------------ | -------------------------------------------- |
+| `ring:code-reviewer`                 | Architecture, patterns, maintainability      |
+| `ring:business-logic-reviewer`       | Domain correctness, edge cases, requirements |
+| `ring:security-reviewer`             | Vulnerabilities, OWASP, auth, validation     |
+| `ring:test-reviewer`                 | Test coverage, quality, and completeness     |
+| `ring:nil-safety-reviewer`           | Nil/null pointer safety analysis             |
+| `ring:dead-code-reviewer`            | Unused code, unreachable paths, dead exports          |
+| `ring:performance-reviewer`          | Performance hotspots, allocations, goroutine leaks, N+1 queries |
+| `ring:multi-tenant-reviewer`         | lib-commons/multitenancy patterns, tenant isolation, tenantId propagation |
+| `ring:lib-commons-reviewer`          | lib-commons package usage and reinvented-wheel opportunities |
 
-**Example:** Before merging, run all 10 parallel reviewers via `ring:codereview` skill
+Conditional specialists run only when their stack is touched:
+
+| Agent | Trigger |
+| ----- | ------- |
+| `ring:lib-observability-reviewer` | tracing, metrics, logging, runtime recovery/panic safety, redaction, constants, SafeGo/recover implications |
+| `ring:lib-systemplane-reviewer` | runtime config, hot-reload knobs, admin config surface, tenant-scoped settings, systemplane imports/config |
+| `ring:lib-streaming-reviewer` | business events, outbox, event producers, broker publishing, CloudEvents, manifests/catalogs |
+
+**Example:** Before merging, run the 9 default reviewers plus any triggered specialists via `ring:codereview` skill
 
 ### Orchestration (ring-default)
 
@@ -117,7 +128,6 @@ Invoke via `Task tool with subagent_type: "..."`.
 
 | Agent                    | Purpose                                                  |
 | ------------------------ | -------------------------------------------------------- |
-| `ring:write-plan`        | Generate implementation plans for zero-context execution |
 | `ring:codebase-explorer` | Deep architecture analysis (vs `Explore` for speed)      |
 
 ### Developer Specialists (ring-dev-team)
@@ -139,7 +149,10 @@ Use when you need expert depth in specific domains:
 | `ring:sre`                              | SRE specialist               | Observability, reliability, SLOs, incident readiness |
 | `ring:performance-reviewer`             | Performance review           | Go, TypeScript, Python, GOMAXPROCS, GC tuning      |
 | `ring:multi-tenant-reviewer`            | Multi-tenant usage review    | lib-commons/multitenancy, tenant isolation, JWT tenantId |
-| `ring:lib-commons-reviewer`             | lib-commons usage review     | Correct lib-commons API usage, reinvented-wheel detection |
+| `ring:lib-commons-reviewer`             | lib-commons usage review | lifecycle, tenancy, http, idempotency, security, database, messaging |
+| `ring:lib-observability-reviewer`       | Conditional observability review | tracing, metrics, logging, runtime, redaction |
+| `ring:lib-systemplane-reviewer`         | Conditional runtime-config review | lib-systemplane, hot reload, admin config, tenant settings |
+| `ring:lib-streaming-reviewer`           | Conditional event producer review | lib-streaming, outbox, CloudEvents, manifests |
 | `ring:ui-engineer`                      | UI component specialist      | Design systems, accessibility, React               |
 
 **Standards Compliance Output:** Refactor-capable ring-dev-team agents produce a `## Standards Compliance` output section with conditional requirement:
@@ -164,7 +177,7 @@ Use when you need expert depth in specific domains:
 
 | Category | Current     | Expected        | Status | Location      |
 | -------- | ----------- | --------------- | ------ | ------------- |
-| Logging  | fmt.Println | lib-commons/zap | ⚠️     | service/\*.go |
+| Logging  | fmt.Println | lib-observability/zap | ⚠️     | service/\*.go |
 ```
 
 **Cross-references:** CLAUDE.md (Standards Compliance section), `dev-team/skills/dev-refactor/SKILL.md`
@@ -199,7 +212,7 @@ For documentation creation and review:
 1. **Plan** → Use `ring:pre-dev-feature` skill (or `ring:pre-dev-full` if complex)
 2. **Isolate** → Use `ring:worktree` skill
 3. **Implement** → Use `ring:test-driven-development` skill
-4. **Review** → Use `ring:codereview` skill (dispatches 10 reviewers)
+4. **Review** → Use `ring:codereview` skill (dispatches 9 defaults plus triggered specialists)
 5. **Commit** → Use `ring:commit` skill
 
 ### Bug Investigation
@@ -218,11 +231,13 @@ Runs in parallel:
   • ring:security-reviewer
   • ring:test-reviewer
   • ring:nil-safety-reviewer
-  • ring:consequences-reviewer
   • ring:dead-code-reviewer
   • ring:performance-reviewer
   • ring:multi-tenant-reviewer
   • ring:lib-commons-reviewer
+  • conditionally: ring:lib-observability-reviewer
+  • conditionally: ring:lib-systemplane-reviewer
+  • conditionally: ring:lib-streaming-reviewer
     ↓
 Consolidated report with recommendations
 ```
@@ -250,7 +265,7 @@ These enforce quality standards:
 | ------------------------------------------------------ | ------------------------------ |
 | Feature will take < 2 days                             | `ring:pre-dev-feature` (skill) |
 | Feature will take ≥ 2 days or has complex dependencies | `ring:pre-dev-full` (skill)    |
-| Need implementation tasks                              | `ring:write-plan` (skill)      |
+| Need implementation tasks                              | `ring:writing-plans` (skill)   |
 | Before merging code                                    | `ring:codereview` (skill)      |
 | Start development cycle                                | `ring:dev-cycle` (skill)       |
 
@@ -258,9 +273,9 @@ These enforce quality standards:
 
 | Need                              | Agent to Use                                |
 | --------------------------------- | ------------------------------------------- |
-| General code quality review       | 10 parallel reviewers via `ring:codereview` skill |
+| General code quality review       | 9 default reviewers plus triggered specialists via `ring:codereview` skill |
 | Large PR review (15+ files)       | Auto-sliced via `ring:review-slicer`        |
-| Implementation planning           | `ring:write-plan`                           |
+| Implementation planning           | `ring:writing-plans`                        |
 | Deep codebase analysis            | `ring:codebase-explorer`                    |
 | Go backend expertise              | `ring:backend-engineer-golang`              |
 | TypeScript/Node.js backend        | `ring:backend-engineer-typescript`          |
@@ -292,7 +307,7 @@ These enforce quality standards:
 ### Session Startup
 
 1. SessionStart hook runs automatically
-2. All 69 skills are auto-discovered and available
+2. All 71 skills are auto-discovered and available
 3. `ring:using-ring` workflow is activated (skill checking is now mandatory)
 
 ### Agent Dispatching
@@ -310,18 +325,18 @@ Returns structured markdown output per the agent's documented sections
 ### Parallel Review Pattern
 
 ```
-Single message with 10 Task calls (not sequential):
+Single message with the selected review pool (not sequential):
 
 Task #1: ring:code-reviewer
 Task #2: ring:business-logic-reviewer
 Task #3: ring:security-reviewer
 Task #4: ring:test-reviewer
 Task #5: ring:nil-safety-reviewer
-Task #6: ring:consequences-reviewer
-Task #7: ring:dead-code-reviewer
-Task #8: ring:performance-reviewer
-Task #9: ring:multi-tenant-reviewer
-Task #10: ring:lib-commons-reviewer
+Task #6: ring:dead-code-reviewer
+Task #7: ring:performance-reviewer
+Task #8: ring:multi-tenant-reviewer
+Task #9: ring:lib-commons-reviewer
+Conditional: ring:lib-observability-reviewer / ring:lib-systemplane-reviewer / ring:lib-streaming-reviewer when triggered
     ↓
 All run in parallel (saves ~15 minutes vs sequential)
     ↓
@@ -339,7 +354,7 @@ Consolidated report
 ## 📚 More Information
 
 - **Full Documentation** → `default/skills/*/SKILL.md` files
-- **Agent Definitions** → `default/agents/*.md` files
+- **Agent Definitions** → `default/agents/*.md` and `dev-team/agents/*.md` files
 - **Plugin Config** → `.claude-plugin/marketplace.json`
 - **CLAUDE.md** → Project-specific instructions (checked into repo)
 

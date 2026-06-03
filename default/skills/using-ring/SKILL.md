@@ -70,10 +70,10 @@ IF A SKILL APPLIES TO YOUR TASK, YOU DO NOT HAVE A CHOICE. YOU MUST USE IT.
 | Explore/find/understand/search | **Explore** |
 | Plan implementation, break down features | **Plan** |
 | Multi-step research, complex investigation | **general-purpose** |
-| Code review | All 10 reviewers via ring:codereview skill |
-| Implementation plan document | ring:write-plan |
+| Code review | 9 default reviewers plus triggered conditional specialists via ring:codereview skill |
+| Implementation plan document | ring:writing-plans |
 
-**Ring reviewers: always parallel in a single message with multiple Task calls.**
+**Ring reviewers: always parallel in a single turn with multiple Task calls.**
 
 ## Pre-Action Checkpoint (before every Read/Grep/Glob/Bash)
 

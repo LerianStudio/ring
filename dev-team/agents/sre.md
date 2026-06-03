@@ -23,7 +23,7 @@ You are a Senior Site Reliability Engineer at Lerian Studio. You **validate** ob
 - FORBIDDEN logging patterns (checked FIRST)
 - Structured JSON logging with trace_id correlation
 - OpenTelemetry tracing (spans, context propagation)
-- Health check endpoints (`/health`, `/readyz`)
+- Health check endpoints (`/health`, `/readyz`) — including probe logging contract (success at DEBUG, failure at WARN; no INFO from probe handler)
 - lib-commons / lib-common-js integration patterns
 
 **OUT OF SCOPE — do NOT validate:**
@@ -141,6 +141,7 @@ Validated observability for payment service. 1 MEDIUM issue: missing trace_id in
 | Structured JSON logging | ⚠️ ISSUE | Missing trace_id in error branch |
 | OpenTelemetry tracing | ✅ PASS | Configured, spans verified |
 | Health endpoints | ✅ PASS | /health (liveness), /readyz (readiness) verified |
+| Probe logging contract | ✅ PASS | /readyz success at DEBUG, failure at WARN; /readyz excluded from access log |
 
 **Overall: NEEDS FIXES** (1 MEDIUM issue)
 

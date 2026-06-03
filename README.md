@@ -6,7 +6,7 @@
 
 **Proven engineering practices, enforced through skills.**
 
-Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **4 active plugins** and **69 skills** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
+Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **4 active plugins**, **71 skills**, and **33 agents** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
 
 ## ✨ Why Ring?
 
@@ -21,8 +21,8 @@ Without Ring, AI assistants often:
 Ring solves this by:
 
 - **Enforcing proven workflows** - Test-driven development, systematic debugging, proper planning
-- **Providing 69 specialized skills** (14 core + 31 dev-team + 18 product planning + 6 technical writing)
-- **32 specialized agents** - 10 review/planning + 15 developer + 4 product research + 3 technical writing
+- **Providing 71 specialized skills** (16 core + 33 dev-team + 18 product planning + 4 technical writing)
+- **33 specialized agents** - 2 planning/analysis + 24 developer/reviewer + 4 product research + 3 technical writing
 - **Automating skill discovery** - Skills load automatically at session start
 - **Preventing common failures** - Built-in anti-patterns and mandatory checklists
 
@@ -36,17 +36,9 @@ Ring solves this by:
 
 ## 🤖 Specialized Agents
 
-**Review & Planning Agents (default plugin):**
+**Planning & Analysis Agents (default plugin):**
 
-- `ring:code-reviewer` - Foundation review (architecture, code quality, design patterns)
-- `ring:business-logic-reviewer` - Correctness review (domain logic, requirements, edge cases)
-- `ring:security-reviewer` - Safety review (vulnerabilities, OWASP, authentication)
-- `ring:test-reviewer` - Test quality review (coverage, edge cases, assertions, test anti-patterns)
-- `ring:nil-safety-reviewer` - Nil/null safety review (traces pointer risks, missing guards, panic paths)
-- `ring:consequences-reviewer` - Ripple effect review (traces how changes propagate beyond modified files - caller chains, consumer contracts, downstream breakage)
-- `ring:dead-code-reviewer` - Dead code review (orphaned code detection, reachability analysis, dead dependency chains)
 - `ring:review-slicer` - Review slicer (groups large multi-themed PRs into thematic slices for focused parallel review)
-- `ring:write-plan` - Implementation planning agent
 - `ring:codebase-explorer` - Deep architecture analysis (deep-analysis, complements built-in Explore)
 - Use `ring:codereview` skill to orchestrate parallel review workflow
 
@@ -64,7 +56,16 @@ Ring solves this by:
 - `ring:sre` - Observability and reliability specialist
 - `ring:ui-engineer` - UI component specialist (design systems, accessibility)
 - `ring:helm-engineer` - Helm chart specialist (chart structure, security, Lerian conventions)
-- `ring:lib-commons-reviewer` - lib-commons usage review (correct API usage, reinvented-wheel opportunities across 35+ packages)
+- `ring:code-reviewer` - Foundation review (architecture, code quality, design patterns)
+- `ring:business-logic-reviewer` - Correctness review (domain logic, requirements, edge cases)
+- `ring:security-reviewer` - Safety review (vulnerabilities, OWASP, authentication)
+- `ring:test-reviewer` - Test quality review (coverage, edge cases, assertions, test anti-patterns)
+- `ring:nil-safety-reviewer` - Nil/null safety review (traces pointer risks, missing guards, panic paths)
+- `ring:dead-code-reviewer` - Dead code review (orphaned code detection, reachability analysis, dead dependency chains)
+- `ring:lib-commons-reviewer` - lib-commons package usage review (lifecycle, tenancy, http, idempotency, security, database, messaging, outbox; reinvented-wheel opportunities)
+- `ring:lib-observability-reviewer` - Conditional specialist for tracing, metrics, logging, runtime recovery, redaction, constants, and SafeGo implications
+- `ring:lib-systemplane-reviewer` - Conditional specialist for runtime config, hot-reload knobs, admin config, tenant-scoped settings, and systemplane imports
+- `ring:lib-streaming-reviewer` - Conditional specialist for business events, outbox, producers, broker publishing, CloudEvents, manifests, and catalogs
 - `ring:multi-tenant-reviewer` - Multi-tenant usage review (lib-commons/multitenancy patterns, tenant isolation, JWT tenantId propagation)
 - `ring:performance-reviewer` - Performance review (code hotspots, infra misconfigurations, Go/TypeScript/Python)
 
@@ -112,96 +113,82 @@ _To restore an archived plugin, move its folder from `.archive/` to the root dir
 
 Ring works across multiple AI development platforms:
 
-| Platform        | Format      | Status             | Features                        |
-| --------------- | ----------- | ------------------ | ------------------------------- |
-| **Claude Code** | Native      | ✅ Source of truth | Skills, agents, hooks           |
-| **Factory AI**  | Transformed | ✅ Supported       | Droids, skills                  |
-| **Cursor**      | Transformed | ✅ Supported       | Skills, agents                  |
-| **Cline**       | Transformed | ✅ Supported       | Prompts                         |
+| Platform        | Native manifest        | Symlink installer       | Status             |
+| --------------- | ---------------------- | ----------------------- | ------------------ |
+| **Claude Code** | ✅ marketplace.json    | ✅ `--claude`           | Source of truth    |
+| **Codex**       | ✅ `.codex-plugin/`    | ✅ `--codex` (built)    | Both paths work    |
+| **OpenCode**    | ✅ `.opencode/`        | ✅ `--opencode` (built) | Both paths work    |
+| **Cursor**      | ✅ `.cursor-plugin/`   | ❌ not in installer     | Native only        |
+| **Factory AI**  | ❌                     | ✅ `--factory`          | Installer only     |
 
-**Transformation Notes:**
+**Two install mechanisms:**
 
-- Claude Code receives Ring content in its native format
-- Factory AI: `agents` → `droids` terminology
-- Cursor: Skills → ~/.cursor/skills/, Agents → ~/.cursor/agents/
-- Cline: All content → structured prompts
+- **Native manifest** — the harness installs Ring directly from this repo via its own package manager (`opencode.json`, Cursor plugin marketplace, Codex plugin manifest). No local build step, no manual symlink work. Best for end users and CI.
+- **Symlink installer** (`ring-install.sh`) — symlinks from your local harness config dir into a cloned Ring repo. For Codex/OpenCode, the installer builds a transformed tree at `.ring-build/` first (namespace + frontmatter rewrites). Best for local development with hot-reload against the source tree.
 
-**Platform-Specific Guides:**
-
-See the [installer README](installer/) for platform-specific setup and transformation details.
+See the [`Native plugin install`](#native-plugin-install-per-harness) and [`Symlink installer`](#symlink-installer-local-dev) sub-sections below for usage.
 
 ## 🚀 Quick Start
 
-### Multi-Platform Installation (Recommended)
+### Native plugin install (per harness)
 
-The Ring installer automatically detects installed platforms and transforms content appropriately.
+Each Ring plugin ships native manifests for Claude Code, Codex, Cursor, and OpenCode. The harness installs the plugin directly from this repo via its own package manager — no transformation step, no local installer.
 
-**Linux/macOS/Git Bash:**
+| Harness         | Mechanism                                | Per-plugin entry points |
+| --------------- | ---------------------------------------- | ----------------------- |
+| **Claude Code** | `.claude-plugin/marketplace.json` (root) | All 4 plugins enumerated in one marketplace file |
+| **Codex**       | `<plugin>/.codex-plugin/plugin.json`     | [default](default/.codex-plugin/plugin.json) · [dev-team](dev-team/.codex-plugin/plugin.json) · [pm-team](pm-team/.codex-plugin/plugin.json) · [tw-team](tw-team/.codex-plugin/plugin.json) |
+| **Cursor**      | `<plugin>/.cursor-plugin/plugin.json`    | [default](default/.cursor-plugin/plugin.json) · [dev-team](dev-team/.cursor-plugin/plugin.json) · [pm-team](pm-team/.cursor-plugin/plugin.json) · [tw-team](tw-team/.cursor-plugin/plugin.json) |
+| **OpenCode**    | `<plugin>/.opencode/` (INSTALL + JS plugin) | [default](default/.opencode/INSTALL.md) · [dev-team](dev-team/.opencode/INSTALL.md) · [pm-team](pm-team/.opencode/INSTALL.md) · [tw-team](tw-team/.opencode/INSTALL.md) |
+
+**`ring-default` is the foundation plugin** — install it alongside any other Ring plugin since it provides the `using-ring` bootstrap that orients agent behavior. Example for OpenCode:
+
+```json
+{
+  "plugin": [
+    "ring-default@git+https://github.com/lerianstudio/ring.git#main",
+    "ring-dev-team@git+https://github.com/lerianstudio/ring.git#main"
+  ]
+}
+```
+
+Each harness's INSTALL.md (for OpenCode) or `plugin.json` (for Codex/Cursor) carries the exact install command for that platform.
+
+### Symlink installer (local dev)
+
+`ring-install.sh` symlinks your harness's local config dir into this cloned Ring repo. For Codex and OpenCode, it first builds a transformed tree at `.ring-build/` (namespace + frontmatter rewrites required by those tools).
+
+**Supported targets:** Claude Code, Factory AI, OpenCode, Codex.
+**Not supported by the installer:** Cursor (use the [native plugin install above](#native-plugin-install-per-harness)).
 
 ```bash
-# Interactive installer (auto-detects platforms)
-curl -fsSL https://raw.githubusercontent.com/lerianstudio/ring/main/install-ring.sh | bash
-
-# Or clone and run locally
+# Clone the repo
 git clone https://github.com/lerianstudio/ring.git ~/ring
 cd ~/ring
-./installer/install-ring.sh
+
+# Interactive menu (lets you pick targets)
+bash ring-install.sh
+
+# Or target specific harnesses without the prompt:
+bash ring-install.sh --claude               # Claude Code (per-file symlinks)
+bash ring-install.sh --factory              # Factory AI (per-file symlinks)
+bash ring-install.sh --opencode             # OpenCode (builds .ring-build/opencode/ first)
+bash ring-install.sh --codex                # Codex    (builds .ring-build/codex/ first)
+bash ring-install.sh --all                  # All four supported targets
 ```
 
-**Windows PowerShell:**
-
-```powershell
-# Interactive installer (auto-detects platforms)
-irm https://raw.githubusercontent.com/lerianstudio/ring/main/install-ring.ps1 | iex
-
-# Or clone and run locally
-git clone https://github.com/lerianstudio/ring.git $HOME\ring
-cd $HOME\ring
-.\installer\install-ring.ps1
-```
-
-### Direct Platform Installation
-
-Install to specific platforms without the interactive menu:
+#### Installer subcommands
 
 ```bash
-# Install to Claude Code only (native format)
-./installer/install-ring.sh install --platforms claude
-
-# Install to Factory AI only (droids format)
-./installer/install-ring.sh install --platforms factory
-
-# Install to multiple platforms
-./installer/install-ring.sh install --platforms claude,cursor,cline
-
-# Install to all detected platforms
-./installer/install-ring.sh install --platforms auto
-
-# Dry run (preview changes without installing)
-./installer/install-ring.sh install --platforms auto --dry-run
+bash ring-install.sh install --opencode --codex   # install symlinks for selected targets
+bash ring-install.sh remove                        # remove all Ring symlinks
+bash ring-install.sh build                         # rebuild .ring-build/{opencode,codex} only
+bash ring-install.sh clean                         # remove .ring-build/ outputs
+bash ring-install.sh doctor                        # verify install + build outputs
+bash ring-install.sh all --all -y                  # clean + build + install for all targets, no prompt
 ```
 
-### Installer Commands
-
-```bash
-# List installed platforms and versions
-./installer/install-ring.sh list
-
-# Update existing installation
-./installer/install-ring.sh update
-
-# Check for available updates
-./installer/install-ring.sh check
-
-# Sync (update only changed files)
-./installer/install-ring.sh sync
-
-# Uninstall from specific platform
-./installer/install-ring.sh uninstall --platforms cursor
-
-# Detect available platforms
-./installer/install-ring.sh detect
-```
+**Flags:** `--yes` / `-y` (skip confirmation), `--dry-run` (preview without changes), `--force` (back up non-symlink collisions), `--verbose`.
 
 ### Claude Code Plugin Marketplace
 
@@ -236,9 +223,9 @@ When you start a new Claude Code session with Ring installed, you'll see:
 ## Available Skills:
 - ring:using-ring (Check for skills BEFORE any task)
 - ring:test-driven-development (RED-GREEN-REFACTOR cycle)
-- ring:codereview (Parallel 10-reviewer dispatch)
+- ring:codereview (9 defaults + conditional specialist dispatch)
 - ring:explore-codebase (Two-phase codebase exploration)
-... and 65 more skills
+... and 73 more skills
 ```
 
 ## 🎯 Core Skills
@@ -261,20 +248,22 @@ GREEN → Minimal code → Watch it pass
 REFACTOR → Clean up → Stay green
 ```
 
-## 📚 All 69 Skills (Across 4 Plugins)
+## 📚 All 71 Skills (Across 4 Plugins)
 
-### Core Skills (ring-default plugin - 14 skills)
+### Core Skills (ring-default plugin - 16 skills)
 
 **Testing & Quality (2):**
 
 - `ring:test-driven-development` - Write test first, watch fail, minimal code
 - `ring:lint` - Parallel lint fixing with agent dispatch
 
-**Collaboration & Planning (3):**
+**Collaboration & Planning (5):**
 
-- `ring:codereview` - **Parallel 10-reviewer dispatch** with severity-based handling
+- `ring:codereview` - **Parallel 9 defaults + conditional specialist dispatch** with severity-based handling
 - `ring:worktree` - Isolated development
 - `ring:commit` - Smart commit organization with atomic grouping, conventional commits, and trailers
+- `ring:writing-plans` - Author bite-sized TDD-shaped implementation plans from a spec, ready for inline or subagent execution
+- `ring:executing-plans` - Inline execution of a written plan with verification checkpoints (TDD enforced per task)
 
 **Meta Skills (3):**
 
@@ -297,13 +286,13 @@ REFACTOR → Clean up → Stay green
 
 - `ring:production-readiness-audit` - 44-dimension production readiness audit; runs explorers in batches of up to 10, appends incrementally to a single report; output: scored report (0-430, max 440 with multi-tenant) with severity ratings. See [default/skills/production-readiness-audit/SKILL.md](default/skills/production-readiness-audit/SKILL.md) for invocation and implementation details.
 
-### Developer Skills (ring-dev-team plugin - 31 skills)
+### Developer Skills (ring-dev-team plugin - 33 skills)
 
 **Orchestration & Refactoring (7):**
 
 - `ring:using-dev-team` - Introduction to developer specialist agents
 - `ring:dev-cycle` - Lean backend development workflow orchestrator: Gate 0 implementation-owned TDD/coverage/docker-compose/runtime/delivery verification, Gate 8 review, Gate 9 validation
-- `ring:dev-cycle-frontend` - 9-gate frontend development workflow orchestrator
+- `ring:dev-cycle-frontend` - lean frontend development cycle orchestrator (Gate 0, 7, 8)
 - `ring:dev-refactor` - Backend/codebase standards analysis
 - `ring:dev-refactor-frontend` - Frontend standards analysis and task generation
 - `ring:dev-simplify` - Whole-codebase structural simplification sweep (hunts unjustified abstractions, adapters, shims; KILL/REVIEW/KEEP output; DELETE-by-default burden of proof for pre-public applications)
@@ -319,10 +308,6 @@ REFACTOR → Clean up → Stay green
 - `ring:dev-readyz` - Comprehensive readiness probes (/readyz) with per-dependency status and TLS validation
 - `ring:dev-streaming-instrumentation` - Wire lib-streaming event emission from a validated instrumentation map
 
-**Deprecated Skills (Reference Only):**
-
-- `ring:dev-delivery-verification` - DEPRECATED: delivery verification merged into ring:dev-implementation Step 7 (Gate 0 exit criterion). Skill preserved for reference only.
-
 **Testing & Validation:**
 
 - `ring:dev-goroutine-leak-testing` - Goroutine leak detection and regression testing
@@ -334,8 +319,8 @@ REFACTOR → Clean up → Stay green
 **Migration & Reference (6):**
 
 - `ring:using-lib-commons` - Comprehensive reference for lib-commons v5.0.2 (Lerian's shared Go library with 30+ packages)
-- `ring:using-runtime` - Deep reference and 6-angle audit for commons/runtime: SafeGo, panic recovery, observability trident, policy selection, framework integration. Catches naked goroutine launches that cause silent production failures.
-- `ring:using-assert` - Deep reference and 6-angle audit for commons/assert: production runtime assertions with observability trident, full domain predicate catalog (double-entry, transaction state machine, financial validations), AssertionError unwrapping patterns. Converts financial invariants into production-enforced rules.
+- `ring:using-runtime` - Deep reference and 6-angle audit for lib-observability/runtime: SafeGo, panic recovery, observability trident, policy selection, framework integration. Catches naked goroutine launches that cause silent production failures.
+- `ring:using-assert` - Deep reference and 6-angle audit for lib-observability/assert: production runtime assertions with observability trident, full domain predicate catalog (double-entry, transaction state machine, financial validations), AssertionError unwrapping patterns. Converts financial invariants into production-enforced rules.
 - `ring:dev-systemplane-migration` - Migrate Lerian Go services from .env/YAML config to systemplane (database-backed hot-reloadable config)
 - `ring:dev-llms-txt` - Generate or audit llms.txt files following llmstxt.org spec for AI-friendly repository entry points
 - `ring:dev-licensing` - Repository license management (Apache 2.0, Elastic v2, Proprietary)
@@ -344,12 +329,9 @@ REFACTOR → Clean up → Stay green
 
 - `ring:dev-dep-security-check` - Supply-chain gate for dependency installations (validates identity, vulnerabilities, suspicious signals)
 
-**Frontend Gate Skills (4):**
+**Frontend Quality Skills (1):**
 
-- `ring:dev-frontend-accessibility` - Frontend accessibility validation gate
-- `ring:dev-frontend-visual` - Visual regression and UI quality gate
-- `ring:dev-frontend-e2e` - End-to-end testing gate
-- `ring:dev-frontend-performance` - Frontend performance validation gate
+- `ring:dev-frontend-quality` - Frontend quality checks in modes `accessibility` (axe-core/WCAG), `visual` (snapshots/viewports), `e2e` (Playwright 3-browser), `performance` (Lighthouse/Core Web Vitals), or `all`; dispatches `ring:qa-analyst-frontend`
 
 > Frontend and backend dev-cycle workflows both use `ring:codereview` (core plugin) as the review gate.
 
@@ -381,13 +363,11 @@ REFACTOR → Clean up → Stay green
 - `ring:delivery-status` - Delivery progress tracking against roadmap
 - `ring:deep-doc-review` - Deep cross-reference review of pre-dev documentation artifacts
 
-### Technical Writing Skills (ring-tw-team plugin - 6 skills)
+### Technical Writing Skills (ring-tw-team plugin - 4 skills)
 
 **Documentation Creation:**
 
 - `ring:using-tw-team` - Introduction to technical writing specialists
-- `ring:write-guide` - Patterns for guides, tutorials, conceptual docs
-- `ring:write-api` - API reference documentation patterns
 - `ring:documentation-structure` - Document hierarchy and organization
 - `ring:voice-and-tone` - Voice and tone guidelines (assertive, encouraging, human)
 - `ring:review-docs` - Quality checklist and review process
@@ -403,7 +383,7 @@ Claude: I'm using ring:pre-dev-feature to scope this feature...
 Claude: I'm using ring:test-driven-development to implement...
         [RED-GREEN-REFACTOR cycle for each component]
 Claude: I'm using ring:codereview to validate...
-        [10-reviewer parallel dispatch]
+        [9 defaults + conditional specialist parallel dispatch]
 ```
 
 ### Fixing a Bug
@@ -428,43 +408,41 @@ Claude: I'll use the pre-dev workflow to plan this systematically...
         ... [Through all 10 gates]
 ```
 
-### Code Review (Parallel, 10 Reviewers!)
+### Code Review (Parallel, 9 Defaults + Conditional Specialists)
 
 ```
 User: "Review my authentication implementation"
-Claude: Dispatching all 10 reviewers in parallel...
+Claude: Dispatching all 9 default reviewers plus triggered conditional specialists in parallel...
         [Launches ring:code-reviewer, ring:business-logic-reviewer, ring:security-reviewer,
-         ring:test-reviewer, ring:nil-safety-reviewer, ring:consequences-reviewer,
+         ring:test-reviewer, ring:nil-safety-reviewer,
          ring:dead-code-reviewer, ring:performance-reviewer, ring:multi-tenant-reviewer,
          ring:lib-commons-reviewer simultaneously]
+        Conditional specialists trigger only when the diff touches their stack:
+        lib-observability, lib-systemplane, or lib-streaming.
 
         Code reviewer: PASS. Clean architecture, good tests.
         Business reviewer: FAIL. Missing password reset flow (HIGH severity).
         Security reviewer: FAIL. JWT secret hardcoded (CRITICAL severity).
         Test reviewer: PASS. Good coverage, assertions well-structured.
         Nil-safety reviewer: PASS. No unguarded nil dereferences found.
-        Consequences reviewer: PASS. No downstream breakage detected.
         Performance reviewer: PASS. No hotspots or goroutine leaks found.
         Multi-tenant reviewer: PASS. No multi-tenant code in scope.
-        lib-commons reviewer: PASS. Correct usage of lib-commons/resilience, no reinvented wheels detected.
+        lib-commons reviewer: PASS. Correct shared-library usage, no reinvented wheels detected.
 
         Aggregating issues by severity:
         - CRITICAL: JWT secret hardcoded in auth.ts:42
         - HIGH: Password reset flow missing from requirements
 
-        Dispatching fix subagent to address Critical/High issues...
-        [Fixes applied]
-
-        Re-running all 10 reviewers in parallel...
-        All reviewers: PASS. Ready for production.
+        Review report complete. No files changed by reviewers.
+        Fixes require a separate implementation step, then a new review run.
 ```
 
 **Key benefits:**
 
 - **All reviewers run simultaneously** (not sequential)
 - **Comprehensive** - Get all feedback at once, easier to prioritize
-- **Tech debt tracking** - Low/Cosmetic issues tracked with TODO/FIXME comments in code
-- **Model-specific** - All reviewers run on for deep analysis
+- **Report-only boundary** - Reviewers report findings; remediation is a separate step
+- **Specialized lanes** - Each reviewer owns a clear domain to avoid duplicate slop
 
 ## 🏗️ Architecture
 
@@ -475,7 +453,7 @@ ring/                                  # Monorepo root
 ├── .claude-plugin/
 │   └── marketplace.json              # Multi-plugin marketplace config (4 active plugins)
 ├── default/                          # Core Ring plugin (ring-default)
-│   ├── skills/                       # 14 core skills
+│   ├── skills/                       # 16 core skills
 │   │   ├── skill-name/
 │   │   │   └── SKILL.md             # Skill definition with frontmatter
 │   │   └── shared-patterns/         # Universal patterns (15 patterns)
@@ -483,20 +461,12 @@ ring/                                  # Monorepo root
 │   │   ├── hooks.json              # Hook configuration
 │   │   ├── session-start.sh        # Loads skills at startup
 │   │   └── generate-skills-ref.py  # Auto-generates quick reference
-│   ├── agents/                      # 10 specialized agents
-│   │   ├── code-reviewer.md             # Foundation review (`ring:code-reviewer`)
-│   │   ├── business-logic-reviewer.md   # Correctness review (`ring:business-logic-reviewer`)
-│   │   ├── security-reviewer.md         # Safety review (`ring:security-reviewer`)
-│   │   ├── test-reviewer.md             # Test quality review (`ring:test-reviewer`)
-│   │   ├── nil-safety-reviewer.md       # Nil/null safety review (`ring:nil-safety-reviewer`)
-│   │   ├── consequences-reviewer.md     # Ripple effect review (`ring:consequences-reviewer`)
-│   │   ├── dead-code-reviewer.md        # Dead code analysis (`ring:dead-code-reviewer`)
+│   ├── agents/                      # 2 planning/analysis agents
 │   │   ├── review-slicer.md             # Review slicing for large PRs (`ring:review-slicer`)
-│   │   ├── write-plan.md                # Implementation planning (`ring:write-plan`)
 │   │   └── codebase-explorer.md         # Deep architecture analysis (`ring:codebase-explorer`)
 │   └── docs/                       # Documentation
-├── dev-team/                      # Developer Agents plugin (ring-dev-team) - 31 skills, 15 agents
-│   └── agents/                      # 15 specialized developer agents
+├── dev-team/                      # Developer Agents plugin (ring-dev-team) - 33 skills, 24 agents
+│   └── agents/                      # 24 specialized developer/reviewer agents
 │       ├── backend-engineer-golang.md       # Go backend specialist (`ring:backend-engineer-golang`)
 │       ├── backend-engineer-typescript.md   # TypeScript/Node.js backend specialist (`ring:backend-engineer-typescript`)
 │       ├── frontend-bff-engineer-typescript.md # BFF & React/Next.js specialist (`ring:frontend-bff-engineer-typescript`)
@@ -504,7 +474,16 @@ ring/                                  # Monorepo root
 │       ├── frontend-designer.md             # Visual design specialist (`ring:frontend-designer`)
 │       ├── frontend-engineer.md             # Frontend engineer (`ring:frontend-engineer`)
 │       ├── helm-engineer.md                 # Helm chart specialist (`ring:helm-engineer`)
+│       ├── code-reviewer.md                 # Foundation review (`ring:code-reviewer`)
+│       ├── business-logic-reviewer.md       # Correctness review (`ring:business-logic-reviewer`)
+│       ├── security-reviewer.md             # Safety review (`ring:security-reviewer`)
+│       ├── test-reviewer.md                 # Test quality review (`ring:test-reviewer`)
+│       ├── nil-safety-reviewer.md           # Nil/null safety review (`ring:nil-safety-reviewer`)
+│       ├── dead-code-reviewer.md            # Dead code analysis (`ring:dead-code-reviewer`)
 │       ├── lib-commons-reviewer.md          # lib-commons usage review (`ring:lib-commons-reviewer`)
+│       ├── lib-observability-reviewer.md    # Conditional observability review (`ring:lib-observability-reviewer`)
+│       ├── lib-systemplane-reviewer.md      # Conditional runtime-config review (`ring:lib-systemplane-reviewer`)
+│       ├── lib-streaming-reviewer.md        # Conditional event producer review (`ring:lib-streaming-reviewer`)
 │       ├── multi-tenant-reviewer.md         # Multi-tenant usage review (`ring:multi-tenant-reviewer`)
 │       ├── performance-reviewer.md          # Performance review (`ring:performance-reviewer`)
 │       ├── prompt-quality-reviewer.md       # Agent quality reviewer (`ring:prompt-quality-reviewer`)
@@ -516,7 +495,7 @@ ring/                                  # Monorepo root
 │   └── skills/                      # 18 product planning skills
 │       └── pre-dev-*/              # PRD, TRD, API, Data, Tasks
 └── tw-team/                         # Technical Writing plugin (ring-tw-team)
-    ├── skills/                      # 6 documentation skills
+    ├── skills/                      # 4 documentation skills
     ├── agents/                      # 3 technical writing agents
     └── hooks/                       # SessionStart hook
 ```

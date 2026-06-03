@@ -177,10 +177,10 @@ Read docs/PROJECT_RULES.md
 
 The following are defined in Ring Standards and MUST not be duplicated in this file:
 - Error handling patterns (no panic, wrap errors)
-- Logging standards (structured JSON via lib-commons)
+- Logging standards (structured JSON via lib-observability)
 - Testing patterns (table-driven tests, mocks)
 - Architecture patterns (Hexagonal, Clean Architecture)
-- Observability (OpenTelemetry via lib-commons)
+- Observability (OpenTelemetry via lib-observability)
 - lib-commons / lib-common-js usage and patterns
 - API directory structure (Lerian pattern)
 - Database connections (PostgreSQL, MongoDB, Redis via lib-commons)

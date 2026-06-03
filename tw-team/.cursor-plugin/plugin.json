@@ -1,0 +1,28 @@
+{
+  "name": "ring-tw-team",
+  "displayName": "Ring TW Team",
+  "description": "Technical writing specialists for functional and API documentation. 3 specialized agents and 4 documentation skills enforcing clear, consistent voice/tone, structure, and quality.",
+  "version": "0.4.7",
+  "author": {
+    "name": "Lerian Studio",
+    "email": "fred@lerian.studio"
+  },
+  "homepage": "https://github.com/lerianstudio/ring/tree/main/tw-team",
+  "repository": "https://github.com/lerianstudio/ring",
+  "license": "MIT",
+  "keywords": [
+    "technical-writing",
+    "documentation",
+    "api-docs",
+    "guides",
+    "tutorials",
+    "voice-tone",
+    "style-guide",
+    "docs-review",
+    "agents",
+    "content-quality"
+  ],
+  "skills": "./skills/",
+  "agents": "./agents/",
+  "hooks": "./hooks/hooks.json"
+}

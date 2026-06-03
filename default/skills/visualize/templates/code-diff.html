@@ -3,10 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Refactoring Findings — Lerian Studio</title>
+<title>Refactoring findings - Lerian Studio</title>
 <!--
   Reference template for the visual-explainer skill: code diff review.
-  Lerian Standard branding — sunglow accent with @pierre/diffs code panels.
+  Pattern reference only. Start generated artifacts from standard.html,
+  then adapt this structure to the user's source data. Do not copy this
+  sample title, findings, metrics, file paths, severities, or rows unless
+  present in the user request or source material.
+
+  Lerian Standard branding - sunglow accent with @pierre/diffs code panels.
   Key patterns demonstrated:
   - Lerian sunglow accent palette (standard.html tokens)
   - @pierre/diffs FileDiff components for code comparison rendering
@@ -16,8 +21,8 @@
   - CSS variable bridge between Lerian tokens and @pierre/diffs
   - Responsive nav sidebar (desktop: sticky TOC, mobile: horizontal scrollbar)
   - Scroll spy JS for active section tracking
-  - KPI summary cards with data-count animation via @property
-  - Horizontal severity breakdown bar below KPIs
+  - Optional source-backed summary cells with data-count animation via @property
+  - Horizontal severity breakdown bar below source-backed counts
   - Finding cards with severity badges, category tags, file paths
   - Collapsible "Why This Matters" sections via <details>
   - Task mapping data table with sticky thead, alternating rows, severity badges
@@ -44,53 +49,53 @@
     --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', ui-monospace, monospace;
 
     /* --- Backgrounds --- */
-    --bg: #F4F4F5;                          /* page background (zinc-100) */
-    --surface: #FFFFFF;                      /* cards, panels */
-    --surface-elevated: #FFFFFF;             /* modals, popovers */
-    --surface-muted: #E4E4E7;               /* subtle backgrounds, muted areas */
+    --bg: oklch(96.7% 0.001 286.4);          /* page background (zinc-100) */
+    --surface: oklch(99% 0.002 286.4);       /* cards, panels */
+    --surface-elevated: oklch(98.5% 0.003 286.4); /* modals, popovers */
+    --surface-muted: oklch(91.9% 0.004 286.3); /* subtle backgrounds, muted areas */
 
     /* --- Text --- */
-    --text: #27272A;                         /* primary text (zinc-800) */
-    --text-secondary: #52525B;               /* secondary text (zinc-600) */
-    --text-muted: #A1A1AA;                   /* placeholder, meta (zinc-400) */
-    --text-inverse: #F4F4F5;                 /* text on dark backgrounds */
+    --text: oklch(27.4% 0.006 286.0);        /* primary text (zinc-800) */
+    --text-secondary: oklch(44.2% 0.017 285.8); /* secondary text (zinc-600) */
+    --text-muted: oklch(70.5% 0.015 286.1);  /* placeholder, meta (zinc-400) */
+    --text-inverse: oklch(96.7% 0.001 286.4); /* text on dark backgrounds */
 
     /* --- Brand Accent (Sunglow) --- */
-    --accent: #FDCB28;                       /* primary brand yellow */
+    --accent: oklch(84.8% 0.166 88.9);       /* primary brand yellow */
     --accent-dim: rgba(253, 203, 40, 0.15);
     --accent-hover: rgba(253, 203, 40, 0.7);
-    --accent-text: #27272A;                  /* text color on accent bg */
+    --accent-text: oklch(27.4% 0.006 286.0); /* text color on accent bg */
 
     /* --- Semantic Status --- */
-    --success: #16A34A;
-    --success-bg: #f0fdf4;
+    --success: oklch(62.7% 0.194 149.2);
+    --success-bg: oklch(98.2% 0.018 155.8);
     --success-dim: rgba(22, 163, 74, 0.12);
-    --warning: #EAB308;
-    --warning-bg: #fefce8;
+    --warning: oklch(79.5% 0.162 86.0);
+    --warning-bg: oklch(98.7% 0.026 102.2);
     --warning-dim: rgba(234, 179, 8, 0.15);
-    --error: #EF4444;
-    --error-bg: #fef2f2;
+    --error: oklch(63.7% 0.208 25.3);
+    --error-bg: oklch(97.1% 0.013 17.4);
     --error-dim: rgba(239, 68, 68, 0.12);
-    --info: #2563EB;
-    --info-bg: #eff6ff;
+    --info: oklch(54.6% 0.215 262.9);
+    --info-bg: oklch(97% 0.014 254.6);
     --info-dim: rgba(37, 99, 235, 0.12);
 
     /* --- Extended Palette (diagram variety) --- */
-    --sunglow-400: #FDCB28;
-    --sunglow-500: #EDAC05;
-    --sunglow-100: #FFF8C2;
-    --de-york-400: #5BCD86;
-    --de-york-600: #26934F;
-    --de-york-100: #E0F8E8;
-    --tangerine-400: #FAA589;
-    --tangerine-500: #F06E43;
-    --tangerine-100: #FEE9E2;
-    --cod-gray-400: #927E81;
-    --cod-gray-600: #655557;
+    --sunglow-400: oklch(84.8% 0.166 88.9);
+    --sunglow-500: oklch(76.7% 0.159 83.8);
+    --sunglow-100: oklch(96.8% 0.083 96.6);
+    --de-york-400: oklch(75.6% 0.147 150.0);
+    --de-york-600: oklch(55% 0.138 149.0);
+    --de-york-100: oklch(95% 0.052 150.0);
+    --tangerine-400: oklch(78.4% 0.106 43.7);
+    --tangerine-500: oklch(66.5% 0.176 38.6);
+    --tangerine-100: oklch(93.6% 0.039 42.4);
+    --cod-gray-400: oklch(59.3% 0.025 13.0);
+    --cod-gray-600: oklch(43.7% 0.023 13.6);
 
     /* --- Borders --- */
-    --border: #E4E4E7;                       /* default border (zinc-200) */
-    --border-strong: #D4D4D8;               /* input borders (zinc-300) */
+    --border: oklch(91.9% 0.004 286.3);     /* default border (zinc-200) */
+    --border-strong: oklch(87.1% 0.006 286.3); /* input borders (zinc-300) */
     --border-subtle: rgba(0, 0, 0, 0.05);   /* very faint separators */
 
     /* --- Shadows (product-console) --- */
@@ -104,6 +109,9 @@
     --radius-md: 6px;
     --radius-lg: 12px;
     --radius-full: 9999px;
+
+    /* --- Layout --- */
+    --page-padding: 40px;
   }
 
 
@@ -111,34 +119,31 @@
 
   @media (prefers-color-scheme: dark) {
     :root {
-      /* GitHub dark — intentional overrides for code readability */
-      --bg: #0d1117;
-      --surface: #161b22;
-      --surface-elevated: #1c2128;
-      --surface-muted: #21262d;
+      --bg: oklch(27.4% 0.006 286.0);
+      --surface: oklch(37% 0.013 285.8);
+      --surface-elevated: oklch(44.2% 0.017 285.8);
+      --surface-muted: oklch(44.2% 0.017 285.8);
 
-      /* GitHub dark text */
-      --text: #e6edf3;
-      --text-secondary: #8b949e;
-      --text-muted: #6e7681;
-      --text-inverse: #27272A;
+      --text: oklch(96.7% 0.001 286.4);
+      --text-secondary: oklch(70.5% 0.015 286.1);
+      --text-muted: oklch(55.2% 0.016 285.9);
+      --text-inverse: oklch(27.4% 0.006 286.0);
 
-      /* Sunglow accent (works well on dark backgrounds) */
-      --accent: #FDCB28;
+      --accent: oklch(84.8% 0.166 88.9);
       --accent-dim: rgba(253, 203, 40, 0.2);
-      --accent-text: #27272A;
+      --accent-text: oklch(27.4% 0.006 286.0);
 
       /* Semantic status (standard tokens) */
-      --success: #16A34A;
+      --success: oklch(62.7% 0.194 149.2);
       --success-bg: rgba(22, 163, 74, 0.15);
       --success-dim: rgba(22, 163, 74, 0.12);
-      --warning: #EAB308;
+      --warning: oklch(79.5% 0.162 86.0);
       --warning-bg: rgba(234, 179, 8, 0.15);
       --warning-dim: rgba(234, 179, 8, 0.15);
-      --error: #f87171;
+      --error: oklch(70.4% 0.191 22.2);
       --error-bg: rgba(248, 113, 113, 0.12);
       --error-dim: rgba(248, 113, 113, 0.12);
-      --info: #60a5fa;
+      --info: oklch(70.7% 0.165 254.6);
       --info-bg: rgba(96, 165, 250, 0.12);
       --info-dim: rgba(96, 165, 250, 0.12);
 
@@ -164,7 +169,7 @@
       radial-gradient(ellipse at 75% 100%, var(--error-dim) 0%, transparent 40%);
     color: var(--text);
     font-family: var(--font-body);
-    padding: 40px;
+    padding: var(--page-padding);
     min-height: 100vh;
     overflow-wrap: break-word;
     -webkit-font-smoothing: antialiased;
@@ -200,7 +205,7 @@
     }
   }
 
-  /* ============ KPI COUNT ANIMATION ============ */
+  /* ============ SOURCE-BACKED COUNT ANIMATION ============ */
   @property --count {
     syntax: '<integer>';
     initial-value: 0;
@@ -211,12 +216,12 @@
     to { --count: var(--target); }
   }
 
-  .kpi-card__value--animated {
+  .source-summary-card__value--animated {
     counter-reset: val var(--count);
     animation: countUp 1.2s ease-out forwards;
   }
 
-  .kpi-card__value--animated::after {
+  .source-summary-card__value--animated::after {
     content: counter(val);
   }
 
@@ -286,18 +291,22 @@
     text-decoration: none;
     padding: 4px 8px;
     border-radius: 5px;
-    border-left: 2px solid transparent;
+    box-shadow: inset 0 0 0 0 transparent;
     transition: all 0.15s;
     line-height: 1.4;
     margin-bottom: 1px;
   }
   .toc a:hover { color: var(--text); background: var(--surface-muted); }
-  .toc a.active { color: var(--text); border-left-color: var(--accent); }
+  .toc a.active {
+    color: var(--text);
+    background: var(--surface-elevated);
+    font-weight: 600;
+    box-shadow: inset 0 0 0 1px var(--accent), var(--shadow-sm);
+  }
 
   /* ============ TOC -- MOBILE (sticky horizontal bar) ============ */
   @media (max-width: 1000px) {
     .wrap { grid-template-columns: 1fr; padding-top: 0; }
-    body { padding-top: 0; }
 
     .toc {
       position: sticky;
@@ -312,9 +321,8 @@
       background: var(--bg);
       border-bottom: 1px solid var(--border);
       padding: 10px 0;
-      margin: 0 -40px;
-      padding-left: 40px;
-      padding-right: 40px;
+      margin-inline: calc(var(--page-padding) * -1);
+      padding-inline: var(--page-padding);
       grid-row: auto;
     }
     .toc::-webkit-scrollbar { display: none; }
@@ -323,16 +331,15 @@
     .toc a {
       white-space: nowrap;
       flex-shrink: 0;
-      border-left: none;
       border-bottom: 2px solid transparent;
       border-radius: 4px 4px 0 0;
       padding: 6px 10px;
       font-size: 10px;
     }
     .toc a.active {
-      border-left: none;
       border-bottom-color: var(--accent);
       background: var(--surface);
+      box-shadow: none;
     }
 
     .main { padding-top: 20px; }
@@ -355,15 +362,15 @@
     margin-bottom: 32px;
   }
 
-  /* ============ KPI SUMMARY ============ */
-  .kpi-row {
+  /* ============ SOURCE-BACKED SUMMARY ============ */
+  .source-summary-row {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 14px;
     margin-bottom: 16px;
   }
 
-  .kpi-card {
+  .source-summary-card {
     background: var(--surface-elevated, var(--surface));
     border: 1px solid var(--border);
     border-radius: 10px;
@@ -371,7 +378,7 @@
     box-shadow: var(--shadow-sm);
   }
 
-  .kpi-card__value {
+  .source-summary-card__value {
     font-size: 32px;
     font-weight: 700;
     line-height: 1.1;
@@ -379,11 +386,11 @@
     font-variant-numeric: tabular-nums;
   }
 
-  .kpi-card__value--accent { color: var(--accent); }
-  .kpi-card__value--error { color: var(--error); }
-  .kpi-card__value--warning { color: var(--warning); }
+  .source-summary-card__value--accent { color: var(--accent); }
+  .source-summary-card__value--error { color: var(--error); }
+  .source-summary-card__value--warning { color: var(--warning); }
 
-  .kpi-card__label {
+  .source-summary-card__label {
     font-family: var(--font-mono);
     font-size: 10px;
     font-weight: 600;
@@ -889,10 +896,14 @@
   }
 
   /* ============ RESPONSIVE ============ */
+  @media (max-width: 1000px) {
+    :root { --page-padding: clamp(24px, 4vw, 40px); }
+  }
+
   @media (max-width: 768px) {
-    body { padding: 20px; }
+    :root { --page-padding: clamp(16px, 5vw, 20px); }
     h1 { font-size: 24px; }
-    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .source-summary-row { grid-template-columns: repeat(2, 1fr); }
     .finding-header { flex-direction: column; align-items: flex-start; }
     .finding-file { margin-left: 0; }
     .data-table th,
@@ -901,15 +912,11 @@
     .footer-meta { align-items: flex-start; }
   }
 
-  @media (max-width: 1000px) {
-    body { padding: 40px 40px 40px 40px; }
-  }
-
   /* ============ PRINT ============ */
   @media print {
     body {
-      background: #fff;
-      color: #000;
+      background: oklch(98.8% 0.004 92);
+      color: oklch(24% 0.012 70);
       padding: 20px;
     }
 
@@ -923,7 +930,7 @@
       left: 0;
       right: 0;
       border-top: 1px solid #ddd;
-      background: #fff;
+      background: oklch(98.8% 0.004 92);
       padding: 12px 20px;
     }
 
@@ -971,34 +978,35 @@
     <a href="#s-f001">FINDING-001</a>
     <a href="#s-f002">FINDING-002</a>
     <a href="#s-f003">FINDING-003</a>
-    <a href="#s-tasks">Task Mapping</a>
+    <a href="#s-tasks">Task mapping</a>
   </nav>
 
   <!-- ========== MAIN CONTENT ========== -->
   <div class="main">
 
-    <h1 class="animate" style="--i:0">Refactoring Findings</h1>
-    <p class="subtitle animate" style="--i:1">codebase analysis &mdash; 3 findings across 3 files</p>
+    <h1 class="animate" style="--i:0">Refactoring findings</h1>
+    <p class="subtitle animate" style="--i:1">codebase analysis: 3 findings across 3 files</p>
 
-    <!-- ========== KPI SUMMARY ========== -->
+    <!-- ========== SOURCE-BACKED DEMO SUMMARY SLOTS ========== -->
     <div id="s-summary" class="sec-head animate" style="--i:2">Summary</div>
 
-    <div class="kpi-row animate-scale" style="--i:3">
-      <div class="kpi-card">
-        <div class="kpi-card__value kpi-card__value--animated kpi-card__value--accent" style="--target:3"></div>
-        <div class="kpi-card__label">Total Findings</div>
+    <!-- Replace every count and label with facts from the source material, or remove this row. -->
+    <div class="source-summary-row animate-scale" style="--i:3">
+      <div class="source-summary-card">
+        <div class="source-summary-card__value source-summary-card__value--animated source-summary-card__value--accent" style="--target:3"></div>
+        <div class="source-summary-card__label">Total findings</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-card__value kpi-card__value--animated" style="--target:3"></div>
-        <div class="kpi-card__label">Files Affected</div>
+      <div class="source-summary-card">
+        <div class="source-summary-card__value source-summary-card__value--animated" style="--target:3"></div>
+        <div class="source-summary-card__label">Files affected</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-card__value kpi-card__value--animated kpi-card__value--error" style="--target:1"></div>
-        <div class="kpi-card__label">Critical Issues</div>
+      <div class="source-summary-card">
+        <div class="source-summary-card__value source-summary-card__value--animated source-summary-card__value--error" style="--target:1"></div>
+        <div class="source-summary-card__label">Critical issues</div>
       </div>
-      <div class="kpi-card">
-        <div class="kpi-card__value kpi-card__value--animated kpi-card__value--warning" style="--target:1"></div>
-        <div class="kpi-card__label">High Issues</div>
+      <div class="source-summary-card">
+        <div class="source-summary-card__value source-summary-card__value--animated source-summary-card__value--warning" style="--target:1"></div>
+        <div class="source-summary-card__label">High issues</div>
       </div>
     </div>
 
@@ -1022,7 +1030,7 @@
 
     <!-- ========== GLOBAL DIFF STYLE TOGGLE ========== -->
     <div class="global-diff-controls animate" style="--i:5">
-      <span class="global-diff-controls__label">Diff View</span>
+      <span class="global-diff-controls__label">Diff view</span>
       <div class="diff-toggle" id="global-diff-toggle">
         <button class="diff-toggle__btn diff-toggle__btn--active" data-style="split">Split</button>
         <button class="diff-toggle__btn" data-style="unified">Unified</button>
@@ -1030,18 +1038,18 @@
     </div>
 
     <!-- ========== FINDING-001: CRITICAL ========== -->
-    <div id="s-f001" class="sec-head animate" style="--i:6">Finding 001 &mdash; Error Handling</div>
+    <div id="s-f001" class="sec-head animate" style="--i:6">Finding 001: error handling</div>
 
     <div class="finding-card animate" style="--i:7">
       <div class="finding-header">
         <span class="finding-id">FINDING-001</span>
         <span class="severity-badge severity-badge--critical">Critical</span>
-        <span class="category-tag">Error Handling</span>
+        <span class="category-tag">Error handling</span>
         <span class="finding-file">internal/handler/user.go</span>
       </div>
       <div class="finding-body">
         <div class="diff-toolbar">
-          <span class="diff-toolbar__label">Before / After</span>
+          <span class="diff-toolbar__label">Before / after</span>
           <div class="diff-toggle" data-finding="1">
             <button class="diff-toggle__btn diff-toggle__btn--active" data-style="split">Split</button>
             <button class="diff-toggle__btn" data-style="unified">Unified</button>
@@ -1054,13 +1062,13 @@
           </div>
         </div>
 
-        <!-- Why This Matters -->
+        <!-- Why this matters -->
         <details class="collapsible">
-          <summary>Why This Matters</summary>
+          <summary>Why this matters</summary>
           <div class="collapsible__body">
             <ul>
               <li><strong>Problem:</strong> Bare <code>return err</code> discards all context about where the error originated, making production debugging impossible.</li>
-              <li><strong>Standard Violated:</strong> Ring Go Standards &sect; Error Handling &mdash; all errors must be wrapped with <code>fmt.Errorf("context: %w", err)</code> to preserve the chain.</li>
+              <li><strong>Standard violated:</strong> Ring Go Standards &sect; error handling: all errors must be wrapped with <code>fmt.Errorf("context: %w", err)</code> to preserve the chain.</li>
               <li><strong>Impact:</strong> When an error surfaces in logs, operators cannot trace it back to the handler or operation that failed, increasing MTTR by orders of magnitude.</li>
             </ul>
           </div>
@@ -1069,18 +1077,18 @@
     </div>
 
     <!-- ========== FINDING-002: HIGH ========== -->
-    <div id="s-f002" class="sec-head animate" style="--i:8">Finding 002 &mdash; Structured Logging</div>
+    <div id="s-f002" class="sec-head animate" style="--i:8">Finding 002: structured logging</div>
 
     <div class="finding-card animate" style="--i:9">
       <div class="finding-header">
         <span class="finding-id">FINDING-002</span>
         <span class="severity-badge severity-badge--high">High</span>
-        <span class="category-tag">Structured Logging</span>
+        <span class="category-tag">Structured logging</span>
         <span class="finding-file">internal/service/auth.go</span>
       </div>
       <div class="finding-body">
         <div class="diff-toolbar">
-          <span class="diff-toolbar__label">Before / After</span>
+          <span class="diff-toolbar__label">Before / after</span>
           <div class="diff-toggle" data-finding="2">
             <button class="diff-toggle__btn diff-toggle__btn--active" data-style="split">Split</button>
             <button class="diff-toggle__btn" data-style="unified">Unified</button>
@@ -1093,13 +1101,13 @@
           </div>
         </div>
 
-        <!-- Why This Matters -->
+        <!-- Why this matters -->
         <details class="collapsible">
-          <summary>Why This Matters</summary>
+          <summary>Why this matters</summary>
           <div class="collapsible__body">
             <ul>
               <li><strong>Problem:</strong> <code>log.Printf</code> emits unstructured text that cannot be parsed, filtered, or correlated in an observability stack.</li>
-              <li><strong>Standard Violated:</strong> Ring Go Standards &sect; Structured Logging &mdash; all log output must use the structured logger (zap) with typed fields and trace context.</li>
+              <li><strong>Standard violated:</strong> Ring Go Standards &sect; structured logging: all log output must use the structured logger (zap) with typed fields and trace context.</li>
               <li><strong>Impact:</strong> Log-based alerting, dashboard queries, and incident investigation all depend on structured key-value fields. Unstructured lines are invisible to these tools.</li>
             </ul>
           </div>
@@ -1108,18 +1116,18 @@
     </div>
 
     <!-- ========== FINDING-003: MEDIUM ========== -->
-    <div id="s-f003" class="sec-head animate" style="--i:10">Finding 003 &mdash; Context Propagation</div>
+    <div id="s-f003" class="sec-head animate" style="--i:10">Finding 003: context propagation</div>
 
     <div class="finding-card animate" style="--i:11">
       <div class="finding-header">
         <span class="finding-id">FINDING-003</span>
         <span class="severity-badge severity-badge--medium">Medium</span>
-        <span class="category-tag">Context Propagation</span>
+        <span class="category-tag">Context propagation</span>
         <span class="finding-file">internal/repository/user.go</span>
       </div>
       <div class="finding-body">
         <div class="diff-toolbar">
-          <span class="diff-toolbar__label">Before / After</span>
+          <span class="diff-toolbar__label">Before / after</span>
           <div class="diff-toggle" data-finding="3">
             <button class="diff-toggle__btn diff-toggle__btn--active" data-style="split">Split</button>
             <button class="diff-toggle__btn" data-style="unified">Unified</button>
@@ -1132,13 +1140,13 @@
           </div>
         </div>
 
-        <!-- Why This Matters -->
+        <!-- Why this matters -->
         <details class="collapsible">
-          <summary>Why This Matters</summary>
+          <summary>Why this matters</summary>
           <div class="collapsible__body">
             <ul>
               <li><strong>Problem:</strong> Without <code>context.Context</code> as the first parameter, the function cannot participate in request cancellation or distributed tracing.</li>
-              <li><strong>Standard Violated:</strong> Ring Go Standards &sect; Context Propagation &mdash; every function in the request path must accept <code>ctx context.Context</code> as its first parameter.</li>
+              <li><strong>Standard violated:</strong> Ring Go Standards &sect; context propagation: every function in the request path must accept <code>ctx context.Context</code> as its first parameter.</li>
               <li><strong>Impact:</strong> Database queries from cancelled HTTP requests continue executing, wasting resources. Trace spans have gaps because the repository layer is invisible to the tracing system.</li>
             </ul>
           </div>
@@ -1147,7 +1155,7 @@
     </div>
 
     <!-- ========== TASK MAPPING TABLE ========== -->
-    <div id="s-tasks" class="sec-head animate" style="--i:12">Task Mapping</div>
+    <div id="s-tasks" class="sec-head animate" style="--i:12">Task mapping</div>
 
     <div class="table-wrap animate" style="--i:13">
       <div class="table-scroll">
@@ -1158,7 +1166,7 @@
               <th>Task</th>
               <th>Severity</th>
               <th>Category</th>
-              <th>Estimated Effort</th>
+              <th>Estimated effort</th>
             </tr>
           </thead>
           <tbody>
@@ -1166,21 +1174,21 @@
               <td><code>FINDING-001</code></td>
               <td><code>REFACTOR-001</code></td>
               <td><span class="severity-badge severity-badge--critical">Critical</span></td>
-              <td>Error Handling</td>
+              <td>Error handling</td>
               <td>2h</td>
             </tr>
             <tr style="--i:15">
               <td><code>FINDING-002</code></td>
               <td><code>REFACTOR-002</code></td>
               <td><span class="severity-badge severity-badge--high">High</span></td>
-              <td>Structured Logging</td>
+              <td>Structured logging</td>
               <td>1.5h</td>
             </tr>
             <tr style="--i:16">
               <td><code>FINDING-003</code></td>
               <td><code>REFACTOR-003</code></td>
               <td><span class="severity-badge severity-badge--medium">Medium</span></td>
-              <td>Context Propagation</td>
+              <td>Context propagation</td>
               <td>1h</td>
             </tr>
           </tbody>
@@ -1214,7 +1222,7 @@
       </div>
     </div>
     <div class="footer-meta">
-      <span class="footer-generated">Generated with <strong>Ring</strong></span>
+      <span class="footer-generated"><strong>Generated with Ring</strong></span>
       <span class="footer-date"></span>
     </div>
   </div>
@@ -1225,7 +1233,7 @@
   import { FileDiff } from 'https://cdn.jsdelivr.net/npm/@pierre/diffs@1.0.11/+esm';
 
   // ============================================================
-  // Finding code data — before/after source for each finding
+  // Finding code data: before/after source for each finding
   // ============================================================
 
   const FINDINGS = [
@@ -1465,20 +1473,23 @@
     if (el) sections.push({ id: id, el: el, link: link });
   });
 
+  function setActive(link) {
+    links.forEach(function(l) { l.classList.remove('active'); });
+    link.classList.add('active');
+    if (window.innerWidth <= 1000) {
+      link.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }
+
+  var initialId = window.location.hash ? window.location.hash.slice(1) : null;
+  var initial = sections.find(function(s) { return s.id === initialId; }) || sections[0];
+  if (initial) setActive(initial.link);
+
   var observer = new IntersectionObserver(function(entries) {
     entries.forEach(function(entry) {
       if (entry.isIntersecting) {
-        links.forEach(function(l) { l.classList.remove('active'); });
         var match = sections.find(function(s) { return s.el === entry.target; });
-        if (match) {
-          match.link.classList.add('active');
-          // On mobile, auto-scroll the active tab into view
-          if (window.innerWidth <= 1000) {
-            match.link.scrollIntoView({
-              behavior: 'smooth', block: 'nearest', inline: 'center'
-            });
-          }
-        }
+        if (match) setActive(match.link);
       }
     });
   }, { rootMargin: '-10% 0px -80% 0px' });
@@ -1491,6 +1502,7 @@
       var id = link.getAttribute('href').slice(1);
       var el = document.getElementById(id);
       if (el) {
+        setActive(link);
         el.scrollIntoView({ behavior: 'smooth', block: 'start' });
         history.replaceState(null, '', '#' + id);
       }

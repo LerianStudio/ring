@@ -6,6 +6,7 @@ This module covers authentication, licensing, and secret protection.
 
 ---
 
+
 ## Table of Contents
 
 | # | Section | Description |
@@ -138,7 +139,7 @@ func NewRouter(
     })
 
     // Middleware setup
-    tlMid := libHTTP.NewTelemetryMiddleware(tl)
+    tlMid := libMiddleware.NewTelemetryMiddleware(tl)
     f.Use(tlMid.WithTelemetry(tl))
     f.Use(recover.New())
 
@@ -170,6 +171,20 @@ auth.Authorize(applicationName, resource, action)
 | `applicationName` | string | Service identifier (must match identity registration) | `"midaz"`, `"plugin-fees"` |
 | `resource` | string | Resource being accessed | `"ledgers"`, `"transactions"`, `"packages"` |
 | `action` | string | HTTP method (lowercase) | `"get"`, `"post"`, `"patch"`, `"delete"` |
+
+### RBAC Resource Naming
+
+RBAC resource names **MUST** match the stable public route collection when the protected route belongs to a collection.
+
+| Route family | RBAC resource | Reason |
+|--------------|---------------|--------|
+| `/v1/boletos`, `/v1/boletos/:id` | `"boletos"` | Collection resource |
+| `/v1/payments`, `/v1/payments/:id` | `"payments"` | Collection resource |
+| `/v1/dashboards/...` | `"dashboards"` | Collection namespace |
+
+Use singular resource names only for true singleton or non-collection surfaces whose route namespace is also singular, for example `/v1/admin/...` -> `"admin"`.
+
+**Forbidden:** protecting plural collection routes with singular RBAC resources such as `auth.Authorize(applicationName, "payments", "post")` for `POST /v1/payments`.
 
 ### Middleware Behavior
 
@@ -272,13 +287,19 @@ req.Header.Set("Authorization", "Bearer hardcoded-token-here")  // never
 f.Post("/v1/sensitive-data", handler.Create)  // Missing auth.Authorize
 
 // FORBIDDEN: Using wrong application name
-auth.Authorize("wrong-app-name", "resource", "post")  // Must match identity registration
+auth.Authorize("wrong-app-name", "resources", "post")  // Must match identity registration
+
+// FORBIDDEN: Singular resource for a collection route
+auth.Authorize(applicationName, "payment", "post")  // Route is /v1/payments, resource must be "payments"
+
+// FORBIDDEN: Singular RBAC resource for a plural route collection
+auth.Authorize(applicationName, "package", "post")  // /v1/packages requires "packages"
 
 // FORBIDDEN: Direct calls to plugin-auth API
 http.Post("http://plugin-auth:4000/v1/authorize", ...)  // Use lib-auth instead
 
 // CORRECT: Always use lib-auth for auth operations
-auth.Authorize(applicationName, "resource", "post")
+auth.Authorize(applicationName, "packages", "post")
 token, _ := auth.GetApplicationToken(ctx, clientID, clientSecret)
 ```
 
@@ -399,6 +420,7 @@ func InitServers() (*Service, error) {
 // adapters/http/in/routes.go
 import (
     libHTTP "github.com/LerianStudio/lib-commons/v5/commons/net/http"
+    libMiddleware "github.com/LerianStudio/lib-observability/middleware"
     libLicense "github.com/LerianStudio/lib-license-go/v2/middleware"
 )
 
@@ -409,14 +431,14 @@ func NewRoutes(lg log.Logger, tl *opentelemetry.Telemetry, handler *YourHandler,
             return libHTTP.HandleFiberError(ctx, err)
         },
     })
-    tlMid := libHTTP.NewTelemetryMiddleware(tl)
+    tlMid := libMiddleware.NewTelemetryMiddleware(tl)
 
     // License middleware - applies GLOBALLY (must be early in chain)
     f.Use(lc.Middleware())
 
     // Other middleware
     f.Use(tlMid.WithTelemetry(tl))
-    f.Use(libHTTP.WithHTTPLogging(libHTTP.WithCustomLogger(lg)))
+    f.Use(libMiddleware.WithHTTPLogging(libMiddleware.WithCustomLogger(lg)))
 
     // Routes
     v1 := f.Group("/v1")
@@ -609,7 +631,7 @@ type SafeConfig struct {
 }
 logger.Infof("Config: %+v", SafeConfig{Host: cfg.Host, Port: cfg.Port, Database: cfg.Database})
 
-// ✅ CORRECT: Use lib-commons logger (automatically redacts sensitive patterns)
+// ✅ CORRECT: Use lib-observability logger (automatically redacts sensitive patterns)
 logger.Infof("Service started on %s", cfg.ServerAddress)  // No secrets in this field
 ```
 
@@ -650,15 +672,15 @@ grep -rn "os.Environ\(\)" --include="*.go"
 # If any match found: STOP. Fix before proceeding.
 ```
 
-### lib-commons Logger Configuration
+### lib-observability Logger Configuration
 
-When using lib-commons logger, configure secret redaction:
+When using lib-observability logger, configure secret redaction:
 
 ```go
-// lib-commons/v5 automatically redacts certain patterns
+// lib-observability automatically redacts certain patterns
 // But you MUST NOT pass secrets to the logger in the first place
 
-// ❌ Still FORBIDDEN even with lib-commons:
+// ❌ Still FORBIDDEN even with lib-observability:
 logger.Infof("Config: %+v", cfg)  // May contain secrets
 
 // ✅ CORRECT: Only log safe fields
@@ -695,7 +717,7 @@ func loadConfig() (*Config, error) {
 | "It's just the dev environment" | Dev logs train bad habits. Same code goes to prod. | **Redact in all environments** |
 | "The password is rotated anyway" | Rotation doesn't help if old password is in logs. | **Never log secrets** |
 | "I'm just debugging locally" | Local debugging code gets committed. | **Remove debug logging before commit** |
-| "lib-commons handles it" | lib-commons can't redact what you pass to it. | **Don't pass secrets to logger** |
+| "lib-observability handles it" | lib-observability can't redact what you pass to it. | **Don't pass secrets to logger** |
 
 ### Verification Checklist (Before PR)
 
@@ -1952,4 +1974,3 @@ If any checkbox is unchecked → FIX before submitting.
 ```
 
 ---
-

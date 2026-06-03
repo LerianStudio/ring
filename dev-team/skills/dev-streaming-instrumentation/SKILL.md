@@ -83,7 +83,7 @@ Service code depends on `streaming.Emitter` INTERFACE. MUST NOT type-assert to `
 | 6 | Manifest HTTP Mount | Required unless service has zero HTTP surface | ring:backend-engineer-golang |
 | 7 | Wiring + Lifecycle + Backward Compat | Always — NEVER skippable | ring:backend-engineer-golang |
 | 8 | Tests | Always | ring:backend-engineer-golang |
-| 9 | Code Review (10 reviewers) | Always | 10 parallel reviewers |
+| 9 | Code Review | Always | 9 defaults + triggered specialists in parallel |
 | 10 | User Validation | Always | User |
 | 11 | Activation Guide | Always | Orchestrator |
 

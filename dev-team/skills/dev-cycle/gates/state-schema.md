@@ -37,8 +37,8 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
   "commit_timing": "per_subtask|per_task|at_end",
   "_comment_cached_standards": "Populated by Step 1.5 (Standards Pre-Cache). Dictionary of URL → {fetched_at, content}. Sub-skills MUST read from here instead of calling WebFetch.",
   "cached_standards": {},
-  "_comment_visual_report_granularity": "Default 'task' (generate visual report once per task). Opt-in 'subtask' to generate per-subtask reports.",
-  "visual_report_granularity": "task",
+  "_comment_visual_report_granularity": "Opt-in code-diff report via ring:visualize: 'none' (default, no report) | 'task' (aggregate per task) | 'subtask' (per subtask).",
+  "visual_report_granularity": "none",
   "custom_prompt": {
     "type": "string",
     "optional": true,
@@ -55,11 +55,12 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
   "gate_progress": {
     "migration_safety_verification": {
       "status": "pending|completed|skipped|blocked|acknowledged",
+      "reason": null,
       "files_checked": [],
       "findings": {
-        "BLOCKING": 0,
-        "WARN": 0,
-        "ACKNOWLEDGE": 0
+        "BLOCKING": [],
+        "WARN": [],
+        "ACKNOWLEDGE": []
       },
       "user_acknowledgment": null,
       "started_at": null,
@@ -71,8 +72,9 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
       "id": "T-001",
       "title": "Task title",
       "status": "pending|in_progress|completed|failed|blocked",
+      "base_sha": "git HEAD SHA captured at task start, before the first subtask's Gate 0; lower bound of the Gate 8 cumulative review diff",
       "feedback_loop_completed": false,
-      "_comment_accumulated_metrics": "Populated at Step 11.2 (Task Approval Checkpoint). Aggregated at cycle end by ring:dev-report (Step 12.1).",
+      "_comment_accumulated_metrics": "Populated at Step 11.1 (Task Approval Checkpoint). Aggregated at cycle end by ring:dev-report (Step 12.1).",
       "accumulated_metrics": {
         "gate_durations_ms": {},
         "review_iterations": 0,
@@ -84,7 +86,7 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
           "LOW": 0
         }
       },
-      "_comment_subtask_gate_progress": "Subtask-level gate_progress holds implementation (Gate 0) and validation (Gate 9). Gate 0 includes TDD, coverage, local docker-compose/runtime, and delivery verification. Task-level review (Gate 8) lives in task.gate_progress, not here.",
+      "_comment_subtask_gate_progress": "Subtask-level gate_progress holds ONLY implementation (Gate 0). Gate 0 includes TDD, coverage, local docker-compose/runtime, and delivery verification. Task-level review (Gate 8) AND validation (Gate 9) live in task.gate_progress, not here. A task with no subtasks of its own carries one synthetic subtask entry (the task-itself unit), so every Gate 0 handoff lives under subtasks[] uniformly.",
       "subtasks": [
         {
           "id": "ST-001-01",
@@ -110,19 +112,21 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
               "delivery_verified": false,
               "coverage_actual": 0.0,
               "coverage_threshold": 85,
-              "local_runtime_verified": false
-            },
-            "validation": {
-              "status": "pending|in_progress|completed",
-              "result": "pending|approved|rejected",
-              "completed_at": "ISO timestamp"
+              "local_runtime_verified": false,
+              "files_changed": []
             }
           }
         }
       ],
-      "_comment_task_gate_progress": "Task-level gate_progress holds review (Gate 8). Subtask-cadence gates (0, 9) live in each subtask's gate_progress.",
+      "_comment_task_gate_progress": "Task-level gate_progress holds review (Gate 8) AND validation (Gate 9). The only subtask-cadence gate (0) lives in each subtask's gate_progress. Gate 9 aggregates every subtask's acceptance criteria; criteria_results is keyed by subtask. gate_progress.review is the Gate 8 VERDICT only (status + completed_at); reviewer detail — iterations, pass counts, per-reviewer outputs — lives in agent_outputs.review, never duplicated here.",
       "gate_progress": {
-        "review": {"status": "pending"}
+        "review": {"status": "pending", "completed_at": null},
+        "validation": {
+          "status": "pending|in_progress|completed",
+          "result": "pending|approved|rejected",
+          "criteria_results": [],
+          "completed_at": "ISO timestamp"
+        }
       },
       "artifacts": {},
       "agent_outputs": {
@@ -147,6 +151,11 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
           "iterations": 1,
           "timestamp": "ISO timestamp",
           "duration_ms": 0,
+          "default_reviewers_passed": "9/9",
+          "conditional_specialists_triggered": [],
+          "conditional_specialists_passed": "0/0",
+          "selected_reviewer_count": 9,
+          "_comment_reviewer_shape": "Each reviewer is an object with the shape shown by code_reviewer below. The 9 defaults (code_reviewer, business_logic_reviewer, security_reviewer, test_reviewer, nil_safety_reviewer, dead_code_reviewer, performance_reviewer, multi_tenant_reviewer, lib_commons_reviewer) all use this shape. Conditional specialists (lib_observability_reviewer, lib_systemplane_reviewer, lib_streaming_reviewer) use the same shape AND add \"optional\": true. Only reviewers that produce a Standards Coverage Table populate standards_compliance.",
           "code_reviewer": {
             "agent": "ring:code-reviewer",
             "output": "...",
@@ -156,34 +165,6 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
             "standards_compliance": {
               "total_sections": 12,
               "compliant": 12,
-              "not_applicable": 0,
-              "non_compliant": 0,
-              "gaps": []
-            }
-          },
-          "business_logic_reviewer": {
-            "agent": "ring:business-logic-reviewer",
-            "output": "...",
-            "verdict": "PASS",
-            "timestamp": "...",
-            "issues": [],
-            "standards_compliance": {
-              "total_sections": 8,
-              "compliant": 8,
-              "not_applicable": 0,
-              "non_compliant": 0,
-              "gaps": []
-            }
-          },
-          "security_reviewer": {
-            "agent": "ring:security-reviewer",
-            "output": "...",
-            "verdict": "PASS",
-            "timestamp": "...",
-            "issues": [],
-            "standards_compliance": {
-              "total_sections": 10,
-              "compliant": 10,
               "not_applicable": 0,
               "non_compliant": 0,
               "gaps": []
@@ -252,30 +233,6 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
 }
 ```
 
-#### DevOps Verification Error Schema
-
-```json
-{
-  "check": "docker_build",
-  "status": "FAIL",
-  "error": "COPY failed: file not found in build context: go.sum",
-  "suggestion": "Ensure go.sum exists and is not in .dockerignore"
-}
-```
-
-#### SRE Validation Error Schema
-
-```json
-{
-  "check": "structured_logging",
-  "status": "FAIL",
-  "file": "internal/handler/user.go",
-  "line": 32,
-  "error": "Using fmt.Printf instead of structured logger",
-  "suggestion": "Use logger.Info().Str(\"user_id\", id).Msg(\"user created\")"
-}
-```
-
 ### Populating Structured Data
 
 **Each gate MUST populate its structured fields when saving to state:**
@@ -313,14 +270,15 @@ if gate == 0:
   state.tasks[current_task_index].subtasks[current_subtask_index].gate_progress.implementation.coverage_threshold = [required coverage percent]
   state.tasks[current_task_index].subtasks[current_subtask_index].gate_progress.implementation.local_runtime_verified = true
 else if gate == 9:
-  state.tasks[current_task_index].subtasks[current_subtask_index].gate_progress.validation.status = "completed"
-  state.tasks[current_task_index].subtasks[current_subtask_index].gate_progress.validation.result = "[approved|rejected]"
-  state.tasks[current_task_index].subtasks[current_subtask_index].gate_progress.validation.completed_at = "[ISO timestamp]"
+  state.tasks[current_task_index].gate_progress.validation.status = "completed"
+  state.tasks[current_task_index].gate_progress.validation.result = "[approved|rejected]"
+  state.tasks[current_task_index].gate_progress.validation.criteria_results = [{subtask_id, criterion, status} for every subtask's aggregated criteria]
+  state.tasks[current_task_index].gate_progress.validation.completed_at = "[ISO timestamp]"
 else if gate == 8:
   state.tasks[current_task_index].gate_progress.review.status = "completed"
   state.tasks[current_task_index].gate_progress.review.completed_at = "[ISO timestamp]"
   state.tasks[current_task_index].agent_outputs.review = [all reviewer outputs]
-state.current_gate = [next_gate_number]
+state.current_gate = [next gate per the "current_gate Transitions and Resume" table below]
 state.updated_at = "[ISO timestamp]"
 
 # Step 2: Write to file (MANDATORY - use Write tool)
@@ -329,21 +287,41 @@ Write tool:
   content: [full JSON state]
 ```
 
+### `current_gate` Transitions and Resume
+
+`current_gate ∈ {0, 8, 9}` — the gate active within the CURRENT task. It is meaningful only during the per-task loop; the Cycle Completion phase (Steps 12.x) is driven by `status`, not `current_gate`.
+
+| After | Outcome | Set |
+|-------|---------|-----|
+| Gate 0 (subtask) | more subtasks remain | `current_gate = 0`, `current_subtask_index += 1` |
+| Gate 0 (subtask) | last subtask of the task done | `current_gate = 8` |
+| Gate 8 (task) | review passed | `current_gate = 9` |
+| Gate 9 (task) | criterion FAIL (Step 11) | `current_gate = 0`, `current_subtask_index = failing subtask` |
+| Gate 9 (task) | approved, Continue (Step 11.1) | `current_gate = 0`, `current_task_index += 1`, `current_subtask_index = 0` |
+| Gate 9 (task) | approved, last task | leave the task loop → Cycle Completion (status-driven; `current_gate` is not consulted there) |
+
+**Resume** reads `status` + `current_task_index` + `current_subtask_index` + `current_gate` jointly:
+- `status` gives the macro-state (`in_progress` / `paused_*` / `completed`).
+- `current_gate` + the two indices pinpoint the exact resume point inside the task loop.
+- Pause states resume by `current_gate` + the two indices:
+  - `paused` / `paused_for_task_approval` with `current_gate == 9` → validation passed; the task (still `in_progress`) awaits the human advance decision — re-enter the Step 11.1 checkpoint.
+  - `paused_for_approval` / `paused_for_testing` with `current_gate == 0` → subtask-level pause after Gate 0 — resume at the Gate 0 subtask given by the indices.
+  - `paused_for_integration_testing` with `current_gate == 9` and the current task already `completed` → integration test ran out-of-band; resume by advancing past it (`current_task_index += 1`, `current_subtask_index = 0`, `current_gate = 0`) into the next task's Gate 0, or Cycle Completion if it was the last task.
+
 ### State Persistence Checkpoints
 
-⛔ **Cadence-aware write paths.** Subtask-level gates (0, 9) write to `state.tasks[i].subtasks[j].gate_progress.<gate_name>`. Task-level Gate 8 writes to `state.tasks[i].gate_progress.review`. Never write task-level gate status under a subtask and never write subtask-level gate status under the task.
+⛔ **Cadence-aware write paths.** The subtask-level gate (0) writes to `state.tasks[i].subtasks[j].gate_progress.implementation`. Task-level gates (8, 9) write to `state.tasks[i].gate_progress.review` and `state.tasks[i].gate_progress.validation`. Never write task-level gate status under a subtask and never write subtask-level gate status under the task.
 
 | Checkpoint | Cadence | MUST Update | MUST Write File |
 |------------|---------|-------------|-----------------|
-| **Before Gate 0 (task start)** | Task | `task.status = "in_progress"` in JSON **+ tasks.md Status → `🔄 Doing`** | ✅ YES |
-| Gate 0.1 (TDD-RED) | Subtask | `state.tasks[i].subtasks[j].gate_progress.implementation.tdd_red.status` + `.failure_output` | ✅ YES |
-| Gate 0.2 (TDD-GREEN) | Subtask | `state.tasks[i].subtasks[j].gate_progress.implementation.tdd_green.status` + `.implementation.status` | ✅ YES |
-| Gate 0 exit (Quality + Delivery Verification) | Subtask | `state.tasks[i].subtasks[j].gate_progress.implementation.delivery_verified = true` + `.standards_compliance` + `.coverage_actual` + `.coverage_threshold` + `.local_runtime_verified` | ✅ YES |
-| Gate 9 (Validation) | Subtask | `state.tasks[i].subtasks[j].gate_progress.validation.status` + `.result` (do NOT touch task-level status here) | ✅ YES |
+| **Before Gate 0 (task start)** | Task | `task.status = "in_progress"` + `task.base_sha = current HEAD SHA` (review-diff lower bound) in JSON **+ tasks.md Status → `🔄 Doing`** | ✅ YES |
+| Gate 0 TDD (RED→GREEN) | Subtask | `state.tasks[i].subtasks[j].gate_progress.implementation.tdd_red` (status + failure_output), `.tdd_green` (status + test_pass_output), `.implementation.status` | ✅ YES |
+| Gate 0 exit (Quality + Delivery Verification) | Subtask | `state.tasks[i].subtasks[j].gate_progress.implementation.delivery_verified = true` + `.standards_compliance` + `.coverage_actual` + `.coverage_threshold` + `.local_runtime_verified` + `.files_changed` (union consumed by Gate 8) | ✅ YES |
+| Step 2.4 (Subtask Checkpoint) | Subtask | `status = "paused_for_approval"` (subtask-level checkpoint; set only when `execution_mode = manual_per_subtask`; fires after Gate 0) | ✅ YES |
 | Gate 8 (Review) | Task | `state.tasks[i].gate_progress.review.status` + `agent_outputs.review` (reviewers see cumulative task diff) | ✅ YES |
-| Step 11.1 (Subtask Approval) | Subtask | `status = "paused_for_approval"` (subtask-level checkpoint; set only when `execution_mode = manual_per_subtask`) | ✅ YES |
-| Step 11.2 (Task Approval) | Task | `task.status = "completed"` in JSON **+ tasks.md Status → `✅ Done`** + `task.accumulated_metrics` populated (gate_durations_ms, review_iterations, testing_iterations, issues_by_severity); NO dev-report dispatch here (runs ONCE at Step 12.1) | ✅ YES |
-| Step 12.0.5b (Gate 0.5D — Migration Safety, conditional) | Cycle | `state.gate_progress.migration_safety_verification = {status: "completed" \| "skipped" \| "blocked" \| "acknowledged", files_checked, findings: {BLOCKING, WARN, ACKNOWLEDGE}, user_acknowledgment}` | ✅ YES |
+| Gate 9 (Validation) | Task | `state.tasks[i].gate_progress.validation.status` + `.result` + `.criteria_results` (aggregated across ALL subtasks; runs after Gate 8 passes) | ✅ YES |
+| Step 11.1 (Task Approval) | Task | `task.status = "completed"` in JSON **+ tasks.md Status → `✅ Done`** + `task.accumulated_metrics` populated (gate_durations_ms, review_iterations, testing_iterations, issues_by_severity); NO dev-report dispatch here (runs ONCE at Step 12.1) | ✅ YES |
+| Step 12.0.5b (Gate 0.5D — Migration Safety, conditional) | Cycle | `state.gate_progress.migration_safety_verification = {status: "completed" \| "skipped" \| "blocked" \| "acknowledged", reason, files_checked, findings: {BLOCKING: [], WARN: [], ACKNOWLEDGE: []}, user_acknowledgment}` | ✅ YES |
 | Step 12.1 (Cycle end — dev-report) | Cycle | `state.feedback_loop_completed = true` after the ONE AND ONLY `ring:dev-report` dispatch | ✅ YES |
 | HARD BLOCK (any gate) | Task | `task.status = "failed"` in JSON **+ tasks.md Status → `❌ Failed`** | ✅ YES |
 
@@ -360,13 +338,15 @@ Use Edit tool on state.source_file (tasks.md):
 - Find the row starting with `| {task_id} |` in the `## Summary` table
 - Before Gate 0: replace `⏸️ Pending` with `🔄 Doing`
   - If already `🔄 Doing` (resumed cycle) → skip, no change needed
-- Step 11.2 (all subtasks done, user approved): replace `🔄 Doing` with `✅ Done`
+- Step 11.1 (all subtasks done, user approved): replace `🔄 Doing` with `✅ Done`
 - HARD BLOCK (any gate, task abandoned): replace `🔄 Doing` with `❌ Failed`
   - If row shows `⏸️ Pending` (unexpected) → replace with target value anyway
 - If row not found or no Status column → log warning "Status update skipped: task {task_id} row not found in {source_file}" and continue, do not abort
 ```
 
 ### Anti-Rationalization for State Persistence
+
+See [shared-patterns/shared-anti-rationalization.md](../../shared-patterns/shared-anti-rationalization.md) for universal rationalizations. These are specific to state persistence:
 
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|

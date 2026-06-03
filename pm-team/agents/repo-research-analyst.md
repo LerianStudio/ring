@@ -101,7 +101,7 @@ You will receive a `research_mode` parameter:
   ```go
   // relevant snippet
   func (s *authService) ValidateToken(ctx context.Context, token string) error {
-      logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)
+      logger, tracer, _, _ := observability.NewTrackingFromContext(ctx)
       ctx, span := tracer.Start(ctx, "service.auth.validate_token")
       defer span.End()
       // ...
@@ -119,7 +119,7 @@ You will receive a `research_mode` parameter:
 - **Document:** `docs/solutions/auth/jwt-validation.md`
 - **Problem:** How JWT validation was implemented
 - **Relevance:** New feature reuses same token structure
-- **Key Learning:** Use `libCommons.NewTrackingFromContext` — direct logger creation was removed
+- **Key Learning:** Use `observability.NewTrackingFromContext` — direct logger creation was removed
 
 [If nothing found:]
 No relevant prior solutions found in `docs/solutions/`.
@@ -127,7 +127,7 @@ No relevant prior solutions found in `docs/solutions/`.
 ## CONVENTIONS DISCOVERED
 
 ### From CLAUDE.md:
-- No `fmt.Println` — use `clog` from lib-commons
+- No `fmt.Println` — use `log.Logger` from lib-observability
 - All service methods must have OpenTelemetry spans
 - Fiber only — no other HTTP frameworks
 

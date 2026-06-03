@@ -1,14 +1,14 @@
-# External Libraries (CDN)
+# External libraries (CDN)
 
 All color tokens and base styles are defined in `../templates/standard.html`. This reference shows library integration patterns (Mermaid, Chart.js, Highlight.js, anime.js) that build ON TOP of the standard foundation.
 
-Optional CDN libraries for cases where pure CSS/HTML isn't enough. Only include what the diagram actually needs — most diagrams need zero external JS.
+Optional CDN libraries for cases where pure CSS/HTML isn't enough. Only include what the diagram actually needs; most diagrams need zero external JS.
 
-## Mermaid.js — Diagramming Engine
+## Mermaid.js diagramming engine
 
-Use for flowcharts, sequence diagrams, ER diagrams, state machines, mind maps, class diagrams, and any diagram where automatic node positioning and edge routing saves effort. Mermaid handles layout — you handle theming.
+Use for flowcharts, sequence diagrams, ER diagrams, state machines, mind maps, class diagrams, and any diagram where automatic node positioning and edge routing saves effort. Mermaid handles layout; you handle theming.
 
-Do NOT use for dashboards — CSS Grid card layouts with Chart.js look better for those. Data tables use `<table>` elements.
+Do NOT use for dashboards: CSS Grid card layouts with Chart.js look better for those. Data tables use `<table>` elements.
 
 **CDN:**
 ```html
@@ -19,7 +19,7 @@ Do NOT use for dashboards — CSS Grid card layouts with Chart.js look better fo
 </script>
 ```
 
-**With ELK layout** (required for `layout: 'elk'` — it's a separate package, not bundled in core):
+**With ELK layout** (required for `layout: 'elk'`; it's a separate package, not bundled in core):
 ```html
 <script type="module">
   import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
@@ -30,11 +30,11 @@ Do NOT use for dashboards — CSS Grid card layouts with Chart.js look better fo
 </script>
 ```
 
-Without the ELK import and registration, `layout: 'elk'` silently falls back to dagre. Only import ELK when you actually need it — it adds significant bundle weight. Most simple diagrams render fine with dagre.
+Without the ELK import and registration, `layout: 'elk'` silently falls back to dagre. Only import ELK when you actually need it; it adds significant bundle weight. Most simple diagrams render fine with dagre.
 
-### Deep Theming
+### Deep theming
 
-Always use `theme: 'base'` — it's the only theme where all `themeVariables` are fully customizable. The built-in themes (`default`, `dark`, `forest`, `neutral`) ignore most variable overrides.
+Always use `theme: 'base'`; it's the only theme where all `themeVariables` are fully customizable. The built-in themes (`default`, `dark`, `forest`, `neutral`) ignore most variable overrides.
 
 ```html
 <script type="module">
@@ -46,8 +46,8 @@ Always use `theme: 'base'` — it's the only theme where all `themeVariables` ar
     theme: 'base',
     look: 'classic',
     themeVariables: {
-      // Background and surfaces — Lerian palette
-      primaryColor: isDark ? '#3F3F46' : '#FFF8C2',          // dark: zinc-700, light: sunglow-100
+      // Background and surfaces: Lerian palette
+      primaryColor: isDark ? '#3F3F46' : 'oklch(96.8% 0.083 96.6)', // dark: zinc-700, light: sunglow-100
       primaryBorderColor: isDark ? '#EDAC05' : '#EDAC05',   // sunglow-500
       primaryTextColor: isDark ? '#F4F4F5' : '#27272A',     // dark: zinc-100, light: zinc-800
       secondaryColor: isDark ? '#2a3a2e' : '#E0F8E8',       // dark: dark green, light: de-york-100
@@ -59,11 +59,11 @@ Always use `theme: 'base'` — it's the only theme where all `themeVariables` ar
       // Lines and edges
       lineColor: isDark ? '#6b7280' : '#52525B',
       // Text
-      // Global default — CSS overrides on .nodeLabel/.edgeLabel win when present
+      // Global default: CSS overrides on .nodeLabel/.edgeLabel win when present
       fontSize: '16px',
       fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif",
       // Notes and labels
-      noteBkgColor: isDark ? '#3F3F46' : '#fefce8',       // dark: zinc-700
+      noteBkgColor: isDark ? '#3F3F46' : 'oklch(96.8% 0.083 96.6)', // light: sunglow-100, not opaque near-white
       noteTextColor: isDark ? '#F4F4F5' : '#27272A',     // dark: zinc-100, light: zinc-800
       noteBorderColor: isDark ? '#FDCB28' : '#d97706',   // dark: sunglow-400
     }
@@ -71,9 +71,17 @@ Always use `theme: 'base'` — it's the only theme where all `themeVariables` ar
 </script>
 ```
 
-### Hand-Drawn Mode
+### Mermaid readability implementation notes
 
-Add `look: 'handDrawn'` for a sketchy, whiteboard-style aesthetic. Combines well with the `elk` layout engine for better positioning (requires the ELK import — see CDN section above):
+Use Mermaid for topology, not dense documentation. The enforceable node thresholds live in `../SKILL.md`; this reference only shows implementation patterns for making diagrams readable after the SKILL gate selects Mermaid.
+
+Implementation notes:
+- Use `subgraph` blocks for source-backed domains, layers, ownership, phases, or execution boundaries.
+- Use semantic classes and a legend when colors or strokes carry meaning.
+- Use critical-path treatment for the main decision or execution route.
+- Zoom controls are required, but zoom is not a readability excuse.
+
+Default to `look: 'classic'` for crisp technical artifacts:
 
 ```html
 <script type="module">
@@ -84,18 +92,20 @@ Add `look: 'handDrawn'` for a sketchy, whiteboard-style aesthetic. Combines well
   mermaid.initialize({
     startOnLoad: true,
     theme: 'base',
-    look: 'handDrawn',
+    look: 'classic',
     layout: 'elk',
     themeVariables: { /* same as above */ }
   });
 </script>
 ```
 
-Or set it per-diagram via frontmatter:
+Use a sketch style only when the artifact brief explicitly calls for a whiteboard or workshop scene. Do not make it the default.
+
+Set classic mode per-diagram via frontmatter when needed:
 ```
 ---
 config:
-  look: handDrawn
+  look: classic
   layout: elk
 ---
 graph TD
@@ -104,12 +114,12 @@ graph TD
   B -->|Invalid| D[Reject]
 ```
 
-### CSS Overrides on Mermaid SVG
+### CSS overrides on Mermaid SVG
 
 Mermaid renders SVG. Override its classes for pixel-perfect control that `themeVariables` can't reach:
 
 ```css
-/* Container — see css-patterns.md "Mermaid Zoom Controls" for the full zoom pattern */
+/* Container: see css-patterns.md "Mermaid Zoom Controls" for the full zoom pattern */
 .mermaid-wrap {
   position: relative;
   background: var(--surface);
@@ -140,13 +150,13 @@ Mermaid renders SVG. Override its classes for pixel-perfect control that `themeV
   stroke-width: 1.5px;
 }
 
-/* Edge labels — smaller than node labels for visual hierarchy */
+/* Edge labels, smaller than node labels for visual hierarchy */
 .mermaid .edgeLabel {
   font-family: var(--font-mono) !important;
   font-size: 13px !important;
 }
 
-/* Node labels — 16px default; drop to 14px for complex diagrams (20+ nodes) */
+/* Node labels, 16px default; drop to 14px for complex diagrams after the SKILL readability gate */
 .mermaid .nodeLabel {
   font-family: var(--font-body) !important;
   font-size: 16px !important;
@@ -174,31 +184,31 @@ Mermaid renders SVG. Override its classes for pixel-perfect control that `themeV
 }
 ```
 
-### classDef Gotchas
+### classDef gotchas
 
-`classDef` values are static text inside `<pre>` — they can't use CSS variables or JS ternaries. Two rules:
+`classDef` values are static text inside `<pre>`; they can't use CSS variables or JS ternaries. Two rules:
 
 1. **Never set `color:` in classDef.** It hardcodes a text color that breaks in the opposite color scheme. Let the CSS overrides above handle text color via `var(--text)`.
 
-2. **Use semi-transparent fills (8-digit hex) for node backgrounds.** They layer over whatever Mermaid's base theme background is, producing a tint that works in both light and dark modes. Use `20`–`44` alpha for subtle, `55`–`77` for prominent:
+2. **Use semi-transparent fills (8-digit hex) for node backgrounds.** They layer over whatever Mermaid's base theme background is, producing a tint that works in both light and dark modes. Use `20`-`44` alpha for subtle, `55`-`77` for prominent:
 
 ```
 classDef highlight fill:#b5761433,stroke:#b57614,stroke-width:2px
 classDef muted fill:#7c6f6411,stroke:#7c6f6444,stroke-width:1px
 ```
 
-Avoid opaque light fills like `fill:#fefce8` — they render as bright boxes in dark mode.
+Avoid opaque light fills like `fill:#fefce8`; they render as bright boxes in dark mode.
 
-### stateDiagram-v2 Label Limitations
+### stateDiagram-v2 label limitations
 
 State diagram transition labels have a strict parser. Avoid:
-- `<br/>` — only works in flowcharts; causes a parse error in state diagrams
-- Parentheses in labels — `cancel()` can confuse the parser
-- Multiple colons — the first `:` is the label delimiter; extra colons in the label text may break parsing
+- `<br/>`, only works in flowcharts; causes a parse error in state diagrams
+- Parentheses in labels, `cancel()` can confuse the parser
+- Multiple colons, the first `:` is the label delimiter; extra colons in the label text may break parsing
 
 If you need multi-line labels or special characters, use a `flowchart` instead of `stateDiagram-v2`. Flowcharts support quoted labels (`|"label with: special chars"|`) and `<br/>` for line breaks.
 
-### Writing Valid Mermaid
+### Writing valid Mermaid
 
 Most Mermaid failures come from a few recurring issues. Follow these rules to avoid invalid diagrams:
 
@@ -215,7 +225,7 @@ A[handleRequest] --> B[query users]
 userSvc["User Service"] --> authSvc["Auth Service"]
 ```
 
-**Max 15-20 nodes per diagram.** Beyond that, readability collapses even with ELK layout. Use `subgraph` blocks to group related nodes, or split into multiple diagrams:
+**Respect the SKILL readability gate.** Beyond the node limits in `../SKILL.md`, readability collapses even with ELK layout. Use `subgraph` blocks to group related source-backed nodes, or split into multiple diagrams:
 
 ```
 subgraph Auth
@@ -237,11 +247,11 @@ Auth --> API
 | `--x` | Cross | Rejected or blocked |
 | `-->\|label\|` | Labeled | Decision branches, data descriptions |
 
-**Escape pipes in labels.** If a label contains a literal `|`, use `#124;` (HTML entity) or rephrase to avoid it — pipes delimit edge labels in flowcharts.
+**Escape pipes in labels.** If a label contains a literal `|`, use `#124;` (HTML entity) or rephrase to avoid it; pipes delimit edge labels in flowcharts.
 
 **Don't mix diagram syntax.** Each diagram type has its own syntax. `-->` works in flowcharts but not in sequence diagrams (`->>` instead). `:::className` works in flowcharts but not in ER diagrams. When in doubt, check the examples below for correct syntax per type.
 
-### Diagram Type Examples
+### Diagram type examples
 
 **Flowchart with decisions:**
 ```html
@@ -324,20 +334,20 @@ mindmap
 </pre>
 ```
 
-### Dark Mode Handling
+### Dark mode handling
 
-Mermaid initializes once — it can't reactively switch themes. Read the preference at load time inside your `<script type="module">`:
+Mermaid initializes once; it can't reactively switch themes. Read the preference at load time inside your `<script type="module">`:
 
 ```javascript
 const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 // Use isDark to pick light or dark values in themeVariables
 ```
 
-The CSS overrides on the container (`.mermaid-wrap`) and page will still respond to `prefers-color-scheme` normally — only the Mermaid SVG internals are static.
+The CSS overrides on the container (`.mermaid-wrap`) and page will still respond to `prefers-color-scheme` normally; only the Mermaid SVG internals are static.
 
-## Chart.js — Data Visualizations
+## Chart.js data visualizations
 
-Use for bar charts, line charts, pie/doughnut charts, radar charts, and other data-driven visualizations in dashboard-type diagrams. Overkill for static numbers — use pure SVG/CSS for simple progress bars and sparklines.
+Use for bar charts, line charts, pie/doughnut charts, radar charts, and other data-driven visualizations in dashboard-type diagrams. Overkill for static numbers; use pure SVG/CSS for simple progress bars and sparklines.
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
@@ -393,7 +403,7 @@ Wrap the canvas in a styled container:
 }
 ```
 
-## anime.js — Orchestrated Animations
+## anime.js orchestrated animations
 
 Use when a diagram has 10+ elements and you want a choreographed entrance sequence (staggered reveals, path drawing, count-up numbers). For simpler diagrams, CSS `animation-delay` staggering is sufficient.
 
@@ -445,24 +455,24 @@ When using anime.js, set initial opacity to 0 in CSS so elements don't flash bef
 }
 ```
 
-## Google Fonts — Typography
+## Google Fonts typography
 
 The standard template (`../templates/standard.html`) uses **Inter** as the body font (`--font-body`) and **'SF Mono'** / system monospace as the code font (`--font-mono`). You MUST NOT override these -- they ensure visual consistency across all diagrams.
 
 You may optionally load a **secondary display font** for `h1`/`h2` headings to give a specific diagram personality. Always load with `display=swap` for fast rendering.
 
 ```html
-<!-- Only load a display font — Inter (body) and mono are already in the standard template -->
+<!-- Only load a display font; Inter (body) and mono are already in the standard template -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
 ```
 
-Define the display font as a separate variable — do NOT override `--font-body`:
+Define the display font as a separate variable; do NOT override `--font-body`:
 ```css
 :root {
   --font-display: 'Outfit', system-ui, sans-serif;
-  /* --font-body and --font-mono are defined in standard.html — do not redeclare */
+  /* --font-body and --font-mono are defined in standard.html; do not redeclare */
 }
 
 h1, h2 { font-family: var(--font-display); }
@@ -470,7 +480,7 @@ h1, h2 { font-family: var(--font-display); }
 
 The standard template uses Inter as the body font (MUST NOT override). The fonts below are suggestions for an optional secondary display font used for `h1`/`h2` headings only.
 
-**Secondary display font suggestions** (rotate — never use the same pairing twice in a row):
+**Secondary display font suggestions** (rotate; never use the same pairing twice in a row):
 
 | Display Font (h1/h2) | Pairs Well With (mono) | Feel |
 |---|---|---|
@@ -485,9 +495,9 @@ The standard template uses Inter as the body font (MUST NOT override). The fonts
 | Manrope | Martian Mono | Soft, contemporary |
 | Geist | Geist Mono | Vercel-inspired, sharp |
 
-## Highlight.js — Syntax Highlighting
+## Highlight.js syntax highlighting
 
-Use for code blocks that need language-aware syntax coloring. Required for non-diff code blocks (inline snippets, implementation previews, standalone `<code>` elements). Lightweight — only load the languages you need.
+Use for code blocks that need language-aware syntax coloring. Required for non-diff code blocks (inline snippets, implementation previews, standalone `<code>` elements). Lightweight; only load the languages you need.
 
 **CDN (core + theme pair for light/dark):**
 ```html
@@ -499,7 +509,7 @@ Use for code blocks that need language-aware syntax coloring. Required for non-d
 <script>hljs.highlightAll();</script>
 ```
 
-**Selective language loading** (smaller bundle — load only what the page needs):
+**Selective language loading** (smaller bundle: load only what the page needs):
 ```html
 <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/highlight.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/languages/go.min.js"></script>
@@ -508,7 +518,7 @@ Use for code blocks that need language-aware syntax coloring. Required for non-d
 <script>hljs.highlightAll();</script>
 ```
 
-> **⚠️ DEPRECATED for diff views:** The following CSS override is only needed if you use Highlight.js for non-diff before/after comparisons. For code diffs, use `@pierre/diffs` instead (see below) — it handles syntax highlighting internally via Shiki.
+> **Deprecated: for diff views:** The following CSS override is only needed if you use Highlight.js for non-diff before/after comparisons. For code diffs, use `@pierre/diffs` instead (see below); it handles syntax highlighting internally via Shiki.
 
 **Theme integration with diff panels:** Override `.hljs` background to `transparent` so the diff line backgrounds (green/red tints) show through the syntax-highlighted code:
 
@@ -520,13 +530,13 @@ Use for code blocks that need language-aware syntax coloring. Required for non-d
 }
 ```
 
-**When to use:** Any page displaying non-diff code blocks with syntax coloring — implementation previews, standalone code snippets, single-file code display. NOT for diff views (use `@pierre/diffs` instead). Not needed for diagrams, data tables, or architecture overviews unless they embed code snippets.
+**When to use:** Any page displaying non-diff code blocks with syntax coloring: implementation previews, standalone code snippets, single-file code display. NOT for diff views (use `@pierre/diffs` instead). Not needed for diagrams, data tables, or architecture overviews unless they embed code snippets.
 
 **Dark mode:** The `github` / `github-dark` theme pair with `prefers-color-scheme` media queries switches automatically. No JS needed for theme toggling.
 
 > **Note:** Highlight.js is still used for non-diff code blocks (inline code snippets, implementation previews, standalone `<code>` elements). Use `@pierre/diffs` below only for diff/review views where you have old vs. new file content.
 
-## @pierre/diffs (Code Diff Rendering)
+## @pierre/diffs code diff rendering
 
 **CDN (ESM):** `https://cdn.jsdelivr.net/npm/@pierre/diffs@1.0.11/+esm`
 
@@ -534,11 +544,11 @@ Use for code blocks that need language-aware syntax coloring. Required for non-d
 
 **What it is:** A professional code diff renderer built on Shiki. Provides split/unified views with syntax highlighting, word-level inline diffs, line selection, and dark/light theme support. Uses Shadow DOM for style isolation.
 
-**Why ESM from CDN works:** jsDelivr's `+esm` endpoint rewrites bare module specifiers (`"shiki"` → `"/npm/shiki@3.22.0/+esm"`), resolving all transitive dependencies automatically. No bundler needed.
+**Why ESM from CDN works:** jsDelivr's `+esm` endpoint rewrites bare module specifiers (`"shiki"` -&gt; `"/npm/shiki@3.22.0/+esm"`), resolving all transitive dependencies automatically. No bundler needed.
 
 **MUST use this for all code diff/review visualizations.** Hand-rolled CSS diff panels are deprecated in favor of this library.
 
-### Import Pattern
+### Import pattern
 
 ```html
 <script type="module">
@@ -546,7 +556,7 @@ Use for code blocks that need language-aware syntax coloring. Required for non-d
 </script>
 ```
 
-### Basic Usage
+### Basic usage
 
 ```js
 const instance = new FileDiff({
@@ -566,7 +576,7 @@ instance.render({
 });
 ```
 
-### Lerian Theme Integration
+### Lerian theme integration
 
 The component renders inside Shadow DOM, so Lerian's page-level CSS tokens do NOT affect the diff rendering. However, CSS custom properties cascade into Shadow DOM. Use these on the container element:
 
@@ -579,7 +589,7 @@ The component renders inside Shadow DOM, so Lerian's page-level CSS tokens do NO
 }
 ```
 
-### Dual Theme (Dark/Light Auto-Switch)
+### Dual theme dark and light auto-switch
 
 ```js
 const instance = new FileDiff({
@@ -593,11 +603,11 @@ To force a specific theme at runtime:
 instance.setThemeType('dark');  // or 'light' or 'system'
 ```
 
-### Key Options Reference
+### Key options reference
 
 | Option | Values | Default | Description |
 |---|---|---|---|
-| `theme` | string or `{ dark, light }` | — | Shiki theme name or dual-theme object |
+| `theme` | string or `{ dark, light }` | none | Shiki theme name or dual-theme object |
 | `themeType` | `'system'`, `'dark'`, `'light'` | `'system'` | Active theme selection |
 | `diffStyle` | `'split'`, `'unified'` | `'split'` | Side-by-side or stacked |
 | `diffIndicators` | `'bars'`, `'classic'`, `'none'` | `'bars'` | Change indicator style |
@@ -607,9 +617,9 @@ instance.setThemeType('dark');  // or 'light' or 'system'
 | `disableFileHeader` | boolean | `false` | Hide file header bar |
 | `disableBackground` | boolean | `false` | Disable colored line backgrounds |
 | `enableLineSelection` | boolean | `false` | Click to select lines |
-| `unsafeCSS` | string | — | **CAUTION:** Inject custom CSS into shadow DOM. MUST NOT use with user-supplied input — risk of CSS injection. |
+| `unsafeCSS` | string | none | **CAUTION:** Inject custom CSS into shadow DOM. MUST NOT use with user-supplied input; risk of CSS injection. |
 
-### Instance Methods
+### Instance methods
 
 | Method | Description |
 |---|---|
@@ -619,27 +629,27 @@ instance.setThemeType('dark');  // or 'light' or 'system'
 | `rerender()` | Force re-render after option changes |
 | `cleanUp()` | Destroy instance, remove DOM elements |
 
-### Language Detection
+### Language detection
 
-Language is auto-detected from filename extension (`handler.go` → Go). Override with `lang` property:
+Language is auto-detected from filename extension (`handler.go` -&gt; Go). Override with `lang` property:
 ```js
 { name: 'config', contents: '...', lang: 'yaml' }
 ```
 
-### Performance Notes
+### Performance notes
 
-- First load fetches Shiki (~2MB+ with grammars) — browser caches subsequent loads
+- First load fetches Shiki (~2MB+ with grammars); browser caches subsequent loads
 - `render()` is synchronous (instant layout), syntax highlighting loads asynchronously
 - Language grammars are loaded lazily on first encounter
 
 ### Gotchas
 
-**`</script>` in code samples:** When code samples contain `</script>` (common in XSS vulnerability examples), the HTML parser terminates the `<script type="module">` block prematurely. MUST escape as `<\/script>` in all JavaScript string literals. This applies to template literals, single-quoted strings, and double-quoted strings alike. The backslash escape (`\/`) is valid JavaScript — `\/` evaluates to `/`.
+**`</script>` in code samples:** When code samples contain `</script>` (common in XSS vulnerability examples), the HTML parser terminates the `<script type="module">` block prematurely. MUST escape as `<\/script>` in all JavaScript string literals. This applies to template literals, single-quoted strings, and double-quoted strings alike. The backslash escape (`\/`) is valid JavaScript; `\/` evaluates to `/`.
 
 ```js
-// WRONG — breaks the HTML parser:
+// WRONG: breaks the HTML parser:
 const before = `<script>alert(1)</script>`;
 
-// CORRECT — escaped for HTML embedding:
+// CORRECT: escaped for HTML embedding:
 const before = `<script>alert(1)<\/script>`;
 ```

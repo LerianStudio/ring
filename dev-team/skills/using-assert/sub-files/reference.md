@@ -7,7 +7,7 @@ exact structure. MUST NOT add sections. MUST NOT reorder sections. MUST populate
 section even if empty (use "None detected" placeholders).
 
 ```markdown
-# commons/assert Sweep Report
+# lib-observability/assert Sweep Report
 
 **Target:** <absolute path to target repo>
 **Generated:** <ISO-8601 timestamp>
@@ -17,31 +17,34 @@ section even if empty (use "None detected" placeholders).
 
 ## Version Status
 
-| Field                    | Value             |
-| ------------------------ | ----------------- |
-| Pinned version           | <v5.0.0>          |
-| Latest stable            | <resolved at runtime> |
-| Drift classification     | <minor-drift>     |
-| Major upgrade required   | <yes / no>        |
-| Module path              | <.../v5>          |
+| Field                       | Value             |
+| --------------------------- | ----------------- |
+| Pinned observability version| <v1.0.0>          |
+| Pinned commons version      | <v5.x or "not used">|
+| Latest stable               | <resolved at runtime> |
+| Drift classification        | <minor-drift>     |
+| Major upgrade required      | <yes / no>        |
+| Module path                 | <github.com/LerianStudio/lib-observability/assert>|
+| Uses lib-commons shim       | <yes / no>        |
 
-**Assessment:** <one-paragraph narrative — "project is up-to-date on commons/assert,
-all recommendations apply to pinned version" or "project pinned to v4.2.0, v5 migration
-required before adopting recommendations below">
+**Assessment:** <one-paragraph narrative — "project imports lib-observability/assert
+directly, all recommendations apply to pinned version" or "project still imports via
+the lib-commons/v5/commons/assert deprecation shim — migration to the canonical
+lib-observability/assert path is required before adopting recommendations below">
 
 ---
 
 ## Unadopted Features
 
-Changes to `commons/assert` between the pinned version and latest stable that the
-target has not yet adopted:
+Changes to `lib-observability/assert` between the pinned version and latest stable that
+the target has not yet adopted:
 
 | Version | Feature                     | Classification  | Relevant Finding Angle |
 | ------- | --------------------------- | --------------- | ---------------------- |
 | <ver>   | <feature>                   | <classification>| <angle>                |
 
 (If no assert-scoped changes exist in the delta, write "No unadopted features — the
-commons/assert API surface is unchanged between pinned and latest versions.")
+lib-observability/assert API surface is unchanged between pinned and latest versions.")
 
 ---
 
@@ -112,8 +115,8 @@ array of tasks shaped for `ring:dev-cycle` consumption. The format matches what
 3. CRITICAL findings (Angle 1 — zero-panic violations) MUST be standalone tasks (no
    batching across concerns) — each gets its own dev-cycle pass.
 4. MUST include dependency references when one task's correctness depends on another
-   (e.g., "Add InitAssertionMetrics" depends on "Upgrade lib-commons to v5" when the
-   pinned version is v4.x).
+   (e.g., "Add InitAssertionMetrics" depends on "Migrate imports to lib-observability/assert"
+   when the target still imports the lib-commons/v5 shim).
 
 **Task schema:**
 
@@ -138,7 +141,7 @@ array of tasks shaped for `ring:dev-cycle` consumption. The format matches what
   "estimated_complexity": "moderate",
   "depends_on": [],
   "angle": 1,
-  "replacement_api": "commons/assert.Asserter + domain predicates"
+  "replacement_api": "lib-observability/assert.Asserter + domain predicates"
 }
 ```
 
@@ -148,20 +151,20 @@ array of tasks shaped for `ring:dev-cycle` consumption. The format matches what
 [
   {
     "id": "assert-sweep-001",
-    "title": "Upgrade lib-commons from v4.2.0 to latest v5.x",
+    "title": "Migrate imports from lib-commons/v5/commons/assert to lib-observability/assert",
     "severity": "HIGH",
-    "description": "Target service pins github.com/LerianStudio/lib-commons/v4 at v4.2.0. The commons/assert API surface is source-compatible across v4 → v5, but the module path bump requires updating all imports. All recommendations below assume v5 APIs are available. This task MUST complete before any other assert-sweep task lands.",
-    "files_affected": ["go.mod", "go.sum", "<all Go files importing lib-commons/v4>"],
+    "description": "Target service imports github.com/LerianStudio/lib-commons/v5/commons/assert — the deprecation shim that re-exports every symbol from github.com/LerianStudio/lib-observability/assert. Types, functions, signatures, and behavior are identical. The canonical home for the package is lib-observability; the shim exists only for backward compatibility. Update all imports to the canonical path so future predicate additions and the eventual removal of the shim do not block this codebase. All recommendations below assume the canonical import. This task MUST complete before any other assert-sweep task lands.",
+    "files_affected": ["go.mod", "go.sum", "<all Go files importing lib-commons/v5/commons/assert>"],
     "acceptance_criteria": [
-      "go.mod declares github.com/LerianStudio/lib-commons/v5 at latest v5.x tag",
-      "All imports updated from /v4 to /v5",
+      "go.mod declares github.com/LerianStudio/lib-observability at latest v1.x tag",
+      "All imports updated from github.com/LerianStudio/lib-commons/v5/commons/assert to github.com/LerianStudio/lib-observability/assert",
       "go build ./... passes",
       "go test ./... passes"
     ],
-    "estimated_complexity": "complex",
+    "estimated_complexity": "moderate",
     "depends_on": [],
     "angle": "version",
-    "replacement_api": "lib-commons/v5"
+    "replacement_api": "lib-observability/assert"
   },
   {
     "id": "assert-sweep-002",
@@ -173,7 +176,7 @@ array of tasks shaped for `ring:dev-cycle` consumption. The format matches what
     "estimated_complexity": "moderate",
     "depends_on": ["assert-sweep-001"],
     "angle": 1,
-    "replacement_api": "commons/assert.Asserter + domain predicates"
+    "replacement_api": "lib-observability/assert.Asserter + domain predicates"
   },
   {
     "id": "assert-sweep-003",
@@ -189,7 +192,7 @@ array of tasks shaped for `ring:dev-cycle` consumption. The format matches what
     "estimated_complexity": "moderate",
     "depends_on": ["assert-sweep-001"],
     "angle": 5,
-    "replacement_api": "commons/assert + DebitsEqualCredits"
+    "replacement_api": "lib-observability/assert + DebitsEqualCredits"
   }
 ]
 ```
@@ -197,7 +200,7 @@ array of tasks shaped for `ring:dev-cycle` consumption. The format matches what
 **Handoff message template** (orchestrator surfaces to user after Phase 4):
 
 ```
-commons/assert sweep complete. Findings: <N> across <M> of 6 angles.
+lib-observability/assert sweep complete. Findings: <N> across <M> of 6 angles.
 - CRITICAL: <N>   HIGH: <N>   MEDIUM: <N>   LOW: <N>
 
 Report: /tmp/assert-sweep-report.md
@@ -212,22 +215,26 @@ hand-rolled predicates) MUST be addressed before MEDIUM/LOW tiers.
 
 # REFERENCE MODE
 
-Sections 1–14 below catalog the `commons/assert` package (latest v5.x). Resolve the
-actual version at runtime via `gh api repos/LerianStudio/lib-commons/releases/latest --jq .tag_name`.
-Read the sections relevant to your current task. Sweep Mode explorers receive extracts from these sections
-as context for their angle.
+Sections 1–14 below catalog the `lib-observability/assert` package (canonical home;
+lib-commons/v5/commons/assert is a deprecation shim with identical signatures). Resolve
+the actual version at runtime via `gh api repos/LerianStudio/lib-observability/releases/latest --jq .tag_name`.
+Read the sections relevant to your current task. Sweep Mode explorers receive extracts
+from these sections as context for their angle.
 
 ## 1. API Surface
 
-Full catalog of exported symbols in `github.com/LerianStudio/lib-commons/v5/commons/assert`.
+Full catalog of exported symbols in `github.com/LerianStudio/lib-observability/assert`
+(the canonical path; `github.com/LerianStudio/lib-commons/v5/commons/assert` re-exports
+the same symbols as deprecated aliases).
 
 ### Constructor
 
 ```go
-func New(ctx context.Context, logger log.Logger, component, operation string) *Asserter
+func New(ctx context.Context, logger Logger, component, operation string) *Asserter
 ```
 
-Creates an asserter scoped to a specific component and operation. `component` and
+Creates an asserter scoped to a specific component and operation. `Logger` is the
+package-defined minimal logging interface (`assert.Logger`). `component` and
 `operation` become metric labels and span-event attributes on every assertion failure.
 
 ### Asserter methods
@@ -247,13 +254,25 @@ returns no value — it calls `runtime.Goexit()` when `err != nil`.
 ### Bootstrap
 
 ```go
-func InitAssertionMetrics(factory metrics.Factory)
+func InitAssertionMetrics(factory *metrics.MetricsFactory)
+func GetAssertionMetrics() *AssertionMetrics
+func ResetAssertionMetrics()
 ```
 
-Registers the `assertion_failed_total` counter with the provided metrics factory. MUST
-be called once during service bootstrap AFTER telemetry is initialized. Without this
-call, the log and span-event layers of the trident still fire, but the metric layer
-stays silent.
+`InitAssertionMetrics` registers the `assertion_failed_total` counter with the provided
+metrics factory (`*github.com/LerianStudio/lib-observability/metrics.MetricsFactory`).
+MUST be called once during service bootstrap AFTER telemetry is initialized. Without
+this call, the log and span-event layers of the trident still fire, but the metric
+layer stays silent. `GetAssertionMetrics` returns the singleton (nil before init).
+`ResetAssertionMetrics` clears the singleton — test-only.
+
+### Constants
+
+```go
+const AssertionSpanEventName = "assertion.failed"
+```
+
+The OTel span-event name attached to the active span on every failure (see Section 6).
 
 ### Error types
 
@@ -278,10 +297,15 @@ See [Section 4](#4-full-domain-predicate-catalog) for the full catalog. Signatur
 summarized:
 
 ```go
-// Numeric
+// Numeric (int64)
 func Positive(n int64) bool
 func NonNegative(n int64) bool
-func InRange(n, min, max int64) bool
+func NotZero(n int64) bool
+func InRange(n, minVal, maxVal int64) bool
+
+// Numeric (int)
+func PositiveInt(n int) bool
+func InRangeInt(n, minVal, maxVal int) bool
 
 // Financial
 func PositiveDecimal(amount decimal.Decimal) bool
@@ -291,13 +315,16 @@ func ValidScale(scale int) bool
 func DebitsEqualCredits(debits, credits decimal.Decimal) bool
 func NonZeroTotals(debits, credits decimal.Decimal) bool
 func BalanceSufficientForRelease(onHold, releaseAmount decimal.Decimal) bool
+func BalanceIsZero(available, onHold decimal.Decimal) bool
 
 // Transaction state machine
 func ValidTransactionStatus(status string) bool
 func TransactionCanTransitionTo(current, target string) bool
 func TransactionCanBeReverted(status string, hasParent bool) bool
-func TransactionHasOperations(ops []Operation) bool
-func TransactionOperationsContain(ops []Operation, allowed []string) bool
+func TransactionHasOperations(operations []string) bool
+func TransactionOperationsContain(operations, allowed []string) bool
+// Deprecated alias of TransactionOperationsContain:
+func TransactionOperationsMatch(operations, allowed []string) bool
 
 // Network / infrastructure
 func ValidUUID(s string) bool
@@ -476,11 +503,19 @@ asserter via `a.That(ctx, predicate, ...)` to add the trident.
 
 ### Numeric (int64)
 
-| Predicate                    | What it validates                   | Scenario                              |
-| ---------------------------- | ----------------------------------- | ------------------------------------- |
-| `Positive(n int64) bool`     | `n > 0`                             | Line counts, retry budgets, TTLs      |
-| `NonNegative(n int64) bool`  | `n >= 0`                            | Queue depths, active connection count |
-| `InRange(n, min, max) bool`  | `min <= n <= max`                   | Bounded tunables, pagination limits   |
+| Predicate                              | What it validates                | Scenario                              |
+| -------------------------------------- | -------------------------------- | ------------------------------------- |
+| `Positive(n int64) bool`               | `n > 0`                          | Line counts, retry budgets, TTLs      |
+| `NonNegative(n int64) bool`            | `n >= 0`                         | Queue depths, active connection count |
+| `NotZero(n int64) bool`                | `n != 0`                         | Signed deltas that must change state  |
+| `InRange(n, minVal, maxVal int64) bool`| `minVal <= n <= maxVal`          | Bounded tunables, pagination limits   |
+
+### Numeric (int)
+
+| Predicate                                | What it validates                | Scenario                            |
+| ---------------------------------------- | -------------------------------- | ----------------------------------- |
+| `PositiveInt(n int) bool`                | `n > 0`                          | Slice lengths, page counts          |
+| `InRangeInt(n, minVal, maxVal int) bool` | `minVal <= n <= maxVal`          | Bounded `int`-typed configuration   |
 
 Composition:
 
@@ -504,6 +539,7 @@ if err := a.That(ctx, assert.Positive(entryCount),
 | `DebitsEqualCredits(debits, credits) bool`          | `debits == credits` — double-entry invariant               |
 | `NonZeroTotals(debits, credits) bool`               | Both sides non-zero                                        |
 | `BalanceSufficientForRelease(onHold, release) bool` | `onHold >= release` — sufficient held funds                |
+| `BalanceIsZero(available, onHold) bool`             | Both `available` and `onHold` are exactly zero             |
 
 Composition — double-entry enforcement at posting time:
 
@@ -546,8 +582,9 @@ if err := a.That(ctx, assert.BalanceSufficientForRelease(holdAmount, releaseAmou
 | `ValidTransactionStatus(status string) bool`                | One of `CREATED, APPROVED, PENDING, CANCELED, NOTED`            |
 | `TransactionCanTransitionTo(current, target string) bool`   | Transition from current to target is legal                      |
 | `TransactionCanBeReverted(status string, hasParent bool)`   | Only `APPROVED` transactions without a parent can be reverted   |
-| `TransactionHasOperations(ops []Operation) bool`            | `len(ops) > 0`                                                  |
-| `TransactionOperationsContain(ops, allowed []string) bool`  | All operation types in `ops` are members of `allowed`           |
+| `TransactionHasOperations(operations []string) bool`        | `len(operations) > 0`                                           |
+| `TransactionOperationsContain(operations, allowed []string)`| All operation types in `operations` are members of `allowed`   |
+| `TransactionOperationsMatch(operations, allowed []string)`  | Deprecated alias for `TransactionOperationsContain`             |
 
 The legal-transition graph (enforced by `TransactionCanTransitionTo`):
 
@@ -952,7 +989,10 @@ Proving assertions fire correctly is part of the test suite, not a manual exerci
 ### Inject a test metrics factory
 
 ```go
-import "github.com/LerianStudio/lib-commons/v5/commons/opentelemetry/metrics"
+import (
+    "github.com/LerianStudio/lib-observability/assert"
+    "github.com/LerianStudio/lib-observability/metrics"
+)
 
 func TestPostTransaction_FiresAssertionOnUnbalanced(t *testing.T) {
     testFactory := metrics.NewTestFactory()
@@ -1171,12 +1211,13 @@ The `assert.InitAssertionMetrics` call has a specific position in service bootst
   / worker starts)
 
 For the complete bootstrap sequence (logger → telemetry → runtime → assert →
-infrastructure clients → server), see `ring:using-lib-commons` Section 2.
+infrastructure clients → server), see `ring:using-lib-observability` (or
+`ring:using-lib-commons` for codebases still on the v5 shim).
 
 The two-line addition at the right point:
 
 ```go
-// After opentelemetry.NewTelemetry(...):
+// After tracing.NewTelemetry(...):
 runtime.InitPanicMetrics(tl.MetricsFactory, logger)
 assert.InitAssertionMetrics(tl.MetricsFactory)
 ```
@@ -1189,10 +1230,9 @@ This skill does not duplicate material available elsewhere. Use these pointers:
 
 | For                                                         | See                                                            |
 | ----------------------------------------------------------- | -------------------------------------------------------------- |
-| Full lib-commons package catalog (22 packages)              | `ring:using-lib-commons` Section 1                             |
-| Full bootstrap sequence with all clients                    | `ring:using-lib-commons` Section 2                             |
-| Observability overview including panic recovery coverage    | `ring:using-lib-commons` Section 5                             |
-| Single-angle assertions sweep (lower-detail version)        | `ring:using-lib-commons` Angle 16                              |
+| Full lib-observability package catalog (assert, tracing, metrics, log, zap, runtime) | `ring:using-lib-observability` |
+| Full bootstrap sequence with all observability clients      | `ring:using-lib-observability`                                 |
+| lib-commons v5 deprecation shim — re-export aliases         | `ring:using-lib-commons` (compatibility window only)           |
 | Panic recovery + `SafeGo` + error reporter integration      | `ring:using-runtime`                                           |
 | Running a full codebase standards sweep                     | `ring:dev-refactor`                                            |
 | Consuming sweep tasks into a development cycle              | `ring:dev-cycle`                                               |
@@ -1200,13 +1240,14 @@ This skill does not duplicate material available elsewhere. Use these pointers:
 `ring:using-runtime` is the natural companion to this skill — `runtime` protects
 against panics that would otherwise silently kill a goroutine; `assert` protects
 against invariant violations that would otherwise silently corrupt state. Together,
-they close both halves of the invisible-failure problem in Go services.
+they close both halves of the invisible-failure problem in Go services. Both packages
+now live under `github.com/LerianStudio/lib-observability` (see `ring:using-lib-observability`).
 
 ---
 
 ## 13. Cross-Cutting Patterns
 
-Patterns that apply across all `commons/assert` usage.
+Patterns that apply across all `lib-observability/assert` usage.
 
 ### Nil-receiver safety
 
@@ -1254,17 +1295,44 @@ tight loops, request handlers, and message consumers.
 
 ## 14. Breaking Changes
 
-### v4.x → v5.x (commons/assert)
+### lib-commons/v5/commons/assert → lib-observability/assert (canonical move)
 
-No API-breaking changes in `commons/assert` across v4.2.0 → v5.x. All method
-signatures, predicate signatures, and error types are source-compatible.
+The package moved out of lib-commons and into the new foundation library
+`github.com/LerianStudio/lib-observability/assert` (v1.0.0+). lib-commons v5 keeps a
+deprecation shim — every type and function in `lib-commons/v5/commons/assert` is
+marked `Deprecated:` and delegates verbatim to `lib-observability/assert`. There are
+no behavior changes; only the canonical import path moves.
 
-The module path bump from `github.com/LerianStudio/lib-commons/v4/...` to
-`github.com/LerianStudio/lib-commons/v5/...` applies. See `ring:using-lib-commons`
-Section 15 for the full module-bump migration checklist.
+**Source-compatible:** All method signatures, predicate signatures, error types, and
+the `AssertionSpanEventName` constant are identical. `AssertionMetrics`, `New`,
+`InitAssertionMetrics`, `GetAssertionMetrics`, `ResetAssertionMetrics`, and every
+predicate are re-exported via type aliases / thin wrappers.
 
-### v5.0.1+
+**Migration path:**
 
-Patch releases — no API changes to `commons/assert`. Check the latest v5.x tag for current patch level.
+```diff
+- import "github.com/LerianStudio/lib-commons/v5/commons/assert"
++ import "github.com/LerianStudio/lib-observability/assert"
+```
+
+```diff
+- import metrics "github.com/LerianStudio/lib-commons/v5/commons/opentelemetry/metrics"
++ import "github.com/LerianStudio/lib-observability/metrics"
+```
+
+Then `go mod tidy` to pick up `github.com/LerianStudio/lib-observability` and drop the
+unused lib-commons subpackage if it is no longer used elsewhere. Code that still imports
+the shim continues to compile during the deprecation window.
+
+### v4.x → v5.x (lib-commons/commons/assert) — legacy
+
+For codebases still on lib-commons/v4, the v4 → v5 module bump came first; that bump
+had no API-breaking changes inside `commons/assert`. After that, switch the import to
+`lib-observability/assert` per the section above.
+
+### lib-observability/assert v1.0.x+
+
+Patch releases — no API changes. Check the latest v1.x tag for current patch level via
+`gh api repos/LerianStudio/lib-observability/releases/latest --jq .tag_name`.
 
 ---

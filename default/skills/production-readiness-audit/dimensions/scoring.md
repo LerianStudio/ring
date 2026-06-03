@@ -252,7 +252,7 @@ Standards loaded at runtime via WebFetch from `dev-team/docs/standards/`:
 ### Core two Codebase (Legacy Reference)
 Original reference implementations derived from the Core two codebase, which serves as the organizational standard for:
 - Hexagonal architecture per bounded context
-- lib-commons integration (telemetry, database, messaging)
+- lib-observability telemetry plus lib-commons database/messaging integration
 - lib-auth integration (JWT validation, tenant extraction)
 - Fiber HTTP framework conventions
 

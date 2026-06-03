@@ -1,9 +1,11 @@
 ---
 name: ring:using-lib-commons
-description: Dual-mode skill for github.com/LerianStudio/lib-commons v5, Lerian's shared Go library. Sweep Mode dispatches 22 parallel explorers to detect DIY implementations that should use lib-commons, with file:line replacement precision. Reference Mode catalogs all lib-commons packages (database, messaging, multi-tenancy, observability, security, resilience, HTTP, idempotency, TLS) for API discovery. Skip for non-Go code or Ring itself.
+description: Dual-mode skill for github.com/LerianStudio/lib-commons v5, Lerian's shared Go library — the non-observability surface. Sweep Mode dispatches parallel explorers to detect DIY implementations that should use lib-commons, with file:line replacement precision. Reference Mode catalogs lib-commons packages for lifecycle (Launcher), outbox repository, circuit breakers, tenant management, idempotency, security/TLS, database, messaging, HTTP toolkit. Observability (log, metrics, tracing, assertions, panic recovery, redaction) moved out of lib-commons into lib-observability v1.0.0 — see [[using-lib-observability]] and its sub-skills [[using-tracing]], [[using-runtime]], [[using-assert]]. Skip for non-Go code or Ring itself.
 ---
 
 # ring:using-lib-commons
+
+> **Scope note (lib-observability v1.0.0):** The observability layer — `log`, `metrics`, `tracing`, `zap`, `assert`, `runtime` (panic recovery), `redaction`, and OTel attribute constants — **moved out of lib-commons into `github.com/LerianStudio/lib-observability`** as of v1.0.0. lib-commons v5 keeps deprecated shims for back-compat, but this skill is no longer the canonical reference for those packages. For observability work, dispatch [[using-lib-observability]] (top-level) or its dedicated sub-skills [[using-tracing]] / [[using-runtime]] / [[using-assert]]. This skill now focuses on lib-commons's non-observability surface: lifecycle (`commons.Launcher`), outbox repository (writer side lives in [[using-lib-streaming]]), circuit breakers, tenant management, idempotency, security/TLS, database connections, messaging (RabbitMQ command queues; events go through [[using-lib-streaming]]), HTTP toolkit.
 
 ## When to use
 Sweep mode:
@@ -26,7 +28,9 @@ Reference mode:
 - Target codebase is Ring itself (no lib-commons dependency)
 
 ## Related
-**Similar:** ring:using-dev-team, ring:dev-refactor, ring:using-runtime, ring:using-assert
+**Similar:** ring:using-dev-team, ring:dev-refactor
+**Observability layer (moved to lib-observability):** [[using-lib-observability]], [[using-tracing]], [[using-runtime]], [[using-assert]]
+**Adjacent libs:** [[using-outbox]], [[using-lib-streaming]], [[using-lib-systemplane]]
 
 
 ## Mode Selection
@@ -73,8 +77,43 @@ Dispatch all 22 explorer angles in **3 batches** (8+8+6). Wait for each batch be
 | Batch | Angles | Focus |
 |---|---|---|
 | 1 | 1–8 | Infrastructure + HTTP |
-| 2 | 9–16 | Ergonomics + security + observability |
+| 2 | 9–16 | Ergonomics + security + observability-shim detection |
 | 3 | 17–22 | Resilience + multi-tenant + utilities |
+
+### ⛔ STOP-CHECK BEFORE DISPATCH (each batch)
+
+Before emitting any Task call in a batch, count the explorers you intend to launch in this turn.
+- Count MUST equal the batch size declared above (8, 8, or 6).
+- If your dispatch count diverges from the batch size → STOP and reconcile against the batch row.
+- No substitutions, no omissions within a batch.
+
+### ⛔ MUST NOT trickle-dispatch within a batch
+
+All explorers in a batch leave in the SAME TURN, before reading any explorer output.
+
+Forbidden sequences:
+- Dispatch explorer 1 → read result → dispatch explorer 2
+- Dispatch a subset of the batch → wait → dispatch the rest
+- Dispatch follow-up explorers conditioned on partial output
+- Loop sequentially over the batch's angle list
+
+If you find yourself about to dispatch an explorer in a turn AFTER any explorer in the SAME batch has already returned a result → STOP. You violated parallel dispatch. Report the violation and mark the batch INCOMPLETE rather than completing the trickle. (Sequential batch ordering is intentional; trickle within a batch is not.)
+
+### Self-verify after dispatch
+
+After each batch's dispatch turn, verify all batched Task calls were emitted in that single turn. If fewer went out than the batch size, the batch did NOT execute correctly. Mark INCOMPLETE and surface the dispatch failure — do NOT silently continue with a partial batch.
+
+### Parallel dispatch — atomic batch (within this batch)
+
+Emit all Task calls for THIS BATCH in a SINGLE TURN, as one atomic batch. (Batches themselves remain sequential — do not dispatch batch N+1 until batch N has fully returned.)
+
+**If your runtime exposes a `multi_tool_use.parallel` wrapper**, use it to dispatch the complete batch in one wrapped invocation. This is the canonical fan-out mechanism on OpenAI-style tool envelopes and on certain Anthropic SDK consumers — naming it explicitly activates parallel emission on runtimes where trickle-dispatch is the default behavior.
+
+**If your runtime emits parallel tool_use blocks natively** (Claude Code with Claude models), `multi_tool_use.parallel` may not be needed — but naming it is harmless and serves as an enforcement anchor.
+
+The STOP-CHECK, anti-trickle, and self-verify guards above remain binding regardless of which mechanism your runtime uses.
+
+> **Observability angles (14, 15, 16) — scope shift:** these angles still run as part of this sweep, but their **detection logic now targets deprecated lib-commons shim imports** in addition to raw DIY. The canonical replacement is `lib-observability/*`, NOT `commons/zap`, `commons/runtime`, `commons/assert`. For a deep, dedicated audit of the observability layer, dispatch [[using-lib-observability]] (top-level) or [[using-tracing]] / [[using-runtime]] / [[using-assert]] instead — those produce richer findings than the breadth-first single-angle sweep here.
 
 **Per-explorer dispatch** (`subagent_type: ring:codebase-explorer`):
 
@@ -125,7 +164,7 @@ Full API catalog in `sub-files/reference.md`. Load the relevant sections for you
 | 2 | Common Initialization Pattern | Typical service bootstrap |
 | 3 | Database Connections | postgres, mongo, redis, rabbitmq |
 | 4 | HTTP Toolkit | Middleware, rate limiting, pagination, idempotency |
-| 5 | Observability | Logger, tracing, metrics, runtime, assert |
+| 5 | Observability *(moved)* | Logger, tracing, metrics, runtime, assert — now in [[using-lib-observability]] |
 | 6 | Resilience & Utilities | Circuit breaker, backoff, safe math |
 | 7 | Security | JWT, encryption, sensitive fields, TLS |
 | 8 | Transaction Domain | Intent planning, balance posting, outbox |

@@ -1457,7 +1457,7 @@ Contributors: @jeff, @jefferson.comff
 ## [1.9.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.9.0)
 
 - **Features**
-  - Add consequences-reviewer to parallel code review
+  - Add legacy ripple-effect reviewer to parallel code review
 
 Contributors: @fred
 
@@ -1468,7 +1468,7 @@ Contributors: @fred
 ## [1.9.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.9.0)
 
 - **Features**
-  - Add consequences-reviewer to parallel code review
+  - Add legacy ripple-effect reviewer to parallel code review
 
 Contributors: @fred
 
@@ -1479,7 +1479,7 @@ Contributors: @fred
 ## [1.9.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.9.0)
 
 - **Features**
-  - Add consequences-reviewer to parallel code review.
+  - Add legacy ripple-effect reviewer to parallel code review.
 
 Contributors: @fred
 
@@ -1551,4 +1551,3 @@ Contributors: @jeff, @jefferson.comff
 Contributors: @gui.rodrigues
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.6.2...ring-default@1.7.0)
-

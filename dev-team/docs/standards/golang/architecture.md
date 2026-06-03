@@ -286,13 +286,14 @@ import (
     "fmt"
     "runtime/debug"
 
+    observability "github.com/LerianStudio/lib-observability"
     libCommons "github.com/LerianStudio/lib-commons/v5/commons"
 )
 
 // Go wraps a goroutine with panic recovery
 // MUST use this instead of bare `go func()` for all background goroutines
 func Go(ctx context.Context, fn func()) {
-    logger, _, _, _ := libCommons.NewTrackingFromContext(ctx)
+    logger, _, _, _ := observability.NewTrackingFromContext(ctx)
 
     go func() {
         defer func() {
@@ -308,7 +309,7 @@ func Go(ctx context.Context, fn func()) {
 
 // GoWithError wraps a goroutine that returns an error
 func GoWithError(ctx context.Context, fn func() error, errChan chan<- error) {
-    logger, _, _, _ := libCommons.NewTrackingFromContext(ctx)
+    logger, _, _, _ := observability.NewTrackingFromContext(ctx)
 
     go func() {
         defer func() {
@@ -1003,4 +1004,3 @@ grep -rn "func.*Handler.*Handle" internal/services/ --include="*.go" | grep -v "
 | "We can add CQRS later" | Retrofitting CQRS into a mixed read/write codebase is a rewrite. Design the separation early. | **Separate command/query from the start if criteria met** |
 | "One repository handles both reads and writes" | Mixed repositories grow into god objects. Command repos need transactions; query repos need JOINs and denormalization. | **Separate repositories for command and query** |
 | "Views are just DTOs, no need for separate models" | Views often need JOINs, aggregations, and computed fields that don't belong in the domain model. | **Use dedicated view types for query side** |
-

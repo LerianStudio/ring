@@ -86,14 +86,14 @@ When adding/removing a code review agent in `ring:codereview` pool:
 
 | Plugin           | Path           | Skills | Agents |
 | ---------------- | -------------- | ------ | ------ |
-| ring-default     | `default/`     | 14     | 10     |
-| ring-dev-team    | `dev-team/`    | 31     | 15     |
+| ring-default     | `default/`     | 16     | 2      |
+| ring-dev-team    | `dev-team/`    | 33     | 24     |
 | ring-pm-team     | `pm-team/`     | 18     | 4      |
-| ring-tw-team     | `tw-team/`     | 6      | 3      |
+| ring-tw-team     | `tw-team/`     | 4      | 3      |
 
-**Total: 69 skills, 32 agents across 4 plugins.** Plugin versions in `.claude-plugin/marketplace.json`.
+**Total: 71 skills, 33 agents across 4 plugins.** Plugin versions in `.claude-plugin/marketplace.json`.
 
-Each plugin contains: `skills/`, `agents/`, `hooks/`. See [README.md](README.md#architecture) for full directory structure.
+Each plugin contains: `skills/`, `agents/`, `hooks/`, plus per-harness install manifests `.codex-plugin/`, `.cursor-plugin/`, and `.opencode/` (alongside the marketplace-wide `.claude-plugin/marketplace.json` at repo root). See [README.md](README.md#architecture) for full directory structure.
 
 ---
 
@@ -104,11 +104,11 @@ Each plugin contains: `skills/`, `agents/`, `hooks/`. See [README.md](README.md#
 | Add skill | Create `*/skills/name/SKILL.md` with frontmatter per [Frontmatter Schema](docs/FRONTMATTER_SCHEMA.md) |
 | Add agent | Create `*/agents/name.md` → verify required sections per [Agent Design](docs/AGENT_DESIGN.md) |
 | Modify hooks | Edit `*/hooks/hooks.json` → test with `bash */hooks/session-start.sh` |
-| Code review | `ring:codereview` dispatches 10 parallel reviewers |
+| Code review | `ring:codereview` dispatches 9 default reviewers plus triggered conditional specialists |
 | Pre-dev (small) | `ring:pre-dev-feature` → 5-gate workflow |
 | Pre-dev (large) | `ring:pre-dev-full` → 10-gate workflow |
-| Dev cycle backend | `ring:dev-cycle` → 10-gate workflow |
-| Dev cycle frontend | `ring:dev-cycle-frontend` → 9-gate workflow |
+| Dev cycle backend | `ring:dev-cycle` → lean backend cycle (Gate 0/8/9) |
+| Dev cycle frontend | `ring:dev-cycle-frontend` → lean frontend cycle (Gate 0/7/8) |
 
 See [docs/WORKFLOWS.md](docs/WORKFLOWS.md) for detailed instructions.
 
@@ -123,9 +123,9 @@ See [docs/WORKFLOWS.md](docs/WORKFLOWS.md) for detailed instructions.
 - Only then write implementation (GREEN)
 
 # Review compliance (default/skills/codereview/SKILL.md)
-- All 10 reviewers must pass
+- All 9 default reviewers must pass; triggered conditional specialists must also pass
 - Critical findings = immediate fix required
-- Re-run all 10 reviewers after fixes
+- Re-run the selected review pool after fixes
 
 # Skill compliance (default/skills/using-ring/SKILL.md)
 - Check for applicable skills before any task

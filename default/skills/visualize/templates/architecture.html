@@ -3,17 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Architecture Diagram — Lerian Studio</title>
+<title>System architecture - Lerian Studio</title>
 <!--
   Reference template for the visual-explainer skill: CSS Grid architecture layout.
-  Lerian standard branding — sunglow accent, de-york greens, tangerine warmth,
+  Pattern reference only. Start generated artifacts from standard.html,
+  then adapt this structure to the user's source data. Do not copy this
+  sample title, entities, statuses, or flows unless present in the user
+  request or source material.
+
+  Lerian standard branding - sunglow accent, de-york greens, tangerine warmth,
   cod-gray neutrals, semantic status colors from the Lerian design system.
   Key patterns demonstrated:
   - Lerian standard palette (sunglow + de-york + tangerine + cod-gray)
   - Depth tiers: hero (input sources), default (mid sections), recessed (callout)
   - Asymmetric background atmosphere (off-center gradient mesh)
   - Large heading (38px) for typographic contrast
-  - Section cards with colored accent borders and dot labels
+  - Section cards with semantic top accents and dot labels
   - Vertical flow arrows between sections (inline SVG)
   - Horizontal pipeline with step boxes and arrow separators
   - Parallel branch within a pipeline
@@ -42,53 +47,53 @@
   --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', ui-monospace, monospace;
 
   /* --- Backgrounds --- */
-  --bg: #F4F4F5;                          /* page background (zinc-100) */
-  --surface: #FFFFFF;                      /* cards, panels */
-  --surface-elevated: #FFFFFF;             /* modals, popovers */
-  --surface-muted: #E4E4E7;               /* subtle backgrounds, muted areas */
+  --bg: oklch(96.7% 0.001 286.4);          /* page background (zinc-100) */
+  --surface: oklch(99% 0.002 286.4);       /* cards, panels */
+  --surface-elevated: oklch(98.5% 0.003 286.4); /* modals, popovers */
+  --surface-muted: oklch(91.9% 0.004 286.3); /* subtle backgrounds, muted areas */
 
   /* --- Text --- */
-  --text: #27272A;                         /* primary text (zinc-800) */
-  --text-secondary: #52525B;               /* secondary text (zinc-600) */
-  --text-muted: #A1A1AA;                   /* placeholder, meta (zinc-400) */
-  --text-inverse: #F4F4F5;                 /* text on dark backgrounds */
+  --text: oklch(27.4% 0.006 286.0);        /* primary text (zinc-800) */
+  --text-secondary: oklch(44.2% 0.017 285.8); /* secondary text (zinc-600) */
+  --text-muted: oklch(70.5% 0.015 286.1);  /* placeholder, meta (zinc-400) */
+  --text-inverse: oklch(96.7% 0.001 286.4); /* text on dark backgrounds */
 
   /* --- Brand Accent (Sunglow) --- */
-  --accent: #FDCB28;                       /* primary brand yellow */
+  --accent: oklch(84.8% 0.166 88.9);       /* primary brand yellow */
   --accent-dim: rgba(253, 203, 40, 0.15);
   --accent-hover: rgba(253, 203, 40, 0.7);
-  --accent-text: #27272A;                  /* text color on accent bg */
+  --accent-text: oklch(27.4% 0.006 286.0); /* text color on accent bg */
 
   /* --- Semantic Status --- */
-  --success: #16A34A;
-  --success-bg: #f0fdf4;
+  --success: oklch(62.7% 0.194 149.2);
+  --success-bg: oklch(98.2% 0.018 155.8);
   --success-dim: rgba(22, 163, 74, 0.12);
-  --warning: #EAB308;
-  --warning-bg: #fefce8;
+  --warning: oklch(79.5% 0.162 86.0);
+  --warning-bg: oklch(98.7% 0.026 102.2);
   --warning-dim: rgba(234, 179, 8, 0.15);
-  --error: #EF4444;
-  --error-bg: #fef2f2;
+  --error: oklch(63.7% 0.208 25.3);
+  --error-bg: oklch(97.1% 0.013 17.4);
   --error-dim: rgba(239, 68, 68, 0.12);
-  --info: #2563EB;
-  --info-bg: #eff6ff;
+  --info: oklch(54.6% 0.215 262.9);
+  --info-bg: oklch(97% 0.014 254.6);
   --info-dim: rgba(37, 99, 235, 0.12);
 
   /* --- Extended Palette (diagram variety) --- */
-  --sunglow-400: #FDCB28;
-  --sunglow-500: #EDAC05;
-  --sunglow-100: #FFF8C2;
-  --de-york-400: #5BCD86;
-  --de-york-600: #26934F;
-  --de-york-100: #E0F8E8;
-  --tangerine-400: #FAA589;
-  --tangerine-500: #F06E43;
-  --tangerine-100: #FEE9E2;
-  --cod-gray-400: #927E81;
-  --cod-gray-600: #655557;
+  --sunglow-400: oklch(84.8% 0.166 88.9);
+  --sunglow-500: oklch(76.7% 0.159 83.8);
+  --sunglow-100: oklch(96.8% 0.083 96.6);
+  --de-york-400: oklch(75.6% 0.147 150.0);
+  --de-york-600: oklch(55% 0.138 149.0);
+  --de-york-100: oklch(95% 0.052 150.0);
+  --tangerine-400: oklch(78.4% 0.106 43.7);
+  --tangerine-500: oklch(66.5% 0.176 38.6);
+  --tangerine-100: oklch(93.6% 0.039 42.4);
+  --cod-gray-400: oklch(59.3% 0.025 13.0);
+  --cod-gray-600: oklch(43.7% 0.023 13.6);
 
   /* --- Borders --- */
-  --border: #E4E4E7;                       /* default border (zinc-200) */
-  --border-strong: #D4D4D8;               /* input borders (zinc-300) */
+  --border: oklch(91.9% 0.004 286.3);     /* default border (zinc-200) */
+  --border-strong: oklch(87.1% 0.006 286.3); /* input borders (zinc-300) */
   --border-subtle: rgba(0, 0, 0, 0.05);   /* very faint separators */
 
   /* --- Shadows (product-console) --- */
@@ -109,22 +114,22 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #27272A;
-    --surface: #3F3F46;
-    --surface-elevated: #52525B;
-    --surface-muted: #52525B;
+    --bg: oklch(27.4% 0.006 286.0);
+    --surface: oklch(37% 0.013 285.8);
+    --surface-elevated: oklch(44.2% 0.017 285.8);
+    --surface-muted: oklch(44.2% 0.017 285.8);
 
-    --text: #F4F4F5;
-    --text-secondary: #A1A1AA;
-    --text-muted: #71717A;
-    --text-inverse: #27272A;
+    --text: oklch(96.7% 0.001 286.4);
+    --text-secondary: oklch(70.5% 0.015 286.1);
+    --text-muted: oklch(55.2% 0.016 285.9);
+    --text-inverse: oklch(27.4% 0.006 286.0);
 
-    --accent: #FDCB28;
+    --accent: oklch(84.8% 0.166 88.9);
     --accent-dim: rgba(253, 203, 40, 0.2);
-    --accent-text: #27272A;
+    --accent-text: oklch(27.4% 0.006 286.0);
 
-    --border: #52525B;
-    --border-strong: #71717A;
+    --border: oklch(44.2% 0.017 285.8);
+    --border-strong: oklch(55.2% 0.016 285.9);
     --border-subtle: rgba(255, 255, 255, 0.06);
 
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
@@ -363,7 +368,7 @@ h1 {
   display: inline-block;
 }
 
-/* Color variants — using Lerian extended palette */
+/* Color variants using Lerian extended palette */
 .section--accent { border-color: var(--accent-dim); }
 .section--accent .section-label { color: var(--accent); }
 .section--accent .section-label .dot { background: var(--accent); }
@@ -489,7 +494,7 @@ h1 {
   line-height: 1.4;
 }
 
-/* Step color variants — Lerian extended palette */
+/* Step color variants using Lerian extended palette */
 .pipeline-step--teal { border-color: var(--info-dim); }
 .pipeline-step--teal .step-num { color: var(--info); }
 
@@ -563,8 +568,8 @@ h1 {
 .callout {
   background: var(--surface-muted);
   border: 1px solid var(--border);
-  border-left: 3px solid var(--accent);
-  border-radius: 0 8px 8px 0;
+  border-top: 3px solid var(--accent);
+  border-radius: 8px;
   padding: 14px 18px;
   font-size: 13px;
   line-height: 1.6;
@@ -651,8 +656,8 @@ h1 {
 
 @media print {
   body {
-    background: #fff;
-    color: #000;
+    background: oklch(98.8% 0.004 92);
+    color: oklch(24% 0.012 70);
     padding: 20px;
   }
 
@@ -671,7 +676,7 @@ h1 {
     left: 0;
     right: 0;
     border-top: 1px solid #ddd;
-    background: #fff;
+    background: oklch(98.8% 0.004 92);
     padding: 12px 20px;
   }
 
@@ -703,14 +708,14 @@ h1 {
 </header>
 
 
-<h1>System Architecture</h1>
-<p class="subtitle">reference template &mdash; architecture diagram pattern</p>
+<h1>System architecture</h1>
+<p class="subtitle">reference template: architecture diagram pattern</p>
 
 <div class="diagram">
 
-  <!-- Source pills row — hero depth for the entry point -->
+  <!-- Source pills row: hero depth for the entry point -->
   <div class="section section--hero" style="--i:0">
-    <div class="section-label"><span class="dot" style="background:var(--text-muted)"></span> Input Sources</div>
+    <div class="section-label"><span class="dot" style="background:var(--text-muted)"></span> Input sources</div>
     <div class="sources">
       <div class="source"><span>💬</span> Slack</div>
       <div class="source"><span>🐙</span> GitHub</div>
@@ -726,14 +731,14 @@ h1 {
 
   <!-- Gateway section with inner grid -->
   <div class="section section--accent" style="--i:2">
-    <div class="section-label"><span class="dot"></span> Gateway Layer</div>
+    <div class="section-label"><span class="dot"></span> Gateway layer</div>
     <div class="inner-grid">
       <div class="inner-card">
         <div class="title">Router</div>
         <div class="desc">Routes messages to agents via <code>resolveRoute()</code></div>
       </div>
       <div class="inner-card">
-        <div class="title">HTTP Server</div>
+        <div class="title">HTTP server</div>
         <div class="desc">Plugin routes + handlers for webhooks and API</div>
       </div>
     </div>
@@ -746,7 +751,7 @@ h1 {
 
   <!-- Pipeline section -->
   <div class="section section--green" style="--i:4">
-    <div class="section-label"><span class="dot"></span> Processing Pipeline</div>
+    <div class="section-label"><span class="dot"></span> Processing pipeline</div>
     <div class="legend" style="margin-bottom:14px">
       <div class="legend-item"><div class="legend-swatch" style="background:var(--info-dim);border:1px solid var(--info)"></div>no LLM</div>
       <div class="legend-item"><div class="legend-swatch" style="background:rgba(146, 126, 129, 0.15);border:1px solid var(--cod-gray-400)"></div>LLM call</div>
@@ -759,19 +764,19 @@ h1 {
         <div class="step-name">Pre-filter</div>
         <div class="step-detail">Allowlist, bots,<br>dedup check</div>
       </div>
-      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-arrow">&rarr;</div>
       <div class="pipeline-step pipeline-step--sage">
         <div class="step-num">STEP 1</div>
         <div class="step-name">Relevance</div>
         <div class="step-detail">Cheap LLM<br>boolean check</div>
       </div>
-      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-arrow">&rarr;</div>
       <div class="pipeline-step pipeline-step--sage">
         <div class="step-num">STEP 2</div>
         <div class="step-name">Classify</div>
         <div class="step-detail">JSON schema<br>validated output</div>
       </div>
-      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-arrow">&rarr;</div>
       <div class="pipeline-parallel">
         <div class="pipeline-step pipeline-step--orange">
           <div class="step-num">STEP 3</div>
@@ -784,7 +789,7 @@ h1 {
           <div class="step-detail">User resolution</div>
         </div>
       </div>
-      <div class="pipeline-arrow">→</div>
+      <div class="pipeline-arrow">&rarr;</div>
       <div class="pipeline-step pipeline-step--green">
         <div class="step-num">STEP 4</div>
         <div class="step-name">Cluster</div>
@@ -821,7 +826,7 @@ h1 {
   <!-- Three column output -->
   <div class="three-col">
     <div class="section section--sage" style="--i:8">
-      <div class="section-label"><span class="dot"></span> Agent Tools</div>
+      <div class="section-label"><span class="dot"></span> Agent tools</div>
       <ul class="node-list">
         <li><code>search</code> semantic vector search</li>
         <li><code>clusters</code> browse and filter</li>
@@ -846,9 +851,9 @@ h1 {
     </div>
   </div>
 
-  <!-- Callout — recessed depth for secondary info -->
+  <!-- Callout: recessed depth for secondary info -->
   <div class="callout section section--recessed" style="--i:11">
-    <strong>Multi-tenant</strong> &mdash; Each agent gets an isolated database at
+    <strong>Multi-tenant</strong>: Each agent gets an isolated database at
     <code>{agentDir}/intelligence/feedback.db</code> with per-agent config overlay
     and credential isolation.
   </div>
@@ -870,7 +875,7 @@ h1 {
       </div>
     </div>
     <div class="footer-meta">
-      <span class="footer-generated">Generated with <strong>Ring</strong></span>
+      <span class="footer-generated"><strong>Generated with Ring</strong></span>
       <span class="footer-date"></span>
     </div>
   </div>

@@ -3,10 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CI/CD Pipeline — Lerian Studio</title>
+<title>CI/CD pipeline - Lerian Studio</title>
 <!--
   Reference template for the visual-explainer skill: Mermaid diagrams.
-  Lerian standard branding — sunglow/de-york/tangerine palette
+  Pattern reference only. Start generated artifacts from standard.html,
+  then adapt this structure to the user's source data. Do not copy this
+  sample title, CI/CD entities, metrics, statuses, or flow unless present
+  in the user request or source material.
+
+  Lerian standard branding - sunglow/de-york/tangerine palette
   with dot-grid background atmosphere.
   Key patterns demonstrated:
   - Lerian standard design tokens (sunglow, de-york, tangerine)
@@ -15,7 +20,7 @@
   - ESM import of Mermaid + @mermaid-js/layout-elk
   - Mermaid theme: 'base' + full themeVariables, fontSize: 16px
   - CSS overrides: .nodeLabel 16px, .edgeLabel 13px
-  - look: 'handDrawn' for sketchy aesthetic (toggle to 'classic')
+  - look: 'classic' for crisp technical readability
   - layout: 'elk' for better node positioning
   - Zoom controls with scroll-to-zoom and drag-to-pan
   - Both light and dark themes via prefers-color-scheme
@@ -33,53 +38,53 @@
     --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', ui-monospace, monospace;
 
     /* --- Backgrounds --- */
-    --bg: #F4F4F5;                          /* page background (zinc-100) */
-    --surface: #FFFFFF;                      /* cards, panels */
-    --surface-elevated: #FFFFFF;             /* modals, popovers */
-    --surface-muted: #E4E4E7;               /* subtle backgrounds, muted areas */
+    --bg: oklch(96.7% 0.001 286.4);          /* page background (zinc-100) */
+    --surface: oklch(99% 0.002 286.4);       /* cards, panels */
+    --surface-elevated: oklch(98.5% 0.003 286.4); /* modals, popovers */
+    --surface-muted: oklch(91.9% 0.004 286.3); /* subtle backgrounds, muted areas */
 
     /* --- Text --- */
-    --text: #27272A;                         /* primary text (zinc-800) */
-    --text-secondary: #52525B;               /* secondary text (zinc-600) */
-    --text-muted: #A1A1AA;                   /* placeholder, meta (zinc-400) */
-    --text-inverse: #F4F4F5;                 /* text on dark backgrounds */
+    --text: oklch(27.4% 0.006 286.0);        /* primary text (zinc-800) */
+    --text-secondary: oklch(44.2% 0.017 285.8); /* secondary text (zinc-600) */
+    --text-muted: oklch(70.5% 0.015 286.1);  /* placeholder, meta (zinc-400) */
+    --text-inverse: oklch(96.7% 0.001 286.4); /* text on dark backgrounds */
 
     /* --- Brand Accent (Sunglow) --- */
-    --accent: #FDCB28;                       /* primary brand yellow */
+    --accent: oklch(84.8% 0.166 88.9);       /* primary brand yellow */
     --accent-dim: rgba(253, 203, 40, 0.15);
     --accent-hover: rgba(253, 203, 40, 0.7);
-    --accent-text: #27272A;                  /* text color on accent bg */
+    --accent-text: oklch(27.4% 0.006 286.0); /* text color on accent bg */
 
     /* --- Semantic Status --- */
-    --success: #16A34A;
-    --success-bg: #f0fdf4;
+    --success: oklch(62.7% 0.194 149.2);
+    --success-bg: oklch(98.2% 0.018 155.8);
     --success-dim: rgba(22, 163, 74, 0.12);
-    --warning: #EAB308;
-    --warning-bg: #fefce8;
+    --warning: oklch(79.5% 0.162 86.0);
+    --warning-bg: oklch(98.7% 0.026 102.2);
     --warning-dim: rgba(234, 179, 8, 0.15);
-    --error: #EF4444;
-    --error-bg: #fef2f2;
+    --error: oklch(63.7% 0.208 25.3);
+    --error-bg: oklch(97.1% 0.013 17.4);
     --error-dim: rgba(239, 68, 68, 0.12);
-    --info: #2563EB;
-    --info-bg: #eff6ff;
+    --info: oklch(54.6% 0.215 262.9);
+    --info-bg: oklch(97% 0.014 254.6);
     --info-dim: rgba(37, 99, 235, 0.12);
 
     /* --- Extended Palette (diagram variety) --- */
-    --sunglow-400: #FDCB28;
-    --sunglow-500: #EDAC05;
-    --sunglow-100: #FFF8C2;
-    --de-york-400: #5BCD86;
-    --de-york-600: #26934F;
-    --de-york-100: #E0F8E8;
-    --tangerine-400: #FAA589;
-    --tangerine-500: #F06E43;
-    --tangerine-100: #FEE9E2;
-    --cod-gray-400: #927E81;
-    --cod-gray-600: #655557;
+    --sunglow-400: oklch(84.8% 0.166 88.9);
+    --sunglow-500: oklch(76.7% 0.159 83.8);
+    --sunglow-100: oklch(96.8% 0.083 96.6);
+    --de-york-400: oklch(75.6% 0.147 150.0);
+    --de-york-600: oklch(55% 0.138 149.0);
+    --de-york-100: oklch(95% 0.052 150.0);
+    --tangerine-400: oklch(78.4% 0.106 43.7);
+    --tangerine-500: oklch(66.5% 0.176 38.6);
+    --tangerine-100: oklch(93.6% 0.039 42.4);
+    --cod-gray-400: oklch(59.3% 0.025 13.0);
+    --cod-gray-600: oklch(43.7% 0.023 13.6);
 
     /* --- Borders --- */
-    --border: #E4E4E7;                       /* default border (zinc-200) */
-    --border-strong: #D4D4D8;               /* input borders (zinc-300) */
+    --border: oklch(91.9% 0.004 286.3);     /* default border (zinc-200) */
+    --border-strong: oklch(87.1% 0.006 286.3); /* input borders (zinc-300) */
     --border-subtle: rgba(0, 0, 0, 0.05);   /* very faint separators */
 
     /* --- Shadows (product-console) --- */
@@ -97,22 +102,22 @@
 
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #27272A;
-      --surface: #3F3F46;
-      --surface-elevated: #52525B;
-      --surface-muted: #52525B;
+      --bg: oklch(27.4% 0.006 286.0);
+      --surface: oklch(37% 0.013 285.8);
+      --surface-elevated: oklch(44.2% 0.017 285.8);
+      --surface-muted: oklch(44.2% 0.017 285.8);
 
-      --text: #F4F4F5;
-      --text-secondary: #A1A1AA;
-      --text-muted: #71717A;
-      --text-inverse: #27272A;
+      --text: oklch(96.7% 0.001 286.4);
+      --text-secondary: oklch(70.5% 0.015 286.1);
+      --text-muted: oklch(55.2% 0.016 285.9);
+      --text-inverse: oklch(27.4% 0.006 286.0);
 
-      --accent: #FDCB28;
+      --accent: oklch(84.8% 0.166 88.9);
       --accent-dim: rgba(253, 203, 40, 0.2);
-      --accent-text: #27272A;
+      --accent-text: oklch(27.4% 0.006 286.0);
 
-      --border: #52525B;
-      --border-strong: #71717A;
+      --border: oklch(44.2% 0.017 285.8);
+      --border-strong: oklch(55.2% 0.016 285.9);
       --border-subtle: rgba(255, 255, 255, 0.06);
 
       --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
@@ -301,6 +306,60 @@
     stroke-width: 1.5px !important;
   }
 
+  .mermaid .node.source rect,
+  .mermaid .node.source circle,
+  .mermaid .node.source polygon {
+    fill: color-mix(in srgb, var(--accent) 18%, var(--surface)) !important;
+    stroke: var(--accent) !important;
+  }
+
+  .mermaid .node.validate rect,
+  .mermaid .node.validate circle,
+  .mermaid .node.validate polygon {
+    fill: color-mix(in srgb, var(--info) 14%, var(--surface)) !important;
+    stroke: var(--info) !important;
+  }
+
+  .mermaid .node.build rect,
+  .mermaid .node.build circle,
+  .mermaid .node.build polygon {
+    fill: color-mix(in srgb, var(--tangerine-400) 14%, var(--surface)) !important;
+    stroke: var(--tangerine-400) !important;
+  }
+
+  .mermaid .node.release rect,
+  .mermaid .node.release circle,
+  .mermaid .node.release polygon {
+    fill: color-mix(in srgb, var(--de-york-400) 14%, var(--surface)) !important;
+    stroke: var(--de-york-400) !important;
+  }
+
+  .mermaid .node.gate rect,
+  .mermaid .node.gate circle,
+  .mermaid .node.gate polygon {
+    stroke-width: 2.5px !important;
+  }
+
+  .mermaid .node.failure rect,
+  .mermaid .node.failure circle,
+  .mermaid .node.failure polygon {
+    fill: color-mix(in srgb, var(--error) 16%, var(--surface)) !important;
+    stroke: var(--error) !important;
+  }
+
+  .mermaid .node.success rect,
+  .mermaid .node.success circle,
+  .mermaid .node.success polygon {
+    fill: color-mix(in srgb, var(--success) 14%, var(--surface)) !important;
+    stroke: var(--success) !important;
+  }
+
+  .mermaid .node.critical rect,
+  .mermaid .node.critical circle,
+  .mermaid .node.critical polygon {
+    stroke-width: 3px !important;
+  }
+
   .mermaid .edge-pattern-solid {
     stroke-width: 1.5px !important;
   }
@@ -331,8 +390,8 @@
   .callout {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-left: 3px solid var(--accent);
-    border-radius: 0 10px 10px 0;
+    border-top: 3px solid var(--accent);
+    border-radius: 10px;
     padding: 16px 20px;
     font-size: 13px;
     line-height: 1.6;
@@ -458,8 +517,8 @@
   /* ============ PRINT ============ */
   @media print {
     body {
-      background: #fff;
-      color: #000;
+      background: oklch(98.8% 0.004 92);
+      color: oklch(24% 0.012 70);
       padding: 20px;
     }
 
@@ -473,7 +532,7 @@
       left: 0;
       right: 0;
       border-top: 1px solid #ddd;
-      background: #fff;
+      background: oklch(98.8% 0.004 92);
       padding: 12px 20px;
     }
 
@@ -508,7 +567,7 @@
     </a>
   </header>
 
-  <h1 class="animate" style="--i:0">CI/CD Pipeline</h1>
+  <h1 class="animate" style="--i:0">CI/CD pipeline</h1>
   <p class="subtitle animate" style="--i:1">github actions &rarr; staging &rarr; production</p>
 
   <p class="description animate" style="--i:2">
@@ -525,37 +584,89 @@
     </div>
     <pre class="mermaid">
       graph TD
-        A[Push to main] --> B{Branch?}
-        B -->|main| C[Run Tests]
-        B -->|feature| I[Run Tests]
-        I --> J[Preview Deploy]
-        C --> D[Lint + Type Check]
-        C --> E[Unit Tests]
-        C --> F[Integration Tests]
-        D --> G[Build Docker Image]
-        E --> G
+        subgraph Source[Source control]
+          A[Push to main]
+          B{Branch target?}
+          C[Preview deploy]
+        end
+
+        subgraph Validate[Validation suite]
+          D[Static analysis]
+          E[Unit tests]
+          F[Integration tests]
+          G[Policy checks]
+        end
+
+        subgraph Build[Build artifact]
+          H[Package application]
+          I[Build image]
+          J[Publish artifact]
+        end
+
+        subgraph Release[Release gates]
+          K[Deploy staging]
+          L{Smoke tests pass?}
+          M[Alert owners]
+          N{Production approval?}
+        end
+
+        subgraph Observe[Production observe]
+          O[Deploy production]
+          P[Health checks]
+          Q[Done]
+        end
+
+        A --> B
+        B -->|feature| C
+        B -->|main| D
+        D --> E
+        E --> F
         F --> G
-        G --> H[Deploy to Staging]
-        H --> K{Smoke Tests Pass?}
-        K -->|Yes| L[Manual Approval]
-        K -->|No| M[Alert + Rollback]
-        L --> N[Deploy to Production]
-        N --> O[Health Check]
-        O --> P[Done]
+        G --> H
+        H --> I
+        I --> J
+        J --> K
+        K --> L
+        L -->|No| M
+        L -->|Yes| N
+        N -->|Approved| O
+        O --> P
+        P --> Q
+
+        classDef source stroke-width:2px;
+        classDef validate stroke-width:2px;
+        classDef build stroke-width:2px;
+        classDef release stroke-width:2px;
+        classDef gate stroke-width:3px;
+        classDef failure stroke-width:3px,stroke-dasharray:4 3;
+        classDef success stroke-width:3px;
+        classDef critical stroke-width:4px;
+
+        class A,B,C source;
+        class D,E,F,G validate;
+        class H,I,J build;
+        class K release;
+        class L,N gate;
+        class M failure;
+        class O,P,Q success;
+        class A,B,D,E,F,G,H,I,J,K,L,N,O,P,Q critical;
+
+        linkStyle 0,2,3,4,5,6,7,8,9,10,12,13,14,15 stroke:#CA8A04,stroke-width:3px;
+        linkStyle 11 stroke:#DC2626,stroke-width:3px,stroke-dasharray:6 4;
     </pre>
   </div>
 
   <div class="legend animate" style="--i:4">
-    <div class="legend-item"><div class="legend-swatch" style="background:var(--accent)"></div> Automated step</div>
-    <div class="legend-item"><div class="legend-swatch" style="background:var(--warning)"></div> Decision gate</div>
-    <div class="legend-item"><div class="legend-swatch" style="background:var(--error)"></div> Failure path</div>
-    <div class="legend-item"><div class="legend-swatch" style="background:var(--de-york-400)"></div> Success</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#FEF08A"></div> Critical path</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#FFEDD5"></div> Approval or test gate</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#FEE2E2"></div> Failure branch</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:#DCFCE7"></div> Successful release</div>
   </div>
 
   <div class="callout animate" style="--i:5">
-    <strong>Hand-drawn mode.</strong> This template uses <code>look: 'handDrawn'</code> for a sketchy aesthetic.
-    Switch to <code>look: 'classic'</code> in the Mermaid config for clean, precise lines.
-    The <code>layout: 'elk'</code> engine provides better node positioning for complex graphs —
+    <strong>Classic mode.</strong> This template uses <code>look: 'classic'</code> for clean technical lines.
+    Use hand-drawn mode only when the artifact brief explicitly calls for a whiteboard sketch.
+    The <code>layout: 'elk'</code> engine provides better node positioning for complex graphs;
     it requires the separate <code>@mermaid-js/layout-elk</code> package (imported above). Without it,
     Mermaid silently falls back to dagre.
   </div>
@@ -574,7 +685,7 @@
         </div>
       </div>
       <div class="footer-meta">
-        <span class="footer-generated">Generated with <strong>Ring</strong></span>
+        <span class="footer-generated"><strong>Generated with Ring</strong></span>
         <span class="footer-date"></span>
       </div>
     </div>
@@ -592,10 +703,10 @@
   mermaid.initialize({
     startOnLoad: true,
     theme: 'base',
-    look: 'handDrawn',
+    look: 'classic',
     layout: 'elk',
     themeVariables: {
-      primaryColor: isDark ? '#3F3F46' : '#FFF8C2',
+      primaryColor: isDark ? '#3F3F46' : 'oklch(96.8% 0.083 96.6)',
       primaryBorderColor: isDark ? '#FDCB28' : '#EDAC05',
       primaryTextColor: isDark ? '#F4F4F5' : '#27272A',
       secondaryColor: isDark ? '#2a3a2e' : '#E0F8E8',
@@ -607,7 +718,7 @@
       lineColor: isDark ? '#A1A1AA' : '#52525B',
       fontSize: '16px',
       fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif",
-      noteBkgColor: isDark ? '#3F3F46' : '#FFF8C2',
+      noteBkgColor: isDark ? '#3F3F46' : 'oklch(96.8% 0.083 96.6)',
       noteTextColor: isDark ? '#F4F4F5' : '#27272A',
       noteBorderColor: isDark ? '#FDCB28' : '#EDAC05',
     }

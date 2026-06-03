@@ -109,7 +109,7 @@ categorize_skill() {
         pre-dev-*) echo "Pre-Dev Workflow" ;;
         test-*|*-debugging|condition-*|defense-*|root-cause*) echo "Testing & Debugging" ;;
         *-review|dispatching-*|sharing-*) echo "Collaboration" ;;
-        brainstorm|write-plan|execute-plan|*worktree|subagent-driven*) echo "Planning & Execution" ;;
+        brainstorm|writing-plans|execute-plan|*worktree|subagent-driven*) echo "Planning & Execution" ;;
         using-*|writing-skills|testing-skills*|testing-agents*) echo "Meta Skills" ;;
         *) echo "Other" ;;
     esac

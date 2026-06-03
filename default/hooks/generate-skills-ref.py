@@ -36,7 +36,7 @@ CATEGORIES = {
     "Collaboration": [r"-review$", r"^dispatching-", r"^sharing-"],
     "Planning & Execution": [
         r"^brainstorm$",
-        r"^write-plan$",
+        r"^writing-plans$",
         r"^execute-plan$",
         r"-worktrees$",
         r"^subagent-driven",

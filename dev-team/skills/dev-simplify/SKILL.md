@@ -37,6 +37,39 @@ Supply `hard_constraint` input to override. Must be declared — never auto-infe
 
 ## Dispatch Protocol
 
+### ⛔ STOP-CHECK BEFORE DISPATCH
+
+Before emitting any Task call, count the explorers you intend to launch in this turn.
+- Count MUST equal 6 (or 5 if branch has no commits ahead of main — Task 5 skipped).
+- If your dispatch count diverges → STOP and reconcile against the task table below.
+- No substitutions, no omissions.
+
+### ⛔ MUST NOT trickle-dispatch
+
+All explorers leave in the SAME TURN, before reading any explorer output.
+
+Forbidden sequences:
+- Dispatch explorer 1 → read result → dispatch explorer 2
+- Dispatch a subset → wait → dispatch the rest
+- Dispatch follow-up explorers conditioned on partial output
+- Loop sequentially over the task list
+
+If you find yourself about to dispatch an explorer in a turn AFTER any explorer has already returned a result → STOP. You violated parallel dispatch. Report the violation and mark the phase INCOMPLETE rather than completing the trickle.
+
+### Self-verify after dispatch
+
+After the dispatch turn, verify all scoped Task calls (6, or 5 if Task 5 skipped) were emitted in that single turn. If fewer went out than scoped, the phase did NOT execute correctly. Mark INCOMPLETE and surface the dispatch failure — do NOT silently continue with a partial pool.
+
+### Parallel dispatch — atomic batch
+
+Emit all scoped Task calls (the count established in the STOP-CHECK above — 6 or 5) in a SINGLE TURN, as one atomic batch.
+
+**If your runtime exposes a `multi_tool_use.parallel` wrapper**, use it to dispatch the complete pool in one wrapped invocation. This is the canonical fan-out mechanism on OpenAI-style tool envelopes and on certain Anthropic SDK consumers — naming it explicitly activates parallel emission on runtimes where trickle-dispatch is the default behavior.
+
+**If your runtime emits parallel tool_use blocks natively** (Claude Code with Claude models), `multi_tool_use.parallel` may not be needed — but naming it is harmless and serves as an enforcement anchor.
+
+The STOP-CHECK, anti-trickle, and self-verify guards above remain binding regardless of which mechanism your runtime uses.
+
 Dispatch 6 explorer agents in **parallel** (5 if branch has no commits ahead of main — skip Task 5):
 
 | Task | Agent | Focus |

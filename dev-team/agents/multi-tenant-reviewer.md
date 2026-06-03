@@ -30,6 +30,20 @@ You are a Senior Multi-Tenant Reviewer auditing correct usage of Lerian's `lib-c
 For Go: Read `dev-team/docs/standards/golang/index.md` and load relevant sections per the index's "Load When" descriptions for multi-tenancy, dispatch layer, tenantId propagation, and tenant isolation.
 For TypeScript: Read `dev-team/docs/standards/typescript.md` (single monolith — load relevant `## ` sections per your scope).
 
+## Blocker Criteria
+
+| Situation | Action |
+|-----------|--------|
+| Possible cross-tenant data access | STOP. Flag CRITICAL. Cannot PASS. |
+| Tenant ownership cannot be proven from the diff/context | STOP and return `NEEDS_DISCUSSION` |
+| Finding lacks tenant leak scenario and file:line evidence | Do not report it |
+
+Verdict contract: `PASS` only with zero eligible findings; any eligible issue means `FAIL`; missing context means `NEEDS_DISCUSSION`. Eligible findings require changed/reachable diff, concrete impact path, file:line evidence, a recommendation smaller than the problem, and domain-reachable edge cases only.
+
+## Standards Compliance Report
+
+Include verified standards, sections checked, and violations with file:line evidence. Mark non-applicable sections `N/A` with a reason.
+
 ## When Review Is Not Needed (Skip Triggers)
 
 Emit `VERDICT: PASS` immediately when diff does NOT touch:
@@ -55,14 +69,17 @@ Emit `VERDICT: PASS` immediately when diff does NOT touch:
 | S3 Isolation | `s3.GetS3KeyStorageContext(ctx, key)` — no raw S3 keys |
 | M2M Credentials | `secretsmanager.GetM2MCredentials` per tenant — NEVER env vars |
 | Backward Compat | `MULTI_TENANT_ENABLED=false` → single-tenant mode preserved |
+| Systemplane registration shape | Padrão A only: `ReadLive` keys MUST drop `Reads`/`AssignX`. Detect: `grep -A 5 "RuntimeClass: systemplaneKeyRuntimeClassReadLive" service_systemplane.go` followed by `grep "AssignString:\|AssignBool:\|AssignInt:\|AssignInt64:"` MUST return zero matches. |
+| Systemplane consumer reads | `spClient.GetX(ctx)` only. No `cfg.X` fallback in hot path. No `if singleTenant {…} else {…}` branching. Adapter packages MUST NOT import `lib-systemplane` directly — narrow per-consumer DI interface required. |
+| Systemplane cold-tenant resolution | Either (a) seed migration `000NNN_systemplane_defaults_seed.up.sql` (migration cadence is the convention — anyone editing the registration MUST also update this migration; there is no automated drift guard), OR (b) a `Manager` constructed via `NewManager` (which binds the Manager to the Client internally) once available in the lib version the service consumes (check `go.mod` and the lib CHANGELOG). NON-COMPLIANT if both are missing in MT. |
 
 ## Severity
 
 | Severity | Examples |
 |----------|---------|
-| **CRITICAL** | Missing tenantId filter in DB query, static DB connection bypassing `tmcore.GetPGContext`, shared RabbitMQ connection without per-tenant vhosts, raw Redis/S3 key without tenant prefix, missing `WithServiceAPIKey` or `WithCircuitBreaker` on TM client |
-| **HIGH** | Tenant context missing in background jobs, non-canonical env var name, manual Redis pub/sub client instead of `tmredis.NewTenantPubSubRedisClient` |
-| **MEDIUM** | Logs without tenantId, missing tenant correlation in downstream HTTP calls |
+| **CRITICAL** | Missing tenantId filter in DB query, static DB connection bypassing `tmcore.GetPGContext`, shared RabbitMQ connection without per-tenant vhosts, raw Redis/S3 key without tenant prefix, missing `WithServiceAPIKey` or `WithCircuitBreaker` on TM client, **systemplane consumer with `cfg.X` fallback or ST/MT branching in hot path**, **`ReadLive` registration still carrying `Reads`/`AssignX` (Padrão B)**, **MT systemplane in use without seed migration AND without `Manager` binding** |
+| **HIGH** | Tenant context missing in background jobs, non-canonical env var name, manual Redis pub/sub client instead of `tmredis.NewTenantPubSubRedisClient`, **adapter package importing `lib-systemplane` directly instead of declaring a narrow DI interface** |
+| **MEDIUM** | Logs without tenantId, missing tenant correlation in downstream HTTP calls, **safe-default constants in consumer drifting from registration `DefaultValue`** |
 | **LOW** | Inconsistent tenant variable naming, missing godoc on tenant functions |
 
 **CRITICAL → automatic VERDICT: FAIL.**
@@ -117,8 +134,10 @@ Emit `VERDICT: PASS` immediately when diff does NOT touch:
 | Gate 5.5: M2M Secret Manager | yes/no | COMPLIANT/NON/N/A |
 | Gate 6: RabbitMQ Two-Layer | yes/no | COMPLIANT/NON/N/A |
 
-## What Was Done Well
-- [Specific correct pattern with file:line]
+## Standards Compliance Report
+| Standard | Section | Status | Evidence |
+|----------|---------|--------|----------|
+| [index/module] | [section] | PASS/FAIL/N/A | [file:line or reason] |
 
 ## Next Steps
 [PASS: "No action required." | FAIL: ordered fix list with file:line]

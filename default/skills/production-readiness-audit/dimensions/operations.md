@@ -12,20 +12,20 @@ Audit telemetry and observability implementation for production readiness.
 
 **Ring Standards (Source of Truth):**
 ---BEGIN STANDARDS---
-{INJECTED: "Observability" section from bootstrap.md and "OpenTelemetry with lib-commons" section from sre.md}
+{INJECTED: "Observability" section from bootstrap.md and "OpenTelemetry with lib-observability" section from sre.md}
 ---END STANDARDS---
 
 **Search Patterns:**
 - Files: `**/observability*.go`, `**/telemetry*.go`, `**/handlers.go`
 - Keywords: `NewTrackingFromContext`, `tracer.Start`, `span`, `logger`, `metrics`
-- Standards-specific: `libCommons.NewTrackingFromContext`, `otel`, `OpenTelemetry`
+- Standards-specific: `observability.NewTrackingFromContext`, `otel`, `OpenTelemetry`
 
 **Reference Implementation (GOOD):**
 ```go
 // Handler with proper telemetry
 func (h *Handler) DoSomething(c *fiber.Ctx) error {
     ctx := c.UserContext()
-    logger, tracer, headerID, _ := libCommons.NewTrackingFromContext(ctx)
+    logger, tracer, headerID, _ := observability.NewTrackingFromContext(ctx)
     ctx, span := tracer.Start(ctx, "handler.DoSomething")
     defer span.End()
 
@@ -90,7 +90,7 @@ func initTracerProvider(env string) *trace.TracerProvider {
     default:
         sampler = trace.AlwaysSample()
     }
-    return trace.NewCore threeProvider(trace.WithSampler(sampler))
+    return trace.NewTracerProvider(trace.WithSampler(sampler))
 }
 
 // Custom span attributes for business context
@@ -122,12 +122,12 @@ func (c *Consumer) Handle(msg *Message) error {
 
 // BAD: No sampling configuration (AlwaysSample in production)
 func initTracerProvider() *trace.TracerProvider {
-    return trace.NewCore threeProvider()  // Default: AlwaysSample — 100% of traces stored
+    return trace.NewTracerProvider()  // Default: AlwaysSample — 100% of traces stored
 }
 ```
 
 **Check Against Ring Standards For:**
-1. (HARD GATE) lib-commons NewTrackingFromContext used for telemetry initialization per Ring standards
+1. (HARD GATE) lib-observability NewTrackingFromContext used for telemetry initialization per Ring standards
 2. (HARD GATE) OpenTelemetry integration (not custom tracing) per sre.md
 3. All handlers start spans with descriptive names
 4. Errors recorded to spans before returning
@@ -143,7 +143,7 @@ func initTracerProvider() *trace.TracerProvider {
 
 **Severity Ratings:**
 - CRITICAL: No tracing in handlers (HARD GATE violation per Ring standards)
-- CRITICAL: HARD GATE violation — not using lib-commons for telemetry
+- CRITICAL: HARD GATE violation — not using lib-observability for telemetry
 - HIGH: Errors not recorded to spans
 - HIGH: No trace context propagation in outgoing HTTP requests (downstream services cannot correlate traces — breaks distributed tracing)
 - HIGH: Async message flows break trace continuity (no span links between producer and consumer — message processing appears as disconnected traces)
@@ -463,7 +463,7 @@ Audit logging practices and PII protection for production readiness.
 **Reference Implementation (GOOD):**
 ```go
 // Structured logging with context
-logger, tracer, requestID, _ := libCommons.NewTrackingFromContext(ctx)
+logger, tracer, requestID, _ := observability.NewTrackingFromContext(ctx)
 logger.WithFields(
     "request_id", requestID,
     "user_id", userID,

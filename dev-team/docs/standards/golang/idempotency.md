@@ -30,6 +30,8 @@ This module covers idempotency patterns for transaction APIs.
 
 **MUST implement idempotency:** All APIs that create resources or trigger side effects. This prevents duplicate operations from network retries, client bugs, or user double-clicks. **HARD GATE**
 
+> **Provenance**: Observability packages (`log`, `zap`, `tracing`, `metrics`, `assert`, `runtime`, `redaction`, `constants`) live in `github.com/LerianStudio/lib-observability` as of v1.0.0 — the `lib-commons/v5/commons/{log,zap,opentelemetry,metrics,assert,runtime}` shims are deprecated and MUST NOT be used in new code. Tracing helpers (`HandleSpanError`, `HandleSpanBusinessErrorEvent`) used below are imported from `lib-observability/tracing`.
+
 ### Why This Pattern Is Mandatory
 
 | Problem | Consequence | Solution |
@@ -166,7 +168,7 @@ func GetIdempotencyKeyAndTTL(c *fiber.Ctx, defaultTTLSec int) (string, time.Dura
 // internal/adapters/http/in/transaction.go
 func (handler *TransactionHandler) createTransaction(c *fiber.Ctx, ...) error {
     ctx := c.UserContext()
-    logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)
+    logger, tracer, _, _ := observability.NewTrackingFromContext(ctx)
 
     _, span := tracer.Start(ctx, "handler.create_transaction")
     defer span.End()
@@ -191,7 +193,7 @@ func (handler *TransactionHandler) createTransaction(c *fiber.Ctx, ...) error {
     value, err := handler.Command.CreateOrCheckIdempotencyKey(
         ctxIdempotency, organizationID, ledgerID, key, hash, ttl)
     if err != nil {
-        libOpentelemetry.HandleSpanBusinessErrorEvent(&spanIdempotency,
+        libTracing.HandleSpanBusinessErrorEvent(&spanIdempotency,
             "Error on create or check redis idempotency key", err)
         spanIdempotency.End()
 
@@ -202,7 +204,7 @@ func (handler *TransactionHandler) createTransaction(c *fiber.Ctx, ...) error {
         // Return cached response
         t := transaction.Transaction{}
         if err = json.Unmarshal([]byte(*value), &t); err != nil {
-            libOpentelemetry.HandleSpanError(&spanIdempotency,
+            libTracing.HandleSpanError(&spanIdempotency,
                 "Error to deserialization idempotency transaction json on redis", err)
 
             logger.Errorf("Error to deserialization idempotency transaction json on redis: %v", err)
@@ -244,8 +246,9 @@ import (
     "errors"
     "time"
 
+    observability "github.com/LerianStudio/lib-observability"
     libCommons "github.com/LerianStudio/lib-commons/v5/commons"
-    libOpentelemetry "github.com/LerianStudio/lib-commons/v5/commons/opentelemetry"
+    libTracing "github.com/LerianStudio/lib-observability/tracing"
     "github.com/redis/go-redis/v9"
 )
 
@@ -265,7 +268,7 @@ func (uc *UseCase) CreateOrCheckIdempotencyKey(
     key, hash string,
     ttl time.Duration,
 ) (*string, error) {
-    logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)
+    logger, tracer, _, _ := observability.NewTrackingFromContext(ctx)
 
     ctx, span := tracer.Start(ctx, "command.create_idempotency_key")
     defer span.End()
@@ -283,7 +286,7 @@ func (uc *UseCase) CreateOrCheckIdempotencyKey(
     // Atomic lock acquisition with SetNX
     success, err := uc.RedisRepo.SetNX(ctx, internalKey, "", ttl)
     if err != nil {
-        libOpentelemetry.HandleSpanError(&span,
+        libTracing.HandleSpanError(&span,
             "Error to lock idempotency key on redis failed", err)
 
         logger.Error("Error to lock idempotency key on redis failed:", err.Error())
@@ -299,7 +302,7 @@ func (uc *UseCase) CreateOrCheckIdempotencyKey(
     // Lock exists - check for cached value
     value, err := uc.RedisRepo.Get(ctx, internalKey)
     if err != nil && !errors.Is(err, redis.Nil) {
-        libOpentelemetry.HandleSpanError(&span,
+        libTracing.HandleSpanError(&span,
             "Error to get idempotency key on redis failed", err)
 
         logger.Error("Error to get idempotency key on redis failed:", err.Error())
@@ -331,7 +334,7 @@ func (uc *UseCase) SetValueOnExistingIdempotencyKey(
     t transaction.Transaction,
     ttl time.Duration,
 ) {
-    logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)
+    logger, tracer, _, _ := observability.NewTrackingFromContext(ctx)
 
     ctx, span := tracer.Start(ctx, "command.set_value_idempotency_key")
     defer span.End()
@@ -363,7 +366,7 @@ func (uc *UseCase) SetTransactionIdempotencyMapping(
     transactionID, idempotencyKey string,
     ttl time.Duration,
 ) {
-    logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)
+    logger, tracer, _, _ := observability.NewTrackingFromContext(ctx)
 
     ctx, span := tracer.Start(ctx, "command.set_transaction_idempotency_mapping")
     defer span.End()
@@ -375,7 +378,7 @@ func (uc *UseCase) SetTransactionIdempotencyMapping(
 
     err := uc.RedisRepo.Set(ctx, reverseKey, idempotencyKey, ttl)
     if err != nil {
-        libOpentelemetry.HandleSpanError(&span,
+        libTracing.HandleSpanError(&span,
             "Error setting transaction idempotency mapping in redis", err)
 
         logger.Errorf("Error setting transaction idempotency mapping in redis for transactionID %s: %s",
@@ -607,4 +610,3 @@ Redis SetNX (atomic lock with empty value)
 - [ ] Reverse mapping with `IdempotencyReverseKey` for transaction lookups (if needed)
 
 ---
-

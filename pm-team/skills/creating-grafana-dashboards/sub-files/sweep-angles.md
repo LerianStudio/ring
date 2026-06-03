@@ -40,7 +40,8 @@ empty `primitives` array (do NOT skip the file).
 
 **Explorer Dispatch Prompt Template:**
 
-> Sweep the target repo for counter metric primitives emitted via lib-commons/v5/commons/opentelemetry.
+> Sweep the target repo for counter metric primitives emitted via lib-observability/metrics (canonical) or
+> lib-commons/v5/commons/opentelemetry (deprecated shim — still emits, but flag the import for migration).
 > MUST find every `meter.Int64Counter(...)`, `meter.Float64Counter(...)` constructor call across `internal/`,
 > `cmd/`, and `pkg/`. For each counter, record file:line of the constructor, the metric name string, the
 > unit (default "1" if absent), the description, and every `.Add(...)` increment site with the labels passed.
@@ -85,7 +86,8 @@ empty `primitives` array (do NOT skip the file).
 
 **Explorer Dispatch Prompt Template:**
 
-> Sweep the target repo for histogram metric primitives emitted via lib-commons/v5/commons/opentelemetry.
+> Sweep the target repo for histogram metric primitives emitted via lib-observability/metrics (canonical) or
+> lib-commons/v5/commons/opentelemetry (deprecated shim — still emits, but flag the import for migration).
 > MUST find every `meter.Float64Histogram(...)`, `meter.Int64Histogram(...)` constructor call. For each, record
 > file:line of the constructor, the metric name, the unit (look for `metric.WithUnit("...")`; if absent, infer
 > from the metric name suffix — `_seconds`→s, `_bytes`→By, `_total`→1), the description, the bucket boundaries
@@ -128,7 +130,8 @@ empty `primitives` array (do NOT skip the file).
 
 **Explorer Dispatch Prompt Template:**
 
-> Sweep the target repo for gauge primitives emitted via lib-commons/v5/commons/opentelemetry. MUST find:
+> Sweep the target repo for gauge primitives emitted via lib-observability/metrics (canonical) or
+> lib-commons/v5/commons/opentelemetry (deprecated shim — still emits, but flag the import for migration). MUST find:
 > (a) `meter.Int64UpDownCounter(...)`, `meter.Float64UpDownCounter(...)` — synchronous gauges; (b)
 > `meter.Int64ObservableGauge(...)`, `meter.Float64ObservableGauge(...)` — async observable gauges. For
 > synchronous gauges, find every `.Add(...)` site. For observable gauges, find the registered callback
@@ -172,7 +175,8 @@ empty `primitives` array (do NOT skip the file).
 
 **Explorer Dispatch Prompt Template:**
 
-> Sweep the target repo for trace span primitives emitted via lib-commons/v5/commons/opentelemetry.
+> Sweep the target repo for trace span primitives emitted via lib-observability/tracing (canonical) or
+> lib-commons/v5/commons/opentelemetry (deprecated shim — still emits, but flag the import for migration).
 > MUST find every `tracer.Start(ctx, "name", ...)` call across `internal/`, `cmd/`, `pkg/`. For each
 > span, record file:line of Start, the span name, the SpanKind (look for `trace.WithSpanKind(...)`;
 > default is `SpanKindInternal`), the description (from doc comments above the function or inferred
@@ -191,7 +195,7 @@ empty `primitives` array (do NOT skip the file).
 **Severity:** REQUIRED — log fields drive log panels and log-to-trace correlation.
 
 **Detection Patterns:**
-- `lib-commons/v5/commons/log` logger usage
+- `lib-observability/log` (canonical) or `lib-commons/v5/commons/log` (deprecated shim) logger usage
 - `log.With(zap.String("k", v), ...)` field-attaching call sites
 - Log-level usage distribution: Debug, Info, Warn, Error, Fatal — levels NOT in use are flagged
 - Trace correlation: logs emitted inside a span context auto-correlate; bare logger usage outside spans is flagged
@@ -223,7 +227,8 @@ Top-level summary in same JSON file:
 
 **Explorer Dispatch Prompt Template:**
 
-> Sweep the target repo for structured log emissions via lib-commons/v5/commons/log. MUST find every
+> Sweep the target repo for structured log emissions via lib-observability/log (canonical) or
+> lib-commons/v5/commons/log (deprecated shim — still emits, but flag the import for migration). MUST find every
 > logger call site (`logger.Info(...)`, `logger.Warn(...)`, `logger.Error(...)`, `logger.Debug(...)`,
 > `logger.With(...).Info(...)`, etc.). For each unique field name attached via `With` or appearing as
 > a structured field, record file:line, the field name, the type observed (from the value expression),

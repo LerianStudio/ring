@@ -181,6 +181,7 @@ This directory contains modular Go standards for Lerian Studio. Load only the mo
 |---|---------|--------|
 | 1 | Multi-Tenant Patterns (CONDITIONAL) | [#multi-tenant-patterns-conditional](multi-tenant.md#multi-tenant-patterns-conditional) |
 | 2 | Route-Level Auth-Before-Tenant Ordering (MANDATORY) | [#route-level-auth-before-tenant-ordering-mandatory](multi-tenant.md#route-level-auth-before-tenant-ordering-mandatory) |
+| 27 | Systemplane in MT mode — compliance pattern (MANDATORY) | [#systemplane-in-mt-mode--compliance-pattern-mandatory](multi-tenant.md#systemplane-in-mt-mode--compliance-pattern-mandatory) |
 
 ### Unit Testing (testing-unit.md) - Gate 3
 

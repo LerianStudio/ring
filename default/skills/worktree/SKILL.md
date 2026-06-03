@@ -18,7 +18,7 @@ description: |
 - Repository doesn't use worktrees → use standard branch workflow
 
 ## Sequence
-**Runs before:** ring:write-plan
+**Runs before:** ring:writing-plans
 
 Git worktrees create isolated workspaces sharing the same repository for parallel branch work.
 

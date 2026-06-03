@@ -7,7 +7,7 @@ exact structure. MUST NOT add sections. MUST NOT reorder sections. MUST populate
 section even if empty (use "None detected" placeholders).
 
 ```markdown
-# commons/runtime Sweep Report
+# lib-observability/runtime Sweep Report
 
 **Target:** <absolute path to target repo>
 **Generated:** <ISO-8601 timestamp>
@@ -26,16 +26,17 @@ section even if empty (use "None detected" placeholders).
 | Module path              | <.../v5>          |
 
 **Assessment:** <one-paragraph narrative — e.g., "project is 2 patch releases behind,
-straightforward `go get -u` upgrade; commons/runtime API surface unchanged since pinned
-version" or "project pinned to v4.2.0, v5 migration required before adopting
-HandlePanicValue recommendations below">
+straightforward `go get -u` upgrade; lib-observability/runtime API surface unchanged
+since pinned version" or "project still imports the deprecated lib-commons/v5/commons/runtime
+shim — migrate imports to github.com/LerianStudio/lib-observability/runtime before
+adopting HandlePanicValue recommendations below">
 
 ---
 
 ## Unadopted Features
 
-commons/runtime features added between the pinned version and latest stable that the
-target has not yet adopted:
+lib-observability/runtime features added between the pinned version and latest stable
+that the target has not yet adopted:
 
 | Version | Feature                                        | Classification  | Relevant Finding Angle |
 | ------- | ---------------------------------------------- | --------------- | ---------------------- |
@@ -102,8 +103,8 @@ grouped by severity, CRITICAL first.
 
 MANDATORY: The synthesizer MUST also emit `/tmp/runtime-sweep-tasks.json` — a JSON
 array of tasks shaped for `ring:dev-cycle` consumption. The format matches what
-`ring:dev-refactor` and `ring:using-lib-commons` produce, so the downstream cycle
-doesn't need to special-case runtime sweeps.
+`ring:dev-refactor`, `ring:using-lib-observability`, and `ring:using-lib-commons`
+produce, so the downstream cycle doesn't need to special-case runtime sweeps.
 
 **Task grouping rules:**
 
@@ -125,7 +126,7 @@ doesn't need to special-case runtime sweeps.
 ```json
 {
   "id": "runtime-sweep-001",
-  "title": "Wrap naked goroutines in commons/runtime.SafeGo",
+  "title": "Wrap naked goroutines in lib-observability runtime.SafeGo",
   "severity": "CRITICAL",
   "description": "Target service launches N goroutines via raw `go func()` / `go someFunc(` across the worker and HTTP handler layers. Panics inside these goroutines silently kill the goroutine, stop the work it was responsible for, and surface nothing in logs, metrics, or traces — the service appears healthy while work is silently dropped. Wrap each site in `runtime.SafeGoWithContextAndComponent` (long-lived workers) or `runtime.SafeGoWithContext` (per-request fan-out) with policy `KeepRunning`. This is the single highest-leverage reliability fix in the sweep.",
   "files_affected": [
@@ -157,7 +158,7 @@ subsequent tasks `depends_on` it so fixes emit clean telemetry from their first 
     "id": "runtime-sweep-001",
     "title": "Initialize panic metrics and production mode in bootstrap",
     "severity": "HIGH",
-    "description": "Target service uses commons/runtime but bootstrap never calls runtime.InitPanicMetrics (counter never emits) nor runtime.SetProductionMode (panic values leak verbatim to logs/spans). Land these two calls first so subsequent fixes emit clean telemetry.",
+    "description": "Target service uses lib-observability/runtime (or the lib-commons shim) but bootstrap never calls runtime.InitPanicMetrics (counter never emits) nor runtime.SetProductionMode (panic values leak verbatim to logs/spans). Land these two calls first so subsequent fixes emit clean telemetry.",
     "files_affected": ["cmd/api/main.go:52"],
     "acceptance_criteria": [
       "main.go calls runtime.InitPanicMetrics(tl.MetricsFactory, logger) after telemetry setup",
@@ -171,7 +172,7 @@ subsequent tasks `depends_on` it so fixes emit clean telemetry from their first 
   },
   {
     "id": "runtime-sweep-002",
-    "title": "Wrap naked goroutines in commons/runtime.SafeGo",
+    "title": "Wrap naked goroutines in lib-observability runtime.SafeGo",
     "severity": "CRITICAL",
     "description": "<as above>",
     "files_affected": ["internal/worker/consumer.go:34", "..."],
@@ -187,7 +188,7 @@ subsequent tasks `depends_on` it so fixes emit clean telemetry from their first 
 **Handoff message template** (orchestrator surfaces to user after Phase 4):
 
 ```
-commons/runtime sweep complete. Findings: <N> across <M> of 6 angles.
+lib-observability/runtime sweep complete. Findings: <N> across <M> of 6 angles.
 - CRITICAL: <N>   HIGH: <N>   MEDIUM: <N>   LOW: <N>
 
 Report: /tmp/runtime-sweep-report.md
@@ -203,44 +204,54 @@ first so all subsequent fixes emit metrics from the first run.
 
 # REFERENCE MODE
 
-Sections 1–10 below catalog commons/runtime's API surface, decision trees, patterns,
-and anti-patterns. Read the sections relevant to your current task. Sweep Mode
-explorers receive extracts from these sections as context for their angle.
+Sections 1–10 below catalog lib-observability/runtime's API surface, decision trees,
+patterns, and anti-patterns. Read the sections relevant to your current task. Sweep
+Mode explorers receive extracts from these sections as context for their angle.
 
 ---
 
 ## 1. API Surface
 
-Full catalog of exported symbols in `commons/runtime` (lib-commons latest v5.x).
+Full catalog of exported symbols in `github.com/LerianStudio/lib-observability/runtime`
+(v1.0.0+). All examples below assume `import "github.com/LerianStudio/lib-observability/runtime"`.
+The `runtime.Logger` interface is defined in lib-observability and is satisfied by
+`lib-commons/commons/log.Logger` and the standard `zap`-backed logger Lerian services
+use.
 
 ### Goroutine Launchers
 
 | Symbol | Signature | Purpose | When to Use |
 |---|---|---|---|
-| `SafeGo` | `func(logger log.Logger, goroutineName string, policy PanicPolicy, fn func())` | Launch a goroutine with panic recovery. No ctx, no component label. | Legacy call sites or trivial fire-and-forget where you have no ctx in scope. Prefer the `WithContext` variants when possible. |
-| `SafeGoWithContext` | `func(ctx context.Context, logger log.Logger, goroutineName string, policy PanicPolicy, fn func(context.Context))` | Launch a goroutine that carries the parent ctx. Trace context propagates. | Per-request fan-out inside HTTP handlers, short-lived workers that need cancellation. |
-| `SafeGoWithContextAndComponent` | `func(ctx context.Context, logger log.Logger, component, goroutineName string, policy PanicPolicy, fn func(context.Context))` | Launch with ctx AND a component label. The component label becomes a metric/log/span attribute, making panics attributable. | **Preferred for long-lived workers.** Consumer loops, periodic workers, bootstrap goroutines. |
+| `SafeGo` | `func(logger Logger, name string, policy PanicPolicy, fn func())` | Launch a goroutine with panic recovery. No ctx, no component label. | Legacy call sites or trivial fire-and-forget where you have no ctx in scope. Prefer the `WithContext` variants when possible. |
+| `SafeGoWithContext` | `func(ctx context.Context, logger Logger, name string, policy PanicPolicy, fn func(context.Context))` | Launch a goroutine that carries the parent ctx. Trace context propagates. | Per-request fan-out inside HTTP handlers, short-lived workers that need cancellation. |
+| `SafeGoWithContextAndComponent` | `func(ctx context.Context, logger Logger, component, name string, policy PanicPolicy, fn func(context.Context))` | Launch with ctx AND a component label. The component label becomes a metric/log/span attribute, making panics attributable. | **Preferred for long-lived workers.** Consumer loops, periodic workers, bootstrap goroutines. |
 
 ### Defer-Form Recovery
 
 | Symbol | Signature | Purpose | When to Use |
 |---|---|---|---|
-| `RecoverWithPolicy` | `func(logger log.Logger, component, operation string, policy PanicPolicy)` | Deferred recovery with policy. No ctx — trace context is not captured. | Functions without a ctx in scope (rare). |
-| `RecoverWithPolicyAndContext` | `func(ctx context.Context, logger log.Logger, component, operation string, policy PanicPolicy)` | Deferred recovery with ctx — the active span receives the `panic.recovered` event. | **Preferred.** Any function with ctx in scope. |
+| `RecoverAndLog` | `func(logger Logger, name string)` | Deferred recovery with `KeepRunning` semantics; emits log + trident, no ctx. | Legacy fire-and-forget recovery without a ctx in scope. |
+| `RecoverAndCrash` | `func(logger Logger, name string)` | Deferred recovery with `CrashProcess` semantics; emits trident then re-panics. | Bootstrap/invariant code without a ctx in scope. |
+| `RecoverAndLogWithContext` | `func(ctx context.Context, logger Logger, component, name string)` | Like `RecoverAndLog` but ctx-aware; span receives the `panic.recovered` event. | Functions with ctx in scope where `KeepRunning` is the correct policy. |
+| `RecoverAndCrashWithContext` | `func(ctx context.Context, logger Logger, component, name string)` | Like `RecoverAndCrash` but ctx-aware. | Functions with ctx where continuing past a panic would corrupt state. |
+| `RecoverWithPolicy` | `func(logger Logger, name string, policy PanicPolicy)` | Deferred recovery with explicit policy. No ctx — trace context is not captured. | Functions without a ctx in scope (rare). |
+| `RecoverWithPolicyAndContext` | `func(ctx context.Context, logger Logger, component, name string, policy PanicPolicy)` | Deferred recovery with ctx — the active span receives the `panic.recovered` event. | **Preferred.** Any function with ctx in scope. |
 
 ### Framework-Level Handling
 
 | Symbol | Signature | Purpose | When to Use |
 |---|---|---|---|
-| `HandlePanicValue` | `func(ctx context.Context, logger log.Logger, recoveredValue any, component, operation string)` | Feed a recovered panic value into the trident pipeline. Does not itself recover — it handles the value someone else already recovered. | Framework handlers that recover panics themselves (Fiber `StackTraceHandler`, gRPC interceptors, custom wrappers). |
+| `HandlePanicValue` | `func(ctx context.Context, logger Logger, panicValue any, component, name string)` | Feed a recovered panic value into the trident pipeline. Does not itself recover — it handles the value someone else already recovered. | Framework handlers that recover panics themselves (Fiber `StackTraceHandler`, gRPC interceptors, custom wrappers). |
 
 ### Bootstrap
 
 | Symbol | Signature | Purpose | When to Use |
 |---|---|---|---|
-| `InitPanicMetrics` | `func(factory metrics.Factory, logger log.Logger)` | Register the `panic_recovered_total` counter with the metrics factory. | Once, at bootstrap, after telemetry setup, before any SafeGo launches. |
-| `SetProductionMode` | `func(on bool)` | Toggle production-mode behavior: redact panic values, truncate stack traces to 4096 bytes. | Once, at bootstrap. Pass `cfg.Env == "production"` (or equivalent). |
+| `InitPanicMetrics` | `func(factory *metrics.MetricsFactory, logger ...Logger)` | Register the `panic_recovered_total` counter with the lib-observability `MetricsFactory`. The logger argument is variadic — pass one if you want bootstrap-time warnings logged through your structured logger. | Once, at bootstrap, after telemetry setup, before any SafeGo launches. |
+| `SetProductionMode` | `func(enabled bool)` | Toggle production-mode behavior: redact panic values, truncate stack traces to 4096 bytes. | Once, at bootstrap. Pass `cfg.Env == "production"` (or equivalent). |
+| `IsProductionMode` | `func() bool` | Read the current production-mode flag — primarily for tests asserting bootstrap wiring. | Test scaffolding; rarely used in production code. |
 | `SetErrorReporter` | `func(reporter ErrorReporter)` | Register an external error reporter (Sentry, Bugsnag, etc.) that gets called on every recovered panic. | Once, at bootstrap, if the service uses external error tracking. Optional. |
+| `GetErrorReporter` | `func() ErrorReporter` | Read the currently registered reporter — primarily for tests. | Test scaffolding. |
 
 ### Policy Constants
 
@@ -422,8 +433,8 @@ cancels (shutdown signal, Launcher draining), the ctx propagates, and the gorout
 observes `ctx.Done()` and exits cleanly. Each `SafeGoWithContextAndComponent` call
 spawns a worker under the same derived ctx; `<-ctx.Done()` in the parent blocks until
 shutdown, at which point every child observes cancellation and exits. This is the
-canonical pattern for service-level graceful shutdown using commons/runtime +
-`commons.Launcher`.
+canonical pattern for service-level graceful shutdown using lib-observability/runtime
++ `lib-commons/commons.Launcher` (the Launcher lifecycle still lives in lib-commons).
 
 ### 3.5 Framework integration — Fiber
 
@@ -616,7 +627,7 @@ aggregator; span events can be dropped by a sampling decision; metrics can be mi
 the dashboard query is wrong. By emitting all three, at least one signal reaches the
 operator. Add the optional ErrorReporter callback and you have four independent
 channels — the probability of a panic going unnoticed drops toward zero. This is the
-whole reason `commons/runtime` exists.
+whole reason `lib-observability/runtime` exists.
 ─────────────────────────────────────────────────
 
 ---
@@ -680,7 +691,7 @@ trigger, assert.
 
 ### 5.5 Leak detection alongside
 
-`commons/runtime` does not leak goroutines by itself, but the code that uses it might.
+`lib-observability/runtime` does not leak goroutines by itself, but the code that uses it might.
 Pair panic-recovery tests with `goleak` to catch goroutines that should have exited but
 didn't. See `ring:dev-goroutine-leak-testing` skill for the full pattern.
 
@@ -801,7 +812,7 @@ cascading restart is not.
 
 ## 7. Bootstrap Order
 
-Where `commons/runtime` setup fits in service initialization.
+Where `lib-observability/runtime` setup fits in service initialization.
 
 **Requirements:**
 
@@ -815,7 +826,7 @@ Where `commons/runtime` setup fits in service initialization.
 
 ```
 1. Logger                (zap.New)
-2. Telemetry             (opentelemetry.NewTelemetry + ApplyGlobals)
+2. Telemetry             (tracing.NewTelemetry + ApplyGlobals)
 3. runtime.InitPanicMetrics(tl.MetricsFactory, logger)
 4. runtime.SetProductionMode(cfg.Env == "production")
 5. runtime.SetErrorReporter(reporter)     // optional
@@ -871,9 +882,10 @@ If you want the recovery event to land on a **child** span (e.g., you started a 
 for the goroutine's unit of work), start that span inside `fn` and the recovery will
 still land on the active span at panic time.
 
-### 8.4 Interaction with `commons/assert`
+### 8.4 Interaction with `lib-observability/assert`
 
-Assertions in `commons/assert` return errors — they do not panic. Therefore:
+Assertions in `lib-observability/assert` (formerly `lib-commons/commons/assert`,
+re-exported via shim for back-compat) return errors — they do not panic. Therefore:
 
 - An assertion failure does **not** trigger runtime recovery.
 - The observability of assertions is orthogonal: assertions fire their own trident
@@ -889,8 +901,9 @@ See [ring:using-assert](https://raw.githubusercontent.com/LerianStudio/ring/main
 for the assertion side of the story.
 
 ★ Insight ─────────────────────────────────────
-Together, `commons/runtime` and `commons/assert` cover both invisible-failure modes in
-Go services: panics (the goroutine dies without emission) and silent invariant
+Together, `lib-observability/runtime` and `lib-observability/assert` cover both
+invisible-failure modes in Go services: panics (the goroutine dies without emission)
+and silent invariant
 violations (the function returns an error that no one aggregates). Assertion failures
 are expected-but-suppressed-elsewhere bugs; panic recoveries are unexpected bugs.
 Tracking both as separate metrics lets you distinguish "we're being defensive
@@ -902,23 +915,36 @@ in recovered panics because the underlying code is drifting from its invariants.
 
 ## 9. Breaking Changes
 
-No API-breaking changes in `commons/runtime` across v4.2.0 → v5.x. The Go module
-major-version bump v4 → v5 applies — imports change from
-`github.com/LerianStudio/lib-commons/v4/commons/runtime` to
-`github.com/LerianStudio/lib-commons/v5/commons/runtime`, but function signatures,
-constants, and interface definitions are source-compatible.
+No API-breaking changes in the `runtime` package across the lib-commons v4.2.0 → v5.x
+window or the migration from lib-commons to lib-observability. Function signatures,
+constants, and interface definitions are source-compatible across all three import
+paths.
 
-For the module-path migration (v4 → v5), see
+Import-path migrations to expect when sweeping:
+
+| From                                                            | To                                                          |
+| --------------------------------------------------------------- | ----------------------------------------------------------- |
+| `github.com/LerianStudio/lib-commons/v4/commons/runtime`        | `github.com/LerianStudio/lib-observability/runtime`         |
+| `github.com/LerianStudio/lib-commons/v5/commons/runtime` (shim) | `github.com/LerianStudio/lib-observability/runtime`         |
+
+The lib-commons v5 path still compiles (it re-exports every symbol via type aliases and
+thin wrappers) but is marked `Deprecated:` in its package docs. New code MUST import
+from lib-observability directly; sweeps SHOULD report shim imports as a follow-up
+migration finding so they get cleaned up before lib-commons removes the shim.
+
+For the lib-commons v4 → v5 module-path migration (still relevant for any package that
+hasn't moved to lib-observability), see
 [ring:using-lib-commons Section 15](https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/skills/using-lib-commons/SKILL.md).
 
-New capabilities added in v5.0.x that Phase 2 of a sweep will surface if the target is
-still on v4:
+New capabilities added in the lib-observability v1.0.0 baseline (carried forward from
+lib-commons v5.0.x) that Phase 2 of a sweep will surface if the target is still on v4:
 
 | Version | Addition                                                                      |
 | ------- | ----------------------------------------------------------------------------- |
 | v5.0.0  | `HandlePanicValue` — structured framework-recovery handler (Angle 5 recommends it) |
 | v5.0.0  | Refined `SetProductionMode` behavior — 4096-byte stack cap formalized         |
 | v5.0.x  | Documentation and test hardening (no new symbols)                             |
+| lib-observability v1.0.0 | Package relocated; API surface unchanged                         |
 
 ---
 
@@ -928,9 +954,11 @@ Explicit pointers rather than duplicated content:
 
 | Topic                                                    | Go To                                                                                       |
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| Full lib-commons package catalog                         | `ring:using-lib-commons` Section 1 "Package Catalog"                                        |
+| Canonical home of `runtime` (parent skill)               | `ring:using-lib-observability`                                                              |
+| Full lib-observability package catalog                   | `ring:using-lib-observability` "Package Catalog"                                            |
+| Observability overview (logger, tracing, metrics basics) | `ring:using-lib-observability` "Observability"                                              |
+| Full lib-commons package catalog (App / Launcher / etc.) | `ring:using-lib-commons` Section 1 "Package Catalog"                                        |
 | Full bootstrap sequence snippet (all packages wired)     | `ring:using-lib-commons` Section 2 "Common Initialization Pattern"                          |
-| Observability overview (logger, tracing, metrics basics) | `ring:using-lib-commons` Section 5 "Observability"                                          |
 | Single-angle panic-handling sweep (higher level)         | `ring:using-lib-commons` Angle 15 "Panic handling DIY"                                      |
 | The other half of the invisible-failure story            | `ring:using-assert` (assertion failures, not panics)                                        |
 | Goroutine leak detection (companion to panic testing)    | `ring:dev-goroutine-leak-testing`                                                           |

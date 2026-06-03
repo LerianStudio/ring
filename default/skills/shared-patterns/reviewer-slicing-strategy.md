@@ -68,7 +68,7 @@ These inputs allow the slicer to assess cohesion structurally rather than relyin
 
 ---
 
-## Why All 10 Reviewers on All Slices
+## Why All 9 Reviewers on All Slices
 
 **Key design decision: every reviewer runs on every slice. No "relevant reviewer" routing.**
 
@@ -80,12 +80,12 @@ A security reviewer scanning a migration file might catch a privilege escalation
 
 ### 2. Cross-Cutting Concerns Are Invisible to Routing
 
-Authorization logic might live in middleware (API slice) but depend on database roles defined in migrations (migration slice). A consequences reviewer needs to see both independently to catch the ripple effect. Routing that reviewer to only one slice would miss the cross-cutting dependency.
+Authorization logic might live in middleware (API slice) but depend on database roles defined in migrations (migration slice). Reviewers need independent slice visibility to catch cross-cutting dependencies.
 
 ### 3. Cost Difference Is Negligible
 
-10 reviewers on 1 full diff = 10 calls, each processing N files of context.
-10 reviewers on 3 slices = 30 calls, each processing ~N/3 files of context.
+9 default reviewers on 1 full diff = 9 calls, each processing N files of context.
+9 default reviewers on 3 slices = 27 calls, each processing ~N/3 files of context, plus triggered specialists per slice.
 
 Total tokens processed is roughly equivalent. The per-call cost is lower (smaller context = faster inference, fewer irrelevant tokens). The marginal increase in API calls is offset by better quality per call.
 
@@ -122,7 +122,7 @@ Files are grouped by **semantic theme**, not blindly by directory:
 
 ## How Deduplication Works
 
-When 10 reviewers run on N slices, the same issue might surface multiple times. The consolidation step deduplicates before presenting results:
+When the selected review pool runs on N slices, the same issue might surface multiple times. The consolidation step deduplicates before presenting results:
 
 ### Exact Match Dedup
 
@@ -146,13 +146,13 @@ Dedup removes noise, not signal. Two different reviewers catching the same issue
 
 | Scenario | API Calls | Context per Call | Total Tokens | Review Quality |
 |----------|-----------|-----------------|--------------|---------------|
-| **No slicing** (40-file PR) | 10 | ~40 files each | 10 x FULL | Shallow (noise dilutes signal) |
-| **3 slices** (40-file PR) | 30 | ~13 files each | 30 x (FULL/3) ~ 10 x FULL | Deep (focused context per slice) |
-| **5 slices** (40-file PR) | 50 | ~8 files each | 50 x (FULL/5) ~ 10 x FULL | Deepest (most focused) |
+| **No slicing** (40-file PR) | 9 | ~40 files each | 9 x FULL | Shallow (noise dilutes signal) |
+| **3 slices** (40-file PR) | 27 | ~13 files each | 27 x (FULL/3) ~ 9 x FULL | Deep (focused context per slice) |
+| **5 slices** (40-file PR) | 45 | ~8 files each | 45 x (FULL/5) ~ 9 x FULL | Deepest (most focused) |
 
 **Key insight:** Total tokens processed is approximately constant. We're redistributing the same work into focused chunks, not adding work.
 
-**Slicer overhead (v2):** The adaptive slicer uses a **Sonnet-class model** for reasoning capability (upgraded from Flash/Haiku). Latency target is **< 15 seconds** (up from < 5s in v1). This is justified because the slicer runs **once per review**, and its decision shapes **10 x N downstream reviewer calls**. A better slice/no-slice decision at 15s saves far more than 10s of slicer time when it prevents unnecessary sliced dispatches or avoids context pollution in full-diff mode. Token cost per slicer call is slightly higher, but potentially fewer unnecessary sliced dispatches save downstream tokens when full-diff is actually optimal.
+**Slicer overhead (v2):** The adaptive slicer uses a **Sonnet-class model** for reasoning capability (upgraded from Flash/Haiku). Latency target is **< 15 seconds** (up from < 5s in v1). This is justified because the slicer runs **once per review**, and its decision shapes **9 x N downstream reviewer calls**. A better slice/no-slice decision at 15s saves far more than 10s of slicer time when it prevents unnecessary sliced dispatches or avoids context pollution in full-diff mode. Token cost per slicer call is slightly higher, but potentially fewer unnecessary sliced dispatches save downstream tokens when full-diff is actually optimal.
 
 ---
 
@@ -167,7 +167,7 @@ The slicer runs **after** Mithril completes. Mithril context files are filtered 
 When slicing is active:
 - `implementation_files` passed to each reviewer = the slice's file list, not the full list
 - Git diff is scoped: `git diff [base_sha] [head_sha] -- [slice files...]`
-- All 10 reviewers still dispatch in parallel per slice
+- All 9 default reviewers still dispatch in parallel per slice; triggered specialists join the same batch
 
 ### With Consolidation
 
@@ -192,9 +192,9 @@ The consolidation step (Step 4 of the review skill) merges all slice results bef
 
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
-| "Route only relevant reviewers per slice" | Unexpected findings > efficiency. All 10, all slices. | **Dispatch all 10 on every slice** |
+| "Route only relevant reviewers per slice" | Unexpected findings > efficiency. All defaults, all slices. | **Dispatch all 9 defaults on every slice** |
 | "Skip slicing, reviewers can handle large diffs" | Context pollution degrades quality non-linearly | **Apply adaptive slicer. Respect hard guardrails and cohesion analysis.** |
-| "Slice into 10 themes for maximum focus" | > 5 slices = overhead exceeds benefit | **Merge to stay within 2-5** |
+| "Slice into too many themes for maximum focus" | > 5 slices = overhead exceeds benefit | **Merge to stay within 2-5** |
 | "Separate tests into their own slice" | Reviewers need code + tests together | **Co-locate tests with production code** |
 | "Dedup removes too many findings" | Dedup removes duplicates, not unique findings | **Dedup by file:line + similarity only** |
 | "Cohesion analysis takes too long, just count files" | Volume-only decisions are the old model. Cohesion analysis is mandatory for the 5-39 file range. | **MUST run cohesion analysis for adaptive range. Hard guardrails handle extremes.** |

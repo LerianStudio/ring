@@ -96,6 +96,7 @@ return libHTTP.OK(c, pagination)
 ```
 ```
 
+
 ### Agent 2: Error Framework Auditor
 
 ```prompt
@@ -275,9 +276,9 @@ func RegisterRoutes(protected func(resource, action string) fiber.Router, handle
     if handler == nil {
         return errors.New("handler is nil")
     }
-    protected("resource", "create").Post("/v1/resources", handler.Create)
-    protected("resource", "read").Get("/v1/resources", handler.List)
-    protected("resource", "read").Get("/v1/resources/:id", handler.Get)
+    protected("resources", "create").Post("/v1/resources", handler.Create)
+    protected("resources", "read").Get("/v1/resources", handler.List)
+    protected("resources", "read").Get("/v1/resources/:id", handler.Get)
     return nil
 }
 
@@ -295,13 +296,16 @@ func NewHandler(deps ...interface{}) (*Handler, error) {
 2. (HARD GATE) Centralized route registration per module
 3. Handler constructors validate all dependencies
 4. Consistent URL patterns (v1, kebab-case, plural resources) per Ring conventions
-5. All routes use protected() wrapper (no public endpoints without explicit exemption)
-6. Clear separation: routes.go vs handlers.go per Ring directory structure
+5. Authorization resource names are plural and match the route collection (for example, `/v1/resources` -> `protected("resources", ...)`)
+6. Singular authorization resource names only appear for protected singleton/capability endpoints, with a local comment explaining the exception
+7. All routes use protected() wrapper (no public endpoints without explicit exemption)
+8. Clear separation: routes.go vs handlers.go per Ring directory structure
 
 **Severity Ratings:**
 - CRITICAL: Unprotected routes (missing auth middleware)
 - CRITICAL: HARD GATE violation — project does not follow hexagonal architecture per Ring standards
 - HIGH: Scattered route definitions
+- HIGH: Authorization resource name is singular for a collection route
 - MEDIUM: Handler accepts nil dependencies
 - LOW: Inconsistent URL naming conventions
 
@@ -512,10 +516,10 @@ func ConnectDB(dsn string) (*sql.DB, error) {
     // Custom connection logic duplicating lib-commons/mpostgres
 }
 
-// BAD: Custom telemetry wrapper duplicating lib-commons
+// BAD: Custom telemetry wrapper duplicating lib-observability
 // internal/common/tracing.go
 func StartSpan(ctx context.Context, name string) (context.Context, trace.Span) {
-    // Custom wrapper duplicating lib-commons/NewTrackingFromContext
+    // Custom wrapper duplicating lib-observability/NewTrackingFromContext
 }
 
 // BAD: Missing lib-commons entirely
@@ -534,7 +538,7 @@ func StartSpan(ctx context.Context, name string) (context.Context, trace.Span) {
 
 **Severity Ratings:**
 - CRITICAL: lib-commons not in go.mod (HARD GATE violation per Ring standards)
-- CRITICAL: Custom utilities duplicating lib-commons functionality (HARD GATE violation)
+- CRITICAL: Custom utilities duplicating lib-commons or lib-observability functionality (HARD GATE violation)
 - HIGH: Framework versions below Ring minimum requirements
 - MEDIUM: Using alternative libraries for functionality covered by Ring stack
 - LOW: Minor version discrepancies
@@ -1453,4 +1457,3 @@ async function fetchData(url: string): Promise<Response> {
 1. ...
 ```
 ```
-

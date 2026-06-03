@@ -95,7 +95,7 @@ Orchestrator executes directly. Detect in parallel:
 2. lib-streaming:       grep "lib-streaming" go.mod
 3. HTTP framework:      grep -rn "gofiber/fiber\|labstack/echo\|gin-gonic" internal/ go.mod
 4. gRPC server:         grep -rn "grpc.NewServer" internal/
-5. RabbitMQ consumers:  grep -rn "lib-commons/v5/commons/rabbitmq" internal/
+5. RabbitMQ command consumers:  grep -rn "lib-commons/v5/commons/rabbitmq" internal/   # command-queue plumbing; eventable publish sites should migrate to lib-streaming
 6. Scheduled jobs:      grep -rn "robfig/cron\|time.NewTicker" internal/
 7. Webhook receivers:   grep -rn "webhook\|/hooks/" internal/
 8. Worker patterns:     grep -rn "commons.Launcher\|commons.App" internal/
@@ -133,6 +133,39 @@ Dispatch `ring:codebase-explorer` with Pass 1 output to produce `docs/streaming/
 **HARD GATE:** If post-fence count = 0 across all segments → STOP and surface to user.
 
 ## Gate 3: Pass 3 — Mark (Parallel)
+
+### ⛔ STOP-CHECK BEFORE DISPATCH
+
+Before emitting any Task call, count the explorers you intend to launch in this turn.
+- Count MUST equal the number of segments identified in Gate 2.
+- If your dispatch count diverges from the Gate 2 segment count → STOP and reconcile.
+- One explorer per segment. No substitutions, no omissions.
+
+### ⛔ MUST NOT trickle-dispatch
+
+All segment explorers leave in the SAME TURN, before reading any explorer output.
+
+Forbidden sequences:
+- Dispatch segment 1 → read result → dispatch segment 2
+- Dispatch a subset → wait → dispatch the rest
+- Dispatch follow-up explorers conditioned on partial output
+- Loop sequentially over the segment list
+
+If you find yourself about to dispatch an explorer in a turn AFTER any explorer has already returned a result → STOP. You violated parallel dispatch. Report the violation and mark the gate INCOMPLETE rather than completing the trickle.
+
+### Self-verify after dispatch
+
+After the dispatch turn, verify all segment Task calls were emitted in that single turn. If fewer went out than the Gate 2 segment count, the gate did NOT execute correctly. Mark INCOMPLETE and surface the dispatch failure — do NOT silently continue with a partial pool.
+
+### Parallel dispatch — atomic batch
+
+Emit all scoped Task calls (the count established in the STOP-CHECK above) in a SINGLE TURN, as one atomic batch.
+
+**If your runtime exposes a `multi_tool_use.parallel` wrapper**, use it to dispatch the complete pool in one wrapped invocation. This is the canonical fan-out mechanism on OpenAI-style tool envelopes and on certain Anthropic SDK consumers — naming it explicitly activates parallel emission on runtimes where trickle-dispatch is the default behavior.
+
+**If your runtime emits parallel tool_use blocks natively** (Claude Code with Claude models), `multi_tool_use.parallel` may not be needed — but naming it is harmless and serves as an enforcement anchor.
+
+The STOP-CHECK, anti-trickle, and self-verify guards above remain binding regardless of which mechanism your runtime uses.
 
 For EACH segment from Gate 2, dispatch `ring:codebase-explorer` IN PARALLEL. Each outputs `docs/streaming/_pass3-{segment_name}.json`.
 

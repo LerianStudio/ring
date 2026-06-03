@@ -2,7 +2,7 @@
 //   - latencyHeatmap: distribution heatmap (best signal for outlier patterns)
 //   - latencyQuantiles: time-series of p50/p95/p99 (best for SLO tracking)
 //
-// Both work on histograms emitted via lib-commons opentelemetry's
+// Both work on histograms emitted via lib-observability tracing's
 // meter.Float64Histogram. Suffix the base name with _bucket for histogram_quantile.
 
 local g = import 'github.com/grafana/grafonnet/gen/grafonnet-latest/main.libsonnet';

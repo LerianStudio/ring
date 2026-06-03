@@ -32,7 +32,7 @@ When producing a Standards Compliance report (used by ring:dev-refactor workflow
 | Config Struct | `Config` struct with `env` tags | Single struct with `env` tags | ✅ Compliant | `internal/bootstrap/config.go:15` |
 | Config Loading | `libCommons.SetConfigFromEnvVars(&cfg)` | `libCommons.SetConfigFromEnvVars(&cfg)` | ✅ Compliant | `internal/bootstrap/config.go:42` |
 | Logger Init | `libZap.InitializeLogger()` | `libZap.InitializeLogger()` (bootstrap only) | ✅ Compliant | `internal/bootstrap/config.go:45` |
-| Telemetry Init | `libOpentelemetry.InitializeTelemetry()` | `libOpentelemetry.InitializeTelemetry()` | ✅ Compliant | `internal/bootstrap/config.go:48` |
+| Telemetry Init | `libOpentelemetry.NewTelemetry()` | `libOpentelemetry.NewTelemetry()` | ✅ Compliant | `internal/bootstrap/config.go:48` |
 | ... | ... | ... | ✅ Compliant | ... |
 
 #### Context & Tracking
@@ -88,18 +88,19 @@ No migration actions required. All categories verified against Lerian/Ring Go St
 
 2. **Logger Migration**
    - Replace: Custom logger or `log.Println()`
-   - With: lib-commons structured logger
-   - Bootstrap import: `libZap "github.com/LerianStudio/lib-commons/v5/commons/zap"` (initialization)
-   - Application import: `libLog "github.com/LerianStudio/lib-commons/v5/commons/log"` (interface for logging calls)
-   - Bootstrap usage: `logger := libZap.InitializeLogger()` (returns `libLog.Logger` interface)
+   - With: lib-observability structured logger
+   - Provenance: Observability packages (`log`, `zap`, `tracing`, `metrics`, `assert`, `runtime`, `redaction`, `constants`) live in `github.com/LerianStudio/lib-observability` as of v1.0.0 — the `lib-commons/v5/commons/{log,zap,opentelemetry,metrics,assert,runtime}` shims are deprecated and MUST NOT be used in new code.
+   - Bootstrap import: `libZap "github.com/LerianStudio/lib-observability/zap"` (initialization)
+   - Application import: `libLog "github.com/LerianStudio/lib-observability/log"` (interface for logging calls)
+   - Bootstrap usage: `logger, err := libZap.New(libZap.Config{Environment, Level, OTelLibraryName})` (returns `*libZap.Logger` which implements `libLog.Logger`)
    - Application usage: Use `libLog.Logger` interface for all logging calls
    - Files affected: [list files]
 
 3. **Telemetry Migration**
    - Replace: No tracing or custom tracing
-   - With: OpenTelemetry integration
-   - Import: `libOpentelemetry "github.com/LerianStudio/lib-commons/v5/commons/opentelemetry"`
-   - Usage: `telemetry := libOpentelemetry.InitializeTelemetry(&libOpentelemetry.TelemetryConfig{...})`
+   - With: OpenTelemetry integration via lib-observability
+   - Import: `libTracing "github.com/LerianStudio/lib-observability/tracing"`
+   - Usage: `telemetry, err := libTracing.NewTelemetry(libTracing.TelemetryConfig{..., Logger: logger})`
    - Files affected: [list files]
 
 4. **[Next Category] Migration**
@@ -124,7 +125,7 @@ Before submitting Go code, verify:
 - [ ] Configuration loaded via `SetConfigFromEnvVars`
 - [ ] Telemetry initialized and middleware configured
 - [ ] Logger/tracer recovered from context via `NewTrackingFromContext`
-- [ ] **No direct imports of `go.opentelemetry.io/otel/*` packages** (use lib-commons wrappers)
+- [ ] **No direct imports of `go.opentelemetry.io/otel/*` packages** (use lib-observability helpers)
 - [ ] **No direct Fiber responses** (`c.JSON()`, `c.Send()`) - use `libHTTP.OK()`, `libHTTP.WithError()`
 - [ ] All errors are checked and wrapped with context
 - [ ] Error codes use service prefix (e.g., PLT-0001)

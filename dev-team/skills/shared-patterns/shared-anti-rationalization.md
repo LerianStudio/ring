@@ -66,10 +66,10 @@ These rationalizations are always wrong, regardless of context:
 |-----------------|----------------|-----------------|
 | "Trivial change, skip review" | Security vulnerabilities fit in 1 line. all changes require review. | **Review all changes** |
 | "Only N lines changed" | Line count is irrelevant. SQL injection is 1 line. | **Review all changes** |
-| "One reviewer is enough" | 10 reviewers catch different issues. All required. | **Dispatch all 10 reviewers** |
-| "Run reviewers sequentially" | Sequential = 10x slower. Parallel is REQUIRED. | **Single message, 10 Task calls** |
+| "One reviewer is enough" | 9 default reviewers catch different issues, and stack specialists catch conditional risks. All selected reviewers are required. | **Dispatch all 9 defaults plus triggered specialists** |
+| "Run reviewers sequentially" | Sequential review is slower and loses atomicity. Parallel is REQUIRED. | **Single message with the selected review pool** |
 | "Only MEDIUM issues, can proceed" | MEDIUM = Fix NOW. No deferral, no FIXME. | **Fix MEDIUM issues** |
-| "Small fix, no re-review needed" | Small fixes can have big impacts. | **Re-run all 10 reviewers after any fix** |
+| "Small fix, no re-review needed" | Small fixes can have big impacts. | **Re-run the selected review pool after any fix** |
 
 ---
 

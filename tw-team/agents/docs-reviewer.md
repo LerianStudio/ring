@@ -124,10 +124,6 @@ Brief overview of documentation quality and main findings.
 ### Low Priority
 [Same format]
 
-## What Was Done Well
-- Positive aspect 1
-- Positive aspect 2
-
 ## Next Steps
 1. Prioritized action item 1
 2. Prioritized action item 2

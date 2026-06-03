@@ -1,8 +1,28 @@
-# CSS Patterns for Diagrams
+# CSS patterns for diagrams
 
-All color tokens, typography, and base styles are defined in `../templates/standard.html`. This reference shows reusable CSS patterns that build ON TOP of the standard foundation. When using these patterns, the standard template's `:root` variables are already available — reference them directly.
+All color tokens, typography, and base styles are defined in `../templates/standard.html`. This reference shows reusable CSS patterns that build ON TOP of the standard foundation. When using these patterns, the standard template's `:root` variables are already available; reference them directly.
 
-## Theme Setup
+CSS patterns are low-level styling and layout references. For assembled semantic primitives such as summaries, legends, findings, rails, matrices, and evidence blocks, use `components.md`.
+
+## Start from story, not cards
+
+Do not begin with a grid of cards. Begin with the artifact brief: audience, physical scene, source facts, entities, relationships, hierarchy, one-sentence message, and non-invention boundary. Cards are a last-mile component, not an information architecture.
+
+Default stance:
+- Build a trustworthy product surface for technical judgment.
+- Choose one physical-scene metaphor tied to the work: review desk, release control room, ledger workbench, incident war room, architecture map table, migration checklist, or operations console.
+- Use restrained product color unless the source data earns richer color.
+- Treat color as meaning, not decoration.
+
+Do not use:
+- Side-stripe accents. They are cheap salience and collapse every component into the same visual trick.
+- Glassmorphism by default. Use solid product surfaces unless the scene explicitly needs layered overlays.
+- Gradient text. It is poster behavior, not judgment-interface behavior.
+- Identical card grids. Change density, grouping, size, and hierarchy according to the content.
+- Radial-gradient-only atmosphere. Atmosphere must support a physical scene, not compensate for weak structure.
+- Hero metrics unless the metric exists in the source data and deserves priority.
+
+## Theme setup
 
 The standard template (`../templates/standard.html`) defines both light and dark palettes via custom properties. You do NOT need to redefine the core tokens. For diagram-specific needs, add semantic aliases that map to the standard palette:
 
@@ -39,9 +59,9 @@ The standard template (`../templates/standard.html`) defines both light and dark
 }
 ```
 
-## Background Atmosphere
+## Background atmosphere
 
-Flat backgrounds feel dead. Use subtle gradients or patterns built on the standard palette.
+Flat backgrounds feel dead, but a radial glow alone is not design. Use subtle gradients or patterns built on the standard palette and tied to the physical scene.
 
 ```css
 /* Radial glow behind focal area */
@@ -75,7 +95,203 @@ body {
 }
 ```
 
-## Section / Node Cards
+## Visual story patterns
+
+### Summary band
+
+CSS implementation for the summary band primitive defined in `components.md`. Intent, source requirements, and accessibility rules live there; this section only provides surface, spacing, and responsive layout.
+
+```css
+.summary-band {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(220px, 0.6fr);
+  gap: 18px;
+  align-items: stretch;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: 22px;
+}
+
+.summary-band__message {
+  font-size: 18px;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.summary-band__evidence {
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 760px) {
+  .summary-band { grid-template-columns: 1fr; }
+}
+```
+
+### Decision rail
+
+CSS implementation for the decision rail primitive defined in `components.md`. Use that reference for intent, source requirements, and ordered-list accessibility; use this section for spacing and marker styling.
+
+```css
+.decision-rail {
+  display: grid;
+  gap: 10px;
+}
+
+.decision-item {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+.decision-item__mark {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  background: var(--accent-dim);
+  color: var(--accent-text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+}
+```
+
+### Swimlane canvas
+
+CSS implementation for swimlane primitives defined in `components.md`. Use that reference for intent, source requirements, lane headings, and accessibility; use this section for canvas layout.
+
+```css
+.swimlane-canvas {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 14px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.swimlane {
+  min-width: 0;
+  background: color-mix(in srgb, var(--surface) 86%, var(--surface-muted) 14%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px;
+}
+
+.swimlane__title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+```
+
+### Evidence block
+
+CSS implementation for the evidence block and source excerpt primitives defined in `components.md`. Use that reference for intent, source requirements, quotation rules, and accessibility; use this section for proof-panel styling.
+
+```css
+.evidence-block {
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  font-size: 13px;
+}
+
+.evidence-block__source {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+```
+
+### Comparison matrix
+
+CSS implementation for the comparison matrix primitive defined in `components.md`. Use that reference for intent, source requirements, semantic table structure, and accessibility; use this section for table styling.
+
+```css
+.comparison-matrix {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.comparison-matrix th,
+.comparison-matrix td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.comparison-matrix tr:last-child td { border-bottom: 0; }
+```
+
+### Timeline spine
+
+CSS implementation for timeline primitives defined in `components.md`. Use that reference for intent, source requirements, date handling, and accessibility; use this section for the spine and item styling.
+
+```css
+.timeline-spine {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  padding-left: 24px;
+}
+
+.timeline-spine::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 8px;
+  width: 2px;
+  background: var(--border);
+}
+
+.timeline-item {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  top: 18px;
+  left: -22px;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--bg);
+}
+```
+
+## Section / node cards
 
 The fundamental building block. A colored card representing a system component, pipeline step, or data entity. The standard template provides `.card` and `.card-elevated` base classes. These patterns extend them for diagram-specific use.
 
@@ -88,14 +304,14 @@ The fundamental building block. A colored card representing a system component, 
   position: relative;
 }
 
-/* Colored accent border (left or top) */
+/* Colored top accent for semantic emphasis */
 .node--accent-a {
-  border-left: 3px solid var(--node-a);
+  border-top: 3px solid var(--node-a);
 }
 
 /* --- Depth tiers: vary card depth to signal importance --- */
 
-/* Elevated: KPIs, key sections, anything that should pop */
+/* Elevated: source-backed counts, key sections, anything that should pop */
 .node--elevated {
   background: var(--surface-elevated);
   box-shadow: var(--shadow-md);
@@ -108,20 +324,14 @@ The fundamental building block. A colored card representing a system component, 
   border-color: var(--border);
 }
 
-/* Hero: executive summaries, focal elements — demands attention */
+/* Hero: executive summaries, focal elements that demand attention */
 .node--hero {
   background: color-mix(in srgb, var(--surface) 92%, var(--accent) 8%);
   box-shadow: var(--shadow-lg);
   border-color: color-mix(in srgb, var(--border) 50%, var(--accent) 50%);
 }
 
-/* Glass: special-occasion overlay effect (use sparingly) */
-.node--glass {
-  background: color-mix(in srgb, var(--surface) 60%, transparent 40%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-color: rgba(255, 255, 255, 0.1);
-}
+/* Avoid default glass effects. Use solid product surfaces unless the physical scene requires overlay layers. */
 
 /* Section label (monospace, uppercase, small) */
 .node__label {
@@ -147,7 +357,7 @@ The fundamental building block. A colored card representing a system component, 
 }
 ```
 
-## Overflow Protection
+## Overflow protection
 
 Grid and flex children default to `min-width: auto`, which prevents them from shrinking below their content width. Long text, inline code badges, and non-wrapping elements will blow out containers.
 
@@ -193,7 +403,7 @@ Using `display: flex` on a list item to position a `::before` marker creates an 
 Use absolute positioning for markers instead:
 
 ```css
-/* WRONG — causes overflow with inline code badges */
+/* WRONG: causes overflow with inline code badges */
 li {
   display: flex;
   align-items: baseline;
@@ -204,7 +414,7 @@ li::before {
   flex-shrink: 0;
 }
 
-/* RIGHT — text wraps normally */
+/* RIGHT: text wraps normally */
 li {
   padding-left: 14px;
   position: relative;
@@ -216,7 +426,7 @@ li::before {
 }
 ```
 
-## Mermaid Zoom Controls
+## Mermaid zoom controls
 
 Mermaid diagrams are often too small to read comfortably, especially complex flowcharts and sequence diagrams. Add zoom controls to every `.mermaid-wrap` container.
 
@@ -369,9 +579,9 @@ document.querySelectorAll('.mermaid-wrap').forEach(function(wrap) {
 
 Scroll-to-zoom requires Ctrl/Cmd+scroll to avoid hijacking normal page scroll. Click-and-drag panning activates only when zoomed in (zoom > 1). Cursor changes to `grab`/`grabbing` to signal the behavior. The zoom range is capped at 0.3x-5x.
 
-## Grid Layouts
+## Grid layouts
 
-### Architecture Diagram (2-column with sidebar)
+### Architecture diagram (2-column with sidebar)
 ```css
 .arch-grid {
   display: grid;
@@ -419,7 +629,10 @@ Scroll-to-zoom requires Ctrl/Cmd+scroll to avoid hijacking normal page scroll. C
 }
 ```
 
-### Card Grid (dashboard / metrics)
+### Content-weighted grid
+
+Use a grid only after the story shape is known. Vary span, density, and grouping by importance; do not create identical cards because the data is mildly list-shaped.
+
 ```css
 .card-grid {
   display: grid;
@@ -428,7 +641,7 @@ Scroll-to-zoom requires Ctrl/Cmd+scroll to avoid hijacking normal page scroll. C
 }
 ```
 
-### Data Tables
+### Data tables
 
 Use real `<table>` elements for tabular data. The standard template provides base `.data-table` styles. These patterns extend them for diagram-specific needs. Wrap in a scrollable container for wide tables.
 
@@ -505,7 +718,7 @@ Use real `<table>` elements for tabular data. The standard template provides bas
 }
 ```
 
-#### Status Indicators
+#### Status indicators
 
 Styled spans for match/gap/warning states. Never use emoji.
 
@@ -562,7 +775,7 @@ Usage in table cells:
 <td><span class="status status--warn">Partial</span></td>
 ```
 
-#### Table Summary Row
+#### Table summary row
 
 For totals, counts, or aggregate status at the bottom:
 
@@ -577,7 +790,7 @@ For totals, counts, or aggregate status at the bottom:
 }
 ```
 
-#### Sticky First Column (for very wide tables)
+#### Sticky first column (for very wide tables)
 
 ```css
 .data-table th:first-child,
@@ -595,7 +808,7 @@ For totals, counts, or aggregate status at the bottom:
 
 ## Connectors
 
-### CSS Arrow (vertical, between stacked sections)
+### CSS arrow (vertical, between stacked sections)
 ```css
 .flow-arrow {
   display: flex;
@@ -625,7 +838,7 @@ Down arrow SVG (reuse inline):
 <svg viewBox="0 0 20 20"><path d="M10 4 L10 16 M6 12 L10 16 L14 12"/></svg>
 ```
 
-### CSS Arrow (horizontal, between inline steps)
+### CSS arrow (horizontal, between inline steps)
 Use `::after` or a literal arrow character:
 ```css
 .h-arrow::after {
@@ -636,7 +849,7 @@ Use `::after` or a literal arrow character:
 }
 ```
 
-### SVG Curved Connector (between arbitrary nodes)
+### SVG curved connector (between arbitrary nodes)
 For connections that aren't simple vertical/horizontal, use an absolutely positioned SVG overlay:
 ```html
 <svg class="connectors" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;">
@@ -652,7 +865,7 @@ Position the parent container as `position: relative` to scope the SVG overlay.
 
 The standard template provides the base `fadeUp` keyframe and the `.animate` utility class. These additional patterns extend the animation toolkit.
 
-### Staggered Fade-In on Load
+### Staggered fade-in on load
 
 The standard template defines `fadeUp` and `.animate` with `--i` stagger. For diagram-specific node animations:
 
@@ -673,7 +886,7 @@ Set `--i` per element in the HTML to control stagger order:
 <div class="node" style="--i: 2">Third</div>
 ```
 
-### Hover Lift
+### Hover lift
 ```css
 .node {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -685,7 +898,7 @@ Set `--i` per element in the HTML to control stagger order:
 }
 ```
 
-### Scale-Fade (for KPI cards, badges, status indicators)
+### Scale-fade (for source-backed counts, badges, status indicators)
 
 ```css
 @keyframes fadeScale {
@@ -693,13 +906,13 @@ Set `--i` per element in the HTML to control stagger order:
   to { opacity: 1; transform: scale(1); }
 }
 
-.kpi-card {
+.source-count {
   animation: fadeScale 0.35s ease-out both;
   animation-delay: calc(var(--i, 0) * 0.06s);
 }
 ```
 
-### SVG Draw-In (for connectors, progress rings, path elements)
+### SVG draw-in (for connectors, progress rings, path elements)
 
 ```css
 @keyframes drawIn {
@@ -715,7 +928,7 @@ Set `--i` per element in the HTML to control stagger order:
 }
 ```
 
-### CSS Counter (for hero numbers without JS)
+### CSS counter (for source-backed counts without JS)
 
 Uses `@property` to animate a custom property as an integer, then display it via `counter()`. No JS required. Falls back to showing the final value immediately in browsers without `@property` support.
 
@@ -730,13 +943,13 @@ Uses `@property` to animate a custom property as an integer, then display it via
   to { --count: var(--target); }
 }
 
-.kpi-card__value--animated {
-  --target: 247;
+.source-count__value--animated {
+  --target: var(--source-count-total);
   counter-reset: val var(--count);
   animation: countUp 1.2s ease-out forwards;
 }
 
-.kpi-card__value--animated::after {
+.source-count__value--animated::after {
   content: counter(val);
 }
 ```
@@ -745,13 +958,13 @@ Uses `@property` to animate a custom property as an integer, then display it via
 
 Don't use the same animation for everything. Mix types by element role, with easing stagger (fast-then-slow, not linear):
 
-- **Cards**: `fadeUp` — the default entrance, reliable and subtle
-- **KPI / badges**: `fadeScale` — scale draws the eye to important numbers
-- **SVG connectors**: `drawIn` — reveals flow direction, pairs with card stagger
-- **Hero numbers**: `countUp` — counting motion signals "this number matters"
+- **Cards**: `fadeUp`, the default entrance, reliable and subtle
+- **Source-backed counts / badges**: `fadeScale`, scale draws the eye to important numbers
+- **SVG connectors**: `drawIn`, reveals flow direction, pairs with card stagger
+- **Source-backed numbers**: `countUp`, counting motion signals "this number matters"
 - **Stagger timing**: `calc(var(--i) * 0.06s)` with lower `--i` values on important elements so they appear first
 
-### Respect Reduced Motion
+### Respect reduced motion
 
 The standard template already includes the global reduced-motion override. If you need it in a standalone context:
 
@@ -765,7 +978,7 @@ The standard template already includes the global reduced-motion override. If yo
 }
 ```
 
-## Sparklines and Simple Charts (Pure SVG)
+## Sparklines and simple charts (pure SVG)
 
 For simple inline visualizations without a library:
 
@@ -782,7 +995,7 @@ For simple inline visualizations without a library:
 </div>
 ```
 
-## Responsive Breakpoint
+## Responsive breakpoint
 
 The standard template includes base responsive overrides. For diagram-specific layouts:
 
@@ -794,7 +1007,7 @@ The standard template includes base responsive overrides. For diagram-specific l
 }
 ```
 
-## Badges and Tags
+## Badges and tags
 
 The standard template provides `.badge`, `.badge-success`, `.badge-warning`, `.badge-error`, `.badge-info`, `.badge-accent`, and `.badge-neutral`. For diagram-specific compact tags:
 
@@ -810,7 +1023,7 @@ The standard template provides `.badge`, `.badge-success`, `.badge-warning`, `.b
 }
 ```
 
-## Lists Inside Nodes
+## Lists inside nodes
 
 For tool listings, feature lists, table columns:
 
@@ -846,18 +1059,18 @@ For tool listings, feature lists, table columns:
 }
 ```
 
-## KPI / Metric Cards
+## Source-backed metric cells
 
-Large hero number with trend indicator and label. For dashboards, review summaries, and impact sections.
+Compact metric cells with trend indicator and label. Use only when the number exists in the source data and supports the artifact's decision. Do not fabricate totals to fill a row.
 
 ```css
-.kpi-row {
+.metric-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 16px;
 }
 
-.kpi-card {
+.metric-cell {
   background: var(--surface-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -865,7 +1078,7 @@ Large hero number with trend indicator and label. For dashboards, review summari
   box-shadow: var(--shadow-sm);
 }
 
-.kpi-card__value {
+.metric-cell__value {
   font-size: 36px;
   font-weight: 700;
   letter-spacing: -1px;
@@ -873,7 +1086,7 @@ Large hero number with trend indicator and label. For dashboards, review summari
   font-variant-numeric: tabular-nums;
 }
 
-.kpi-card__label {
+.metric-cell__label {
   font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 600;
@@ -883,32 +1096,32 @@ Large hero number with trend indicator and label. For dashboards, review summari
   margin-top: 6px;
 }
 
-.kpi-card__trend {
+.metric-cell__trend {
   font-family: var(--font-mono);
   font-size: 12px;
   margin-top: 4px;
 }
 
-.kpi-card__trend--up { color: var(--success); }
-.kpi-card__trend--down { color: var(--error); }
+.metric-cell__trend--up { color: var(--success); }
+.metric-cell__trend--down { color: var(--error); }
 ```
 
 ```html
-<div class="kpi-row">
-  <div class="kpi-card">
-    <div class="kpi-card__value">247</div>
-    <div class="kpi-card__label">Lines Added</div>
-    <div class="kpi-card__trend kpi-card__trend--up">+34%</div>
+<div class="metric-row">
+  <div class="metric-cell">
+    <div class="metric-cell__value">SOURCE_COUNT</div>
+    <div class="metric-cell__label">Source-backed label</div>
+    <div class="metric-cell__trend metric-cell__trend--up">SOURCE_DELTA</div>
   </div>
-  <!-- ... more cards -->
+  <!-- Add only source-backed metrics. -->
 </div>
 ```
 
-## Before / After Panels
+## Before / after panels
 
-> **⛔ DEPRECATED for diff views:** These CSS patterns are superseded by `@pierre/diffs` (see `./libraries.md`). MUST use `@pierre/diffs` for all code diff/review visualizations. These patterns are ONLY retained for non-diff before/after comparisons (e.g., configuration comparisons, text comparisons without syntax highlighting). For code diffs, `@pierre/diffs` provides superior syntax highlighting (Shiki), word-level inline diffs, split/unified toggle, and Shadow DOM isolation.
+> **Deprecated: for diff views:** These CSS patterns are superseded by `@pierre/diffs` (see `./libraries.md`). MUST use `@pierre/diffs` for all code diff/review visualizations. These patterns are ONLY retained for non-diff before/after comparisons (e.g., configuration comparisons, text comparisons without syntax highlighting). For code diffs, `@pierre/diffs` provides superior syntax highlighting (Shiki), word-level inline diffs, split/unified toggle, and Shadow DOM isolation.
 
-Two-column comparison with diff-colored headers. For review pages, migration docs, and feature comparisons.
+Two-column comparison with diff-colored headers. Use only for non-code before/after comparisons, migration notes, configuration snapshots, and text comparisons without syntax highlighting.
 
 ```css
 .diff-panels {
@@ -971,202 +1184,13 @@ Two-column comparison with diff-colored headers. For review pages, migration doc
 </div>
 ```
 
-### Code Diff Enhancements
+### Code diff guidance
 
-> **⛔ DEPRECATED for diff views:** These CSS patterns are superseded by `@pierre/diffs` (see `./libraries.md`). MUST use `@pierre/diffs` for all code diff/review visualizations. These patterns are ONLY retained for non-diff before/after comparisons (e.g., configuration comparisons, text comparisons without syntax highlighting). For code diffs, `@pierre/diffs` provides superior syntax highlighting (Shiki), word-level inline diffs, split/unified toggle, and Shadow DOM isolation.
+MUST use `@pierre/diffs` from `./libraries.md` for all code diff/review visualizations. Do not build code-level diff views with CSS panels, line counters, added/removed spans, or syntax-highlighting overrides.
 
-Extended patterns for code-level diff views with line numbers, added/removed indicators, severity badges, and finding cards. Use alongside the base `.diff-panels` above. See `./templates/code-diff.html` for a complete working example.
+Use the before/after panel pattern above only for non-code comparisons such as configuration values, prose revisions, policy changes, option tables, or source brief versus plan summaries.
 
-**Line numbers via CSS counter:**
-
-```css
-.diff-code {
-  counter-reset: line;
-  font-family: var(--font-mono);
-  font-size: 13px;
-  line-height: 1.5;
-  overflow-x: auto;
-}
-
-.diff-line {
-  counter-increment: line;
-  display: block;
-  padding: 1px 12px 1px 48px;
-  position: relative;
-  min-height: 20px;
-  line-height: 20px;
-  white-space: pre;
-}
-
-.diff-line::before {
-  content: counter(line);
-  position: absolute;
-  left: 0;
-  width: 40px;
-  text-align: right;
-  padding-right: 8px;
-  color: var(--text-muted);
-  opacity: 0.4;
-  font-size: 12px;
-  user-select: none;
-}
-```
-
-**Added / removed / unchanged line indicators:**
-
-```css
-.diff-line--added {
-  background: var(--success-dim);
-}
-
-.diff-line--removed {
-  background: var(--error-dim);
-  text-decoration: line-through;
-  opacity: 0.7;
-}
-
-.diff-line--unchanged {
-  opacity: 0.55;
-}
-```
-
-**Hunk headers** (file path + line range):
-
-```css
-.diff-hunk-header {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--text-muted);
-  background: var(--surface-muted);
-  padding: 6px 16px;
-  border-bottom: 1px solid var(--border);
-  letter-spacing: 0.3px;
-}
-```
-
-```html
-<div class="diff-hunk-header">@@ internal/handler/user.go:45-62 @@</div>
-```
-
-**Severity badges:**
-
-```css
-.severity-badge {
-  display: inline-block;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: var(--radius-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.severity-badge--critical { background: var(--error-dim); color: var(--error); }
-.severity-badge--high { background: var(--warning-dim); color: var(--warning); }
-.severity-badge--medium { background: var(--accent-dim); color: var(--accent); }
-.severity-badge--low { background: var(--surface-muted); color: var(--text-muted); }
-```
-
-```html
-<span class="severity-badge severity-badge--critical">Critical</span>
-<span class="severity-badge severity-badge--high">High</span>
-<span class="severity-badge severity-badge--medium">Medium</span>
-<span class="severity-badge severity-badge--low">Low</span>
-```
-
-**Finding card** (wraps each finding's diff panel):
-
-```css
-.finding-card {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  margin-bottom: 24px;
-}
-
-.finding-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 20px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  flex-wrap: wrap;
-}
-
-.finding-id {
-  font-family: var(--font-mono);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.finding-category {
-  font-size: 11px;
-  color: var(--text-muted);
-  background: var(--surface-muted);
-  padding: 2px 8px;
-  border-radius: var(--radius-sm);
-}
-
-.finding-file {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-left: auto;
-}
-```
-
-```html
-<div class="finding-card">
-  <div class="finding-header">
-    <span class="finding-id">FINDING-001</span>
-    <span class="severity-badge severity-badge--critical">Critical</span>
-    <span class="finding-category">Error Handling</span>
-    <span class="finding-file">internal/handler/user.go:45-62</span>
-  </div>
-  <div class="diff-hunk-header">@@ internal/handler/user.go:45-62 @@</div>
-  <div class="diff-panels">
-    <div class="diff-panel__header diff-panel__header--before">Before</div>
-    <div class="diff-panel__header diff-panel__header--after">After</div>
-    <div class="diff-panel__body">
-      <div class="diff-code">
-        <span class="diff-line diff-line--removed">if err != nil {</span>
-        <span class="diff-line diff-line--removed">    return err</span>
-        <span class="diff-line diff-line--removed">}</span>
-      </div>
-    </div>
-    <div class="diff-panel__body">
-      <div class="diff-code">
-        <span class="diff-line diff-line--added">if err != nil {</span>
-        <span class="diff-line diff-line--added">    return fmt.Errorf("create user: %w", err)</span>
-        <span class="diff-line diff-line--added">}</span>
-      </div>
-    </div>
-  </div>
-  <details class="collapsible">
-    <summary>Why This Matters</summary>
-    <div class="collapsible__body">
-      <strong>Problem:</strong> Missing error context makes debugging impossible<br>
-      <strong>Standard:</strong> golang.md -> Error Handling<br>
-      <strong>Impact:</strong> Production incidents take 3x longer to diagnose
-    </div>
-  </details>
-</div>
-```
-
-**Highlight.js background override** (⚠️ DEPRECATED for diff views — use `@pierre/diffs` instead, which handles syntax highlighting via Shiki in Shadow DOM):
-
-```css
-.diff-panel__body .hljs,
-.diff-code .hljs {
-  background: transparent;
-  padding: 0;
-}
-```
-
-## Collapsible Sections
+## Collapsible sections
 
 Native `<details>/<summary>` with styled disclosure. Zero JS, accessible. For lower-priority content: file maps, decision logs, reference sections.
 
@@ -1227,11 +1251,11 @@ details.collapsible .collapsible__body {
 </details>
 ```
 
-## Generated Images
+## Generated images
 
-For AI-generated illustrations embedded as base64 data URIs via `surf gemini --generate-image`. Use sparingly — hero banners, conceptual illustrations, educational diagrams, decorative accents.
+For AI-generated illustrations embedded as base64 data URIs via `surf gemini --generate-image`. Use sparingly: hero banners, conceptual illustrations, educational diagrams, decorative accents.
 
-### Hero Banner
+### Hero banner
 
 Full-width image cropped to a fixed height with a gradient fade into the page background. Place at the top of the page before the title, or between the title and the first content section.
 
@@ -1271,7 +1295,7 @@ Full-width image cropped to a fixed height with a gradient fade into the page ba
 
 Generate with `--aspect-ratio 16:9` for hero banners.
 
-### Inline Illustration
+### Inline illustration
 
 Centered image with border, shadow, and optional caption. Use within content sections for conceptual or educational illustrations.
 
@@ -1306,7 +1330,7 @@ Centered image with border, shadow, and optional caption. Use within content sec
 
 Generate with `--aspect-ratio 1:1` or `--aspect-ratio 4:3` for inline illustrations.
 
-### Side Accent
+### Side accent
 
 Small image floated beside a section. Use when the illustration supports but doesn't dominate the content.
 

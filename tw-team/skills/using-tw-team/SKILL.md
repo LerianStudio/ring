@@ -17,7 +17,7 @@ description: |
 ## Skip when
 - Writing code → use dev-team agents
 - Writing plans → use pm-team agents
-- General code review → use default plugin reviewers
+- General code review → use `ring:codereview` with dev-team reviewer agents
 
 ## Related
 **Similar:** ring:using-ring, ring:using-dev-team
@@ -62,7 +62,7 @@ The ring-tw-team plugin provides specialized agents for technical documentation.
 
 ## Dispatching Specialists
 
-**Parallel dispatch** for comprehensive documentation (single message, multiple Tasks):
+**Parallel dispatch** for comprehensive documentation (single turn, multiple Tasks):
 
 ```
 Task #1: functional-writer (write the guide)
@@ -73,6 +73,14 @@ Then:
 Task #3: docs-reviewer (review both)
 ```
 
+### ⛔ MUST NOT trickle-dispatch
+
+Tasks #1 and #2 leave in the SAME TURN, before reading either's output. Forbidden: dispatch #1 → read result → dispatch #2. If you find yourself about to dispatch #2 in a turn AFTER #1 has already returned → STOP, report the violation, and re-dispatch both together. Task #3 runs only after both #1 and #2 complete — that sequencing is intentional; the trickle inside the parallel pair is not.
+
+### Parallel dispatch — atomic batch
+
+Emit both Task calls in a SINGLE TURN as one atomic batch. If your runtime exposes a `multi_tool_use.parallel` wrapper, use it. The anti-trickle guard above remains binding.
+
 ---
 
 ## Available in This Plugin
@@ -81,16 +89,11 @@ Task #3: docs-reviewer (review both)
 
 **Skills:**
 - using-tw-team: Plugin introduction
-- write-guide: Functional doc patterns
-- write-api: API reference patterns
 - documentation-structure: Hierarchy and organization
 - voice-and-tone: Voice guidelines
 - review-docs: Quality checklist
-- write-api: Also includes detailed field description patterns (merged from api-field-descriptions)
 
 **Commands:**
-- /write-guide: Start functional guide
-- /write-api: Start API documentation
 - /review-docs: Review existing docs
 
 ---
@@ -116,4 +119,3 @@ Task #3: docs-reviewer (review both)
 > ❌ "I'll manually write all the documentation myself."
 
 ---
-

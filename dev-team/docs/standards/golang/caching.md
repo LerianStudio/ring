@@ -45,7 +45,7 @@ type EntityCacheRepository struct {
 
 // Read path: cache first, DB on miss, populate cache
 func (r *EntityCacheRepository) FindByID(ctx context.Context, id uuid.UUID) (*entity.Entity, error) {
-    logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)
+    logger, tracer, _, _ := observability.NewTrackingFromContext(ctx)
 
     ctx, span := tracer.Start(ctx, "cache.entity.find_by_id")
     defer span.End()
@@ -123,7 +123,7 @@ type BalanceCacheRepository struct {
 
 // Write path: write to DB AND cache in same operation
 func (r *BalanceCacheRepository) UpdateBalance(ctx context.Context, b *entity.Balance) error {
-    logger, tracer, _, _ := libCommons.NewTrackingFromContext(ctx)
+    logger, tracer, _, _ := observability.NewTrackingFromContext(ctx)
 
     ctx, span := tracer.Start(ctx, "cache.balance.update")
     defer span.End()
