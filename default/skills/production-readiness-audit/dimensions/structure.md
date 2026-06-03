@@ -275,9 +275,9 @@ func RegisterRoutes(protected func(resource, action string) fiber.Router, handle
     if handler == nil {
         return errors.New("handler is nil")
     }
-    protected("resource", "create").Post("/v1/resources", handler.Create)
-    protected("resource", "read").Get("/v1/resources", handler.List)
-    protected("resource", "read").Get("/v1/resources/:id", handler.Get)
+    protected("resources", "create").Post("/v1/resources", handler.Create)
+    protected("resources", "read").Get("/v1/resources", handler.List)
+    protected("resources", "read").Get("/v1/resources/:id", handler.Get)
     return nil
 }
 

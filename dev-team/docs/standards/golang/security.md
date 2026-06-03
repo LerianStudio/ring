@@ -171,6 +171,20 @@ auth.Authorize(applicationName, resource, action)
 | `resource` | string | Resource being accessed | `"ledgers"`, `"transactions"`, `"packages"` |
 | `action` | string | HTTP method (lowercase) | `"get"`, `"post"`, `"patch"`, `"delete"` |
 
+### RBAC Resource Naming
+
+RBAC resource names **MUST** match the stable public route collection when the protected route belongs to a collection.
+
+| Route family | RBAC resource | Reason |
+|--------------|---------------|--------|
+| `/v1/boletos`, `/v1/boletos/:id` | `"boletos"` | Collection resource |
+| `/v1/payments`, `/v1/payments/:id` | `"payments"` | Collection resource |
+| `/v1/dashboards/...` | `"dashboards"` | Collection namespace |
+
+Use singular resource names only for true singleton or non-collection surfaces whose route namespace is also singular, for example `/v1/admin/...` -> `"admin"`.
+
+**Forbidden:** protecting plural collection routes with singular RBAC resources such as `auth.Authorize(applicationName, "payment", "post")` for `POST /v1/payments`.
+
 ### Middleware Behavior
 
 | Scenario | HTTP Response |
@@ -274,11 +288,14 @@ f.Post("/v1/sensitive-data", handler.Create)  // Missing auth.Authorize
 // FORBIDDEN: Using wrong application name
 auth.Authorize("wrong-app-name", "resource", "post")  // Must match identity registration
 
+// FORBIDDEN: Singular RBAC resource for a plural route collection
+auth.Authorize(applicationName, "package", "post")  // /v1/packages requires "packages"
+
 // FORBIDDEN: Direct calls to plugin-auth API
 http.Post("http://plugin-auth:4000/v1/authorize", ...)  // Use lib-auth instead
 
 // CORRECT: Always use lib-auth for auth operations
-auth.Authorize(applicationName, "resource", "post")
+auth.Authorize(applicationName, "packages", "post")
 token, _ := auth.GetApplicationToken(ctx, clientID, clientSecret)
 ```
 
