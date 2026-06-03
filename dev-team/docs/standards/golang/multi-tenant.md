@@ -1676,7 +1676,7 @@ MULTI_TENANT_ENABLED=true MULTI_TENANT_URL=http://dispatch layer:4003 go test ./
 ```go
 // ❌ WRONG: Tenant middleware runs before auth on ALL routes
 app.Use(tenantMid.WithTenantDB)  // Runs first — calls TM API before auth validates JWT
-app.Post("/v1/resources", auth.Authorize("app", "resource", "post"), handler.Create)
+app.Post("/v1/resources", auth.Authorize("app", "resources", "post"), handler.Create)
 ```
 
 In this pattern, `WithTenantDB` executes for **every request** before `auth.Authorize` validates the JWT. A request with a forged JWT containing `tenantId: "victim-tenant"` triggers a full Tenant Manager resolution — fetching credentials, opening connections — before auth rejects it.
@@ -1706,10 +1706,12 @@ func WhenEnabled(middleware fiber.Handler) fiber.Handler {
 ```go
 // ✅ CORRECT: Auth validates JWT FIRST, then tenant resolves DB
 // ttHandler is nil when MULTI_TENANT_ENABLED=false (single-tenant passthrough)
-f.Post("/v1/resources", auth.Authorize("app", "resource", "post"), WhenEnabled(ttHandler), handler.Create)
-f.Get("/v1/resources", auth.Authorize("app", "resource", "get"), WhenEnabled(ttHandler), handler.GetAll)
-f.Get("/v1/resources/:id", auth.Authorize("app", "resource", "get"), WhenEnabled(ttHandler), handler.GetByID)
+f.Post("/v1/resources", auth.Authorize("app", "resources", "post"), WhenEnabled(ttHandler), handler.Create)
+f.Get("/v1/resources", auth.Authorize("app", "resources", "get"), WhenEnabled(ttHandler), handler.GetAll)
+f.Get("/v1/resources/:id", auth.Authorize("app", "resources", "get"), WhenEnabled(ttHandler), handler.GetByID)
 ```
+
+`auth.Authorize(..., resource, ...)` MUST use the plural resource name that matches the collection route. Singular resources are allowed only for protected singleton/capability endpoints that are not collection routes, and the exception must be documented next to the route.
 
 **How it works:**
 1. `auth.Authorize(...)` is the first handler — validates JWT before anything else
