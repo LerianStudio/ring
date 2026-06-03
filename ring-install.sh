@@ -619,6 +619,41 @@ build_copy_opencode_commands() {
   done
 }
 
+# Emit a slash-command shim for every Ring skill so it appears in opencode's
+# TUI `/` autocomplete. The TUI silently filters source="skill" entries (see
+# packages/opencode/src/cli/cmd/tui/component/prompt/autocomplete.tsx), so
+# without these shims only real command-source files show up. A real command
+# at the same destination always wins — shims never overwrite.
+build_make_opencode_skill_commands() {
+  local team="$1"
+  local src_dir="$RING_DIR/$team/skills"
+  local dst_dir="$OPENCODE_OUT/command/$team"
+  [ -d "$src_dir" ] || return 0
+  local skill_dir name src_md dst_md
+  for skill_dir in "$src_dir"/*/; do
+    [ -d "$skill_dir" ] || continue
+    name="$(basename "$skill_dir")"
+    [ "$name" = "shared-patterns" ] && continue
+    src_md="$skill_dir/SKILL.md"
+    [ -f "$src_md" ] || continue
+    dst_md="$dst_dir/$name.md"
+    if [ -e "$dst_md" ]; then
+      vlog "opencode skill-cmd: $team/$name (real command exists, skip shim)"
+      continue
+    fi
+    if [ "$DRY_RUN" -eq 1 ]; then
+      vlog "[dry-run] opencode skill-cmd shim: $team/$name -> $dst_md"
+      continue
+    fi
+    mkdir -p "$dst_dir"
+    python3 "$PY_HELPER" \
+      --emit-opencode-skill-shim \
+      --source "$src_md" \
+      --dest   "$dst_md"
+    vlog "opencode skill-cmd: $team/$name"
+  done
+}
+
 build_codex_skill() {
   local team="$1"; local skill_dir="$2"
   local name dst_dir src_skill_md dst_skill_md
@@ -742,10 +777,11 @@ do_build() {
   local team d
   for team in $TEAMS; do
     [ -d "$RING_DIR/$team" ] || { log_warn "team dir missing: $team"; continue; }
-    build_copy_opencode_agents   "$team"
-    build_copy_opencode_skills   "$team"
-    build_copy_opencode_commands "$team"
-    build_copy_shared_patterns_codex "$team"
+    build_copy_opencode_agents          "$team"
+    build_copy_opencode_skills          "$team"
+    build_copy_opencode_commands        "$team"
+    build_make_opencode_skill_commands  "$team"
+    build_copy_shared_patterns_codex    "$team"
 
     if [ -d "$RING_DIR/$team/skills" ]; then
       for d in "$RING_DIR/$team/skills"/*/; do

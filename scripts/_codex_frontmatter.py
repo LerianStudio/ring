@@ -14,6 +14,11 @@ Or, to build the lookup map once and cache it:
 Or, to rewrite markdown link paths in an accessory (non-SKILL.md) file:
   python3 scripts/_codex_frontmatter.py --rewrite-paths \
     --source <path> --dest <path> --team <team> --lookup <lookup.json>
+
+Or, to emit a slash-command shim for an opencode skill so it appears in the
+TUI's `/` autocomplete (which silently filters source="skill" entries):
+  python3 scripts/_codex_frontmatter.py --emit-opencode-skill-shim \
+    --source <path-to-SKILL.md> --dest <path-to-shim.md>
 """
 
 from __future__ import annotations
@@ -390,6 +395,44 @@ def rewrite_accessory(
     os.replace(tmp, dest)
 
 
+def emit_opencode_skill_shim(source: Path, dest: Path) -> None:
+    """Emit an opencode slash-command shim for a Ring skill.
+
+    The opencode TUI silently filters commands whose source is "skill" out
+    of the `/` autocomplete (see packages/opencode/src/cli/cmd/tui/component/
+    prompt/autocomplete.tsx). Skills only appear when also registered as a
+    real command-source file. This writes a minimal shim that delegates to
+    the skill tool so the user can invoke it via `/ring:<skill-name>`.
+    """
+    text = source.read_text(encoding="utf-8")
+    fm_lines, _ = _split_frontmatter(text, str(source))
+    groups = {key: lines for key, lines in _parse_top_level_keys(fm_lines)}
+
+    name_group = groups.get("name")
+    if not name_group:
+        raise ValueError("missing 'name' in frontmatter: " + str(source))
+    # Reuse description-collapsing logic to normalize 'name' (always inline in
+    # Ring skills, but the helper handles quoting/whitespace defensively).
+    name = _extract_description(name_group)
+
+    description_group = groups.get("description")
+    description = _extract_description(description_group) if description_group else ""
+
+    shim = (
+        "---\n"
+        f"name: {_yaml_inline_string(name)}\n"
+        f"description: {_yaml_inline_string(description)}\n"
+        "---\n"
+        "\n"
+        f"Invoke the `{name}` skill via the Skill tool. Arguments: $ARGUMENTS\n"
+    )
+
+    tmp = dest.with_suffix(dest.suffix + ".tmp")
+    tmp.parent.mkdir(parents=True, exist_ok=True)
+    tmp.write_text(shim, encoding="utf-8")
+    os.replace(tmp, dest)
+
+
 def main(argv: list[str]) -> int:
     p = argparse.ArgumentParser()
     p.add_argument("--build-lookup", type=Path, default=None)
@@ -403,6 +446,11 @@ def main(argv: list[str]) -> int:
         "--rewrite-paths",
         action="store_true",
         help="Rewrite link paths in an accessory .md file only",
+    )
+    p.add_argument(
+        "--emit-opencode-skill-shim",
+        action="store_true",
+        help="Emit an opencode slash-command shim for a Ring skill",
     )
     args = p.parse_args(argv)
 
@@ -430,6 +478,15 @@ def main(argv: list[str]) -> int:
             return 2
         lookup = json.loads(args.lookup.read_text(encoding="utf-8"))
         rewrite_accessory(args.source, args.dest, args.team, lookup)
+        return 0
+
+    if args.emit_opencode_skill_shim:
+        required = (("--source", args.source), ("--dest", args.dest))
+        missing = [n for n, v in required if v is None]
+        if missing:
+            print("missing required args: " + ", ".join(missing), file=sys.stderr)
+            return 2
+        emit_opencode_skill_shim(args.source, args.dest)
         return 0
 
     missing = [
