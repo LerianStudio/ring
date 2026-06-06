@@ -23,7 +23,7 @@ description: |
 
 ## Sequence
 
-**Runs before:** ring:pre-dev-api-design, ring:pre-dev-task-breakdown
+**Runs before:** ring:pre-dev-api-design, ring:pre-dev-phases-and-epics
 **Runs after:** ring:pre-dev-prd-creation, ring:pre-dev-feature-map, ring:pre-dev-design-validation
 
 

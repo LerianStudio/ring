@@ -43,16 +43,16 @@ All code changes go through `Task(subagent_type=...)`. Announce at start: "Using
 
 4. Verify PROJECT_RULES.md exists → STOP if missing.
 
-5. Ask execution mode: automatic | manual_per_task | manual_per_subtask
+5. Ask execution mode: automatic | manual_per_epic | manual_per_task
 ```
 
 ## Gate Map
 
 | Gate | Cadence | Skill | Agent | Purpose |
 |------|---------|-------|-------|---------|
-| 0 | subtask | ring:dev-implementation | ring:frontend-engineer / ring:ui-engineer / ring:frontend-bff-engineer-typescript | TDD, coverage, accessibility, visual/E2E/perf checks, local runtime |
-| 7 | task | ring:codereview | 9 defaults + triggered specialists via ring:codereview | Code review |
-| 8 | subtask | ring:dev-validation | User | Acceptance sign-off |
+| 0 | task | ring:dev-implementation | ring:frontend-engineer / ring:ui-engineer / ring:frontend-bff-engineer-typescript | TDD, coverage, accessibility, visual/E2E/perf checks, local runtime |
+| 7 | epic | ring:codereview | 9 defaults + triggered specialists via ring:codereview | Code review |
+| 8 | task | ring:dev-validation | User | Acceptance sign-off |
 
 All listed gates are MANDATORY. No exceptions.
 
@@ -83,18 +83,39 @@ Pass `ui_library_mode` to every Gate 0 agent.
 ## Execution Order
 
 ```yaml
-for each task:
-  for each subtask:
+for each epic:
+  for each task:
     Gate 0
-    [checkpoint if manual_per_subtask]
-  
-  # task-level (after all subtasks)
+    [checkpoint if manual_per_task]
+
+  # epic-level (after all tasks)
   Gate 7
 
-  # subtask-level validation after review passes
-  for each subtask:
+  # task-level validation after review passes
+  for each task:
     Gate 8
+
+  [checkpoint if manual_per_epic]
+
+  # phase boundary — fires once, after the last epic of the current phase
+  [if epic is last in its phase: Phase Cadence (see below)]
 ```
+
+## Phase Boundary (Rolling Wave)
+
+Phases group epics and are elaborated one at a time. After the last epic of the current
+phase completes its Gate 0/7/8 flow, fire the phase boundary exactly once:
+
+```
+1. Checkpoint with the user: summarize the completed phase (epics done, review/validation
+   outcomes) and confirm intent to continue.
+2. Elaborate the next phase's tasks inline under each epic, following the
+   ring:pre-dev-task-creation format (Context, Implementation vision, Files, Verification,
+   Done when). Detail exactly one phase ahead — never further.
+3. Set state.current_phase to the next phase and resume execution from its first epic.
+```
+
+Do not elaborate more than one phase ahead — detail decays before execution reaches it.
 
 ## Gate Execution Workflow (MANDATORY for every gate)
 
@@ -125,22 +146,31 @@ Former Gates 1-6 checks are owned by Gate 0 implementation and local verificatio
 
 ## State Management
 
-State: `docs/ring:dev-cycle-frontend/current-cycle.json`
+State: `docs/ring:dev-cycle-frontend/current-cycle.json` (state schema v2.0.0).
 
 Write after EVERY gate. If write fails → STOP.
 
 ```json
 {
+  "schema_version": "2.0.0",
   "ui_library_mode": "",
   "tasks_file": "",
   "execution_mode": "",
   "current_gate": 0,
-  "current_task": "",
-  "current_subtask": "",
+  "phases": [],
+  "current_phase": "",
+  "phase_checkpoint": {},
+  "epics": [],
+  "current_epic_index": 0,
+  "current_task_index": 0,
   "gates_completed": {},
   "cached_standards": {}
 }
 ```
+
+Each entry in `epics[]` (E-X.Y) carries its own `tasks[]` array (T-X.Y.Z). Gate 0/8
+run at task cadence over `epics[current_epic_index].tasks[current_task_index]`; Gate 7
+runs at epic cadence over the union of that epic's tasks.
 
 ## Blocker Handling
 

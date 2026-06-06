@@ -262,8 +262,8 @@ REFACTOR → Clean up → Stay green
 - `ring:codereview` - **Parallel 9 defaults + conditional specialist dispatch** with severity-based handling
 - `ring:worktree` - Isolated development
 - `ring:commit` - Smart commit organization with atomic grouping, conventional commits, and trailers
-- `ring:writing-plans` - Author bite-sized TDD-shaped implementation plans from a spec, ready for inline or subagent execution
-- `ring:executing-plans` - Inline execution of a written plan with verification checkpoints (TDD enforced per task)
+- `ring:writing-plans` - Author phased implementation plans (phase → epic → task) from a spec; first phase detailed into dispatch-ready tasks, later phases epic-level for rolling-wave elaboration
+- `ring:executing-plans` - Rolling-wave execution of a phased plan: implement the detailed phase, checkpoint with the user, elaborate the next phase against the real codebase, repeat
 
 **Meta Skills (3):**
 
@@ -291,12 +291,12 @@ REFACTOR → Clean up → Stay green
 **Orchestration & Refactoring (7):**
 
 - `ring:using-dev-team` - Introduction to developer specialist agents
-- `ring:dev-cycle` - Lean backend development workflow orchestrator: Gate 0 implementation-owned TDD/coverage/docker-compose/runtime/delivery verification, Gate 8 review, Gate 9 validation
-- `ring:dev-cycle-frontend` - lean frontend development cycle orchestrator (Gate 0, 7, 8)
+- `ring:dev-cycle` - Lean backend development cycle orchestrator driven by a rolling-wave phased plan (phases → epics E-X.Y → tasks T-X.Y.Z): Gate 0 implementation-owned TDD/coverage/docker-compose/runtime/delivery verification per task, Gate 8 review + Gate 9 validation per epic, phase boundary (Step 11.5) closes each phase and elaborates the next against the real codebase
+- `ring:dev-cycle-frontend` - Lean frontend development cycle orchestrator on the same rolling-wave phased plan (Gate 0 per task, Gate 7 review per epic, Gate 8 validation per task, phase boundary per phase)
 - `ring:dev-refactor` - Backend/codebase standards analysis
 - `ring:dev-refactor-frontend` - Frontend standards analysis and task generation
 - `ring:dev-simplify` - Whole-codebase structural simplification sweep (hunts unjustified abstractions, adapters, shims; KILL/REVIEW/KEEP output; DELETE-by-default burden of proof for pre-public applications)
-- `ring:dev-cycle-management` - Development cycle state management (status reporting and cancellation)
+- `ring:dev-cycle-management` - Development cycle state management (phase/epic status reporting and cancellation)
 
 **Backend Gate Skills:**
 
@@ -348,8 +348,8 @@ REFACTOR → Clean up → Stay green
 4. `ring:pre-dev-api-design` - Component contracts
 5. `ring:pre-dev-data-model` - Entity relationships
 6. `ring:pre-dev-dependency-map` - Technology selection
-7. `ring:pre-dev-task-breakdown` - Work increments
-8. `ring:pre-dev-subtask-creation` - Atomic units
+7. `ring:pre-dev-phases-and-epics` - Phased plan: phases + epics, rolling wave
+8. `ring:pre-dev-task-creation` - Phase 1 task detailing: dispatch-ready tasks, no code
 
 **Workflow Orchestrators:**
 

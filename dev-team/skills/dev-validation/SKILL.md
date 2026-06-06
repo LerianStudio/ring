@@ -2,7 +2,7 @@
 name: ring:dev-validation
 description: |
   Development cycle validation gate (Gate 5) — validates all acceptance criteria are met
-  and requires explicit user approval before completion. Runs at subtask cadence.
+  and requires explicit user approval before completion. Runs at task cadence.
 ---
 
 # Validation Gate (Gate 5)

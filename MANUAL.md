@@ -209,10 +209,10 @@ For documentation creation and review:
 
 ### New Feature Development
 
-1. **Plan** → Use `ring:pre-dev-feature` skill (or `ring:pre-dev-full` if complex)
+1. **Plan** → Use `ring:pre-dev-feature` skill (or `ring:pre-dev-full` if complex) — produces a rolling-wave phased plan (`tasks.md`: phases → epics E-X.Y → tasks T-X.Y.Z; only Phase 1 task-detailed)
 2. **Isolate** → Use `ring:worktree` skill
-3. **Implement** → Use `ring:test-driven-development` skill
-4. **Review** → Use `ring:codereview` skill (dispatches 9 defaults plus triggered specialists)
+3. **Implement** → Use `ring:dev-cycle` skill (consumes `tasks.md`: Gate 0 TDD per task, review/validation per epic, phase-boundary elaboration of the next phase) — or `ring:test-driven-development` directly for ad-hoc changes
+4. **Review** → Use `ring:codereview` skill (dispatches 9 defaults plus triggered specialists; runs at epic cadence inside dev-cycle)
 5. **Commit** → Use `ring:commit` skill
 
 ### Bug Investigation

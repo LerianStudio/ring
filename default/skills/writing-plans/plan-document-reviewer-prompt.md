@@ -25,10 +25,12 @@ Agent tool (subagent_type: general-purpose):
 
     | Category | What to Look For |
     |----------|------------------|
-    | Completeness | TODOs, placeholders, incomplete tasks, missing steps |
-    | Spec Alignment | Plan covers spec requirements, no major scope creep |
-    | Task Decomposition | Tasks have clear boundaries, steps are actionable |
-    | Buildability | Could an engineer follow this plan without getting stuck? |
+    | Spec Alignment | Every spec requirement maps to an epic; no major scope creep |
+    | Phase Boundaries | Every phase ends in working, verifiable software |
+    | Wave Discipline | Exactly one phase is task-detailed; later phases sit at epic level (premature task detail is stale risk) |
+    | Task Quality | Detailed-wave tasks are dispatch-ready: context with file:line refs, implementation vision with decisions made, exact files, verification — no "TBD", "appropriate handling", or unnamed edge cases |
+    | Contract Consistency | Names, signatures, and schemas referenced across epics agree |
+    | Buildability | Could an implementer with zero context start each detailed task within a minute of reading it? |
 
     ## Calibration
 
@@ -46,7 +48,7 @@ Agent tool (subagent_type: general-purpose):
     **Status:** Approved | Issues Found
 
     **Issues (if any):**
-    - [Task X, Step Y]: [specific issue] — [why it matters for implementation]
+    - [Phase N / Epic N.M / Task N.M.T]: [specific issue] — [why it matters for implementation]
 
     **Recommendations (advisory, do not block approval):**
     - [suggestions for improvement]
@@ -60,6 +62,6 @@ Agent tool (subagent_type: general-purpose):
 |-----------------|--------|
 | Approved, no issues | Proceed to execution handoff |
 | Approved, recommendations only | Optionally apply; proceed to handoff |
-| Issues Found | Fix the flagged tasks/steps inline, then re-dispatch or self-verify |
+| Issues Found | Fix the flagged epics/tasks inline, then re-dispatch or self-verify |
 
 Do NOT loop indefinitely on minor cosmetic findings — the calibration above scopes the reviewer to real blockers.

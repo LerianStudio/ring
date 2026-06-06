@@ -2,43 +2,46 @@
 name: ring:pre-dev-delivery-planning
 description: |
   Gate 9 (Full Track) / Gate 4 (Small Track): Delivery roadmap and timeline planning.
-  Transforms tasks into realistic delivery schedule with critical path analysis,
-  resource allocation, and delivery breakdown. MANDATORY gate for both workflows.
+  Transforms the phased plan (epics) into a realistic delivery schedule with critical
+  path analysis, resource allocation, and delivery breakdown aligned to plan phases.
+  MANDATORY gate for both workflows.
 ---
 
 # Delivery Planning — Realistic Roadmap with Critical Path
 
 ## When to use
 
-- Tasks passed Gate 7 validation (Full Track) OR Gate 3 (Small Track)
+- Phased plan passed Gate 7 validation (Full Track) OR Gate 3 (Small Track); Phase 1 detailed (Gate 8, Full Track)
 - Need realistic delivery timeline with dates
-- Ready to convert tasks into delivery schedule
+- Ready to convert epics into delivery schedule
 - Team composition known or determinable
 
 ## Skip when
 
-- Tasks not validated → complete task breakdown first
+- Phased plan not validated → complete phases & epics first
 - Proof-of-concept without delivery commitment
 - Research/exploration work without delivery deadline
 
 ## Sequence
 
 **Runs before:** ring:dev-cycle
-**Runs after:** ring:pre-dev-task-breakdown, ring:pre-dev-subtask-creation
+**Runs after:** ring:pre-dev-phases-and-epics, ring:pre-dev-task-creation
 
 
-Every roadmap must be grounded in reality, not optimism. Tasks not validated, team composition unknown, or start date absent → STOP and gather the missing input before proceeding.
+Every roadmap must be grounded in reality, not optimism. Epics not validated, team composition unknown, or start date absent → STOP and gather the missing input before proceeding.
 
-## Phase Model
+Scheduling unit is the **epic** (rows of the `## Summary` table in tasks.md). Plan phases are hard sequencing constraints: an epic never starts before its phase's predecessor phase completes. Only Phase 1 carries task-level detail — later-phase epic estimates are coarser by design (rolling wave); reflect that in confidence, not in false precision.
 
-| Phase | Activities |
-|-------|------------|
-| **1. Input Gathering** | Load tasks.md; ask user for start date, team composition, delivery cadence, period configuration, velocity multiplier |
-| **2. Dependency Analysis** | Build dependency graph, identify critical path, find parallelization opportunities |
+## Workflow Steps
+
+| Step | Activities |
+|------|------------|
+| **1. Input Gathering** | Load tasks.md (phased plan); ask user for start date, team composition, delivery cadence, period configuration, velocity multiplier |
+| **2. Dependency Analysis** | Build dependency graph from epics (phase order + epic dependencies), identify critical path, find parallelization opportunities within phases |
 | **3. Capacity Planning** | Calculate team velocity (custom multiplier), allocate resources, identify bottlenecks |
-| **4. Delivery Breakdown** | Group tasks by cadence (sprint/cycle/continuous), calculate period boundaries, identify spill overs, map parallel streams |
+| **4. Delivery Breakdown** | Group epics by cadence (sprint/cycle/continuous), align milestones to plan phases where the cadence allows, calculate period boundaries, identify spill overs, map parallel streams |
 | **5. Risk Analysis** | Flag high-risk dependencies, add contingency buffer (10-20%), define mitigations |
-| **6. Gate Validation** | Verify all tasks scheduled, critical path correct, dates achievable, period boundaries respected |
+| **6. Gate Validation** | Verify all epics scheduled, phase ordering respected, critical path correct, dates achievable, period boundaries respected |
 
 ## Mandatory User Questions
 
@@ -73,7 +76,7 @@ calendar_days  = calendar_hours ÷ 8 ÷ team_size
 task_days      = calendar_days + taura_days
 
 Where:
-  ai_estimate = from tasks.md (AI-agent-hours)
+  ai_estimate = per epic, from tasks.md Summary table (AI-agent-hours)
   0.90        = capacity utilization (AI Agent standard)
   taura_days  = 0 (Development/Delivery) | 5 (Quality) | 10 (Quality integration)
 ```
@@ -88,10 +91,10 @@ Continuous delivery: no period boundaries — tasks scheduled by dependency and 
 
 ## Critical Path Analysis
 
-1. Build dependency graph from tasks.md
-2. Calculate Earliest Start Date (ESD) per task
+1. Build dependency graph from tasks.md (epic dependencies + plan-phase ordering)
+2. Calculate Earliest Start Date (ESD) per epic
 3. Calculate Latest Start Date (LSD) without delaying project
-4. Tasks where ESD = LSD → on critical path (zero slack)
+4. Epics where ESD = LSD → on critical path (zero slack)
 
 ## Output Files
 
@@ -108,6 +111,12 @@ MUST generate both:
 | multi-repo | Per-repo `{repo.path}/docs/pre-dev/{feature}/delivery-roadmap.{md,json}` |
 
 ## JSON Output Schema
+
+> Schema note: `tasks[]` rows are the plan's **epics** (IDs `E-X.Y`). The field name
+> is retained for schema stability (`version 1.0.0`); `tasks[].phase` remains the
+> work-type classifier (development|quality|delivery) — it is NOT the plan phase.
+> Plan phases surface through `milestones[]`, which SHOULD align to phase boundaries
+> when the cadence allows.
 
 ```json
 {
@@ -195,7 +204,7 @@ MUST generate both:
 | Category | Requirements |
 |----------|--------------|
 | **Input Completeness** | Start date, team composition, cadence, period config (if sprint/cycle), velocity multiplier all confirmed |
-| **Dependency Analysis** | Graph built, critical path identified, parallel streams defined, no circular deps |
+| **Dependency Analysis** | Graph built, plan-phase ordering respected, critical path identified, parallel streams defined, no circular deps |
 | **Capacity Planning** | Velocity calculated, resources allocated, bottlenecks identified, ≤80% utilization |
 | **Delivery Breakdown** | Periods match cadence, boundaries calculated, spill overs identified, delivery goals measurable |
 | **Risk Management** | High-risk deps flagged, buffer added (10-20%), mitigations defined |

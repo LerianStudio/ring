@@ -1,10 +1,11 @@
 ---
 name: ring:writing-plans
 description: |
-  Authoring comprehensive implementation plans from a spec or requirements before
-  touching code. Produces bite-sized, TDD-shaped tasks with exact file paths,
-  complete code, and verifiable commands — executable by an engineer with zero
-  context for the codebase.
+  Authoring phased implementation plans from a spec or requirements before
+  touching code. Produces a phase → epic → task hierarchy: Phase 1 fully
+  detailed into dispatch-ready tasks with file:line references and an
+  implementation vision; later phases stay at epic level for rolling-wave
+  elaboration during execution.
 ---
 
 # Writing Plans
@@ -16,19 +17,21 @@ description: |
 
 ## Skip when
 - Single-file change with obvious shape (just do it)
-- Exploratory spike — TDD-shaped plans assume known requirements
+- Exploratory spike — phased plans assume known requirements
 - Spec is still in brainstorming; the plan would lock premature decisions
 
 ## Sequence
 **Runs after:** ring:explore-codebase, ring:pre-dev-* skills (Gates 0-9 outputs feed the spec)
-**Runs before:** ring:executing-plans (inline execution) or ring:dev-cycle (gated subagent workflow)
+**Runs before:** ring:executing-plans (rolling-wave execution) or ring:dev-cycle (gated subagent workflow)
 
 ## Related
 **Companion:** [plan-document-reviewer-prompt.md](plan-document-reviewer-prompt.md) — subagent dispatch template for thorough plan review
 
 ---
 
-Write the plan assuming the engineer is skilled but has zero context for this codebase, toolset, or problem domain. Document every file to touch, every test to write, every command to run. Give them the whole plan as bite-sized tasks. DRY. YAGNI. TDD. Frequent commits.
+Write the plan assuming the implementer is skilled but has zero context for this codebase, toolset, or problem domain.
+
+The plan is a **rolling-wave document**. Only the first phase is detailed to task level at plan time; later phases stay at epic level until execution reaches them. Detail decays: code written in Phase 1 invalidates assumptions baked into Phase 3 tasks, so do not write Phase 3 tasks yet. ring:executing-plans elaborates each subsequent phase against the codebase as it actually exists.
 
 **Announce at start:** "Using ring:writing-plans to author the implementation plan."
 
@@ -57,30 +60,32 @@ If the spec covers multiple independent subsystems, suggest breaking it into sep
 
 If brainstorming already split the spec into sub-project specs, write one plan per sub-spec.
 
-## File Structure
+## Plan Hierarchy
 
-Before defining tasks, map which files will be created or modified and what each is responsible for. This is where decomposition decisions lock in.
+| Level | Granularity | When detailed |
+|-------|-------------|---------------|
+| **Phase** | Independently verifiable milestone — software works at the end of every phase | At plan time |
+| **Epic** | Cohesive unit of work inside a phase (one capability, one subsystem) | At plan time |
+| **Task** | Dispatch-ready unit: context + implementation vision + verification | Phase 1 at plan time; later phases during execution (rolling wave) |
 
-| Principle | What it means |
-|-----------|---------------|
-| Clear boundaries | Each file has one responsibility |
-| Small and focused | Easier to hold in context; edits more reliable |
-| Co-locate change | Files that change together live together |
-| Split by responsibility | Not by technical layer alone |
-| Follow existing patterns | Don't unilaterally restructure; mention restructure only if a file you're modifying is already unwieldy |
+Rules:
+- Every phase ends with working, testable software. No phase ends mid-refactor.
+- 2–5 epics per phase. An epic that needs more than a paragraph to describe is two epics.
+- Order phases by dependency first, then by risk — front-load whatever invalidates the design if it turns out wrong.
 
-This structure informs task decomposition. Each task produces self-contained changes that make sense independently.
+## Code Snippet Policy
 
-## Bite-Sized Task Granularity
+Default is **prose, not code**. Describe intent, decisions, and shape; the implementer writes the code at execution time with the real codebase in front of them.
 
-**Each step is one action (2–5 minutes):**
-- "Write the failing test" — step
-- "Run it to make sure it fails" — step
-- "Implement the minimal code to make the test pass" — step
-- "Run the tests and make sure they pass" — step
-- "Commit" — step
+Include a snippet ONLY when prose cannot pin down the decision:
 
-Larger units → smaller. If a step takes longer than 5 minutes, it's two steps.
+| Justified | Example |
+|-----------|---------|
+| Public contract other epics depend on | API signature, event schema, migration DDL |
+| Non-obvious algorithm where the approach IS the decision | Custom balancing logic, conflict-resolution rule |
+| Exact artifact where approximation breaks behavior | Config block, regex, SQL query |
+
+If the snippet exists to "save the implementer time", delete it. If it exists because two epics would otherwise disagree about a contract, keep it.
 
 ## Plan Document Header
 
@@ -89,7 +94,11 @@ Larger units → smaller. If a step takes longer than 5 minutes, it's two steps.
 ```markdown
 # [Feature Name] Implementation Plan
 
-> **For implementers:** Use ring:executing-plans to implement this plan task-by-task (inline execution with checkpoints), or ring:dev-cycle for full subagent-orchestrated workflow. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For implementers:** Use ring:executing-plans (rolling wave: implement the
+> detailed phase → user checkpoint → detail the next phase → implement → repeat),
+> or ring:dev-cycle for the full subagent-orchestrated workflow.
+> This document is the living source of truth — task elaboration for later
+> phases is written back into it during execution.
 
 **Goal:** [One sentence describing what this builds]
 
@@ -97,73 +106,70 @@ Larger units → smaller. If a step takes longer than 5 minutes, it's two steps.
 
 **Tech Stack:** [Key technologies/libraries]
 
+## Phase Overview
+
+| Phase | Milestone | Epics | Status |
+|-------|-----------|-------|--------|
+| 1 | [what works at the end] | 1.1, 1.2 | Detailed |
+| 2 | [what works at the end] | 2.1, 2.2 | Epic-level |
+| 3 | [what works at the end] | 3.1 | Epic-level |
+
 ---
 ```
 
-## Task Structure
+## Epic Format (all phases)
 
-````markdown
-### Task N: [Component Name]
+```markdown
+### Epic N.M: [Name]
+
+**Goal:** [what exists and works when this epic is done]
+**Scope:** [subsystems/directories touched — coarse-grained for later phases]
+**Dependencies:** [epics or phases that must land first, or "none"]
+**Done when:** [observable acceptance criteria]
+```
+
+For Phase 1 epics, tasks follow immediately below the epic block. For later phases, the epic block is the whole entry — tasks are added during execution.
+
+## Task Format (detailed wave only)
+
+Each task is close to a ready-to-dispatch prompt: an implementer with zero context should be able to start within a minute of reading it.
+
+```markdown
+#### Task N.M.T: [Action-oriented name]
+
+- [ ] Done
+
+**Context:** [why this task exists; what already exists, with `file.go:42`-style
+references into the current codebase]
+
+**Implementation vision:** [the approach; key decisions already made; patterns
+to follow or avoid; named edge cases and how each is handled]
 
 **Files:**
 - Create: `exact/path/to/file.go`
 - Modify: `exact/path/to/existing.go:123-145`
 - Test: `path/to/file_test.go`
 
-- [ ] **Step 1: Write the failing test**
+**Verification:** [command to run + expected outcome]
 
-```go
-func TestSpecificBehavior(t *testing.T) {
-    result := Function(input)
-    require.Equal(t, expected, result)
-}
+**Done when:** [acceptance criteria]
 ```
 
-- [ ] **Step 2: Run test to verify it fails**
+Use `file:line` references when pointing into existing code. Paths are always exact for every file touched.
 
-Run: `go test ./path/... -run TestSpecificBehavior -v`
-Expected: FAIL with "Function not defined"
+## ⛔ No Vague Tasks
 
-- [ ] **Step 3: Write minimal implementation**
-
-```go
-func Function(input string) string {
-    return expected
-}
-```
-
-- [ ] **Step 4: Run test to verify it passes**
-
-Run: `go test ./path/... -run TestSpecificBehavior -v`
-Expected: PASS
-
-- [ ] **Step 5: Commit**
-
-Use ring:commit skill with:
-- Type: `feat`
-- Scope: relevant module
-- Files: `path/to/file_test.go`, `path/to/file.go`
-````
-
-## ⛔ No Placeholders
-
-Every step must contain the actual content the engineer needs. These are **plan failures** — never write them:
+The plan's deliverable is **decisions**, not code. A task without decisions is a plan failure:
 
 | Pattern | Why it fails |
 |---------|--------------|
-| "TBD", "TODO", "implement later", "fill in details" | Forces the engineer to guess scope |
-| "Add appropriate error handling" / "add validation" / "handle edge cases" | Decision deferred — plan didn't do its job |
-| "Write tests for the above" (without actual test code) | Test design is the plan's job, not the implementer's |
-| "Similar to Task N" (without repeating the code) | Engineer may read tasks out of order |
-| Steps that describe what without showing how | Code steps require code blocks |
-| References to types/functions/methods not defined in any task | Plan is internally inconsistent |
+| "Add appropriate error handling" | WHICH errors, handled HOW? Decide in the plan. |
+| "Handle edge cases" | Name them, one by one. |
+| "TBD" / "TODO" / "figure out during implementation" in detailed-wave tasks | The detailed wave admits no deferrals — that's what makes it dispatch-ready |
+| Implementation vision that restates the task name | Vision = approach + decisions, not a paraphrase |
+| Task referencing a contract no epic defines | Plan is internally inconsistent |
 
-## Remember
-
-- Exact file paths always
-- Complete code in every step — if a step changes code, show the code
-- Exact commands with expected output
-- DRY, YAGNI, TDD, frequent commits
+Deferrals ARE allowed in later-phase epics — that is the point of rolling wave. They are NOT allowed inside the detailed wave.
 
 ## Self-Review
 
@@ -171,12 +177,13 @@ After writing the complete plan, look at the spec with fresh eyes and check the 
 
 | Check | What to verify |
 |-------|----------------|
-| **Spec coverage** | Skim each requirement in the spec. Point to a task that implements it. List gaps. |
-| **Placeholder scan** | Search for the red flags in the "No Placeholders" table. Fix any matches. |
-| **Type consistency** | Method signatures, property names, and types used in later tasks match what earlier tasks defined. A function `clearLayers()` in Task 3 but `clearFullLayers()` in Task 7 is a bug. |
-| **Command accuracy** | Test commands target the right paths; expected output matches the test name. |
+| **Spec coverage** | Skim each requirement in the spec. Point to an epic that covers it. List gaps. |
+| **Vagueness scan** | Search detailed-wave tasks for the red flags in "No Vague Tasks". Fix any matches. |
+| **Contract consistency** | Names, signatures, and schemas referenced across epics agree. A contract defined nowhere but used somewhere is a bug. |
+| **Phase boundaries** | Every phase ends with working, verifiable software. |
+| **Verification plausibility** | Detailed-wave verification commands target real paths and plausible outcomes. |
 
-If you find issues, fix them inline. No need to re-review — just fix and move on. If you find a spec requirement with no task, add the task.
+If you find issues, fix them inline. No need to re-review — just fix and move on.
 
 **For high-stakes plans** (large surface, multiple authors, critical path): also dispatch a plan-document reviewer subagent using the template in `plan-document-reviewer-prompt.md`.
 
@@ -186,103 +193,64 @@ After saving the plan, offer execution choice:
 
 > Plan complete and saved to `docs/plans/<filename>.md`. Two execution options:
 >
-> **1. Inline Execution (this session)** — Use ring:executing-plans for task-by-task execution with verification checkpoints. Best for fast iteration, small-to-medium plans.
+> **1. Rolling-Wave Execution (this session)** — Use ring:executing-plans: implement Phase 1, checkpoint with you, elaborate Phase 2 into tasks against the real codebase, implement, and repeat. Best for iterative delivery with course-correction between phases.
 >
-> **2. Subagent-Orchestrated (ring:dev-cycle)** — lean backend cycle (Gate 0/8/9) with parallel specialist dispatch (backend-engineer-golang/typescript, qa-analyst, code-reviewer, etc.). Best for production work that must pass through the full review pool.
+> **2. Subagent-Orchestrated (ring:dev-cycle)** — lean backend cycle (Gate 0/8/9) with parallel specialist dispatch. Best for production work that must pass through the full review pool.
 >
 > Which approach?
 
-**If Inline Execution chosen:** Continue with ring:executing-plans in this session.
+**If Rolling-Wave chosen:** Continue with ring:executing-plans in this session.
 
 **If Subagent-Orchestrated chosen:** Hand off to ring:dev-cycle, which owns implementation across Gates 0–10.
 
 ## Verification Checklist
 
 Before marking the plan complete:
-- [ ] Plan header present (Goal, Architecture, Tech Stack)
-- [ ] File structure mapped before tasks
-- [ ] Every task has exact file paths and complete code
-- [ ] Every code step has a code block; every command step has a command
-- [ ] No placeholders ("TBD", "TODO", "appropriate error handling")
-- [ ] Type and naming consistency across tasks
+- [ ] Plan header present (Goal, Architecture, Tech Stack, Phase Overview)
+- [ ] Every phase ends in working, testable software
+- [ ] Every epic has Goal, Scope, Dependencies, Done-when
+- [ ] Phase 1 epics fully broken into dispatch-ready tasks; later phases epic-level only
+- [ ] No vague tasks in the detailed wave (no "appropriate", "TBD", unnamed edge cases)
+- [ ] Code snippets only where the Code Snippet Policy justifies them
+- [ ] Contract consistency across epics
 - [ ] Self-review checklist applied
 - [ ] Plan saved to `docs/plans/YYYY-MM-DD-<feature-name>.md`
 - [ ] Execution handoff offered
 
 ## Worked Example
 
-<example title="Complete task for adding a new service method">
-### Task 3: Implement GetTransactionByID service method
+<example title="Phase 1 epic with a dispatch-ready task, and a Phase 2 epic left at epic level">
+### Epic 1.1: Transaction lookup service path
+
+**Goal:** `GET /transactions/:id` returns a persisted transaction end-to-end
+**Scope:** `internal/service/`, `internal/handler/`
+**Dependencies:** none
+**Done when:** integration test fetches a seeded transaction by ID; unknown ID returns 404
+
+#### Task 1.1.1: Implement GetTransactionByID service method
+
+- [ ] Done
+
+**Context:** `TransactionRepository` interface already exposes `GetByID` at `internal/domain/repository.go:15`. The service layer (`internal/service/transaction_service.go`) has no read path yet — only `Create`.
+
+**Implementation vision:** Add `GetByID(ctx, id)` to `transactionService`, delegating to the repository. Follow the observability pattern used by `Create` (`transaction_service.go:31-38`): tracking from context, span around the call, `HandleSpanError` on failure. Propagate `domain.ErrNotFound` untouched — the handler layer maps it to 404; do not wrap it. No input validation here: ID format is validated at the handler.
 
 **Files:**
 - Modify: `internal/service/transaction_service.go`
-- Modify: `internal/service/transaction_service_test.go`
+- Test: `internal/service/transaction_service_test.go`
 
-**Prerequisites:**
-- `TransactionRepository` interface must exist at `internal/domain/repository.go:15`
+**Verification:** `go test ./internal/service/... -run TestTransactionService_GetByID -v` — found and not-found cases both pass; not-found asserts `errors.Is(err, domain.ErrNotFound)`.
 
-- [ ] **Step 1: Write the failing test**
+**Done when:** service returns the transaction for a known ID and `domain.ErrNotFound` for an unknown one, with span + log coverage matching the `Create` pattern.
 
-```go
-func TestTransactionService_GetByID_Found(t *testing.T) {
-    mockRepo := &mockTransactionRepo{}
-    svc := NewTransactionService(mockRepo)
+---
 
-    expected := &domain.Transaction{ID: "txn-123", Amount: decimal.NewFromInt(100)}
-    mockRepo.On("GetByID", mock.Anything, "txn-123").Return(expected, nil)
+### Epic 2.1: Transaction list endpoint with cursor pagination
 
-    result, err := svc.GetByID(context.Background(), "txn-123")
-    require.NoError(t, err)
-    assert.Equal(t, "txn-123", result.ID)
-    assert.True(t, decimal.NewFromInt(100).Equal(result.Amount))
-}
+**Goal:** `GET /transactions` returns tenant-scoped pages of transactions
+**Scope:** `internal/service/`, `internal/handler/`, repository query layer
+**Dependencies:** Epic 1.1 (read path patterns established there)
+**Done when:** paginated listing works against seeded data; cursor round-trips; page size capped at 100
 
-func TestTransactionService_GetByID_NotFound(t *testing.T) {
-    mockRepo := &mockTransactionRepo{}
-    svc := NewTransactionService(mockRepo)
-    mockRepo.On("GetByID", mock.Anything, "missing").Return(nil, domain.ErrNotFound)
-
-    _, err := svc.GetByID(context.Background(), "missing")
-    assert.ErrorIs(t, err, domain.ErrNotFound)
-}
-```
-
-- [ ] **Step 2: Verify tests fail**
-
-Run: `go test ./internal/service/... -run TestTransactionService_GetByID -v`
-Expected: `FAIL: TestTransactionService_GetByID_Found — method GetByID undefined`
-
-- [ ] **Step 3: Implement**
-
-```go
-func (s *transactionService) GetByID(ctx context.Context, id string) (*domain.Transaction, error) {
-    logger, tracer, _, _ := observability.NewTrackingFromContext(ctx)
-    ctx, span := tracer.Start(ctx, "service.transaction.get_by_id")
-    defer span.End()
-
-    logger.Infof("Getting transaction: id=%s", id)
-
-    txn, err := s.repo.GetByID(ctx, id)
-    if err != nil {
-        libOpentelemetry.HandleSpanError(&span, "failed to get transaction", err)
-        return nil, err
-    }
-
-    return txn, nil
-}
-```
-
-- [ ] **Step 4: Verify tests pass**
-
-Run: `go test ./internal/service/... -run TestTransactionService_GetByID -v`
-Expected: `PASS: TestTransactionService_GetByID_Found` and `PASS: TestTransactionService_GetByID_NotFound`
-
-- [ ] **Step 5: Commit**
-
-Use ring:commit skill to stage and commit changes.
-
-**If Task Fails:**
-1. Compile errors → check `go build ./...` for missing imports
-2. Mock not working → verify mock implements the interface: `go vet ./...`
-3. Test still fails → `git stash`, re-read the repository interface at `internal/domain/repository.go:15`
+*(No tasks yet — elaborated by ring:executing-plans after Phase 1 lands, against the read-path patterns Phase 1 actually established.)*
 </example>

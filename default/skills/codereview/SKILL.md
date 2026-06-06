@@ -5,7 +5,7 @@ description: |
   (code, business-logic, security, test, nil-safety, dead-code, performance,
   multi-tenant, lib-commons), plus up to 3 conditional stack specialists when
   their triggers match (lib-observability, lib-systemplane, lib-streaming).
-  Runs at TASK cadence — reviewers see cumulative diff, not per-subtask fragments. Report-only: no automatic remediation.
+  Runs at EPIC cadence — one review per epic over the cumulative diff of its tasks, not per-task fragments. Report-only: no automatic remediation.
 ---
 
 # Code Review (Gate 8)
@@ -109,8 +109,8 @@ Emit all selected Task calls in a SINGLE TURN, as one atomic batch.
 If your runtime exposes a `multi_tool_use.parallel` wrapper, use it to dispatch the complete selected pool in one wrapped invocation. The STOP-CHECK, anti-trickle, and self-verify guards remain binding regardless of runtime.
 
 Read `reviewers/dispatch-prompts.md` for the prompt templates. Inject:
-- Task-level scope header (when `scope=task`)
-- `base_sha` / `head_sha` from cumulative_diff_range when task-level
+- Epic-level scope header (when `scope=epic`)
+- `base_sha` / `head_sha` from cumulative_diff_range when epic-level
 - Ring standards slice (cache-first per `shared-patterns/standards-cache-protocol.md`)
 - Explicit instruction that reviewers must report findings only and must not modify files
 
@@ -161,7 +161,7 @@ All of these mean: stop and produce the session report instead.
 **Unit ID:** [unit_id]
 **Base:** [base_sha]
 **Head:** [head_sha]
-**Scope:** [task|branch|provided]
+**Scope:** [epic|branch|provided]
 **Reviewers Dispatched:** [9-12]
 **Conditional Specialists Triggered:** [none|list]
 

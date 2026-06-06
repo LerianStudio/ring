@@ -22,7 +22,7 @@ description: |
 
 ## Sequence
 
-**Runs before:** ring:pre-dev-task-breakdown
+**Runs before:** ring:pre-dev-phases-and-epics
 **Runs after:** ring:pre-dev-data-model
 
 

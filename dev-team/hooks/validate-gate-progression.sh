@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 # validate-gate-progression.sh
 # PreToolUse hook for the lean backend ring:dev-cycle.
+# Phased rolling-wave model (state v2.0.0): epics[] iterate, tasks[] are the Gate 0 unit.
 # Active backend gates:
-#   Gate 0: implementation-owned TDD, coverage, local runtime, delivery verification
-#   Gate 8: task-level review
+#   Gate 0: implementation-owned TDD, coverage, local runtime, delivery verification (per task T-X.Y.Z)
+#   Gate 8: epic-level review (per epic E-X.Y)
 #   Gate 9: user validation (not programmatically checked)
+# Also guards: an epic in an un-elaborated phase MUST NOT enter Gate 0.
 
 set -euo pipefail
 
@@ -37,19 +39,19 @@ if ! echo "$CONTENT" | jq empty 2>/dev/null; then
 fi
 
 STATE="$CONTENT"
-CURRENT_TASK_INDEX=$(echo "$STATE" | jq -r '.current_task_index // 0')
+CURRENT_EPIC_INDEX=$(echo "$STATE" | jq -r '.current_epic_index // 0')
 TARGET_GATE=$(echo "$STATE" | jq -r '.current_gate // 0')
-TASK_COUNT=$(echo "$STATE" | jq -r '(.tasks // []) | length')
+EPIC_COUNT=$(echo "$STATE" | jq -r '(.epics // []) | length')
 
-if ! [[ "$CURRENT_TASK_INDEX" =~ ^[0-9]+$ ]]; then
-  deny "Invalid current_task_index: $CURRENT_TASK_INDEX"
+if ! [[ "$CURRENT_EPIC_INDEX" =~ ^[0-9]+$ ]]; then
+  deny "Invalid current_epic_index: $CURRENT_EPIC_INDEX"
 fi
 
-if [[ "$CURRENT_TASK_INDEX" -ge "$TASK_COUNT" ]]; then
-  deny "current_task_index out of range: $CURRENT_TASK_INDEX (tasks: $TASK_COUNT)"
+if [[ "$CURRENT_EPIC_INDEX" -ge "$EPIC_COUNT" ]]; then
+  deny "current_epic_index out of range: $CURRENT_EPIC_INDEX (epics: $EPIC_COUNT)"
 fi
 
-TASK_GATES=$(echo "$STATE" | jq -c ".tasks[$CURRENT_TASK_INDEX].gate_progress // {}")
+EPIC_GATES=$(echo "$STATE" | jq -c ".epics[$CURRENT_EPIC_INDEX].gate_progress // {}")
 
 errors=()
 
@@ -62,46 +64,67 @@ gate_to_num() {
   esac
 }
 
-validate_gate_0_for_subtask() {
+validate_gate_0_for_task() {
   local idx="$1"
-  local subtask_id tdd_red tdd_green delivery coverage threshold runtime_verified
+  local task_id tdd_red tdd_green delivery coverage threshold runtime_verified
 
-  subtask_id=$(echo "$STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].subtasks[$idx].id // \"S-???\"")
+  task_id=$(echo "$STATE" | jq -r ".epics[$CURRENT_EPIC_INDEX].tasks[$idx].id // \"T-???\"")
 
-  tdd_red=$(echo "$STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].subtasks[$idx].gate_progress.implementation.tdd_red.status // \"pending\"")
-  tdd_green=$(echo "$STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].subtasks[$idx].gate_progress.implementation.tdd_green.status // \"pending\"")
-  delivery=$(echo "$STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].subtasks[$idx].gate_progress.implementation.delivery_verified // false")
-  coverage=$(echo "$STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].subtasks[$idx].gate_progress.implementation.coverage_actual // 0")
-  threshold=$(echo "$STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].subtasks[$idx].gate_progress.implementation.coverage_threshold // 85")
-  runtime_verified=$(echo "$STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].subtasks[$idx].gate_progress.implementation.local_runtime_verified // false")
+  tdd_red=$(echo "$STATE" | jq -r ".epics[$CURRENT_EPIC_INDEX].tasks[$idx].gate_progress.implementation.tdd_red.status // \"pending\"")
+  tdd_green=$(echo "$STATE" | jq -r ".epics[$CURRENT_EPIC_INDEX].tasks[$idx].gate_progress.implementation.tdd_green.status // \"pending\"")
+  delivery=$(echo "$STATE" | jq -r ".epics[$CURRENT_EPIC_INDEX].tasks[$idx].gate_progress.implementation.delivery_verified // false")
+  coverage=$(echo "$STATE" | jq -r ".epics[$CURRENT_EPIC_INDEX].tasks[$idx].gate_progress.implementation.coverage_actual // 0")
+  threshold=$(echo "$STATE" | jq -r ".epics[$CURRENT_EPIC_INDEX].tasks[$idx].gate_progress.implementation.coverage_threshold // 85")
+  runtime_verified=$(echo "$STATE" | jq -r ".epics[$CURRENT_EPIC_INDEX].tasks[$idx].gate_progress.implementation.local_runtime_verified // false")
 
-  [[ "$tdd_red" == "completed" ]] || errors+=("Gate 0 ($subtask_id): TDD-RED not completed")
-  [[ "$tdd_green" == "completed" ]] || errors+=("Gate 0 ($subtask_id): TDD-GREEN not completed")
-  [[ "$delivery" == "true" ]] || errors+=("Gate 0 ($subtask_id): delivery verification missing")
+  [[ "$tdd_red" == "completed" ]] || errors+=("Gate 0 ($task_id): TDD-RED not completed")
+  [[ "$tdd_green" == "completed" ]] || errors+=("Gate 0 ($task_id): TDD-GREEN not completed")
+  [[ "$delivery" == "true" ]] || errors+=("Gate 0 ($task_id): delivery verification missing")
 
   if ! [[ "$coverage" =~ ^[0-9]+\.?[0-9]*$ ]] || ! [[ "$threshold" =~ ^[0-9]+\.?[0-9]*$ ]]; then
-    errors+=("Gate 0 ($subtask_id): invalid coverage data")
+    errors+=("Gate 0 ($task_id): invalid coverage data")
   elif awk "BEGIN {exit !($coverage < $threshold)}"; then
-    errors+=("Gate 0 ($subtask_id): coverage $coverage% < threshold $threshold%")
+    errors+=("Gate 0 ($task_id): coverage $coverage% < threshold $threshold%")
   fi
 
   if [[ "$runtime_verified" != "true" ]]; then
-    errors+=("Gate 0 ($subtask_id): local runtime verification missing or explicitly false")
+    errors+=("Gate 0 ($task_id): local runtime verification missing or explicitly false")
+  fi
+}
+
+# Phase guard: an epic whose phase is not detailed/in_progress is not elaborated
+# and MUST NOT enter Gate 0 (its tasks[] is empty until its phase boundary runs).
+validate_phase_elaborated() {
+  local epic_phase phase_status
+  epic_phase=$(echo "$STATE" | jq -r ".epics[$CURRENT_EPIC_INDEX].phase // empty")
+  # No phase field (legacy/flat fallback without phases[]) → skip guard.
+  if [[ -z "$epic_phase" ]]; then
+    return
+  fi
+  phase_status=$(echo "$STATE" | jq -r "(.phases // []) | map(select(.phase == ($epic_phase | tonumber))) | .[0].status // empty")
+  # No phases[] entry to look up → skip guard (don't block on missing metadata).
+  if [[ -z "$phase_status" ]]; then
+    return
+  fi
+  if [[ "$phase_status" != "detailed" && "$phase_status" != "in_progress" ]]; then
+    errors+=("Gate 0: phase not elaborated (epic phase $epic_phase has status '$phase_status'; expected 'detailed' or 'in_progress')")
   fi
 }
 
 validate_gate_0() {
-  local subtask_count
-  subtask_count=$(echo "$STATE" | jq -r ".tasks[$CURRENT_TASK_INDEX].subtasks | length // 0")
+  local task_count
+  task_count=$(echo "$STATE" | jq -r ".epics[$CURRENT_EPIC_INDEX].tasks | length // 0")
 
-  if [[ "$subtask_count" -eq 0 ]]; then
+  validate_phase_elaborated
+
+  if [[ "$task_count" -eq 0 ]]; then
     local tdd_red tdd_green delivery coverage threshold runtime_verified
-    tdd_red=$(echo "$TASK_GATES" | jq -r '.implementation.tdd_red.status // "pending"')
-    tdd_green=$(echo "$TASK_GATES" | jq -r '.implementation.tdd_green.status // "pending"')
-    delivery=$(echo "$TASK_GATES" | jq -r '.implementation.delivery_verified // false')
-    coverage=$(echo "$TASK_GATES" | jq -r '.implementation.coverage_actual // 0')
-    threshold=$(echo "$TASK_GATES" | jq -r '.implementation.coverage_threshold // 85')
-    runtime_verified=$(echo "$TASK_GATES" | jq -r '.implementation.local_runtime_verified // false')
+    tdd_red=$(echo "$EPIC_GATES" | jq -r '.implementation.tdd_red.status // "pending"')
+    tdd_green=$(echo "$EPIC_GATES" | jq -r '.implementation.tdd_green.status // "pending"')
+    delivery=$(echo "$EPIC_GATES" | jq -r '.implementation.delivery_verified // false')
+    coverage=$(echo "$EPIC_GATES" | jq -r '.implementation.coverage_actual // 0')
+    threshold=$(echo "$EPIC_GATES" | jq -r '.implementation.coverage_threshold // 85')
+    runtime_verified=$(echo "$EPIC_GATES" | jq -r '.implementation.local_runtime_verified // false')
 
     [[ "$tdd_red" == "completed" ]] || errors+=("Gate 0: TDD-RED not completed")
     [[ "$tdd_green" == "completed" ]] || errors+=("Gate 0: TDD-GREEN not completed")
@@ -115,38 +138,38 @@ validate_gate_0() {
     return
   fi
 
-  for ((i=0; i<subtask_count; i++)); do
-    validate_gate_0_for_subtask "$i"
+  for ((i=0; i<task_count; i++)); do
+    validate_gate_0_for_task "$i"
   done
 }
 
 validate_gate_8() {
   local status default_failures optional_failures
-  status=$(echo "$TASK_GATES" | jq -r '.review.status // "pending"')
+  status=$(echo "$EPIC_GATES" | jq -r '.review.status // "pending"')
   [[ "$status" == "completed" ]] || errors+=("Gate 8 (Review): not completed")
 
-  default_failures=$(echo "$STATE" | jq -r --argjson idx "$CURRENT_TASK_INDEX" '
+  default_failures=$(echo "$STATE" | jq -r --argjson idx "$CURRENT_EPIC_INDEX" '
     [
-      {name: "code_reviewer", verdict: .tasks[$idx].agent_outputs.review.code_reviewer.verdict},
-      {name: "business_logic_reviewer", verdict: .tasks[$idx].agent_outputs.review.business_logic_reviewer.verdict},
-      {name: "security_reviewer", verdict: .tasks[$idx].agent_outputs.review.security_reviewer.verdict},
-      {name: "nil_safety_reviewer", verdict: .tasks[$idx].agent_outputs.review.nil_safety_reviewer.verdict},
-      {name: "test_reviewer", verdict: .tasks[$idx].agent_outputs.review.test_reviewer.verdict},
-      {name: "dead_code_reviewer", verdict: .tasks[$idx].agent_outputs.review.dead_code_reviewer.verdict},
-      {name: "performance_reviewer", verdict: .tasks[$idx].agent_outputs.review.performance_reviewer.verdict},
-      {name: "multi_tenant_reviewer", verdict: .tasks[$idx].agent_outputs.review.multi_tenant_reviewer.verdict},
-      {name: "lib_commons_reviewer", verdict: .tasks[$idx].agent_outputs.review.lib_commons_reviewer.verdict}
+      {name: "code_reviewer", verdict: .epics[$idx].agent_outputs.review.code_reviewer.verdict},
+      {name: "business_logic_reviewer", verdict: .epics[$idx].agent_outputs.review.business_logic_reviewer.verdict},
+      {name: "security_reviewer", verdict: .epics[$idx].agent_outputs.review.security_reviewer.verdict},
+      {name: "nil_safety_reviewer", verdict: .epics[$idx].agent_outputs.review.nil_safety_reviewer.verdict},
+      {name: "test_reviewer", verdict: .epics[$idx].agent_outputs.review.test_reviewer.verdict},
+      {name: "dead_code_reviewer", verdict: .epics[$idx].agent_outputs.review.dead_code_reviewer.verdict},
+      {name: "performance_reviewer", verdict: .epics[$idx].agent_outputs.review.performance_reviewer.verdict},
+      {name: "multi_tenant_reviewer", verdict: .epics[$idx].agent_outputs.review.multi_tenant_reviewer.verdict},
+      {name: "lib_commons_reviewer", verdict: .epics[$idx].agent_outputs.review.lib_commons_reviewer.verdict}
     ]
     | map(select(.verdict != "PASS"))
     | map(.name + "=" + (.verdict // "missing"))
     | join(", ")
   ')
 
-  optional_failures=$(echo "$STATE" | jq -r --argjson idx "$CURRENT_TASK_INDEX" '
+  optional_failures=$(echo "$STATE" | jq -r --argjson idx "$CURRENT_EPIC_INDEX" '
     [
-      {name: "lib_observability_reviewer", verdict: .tasks[$idx].agent_outputs.review.lib_observability_reviewer.verdict},
-      {name: "lib_systemplane_reviewer", verdict: .tasks[$idx].agent_outputs.review.lib_systemplane_reviewer.verdict},
-      {name: "lib_streaming_reviewer", verdict: .tasks[$idx].agent_outputs.review.lib_streaming_reviewer.verdict}
+      {name: "lib_observability_reviewer", verdict: .epics[$idx].agent_outputs.review.lib_observability_reviewer.verdict},
+      {name: "lib_systemplane_reviewer", verdict: .epics[$idx].agent_outputs.review.lib_systemplane_reviewer.verdict},
+      {name: "lib_streaming_reviewer", verdict: .epics[$idx].agent_outputs.review.lib_streaming_reviewer.verdict}
     ]
     | map(select(.verdict != null and .verdict != "PASS"))
     | map(.name + "=" + .verdict)
@@ -188,7 +211,7 @@ if [[ ${#errors[@]} -gt 0 ]]; then
     hookSpecificOutput: {
       hookEventName: "PreToolUse",
       permissionDecision: "deny",
-      permissionDecisionReason: ("Lean backend dev-cycle progression blocked:\n" + ($errors | map("- " + .) | join("\n")) + "\n\nRecovery: fix Gate 0 via ring:dev-implementation, then run Gate 8 via ring:codereview before Gate 9 validation.")
+      permissionDecisionReason: ("Lean backend dev-cycle progression blocked:\n" + ($errors | map("- " + .) | join("\n")) + "\n\nRecovery: complete Gate 0 (per task T-X.Y.Z) via ring:dev-implementation for every task of the current epic, then run Gate 8 (per epic) via ring:codereview before Gate 9 validation. On a phase-not-elaborated error: run the phase boundary (Step 11.5, gates/phase-boundary.md) to elaborate the epic phase before entering Gate 0.")
     }
   }'
   exit 0

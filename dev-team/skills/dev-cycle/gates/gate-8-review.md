@@ -1,33 +1,33 @@
-## Step 10: Gate 8 - Review (Per Task — after all subtasks complete Gate 0 and before Gate 9)
+## Step 10: Gate 8 - Review (Per Epic — after all tasks complete Gate 0 and before Gate 9)
 
-⛔ **CADENCE:** This gate runs ONCE per task, NOT per subtask. Reviewers see the CUMULATIVE diff of all subtasks in the task — cross-subtask interaction bugs (contract drift, hidden coupling, duplicated logic) are MORE visible at this cadence, not less.
+⛔ **CADENCE:** This gate runs ONCE per epic, NOT per task. Reviewers see the CUMULATIVE diff of all tasks in the epic — cross-task interaction bugs (contract drift, hidden coupling, duplicated logic) are MORE visible at this cadence, not less.
 
 **REQUIRED SUB-SKILL:** Use `ring:codereview`
 
 ### Step 10.1: Prepare Input for ring:codereview Skill
 
-⛔ **Input scope:** TASK-level. `base_sha` is the SHA before the FIRST subtask's Gate 0 (i.e., the task's starting commit); `head_sha` is the current HEAD after all subtasks up to this point. The resulting diff covers ALL subtasks of the task.
+⛔ **Input scope:** EPIC-level. `base_sha` is the SHA before the FIRST task's Gate 0 (i.e., the epic's starting commit); `head_sha` is the current HEAD after all tasks up to this point. The resulting diff covers ALL tasks of the epic.
 
 ```text
-task = state.tasks[state.current_task_index]
+epic = state.epics[state.current_epic_index]
 
 review_input = {
-  // REQUIRED - TASK-level
-  unit_id: task.id,  // TASK id
-  base_sha: task.base_sha,            // SHA before the FIRST subtask started
-  head_sha: [current HEAD],           // SHA after all subtasks up to this point
+  // REQUIRED - EPIC-level
+  unit_id: epic.id,  // EPIC id (E-X.Y)
+  base_sha: epic.base_sha,            // SHA before the FIRST task started
+  head_sha: [current HEAD],           // SHA after all tasks up to this point
 
-  // REQUIRED - summary and requirements aggregated from task + subtasks
-  implementation_summary: task.title + "\n" +
-    task.subtasks.map(st => "- " + st.title + ": " + (st.summary || "")).join("\n"),
-  requirements: task.acceptance_criteria
-    || flatten(task.subtasks.map(st => st.acceptance_criteria || [])),
+  // REQUIRED - summary and requirements aggregated from epic + tasks
+  implementation_summary: epic.title + "\n" +
+    epic.tasks.map(t => "- " + t.id + ": " + (t.summary || "")).join("\n"),
+  requirements: epic.acceptance_criteria
+    || flatten(epic.tasks.map(t => t.acceptance_criteria || [])),
 
   // OPTIONAL - additional context
-  implementation_files: flatten(task.subtasks.map(st =>
-    st.gate_progress.implementation.files_changed || []
-  )),  // UNION across subtasks
-  gate0_handoffs: task.subtasks.map(st => st.gate_progress.implementation)  // ARRAY
+  implementation_files: flatten(epic.tasks.map(t =>
+    t.gate_progress.implementation.files_changed || []
+  )),  // UNION across tasks
+  gate0_handoffs: epic.tasks.map(t => t.gate_progress.implementation)  // ARRAY
 }
 ```
 
@@ -40,12 +40,12 @@ review_input = {
 
    Skill("ring:codereview") with input:
      unit_id: review_input.unit_id                    # TASK id
-     base_sha: review_input.base_sha                  # SHA before first subtask
+     base_sha: review_input.base_sha                  # SHA before first task
      head_sha: review_input.head_sha                  # Current HEAD (cumulative diff)
      implementation_summary: review_input.implementation_summary
      requirements: review_input.requirements
-     implementation_files: review_input.implementation_files  # UNION across subtasks
-     gate0_handoffs: review_input.gate0_handoffs      # ARRAY of subtask handoffs
+     implementation_files: review_input.implementation_files  # UNION across tasks
+     gate0_handoffs: review_input.gate0_handoffs      # ARRAY of task handoffs
 
    The skill handles:
    - Dispatching all 9 default reviewers plus triggered specialists in PARALLEL (single message)

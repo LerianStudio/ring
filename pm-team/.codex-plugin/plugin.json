@@ -21,14 +21,14 @@
     "data-model",
     "workflow",
     "feature-planning",
-    "task-breakdown"
+    "phases-and-epics"
   ],
   "skills": "./skills/",
   "agents": "./agents/",
   "interface": {
     "displayName": "Ring PM Team",
-    "shortDescription": "Pre-dev planning workflows: PRD, TRD, API design, data model, task breakdown",
-    "longDescription": "Structured pre-development workflow for the Lerian team. 5-gate orchestrator for small features (<2 days) and 10-gate orchestrator for large features (≥2 days). Each gate produces a versioned artifact (research, PRD, feature-map, TRD, API design, data model, dependency map, task breakdown, subtask creation, delivery planning) with human approval between gates.",
+    "shortDescription": "Pre-dev planning workflows: PRD, TRD, API design, data model, phases and epics",
+    "longDescription": "Structured pre-development workflow for the Lerian team. 5-gate orchestrator for small features (<2 days) and 10-gate orchestrator for large features (≥2 days). Each gate produces a versioned artifact (research, PRD, feature-map, TRD, API design, data model, dependency map, phased plan with phases and epics, Phase 1 task creation, delivery planning) with human approval between gates.",
     "developerName": "Lerian Studio",
     "category": "Productivity",
     "capabilities": [

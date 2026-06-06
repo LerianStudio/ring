@@ -26,18 +26,20 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
 
 ```json
 {
-  "version": "1.1.0",
+  "version": "2.0.0",
   "cycle_id": "uuid",
   "started_at": "ISO timestamp",
   "updated_at": "ISO timestamp",
   "source_file": "path/to/tasks.md",
   "state_path": "docs/ring:dev-cycle/current-cycle.json | docs/ring:dev-refactor/current-cycle.json",
   "cycle_type": "feature | refactor",
-  "execution_mode": "manual_per_subtask|manual_per_task|automatic",
-  "commit_timing": "per_subtask|per_task|at_end",
+  "execution_mode": "manual_per_task|manual_per_epic|automatic",
+  "commit_timing": "per_task|per_epic|at_end",
+  "_comment_phase_checkpoint": "Asked at cycle init alongside execution_mode. 'manual' (default): AskUserQuestion at each phase boundary (Step 11.5) before elaborating the next phase. 'auto': log a phase summary and continue without pausing.",
+  "phase_checkpoint": "manual|auto",
   "_comment_cached_standards": "Populated by Step 1.5 (Standards Pre-Cache). Dictionary of URL → {fetched_at, content}. Sub-skills MUST read from here instead of calling WebFetch.",
   "cached_standards": {},
-  "_comment_visual_report_granularity": "Opt-in code-diff report via ring:visualize: 'none' (default, no report) | 'task' (aggregate per task) | 'subtask' (per subtask).",
+  "_comment_visual_report_granularity": "Opt-in code-diff report via ring:visualize: 'none' (default, no report) | 'epic' (aggregate per epic) | 'task' (per task).",
   "visual_report_granularity": "none",
   "custom_prompt": {
     "type": "string",
@@ -46,12 +48,18 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
     "description": "User-provided context for agents (from second positional argument). Max 500 characters. Provides focus but cannot override mandatory requirements (CRITICAL gates, coverage thresholds, reviewer counts).",
     "validation": "Max 500 chars (truncated with warning if exceeded); whitespace trimmed; control chars stripped (except newlines). Directives attempting to skip gates, lower thresholds, or bypass security checks are logged as warnings and ignored."
   },
-  "status": "in_progress|completed|failed|paused|paused_for_approval|paused_for_testing|paused_for_task_approval|paused_for_integration_testing",
+  "status": "in_progress|completed|failed|paused|paused_for_approval|paused_for_testing|paused_for_epic_approval|paused_for_integration_testing|paused_for_phase_review",
   "feedback_loop_completed": false,
-  "current_task_index": 0,
+  "_comment_phases": "Parsed from the tasks.md '## Phase Overview' table at init. status mirrors the Phase Overview Status cell: 'epic-level' (not yet task-detailed) | 'detailed' (tasks written, ready to enter Gate 0) | 'in_progress' (epics of this phase executing) | 'complete' (all epics done). FALLBACK: a tasks.md without a '## Phase Overview' (ring:dev-refactor output, flat plans) synthesizes a single phase 1 with status 'detailed' containing all epics.",
+  "phases": [
+    {"phase": 1, "milestone": "what works at the end", "status": "detailed"},
+    {"phase": 2, "milestone": "what works at the end", "status": "epic-level"}
+  ],
+  "current_phase": 1,
+  "current_epic_index": 0,
   "current_gate": 0,
-  "current_subtask_index": 0,
-  "_comment_migration_safety_verification": "Populated at Step 12.0.5b (Gate 0.5D — Migration Safety, conditional on SQL migration files present in cycle diff vs origin/main). Cycle-cadence (runs once per cycle, not per task/subtask). status transitions: pending → skipped (no migration files) | completed (no BLOCKING findings) | blocked (BLOCKING unacknowledged) | acknowledged (ACKNOWLEDGE findings approved by user). See Step 12.0.5b state persistence block for full shape.",
+  "current_task_index": 0,
+  "_comment_migration_safety_verification": "Populated at Step 12.0.5b (Gate 0.5D — Migration Safety, conditional on SQL migration files present in cycle diff vs origin/main). Cycle-cadence (runs once per cycle, not per epic/task). status transitions: pending → skipped (no migration files) | completed (no BLOCKING findings) | blocked (BLOCKING unacknowledged) | acknowledged (ACKNOWLEDGE findings approved by user). See Step 12.0.5b state persistence block for full shape.",
   "gate_progress": {
     "migration_safety_verification": {
       "status": "pending|completed|skipped|blocked|acknowledged",
@@ -67,14 +75,15 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
       "completed_at": null
     }
   },
-  "tasks": [
+  "epics": [
     {
-      "id": "T-001",
-      "title": "Task title",
+      "id": "E-1.1",
+      "title": "Epic title",
+      "phase": 1,
       "status": "pending|in_progress|completed|failed|blocked",
-      "base_sha": "git HEAD SHA captured at task start, before the first subtask's Gate 0; lower bound of the Gate 8 cumulative review diff",
+      "base_sha": "git HEAD SHA captured at epic start, before the first task's Gate 0; lower bound of the Gate 8 cumulative review diff",
       "feedback_loop_completed": false,
-      "_comment_accumulated_metrics": "Populated at Step 11.1 (Task Approval Checkpoint). Aggregated at cycle end by ring:dev-report (Step 12.1).",
+      "_comment_accumulated_metrics": "Populated at Step 11.1 (Epic Approval Checkpoint). Aggregated at cycle end by ring:dev-report (Step 12.1).",
       "accumulated_metrics": {
         "gate_durations_ms": {},
         "review_iterations": 0,
@@ -86,11 +95,10 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
           "LOW": 0
         }
       },
-      "_comment_subtask_gate_progress": "Subtask-level gate_progress holds ONLY implementation (Gate 0). Gate 0 includes TDD, coverage, local docker-compose/runtime, and delivery verification. Task-level review (Gate 8) AND validation (Gate 9) live in task.gate_progress, not here. A task with no subtasks of its own carries one synthetic subtask entry (the task-itself unit), so every Gate 0 handoff lives under subtasks[] uniformly.",
-      "subtasks": [
+      "_comment_task_gate_progress": "Task-level gate_progress holds ONLY implementation (Gate 0). Gate 0 includes TDD, coverage, local docker-compose/runtime, and delivery verification. Epic-level review (Gate 8) AND validation (Gate 9) live in epic.gate_progress, not here. An epic with no task breakdown of its own (FALLBACK plans) carries one synthetic task entry (the epic-itself unit), so every Gate 0 handoff lives under tasks[] uniformly. Later-phase epics carry tasks: [] until elaborated at their phase boundary (Step 11.5).",
+      "tasks": [
         {
-          "id": "ST-001-01",
-          "file": "subtasks/T-001/ST-001-01.md",
+          "id": "T-1.1.1",
           "status": "pending|completed",
           "gate_progress": {
             "implementation": {
@@ -118,7 +126,7 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
           }
         }
       ],
-      "_comment_task_gate_progress": "Task-level gate_progress holds review (Gate 8) AND validation (Gate 9). The only subtask-cadence gate (0) lives in each subtask's gate_progress. Gate 9 aggregates every subtask's acceptance criteria; criteria_results is keyed by subtask. gate_progress.review is the Gate 8 VERDICT only (status + completed_at); reviewer detail — iterations, pass counts, per-reviewer outputs — lives in agent_outputs.review, never duplicated here.",
+      "_comment_epic_gate_progress": "Epic-level gate_progress holds review (Gate 8) AND validation (Gate 9). The only task-cadence gate (0) lives in each task's gate_progress. Gate 9 aggregates every task's acceptance criteria; criteria_results is keyed by task. gate_progress.review is the Gate 8 VERDICT only (status + completed_at); reviewer detail — iterations, pass counts, per-reviewer outputs — lives in agent_outputs.review, never duplicated here.",
       "gate_progress": {
         "review": {"status": "pending", "completed_at": null},
         "validation": {
@@ -186,6 +194,29 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
   }
 }
 ```
+
+### Version Guard (Init / Resume — MANDATORY)
+
+State schema is `version: "2.0.0"` (phased rolling-wave model).
+
+- **On resume:** if an existing `current-cycle.json` has `version` starting with `1.` (any 1.x) → ⛔ STOP. Do NOT attempt migration. Tell the user: *"This cycle was started with the pre-phased (v1.x) dev-cycle. Complete or cancel it with the prior skill version, or delete `{state_path}` to re-init under the phased model (v2.0.0)."* The schemas are not field-compatible (tasks→epics, subtasks→tasks); silent migration would corrupt the cycle.
+- **On init:** always write `version: "2.0.0"`.
+
+### Initialization (Parse the Phased Plan)
+
+At cycle init, parse `state.source_file` (tasks.md):
+
+1. **Phase Overview** (`## Phase Overview` table: `| Phase | Milestone | Epics | Status |`) → `phases[]`. Map the Status cell: `Epic-level` → `"epic-level"`, `Detailed` → `"detailed"`, `Complete` → `"complete"`. Set `current_phase` to the lowest phase whose status is `detailed` (the active wave; normally Phase 1).
+2. **Summary** (`## Summary` table: `| Epic | Title | Phase | Type | Hours | Confidence | Blocks | Status |`) → ALL epics load into `epics[]`, each with its `phase` field from the Phase column. Skip rows whose first cell is `TOTAL` or empty.
+3. **Task blocks** — for each epic in a `detailed` phase, parse the inline `#### Task T-X.Y.Z` blocks under its epic section into `epics[i].tasks[]` (id, and the implementation gate_progress skeleton). Epics in `epic-level` phases load with `tasks: []` — they are elaborated at their phase boundary (Step 11.5).
+
+**FALLBACK — no `## Phase Overview`** (ring:dev-refactor output, flat plans):
+- Synthesize a single `phases[] = [{phase: 1, milestone: "<feature> (flat plan)", status: "detailed"}]`, `current_phase = 1`. Every epic gets `phase: 1`.
+- If an epic has no inline task breakdown, keep the existing synthetic single-unit mechanism: one `tasks[]` entry representing the epic itself (the epic-itself unit), so every Gate 0 handoff lives under `tasks[]` uniformly.
+
+### ⛔ Phase-Elaboration Invariant
+
+An epic whose phase (`phases[]` lookup via `epic.phase`) has status NOT in (`detailed`, `in_progress`) MUST NOT enter Gate 0. Later-phase epics are not dispatch-ready until elaborated at their phase boundary. The hook enforces this; the orchestrator must not attempt to start an un-elaborated epic.
 
 ### Structured Error/Issue Schemas
 
@@ -262,22 +293,22 @@ You MUST execute these steps after completing any active gate (0, 8, or 9):
 ```yaml
 # Step 1: Update state object with gate results (cadence-aware path)
 if gate == 0:
-  state.tasks[current_task_index].subtasks[current_subtask_index].gate_progress.implementation.status = "completed"
-  state.tasks[current_task_index].subtasks[current_subtask_index].gate_progress.implementation.completed_at = "[ISO timestamp]"
-  state.tasks[current_task_index].subtasks[current_subtask_index].gate_progress.implementation.delivery_verified = true
-  state.tasks[current_task_index].subtasks[current_subtask_index].gate_progress.implementation.standards_compliance = [standards result]
-  state.tasks[current_task_index].subtasks[current_subtask_index].gate_progress.implementation.coverage_actual = [coverage percent]
-  state.tasks[current_task_index].subtasks[current_subtask_index].gate_progress.implementation.coverage_threshold = [required coverage percent]
-  state.tasks[current_task_index].subtasks[current_subtask_index].gate_progress.implementation.local_runtime_verified = true
+  state.epics[current_epic_index].tasks[current_task_index].gate_progress.implementation.status = "completed"
+  state.epics[current_epic_index].tasks[current_task_index].gate_progress.implementation.completed_at = "[ISO timestamp]"
+  state.epics[current_epic_index].tasks[current_task_index].gate_progress.implementation.delivery_verified = true
+  state.epics[current_epic_index].tasks[current_task_index].gate_progress.implementation.standards_compliance = [standards result]
+  state.epics[current_epic_index].tasks[current_task_index].gate_progress.implementation.coverage_actual = [coverage percent]
+  state.epics[current_epic_index].tasks[current_task_index].gate_progress.implementation.coverage_threshold = [required coverage percent]
+  state.epics[current_epic_index].tasks[current_task_index].gate_progress.implementation.local_runtime_verified = true
 else if gate == 9:
-  state.tasks[current_task_index].gate_progress.validation.status = "completed"
-  state.tasks[current_task_index].gate_progress.validation.result = "[approved|rejected]"
-  state.tasks[current_task_index].gate_progress.validation.criteria_results = [{subtask_id, criterion, status} for every subtask's aggregated criteria]
-  state.tasks[current_task_index].gate_progress.validation.completed_at = "[ISO timestamp]"
+  state.epics[current_epic_index].gate_progress.validation.status = "completed"
+  state.epics[current_epic_index].gate_progress.validation.result = "[approved|rejected]"
+  state.epics[current_epic_index].gate_progress.validation.criteria_results = [{task_id, criterion, status} for every task's aggregated criteria]
+  state.epics[current_epic_index].gate_progress.validation.completed_at = "[ISO timestamp]"
 else if gate == 8:
-  state.tasks[current_task_index].gate_progress.review.status = "completed"
-  state.tasks[current_task_index].gate_progress.review.completed_at = "[ISO timestamp]"
-  state.tasks[current_task_index].agent_outputs.review = [all reviewer outputs]
+  state.epics[current_epic_index].gate_progress.review.status = "completed"
+  state.epics[current_epic_index].gate_progress.review.completed_at = "[ISO timestamp]"
+  state.epics[current_epic_index].agent_outputs.review = [all reviewer outputs]
 state.current_gate = [next gate per the "current_gate Transitions and Resume" table below]
 state.updated_at = "[ISO timestamp]"
 
@@ -289,59 +320,68 @@ Write tool:
 
 ### `current_gate` Transitions and Resume
 
-`current_gate ∈ {0, 8, 9}` — the gate active within the CURRENT task. It is meaningful only during the per-task loop; the Cycle Completion phase (Steps 12.x) is driven by `status`, not `current_gate`.
+`current_gate ∈ {0, 8, 9}` — the gate active within the CURRENT epic. It is meaningful only during the per-epic loop; the phase boundary (Step 11.5) is driven by `status` (`paused_for_phase_review`) and the Cycle Completion phase (Steps 12.x) by `status` (`completed`), neither by `current_gate`.
 
 | After | Outcome | Set |
 |-------|---------|-----|
-| Gate 0 (subtask) | more subtasks remain | `current_gate = 0`, `current_subtask_index += 1` |
-| Gate 0 (subtask) | last subtask of the task done | `current_gate = 8` |
-| Gate 8 (task) | review passed | `current_gate = 9` |
-| Gate 9 (task) | criterion FAIL (Step 11) | `current_gate = 0`, `current_subtask_index = failing subtask` |
-| Gate 9 (task) | approved, Continue (Step 11.1) | `current_gate = 0`, `current_task_index += 1`, `current_subtask_index = 0` |
-| Gate 9 (task) | approved, last task | leave the task loop → Cycle Completion (status-driven; `current_gate` is not consulted there) |
+| Gate 0 (task) | more tasks remain | `current_gate = 0`, `current_task_index += 1` |
+| Gate 0 (task) | last task of the epic done | `current_gate = 8` |
+| Gate 8 (epic) | review passed | `current_gate = 9` |
+| Gate 9 (epic) | criterion FAIL (Step 11) | `current_gate = 0`, `current_task_index = failing task` |
+| Gate 9 (epic) | approved, Continue (Step 11.1), next epic same phase | `current_gate = 0`, `current_epic_index += 1`, `current_task_index = 0` |
+| Gate 9 (epic) | approved, Continue (Step 11.1), next epic crosses a phase boundary or no epic left | enter Step 11.5 (phase boundary) — see gates/phase-boundary.md |
+| Gate 9 (epic) | approved, last epic of last phase | leave the epic loop → Cycle Completion (status-driven; `current_gate` is not consulted there) |
 
-**Resume** reads `status` + `current_task_index` + `current_subtask_index` + `current_gate` jointly:
+**Resume** reads `status` + `current_epic_index` + `current_task_index` + `current_gate` jointly:
 - `status` gives the macro-state (`in_progress` / `paused_*` / `completed`).
-- `current_gate` + the two indices pinpoint the exact resume point inside the task loop.
+- `current_gate` + the two indices pinpoint the exact resume point inside the epic loop.
 - Pause states resume by `current_gate` + the two indices:
-  - `paused` / `paused_for_task_approval` with `current_gate == 9` → validation passed; the task (still `in_progress`) awaits the human advance decision — re-enter the Step 11.1 checkpoint.
-  - `paused_for_approval` / `paused_for_testing` with `current_gate == 0` → subtask-level pause after Gate 0 — resume at the Gate 0 subtask given by the indices.
-  - `paused_for_integration_testing` with `current_gate == 9` and the current task already `completed` → integration test ran out-of-band; resume by advancing past it (`current_task_index += 1`, `current_subtask_index = 0`, `current_gate = 0`) into the next task's Gate 0, or Cycle Completion if it was the last task.
+  - `paused` / `paused_for_epic_approval` with `current_gate == 9` → validation passed; the epic (still `in_progress`) awaits the human advance decision — re-enter the Step 11.1 checkpoint.
+  - `paused_for_approval` / `paused_for_testing` with `current_gate == 0` → task-level pause after Gate 0 — resume at the Gate 0 task given by the indices.
+  - `paused_for_phase_review` → the last epic of `current_phase` is approved and the cycle is at the phase boundary (Step 11.5) awaiting the user's continue/pause/adjust decision (manual checkpoint) — re-enter gates/phase-boundary.md at the checkpoint step.
+  - `paused_for_integration_testing` with `current_gate == 9` and the current epic already `completed` → integration test ran out-of-band; resume by advancing past it (re-enter Step 11.1's Continue path: next epic same phase, or Step 11.5 if a phase boundary is crossed), or Cycle Completion if it was the last epic of the last phase.
 
 ### State Persistence Checkpoints
 
-⛔ **Cadence-aware write paths.** The subtask-level gate (0) writes to `state.tasks[i].subtasks[j].gate_progress.implementation`. Task-level gates (8, 9) write to `state.tasks[i].gate_progress.review` and `state.tasks[i].gate_progress.validation`. Never write task-level gate status under a subtask and never write subtask-level gate status under the task.
+⛔ **Cadence-aware write paths.** The task-level gate (0) writes to `state.epics[i].tasks[j].gate_progress.implementation`. Epic-level gates (8, 9) write to `state.epics[i].gate_progress.review` and `state.epics[i].gate_progress.validation`. Never write epic-level gate status under a task and never write task-level gate status under the epic.
 
 | Checkpoint | Cadence | MUST Update | MUST Write File |
 |------------|---------|-------------|-----------------|
-| **Before Gate 0 (task start)** | Task | `task.status = "in_progress"` + `task.base_sha = current HEAD SHA` (review-diff lower bound) in JSON **+ tasks.md Status → `🔄 Doing`** | ✅ YES |
-| Gate 0 TDD (RED→GREEN) | Subtask | `state.tasks[i].subtasks[j].gate_progress.implementation.tdd_red` (status + failure_output), `.tdd_green` (status + test_pass_output), `.implementation.status` | ✅ YES |
-| Gate 0 exit (Quality + Delivery Verification) | Subtask | `state.tasks[i].subtasks[j].gate_progress.implementation.delivery_verified = true` + `.standards_compliance` + `.coverage_actual` + `.coverage_threshold` + `.local_runtime_verified` + `.files_changed` (union consumed by Gate 8) | ✅ YES |
-| Step 2.4 (Subtask Checkpoint) | Subtask | `status = "paused_for_approval"` (subtask-level checkpoint; set only when `execution_mode = manual_per_subtask`; fires after Gate 0) | ✅ YES |
-| Gate 8 (Review) | Task | `state.tasks[i].gate_progress.review.status` + `agent_outputs.review` (reviewers see cumulative task diff) | ✅ YES |
-| Gate 9 (Validation) | Task | `state.tasks[i].gate_progress.validation.status` + `.result` + `.criteria_results` (aggregated across ALL subtasks; runs after Gate 8 passes) | ✅ YES |
-| Step 11.1 (Task Approval) | Task | `task.status = "completed"` in JSON **+ tasks.md Status → `✅ Done`** + `task.accumulated_metrics` populated (gate_durations_ms, review_iterations, testing_iterations, issues_by_severity); NO dev-report dispatch here (runs ONCE at Step 12.1) | ✅ YES |
+| **Before Gate 0 (epic start)** | Epic | `epic.status = "in_progress"` + `epic.base_sha = current HEAD SHA` (review-diff lower bound) in JSON **+ tasks.md Status → `🔄 Doing`** | ✅ YES |
+| Gate 0 TDD (RED→GREEN) | Task | `state.epics[i].tasks[j].gate_progress.implementation.tdd_red` (status + failure_output), `.tdd_green` (status + test_pass_output), `.implementation.status` | ✅ YES |
+| Gate 0 exit (Quality + Delivery Verification) | Task | `state.epics[i].tasks[j].gate_progress.implementation.delivery_verified = true` + `.standards_compliance` + `.coverage_actual` + `.coverage_threshold` + `.local_runtime_verified` + `.files_changed` (union consumed by Gate 8) | ✅ YES |
+| Step 2.4 (Task Checkpoint) | Task | `status = "paused_for_approval"` (task-level checkpoint; set only when `execution_mode = manual_per_task`; fires after Gate 0) | ✅ YES |
+| Gate 8 (Review) | Epic | `state.epics[i].gate_progress.review.status` + `agent_outputs.review` (reviewers see cumulative epic diff) | ✅ YES |
+| Gate 9 (Validation) | Epic | `state.epics[i].gate_progress.validation.status` + `.result` + `.criteria_results` (aggregated across ALL tasks; runs after Gate 8 passes) | ✅ YES |
+| Step 11.1 (Epic Approval) | Epic | `epic.status = "completed"` in JSON **+ tasks.md Status → `✅ Done`** + `epic.accumulated_metrics` populated (gate_durations_ms, review_iterations, testing_iterations, issues_by_severity); NO dev-report dispatch here (runs ONCE at Step 12.1) | ✅ YES |
+| Step 11.5 (Phase Boundary) | Phase | At phase close: tasks.md Phase Overview Status → `Complete`, `phases[]` status → `complete`, `status = "paused_for_phase_review"` (manual checkpoint). After elaboration: new phase `phases[]` status → `detailed`, Phase Overview Status → `Detailed`, load new tasks into `epics[].tasks[]`, `current_phase += 1`. See gates/phase-boundary.md. | ✅ YES |
 | Step 12.0.5b (Gate 0.5D — Migration Safety, conditional) | Cycle | `state.gate_progress.migration_safety_verification = {status: "completed" \| "skipped" \| "blocked" \| "acknowledged", reason, files_checked, findings: {BLOCKING: [], WARN: [], ACKNOWLEDGE: []}, user_acknowledgment}` | ✅ YES |
 | Step 12.1 (Cycle end — dev-report) | Cycle | `state.feedback_loop_completed = true` after the ONE AND ONLY `ring:dev-report` dispatch | ✅ YES |
-| HARD BLOCK (any gate) | Task | `task.status = "failed"` in JSON **+ tasks.md Status → `❌ Failed`** | ✅ YES |
+| HARD BLOCK (any gate) | Epic | `epic.status = "failed"` in JSON **+ tasks.md Status → `❌ Failed`** | ✅ YES |
 
-**tasks.md Status update rules (apply at the three checkpoints above):**
+**tasks.md Status update rules (apply at the epic checkpoints above):**
 
 ```text
 If state.source_file is absent or file does not exist → log warning "tasks.md Status updates skipped: source_file missing" and skip all status updates for this cycle.
 
-task_id = state.tasks[state.current_task_index].id
-# Always the parent TASK ID — do NOT use current_subtask_index
-# Rows where column 1 is "TOTAL" or empty → skip, not a task row
+epic_id = state.epics[state.current_epic_index].id
+# Always the parent EPIC ID (E-X.Y) — do NOT use current_task_index
+# Rows where column 1 is "TOTAL" or empty → skip, not an epic row
 
 Use Edit tool on state.source_file (tasks.md):
-- Find the row starting with `| {task_id} |` in the `## Summary` table
+- Find the row starting with `| {epic_id} |` in the `## Summary` table
 - Before Gate 0: replace `⏸️ Pending` with `🔄 Doing`
   - If already `🔄 Doing` (resumed cycle) → skip, no change needed
-- Step 11.1 (all subtasks done, user approved): replace `🔄 Doing` with `✅ Done`
-- HARD BLOCK (any gate, task abandoned): replace `🔄 Doing` with `❌ Failed`
+- Step 11.1 (all tasks done, user approved): replace `🔄 Doing` with `✅ Done`
+- HARD BLOCK (any gate, epic abandoned): replace `🔄 Doing` with `❌ Failed`
   - If row shows `⏸️ Pending` (unexpected) → replace with target value anyway
-- If row not found or no Status column → log warning "Status update skipped: task {task_id} row not found in {source_file}" and continue, do not abort
+- If row not found or no Status column → log warning "Status update skipped: epic {epic_id} row not found in {source_file}" and continue, do not abort
+
+**Phase Overview Status sync (Step 11.5 — phase boundary):**
+- Find the row starting with `| {phase} |` in the `## Phase Overview` table
+- At phase close (last epic of the phase done): replace its Status cell with `Complete`
+- After next-phase elaboration: replace the next phase's Status cell `Epic-level` with `Detailed`
+- If the table is absent (FALLBACK single-phase plan) → skip Phase Overview sync silently
 ```
 
 ### Anti-Rationalization for State Persistence

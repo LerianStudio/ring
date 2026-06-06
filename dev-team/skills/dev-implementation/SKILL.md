@@ -30,7 +30,11 @@ You orchestrate. Agents implement. Select the agent, prepare the prompt, track s
 
 ## Step 1: Validate Input
 
-Required: `unit_id`, `requirements`, `language` (go|typescript|python), `service_type` (api|worker|batch|cli|frontend|bff).
+The unit of work is a single task (T-X.Y.Z) from the phased plan, dispatched inline from
+under its epic in tasks.md. Its requirements arrive as the task block: Context,
+Implementation vision, Files, Verification, and Done when.
+
+Required: `unit_id` (the task's T-X.Y.Z id), `requirements` (the task block), `language` (go|typescript|python), `service_type` (api|worker|batch|cli|frontend|bff).
 Optional: `technical_design`, `existing_patterns`, `project_rules_path` (default: `docs/PROJECT_RULES.md`).
 
 STOP if any required input is missing.

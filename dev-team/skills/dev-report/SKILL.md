@@ -1,30 +1,31 @@
 ---
 name: ring:dev-report
 description: |
-  Feedback loop skill — collects task metrics, calculates quality scores, and writes
+  Feedback loop skill — collects epic metrics, calculates quality scores, and writes
   a structured development report for continuous improvement tracking.
 ---
 
 # Dev Report — Feedback Loop
 
 ## When to use
-- After task completion in any dev cycle
+- After epic completion in any dev cycle
 - User requests a development report or feedback summary
 - ring:dev-cycle Gate 10 handoff
 
 ## Skip when
-- Task was documentation-only with no code changes
+- Epic was documentation-only with no code changes
 - Not inside a development cycle
 
 
-Collects metrics and writes a structured report for completed development tasks.
+Collects metrics and writes a structured report for completed development epics.
 
 ## Step 1: Collect Metrics
 
-Gather the following from the completed task:
+Read `accumulated_metrics` from each completed epic (`state.epics[].accumulated_metrics`),
+then gather the following per epic:
 
 ```yaml
-task_id: {unit_id}
+epic_id: {unit_id}
 completed_at: {ISO timestamp}
 agent_used: {ring:backend-engineer-golang | ring:frontend-engineer | etc.}
 language: {go | typescript | python}
@@ -75,10 +76,10 @@ Score tiers:
 
 ## Step 3: Write Report
 
-Save to `docs/ring:dev-report/{task_id}-{timestamp}.md`:
+Save to `docs/ring:dev-report/{epic_id}-{timestamp}.md`:
 
 ```markdown
-# Dev Report: {task_id}
+# Dev Report: {epic_id}
 
 **Completed:** {timestamp}
 **Agent:** {agent_used}

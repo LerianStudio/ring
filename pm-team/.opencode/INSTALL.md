@@ -27,7 +27,7 @@ Verify by asking: "List the Ring pre-dev planning gates."
 - **4 research agents:** best-practices-researcher, framework-docs-researcher, repo-research-analyst, product-designer
 - **18 skills** organized in three groups:
   - **Orchestrators (2):** `ring:pre-dev-feature` (5-gate, small features <2 days), `ring:pre-dev-full` (10-gate, large features ≥2 days)
-  - **Pre-dev planning gates (11):** research, design-validation, PRD-creation, feature-map, TRD-creation, API-design, data-model, dependency-map, task-breakdown, subtask-creation, delivery-planning
+  - **Pre-dev planning gates (11):** research, design-validation, PRD-creation, feature-map, TRD-creation, API-design, data-model, dependency-map, phases-and-epics, task-creation, delivery-planning
   - **Standalone utilities (5):** `ring:streaming-event-mapping`, `ring:delivery-status`, `ring:creating-grafana-dashboards`, `ring:deep-doc-review`, `ring:using-pm-team`
 
 ## Usage

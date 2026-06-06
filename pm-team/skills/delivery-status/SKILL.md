@@ -32,7 +32,7 @@ Every status report must be grounded in repository evidence, not estimates or ve
 
 | Phase | Activities |
 |-------|------------|
-| **1. Input Gathering** | Load delivery-roadmap.md (required), tasks.md (required), subtasks.md (optional), current date |
+| **1. Input Gathering** | Load delivery-roadmap.md (required), tasks.md (required; the phased plan — epics plus detailed Phase 1 tasks), current date |
 | **2. Repository Scan** | Scan ALL branches, commits, PRs, releases; build activity timeline; identify task-related work |
 | **3. Task Matching** | Pattern matching (branches, commits, PRs) + semantic analysis (code content vs scope) via specialized agents |
 | **4. Completion Calculation** | Per task: analyze scope items found vs expected; calculate % done; determine status |

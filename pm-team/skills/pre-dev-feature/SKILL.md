@@ -3,7 +3,7 @@ name: ring:pre-dev-feature
 description: |
   Lightweight 5-gate pre-dev workflow for small features (<2 days).
   Orchestrates topology discovery, research, PRD with UX validation,
-  design validation, TRD, task breakdown, and delivery planning
+  design validation, TRD, phases and epics, and delivery planning
   in a sequential gated process with human approval at each gate.
 ---
 
@@ -35,7 +35,7 @@ description: |
 - ring:pre-dev-prd-creation
 - ring:pre-dev-design-validation
 - ring:pre-dev-trd-creation
-- ring:pre-dev-task-breakdown
+- ring:pre-dev-phases-and-epics
 - ring:pre-dev-delivery-planning
 
 
@@ -51,7 +51,7 @@ For complex features (any of the above false), use `ring:pre-dev-full` instead.
 | 1 | ring:pre-dev-prd-creation | prd.md |
 | 1.5 | ring:pre-dev-design-validation | design-validation.md (if UI) |
 | 2 | ring:pre-dev-trd-creation | trd.md |
-| 3 | ring:pre-dev-task-breakdown | tasks.md |
+| 3 | ring:pre-dev-phases-and-epics | tasks.md (phased plan; Phase 1 detailed inline) |
 | 4 | ring:pre-dev-delivery-planning | delivery-roadmap.md + .json |
 
 All artifacts saved to: `docs/pre-dev/<feature-name>/`

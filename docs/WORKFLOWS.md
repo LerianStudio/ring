@@ -174,8 +174,8 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 │   └── Output: docs/pre-dev/feature/PRD.md
 ├── Gate 2: pm-team/skills/pre-dev-trd-creation
 │   └── Output: docs/pre-dev/feature/TRD.md
-└── Gate 3: pm-team/skills/pre-dev-task-breakdown
-    └── Output: docs/pre-dev/feature/tasks.md
+└── Gate 3: pm-team/skills/pre-dev-phases-and-epics
+    └── Output: docs/pre-dev/feature/tasks.md (phased plan, living document; Phase 1 detailed inline)
 ```
 
 ### Complex Features (≥2 days): `/ring:pre-dev-full`
@@ -190,10 +190,10 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 │   └── Output: docs/pre-dev/feature/data-model.md
 ├── Gate 6: pm-team/skills/pre-dev-dependency-map
 │   └── Output: docs/pre-dev/feature/dependencies.md
-├── Gate 7: pm-team/skills/pre-dev-task-breakdown
-│   └── Output: docs/pre-dev/feature/tasks.md
-└── Gate 8: pm-team/skills/pre-dev-subtask-creation
-    └── Output: docs/pre-dev/feature/subtasks.md
+├── Gate 7: pm-team/skills/pre-dev-phases-and-epics
+│   └── Output: docs/pre-dev/feature/tasks.md (phased plan, living document; phases + epics)
+└── Gate 8: pm-team/skills/pre-dev-task-creation
+    └── Output: docs/pre-dev/feature/tasks.md (Phase 1 epics detailed into tasks)
 ```
 
 ---
@@ -202,19 +202,22 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 
 `ring:dev-cycle` is now a lean backend flow. Backend implementation owns TDD, coverage, docker-compose/local runtime, basic health/observability checks, and delivery verification in Gate 0.
 
-**Subtask cadence** (runs for each subtask, or for the task itself if no subtasks):
+**Task cadence** (runs for each task T-X.Y.Z, or for the epic itself if no task breakdown):
 - Gate 0 — Implementation (includes Delivery Verification exit check inline)
 
-**Task cadence** (runs once per task, after all subtasks complete Gate 0):
-- Gate 8 — Review (9 default reviewers plus triggered specialists on cumulative task diff)
-- Gate 9 — Validation (aggregates EVERY subtask's acceptance criteria + one human approval, after Gate 8 passes)
+**Epic cadence** (runs once per epic, after all its tasks complete Gate 0):
+- Gate 8 — Review (9 default reviewers plus triggered specialists on cumulative epic diff)
+- Gate 9 — Validation (aggregates EVERY task's acceptance criteria + one human approval, after Gate 8 passes)
+
+**Phase cadence** (runs once per phase transition — rolling wave):
+- Step 11.5 — Phase Boundary (close phase in tasks.md, user checkpoint, elaborate next phase's epics into tasks against the codebase as it now exists)
 
 **Cycle cadence** (runs once per cycle at the end):
 - Multi-Tenant Verify
 - `ring:dev-report` aggregate
 - Final Commit
 
-Inputs for task-cadence gates receive UNION of changed files across all subtasks of the task. Multi-tenant adaptation is integrated into Gate 0. All gates are MANDATORY. Invoke with `/ring:dev-cycle [tasks-file]` or Skill tool `ring:dev-cycle`. State is persisted to `docs/ring:dev-cycle/current-cycle.json`. See `dev-team/skills/shared-patterns/gate-cadence-classification.md` for full taxonomy and [dev-team/skills/dev-cycle/SKILL.md](../dev-team/skills/dev-cycle/SKILL.md) for full protocol.
+Inputs for epic-cadence gates receive UNION of changed files across all tasks of the epic. Multi-tenant adaptation is integrated into Gate 0. All gates are MANDATORY. Invoke with `/ring:dev-cycle [tasks-file]` or Skill tool `ring:dev-cycle`. State is persisted to `docs/ring:dev-cycle/current-cycle.json` (schema v2.0.0: phases → epics → tasks). See `dev-team/skills/shared-patterns/gate-cadence-classification.md` for full taxonomy and [dev-team/skills/dev-cycle/SKILL.md](../dev-team/skills/dev-cycle/SKILL.md) for full protocol.
 
 ---
 

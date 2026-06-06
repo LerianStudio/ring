@@ -36,7 +36,7 @@ Use when ALL criteria met: implementation <2 days, no new external dependencies,
 | 0 | ring:pre-dev-research | research.md |
 | 1 | ring:pre-dev-prd-creation | prd.md |
 | 2 | ring:pre-dev-trd-creation | trd.md |
-| 3 | ring:pre-dev-task-breakdown | tasks.md |
+| 3 | ring:pre-dev-phases-and-epics | tasks.md (phased plan; Phase 1 detailed inline) |
 | 4 | ring:pre-dev-delivery-planning | delivery-roadmap.md + .json |
 
 **Planning time:** 60-90 minutes
@@ -56,8 +56,8 @@ Use when ANY criteria met: implementation ≥2 days, new external dependencies, 
 | 4 | ring:pre-dev-api-design | api-design.md |
 | 5 | ring:pre-dev-data-model | data-model.md |
 | 6 | ring:pre-dev-dependency-map | dependencies.md |
-| 7 | ring:pre-dev-task-breakdown | tasks.md |
-| 8 | ring:pre-dev-subtask-creation | subtasks/ |
+| 7 | ring:pre-dev-phases-and-epics | tasks.md (phased plan: phases + epics) |
+| 8 | ring:pre-dev-task-creation | Phase 1 tasks written into tasks.md |
 | 9 | ring:pre-dev-delivery-planning | delivery-roadmap.md + .json |
 
 **Planning time:** 2.5-5 hours
@@ -74,8 +74,8 @@ Use when ANY criteria met: implementation ≥2 days, new external dependencies, 
 | 4 | ring:pre-dev-api-design | API contracts, operations, error handling (Large only) |
 | 5 | ring:pre-dev-data-model | Entities, relationships, ownership (Large only) |
 | 6 | ring:pre-dev-dependency-map | Explicit tech choices, versions, licenses (Large only) |
-| 7 | ring:pre-dev-task-breakdown | Value-driven tasks with success criteria |
-| 8 | ring:pre-dev-subtask-creation | Zero-context 2-5 min implementation steps (Large only) |
+| 7 | ring:pre-dev-phases-and-epics | Phased plan: phases (verifiable milestones) + epics (value increments), rolling wave |
+| 8 | ring:pre-dev-task-creation | Phase 1 epics → dispatch-ready tasks, written into tasks.md (Large only) |
 | 9/4 | ring:pre-dev-delivery-planning | Realistic schedule with critical path + JSON output |
 
 ## Standalone Skills

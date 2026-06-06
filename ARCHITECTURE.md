@@ -509,6 +509,24 @@ Complex Skill → TodoWrite tracking
 
 **Implementation:** Multi-phase skills use TodoWrite to track progress through structured workflows.
 
+### Pattern 4: Rolling-Wave Planning Hierarchy (pm-team → dev-team)
+
+```
+ring:pre-dev-* (pm-team)
+    └─ tasks.md — phased plan, living document
+       (Phase Overview + epics E-X.Y + Phase 1 tasks T-X.Y.Z)
+            ↓
+ring:dev-cycle / ring:dev-cycle-frontend (dev-team)
+    ├─ Gate 0 per task          (TDD implementation)
+    ├─ Gate 8/9 per epic        (review + validation; frontend: Gate 7 per epic, Gate 8 per task)
+    └─ Phase boundary per phase (Step 11.5):
+        close phase → record deviations → user checkpoint →
+        elaborate next phase's epics into dispatch-ready tasks
+        against the codebase as it now exists
+```
+
+**Implementation:** Only the active phase is task-detailed; later phases stay at epic level and are elaborated at each phase boundary (rolling wave — pre-written detail for a not-yet-built phase is stale by construction). `tasks.md` is the single living source of truth: gate orchestrators and `ring:executing-plans` (default plugin) write elaborated tasks back into it. Dev-cycle state persists with schema v2.0.0 (phases → epics → tasks). See `dev-team/skills/dev-cycle/gates/phase-boundary.md` and `dev-team/skills/shared-patterns/gate-cadence-classification.md`.
+
 ## Component Relationships
 
 ### Skills ↔ Agents

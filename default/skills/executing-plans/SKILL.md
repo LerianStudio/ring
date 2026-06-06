@@ -1,17 +1,18 @@
 ---
 name: ring:executing-plans
 description: |
-  Inline execution of an implementation plan task-by-task with review checkpoints.
-  Loads a written plan, reviews it critically, executes tasks in order with
-  verification, and hands off to finishing skills when done.
+  Rolling-wave execution of a phased implementation plan. Implements the
+  detailed phase task-by-task, checkpoints with the user at the phase boundary,
+  then elaborates the next phase's epics into dispatch-ready tasks — informed
+  by what was actually built — and repeats until all phases land.
 ---
 
 # Executing Plans
 
 ## When to use
-- A written plan exists (typically produced by ring:writing-plans)
+- A phased plan exists (typically produced by ring:writing-plans)
 - Inline execution in this session is preferred over full subagent orchestration
-- Plan is small-to-medium and benefits from fast iteration with checkpoints
+- Work benefits from phase checkpoints and course-correction between phases
 
 ## Skip when
 - Plan doesn't exist yet — use ring:writing-plans first
@@ -19,15 +20,15 @@ description: |
 - Plan covers multiple independent subsystems — split into separate plans before executing
 
 ## Sequence
-**Runs after:** ring:writing-plans (consumes its plan document)
+**Runs after:** ring:writing-plans (consumes and updates its plan document)
 **Alternative:** ring:dev-cycle (subagent-orchestrated, gated workflow with parallel specialist dispatch)
 
 ## Related
-**Companion skills:** ring:test-driven-development (enforces RED→GREEN→REFACTOR per task), ring:commit (closes each task with a signed atomic commit)
+**Companion skills:** ring:writing-plans (defines the Epic and Task formats used during elaboration), ring:test-driven-development (enforces RED→GREEN→REFACTOR per task), ring:commit (closes each task with a signed atomic commit)
 
 ---
 
-Load the plan. Review it critically. Execute every task in order. Stop and ask when blocked.
+The loop: **implement the detailed phase → phase checkpoint → elaborate the next phase → repeat.** The plan document is the living source of truth — elaboration writes tasks back into it.
 
 **Announce at start:** "Using ring:executing-plans to implement this plan."
 
@@ -36,36 +37,56 @@ Load the plan. Review it critically. Execute every task in order. Stop and ask w
 ### Step 1: Load and Review Plan
 
 1. Read the plan file end-to-end
-2. Review critically — identify questions or concerns
-3. Verify the plan header (Goal, Architecture, Tech Stack) is present
-4. If concerns: raise them with the user **before starting**
-5. If no concerns: create the task tracker and proceed
+2. Verify the header (Goal, Architecture, Tech Stack, Phase Overview) is present
+3. Verify exactly one phase is task-detailed (the current wave); later phases sit at epic level
+4. Review critically — raise concerns with the user **before starting**
 
 | Concern type | Action |
 |--------------|--------|
-| Placeholder content ("TBD", "appropriate error handling") | Block; ask user to refine plan or fill in |
-| Missing/contradictory test commands | Block; ask user to clarify |
-| Type/method name inconsistency across tasks | Block; ask user to reconcile |
+| Vague detailed-wave task ("appropriate error handling", "TBD") | Block; ask user to refine or fill in |
+| Phase that doesn't end in working, verifiable software | Block; ask user to redraw the boundary |
+| Contract inconsistency between epics | Block; ask user to reconcile |
+| Later phases already task-detailed | Warn — those tasks are stale risk; treat as drafts to re-validate at elaboration time |
 | Stylistic / "nice to have" | Note but proceed |
 
-### Step 2: Execute Tasks
+### Step 2: Implement the Current Phase
 
-For each task in the plan:
+For each task in the detailed phase, in order:
 
 1. Mark as in-progress in the task tracker
-2. Follow each step exactly — the plan has bite-sized steps for a reason
-3. Run verifications as specified (test commands, expected output)
-4. Use ring:test-driven-development when a step writes new production code
-5. Use ring:commit at the step that says "Commit"
-6. Mark as completed only after verification passes
+2. Implement per the task's **Implementation vision** — its decisions are binding; raise a blocker rather than silently diverging
+3. Use ring:test-driven-development for new production code: write the failing test first from the task's **Verification** intent, capture the RED output, then implement
+4. Run the task's verification; paste the output
+5. Close the task with ring:commit (atomic, signed)
+6. Mark as completed only after verification passes — tick the task's `- [ ] Done` checkbox in the plan document
 
-**Do not skip the RED phase.** If the plan says "Run test to verify it fails," run it and paste the failure output. Skipping verification means the plan didn't actually execute.
+**Do not skip the RED phase.** The plan carries no test code — writing the failing test from the verification intent IS the task's first step.
 
-### Step 3: Complete Development
+### Step 3: Phase Checkpoint (user gate)
 
-After all tasks complete and verified:
+When every task in the phase is complete and verified:
 
-- Announce: "All tasks complete and verified. Closing with ring:commit."
+1. Update the plan document: flip the phase's Status to `Complete` in the Phase Overview; record any deviations from the plan that affect later phases
+2. Present to the user: what was built, test results, deviations and why
+3. **STOP and wait for the user's check** before elaborating the next phase — unless the user pre-authorized continuous execution, in which case state that and proceed
+
+### Step 4: Elaborate the Next Phase (rolling wave)
+
+After the checkpoint, detail the next phase before implementing it:
+
+1. Re-read the phase's epics against the codebase **as it now exists** — not as the plan assumed it would
+2. Fold in learnings and deviations from completed phases; if reality diverged enough to change an epic's scope or approach, surface that to the user before proceeding
+3. Break each epic into dispatch-ready tasks using the **Task Format from ring:writing-plans** (load that skill if the format is not in context) — same bar: context with file:line references, implementation vision with decisions made, exact files, verification, done-when
+4. Write the tasks into the plan document under their epics; flip the phase's Status to `Detailed`
+5. Return to Step 2 with the newly detailed phase
+
+Repeat Steps 2–4 until every phase is complete.
+
+### Step 5: Complete Development
+
+After all phases complete and verified:
+
+- Announce: "All phases complete and verified. Closing with ring:commit."
 - Use ring:commit for the final commit if uncommitted work remains
 - Offer to push: `git push` (or `git push -u origin <branch>` if no upstream)
 
@@ -79,19 +100,12 @@ For production work, hand off to ring:codereview to run the review pool against 
 |---------|---------------|
 | Missing dependency | Can't proceed reliably without it |
 | Test fails unexpectedly (not RED phase) | Either plan is wrong or implementation diverged |
+| Task's implementation vision conflicts with the actual codebase | The wave is stale; re-elaborate, don't improvise |
 | Instruction unclear or ambiguous | Guessing wastes more time than asking |
 | Verification fails repeatedly | Underlying issue, not a flakiness retry |
-| Plan has critical gaps preventing start | Should have been caught in Step 1; refine before continuing |
+| Epic scope no longer matches reality at elaboration time | User decides whether scope shifts or plan changes |
 
 **Ask for clarification rather than guessing.** Plan execution is not the place for taste calls.
-
-## When to Revisit Earlier Steps
-
-**Return to Step 1 (Review) when:**
-- User updates the plan based on your feedback
-- Fundamental approach needs rethinking mid-execution
-
-**Don't force through blockers** — stop and ask. A correctly-executed wrong plan still produces wrong code.
 
 ## ⛔ Branch Safety
 
@@ -103,19 +117,23 @@ For production work, hand off to ring:codereview to run the review pool against 
 
 ## Remember
 
-- Review plan critically first — fix gaps before executing
-- Follow plan steps exactly — they are bite-sized for a reason
+- Review the plan critically first — fix gaps before executing
+- One detailed wave at a time — never elaborate two phases ahead
+- The plan document is living: tick tasks, flip statuses, record deviations
 - Don't skip verifications (RED phase included)
-- Reference required skills when the plan says to (ring:test-driven-development, ring:commit)
+- Phase checkpoint is a user gate, not a formality
+- Elaborate against the codebase as it exists, not as the plan assumed
 - Stop when blocked — don't guess
 - Never implement on main/master without consent
 
 ## Verification Checklist
 
 Before marking the plan complete:
-- [ ] Every task in the plan executed and verified
+- [ ] Every phase implemented and verified, in order
+- [ ] Every phase boundary checkpointed with the user (or continuous mode explicitly pre-authorized)
+- [ ] Every later phase elaborated into tasks before implementation, against the real codebase
 - [ ] Every RED phase produced a real failure (output captured)
-- [ ] Every GREEN phase passes with minimal code
-- [ ] Every "Commit" step produced an atomic, signed commit via ring:commit
+- [ ] Every task closed with an atomic, signed commit via ring:commit
+- [ ] Plan document reflects final state (statuses, ticked tasks, recorded deviations)
 - [ ] Working tree clean (or remaining changes documented)
 - [ ] Final commit / push offered to user

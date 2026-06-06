@@ -107,8 +107,8 @@ Each plugin contains: `skills/`, `agents/`, `hooks/`, plus per-harness install m
 | Code review | `ring:codereview` dispatches 9 default reviewers plus triggered conditional specialists |
 | Pre-dev (small) | `ring:pre-dev-feature` → 5-gate workflow |
 | Pre-dev (large) | `ring:pre-dev-full` → 10-gate workflow |
-| Dev cycle backend | `ring:dev-cycle` → lean backend cycle (Gate 0/8/9) |
-| Dev cycle frontend | `ring:dev-cycle-frontend` → lean frontend cycle (Gate 0/7/8) |
+| Dev cycle backend | `ring:dev-cycle` → rolling-wave phased cycle (Gate 0 per task, Gate 8/9 per epic, Step 11.5 phase boundary) |
+| Dev cycle frontend | `ring:dev-cycle-frontend` → rolling-wave phased cycle (Gate 0 per task, Gate 7 per epic, Gate 8 per task, phase boundary) |
 
 See [docs/WORKFLOWS.md](docs/WORKFLOWS.md) for detailed instructions.
 

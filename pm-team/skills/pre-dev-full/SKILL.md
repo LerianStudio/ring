@@ -3,7 +3,7 @@ name: ring:pre-dev-full
 description: |
   Complete 10-gate pre-dev workflow for large features (>=2 days).
   Orchestrates topology discovery, research, PRD, feature map, design validation,
-  TRD, API design, data model, dependency map, task breakdown, subtask creation,
+  TRD, API design, data model, dependency map, phases and epics, task creation,
   and delivery planning in a sequential gated process with human approval at each gate.
 ---
 
@@ -39,8 +39,8 @@ description: |
 - ring:pre-dev-api-design
 - ring:pre-dev-data-model
 - ring:pre-dev-dependency-map
-- ring:pre-dev-task-breakdown
-- ring:pre-dev-subtask-creation
+- ring:pre-dev-phases-and-epics
+- ring:pre-dev-task-creation
 - ring:pre-dev-delivery-planning
 
 
@@ -61,8 +61,8 @@ For simple features (<2 days, existing patterns), use `ring:pre-dev-feature` ins
 | 4 | ring:pre-dev-api-design | api-design.md | Full |
 | 5 | ring:pre-dev-data-model | data-model.md | Full |
 | 6 | ring:pre-dev-dependency-map | dependencies.md | Full |
-| 7 | ring:pre-dev-task-breakdown | tasks.md | Full |
-| 8 | ring:pre-dev-subtask-creation | subtasks/ | Full |
+| 7 | ring:pre-dev-phases-and-epics | tasks.md (phased plan: phases + epics) | Full |
+| 8 | ring:pre-dev-task-creation | Phase 1 tasks written into tasks.md | Full |
 | 9 | ring:pre-dev-delivery-planning | delivery-roadmap.md + .json | Full |
 
 All artifacts saved to: `docs/pre-dev/<feature-name>/`
@@ -95,7 +95,7 @@ Each gate invokes its sub-skill. Human approval required at each gate before pro
 - Gate 1.5 / 2.5 (Design Validation): only if Q4=Yes
 - Gate 2 (Feature Map): always for Full Track
 - Gates 4-6 (API Design, Data Model, Dependency Map): always for Full Track
-- Gate 8 (Subtask Creation): always for Full Track
+- Gate 8 (Task Creation): always for Full Track
 
 ## Gate Progress Tracking
 

@@ -1,6 +1,6 @@
 # Code Example Standards Pattern
 
-This file defines MANDATORY rules for code examples in pre-dev documents (PRDs, TRDs, task breakdowns, subtasks).
+This file defines MANDATORY rules for code examples in pre-dev documents (PRDs, TRDs, phased plans, tasks).
 
 ---
 
@@ -41,7 +41,7 @@ MUST use the canonical Lerian libraries instead of creating custom utilities whe
 ### Verification Before Writing Code Examples
 
 ```text
-Before writing any Go code example in subtasks:
+Before writing any Go code example in tasks:
 
 [ ] 1. Does this example need logging?           → Use libLog.Logger (lib-observability/log)
 [ ] 2. Does this example need config loading?    → Use libCommons.SetConfigFromEnvVars()
@@ -219,15 +219,15 @@ factory := libMetrics.NewFactory(tel.Meter())
 
 ---
 
-## Integration with Subtask Creation
+## Integration with Task Creation
 
-When creating subtasks with code examples (Gate 8), apply these rules:
+When creating Phase 1 tasks with code examples (Gate 8), apply these rules:
 
 1. **Step 1 (Write failing test)**: Tests can use custom test helpers
 2. **Step 3 (Write implementation)**: Implementation MUST use lib-commons for non-observability infrastructure and lib-observability for logging/telemetry
 3. **Imports**: Always show complete lib-commons/lib-observability imports with `lib` prefix aliases
 
-**Example subtask code block:**
+**Example task code block:**
 
 ```go
 // Step 3: Implement the service

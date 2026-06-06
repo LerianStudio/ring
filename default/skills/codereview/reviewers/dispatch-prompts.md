@@ -2,14 +2,14 @@
 
 Use this dispatch when `review_state.slicing.enabled == false`.
 
-**Scope header:** when `scope == "task"`, inject this block immediately after each review request heading:
+**Scope header:** when `scope == "epic"`, inject this block immediately after each review request heading:
 
 ```markdown
-**REVIEW SCOPE: TASK-LEVEL**
-This review covers the CUMULATIVE diff of task {task_id}, including changes from {N} subtasks: {subtask_ids}. Review the task as one integrated unit; subtask boundaries are implementation detail.
+**REVIEW SCOPE: EPIC-LEVEL**
+This review covers the CUMULATIVE diff of epic {epic_id}, including changes from {N} tasks: {task_ids}. Review the epic as one integrated unit; task boundaries are implementation detail.
 ```
 
-When `scope == "task"`, use `cumulative_diff_range.base_sha` and `cumulative_diff_range.head_sha` for every reviewer.
+When `scope == "epic"`, use `cumulative_diff_range.base_sha` and `cumulative_diff_range.head_sha` for every reviewer.
 
 ## Finding Eligibility Gate
 
@@ -38,7 +38,7 @@ Task:
   description: "Code review for [unit_id]"
   prompt: |
     ## Code Review Request
-    [INJECT REVIEW SCOPE: TASK-LEVEL block here when scope=task]
+    [INJECT REVIEW SCOPE: EPIC-LEVEL block here when scope=epic]
     **Unit ID:** [unit_id]
     **Base SHA:** [base_sha]
     **Head SHA:** [head_sha]
@@ -61,7 +61,7 @@ Task:
   description: "Business logic review for [unit_id]"
   prompt: |
     ## Business Logic Review Request
-    [INJECT REVIEW SCOPE: TASK-LEVEL block here when scope=task]
+    [INJECT REVIEW SCOPE: EPIC-LEVEL block here when scope=epic]
     **Unit ID:** [unit_id]
     **Base SHA:** [base_sha]
     **Head SHA:** [head_sha]
@@ -84,7 +84,7 @@ Task:
   description: "Security review for [unit_id]"
   prompt: |
     ## Security Review Request
-    [INJECT REVIEW SCOPE: TASK-LEVEL block here when scope=task]
+    [INJECT REVIEW SCOPE: EPIC-LEVEL block here when scope=epic]
     **Unit ID:** [unit_id]
     **Base SHA:** [base_sha]
     **Head SHA:** [head_sha]
@@ -107,7 +107,7 @@ Task:
   description: "Test quality review for [unit_id]"
   prompt: |
     ## Test Quality Review Request
-    [INJECT REVIEW SCOPE: TASK-LEVEL block here when scope=task]
+    [INJECT REVIEW SCOPE: EPIC-LEVEL block here when scope=epic]
     **Unit ID:** [unit_id]
     **Base SHA:** [base_sha]
     **Head SHA:** [head_sha]
@@ -130,7 +130,7 @@ Task:
   description: "Nil/null safety review for [unit_id]"
   prompt: |
     ## Nil-Safety Review Request
-    [INJECT REVIEW SCOPE: TASK-LEVEL block here when scope=task]
+    [INJECT REVIEW SCOPE: EPIC-LEVEL block here when scope=epic]
     **Unit ID:** [unit_id]
     **Base SHA:** [base_sha]
     **Head SHA:** [head_sha]
@@ -153,7 +153,7 @@ Task:
   description: "Dead code review for [unit_id]"
   prompt: |
     ## Dead Code Review Request
-    [INJECT REVIEW SCOPE: TASK-LEVEL block here when scope=task]
+    [INJECT REVIEW SCOPE: EPIC-LEVEL block here when scope=epic]
     **Unit ID:** [unit_id]
     **Base SHA:** [base_sha]
     **Head SHA:** [head_sha]
@@ -176,7 +176,7 @@ Task:
   description: "Performance review for [unit_id]"
   prompt: |
     ## Performance Review Request
-    [INJECT REVIEW SCOPE: TASK-LEVEL block here when scope=task]
+    [INJECT REVIEW SCOPE: EPIC-LEVEL block here when scope=epic]
     **Unit ID:** [unit_id]
     **Base SHA:** [base_sha]
     **Head SHA:** [head_sha]
@@ -199,7 +199,7 @@ Task:
   description: "Multi-tenant review for [unit_id]"
   prompt: |
     ## Multi-Tenant Review Request
-    [INJECT REVIEW SCOPE: TASK-LEVEL block here when scope=task]
+    [INJECT REVIEW SCOPE: EPIC-LEVEL block here when scope=epic]
     **Unit ID:** [unit_id]
     **Base SHA:** [base_sha]
     **Head SHA:** [head_sha]
@@ -222,7 +222,7 @@ Task:
   description: "lib-commons usage review for [unit_id]"
   prompt: |
     ## lib-commons Usage Review Request
-    [INJECT REVIEW SCOPE: TASK-LEVEL block here when scope=task]
+    [INJECT REVIEW SCOPE: EPIC-LEVEL block here when scope=epic]
     **Unit ID:** [unit_id]
     **Base SHA:** [base_sha]
     **Head SHA:** [head_sha]
@@ -247,7 +247,7 @@ Task:
   description: "lib-observability review for [unit_id]"
   prompt: |
     ## lib-observability Review Request
-    [INJECT REVIEW SCOPE: TASK-LEVEL block here when scope=task]
+    [INJECT REVIEW SCOPE: EPIC-LEVEL block here when scope=epic]
     **Unit ID:** [unit_id]
     **Base SHA:** [base_sha]
     **Head SHA:** [head_sha]
@@ -274,7 +274,7 @@ Task:
   description: "lib-systemplane review for [unit_id]"
   prompt: |
     ## lib-systemplane Review Request
-    [INJECT REVIEW SCOPE: TASK-LEVEL block here when scope=task]
+    [INJECT REVIEW SCOPE: EPIC-LEVEL block here when scope=epic]
     **Unit ID:** [unit_id]
     **Base SHA:** [base_sha]
     **Head SHA:** [head_sha]
@@ -301,7 +301,7 @@ Task:
   description: "lib-streaming review for [unit_id]"
   prompt: |
     ## lib-streaming Review Request
-    [INJECT REVIEW SCOPE: TASK-LEVEL block here when scope=task]
+    [INJECT REVIEW SCOPE: EPIC-LEVEL block here when scope=epic]
     **Unit ID:** [unit_id]
     **Base SHA:** [base_sha]
     **Head SHA:** [head_sha]

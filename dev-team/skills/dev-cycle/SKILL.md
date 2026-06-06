@@ -1,17 +1,20 @@
 ---
 name: ring:dev-cycle
 description: |
-  Lean backend development cycle orchestrator with implementation-owned quality.
+  Lean backend development cycle orchestrator with implementation-owned quality,
+  driven by a rolling-wave phased plan (tasks.md: Phase Overview + epics + inline tasks).
+  Iterates epics (E-X.Y) within the current phase; only the active wave is task-detailed,
+  later phases are elaborated at each phase boundary against the real codebase.
   Backend engineers own TDD, coverage, docker-compose/local runtime, and delivery verification.
-  Task-level review stays separate; user validation closes each task.
+  Epic-level review stays separate; user validation closes each epic.
 ---
 
 # Development Cycle Orchestrator
 
 ## When to use
-- Starting a new development cycle with a task file
+- Starting a new development cycle with a phased plan (tasks.md from pre-dev)
 - Resuming an interrupted development cycle
-- Need structured, gate-based task execution with quality checkpoints
+- Need structured, gate-based epic execution with quality checkpoints and phase cadence
 
 ## Skip when
 - No tasks file exists
@@ -23,42 +26,54 @@ You orchestrate. Agents execute. You NEVER read, write, or edit source code dire
 
 ## How This Works
 
-Load tasks from PM output and execute the lean backend cycle. Backend implementation owns local runtime and quality so the flow does not dispatch separate QA, SRE, or DevOps gates.
+Load the phased plan (tasks.md) from PM output and execute the lean backend cycle. tasks.md is a rolling-wave phased plan: a `## Phase Overview` table (phases + milestone + status), a `## Summary` table whose rows are epics (E-X.Y), and inline dispatch-ready tasks (T-X.Y.Z) written under each epic of the currently-detailed wave. Only the active wave is task-detailed; later phases are epic-level and get elaborated at each phase boundary. Backend implementation owns local runtime and quality so the flow does not dispatch separate QA, SRE, or DevOps gates.
 
-**Announce at start:** "Using ring:dev-cycle lean backend flow."
+**Vocabulary:** Phase = independently verifiable milestone. Epic (E-X.Y) = value-driven increment, the UNIT this cycle iterates. Task (T-X.Y.Z) = dispatch-ready unit, the Gate 0 execution unit.
+
+**Announce at start:** "Using ring:dev-cycle lean backend flow (rolling-wave phased plan)."
 
 ## Gate Map
 
 | Gate | Skill to Load | Agent to Dispatch | Cadence | Mode |
 |------|---------------|-------------------|---------|------|
-| 0 | ring:dev-implementation | ring:backend-engineer-* | Per subtask | Write + Run |
-| 8 | ring:codereview | 9 default reviewers + triggered specialists in parallel | Per task | Run |
-| 9 | ring:dev-validation | N/A (verification) | Per task | Run |
+| 0 | ring:dev-implementation | ring:backend-engineer-* | Per task (T-X.Y.Z) | Write + Run |
+| 8 | ring:codereview | 9 default reviewers + triggered specialists in parallel | Per epic (E-X.Y) | Run |
+| 9 | ring:dev-validation | N/A (verification) | Per epic | Run |
+| 11.5 | (orchestrator + 1 planning agent) | ring:backend-engineer-* / ring:frontend-engineer / ring:codebase-explorer (ANALYSIS mode) | Per phase boundary | Plan only |
 
-Gate 0 includes TDD RED/GREEN, coverage threshold enforcement, docker-compose/local runtime updates, basic health/observability verification, and delivery verification. Do not dispatch separate QA, SRE, or DevOps gates as part of this cycle.
+Gate 0 includes TDD RED/GREEN, coverage threshold enforcement, docker-compose/local runtime updates, basic health/observability verification, and delivery verification. Do not dispatch separate QA, SRE, or DevOps gates as part of this cycle. Step 11.5 (phase cadence) closes the just-finished phase and rolling-wave elaborates the next phase's epics into dispatch-ready tasks — read `gates/phase-boundary.md`.
 
 ## Execution Order
 
 ```yaml
-for each task:
+for each phase (current wave; starts at Phase 1, the only detailed phase at init):
 
-  # 1. SUBTASK-LEVEL build (per subtask, or task-itself if no subtasks)
-  for each subtask:
-    Gate 0  # build subtask
-    [checkpoint if manual_per_subtask mode]
+  for each epic in this phase (Summary order):
 
-  # 2. TASK-LEVEL review (once per task, after all subtasks are built)
-  Gate 8  # review whole task — 9 parallel reviewers see cumulative diff
+    # 1. TASK-LEVEL build (per task T-X.Y.Z, or epic-itself if no task breakdown)
+    for each task:
+      Gate 0  # build task
+      [checkpoint if manual_per_task mode]
 
-  # 3-4. Fix CRITICAL/HIGH/MEDIUM, then re-review until clean (inside Gate 8)
+    # 2. EPIC-LEVEL review (once per epic, after all tasks are built)
+    Gate 8  # review whole epic — 9 parallel reviewers see cumulative diff
 
-  # 5. TASK-LEVEL validation (once per task, after review passes)
-  Gate 9  # validate whole task — aggregate EVERY subtask's acceptance criteria + ONE human approval
-          # criterion FAIL → back to Gate 0 for that subtask, then re-review (step 2) → re-validate
+    # 3-4. Fix CRITICAL/HIGH/MEDIUM, then re-review until clean (inside Gate 8)
 
-  # 6. "Proceed to next task?" checkpoint → reopens step 1 for the next task
+    # 5. EPIC-LEVEL validation (once per epic, after review passes)
+    Gate 9  # validate whole epic — aggregate EVERY task's acceptance criteria + ONE human approval
+            # criterion FAIL → back to Gate 0 for that task, then re-review (step 2) → re-validate
 
-# 7. CYCLE-END (once, after all tasks done) — see "Cycle Completion" section; read gates/cycle-completion.md
+    # 6. "Proceed to next epic?" checkpoint (Step 11.1) → next epic in this phase
+
+  # 7. PHASE BOUNDARY (Step 11.5, after the LAST epic of the phase is approved) — read gates/phase-boundary.md
+  #    close phase (Phase Overview → Complete, record deviations) →
+  #    phase checkpoint (manual: ask Continue/Pause/Adjust | auto: log + continue) →
+  #    elaborate next phase's epics into dispatch-ready tasks (1 planning agent, ANALYSIS mode) →
+  #    validate elaboration → resume epic loop at Gate 0 for the new phase
+  #    (no next phase → fall through to cycle-end)
+
+# 8. CYCLE-END (once, after the LAST phase completes its boundary) — see "Cycle Completion"; read gates/cycle-completion.md
 Final Test Confirmation → Multi-Tenant Verify → Migration Safety (Gate 0.5D, conditional) → dev-report → Final Commit
 ```
 
@@ -67,7 +82,7 @@ Final Test Confirmation → Multi-Tenant Verify → Migration Safety (Gate 0.5D,
 For EVERY gate, follow this exact sequence:
 
 ```
-1. Read gate-specific instructions  → Gate 0: Read("gates/gate-0-implementation.md"); Gate 8: Read("gates/gate-8-review.md"); Gate 9: Read("gates/gate-9-validation.md")
+1. Read gate-specific instructions  → Gate 0: Read("gates/gate-0-implementation.md"); Gate 8: Read("gates/gate-8-review.md"); Gate 9: Read("gates/gate-9-validation.md"); Phase boundary (Step 11.5): Read("gates/phase-boundary.md")
 2. Load sub-skill                   → Skill("ring:{sub-skill-name}")
 3. Follow sub-skill dispatch rules  → Sub-skill tells you HOW to dispatch
 4. Dispatch agent                   → Task(subagent_type="ring:{agent}", ...)
@@ -113,7 +128,7 @@ If PROJECT_RULES.md doesn't exist → create it using the Ring template before p
 
 ## Cycle Completion
 
-When the task loop in Execution Order finishes (last task passed all its gates), the cycle is NOT done — a completion phase runs once.
+When the epic loop finishes the LAST phase (last epic of the last phase passed all its gates AND that phase's boundary at Step 11.5 found no next phase to elaborate), the cycle is NOT done — a completion phase runs once.
 
 Read `gates/cycle-completion.md` from this skill directory and execute Steps 12.0–12.1 in order:
 
@@ -125,15 +140,24 @@ Read `gates/cycle-completion.md` from this skill directory and execute Steps 12.
 
 ## Execution Modes
 
-Ask user at cycle start:
+Ask user at cycle start (two independent questions):
+
+**1. Execution mode** (epic/task checkpoint cadence):
 
 | Mode | Behavior |
 |------|----------|
 | `automatic` | All gates execute, pause only on failure |
-| `manual_per_task` | Checkpoint after each task completes all gates |
-| `manual_per_subtask` | Checkpoint after each subtask completes subtask-level gates |
+| `manual_per_epic` | Checkpoint after each epic completes all gates |
+| `manual_per_task` | Checkpoint after each task completes task-level gates |
 
-Mode affects CHECKPOINTS (user approval pauses), not GATES. All listed gates execute regardless of mode.
+**2. Phase checkpoint** (`state.phase_checkpoint`):
+
+| Value | Behavior |
+|-------|----------|
+| `manual` (default) | At each phase boundary (Step 11.5), AskUserQuestion: Continue / Pause / Adjust plan first |
+| `auto` | At each phase boundary, log a phase summary and continue (still elaborates the next phase) |
+
+Mode and phase_checkpoint affect CHECKPOINTS (user approval pauses), not GATES. All listed gates execute regardless of mode. The phase boundary's elaboration step runs in BOTH phase_checkpoint values — only the pause differs.
 
 ## Custom Instructions
 
@@ -151,12 +175,12 @@ If user provides custom context at cycle start, store in `state.custom_prompt` a
 
 ## Commit Timing
 
-- Gate 0 (implementation): Commit after GREEN phase, coverage, docker-compose/local runtime, and delivery verification pass
+- Gate 0 (implementation): Commit after GREEN phase, coverage, docker-compose/local runtime, and delivery verification pass (`commit_timing == "per_task"`)
 - Gate 8 (review): Commit fixes after all reviewers pass
-- Gate 9 (validation): No commit (verification only)
+- Gate 9 (validation): No commit (verification only); epic-level commit at Step 11.1 when `commit_timing == "per_epic"`
 - Cycle-end: Final commit with cycle metadata
 
-Convention: `feat|fix|test|chore(scope): description` — keep commits atomic per gate.
+`commit_timing ∈ {per_task, per_epic, at_end}`. Convention: `feat|fix|test|chore(scope): description` — keep commits atomic per gate.
 
 ## Blocker Handling
 
@@ -170,9 +194,10 @@ Convention: `feat|fix|test|chore(scope): description` — keep commits atomic pe
 ## Gate Completion Rules
 
 A gate is complete ONLY when ALL components succeed:
-- Gate 0: TDD RED + GREEN + coverage ≥ 85% + all acceptance criteria tested + docker-compose/local runtime verified + delivery verification (all requirements delivered, 0 dead code)
-- Gate 8: all 9 default reviewers pass, and any triggered conditional specialist also passes.
-- Gate 9 (per task): every subtask's acceptance criteria aggregated and marked PASS + explicit "APPROVED" from user
+- Gate 0 (per task): TDD RED + GREEN + coverage ≥ 85% + all acceptance criteria tested + docker-compose/local runtime verified + delivery verification (all requirements delivered, 0 dead code)
+- Gate 8 (per epic): all 9 default reviewers pass, and any triggered conditional specialist also passes.
+- Gate 9 (per epic): every task's acceptance criteria aggregated and marked PASS + explicit "APPROVED" from user
+- Phase boundary (Step 11.5): phase closed (Phase Overview → Complete, deviations recorded) + next phase elaborated and validated (or no next phase) + checkpoint honored per `phase_checkpoint`
 
 ## Severity of Issues
 
@@ -194,7 +219,7 @@ A gate is complete ONLY when ALL components succeed:
 | Source | Path |
 |--------|------|
 | Tasks (PM output) | `docs/pre-dev/{feature}/tasks.md` |
-| Subtasks | `docs/pre-dev/{feature}/subtasks/{task-id}/ST-XXX-01.md` |
+| Phase tasks | inside tasks.md, under each epic (phased plan) |
 | Refactor tasks | `docs/ring:dev-refactor/*/tasks.md` |
 
 ## Frontend Handoff

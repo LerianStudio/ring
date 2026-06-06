@@ -30,7 +30,7 @@ description: |
 
 ## Related
 
-**Complementary:** ring:pre-dev-prd-creation, ring:pre-dev-trd-creation, ring:pre-dev-api-design, ring:pre-dev-data-model, ring:pre-dev-task-breakdown
+**Complementary:** ring:pre-dev-prd-creation, ring:pre-dev-trd-creation, ring:pre-dev-api-design, ring:pre-dev-data-model, ring:pre-dev-phases-and-epics
 **Differentiation:** ring:codereview reviews code. ring:deep-doc-review reviews documentation artifacts against each other.
 
 
@@ -49,7 +49,7 @@ If user specified files, use those. Otherwise, auto-discover:
 - `docs/` (general project docs)
 - Root directory (README, CHANGELOG, ARCHITECTURE)
 
-**Include:** PRD, TRD, API design, data model, task specs, subtask specs, dependency map, delivery plan, research docs, coding standards, README, CHANGELOG
+**Include:** PRD, TRD, API design, data model, phased plan (tasks.md), task specs, dependency map, delivery plan, research docs, coding standards, README, CHANGELOG
 
 **Exclude:** generated files, node_modules, build artifacts, binary files, test fixtures
 

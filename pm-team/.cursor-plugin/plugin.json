@@ -21,7 +21,7 @@
     "data-model",
     "workflow",
     "feature-planning",
-    "task-breakdown"
+    "phases-and-epics"
   ],
   "skills": "./skills/",
   "agents": "./agents/",

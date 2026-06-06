@@ -49,9 +49,10 @@ Display the current development cycle status.
 
 Displays:
 - Current cycle ID and start time
-- Tasks: total, completed, in progress, pending
-- Current task and gate being executed
-- Assertiveness score (if tasks completed)
+- Current phase (if `phases[]` is present in state)
+- Epics: total, completed, in progress, pending
+- Current epic and gate being executed
+- Assertiveness score (if epics completed)
 - Elapsed time
 
 ### Example Output
@@ -62,18 +63,19 @@ Development Cycle Status
 Cycle ID: 2024-01-15-143000
 Started: 2024-01-15 14:30:00
 Status: in_progress
+Phase: Phase 2 - Core flows
 
-Tasks:
+Epics:
   Completed: 2/5
-  In Progress: 1/5 (AUTH-003)
+  In Progress: 1/5 (E-2.3)
   Pending: 2/5
 
 Current:
-  Task: AUTH-003 - Implementar refresh token
+  Epic: E-2.3 - Implementar refresh token
   Gate 0→8→9 lean flow (ring:dev-implementation)
   Iterations: 1
 
-Metrics (completed tasks):
+Metrics (completed epics):
   Average Assertiveness: 89%
   Total Duration: 1h 45m
 
@@ -96,8 +98,8 @@ Or resume an interrupted cycle:
 
 1. **Discover state file** — check both paths per "Shared: State File Discovery" above
 2. **Read JSON** — parse `current-cycle.json`
-3. **Extract fields** — cycle ID, start time, status, task list, current task/gate, iterations
-4. **Compute metrics** — count completed/in-progress/pending tasks, calculate elapsed time, average assertiveness score across completed tasks
+3. **Extract fields** — cycle ID, start time, status (incl. `paused_for_epic_approval`, `paused_for_phase_review`), `current_phase` and `phases[]` (if present), `epics[]` list, `current_epic_index`/gate, iterations
+4. **Compute metrics** — count completed/in-progress/pending epics from `epics[]`, calculate elapsed time, average assertiveness score across completed epics
 5. **Display** — format and present the output as shown above
 
 ---
@@ -127,7 +129,7 @@ Unless `--force` is specified, display:
 Cancel Development Cycle?
 
 Cycle ID: 2024-01-15-143000
-Progress: 3/5 tasks completed
+Progress: 3/5 epics completed
 
 This will:
 - Stop the current cycle
@@ -144,7 +146,7 @@ Cycle Cancelled
 
 Cycle ID: 2024-01-15-143000
 Status: cancelled
-Completed: 3/5 tasks
+Completed: 3/5 epics
 
 State saved to: docs/ring:dev-cycle/current-cycle.json (or docs/ring:dev-refactor/current-cycle.json)
 Partial report: docs/dev-team/feedback/cycle-2024-01-15-partial.md
@@ -166,11 +168,11 @@ Check status with:
 
 1. **Discover state file** — check both paths per "Shared: State File Discovery" above
 2. **Read JSON** — parse `current-cycle.json`
-3. **Validate** — confirm the cycle is in a non-terminal status (`in_progress` or similar)
+3. **Validate** — confirm the cycle is in a non-terminal status (`in_progress`, `paused_for_epic_approval`, `paused_for_phase_review`, or similar)
 4. **Confirm** — unless `--force`, use AskUserQuestion to get explicit user confirmation; if declined, abort
 5. **Preserve state** — the existing JSON already contains the full state for potential resume
 6. **Mark cancelled** — update the `status` field in `current-cycle.json` to `cancelled` and write back
-7. **Generate partial report** — create a feedback file at `docs/dev-team/feedback/cycle-{id}-partial.md` summarizing completed tasks, current progress, and reason (user-cancelled)
+7. **Generate partial report** — create a feedback file at `docs/dev-team/feedback/cycle-{id}-partial.md` summarizing completed epics, current progress, and reason (user-cancelled)
 8. **Display** — format and present the cancellation confirmation as shown above
 
 ---

@@ -1,19 +1,21 @@
 ## Step 2: Gate 0 - Implementation (Per Execution Unit)
 
-ℹ️ **CADENCE:** Subtask-level. Execution unit is always a subtask (or the task-itself when the task has no subtasks). Writes to `state.tasks[i].subtasks[j].gate_progress.implementation`. Task-level review (Gate 8) MUST NOT be dispatched from inside this step — it runs after the subtask loop.
+ℹ️ **CADENCE:** Task-level. Execution unit is always a task T-X.Y.Z (or the epic-itself when the epic has no task breakdown — FALLBACK plans). Writes to `state.epics[i].tasks[j].gate_progress.implementation`. Epic-level review (Gate 8) MUST NOT be dispatched from inside this step — it runs after the task loop.
+
+⛔ **Phase gate:** Before entering Gate 0 for the current epic, confirm its phase (`state.phases[]` lookup via `epic.phase`) has status `detailed` or `in_progress`. An epic in an un-elaborated (`epic-level`) phase is NOT dispatch-ready — its `tasks[]` is empty. The hook also blocks this; do not attempt it.
 
 **REQUIRED SUB-SKILL:** Use ring:dev-implementation
 
-**Execution Unit:** Task-itself (if no subtasks) or a Subtask (if task has subtasks). Either way, the unit is a SUBTASK-LEVEL scope.
+**Execution Unit:** Epic-itself (if no task breakdown) or a Task T-X.Y.Z (if epic has tasks). Either way, the unit is a TASK-LEVEL scope.
 
 ### Pre-Dispatch: Before Gate 0 Checkpoint (MANDATORY)
 
-MUST execute the **Before Gate 0 (task start)** row from the State Persistence Checkpoints table before sub-steps 2.1–2.3:
-- Set `task.status = "in_progress"` in state JSON
+MUST execute the **Before Gate 0 (epic start)** row from the State Persistence Checkpoints table before sub-steps 2.1–2.3:
+- Set `epic.status = "in_progress"` in state JSON
 - Update tasks.md Status → `🔄 Doing` (per tasks.md Status update rules in that table)
 - Write state to file
 
-CANNOT proceed to sub-steps 2.1–2.3 without completing this checkpoint.
+CANNOT proceed to sub-steps 2.1–2.3 without completing this checkpoint. (The `epic.base_sha` captured here is the lower bound of the Gate 8 cumulative review diff — the SHA before the epic's first task.)
 
 ### ⛔ MANDATORY: Invoke ring:dev-implementation Skill (not inline execution)
 
@@ -48,20 +50,27 @@ See [shared-patterns/file-size-enforcement.md](../../shared-patterns/file-size-e
 ### Step 2.1: Prepare Input for ring:dev-implementation Skill
 
 ```text
-Gather from current execution unit:
+current_task = state.epics[current_epic_index].tasks[current_task_index]
+
+Gather from current execution unit (a task T-X.Y.Z, or the epic-itself for FALLBACK plans):
 
 implementation_input = {
-  // REQUIRED - from current execution unit
-  unit_id: state.current_unit.id,
-  requirements: state.current_unit.acceptance_criteria,
+  // REQUIRED - the current task's identity
+  unit_id: current_task.id,  // T-X.Y.Z (or the epic id for the synthetic epic-itself unit)
 
-  // REQUIRED - detected from project
-  language: state.current_unit.language,  // "go" | "typescript" | "python"
-  service_type: state.current_unit.service_type,  // "api" | "worker" | "batch" | "cli" | "frontend" | "bff"
+  // REQUIRED - the task's FULL block from tasks.md (read live from state.source_file
+  //            under this epic): Context (with file:line refs), Implementation vision,
+  //            Files, Verification, Done when. This replaces legacy acceptance_criteria
+  //            sourcing — the dispatch-ready task block IS the requirement.
+  requirements: current_task_block_from_tasks_md,
+
+  // REQUIRED - detected from project / inherited from the epic
+  language: epic.language,  // "go" | "typescript" | "python"
+  service_type: epic.service_type,  // "api" | "worker" | "batch" | "cli" | "frontend" | "bff"
 
   // OPTIONAL - additional context
-  technical_design: state.current_unit.technical_design || null,
-  existing_patterns: state.current_unit.existing_patterns || [],
+  technical_design: current_task.technical_design || null,
+  existing_patterns: current_task.existing_patterns || [],
   project_rules_path: "docs/PROJECT_RULES.md"
 }
 ```
@@ -186,7 +195,7 @@ Verify that the dev-implementation handoff includes `delivery_verification` fiel
         dead_code_items: int
 
 IF delivery_verification.result == "PASS":
-  → Update state.tasks[current].subtasks[current].gate_progress.implementation.delivery_verified = true
+  → Update state.epics[current_epic_index].tasks[current_task_index].gate_progress.implementation.delivery_verified = true
   → Gate 0 is complete
 
 IF delivery_verification.result == "PARTIAL" or "FAIL":
@@ -199,7 +208,7 @@ Anti-Rationalization:
 | "There's a separate Gate 0.5 / delivery-verification dispatch" | Delivery verification is a sub-check inside Gate 0, not a separate dispatch. | **Read `delivery_verification` from the Gate 0 handoff; do NOT dispatch a separate skill.** |
 | "I'll just skip this check if Gate 0 passed" | Gate 0 passing without `delivery_verification` means Gate 0 is incomplete. | **Verify `delivery_verification` exists in handoff. If absent → Gate 0 failed.** |
 
-No separate `state.gate_progress.delivery_verification` field — delivery verification is a sub-check of implementation, tracked inline.
+No separate `state.gate_progress.delivery_verification` field — delivery verification is a sub-check of implementation, tracked inline under `state.epics[i].tasks[j].gate_progress.implementation`.
 
 ### Anti-Rationalization: Gate 0 Skill Invocation
 
@@ -212,30 +221,30 @@ No separate `state.gate_progress.delivery_verification` field — delivery verif
 | "I'll dispatch the agent and verify output myself" | Self-verification skips the skill's re-dispatch loop. | **Invoke Skill("ring:dev-implementation")** |
 | "Agent already did TDD internally" | Internal ≠ verified by skill. Skill validates output structure. | **Invoke Skill("ring:dev-implementation")** |
 
-### Step 2.4: Subtask Checkpoint (Conditional — `manual_per_subtask` only)
+### Step 2.4: Task Checkpoint (Conditional — `manual_per_task` only)
 
-**Checkpoint depends on `execution_mode`:** `manual_per_subtask` → Execute | `manual_per_task` / `automatic` → Skip
+**Checkpoint depends on `execution_mode`:** `manual_per_task` → Execute | `manual_per_epic` / `automatic` → Skip
 
-This is the ONLY per-subtask pause. It fires after the subtask's Gate 0 completes (the `[checkpoint if manual_per_subtask mode]` step in the Execution Order). Task review (Gate 8) and task validation (Gate 9) run later, once per task.
+This is the ONLY per-task pause. It fires after the task's Gate 0 completes (the `[checkpoint if manual_per_task mode]` step in the Execution Order). Epic review (Gate 8) and epic validation (Gate 9) run later, once per epic.
 
 0. **COMMIT CHECK (before checkpoint):**
-   - if `commit_timing == "per_subtask"`:
-     - Execute `/ring:commit` command with message: `feat({subtask_id}): {subtask_title}`
-     - Include all changed files from this subtask
-   - else: Skip commit (will happen at task or cycle end)
+   - if `commit_timing == "per_task"`:
+     - Execute `/ring:commit` command with message: `feat({task_id}): {task_title}`
+     - Include all changed files from this task
+   - else: Skip commit (will happen at epic or cycle end)
 
 0b. **VISUAL CHANGE REPORT (opt-in):**
-   - If `state.visual_report_granularity == "subtask"`: invoke `Skill("ring:visualize")` for a per-subtask code-diff and tell the user the path.
+   - If `state.visual_report_granularity == "task"`: invoke `Skill("ring:visualize")` for a per-task code-diff and tell the user the path.
    - Default (`"none"`): skip.
 
 1. Set `status = "paused_for_approval"`, save state
-2. Present summary: Subtask ID, Parent Task, Gate 0 status, Duration, Files Changed, Commit Status
+2. Present summary: Task ID, Parent Epic, Gate 0 status, Duration, Files Changed, Commit Status
 3. **AskUserQuestion:** "Ready to proceed?" Options: (a) Continue (b) Test First (c) Stop Here
 4. **Handle response:**
 
 | Response | Action |
 |----------|--------|
-| Continue | Set in_progress, move to next subtask (or to Gate 8 if this was the last subtask of the task) |
+| Continue | Set in_progress, move to next task (or to Gate 8 if this was the last task of the epic) |
 | Test First | Set `paused_for_testing`, STOP, output resume command |
 | Stop Here | Set `paused`, STOP, output resume command |
 

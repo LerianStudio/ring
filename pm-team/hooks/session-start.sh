@@ -30,8 +30,8 @@ get_output_file() {
     pre-dev-api-design)        echo "API.md" ;;
     pre-dev-data-model)        echo "data-model.md" ;;
     pre-dev-dependency-map)    echo "dependencies.md" ;;
-    pre-dev-task-breakdown)    echo "tasks.md" ;;
-    pre-dev-subtask-creation)  echo "subtasks.md" ;;
+    pre-dev-phases-and-epics)  echo "tasks.md" ;;
+    pre-dev-task-creation)     echo "tasks.md" ;;
     *)                         echo "${skill_name#pre-dev-}.md" ;;
   esac
 }
@@ -132,7 +132,7 @@ EOF
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "<ring-pm-team-system>\n**Pre-Dev Planning Skills**\n\n9-gate structured feature planning (use via Skill tool):\n\n| Skill | Gate | Output |\n|-------|------|--------|\n| `ring:pre-dev-research` | 0 | research.md |\n| `ring:pre-dev-prd-creation` | 1 | PRD.md |\n| `ring:pre-dev-feature-map` | 2 | feature-map.md |\n| `ring:pre-dev-trd-creation` | 3 | TRD.md |\n| `ring:pre-dev-api-design` | 4 | API.md |\n| `ring:pre-dev-data-model` | 5 | data-model.md |\n| `ring:pre-dev-dependency-map` | 6 | dependencies.md |\n| `ring:pre-dev-task-breakdown` | 7 | tasks.md |\n| `ring:pre-dev-subtask-creation` | 8 | subtasks.md |\n\n**Standalone Discovery Skills** (use via Skill tool):\n\n| Skill | Output |\n|-------|--------|\n| `ring:streaming-event-mapping` | docs/streaming/event-catalog.md, instrumentation-map.json |\n\nFor full details: Skill tool with \"ring:using-pm-team\"\n</ring-pm-team-system>"
+    "additionalContext": "<ring-pm-team-system>\n**Pre-Dev Planning Skills**\n\n9-gate structured feature planning (use via Skill tool):\n\n| Skill | Gate | Output |\n|-------|------|--------|\n| `ring:pre-dev-research` | 0 | research.md |\n| `ring:pre-dev-prd-creation` | 1 | PRD.md |\n| `ring:pre-dev-feature-map` | 2 | feature-map.md |\n| `ring:pre-dev-trd-creation` | 3 | TRD.md |\n| `ring:pre-dev-api-design` | 4 | API.md |\n| `ring:pre-dev-data-model` | 5 | data-model.md |\n| `ring:pre-dev-dependency-map` | 6 | dependencies.md |\n| `ring:pre-dev-phases-and-epics` | 7 | tasks.md |\n| `ring:pre-dev-task-creation` | 8 | tasks.md |\n\n**Standalone Discovery Skills** (use via Skill tool):\n\n| Skill | Output |\n|-------|--------|\n| `ring:streaming-event-mapping` | docs/streaming/event-catalog.md, instrumentation-map.json |\n\nFor full details: Skill tool with \"ring:using-pm-team\"\n</ring-pm-team-system>"
   }
 }
 EOF

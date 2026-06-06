@@ -1,8 +1,10 @@
 ## Step 12: Cycle Completion
 
+⛔ **Entry condition:** Step 12 runs ONCE, only after the LAST phase has completed its phase boundary (Step 11.5) — i.e. every phase in `state.phases[]` has status `complete` and there is no further phase to elaborate. Reaching the approval of the last epic alone does NOT enter Step 12; the phase boundary for the final phase runs first (it has no "next phase" to elaborate, so it falls straight through to here per gates/phase-boundary.md step 3).
+
 ### Step 12.0: Cycle Exit Verification
 
-Iterate `state.tasks` once and assert both cycle-exit invariants. Both are HARD GATES; neither implements or adapts code.
+Iterate `state.epics` once and assert both cycle-exit invariants. Both are HARD GATES; neither implements or adapts code.
 
 ```text
 1. Final test confirmation — for every Gate 0 handoff: passing tests, coverage ≥ threshold,
@@ -10,7 +12,7 @@ Iterate `state.tasks` once and assert both cycle-exit invariants. Both are HARD 
    → Any missing/failed quality check: HARD BLOCK, return to Gate 0 for the affected unit.
 
 2. Multi-tenant dual-mode — verified at Gate 0 as delivery-verification check (G); confirm it held:
-   for each unit: if subtasks[j].gate_progress.implementation.delivery_verified != true
+   for each unit: if epics[i].tasks[j].gate_progress.implementation.delivery_verified != true
    → HARD BLOCK: "Unit [unit_id] failed Gate 0 delivery verification (includes multi-tenant dual-mode, check G)"
 
 3. Display to user:
@@ -133,7 +135,7 @@ state.gate_progress.migration_safety_verification = {
 | "This migration looks simple, skip the check" | Simple migrations cause incidents too. Gate 0.5D only fires on BLOCKING patterns — if it fires, it's not simple. | **MUST run whenever migration files present in cycle diff.** |
 | "ACKNOWLEDGE findings are informational, just log them" | ACKNOWLEDGE means the author MUST confirm intent. Silent acknowledgment is not acknowledgment. | **MUST pause cycle and require explicit user phrase.** |
 | "Migration safety duplicates the multi-tenant check" | Different domains: multi-tenant dual-mode = Go code safety (Gate 0 check G); migration safety = SQL schema evolution. Orthogonal. | **Both run; they check different properties.** |
-| "Delivery-verification already covers migrations at Gate 0" | Gate 0's delivery verification is per-subtask on application code, not cycle-wide SQL. Cycle-level diff can only be assessed post-cycle. | **MUST run 0.5D post-cycle on the full cycle diff.** |
+| "Delivery-verification already covers migrations at Gate 0" | Gate 0's delivery verification is per-task on application code, not cycle-wide SQL. Cycle-level diff can only be assessed post-cycle. | **MUST run 0.5D post-cycle on the full cycle diff.** |
 | "Migration was in an early task, already committed per-task" | 0.5D inspects cumulative cycle diff vs origin/main. Per-task commits don't exempt cycle-level safety. | **MUST check against origin/main, not per-task boundary.** |
 | "BLOCKING will cause rework, let's downgrade to WARN" | Severity is set by migration-safety.md. Downgrading violates the standard. | **MUST HARD BLOCK on BLOCKING; use ACKNOWLEDGE only for documented expand-contract.** |
 
@@ -145,7 +147,7 @@ state.gate_progress.migration_safety_verification = {
 
 2. **⛔ MANDATORY: Run ring:dev-report skill (the ONE AND ONLY dispatch).**
 
-   ring:dev-report reads `accumulated_metrics` from ALL tasks in state and writes aggregate feedback to `docs/feedbacks/cycle-YYYY-MM-DD/`. It manages its own TodoWrite tracking.
+   ring:dev-report reads `accumulated_metrics` from ALL epics in state and writes aggregate feedback to `docs/feedbacks/cycle-YYYY-MM-DD/`. It manages its own TodoWrite tracking.
 
    ```yaml
    Skill tool:
@@ -166,7 +168,7 @@ state.gate_progress.migration_safety_verification = {
 
 4. **FINAL COMMIT** (runs regardless of `commit_timing` — the cycle-metadata commit captures the dev-report feedback and finalized state, so nothing is left dangling):
    - `commit_timing == "at_end"`: include all changed files from the entire cycle (feature code + dev-report feedback + final state).
-   - `commit_timing == "per_task"` / `"per_subtask"`: feature code already committed; this commit captures the cycle-end artifacts (dev-report feedback, finalized state).
+   - `commit_timing == "per_epic"` / `"per_task"`: feature code already committed; this commit captures the cycle-end artifacts (dev-report feedback, finalized state).
    - Execute `/ring:commit` with message: `feat({cycle_id}): complete dev cycle for {feature_name}`.
 
-5. **Report:** "Cycle completed. Tasks X/X, Subtasks Y, Time Xh Xm, Review iterations X."
+5. **Report:** "Cycle completed. Phases X/X, Epics X/X, Tasks Y, Time Xh Xm, Review iterations X."

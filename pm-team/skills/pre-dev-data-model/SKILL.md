@@ -105,7 +105,7 @@ AskUserQuestion: "How should database fields be named?"
 - SQL DDL statements (`CREATE TABLE`)
 - ORM annotations (`@Column`, `json:"field"`)
 - Migration scripts
-- Query patterns (belong in subtasks)
+- Query patterns (belong in tasks)
 
 ## Topology-Aware Output
 
