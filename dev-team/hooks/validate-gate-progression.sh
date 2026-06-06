@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # validate-gate-progression.sh
-# PreToolUse hook for the lean backend ring:dev-cycle.
+# PreToolUse hook for the lean backend ring:running-dev-cycle.
 # Phased rolling-wave model (state v2.0.0): epics[] iterate, tasks[] are the Gate 0 unit.
 # Active backend gates:
 #   Gate 0: implementation-owned TDD, coverage, local runtime, delivery verification (per task T-X.Y.Z)
@@ -151,14 +151,14 @@ validate_gate_8() {
   default_failures=$(echo "$STATE" | jq -r --argjson idx "$CURRENT_EPIC_INDEX" '
     [
       {name: "code_reviewer", verdict: .epics[$idx].agent_outputs.review.code_reviewer.verdict},
-      {name: "business_logic_reviewer", verdict: .epics[$idx].agent_outputs.review.business_logic_reviewer.verdict},
+      {name: "logic_reviewer", verdict: .epics[$idx].agent_outputs.review.logic_reviewer.verdict},
       {name: "security_reviewer", verdict: .epics[$idx].agent_outputs.review.security_reviewer.verdict},
-      {name: "nil_safety_reviewer", verdict: .epics[$idx].agent_outputs.review.nil_safety_reviewer.verdict},
+      {name: "nil_reviewer", verdict: .epics[$idx].agent_outputs.review.nil_reviewer.verdict},
       {name: "test_reviewer", verdict: .epics[$idx].agent_outputs.review.test_reviewer.verdict},
       {name: "dead_code_reviewer", verdict: .epics[$idx].agent_outputs.review.dead_code_reviewer.verdict},
-      {name: "performance_reviewer", verdict: .epics[$idx].agent_outputs.review.performance_reviewer.verdict},
-      {name: "multi_tenant_reviewer", verdict: .epics[$idx].agent_outputs.review.multi_tenant_reviewer.verdict},
-      {name: "lib_commons_reviewer", verdict: .epics[$idx].agent_outputs.review.lib_commons_reviewer.verdict}
+      {name: "perf_reviewer", verdict: .epics[$idx].agent_outputs.review.perf_reviewer.verdict},
+      {name: "tenancy_reviewer", verdict: .epics[$idx].agent_outputs.review.tenancy_reviewer.verdict},
+      {name: "commons_reviewer", verdict: .epics[$idx].agent_outputs.review.commons_reviewer.verdict}
     ]
     | map(select(.verdict != "PASS"))
     | map(.name + "=" + (.verdict // "missing"))
@@ -167,9 +167,9 @@ validate_gate_8() {
 
   optional_failures=$(echo "$STATE" | jq -r --argjson idx "$CURRENT_EPIC_INDEX" '
     [
-      {name: "lib_observability_reviewer", verdict: .epics[$idx].agent_outputs.review.lib_observability_reviewer.verdict},
-      {name: "lib_systemplane_reviewer", verdict: .epics[$idx].agent_outputs.review.lib_systemplane_reviewer.verdict},
-      {name: "lib_streaming_reviewer", verdict: .epics[$idx].agent_outputs.review.lib_streaming_reviewer.verdict}
+      {name: "obs_reviewer", verdict: .epics[$idx].agent_outputs.review.obs_reviewer.verdict},
+      {name: "systemplane_reviewer", verdict: .epics[$idx].agent_outputs.review.systemplane_reviewer.verdict},
+      {name: "streaming_reviewer", verdict: .epics[$idx].agent_outputs.review.streaming_reviewer.verdict}
     ]
     | map(select(.verdict != null and .verdict != "PASS"))
     | map(.name + "=" + .verdict)
@@ -211,7 +211,7 @@ if [[ ${#errors[@]} -gt 0 ]]; then
     hookSpecificOutput: {
       hookEventName: "PreToolUse",
       permissionDecision: "deny",
-      permissionDecisionReason: ("Lean backend dev-cycle progression blocked:\n" + ($errors | map("- " + .) | join("\n")) + "\n\nRecovery: complete Gate 0 (per task T-X.Y.Z) via ring:dev-implementation for every task of the current epic, then run Gate 8 (per epic) via ring:codereview before Gate 9 validation. On a phase-not-elaborated error: run the phase boundary (Step 11.5, gates/phase-boundary.md) to elaborate the epic phase before entering Gate 0.")
+      permissionDecisionReason: ("Lean backend dev-cycle progression blocked:\n" + ($errors | map("- " + .) | join("\n")) + "\n\nRecovery: complete Gate 0 (per task T-X.Y.Z) via ring:implementing-tasks for every task of the current epic, then run Gate 8 (per epic) via ring:reviewing-code before Gate 9 validation. On a phase-not-elaborated error: run the phase boundary (Step 11.5, gates/phase-boundary.md) to elaborate the epic phase before entering Gate 0.")
     }
   }'
   exit 0

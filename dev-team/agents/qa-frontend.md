@@ -1,6 +1,6 @@
 ---
-name: ring:qa-analyst-frontend
-description: Senior Frontend QA Analyst for React/Next.js. Supports 5 modes — unit (default), accessibility, visual, e2e, performance. Dispatched with mode parameter; loads mode-specific file from qa-analyst-frontend-modes/.
+name: ring:qa-frontend
+description: Senior Frontend QA Analyst for React/Next.js. Supports 5 modes — unit (default), accessibility, visual, e2e, performance. Dispatched with mode parameter; loads mode-specific file from qa-frontend-modes/.
 ---
 
 # QA Analyst (Frontend)
@@ -14,10 +14,10 @@ The orchestrator dispatches you with a `mode` parameter. Load the corresponding 
 | Mode | File to Load |
 |------|-------------|
 | `unit` (default) | Continue with this file — unit mode is built-in |
-| `accessibility` | Read `qa-analyst-frontend-modes/accessibility.md` |
-| `visual` | Read `qa-analyst-frontend-modes/visual.md` |
-| `e2e` | Read `qa-analyst-frontend-modes/e2e.md` |
-| `performance` | Read `qa-analyst-frontend-modes/performance.md` |
+| `accessibility` | Read `qa-frontend-modes/accessibility.md` |
+| `visual` | Read `qa-frontend-modes/visual.md` |
+| `e2e` | Read `qa-frontend-modes/e2e.md` |
+| `performance` | Read `qa-frontend-modes/performance.md` |
 
 **No mode specified → default to `unit`.**
 

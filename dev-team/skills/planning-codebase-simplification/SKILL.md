@@ -1,11 +1,6 @@
 ---
-name: ring:dev-simplify
-description: |
-  Whole-codebase structural simplification sweep. Dispatches parallel explorers
-  to identify adapters, shims, single-implementation interfaces, translation-free
-  layers, and speculative abstractions. Applies dead-code Three-Rings cascade
-  analysis across the live codebase. Produces KILL / REVIEW / KEEP classification
-  with an inverted burden of proof — every abstraction must justify itself or be removed.
+name: ring:planning-codebase-simplification
+description: "Planning a whole-codebase simplification: audits a Go/TS codebase for needless abstraction and emits a KILL/REVIEW/KEEP plan plus a ring:running-dev-cycle task array. Plans only — no edits. Detects single-impl interfaces, pass-through shims, translation-free adapters, and dead-code cascade chains under an inverted burden of proof. Use for pre-public or post-pivot cleanup. Skip for current diff review (use ring:reviewing-code)."
 ---
 
 # Dev Simplify — Whole-Codebase Structural Sweep
@@ -17,14 +12,14 @@ description: |
 - Post-pivot cleanup: speculative scaffolding accumulated during exploration
 
 ## Skip when
-- Diff review on a feature branch → use ring:codereview
-- Standards-conformance refactor → use ring:dev-refactor
-- Dead code from a specific change → use ring:dead-code-reviewer in ring:codereview
+- Diff review on a feature branch → use ring:reviewing-code
+- Standards-conformance refactor → use ring:planning-backend-refactor
+- Dead code from a specific change → use ring:dead-code-reviewer in ring:reviewing-code
 - Application already has external clients depending on internals
 
 ## Related
-**Complementary:** ring:codereview, ring:codebase-explorer
-**Similar:** ring:dev-refactor, ring:production-readiness-audit
+**Complementary:** ring:reviewing-code, ring:codebase-explorer
+**Similar:** ring:planning-backend-refactor, ring:auditing-production-readiness
 
 
 **Core principle:** DELETE is the default verdict. An abstraction survives only with concrete evidence of the swap it enables.
@@ -116,8 +111,8 @@ Schema: { task, findings: [{name, file_line, smell, rebuttal_if_any, blast_radiu
 ## Phase 4: Consolidated Report
 
 Dispatch synthesizer to read all explorer files and emit:
-1. `docs/dev-simplify/simplify-report-{timestamp}.md` — KILL / REVIEW / KEEP tables
-2. `docs/dev-simplify/simplify-tasks-{timestamp}.json` — ring:dev-cycle task array
+1. `docs/ring:planning-codebase-simplification/simplify-report-{timestamp}.md` — KILL / REVIEW / KEEP tables
+2. `docs/ring:planning-codebase-simplification/simplify-tasks-{timestamp}.json` — ring:running-dev-cycle task array
 
 MUST emit both artifacts. MUST include cascade chains decomposed into per-ring tasks with `depends_on` wiring.
 

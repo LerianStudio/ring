@@ -1,8 +1,6 @@
 ---
-name: ring:pre-dev-feature-map
-description: |
-  Gate 2: Feature relationship map - visualizes feature landscape, groupings,
-  and interactions at business level before technical architecture.
+name: ring:mapping-feature-relationships
+description: "Mapping how features relate at a business level: categorizing PRD features, grouping them into domains, and charting cross-feature user journeys and integration points (no technical detail), then triggering wireframes. Gate 2 of ring:planning-large-features, runs after ring:writing-prds. Use for Large Track features with multiple interacting parts. Skip for Small Track or a single simple feature."
 ---
 
 # Feature Map Creation — Understanding the Feature Landscape
@@ -22,8 +20,8 @@ description: |
 
 ## Sequence
 
-**Runs before:** ring:pre-dev-trd-creation
-**Runs after:** ring:pre-dev-prd-creation
+**Runs before:** ring:writing-trds
+**Runs after:** ring:writing-prds
 
 
 Maps HOW features relate, group, and interact at a business level before architectural decisions.

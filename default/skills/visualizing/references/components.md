@@ -1,6 +1,6 @@
 # Component primitive atlas
 
-This reference defines reusable semantic primitives for `ring:visualize`. It is not a page template and not a CSS dump. Use it to compose source-backed summaries, evidence, legends, decisions, comparisons, flows, findings, and review surfaces inside artifacts built from `../templates/standard.html`.
+This reference defines reusable semantic primitives for `ring:visualizing`. It is not a page template and not a CSS dump. Use it to compose source-backed summaries, evidence, legends, decisions, comparisons, flows, findings, and review surfaces inside artifacts built from `../templates/standard.html`.
 
 For low-level styling patterns, use `css-patterns.md`. For CDN and library usage, use `libraries.md`. For long artifacts with section navigation, use `responsive-nav.md`.
 

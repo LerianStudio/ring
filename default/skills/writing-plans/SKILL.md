@@ -1,11 +1,6 @@
 ---
 name: ring:writing-plans
-description: |
-  Authoring phased implementation plans from a spec or requirements before
-  touching code. Produces a phase → epic → task hierarchy: Phase 1 fully
-  detailed into dispatch-ready tasks with file:line references and an
-  implementation vision; later phases stay at epic level for rolling-wave
-  elaboration during execution.
+description: "Writing a rolling-wave phased implementation plan from a spec before coding: a phase-epic-task hierarchy where Phase 1 is detailed into dispatch-ready tasks and later phases stay epic-level for elaboration during execution. Use when a multi-file feature needs decomposition; runs after ring:exploring-codebases or pre-dev gates, hands off to ring:executing-plans or ring:running-dev-cycle. Skip for single-file changes or spikes."
 ---
 
 # Writing Plans
@@ -21,8 +16,8 @@ description: |
 - Spec is still in brainstorming; the plan would lock premature decisions
 
 ## Sequence
-**Runs after:** ring:explore-codebase, ring:pre-dev-* skills (Gates 0-9 outputs feed the spec)
-**Runs before:** ring:executing-plans (rolling-wave execution) or ring:dev-cycle (gated subagent workflow)
+**Runs after:** ring:exploring-codebases, ring:pre-dev-* skills (Gates 0-9 outputs feed the spec)
+**Runs before:** ring:executing-plans (rolling-wave execution) or ring:running-dev-cycle (gated subagent workflow)
 
 ## Related
 **Companion:** [plan-document-reviewer-prompt.md](plan-document-reviewer-prompt.md) — subagent dispatch template for thorough plan review
@@ -50,7 +45,7 @@ Do not write a plan on a shaky foundation. STOP and ask when:
 |-----------|--------|
 | Vague requirements ("make it better", "add feature") | STOP. Ask: "What specific behavior should change?" |
 | Missing success criteria | STOP. Ask: "How do we verify this works?" |
-| Unknown codebase structure (can't locate files) | STOP. Run ring:explore-codebase first, then plan |
+| Unknown codebase structure (can't locate files) | STOP. Run ring:exploring-codebases first, then plan |
 | Conflicting constraints | STOP. Ask: "Which constraint takes priority?" |
 | Multiple valid architectures without guidance | STOP. Ask: "Which pattern should we use?" |
 
@@ -96,7 +91,7 @@ If the snippet exists to "save the implementer time", delete it. If it exists be
 
 > **For implementers:** Use ring:executing-plans (rolling wave: implement the
 > detailed phase → user checkpoint → detail the next phase → implement → repeat),
-> or ring:dev-cycle for the full subagent-orchestrated workflow.
+> or ring:running-dev-cycle for the full subagent-orchestrated workflow.
 > This document is the living source of truth — task elaboration for later
 > phases is written back into it during execution.
 
@@ -195,13 +190,13 @@ After saving the plan, offer execution choice:
 >
 > **1. Rolling-Wave Execution (this session)** — Use ring:executing-plans: implement Phase 1, checkpoint with you, elaborate Phase 2 into tasks against the real codebase, implement, and repeat. Best for iterative delivery with course-correction between phases.
 >
-> **2. Subagent-Orchestrated (ring:dev-cycle)** — lean backend cycle (Gate 0/8/9) with parallel specialist dispatch. Best for production work that must pass through the full review pool.
+> **2. Subagent-Orchestrated (ring:running-dev-cycle)** — lean backend cycle (Gate 0/8/9) with parallel specialist dispatch. Best for production work that must pass through the full review pool.
 >
 > Which approach?
 
 **If Rolling-Wave chosen:** Continue with ring:executing-plans in this session.
 
-**If Subagent-Orchestrated chosen:** Hand off to ring:dev-cycle, which owns implementation across Gates 0–10.
+**If Subagent-Orchestrated chosen:** Hand off to ring:running-dev-cycle, which owns implementation across Gates 0–10.
 
 ## Verification Checklist
 

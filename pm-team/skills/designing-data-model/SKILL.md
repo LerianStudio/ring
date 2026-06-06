@@ -1,8 +1,6 @@
 ---
-name: ring:pre-dev-data-model
-description: |
-  Gate 5: Data structures document - defines entities, relationships, and ownership
-  before database technology selection. Large Track only.
+name: ring:designing-data-model
+description: "Designing the data model (entities, fields, relationships, per-service ownership) from the Gate 4 API design and TRD, before database selection; no SQL, ORM, or migration syntax. Gate 5 of ring:planning-large-features; runs after ring:designing-api-contracts, before ring:pinning-dependency-versions. Use when the system stores persistent data. Skip for Small Track, no persistent data, or an unvalidated API design."
 ---
 
 # Data Modeling — Defining Data Structures
@@ -22,8 +20,8 @@ description: |
 
 ## Sequence
 
-**Runs before:** ring:pre-dev-dependency-map
-**Runs after:** ring:pre-dev-api-design
+**Runs before:** ring:pinning-dependency-versions
+**Runs after:** ring:designing-api-contracts
 
 
 Defines WHAT data exists, HOW entities relate, and WHO owns what data — before database technology selection.

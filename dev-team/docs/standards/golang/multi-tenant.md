@@ -3129,7 +3129,7 @@ The consumer-facing code (repositories, services, workers) is **mode-agnostic** 
 
 ### NON-COMPLIANT signs (consolidated)
 
-A `ring:dev-multi-tenant` Gate 0 audit (or any equivalent compliance sweep) MUST flag any of the following:
+A `ring:adding-multi-tenancy` Gate 0 audit (or any equivalent compliance sweep) MUST flag any of the following:
 
 - `PingContext` / `.Ping(` calls inside `internal/bootstrap/` that are NOT gated behind `if !cfg.MultiTenant.Enabled` (or behind a per-tenant resolver). Reference: `internal/bootstrap/service_infrastructure.go:154-172`.
 - Bootstrap Mongo init call sites without an `cfg.Mongo.Enabled && !cfg.MultiTenant.Enabled` gate. Reference: `internal/bootstrap/service_infrastructure.go:79-93`.
@@ -3169,4 +3169,4 @@ These files in `plugin-br-bank-transfer` are the canonical reference for this pa
 | `internal/bootstrap/service_internal_test.go:451-509` | Banner tests pinning the ST/MT contract — copy this test shape into new services. |
 | `internal/bootstrap/readyz_self_probe_mt_test.go` | Self-probe MT carve-out regression tests. |
 
-Cross-reference: §27 (Systemplane in MT mode — compliance pattern) for the runtime-config side of the same dual-mode discipline. `ring:dev-systemplane-migration` orchestrates the systemplane-side migration; the bootstrap-resource-requirement rule documented here MUST be in place before that migration is enabled in MT-prod.
+Cross-reference: §27 (Systemplane in MT mode — compliance pattern) for the runtime-config side of the same dual-mode discipline. `ring:migrating-to-lib-systemplane` orchestrates the systemplane-side migration; the bootstrap-resource-requirement rule documented here MUST be in place before that migration is enabled in MT-prod.

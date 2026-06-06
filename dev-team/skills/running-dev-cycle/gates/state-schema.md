@@ -6,23 +6,23 @@ The state file path depends on the **source of tasks**:
 
 | Task Source | State Path | Use Case |
 |-------------|------------|----------|
-| `docs/ring:dev-refactor/*/tasks.md` | `docs/ring:dev-refactor/current-cycle.json` | Refactoring existing code |
-| `docs/pre-dev/*/tasks.md` | `docs/ring:dev-cycle/current-cycle.json` | New feature development |
-| Any other path | `docs/ring:dev-cycle/current-cycle.json` | Default for manual tasks |
+| `docs/ring:planning-backend-refactor/*/tasks.md` | `docs/ring:planning-backend-refactor/current-cycle.json` | Refactoring existing code |
+| `docs/pre-dev/*/tasks.md` | `docs/ring:running-dev-cycle/current-cycle.json` | New feature development |
+| Any other path | `docs/ring:running-dev-cycle/current-cycle.json` | Default for manual tasks |
 
 **Detection Logic:**
 ```text
-if source_file contains "docs/ring:dev-refactor/" THEN
-  state_path = "docs/ring:dev-refactor/current-cycle.json"
+if source_file contains "docs/ring:planning-backend-refactor/" THEN
+  state_path = "docs/ring:planning-backend-refactor/current-cycle.json"
 else
-  state_path = "docs/ring:dev-cycle/current-cycle.json"
+  state_path = "docs/ring:running-dev-cycle/current-cycle.json"
 ```
 
 **Store state_path in the state object itself** so resume knows where to look.
 
 ### State File Structure
 
-State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.json` or `docs/ring:dev-refactor/current-cycle.json`):
+State is persisted to `{state_path}` (either `docs/ring:running-dev-cycle/current-cycle.json` or `docs/ring:planning-backend-refactor/current-cycle.json`):
 
 ```json
 {
@@ -31,7 +31,7 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
   "started_at": "ISO timestamp",
   "updated_at": "ISO timestamp",
   "source_file": "path/to/tasks.md",
-  "state_path": "docs/ring:dev-cycle/current-cycle.json | docs/ring:dev-refactor/current-cycle.json",
+  "state_path": "docs/ring:running-dev-cycle/current-cycle.json | docs/ring:planning-backend-refactor/current-cycle.json",
   "cycle_type": "feature | refactor",
   "execution_mode": "manual_per_task|manual_per_epic|automatic",
   "commit_timing": "per_task|per_epic|at_end",
@@ -39,7 +39,7 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
   "phase_checkpoint": "manual|auto",
   "_comment_cached_standards": "Populated by Step 1.5 (Standards Pre-Cache). Dictionary of URL → {fetched_at, content}. Sub-skills MUST read from here instead of calling WebFetch.",
   "cached_standards": {},
-  "_comment_visual_report_granularity": "Opt-in code-diff report via ring:visualize: 'none' (default, no report) | 'epic' (aggregate per epic) | 'task' (per task).",
+  "_comment_visual_report_granularity": "Opt-in code-diff report via ring:visualizing: 'none' (default, no report) | 'epic' (aggregate per epic) | 'task' (per task).",
   "visual_report_granularity": "none",
   "custom_prompt": {
     "type": "string",
@@ -50,7 +50,7 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
   },
   "status": "in_progress|completed|failed|paused|paused_for_approval|paused_for_testing|paused_for_epic_approval|paused_for_integration_testing|paused_for_phase_review",
   "feedback_loop_completed": false,
-  "_comment_phases": "Parsed from the tasks.md '## Phase Overview' table at init. status mirrors the Phase Overview Status cell: 'epic-level' (not yet task-detailed) | 'detailed' (tasks written, ready to enter Gate 0) | 'in_progress' (epics of this phase executing) | 'complete' (all epics done). FALLBACK: a tasks.md without a '## Phase Overview' (ring:dev-refactor output, flat plans) synthesizes a single phase 1 with status 'detailed' containing all epics.",
+  "_comment_phases": "Parsed from the tasks.md '## Phase Overview' table at init. status mirrors the Phase Overview Status cell: 'epic-level' (not yet task-detailed) | 'detailed' (tasks written, ready to enter Gate 0) | 'in_progress' (epics of this phase executing) | 'complete' (all epics done). FALLBACK: a tasks.md without a '## Phase Overview' (ring:planning-backend-refactor output, flat plans) synthesizes a single phase 1 with status 'detailed' containing all epics.",
   "phases": [
     {"phase": 1, "milestone": "what works at the end", "status": "detailed"},
     {"phase": 2, "milestone": "what works at the end", "status": "epic-level"}
@@ -83,7 +83,7 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
       "status": "pending|in_progress|completed|failed|blocked",
       "base_sha": "git HEAD SHA captured at epic start, before the first task's Gate 0; lower bound of the Gate 8 cumulative review diff",
       "feedback_loop_completed": false,
-      "_comment_accumulated_metrics": "Populated at Step 11.1 (Epic Approval Checkpoint). Aggregated at cycle end by ring:dev-report (Step 12.1).",
+      "_comment_accumulated_metrics": "Populated at Step 11.1 (Epic Approval Checkpoint). Aggregated at cycle end by ring:writing-dev-reports (Step 12.1).",
       "accumulated_metrics": {
         "gate_durations_ms": {},
         "review_iterations": 0,
@@ -139,7 +139,7 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
       "artifacts": {},
       "agent_outputs": {
         "implementation": {
-          "agent": "ring:backend-engineer-golang",
+          "agent": "ring:backend-go",
           "output": "## Summary\n...",
           "timestamp": "ISO timestamp",
           "duration_ms": 0,
@@ -163,7 +163,7 @@ State is persisted to `{state_path}` (either `docs/ring:dev-cycle/current-cycle.
           "conditional_specialists_triggered": [],
           "conditional_specialists_passed": "0/0",
           "selected_reviewer_count": 9,
-          "_comment_reviewer_shape": "Each reviewer is an object with the shape shown by code_reviewer below. The 9 defaults (code_reviewer, business_logic_reviewer, security_reviewer, test_reviewer, nil_safety_reviewer, dead_code_reviewer, performance_reviewer, multi_tenant_reviewer, lib_commons_reviewer) all use this shape. Conditional specialists (lib_observability_reviewer, lib_systemplane_reviewer, lib_streaming_reviewer) use the same shape AND add \"optional\": true. Only reviewers that produce a Standards Coverage Table populate standards_compliance.",
+          "_comment_reviewer_shape": "Each reviewer is an object with the shape shown by code_reviewer below. The 9 defaults (code_reviewer, logic_reviewer, security_reviewer, test_reviewer, nil_reviewer, dead_code_reviewer, perf_reviewer, tenancy_reviewer, commons_reviewer) all use this shape. Conditional specialists (obs_reviewer, systemplane_reviewer, streaming_reviewer) use the same shape AND add \"optional\": true. Only reviewers that produce a Standards Coverage Table populate standards_compliance.",
           "code_reviewer": {
             "agent": "ring:code-reviewer",
             "output": "...",
@@ -210,7 +210,7 @@ At cycle init, parse `state.source_file` (tasks.md):
 2. **Summary** (`## Summary` table: `| Epic | Title | Phase | Type | Hours | Confidence | Blocks | Status |`) → ALL epics load into `epics[]`, each with its `phase` field from the Phase column. Skip rows whose first cell is `TOTAL` or empty.
 3. **Task blocks** — for each epic in a `detailed` phase, parse the inline `#### Task T-X.Y.Z` blocks under its epic section into `epics[i].tasks[]` (id, and the implementation gate_progress skeleton). Epics in `epic-level` phases load with `tasks: []` — they are elaborated at their phase boundary (Step 11.5).
 
-**FALLBACK — no `## Phase Overview`** (ring:dev-refactor output, flat plans):
+**FALLBACK — no `## Phase Overview`** (ring:planning-backend-refactor output, flat plans):
 - Synthesize a single `phases[] = [{phase: 1, milestone: "<feature> (flat plan)", status: "detailed"}]`, `current_phase = 1`. Every epic gets `phase: 1`.
 - If an epic has no inline task breakdown, keep the existing synthetic single-unit mechanism: one `tasks[]` entry representing the epic itself (the epic-itself unit), so every Gate 0 handoff lives under `tasks[]` uniformly.
 
@@ -220,7 +220,7 @@ An epic whose phase (`phases[]` lookup via `epic.phase`) has status NOT in (`det
 
 ### Structured Error/Issue Schemas
 
-**These schemas enable `ring:dev-report` to analyze issues without parsing raw output.**
+**These schemas enable `ring:writing-dev-reports` to analyze issues without parsing raw output.**
 
 #### Standards Compliance Gap Schema
 
@@ -356,7 +356,7 @@ Write tool:
 | Step 11.1 (Epic Approval) | Epic | `epic.status = "completed"` in JSON **+ tasks.md Status → `✅ Done`** + `epic.accumulated_metrics` populated (gate_durations_ms, review_iterations, testing_iterations, issues_by_severity); NO dev-report dispatch here (runs ONCE at Step 12.1) | ✅ YES |
 | Step 11.5 (Phase Boundary) | Phase | At phase close: tasks.md Phase Overview Status → `Complete`, `phases[]` status → `complete`, `status = "paused_for_phase_review"` (manual checkpoint). After elaboration: new phase `phases[]` status → `detailed`, Phase Overview Status → `Detailed`, load new tasks into `epics[].tasks[]`, `current_phase += 1`. See gates/phase-boundary.md. | ✅ YES |
 | Step 12.0.5b (Gate 0.5D — Migration Safety, conditional) | Cycle | `state.gate_progress.migration_safety_verification = {status: "completed" \| "skipped" \| "blocked" \| "acknowledged", reason, files_checked, findings: {BLOCKING: [], WARN: [], ACKNOWLEDGE: []}, user_acknowledgment}` | ✅ YES |
-| Step 12.1 (Cycle end — dev-report) | Cycle | `state.feedback_loop_completed = true` after the ONE AND ONLY `ring:dev-report` dispatch | ✅ YES |
+| Step 12.1 (Cycle end — dev-report) | Cycle | `state.feedback_loop_completed = true` after the ONE AND ONLY `ring:writing-dev-reports` dispatch | ✅ YES |
 | HARD BLOCK (any gate) | Epic | `epic.status = "failed"` in JSON **+ tasks.md Status → `❌ Failed`** | ✅ YES |
 
 **tasks.md Status update rules (apply at the epic checkpoints above):**

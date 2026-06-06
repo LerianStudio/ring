@@ -3,7 +3,7 @@
 > **⚠️ MAINTENANCE:** This directory is indexed in `dev-team/skills/shared-patterns/standards-coverage-table.md`.
 > When adding/removing sections, follow FOUR-FILE UPDATE RULE in CLAUDE.md.
 
-This directory contains testing-mode-specific frontend standards for Lerian Studio. The general frontend standards live in [`../frontend.md`](../frontend.md); this index covers the 4 specialized testing modules dispatched by `ring:qa-analyst-frontend`.
+This directory contains testing-mode-specific frontend standards for Lerian Studio. The general frontend standards live in [`../frontend.md`](../frontend.md); this index covers the 4 specialized testing modules dispatched by `ring:qa-frontend`.
 
 > **Reference**: Always consult `docs/PROJECT_RULES.md` for common project standards.
 

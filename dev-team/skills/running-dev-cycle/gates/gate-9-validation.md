@@ -15,7 +15,7 @@ For the current epic:
      * The delivery-verification evidence already written at Gate 0:
        `state.epics[i].tasks[j].gate_progress.implementation`
        (delivery_verified, and the requirements_delivered mapping produced by
-        ring:dev-implementation's Delivery Verification Exit Check)
+        ring:implementing-tasks's Delivery Verification Exit Check)
    - If the epic itself carries epic-level acceptance_criteria, include those too.
    - ⛔ Every task's criteria MUST appear in the aggregated set. A criterion
      defined on any task of the epic that is dropped here is a silent bug.
@@ -56,12 +56,12 @@ For the current epic:
 > The per-task pause for `manual_per_task` mode lives after Gate 0 (see the `[checkpoint if manual_per_task mode]` step in the Execution Order). There is NO per-task validation pause here — Gate 9 validation is epic-level only.
 
 0. **COMMIT CHECK (before checkpoint):**
-   - `commit_timing == "per_epic"` → execute `/ring:commit` with message `feat({epic_id}): {epic_title}`, including all files changed across the epic's tasks.
+   - `commit_timing == "per_epic"` → execute `/ring:committing-changes` with message `feat({epic_id}): {epic_title}`, including all files changed across the epic's tasks.
    - `commit_timing == "per_task"` → already committed per task.
    - else → defer to cycle end.
 
 0b. **VISUAL CHANGE REPORT (opt-in):**
-   - `state.visual_report_granularity == "epic"` → invoke `Skill("ring:visualize")` for an aggregate code-diff of all tasks in the epic, save to `docs/ring:dev-cycle/reports/epic-{epic_id}-report.html`, and tell the user the path.
+   - `state.visual_report_granularity == "epic"` → invoke `Skill("ring:visualizing")` for an aggregate code-diff of all tasks in the epic, save to `docs/ring:running-dev-cycle/reports/epic-{epic_id}-report.html`, and tell the user the path.
    - Default (`"none"`): skip.
 
 1. **Accumulate epic metrics into state** (always, independent of mode — NO dev-report dispatch here):
@@ -72,7 +72,7 @@ For the current epic:
    - `issues_by_severity`: {CRITICAL, HIGH, MEDIUM, LOW counts from Gate 8 output}
 
    Set `state.epics[current_epic_index].feedback_loop_completed = true`. Save state.
-   (The single `ring:dev-report` dispatch runs at cycle end, Step 12.1 — aggregate data yields stronger insight than N per-epic runs.)
+   (The single `ring:writing-dev-reports` dispatch runs at cycle end, Step 12.1 — aggregate data yields stronger insight than N per-epic runs.)
 
    | Rationalization | Why It's WRONG | Required Action |
    |-----------------|----------------|-----------------|
@@ -107,7 +107,7 @@ For the current epic:
 | Response | Action |
 |----------|--------|
 | Continue | Set `epic.status = "completed"`, tasks.md Status → `✅ Done`. **If next epic is in the same phase:** set cycle `status = "in_progress"`, `current_epic_index += 1`, `current_task_index = 0`, `current_gate = 0`, save, proceed to the next epic. **If next epic crosses a phase boundary or no epic remains:** enter Step 11.5 (gates/phase-boundary.md). |
-| Integration Test | Set `epic.status = "completed"`, tasks.md Status → `✅ Done`. Set cycle `status = "paused_for_integration_testing"`. Save. Output: `Cycle paused for integration testing. Resume with /ring:dev-cycle --resume`. STOP. (On resume, apply the phase-boundary routing above.) |
-| Stop Here | Leave `epic.status = "in_progress"` (NOT completed; the cycle re-enters this checkpoint on resume). Set cycle `status = "paused"`. Save. Output: `Cycle paused after epic [epic_id]. Resume with /ring:dev-cycle --resume`. STOP. |
+| Integration Test | Set `epic.status = "completed"`, tasks.md Status → `✅ Done`. Set cycle `status = "paused_for_integration_testing"`. Save. Output: `Cycle paused for integration testing. Resume with /ring:running-dev-cycle --resume`. STOP. (On resume, apply the phase-boundary routing above.) |
+| Stop Here | Leave `epic.status = "in_progress"` (NOT completed; the cycle re-enters this checkpoint on resume). Set cycle `status = "paused"`. Save. Output: `Cycle paused after epic [epic_id]. Resume with /ring:running-dev-cycle --resume`. STOP. |
 
 **Note:** Epics without a task breakdown (FALLBACK plans) treat the epic-itself as a single task; their aggregated criteria set is just that one unit's acceptance criteria.

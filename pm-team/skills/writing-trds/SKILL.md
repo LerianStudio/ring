@@ -1,8 +1,6 @@
 ---
-name: ring:pre-dev-trd-creation
-description: |
-  Gate 3 (Full Track) / Gate 2 (Small Track): Technical architecture document - defines HOW/WHERE with technology-agnostic
-  patterns before concrete implementation choices.
+name: ring:writing-trds
+description: "Writing a Technical Requirements Document that defines HOW and WHERE using technology-agnostic patterns: architecture style, component boundaries, data and integration design, auth/pagination, and BFF contracts for fullstack. Gate 3 (Full) / Gate 2 (Small) of ring:using-pm-team; runs after ring:writing-prds; names zero concrete products. Use when the PRD passed validation. Skip when the PRD is unvalidated or documented."
 ---
 
 # TRD Creation — Architecture Before Implementation
@@ -23,8 +21,8 @@ description: |
 
 ## Sequence
 
-**Runs before:** ring:pre-dev-api-design, ring:pre-dev-phases-and-epics
-**Runs after:** ring:pre-dev-prd-creation, ring:pre-dev-feature-map, ring:pre-dev-design-validation
+**Runs before:** ring:designing-api-contracts, ring:decomposing-phases-and-epics
+**Runs after:** ring:writing-prds, ring:mapping-feature-relationships, ring:validating-ux-completeness
 
 
 The TRD defines HOW to architect the solution and WHERE components will live — using technology-agnostic patterns before concrete technology choices.
@@ -44,7 +42,7 @@ Read PRD and detect UI indicators (user stories with "see", "view", "click", "pa
 
 **If feature has UI:**
 - Check `docs/pre-dev/{feature}/design-validation.md`
-- If missing → STOP: "Run ring:pre-dev-design-validation before TRD"
+- If missing → STOP: "Run ring:validating-ux-completeness before TRD"
 - If verdict ≠ "DESIGN VALIDATED" → STOP: "Fix design gaps and re-run validation"
 - If "DESIGN VALIDATED" → proceed
 

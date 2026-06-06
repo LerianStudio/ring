@@ -1,10 +1,6 @@
 ---
 name: ring:executing-plans
-description: |
-  Rolling-wave execution of a phased implementation plan. Implements the
-  detailed phase task-by-task, checkpoints with the user at the phase boundary,
-  then elaborates the next phase's epics into dispatch-ready tasks — informed
-  by what was actually built — and repeats until all phases land.
+description: "Executing a phased plan from ring:writing-plans in rolling waves: implements the detailed phase task-by-task with TDD and signed commits via ring:committing-changes, checkpoints at each phase boundary, then elaborates the next phase. Use when a phased plan exists and inline execution is preferred over subagent orchestration. Skip when no plan exists (use ring:writing-plans) or a tasks.md dev cycle is wanted (use ring:running-dev-cycle)."
 ---
 
 # Executing Plans
@@ -16,15 +12,15 @@ description: |
 
 ## Skip when
 - Plan doesn't exist yet — use ring:writing-plans first
-- Production-grade work requiring the full review pool — use ring:dev-cycle instead (lean backend cycle, Gate 0/8/9, dispatches specialists in parallel)
+- Production-grade work requiring the full review pool — use ring:running-dev-cycle instead (lean backend cycle, Gate 0/8/9, dispatches specialists in parallel)
 - Plan covers multiple independent subsystems — split into separate plans before executing
 
 ## Sequence
 **Runs after:** ring:writing-plans (consumes and updates its plan document)
-**Alternative:** ring:dev-cycle (subagent-orchestrated, gated workflow with parallel specialist dispatch)
+**Alternative:** ring:running-dev-cycle (subagent-orchestrated, gated workflow with parallel specialist dispatch)
 
 ## Related
-**Companion skills:** ring:writing-plans (defines the Epic and Task formats used during elaboration), ring:test-driven-development (enforces RED→GREEN→REFACTOR per task), ring:commit (closes each task with a signed atomic commit)
+**Companion skills:** ring:writing-plans (defines the Epic and Task formats used during elaboration), ring:test-driven-development (enforces RED→GREEN→REFACTOR per task), ring:committing-changes (closes each task with a signed atomic commit)
 
 ---
 
@@ -57,7 +53,7 @@ For each task in the detailed phase, in order:
 2. Implement per the task's **Implementation vision** — its decisions are binding; raise a blocker rather than silently diverging
 3. Use ring:test-driven-development for new production code: write the failing test first from the task's **Verification** intent, capture the RED output, then implement
 4. Run the task's verification; paste the output
-5. Close the task with ring:commit (atomic, signed)
+5. Close the task with ring:committing-changes (atomic, signed)
 6. Mark as completed only after verification passes — tick the task's `- [ ] Done` checkbox in the plan document
 
 **Do not skip the RED phase.** The plan carries no test code — writing the failing test from the verification intent IS the task's first step.
@@ -86,11 +82,11 @@ Repeat Steps 2–4 until every phase is complete.
 
 After all phases complete and verified:
 
-- Announce: "All phases complete and verified. Closing with ring:commit."
-- Use ring:commit for the final commit if uncommitted work remains
+- Announce: "All phases complete and verified. Closing with ring:committing-changes."
+- Use ring:committing-changes for the final commit if uncommitted work remains
 - Offer to push: `git push` (or `git push -u origin <branch>` if no upstream)
 
-For production work, hand off to ring:codereview to run the review pool against the cumulative diff.
+For production work, hand off to ring:reviewing-code to run the review pool against the cumulative diff.
 
 ## ⛔ When to Stop and Ask
 
@@ -112,7 +108,7 @@ For production work, hand off to ring:codereview to run the review pool against 
 **MUST NOT** start implementation on `main`/`master` without explicit user consent. If currently on a protected branch:
 
 1. Stop
-2. Ask the user to create or switch to a feature branch (or invoke ring:worktree for an isolated workspace)
+2. Ask the user to create or switch to a feature branch (or invoke ring:creating-worktrees for an isolated workspace)
 3. Resume only after branch confirmation
 
 ## Remember
@@ -133,7 +129,7 @@ Before marking the plan complete:
 - [ ] Every phase boundary checkpointed with the user (or continuous mode explicitly pre-authorized)
 - [ ] Every later phase elaborated into tasks before implementation, against the real codebase
 - [ ] Every RED phase produced a real failure (output captured)
-- [ ] Every task closed with an atomic, signed commit via ring:commit
+- [ ] Every task closed with an atomic, signed commit via ring:committing-changes
 - [ ] Plan document reflects final state (statuses, ticked tasks, recorded deviations)
 - [ ] Working tree clean (or remaining changes documented)
 - [ ] Final commit / push offered to user

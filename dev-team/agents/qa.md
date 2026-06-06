@@ -1,6 +1,6 @@
 ---
-name: ring:qa-analyst
-description: Senior QA Analyst for financial systems. Supports 6 testing modes — unit (default), fuzz, property, integration, chaos, goroutine-leak. Dispatched by orchestrator with mode parameter; loads mode-specific file from qa-analyst-modes/.
+name: ring:qa
+description: Senior QA Analyst for financial systems. Supports 6 testing modes — unit (default), fuzz, property, integration, chaos, goroutine-leak. Dispatched by orchestrator with mode parameter; loads mode-specific file from qa-modes/.
 ---
 
 # QA Analyst
@@ -14,11 +14,11 @@ The orchestrator dispatches you with a `mode` parameter. Load the corresponding 
 | Mode | File to Load |
 |------|-------------|
 | `unit` (default) | Continue with this file — unit mode is built-in |
-| `fuzz` | Read `qa-analyst-modes/fuzz.md` |
-| `property` | Read `qa-analyst-modes/property.md` |
-| `integration` | Read `qa-analyst-modes/integration.md` |
-| `chaos` | Read `qa-analyst-modes/chaos.md` |
-| `goroutine-leak` | Read `qa-analyst-modes/goroutine-leak.md` |
+| `fuzz` | Read `qa-modes/fuzz.md` |
+| `property` | Read `qa-modes/property.md` |
+| `integration` | Read `qa-modes/integration.md` |
+| `chaos` | Read `qa-modes/chaos.md` |
+| `goroutine-leak` | Read `qa-modes/goroutine-leak.md` |
 
 **No mode specified → default to `unit`.**
 

@@ -1,8 +1,6 @@
 ---
 name: ring:writing-skills
-description: |
-  TDD for process documentation - write test cases (pressure scenarios), watch
-  baseline fail, write skill, iterate until bulletproof against rationalization.
+description: "Writing or editing a Ring skill: SKILL.md structure, frontmatter and Agent-Search-Optimization rules, token-efficiency targets, and bulletproofing (Iron Law, rationalization tables, Red Flags) so discipline-enforcing skills resist excuses. Use when creating or revising a skill. Delegates pressure-testing to ring:testing-skills-with-subagents. Skip for pure reference skills with no rules, or project conventions (put those in CLAUDE.md)."
 ---
 
 # Writing Skills

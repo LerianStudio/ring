@@ -1,6 +1,6 @@
 ---
-name: ring:gandalf-webhook
-description: Send tasks to Gandalf (AI team member) via webhook and get responses back. Publish to Alfarrábio, send Slack notifications, ask for business context, and more.
+name: ring:delegating-to-gandalf
+description: "Delegating tasks to Gandalf, a Lerian AI teammate reachable over Tailscale, and returning its response. Use when you need to publish an HTML/markdown report to Alfarrabio and get a URL, post a Slack notification, or ask Gandalf for business/product context via a full agent session. Tailscale-network only, no auth token. Skip when off the Tailscale network or the task can be done locally."
 ---
 
 # Gandalf Webhook

@@ -854,7 +854,7 @@ grep -rn "CREATE TABLE\|ALTER TABLE\|DROP TABLE" --include="*.go" ./internal
 
 ### Important: License Is Per-Repository
 
-Lerian uses three license types, chosen per-app. The actual header text MUST match the LICENSE file in the repository root. Use the `/ring:dev-license` command (or the `ring:dev-licensing` skill) to apply or switch licenses consistently across a repository.
+Lerian uses three license types, chosen per-app. The actual header text MUST match the LICENSE file in the repository root. Use the `/ring:dev-license` command (or the `ring:applying-licenses` skill) to apply or switch licenses consistently across a repository.
 
 | License | SPDX Identifier | When Used |
 | ------- | --------------- | --------- |

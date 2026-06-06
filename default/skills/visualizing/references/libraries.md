@@ -540,7 +540,7 @@ Use for code blocks that need language-aware syntax coloring. Required for non-d
 
 **CDN (ESM):** `https://cdn.jsdelivr.net/npm/@pierre/diffs@1.0.11/+esm`
 
-> **Version Update:** When updating the `@pierre/diffs` version, update ALL files that reference it: `libraries.md`, `SKILL.md`, `css-patterns.md`, and `code-diff.html`. Search: `grep -r "@pierre/diffs" default/skills/visualize/`
+> **Version Update:** When updating the `@pierre/diffs` version, update ALL files that reference it: `libraries.md`, `SKILL.md`, `css-patterns.md`, and `code-diff.html`. Search: `grep -r "@pierre/diffs" default/skills/visualizing/`
 
 **What it is:** A professional code diff renderer built on Shiki. Provides split/unified views with syntax highlighting, word-level inline diffs, line selection, and dark/light theme support. Uses Shadow DOM for style isolation.
 

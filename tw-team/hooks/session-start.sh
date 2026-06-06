@@ -81,7 +81,7 @@ EOF
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "<ring-tw-team-system>\n**Technical Writing Specialists Available**\n\nUse via Task tool with `subagent_type`:\n\n| Agent | Expertise |\n|-------|----------|\n| `ring:functional-writer` | Guides, tutorials, conceptual docs |\n| `ring:api-writer` | API reference, endpoints, schemas |\n| `ring:docs-reviewer` | Quality review, voice/tone compliance |\n\n**Documentation Standards:**\n- Voice: Assertive but not arrogant, encouraging, tech-savvy but human\n- Capitalization: Sentence case for headings\n- Structure: Lead with value, short paragraphs, scannable content\n\nFor full details: Skill tool with \"ring:using-tw-team\"\n</ring-tw-team-system>"
+    "additionalContext": "<ring-tw-team-system>\n**Technical Writing Specialists Available**\n\nUse via Task tool with `subagent_type`:\n\n| Agent | Expertise |\n|-------|----------|\n| `ring:guide-writer` | Guides, tutorials, conceptual docs |\n| `ring:api-writer` | API reference, endpoints, schemas |\n| `ring:docs-reviewer` | Quality review, voice/tone compliance |\n\n**Documentation Standards:**\n- Voice: Assertive but not arrogant, encouraging, tech-savvy but human\n- Capitalization: Sentence case for headings\n- Structure: Lead with value, short paragraphs, scannable content\n\nFor full details: Skill tool with \"ring:using-tw-team\"\n</ring-tw-team-system>"
   }
 }
 EOF
@@ -92,7 +92,7 @@ else
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "<ring-tw-team-system>\n**Technical Writing Specialists**\n\n| Agent | Expertise |\n|-------|----------|\n| `ring:functional-writer` | Guides, tutorials, conceptual docs |\n| `ring:api-writer` | API reference, endpoints, schemas |\n| `ring:docs-reviewer` | Quality review, voice/tone compliance |\n\nFor full list: Skill tool with \"ring:using-tw-team\"\n</ring-tw-team-system>"
+    "additionalContext": "<ring-tw-team-system>\n**Technical Writing Specialists**\n\n| Agent | Expertise |\n|-------|----------|\n| `ring:guide-writer` | Guides, tutorials, conceptual docs |\n| `ring:api-writer` | API reference, endpoints, schemas |\n| `ring:docs-reviewer` | Quality review, voice/tone compliance |\n\nFor full list: Skill tool with \"ring:using-tw-team\"\n</ring-tw-team-system>"
   }
 }
 EOF

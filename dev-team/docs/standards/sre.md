@@ -725,7 +725,7 @@ Kubernetes hits readiness probes every 5s. INFO on probe success is FORBIDDEN �
 | Success (all dependencies up) | DEBUG |
 | Failure (any dependency down/degraded) | WARN |
 
-Steady-state observability is the job of probe metrics (`readyz_check_status`, `readyz_check_duration`), not logs. Access-log middleware MUST exclude `/readyz`, `/health`, `/metrics` from request logging — automatic on `lib-observability` (`defaultLogExcludedRoutes`); use `middleware.WithExcludedRoutes(...)` to append more paths. See `ring:dev-readyz` for the full contract and Go reference implementation in `golang/bootstrap.md`.
+Steady-state observability is the job of probe metrics (`readyz_check_status`, `readyz_check_duration`), not logs. Access-log middleware MUST exclude `/readyz`, `/health`, `/metrics` from request logging — automatic on `lib-observability` (`defaultLogExcludedRoutes`); use `middleware.WithExcludedRoutes(...)` to append more paths. See `ring:implementing-readyz` for the full contract and Go reference implementation in `golang/bootstrap.md`.
 
 ### Kubernetes Configuration
 

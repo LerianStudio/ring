@@ -1287,17 +1287,17 @@ efforts that MUST go through the full dev-cycle.
 
 ## Recommended Next Step
 
-`ring:dev-cycle` consuming `/tmp/libcommons-sweep-tasks.json` — N tasks generated,
+`ring:running-dev-cycle` consuming `/tmp/libcommons-sweep-tasks.json` — N tasks generated,
 grouped by severity, CRITICAL first.
 ```
 
 ---
 
-## Task Generation for ring:dev-cycle
+## Task Generation for ring:running-dev-cycle
 
 MANDATORY: The synthesizer MUST also emit `/tmp/libcommons-sweep-tasks.json` — a JSON
-array of tasks shaped for `ring:dev-cycle` consumption. The format matches what
-`ring:dev-refactor` produces.
+array of tasks shaped for `ring:running-dev-cycle` consumption. The format matches what
+`ring:planning-backend-refactor` produces.
 
 **Task grouping rules:**
 
@@ -1382,7 +1382,7 @@ Sweep complete. Findings: <N> across <M> angles.
 Report: /tmp/libcommons-sweep-report.md
 Tasks:  /tmp/libcommons-sweep-tasks.json (<N> tasks)
 
-Next: Invoke ring:dev-cycle with the task file to execute fixes. CRITICAL tasks
+Next: Invoke ring:running-dev-cycle with the task file to execute fixes. CRITICAL tasks
 (especially multi-tenancy, JWT, webhook, crypto, panic handling) MUST be addressed
 before the HIGH/MEDIUM/LOW tier.
 ```

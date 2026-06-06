@@ -23,26 +23,38 @@ MONOREPO_ROOT="$(cd "$PLUGIN_ROOT/.." && pwd)"
 get_output_file() {
   local skill_name="$1"
   case "$skill_name" in
-    pre-dev-research)          echo "research.md" ;;
-    pre-dev-prd-creation)      echo "PRD.md" ;;
-    pre-dev-feature-map)       echo "feature-map.md" ;;
-    pre-dev-trd-creation)      echo "TRD.md" ;;
-    pre-dev-api-design)        echo "API.md" ;;
-    pre-dev-data-model)        echo "data-model.md" ;;
-    pre-dev-dependency-map)    echo "dependencies.md" ;;
-    pre-dev-phases-and-epics)  echo "tasks.md" ;;
-    pre-dev-task-creation)     echo "tasks.md" ;;
-    *)                         echo "${skill_name#pre-dev-}.md" ;;
+    researching-features)            echo "research.md" ;;
+    writing-prds)                    echo "PRD.md" ;;
+    mapping-feature-relationships)   echo "feature-map.md" ;;
+    writing-trds)                    echo "TRD.md" ;;
+    designing-api-contracts)         echo "API.md" ;;
+    designing-data-model)            echo "data-model.md" ;;
+    pinning-dependency-versions)     echo "dependencies.md" ;;
+    decomposing-phases-and-epics)    echo "tasks.md" ;;
+    detailing-tasks)                 echo "tasks.md" ;;
+    validating-ux-completeness)      echo "design-validation.md" ;;
+    planning-delivery)               echo "delivery-planning.md" ;;
+    *)                               echo "${skill_name}.md" ;;
   esac
 }
 
-# Extract gate number from skill description (format: "Gate X: ...")
+# Extract gate number from skill description.
+# Gate skills declare their own gate as "Gate N of ring:..."; some descriptions
+# also reference an upstream gate first (e.g. data-model says "from the Gate 4 API
+# design ... Gate 5 of ..."), so prefer the "Gate N of" form and only fall back to
+# the first "Gate N" token when that canonical phrasing is absent.
 extract_gate() {
   local skill_dir="$1"
   local skill_file="$skill_dir/SKILL.md"
+  local desc gate
   if [ -f "$skill_file" ]; then
-    # Extract description field and find "Gate X:" pattern
-    grep -A1 "^description:" "$skill_file" 2>/dev/null | grep -oE "Gate [0-9]+" | head -1 | grep -oE "[0-9]+" || true
+    # Collect the full description field value (frontmatter line + continuations)
+    desc=$(grep -A3 "^description:" "$skill_file" 2>/dev/null | tr '\n' ' ')
+    gate=$(printf '%s' "$desc" | grep -oE "Gate [0-9.]+ of " | head -1 | grep -oE "[0-9.]+")
+    if [ -z "$gate" ]; then
+      gate=$(printf '%s' "$desc" | grep -oE "Gate [0-9.]+" | head -1 | grep -oE "[0-9.]+")
+    fi
+    printf '%s' "$gate"
   fi
 }
 
@@ -51,8 +63,8 @@ build_skills_table() {
   local skills_dir="$1"
   local table_rows=""
 
-  # Discover pre-dev skills dynamically
-  for skill_dir in "$skills_dir"/pre-dev-*/; do
+  # Discover all skills; the "has a Gate N" description filter selects gate skills
+  for skill_dir in "$skills_dir"/*/; do
     [ -d "$skill_dir" ] || continue
     local skill_name
     skill_name=$(basename "$skill_dir")
@@ -132,7 +144,7 @@ EOF
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "<ring-pm-team-system>\n**Pre-Dev Planning Skills**\n\n9-gate structured feature planning (use via Skill tool):\n\n| Skill | Gate | Output |\n|-------|------|--------|\n| `ring:pre-dev-research` | 0 | research.md |\n| `ring:pre-dev-prd-creation` | 1 | PRD.md |\n| `ring:pre-dev-feature-map` | 2 | feature-map.md |\n| `ring:pre-dev-trd-creation` | 3 | TRD.md |\n| `ring:pre-dev-api-design` | 4 | API.md |\n| `ring:pre-dev-data-model` | 5 | data-model.md |\n| `ring:pre-dev-dependency-map` | 6 | dependencies.md |\n| `ring:pre-dev-phases-and-epics` | 7 | tasks.md |\n| `ring:pre-dev-task-creation` | 8 | tasks.md |\n\n**Standalone Discovery Skills** (use via Skill tool):\n\n| Skill | Output |\n|-------|--------|\n| `ring:streaming-event-mapping` | docs/streaming/event-catalog.md, instrumentation-map.json |\n\nFor full details: Skill tool with \"ring:using-pm-team\"\n</ring-pm-team-system>"
+    "additionalContext": "<ring-pm-team-system>\n**Pre-Dev Planning Skills**\n\n11-gate structured feature planning (use via Skill tool):\n\n| Skill | Gate | Output |\n|-------|------|--------|\n| `ring:researching-features` | 0 | research.md |\n| `ring:writing-prds` | 1 | PRD.md |\n| `ring:validating-ux-completeness` | 1.5 | design-validation.md |\n| `ring:mapping-feature-relationships` | 2 | feature-map.md |\n| `ring:writing-trds` | 3 | TRD.md |\n| `ring:designing-api-contracts` | 4 | API.md |\n| `ring:designing-data-model` | 5 | data-model.md |\n| `ring:pinning-dependency-versions` | 6 | dependencies.md |\n| `ring:decomposing-phases-and-epics` | 7 | tasks.md |\n| `ring:detailing-tasks` | 8 | tasks.md |\n| `ring:planning-delivery` | 9 | delivery-planning.md |\n\n**Standalone Discovery Skills** (use via Skill tool):\n\n| Skill | Output |\n|-------|--------|\n| `ring:mapping-streaming-events` | docs/streaming/event-catalog.md, instrumentation-map.json |\n\nFor full details: Skill tool with \"ring:using-pm-team\"\n</ring-pm-team-system>"
   }
 }
 EOF
@@ -143,7 +155,7 @@ else
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "<ring-pm-team-system>\n**Pre-Dev Planning Skills** (9 gates)\n\nFor full list: Skill tool with \"ring:using-pm-team\"\n</ring-pm-team-system>"
+    "additionalContext": "<ring-pm-team-system>\n**Pre-Dev Planning Skills** (11 gates)\n\nFor full list: Skill tool with \"ring:using-pm-team\"\n</ring-pm-team-system>"
   }
 }
 EOF

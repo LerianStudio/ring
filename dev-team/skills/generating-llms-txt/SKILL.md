@@ -1,9 +1,6 @@
 ---
-name: ring:dev-llms-txt
-description: |
-  Generates or audits llms.txt files for Lerian repositories following the llmstxt.org
-  specification. Creates LLM-friendly entry points for AI agents and coding assistants.
-  Also generates CLAUDE.md / AGENTS.md when missing.
+name: ring:generating-llms-txt
+description: "Generating or auditing a repository's llms.txt per the llmstxt.org spec, and creating CLAUDE.md / AGENTS.md when missing, by analyzing README, build files, docs, and API surface. Use when creating an llms.txt, auditing an existing one for spec compliance and live links, or improving a repo's AI readability. Skip when the llms.txt is current, the task is code-only with no doc scope, or the repo needs no LLM discoverability."
 ---
 
 # LLMs.txt & AI Documentation Generator
@@ -20,7 +17,7 @@ description: |
 - Repository is private/internal with no LLM discoverability need
 
 ## Related
-**Complementary:** ring:dev-cycle, ring:dev-implementation
+**Complementary:** ring:running-dev-cycle, ring:implementing-tasks
 
 
 Generates `llms.txt`, `CLAUDE.md`, and `AGENTS.md` for Lerian repositories.

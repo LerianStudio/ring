@@ -1,6 +1,6 @@
 ---
 name: ring:using-assert
-description: Dual-mode skill for lib-observability/assert — Lerian's production-grade runtime assertion package. Sweep Mode dispatches 6 parallel explorers to find DIY invariant checks, zero-panic violations, hand-rolled domain predicates, and missing metric initialization. Reference Mode catalogs the full API (asserter lifecycle, domain predicates, observability trident, AssertionError unwrapping) and the panic-vs-assert-vs-error decision tree. Skip for non-Go or frontend code.
+description: "Using lib-observability/assert, Lerian's runtime assertion package, in two modes. Sweep Mode detects panic()/log.Fatal zero-panic violations, DIY invariant checks, hand-rolled domain predicates, and missing InitAssertionMetrics. Reference Mode catalogs the asserter lifecycle, domain predicates, observability trident, AssertionError unwrapping, and the panic-vs-assert-vs-error decision tree. Go-only. Skip for non-Go or frontend code."
 ---
 
 # ring:using-assert
@@ -137,7 +137,7 @@ Dispatch synthesizer to read all 6 explorer files and emit:
 1. `/tmp/assert-sweep-report.md` — aggregate findings by severity
 2. `/tmp/assert-sweep-tasks.json` — one task per DIY pattern cluster
 
-Surface report path + task count; offer handoff to `ring:dev-cycle`.
+Surface report path + task count; offer handoff to `ring:running-dev-cycle`.
 
 ---
 

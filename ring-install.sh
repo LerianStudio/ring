@@ -107,6 +107,7 @@ SKIPPED=0
 UPDATED=0
 ERRORS=0
 REMOVED=0
+PRUNED=0
 
 # --- Logging helpers ---
 log_info()    { printf "  ${BLUE}INFO${NC}    %s\n" "$1"; }
@@ -519,10 +520,31 @@ link_perfile_hooks() {
   fi
 }
 
+# Remove BROKEN symlinks owned by Ring (readlink into RING_DIR, target gone).
+# Renames upstream (agents/skills) otherwise leave dangling links behind,
+# since install only creates links for names that currently exist.
+prune_perfile_stale() {
+  local target_dir="$1"
+  local sub item link_target
+  for sub in agents commands skills hooks; do
+    [ -d "$target_dir/$sub" ] || continue
+    for item in "$target_dir/$sub"/*; do
+      [ -L "$item" ] || continue
+      link_target="$(readlink "$item")"
+      [[ "$link_target" == "$RING_DIR"/* ]] || continue
+      [ -e "$item" ] && continue
+      do_rm_one "$item"
+      log_success "Pruned stale: $sub/$(basename "$item")"
+      PRUNED=$((PRUNED + 1))
+    done
+  done
+}
+
 install_perfile() {
   local target_dir="$1"; local label="$2"
   log_section "$label  ($target_dir)"
   create_perfile_directories "$target_dir"
+  prune_perfile_stale "$target_dir"
   local plugin
   for plugin in $TEAMS; do
     [ -d "$RING_DIR/$plugin" ] || continue
@@ -1080,6 +1102,9 @@ do_install() {
   [ "$INSTALL_FACTORY"  = true ] && install_perfile "$FACTORY_DIR" "Factory AI"
   [ "$INSTALL_OPENCODE" = true ] && install_opencode
   [ "$INSTALL_CODEX"    = true ] && install_codex
+  # Last && guard above returns 1 when its target is unselected; without this,
+  # set -e kills the script here and print_summary never runs (exit 1).
+  return 0
 }
 
 print_summary() {
@@ -1087,6 +1112,7 @@ print_summary() {
   printf "  ${BOLD}════════════════════════════════════════${NC}\n"
   printf "  ${GREEN}Created:${NC}  %d symlinks\n" "$CREATED"
   [ "$UPDATED" -gt 0 ] && printf "  ${BLUE}Updated:${NC}  %d (pointed elsewhere)\n" "$UPDATED"
+  [ "$PRUNED"  -gt 0 ] && printf "  ${MAGENTA}Pruned:${NC}   %d (stale Ring links)\n" "$PRUNED"
   printf "  ${YELLOW}Skipped:${NC}  %d (already correct)\n" "$SKIPPED"
   [ "$ERRORS" -gt 0 ] && printf "  ${RED}Errors:${NC}   %d\n" "$ERRORS"
   printf "  ${BOLD}════════════════════════════════════════${NC}\n\n"
@@ -1098,10 +1124,10 @@ print_summary() {
   if [ "$total" -gt 0 ] && [ "$ERRORS" -eq 0 ]; then
     printf "  ${GREEN}${BOLD}Ring is ready!${NC}\n\n"
     printf "  Try these commands:\n"
-    printf "    ${BOLD}/ring:dev-cycle${NC}       — 10-gate development cycle\n"
-    printf "    ${BOLD}/ring:pre-dev-feature${NC} — lightweight pre-dev workflow\n"
-    printf "    ${BOLD}/ring:codereview${NC}      — parallel code review (9 defaults + conditionals)\n"
-    printf "    ${BOLD}/ring:commit${NC}          — smart atomic commits\n\n"
+    printf "    ${BOLD}/ring:running-dev-cycle${NC}       — 10-gate development cycle\n"
+    printf "    ${BOLD}/ring:planning-small-features${NC} — lightweight pre-dev workflow\n"
+    printf "    ${BOLD}/ring:reviewing-code${NC}          — parallel code review (9 defaults + conditionals)\n"
+    printf "    ${BOLD}/ring:committing-changes${NC}      — smart atomic commits\n\n"
   fi
 }
 

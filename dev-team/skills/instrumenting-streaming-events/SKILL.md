@@ -1,21 +1,21 @@
 ---
-name: ring:dev-streaming-instrumentation
-description: lib-streaming instrumentation orchestrator for Lerian Go services. Consumes the validated instrumentation-map.json produced by ring:streaming-event-mapping and wires lib-streaming end-to-end via a 13-gate cycle (catalog, producer bootstrap, emit instrumentation, outbox wiring, HTTP manifest, NoopEmitter fallback, integration and chaos tests). Use after streaming-event-mapping has produced its map and you need to implement event emission.
+name: ring:instrumenting-streaming-events
+description: "Instrumenting streaming events: wires lib-streaming event emission end-to-end into a Lerian Go service via a 13-gate cycle (catalog, Builder bootstrap, Emit sites, outbox, HTTP manifest, NoopEmitter fallback, integration and chaos tests), dispatching ring:backend-go under TDD. Consumes the validated instrumentation-map.json from ring:mapping-streaming-events. Use after that map exists. Skip for non-Go or when no map is present."
 ---
 
 # Streaming Instrumentation (lib-streaming)
 
 ## When to use
-- User requests streaming instrumentation for a Go service with a validated docs/streaming/instrumentation-map.json from ring:streaming-event-mapping
+- User requests streaming instrumentation for a Go service with a validated docs/streaming/instrumentation-map.json from ring:mapping-streaming-events
 - Task mentions "wire lib-streaming", "instrument streaming events", "implement event emission", "add streaming.NewBuilder", "Emit business events", "lib-streaming bootstrap"
 
 ## Skip when
 - Service is not a Go project
-- No instrumentation-map.json present (run ring:streaming-event-mapping first)
+- No instrumentation-map.json present (run ring:mapping-streaming-events first)
 
 
 You orchestrate. Agents implement. NEVER use Edit/Write/Bash on Go source files.
-All code changes go through `Task(subagent_type="ring:backend-engineer-golang")`.
+All code changes go through `Task(subagent_type="ring:backend-go")`.
 TDD mandatory for all implementation gates (RED → GREEN → REFACTOR).
 
 ## Streaming Architecture
@@ -75,14 +75,14 @@ Service code depends on `streaming.Emitter` INTERFACE. MUST NOT type-assert to `
 |------|------|-----------|-------|
 | 0 | Stack Detection + JSON Validation + Compliance Audit | Always | Orchestrator |
 | 1 | Codebase Analysis | Always | ring:codebase-explorer |
-| 1.5 | Visual Implementation Preview | Always; user must approve | ring:visualize |
-| 2 | lib-streaming Dependency + Non-Canonical Removal | Skip only if lib-streaming pinned AND zero non-canonical detected | ring:backend-engineer-golang |
-| 3 | Catalog Construction + Builder Bootstrap | Always | ring:backend-engineer-golang |
-| 4 | Emit Instrumentation per Eventable Point | Always | ring:backend-engineer-golang |
-| 5 | Outbox Wiring | Required if any event has `outbox != "never"` | ring:backend-engineer-golang |
-| 6 | Manifest HTTP Mount | Required unless service has zero HTTP surface | ring:backend-engineer-golang |
-| 7 | Wiring + Lifecycle + Backward Compat | Always — NEVER skippable | ring:backend-engineer-golang |
-| 8 | Tests | Always | ring:backend-engineer-golang |
+| 1.5 | Visual Implementation Preview | Always; user must approve | ring:visualizing |
+| 2 | lib-streaming Dependency + Non-Canonical Removal | Skip only if lib-streaming pinned AND zero non-canonical detected | ring:backend-go |
+| 3 | Catalog Construction + Builder Bootstrap | Always | ring:backend-go |
+| 4 | Emit Instrumentation per Eventable Point | Always | ring:backend-go |
+| 5 | Outbox Wiring | Required if any event has `outbox != "never"` | ring:backend-go |
+| 6 | Manifest HTTP Mount | Required unless service has zero HTTP surface | ring:backend-go |
+| 7 | Wiring + Lifecycle + Backward Compat | Always — NEVER skippable | ring:backend-go |
+| 8 | Tests | Always | ring:backend-go |
 | 9 | Code Review | Always | 9 defaults + triggered specialists in parallel |
 | 10 | User Validation | Always | User |
 | 11 | Activation Guide | Always | Orchestrator |
@@ -127,7 +127,7 @@ CRITICAL events must have outbox = "always"
 
 ## State Management
 
-State: `docs/ring:dev-streaming-instrumentation/current-cycle.json`
+State: `docs/ring:instrumenting-streaming-events/current-cycle.json`
 
 Write state after EVERY gate. If write fails → STOP.
 

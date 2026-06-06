@@ -1,11 +1,6 @@
 ---
-name: ring:deep-doc-review
-description: |
-  Deep review of project documentation before entering dev-cycle.
-  Finds errors, inconsistencies, gaps, missing data, and contradictions
-  across PRD, TRD, API design, data model, and other pre-dev artifacts.
-  Cross-references information between docs — not just reviewing one doc
-  in isolation — to catch mismatches that cause implementation failures.
+name: ring:reconciling-predev-docs
+description: "Reconciling pre-dev artifacts (PRD, TRD, API design, data model, tasks.md, dependency map) against each other to surface contradictions and gaps that break implementation, then applying approved corrections before ring:running-dev-cycle. Use after ring:planning-small-features or ring:planning-large-features. Skip for end-user docs (use ring:reviewing-docs), code review (use ring:reviewing-code), or before the docs exist."
 ---
 
 # Deep Doc Review
@@ -13,25 +8,25 @@ description: |
 ## When to use
 
 - Before starting dev-cycle (validate doc quality as a pre-gate)
-- After completing pre-dev workflow (ring:pre-dev-feature or ring:pre-dev-full)
+- After completing pre-dev workflow (ring:planning-small-features or ring:planning-large-features)
 - When user requests project documentation review
 - After significant changes to reference docs (PRD, TRD, API design, data model)
 
 ## Skip when
 
-- Code review needed (use ring:codereview instead)
+- Code review needed (use ring:reviewing-code instead)
 - Docs do not exist yet (run pre-dev workflow first)
 - Reviewing a single simple file (do it directly without the skill)
 
 ## Sequence
 
-**Runs before:** ring:dev-cycle, ring:writing-plans
-**Runs after:** ring:pre-dev-feature, ring:pre-dev-full
+**Runs before:** ring:running-dev-cycle, ring:writing-plans
+**Runs after:** ring:planning-small-features, ring:planning-large-features
 
 ## Related
 
-**Complementary:** ring:pre-dev-prd-creation, ring:pre-dev-trd-creation, ring:pre-dev-api-design, ring:pre-dev-data-model, ring:pre-dev-phases-and-epics
-**Differentiation:** ring:codereview reviews code. ring:deep-doc-review reviews documentation artifacts against each other.
+**Complementary:** ring:writing-prds, ring:writing-trds, ring:designing-api-contracts, ring:designing-data-model, ring:decomposing-phases-and-epics
+**Differentiation:** ring:reviewing-code reviews code. ring:reconciling-predev-docs reviews documentation artifacts against each other.
 
 
 > Adapted from alexgarzao/optimus (optimus-deep-doc-review)
@@ -129,7 +124,7 @@ For each finding user approves:
 | LOW | N | N | N |
 
 ## Status
-✅ CLEARED — Ready for ring:dev-cycle
+✅ CLEARED — Ready for ring:running-dev-cycle
 ⚠️ ISSUES REMAIN — {N} unfixed critical/high findings
 ```
 

@@ -32,7 +32,7 @@
 │           │                                                                 │
 │           └── no (no PM docs) → ⛔ HARD BLOCK:                              │
 │               "PM documents are REQUIRED for new projects.                  │
-│                Run /ring:pre-dev-full or /ring:pre-dev-feature first."               │
+│                Run /ring:planning-large-features or /ring:planning-small-features first."               │
 │               → STOP (cycle cannot proceed)                                 │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -278,7 +278,7 @@ Proceed to Step 1
 
 #### Check for PM Documents
 
-For NEW projects (not legacy), ask about PM documents. Context: a new project following the Ring workflow should have PM documents from pre-dev — PRD (Product Requirements), TRD (Technical Requirements), or Feature Map (from `ring:pre-dev-feature-map`).
+For NEW projects (not legacy), ask about PM documents. Context: a new project following the Ring workflow should have PM documents from pre-dev — PRD (Product Requirements), TRD (Technical Requirements), or Feature Map (from `ring:mapping-feature-relationships`).
 
 #### Question
 
@@ -313,8 +313,8 @@ docs/pre-dev/{feature-name}/
 
 #### Common Patterns
 
-- `/ring:pre-dev-full` output: `docs/pre-dev/{feature}/prd.md`, `trd.md`, `feature-map.md`
-- `/ring:pre-dev-feature` output: `docs/pre-dev/{feature}/prd.md`, `feature-map.md`
+- `/ring:planning-large-features` output: `docs/pre-dev/{feature}/prd.md`, `trd.md`, `feature-map.md`
+- `/ring:planning-small-features` output: `docs/pre-dev/{feature}/prd.md`, `feature-map.md`
 - Custom locations: User may have docs in different paths (e.g., `requirements/`, `specs/`)
 
 #### Then
@@ -403,10 +403,10 @@ Present to user for review, then proceed to Step 1.
 
 ⛔ **CANNOT PROCEED — PM DOCUMENTS REQUIRED.** Development cannot start without PM documents. The user MUST create PRD, TRD, and/or Feature Map first using PM team skills:
 
-- `/ring:pre-dev-full` → features ≥2 days (9 gates)
-- `/ring:pre-dev-feature` → features <2 days (4 gates)
+- `/ring:planning-large-features` → features ≥2 days (9 gates)
+- `/ring:planning-small-features` → features <2 days (4 gates)
 
-These guide creation of the PRD, TRD, and Feature Map (technology choices, feature relationships). After completing pre-dev, run `/ring:dev-cycle` again.
+These guide creation of the PRD, TRD, and Feature Map (technology choices, feature relationships). After completing pre-dev, run `/ring:running-dev-cycle` again.
 
 #### Action
 
@@ -418,7 +418,7 @@ See [shared-patterns/shared-anti-rationalization.md](../../shared-patterns/share
 
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
-| "Skip PM docs, I'll add them later" | Later = never. No PM docs = no project context = agents guessing. | **Run /ring:pre-dev-full or /ring:pre-dev-feature NOW** |
+| "Skip PM docs, I'll add them later" | Later = never. No PM docs = no project context = agents guessing. | **Run /ring:planning-large-features or /ring:planning-small-features NOW** |
 | "Project is simple, doesn't need PM docs" | Simple projects still need domain context defined upfront. | **Create PM documents first** |
 | "I know what I want to build" | Your knowledge ≠ documented knowledge agents can use. | **Document in PRD/TRD/Feature Map** |
 | "PM workflow takes too long" | PM workflow takes 30-60 min. Rework from unclear requirements takes days. | **Invest time upfront** |
@@ -430,11 +430,11 @@ See [shared-patterns/shared-anti-rationalization.md](../../shared-patterns/share
 
 | User Says | Your Response |
 |-----------|---------------|
-| "Just skip this, I'll create PM docs later" | "PM documents are REQUIRED for new projects. Without them, agents cannot understand your project's domain context or technical requirements. Run `/ring:pre-dev-full` or `/ring:pre-dev-feature` first." |
+| "Just skip this, I'll create PM docs later" | "PM documents are REQUIRED for new projects. Without them, agents cannot understand your project's domain context or technical requirements. Run `/ring:planning-large-features` or `/ring:planning-small-features` first." |
 | "I don't need formal documents" | "PM documents are the source of truth for PROJECT_RULES.md. Development cannot start without documented requirements." |
-| "This is just a quick prototype" | "Even prototypes need clear requirements. `/ring:pre-dev-feature` takes ~30 minutes and prevents hours of rework." |
+| "This is just a quick prototype" | "Even prototypes need clear requirements. `/ring:planning-small-features` takes ~30 minutes and prevents hours of rework." |
 | "I already explained what I want verbally" | "Verbal explanations cannot be used by agents. Requirements MUST be documented in PRD/TRD/Feature Map files." |
 | "It's a legacy project but skip the questions" | "The legacy analysis (ring:codebase-explorer + 3 questions) is the only way I can understand your project. It takes ~5 minutes and enables me to help you effectively." |
-| "I'll fill in PROJECT_RULES.md myself" | "That works! Create `docs/PROJECT_RULES.md` with: Tech Stack (not in Ring), External Integrations, Domain Terminology. Do not duplicate Ring Standards content. Then run `/ring:dev-cycle` again." |
+| "I'll fill in PROJECT_RULES.md myself" | "That works! Create `docs/PROJECT_RULES.md` with: Tech Stack (not in Ring), External Integrations, Domain Terminology. Do not duplicate Ring Standards content. Then run `/ring:running-dev-cycle` again." |
 
 ---

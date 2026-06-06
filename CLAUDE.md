@@ -32,14 +32,14 @@ When creating or modifying any agent in `*/agents/*.md`:
 3. **MUST NOT skip TDD's RED phase** — test must fail before implementation
 4. **MUST NOT ignore skill when applicable** — "simple task" is not an excuse
 5. **ZERO PANIC POLICY** — `panic()`, `log.Fatal()`, and `Must*` helpers are FORBIDDEN everywhere (including bootstrap/init). Return `(T, error)` instead. Only exception: `regexp.MustCompile()` with compile-time constants.
-6. **MUST NOT commit manually** — use `ring:commit` skill
+6. **MUST NOT commit manually** — use `ring:committing-changes` skill
 7. **MUST NOT assume compliance** — VERIFY with evidence
 
 ### 4. Unified Ring Namespace (MANDATORY)
 
 All Ring components use the unified `ring:` prefix.
 
-- ✅ `ring:code-reviewer`, `ring:backend-engineer-golang`
+- ✅ `ring:code-reviewer`, `ring:backend-go`
 - ❌ omitting `ring:` prefix (FORBIDDEN)
 - ❌ `ring-default:ring:code-reviewer` (deprecated plugin-specific prefix)
 
@@ -62,7 +62,7 @@ See [docs/WORKFLOWS.md](docs/WORKFLOWS.md#content-duplication-prevention) for ca
 
 ### 7. Reviewer-Pool Synchronization (MUST CHECK)
 
-When adding/removing a code review agent in `ring:codereview` pool:
+When adding/removing a code review agent in `ring:reviewing-code` pool:
 
 **⛔ SEVEN-FILE UPDATE RULE** (all in same commit) — see [docs/WORKFLOWS.md](docs/WORKFLOWS.md#reviewer-pool-synchronization) for the complete checklist and secondary consumers sweep.
 
@@ -104,11 +104,11 @@ Each plugin contains: `skills/`, `agents/`, `hooks/`, plus per-harness install m
 | Add skill | Create `*/skills/name/SKILL.md` with frontmatter per [Frontmatter Schema](docs/FRONTMATTER_SCHEMA.md) |
 | Add agent | Create `*/agents/name.md` → verify required sections per [Agent Design](docs/AGENT_DESIGN.md) |
 | Modify hooks | Edit `*/hooks/hooks.json` → test with `bash */hooks/session-start.sh` |
-| Code review | `ring:codereview` dispatches 9 default reviewers plus triggered conditional specialists |
-| Pre-dev (small) | `ring:pre-dev-feature` → 5-gate workflow |
-| Pre-dev (large) | `ring:pre-dev-full` → 10-gate workflow |
-| Dev cycle backend | `ring:dev-cycle` → rolling-wave phased cycle (Gate 0 per task, Gate 8/9 per epic, Step 11.5 phase boundary) |
-| Dev cycle frontend | `ring:dev-cycle-frontend` → rolling-wave phased cycle (Gate 0 per task, Gate 7 per epic, Gate 8 per task, phase boundary) |
+| Code review | `ring:reviewing-code` dispatches 9 default reviewers plus triggered conditional specialists |
+| Pre-dev (small) | `ring:planning-small-features` → 5-gate workflow |
+| Pre-dev (large) | `ring:planning-large-features` → 10-gate workflow |
+| Dev cycle backend | `ring:running-dev-cycle` → rolling-wave phased cycle (Gate 0 per task, Gate 8/9 per epic, Step 11.5 phase boundary) |
+| Dev cycle frontend | `ring:running-dev-cycle-frontend` → rolling-wave phased cycle (Gate 0 per task, Gate 7 per epic, Gate 8 per task, phase boundary) |
 
 See [docs/WORKFLOWS.md](docs/WORKFLOWS.md) for detailed instructions.
 
@@ -122,7 +122,7 @@ See [docs/WORKFLOWS.md](docs/WORKFLOWS.md) for detailed instructions.
 - Test must produce failure output (RED)
 - Only then write implementation (GREEN)
 
-# Review compliance (default/skills/codereview/SKILL.md)
+# Review compliance (default/skills/reviewing-code/SKILL.md)
 - All 9 default reviewers must pass; triggered conditional specialists must also pass
 - Critical findings = immediate fix required
 - Re-run the selected review pool after fixes
@@ -131,8 +131,8 @@ See [docs/WORKFLOWS.md](docs/WORKFLOWS.md) for detailed instructions.
 - Check for applicable skills before any task
 - If skill exists for task → MUST use it
 
-# Commit compliance: see default/skills/commit/SKILL.md (canonical source).
-- MUST use ring:commit skill for all commits
+# Commit compliance: see default/skills/committing-changes/SKILL.md (canonical source).
+- MUST use ring:committing-changes skill for all commits
 - MUST NOT write git commit commands manually
 ```
 

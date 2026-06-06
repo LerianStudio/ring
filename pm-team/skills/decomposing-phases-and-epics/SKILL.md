@@ -1,10 +1,6 @@
 ---
-name: ring:pre-dev-phases-and-epics
-description: |
-  Gate 7 (Full Track) / Gate 3 (Small Track): Phased plan — rolling-wave decomposition
-  into phases (independently verifiable milestones) and epics (value-driven working
-  increments). All phases are epic-level at this gate; Phase 1 task detailing happens
-  at Gate 8 (Full Track) or inline (Small Track).
+name: ring:decomposing-phases-and-epics
+description: "Decomposing a validated feature into a rolling-wave phased plan (tasks.md): phases as verifiable working milestones and epics as value increments (max 16 AI-agent-hours) with AI-assisted effort estimation; only the current wave is task-detailed. Produces the plan that ring:running-dev-cycle consumes. Gate 7 (Full) / Gate 3 (Small), after ring:writing-trds. Skip for trivial changes or when a phased plan already exists."
 ---
 
 # Phases & Epics — Rolling-Wave Decomposition
@@ -23,8 +19,8 @@ description: |
 
 ## Sequence
 
-**Runs before:** ring:pre-dev-task-creation (Full Track), ring:pre-dev-delivery-planning (Small Track)
-**Runs after:** ring:pre-dev-dependency-map (Full Track), ring:pre-dev-trd-creation (Small Track)
+**Runs before:** ring:detailing-tasks (Full Track), ring:planning-delivery (Small Track)
+**Runs after:** ring:pinning-dependency-versions (Full Track), ring:writing-trds (Small Track)
 
 ---
 
@@ -61,9 +57,9 @@ After defining epic scope, dispatch the appropriate specialist agent to estimate
 
 | Project Type | Agent |
 |-------------|-------|
-| Go | ring:backend-engineer-golang |
-| TypeScript Backend | ring:backend-engineer-typescript |
-| React/Next.js | ring:frontend-engineer |
+| Go | ring:backend-go |
+| TypeScript Backend | ring:backend-ts |
+| React/Next.js | ring:frontend |
 | Mixed/Unknown | ring:codebase-explorer |
 
 Agent analyzes: endpoints/schemas/services, complexity, available libraries, test requirements, documentation needs — and returns a detailed breakdown by component.
@@ -119,7 +115,7 @@ Phase sections with epic blocks follow the tables.
 | **Header** | E-[phase].[seq]: [Epic Title] |
 | **Target** | backend \| frontend \| shared (if multi-module) |
 | **Working Directory** | Path from topology config (if multi-module) |
-| **Agent** | Recommended agent: ring:backend-engineer-* or ring:frontend-*-engineer-* |
+| **Agent** | Recommended agent: ring:backend-go / ring:backend-ts (backend) or ring:frontend / ring:bff-ts (frontend) |
 | **Deliverable** | One sentence: what working software ships |
 | **Scope** | Includes + Excludes (with epic IDs for future work) |
 | **Success Criteria** | Testable: Functional, Technical, Operational, Quality |
@@ -153,10 +149,10 @@ Each epic MUST have `Target:` and `Working Directory:` when topology is monorepo
 
 | Target | API Pattern | Agent |
 |--------|-------------|-------|
-| `backend` | any | ring:backend-engineer-golang or ring:backend-engineer-typescript |
-| `frontend` | `direct` | ring:frontend-engineer |
-| `frontend` | `bff` (API routes) | ring:frontend-bff-engineer-typescript |
-| `frontend` | `bff` (UI components) | ring:frontend-engineer |
+| `backend` | any | ring:backend-go or ring:backend-ts |
+| `frontend` | `direct` | ring:frontend |
+| `frontend` | `bff` (API routes) | ring:bff-ts |
+| `frontend` | `bff` (UI components) | ring:frontend |
 | `shared` | any | DevOps or general |
 
 **Output paths:**
@@ -166,7 +162,7 @@ Each epic MUST have `Target:` and `Working Directory:` when topology is monorepo
 
 ## Small Track Addendum (Gate 3)
 
-The Small Track has no separate Task Creation gate. After epics validate, detail Phase 1 inline in the same gate, using the Task Format from ring:pre-dev-task-creation. Single-phase features end this gate fully detailed.
+The Small Track has no separate Task Creation gate. After epics validate, detail Phase 1 inline in the same gate, using the Task Format from ring:detailing-tasks. Single-phase features end this gate fully detailed.
 
 ## Gate Validation Checklist
 

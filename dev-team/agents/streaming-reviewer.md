@@ -1,5 +1,5 @@
 ---
-name: ring:lib-streaming-reviewer
+name: ring:streaming-reviewer
 description: Conditional Gate 8 specialist for lib-streaming, business events, outbox, event producers, broker publishing, CloudEvents, and event manifests/catalogs.
 ---
 

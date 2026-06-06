@@ -1,8 +1,6 @@
 ---
-name: ring:voice-and-tone
-description: |
-  Voice and tone guidelines for technical documentation. Ensures consistent,
-  clear, and human writing across all documentation.
+name: ring:applying-voice-and-tone
+description: "Applying the technical-writing voice and tone style guide: second person, present tense, active voice, short sentences, sentence-case headings, product/entity capitalization, contractions, and sparing emphasis. Use when checking voice/tone compliance, writing new docs, or reviewing docs for style. Skip when checking structure only (use ring:structuring-documentation) or technical accuracy only (use the docs-reviewer agent)."
 ---
 
 # Voice and Tone Guidelines
@@ -13,11 +11,11 @@ description: |
 - Reviewing existing documentation for style
 
 ## Skip when
-- Only checking structure → use documentation-structure
+- Only checking structure → use ring:structuring-documentation
 - Only checking technical accuracy → use docs-reviewer agent
 
 ## Related
-**Complementary:** ring:review-docs
+**Complementary:** ring:reviewing-docs
 
 Write the way you work: with confidence, clarity, and care. Good documentation sounds like a knowledgeable colleague helping you solve a problem.
 

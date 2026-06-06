@@ -4,7 +4,7 @@
 
 This module covers automated accessibility testing patterns for React/Next.js applications. WCAG 2.1 AA compliance is verified through axe-core, keyboard navigation testing, and focus management validation.
 
-> **Gate Reference:** This module is loaded by `ring:qa-analyst-frontend` at Gate 2 (Accessibility Testing).
+> **Gate Reference:** This module is loaded by `ring:qa-frontend` at Gate 2 (Accessibility Testing).
 
 ---
 

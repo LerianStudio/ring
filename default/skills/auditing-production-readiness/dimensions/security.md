@@ -1033,7 +1033,7 @@ cors.Config{
 ## Consolidated Report Template (Thorough)
 
 > **EXTRACTED TO SHARED PATTERN:** The consolidated report template has been moved to avoid duplication.
-> Load from: [`shared-patterns/consolidated-report-template.md`](../../../../skills/shared-patterns/consolidated-report-template.md)
+> Load from: [`shared-patterns/consolidated-report-template.md`](../../shared-patterns/consolidated-report-template.md)
 >
 > After all explorers complete, read and apply that template exactly as written.
 > MANDATORY: every section REQUIRED — do not abbreviate, summarize, condense, or skip any section.

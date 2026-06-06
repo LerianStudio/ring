@@ -1,8 +1,6 @@
 ---
 name: ring:testing-skills-with-subagents
-description: |
-  Skill testing methodology - run scenarios without skill (RED), observe failures,
-  write skill (GREEN), close loopholes (REFACTOR).
+description: "Hardening a skill so it resists rationalization under pressure: run combined-pressure scenarios on a subagent without the skill (RED), capture excuses verbatim, write/edit the skill (GREEN), then plug loopholes (REFACTOR) until compliance holds. Use when deploying or editing a discipline-enforcing skill that an agent could rationalize away. Skip for pure reference skills with no rules to violate."
 ---
 
 # Testing Skills With Subagents

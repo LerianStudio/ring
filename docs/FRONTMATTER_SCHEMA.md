@@ -14,7 +14,7 @@ Skills live in `{plugin}/skills/{name}/SKILL.md`.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `name` | string | Skill identifier. MUST use `ring:` prefix (e.g., `ring:codereview`). Lerian convention is mandatory per CLAUDE.md. |
+| `name` | string | Skill identifier. MUST use `ring:` prefix (e.g., `ring:reviewing-code`). Lerian convention is mandatory per CLAUDE.md. |
 | `description` | string | WHAT the skill does + WHEN to invoke + WHEN to skip, condensed. Anthropic loader caps `description` at **1,536 characters**. Target ≤500 chars to leave headroom. |
 
 ### Optional Fields

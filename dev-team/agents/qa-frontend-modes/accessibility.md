@@ -1,6 +1,6 @@
 # QA Analyst (Frontend) — Accessibility Testing Mode
 
-Extends `qa-analyst-frontend.v2.md`. Load when dispatched with `mode: accessibility`.
+Extends `qa-frontend.v2.md`. Load when dispatched with `mode: accessibility`.
 
 ## What to Test
 

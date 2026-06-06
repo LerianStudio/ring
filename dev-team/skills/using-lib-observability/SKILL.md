@@ -1,6 +1,6 @@
 ---
 name: ring:using-lib-observability
-description: "Dual-mode skill for github.com/LerianStudio/lib-observability v1.0.0, Lerian's OpenTelemetry foundation. Sweep Mode dispatches 5 parallel explorers to detect DIY logging/metrics/redaction/OTel-attribute usage that should route through lib-observability. Reference Mode catalogs the log, metrics, zap, redaction, and constants packages with verified API signatures. This library is the foundation: lib-commons v5, lib-systemplane, and lib-streaming all depend on it. Skip for non-Go services, frontend code, or Ring itself."
+description: "Using lib-observability v1.0.0, Lerian's OpenTelemetry foundation (lib-commons, lib-systemplane, lib-streaming depend on it), in two modes. Sweep Mode detects DIY zap/slog logging, raw OTel metrics, hand-rolled redaction, and hard-coded attribute strings. Reference Mode catalogs the log, metrics, zap, redaction, and constants packages. Go-only. Skip for non-Go or assert/runtime/tracing."
 ---
 
 # ring:using-lib-observability
@@ -267,10 +267,10 @@ Emit:
 
 MUST NOT invent findings. MUST NOT omit explorer findings. MUST NOT reclassify severity
 without justification. Each task carries the angle number, replacement API, and evidence
-snippet so ring:dev-cycle can execute without re-discovery.
+snippet so ring:running-dev-cycle can execute without re-discovery.
 ```
 
-Surface report path + task count to user; offer handoff to `ring:dev-cycle`.
+Surface report path + task count to user; offer handoff to `ring:running-dev-cycle`.
 
 ---
 

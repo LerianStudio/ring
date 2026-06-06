@@ -1,5 +1,5 @@
 ---
-name: ring:nil-safety-reviewer
+name: ring:nil-reviewer
 description: "Nil/Null Safety Review: traces nil/null pointer risks from git diff changes through the codebase. Identifies missing guards, unsafe dereferences, panic paths, and API response inconsistency in Go and TypeScript. Runs in parallel with other reviewers at Gate 8."
 ---
 

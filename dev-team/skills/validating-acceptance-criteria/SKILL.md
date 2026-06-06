@@ -1,8 +1,6 @@
 ---
-name: ring:dev-validation
-description: |
-  Development cycle validation gate (Gate 5) — validates all acceptance criteria are met
-  and requires explicit user approval before completion. Runs at task cadence.
+name: ring:validating-acceptance-criteria
+description: "Validating a completed task against its acceptance criteria, mapping each AC to evidence, and gating completion on explicit user sign-off (self-approval prohibited). Gate 5 of ring:running-dev-cycle / ring:running-dev-cycle-frontend, run at task cadence after ring:reviewing-code. Use when implementation and tests are done and you need approval to close the task. Skip outside a dev-cycle, or for doc-only or non-code tasks."
 ---
 
 # Validation Gate (Gate 5)
@@ -13,15 +11,15 @@ description: |
 - Need user sign-off on acceptance criteria
 
 ## Skip when
-- Not inside a development cycle (ring:dev-cycle or ring:dev-cycle-frontend)
+- Not inside a development cycle (ring:running-dev-cycle or ring:running-dev-cycle-frontend)
 - Task is documentation-only, configuration-only, or non-code
 - No implementation or tests were produced
 
 ## Sequence
-**Runs after:** ring:codereview
+**Runs after:** ring:reviewing-code
 
 ## Related
-**Complementary:** ring:dev-cycle, ring:codereview
+**Complementary:** ring:running-dev-cycle, ring:reviewing-code
 
 
 Validates acceptance criteria and requires explicit user approval.

@@ -1,10 +1,6 @@
 ---
-name: ring:pre-dev-task-creation
-description: |
-  Gate 8: Phase 1 task detailing — breaks the first phase's epics into
-  dispatch-ready tasks with file:line context, implementation vision, and
-  verification. No code snippets unless strictly necessary. Later phases stay
-  epic-level for rolling-wave elaboration during execution. Full Track only.
+name: ring:detailing-tasks
+description: "Detailing the first phase's epics into dispatch-ready tasks written inline into tasks.md — Context with file:line refs, implementation vision, exact Files, Verification, Done-when — prose over code, no vague tasks, no deferrals. Gate 8 of ring:using-pm-team Full Track; runs after ring:decomposing-phases-and-epics. Use when a phased plan passed Gate 7 and Phase 1 must become executable. Skip on Small Track or for later phases."
 ---
 
 # Task Creation — Detailing the First Wave
@@ -17,13 +13,13 @@ description: |
 
 ## Skip when
 
-- Small Track workflow → Phase 1 detailing happens inside ring:pre-dev-phases-and-epics
+- Small Track workflow → Phase 1 detailing happens inside ring:decomposing-phases-and-epics
 - Phased plan not validated → complete Gate 7 first
 
 ## Sequence
 
-**Runs before:** ring:pre-dev-delivery-planning
-**Runs after:** ring:pre-dev-phases-and-epics
+**Runs before:** ring:planning-delivery
+**Runs after:** ring:decomposing-phases-and-epics
 
 ## Related
 
@@ -33,7 +29,7 @@ description: |
 
 Break each Phase 1 epic into dispatch-ready tasks. A task is close to a ready-to-use prompt: an implementer (agent or human) with zero codebase context should be able to start within a minute of reading it. The deliverable is **decisions**, not code.
 
-**Detail ONLY Phase 1.** Later phases stay epic-level — they are elaborated during execution (ring:executing-plans or ring:dev-cycle), against the codebase as it exists after earlier phases land. Pre-written detail for Phase 3 is stale the moment Phase 1 ships.
+**Detail ONLY Phase 1.** Later phases stay epic-level — they are elaborated during execution (ring:executing-plans or ring:running-dev-cycle), against the codebase as it exists after earlier phases land. Pre-written detail for Phase 3 is stale the moment Phase 1 ships.
 
 ## Task Format
 
@@ -92,7 +88,7 @@ Tasks are written **into `tasks.md`**, directly under their Phase 1 epic blocks.
 
 After writing all tasks:
 1. Flip Phase 1 `Status` to `Detailed` in the Phase Overview table
-2. Leave the epic-level `## Summary` table untouched — it remains the dev-cycle Status contract
+2. Leave the epic-level `## Summary` table untouched — it remains the ring:running-dev-cycle Status contract
 
 During execution, the same elaboration is repeated for each subsequent phase by the executing workflow — this gate establishes the format and quality bar the elaboration follows.
 

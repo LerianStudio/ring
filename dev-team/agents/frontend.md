@@ -1,5 +1,5 @@
 ---
-name: ring:frontend-engineer
+name: ring:frontend
 description: Senior Frontend Engineer specialized in React/Next.js for financial dashboards and enterprise applications. Expert in App Router, Server Components, accessibility, performance optimization, modern React patterns, and dual-mode UI library support (sindarian-ui vs vanilla).
 ---
 
@@ -188,4 +188,4 @@ PASS — 12 tests, 0 failures
 ## Scope
 
 **Handles:** All frontend UI development — pages, components, forms, state, accessibility.
-**Does NOT handle:** BFF/API routes (use `frontend-bff-engineer-typescript`), design specifications (use `frontend-designer`), UI from product-designer specs (use `ui-engineer`), backend APIs (use `backend-engineer-*`).
+**Does NOT handle:** BFF/API routes (use `bff-ts`), design specifications (use `ui-designer`), UI from product-designer specs (use `ui-engineer`), backend APIs (use `backend-go`/`backend-ts`).

@@ -26,8 +26,8 @@ Feature scope determines how many working directories are needed and which agent
 
 | Scope | Description | Working Directories | Agents |
 |-------|-------------|---------------------|--------|
-| `backend-only` | API, services, data layer only | Single | backend-engineer-* |
-| `frontend-only` | UI, BFF routes only | Single | frontend-*-engineer-* |
+| `backend-only` | API, services, data layer only | Single | backend-go / backend-ts |
+| `frontend-only` | UI, BFF routes only | Single | frontend / bff-ts |
 | `fullstack` | Both backend and frontend | May require multiple | Both backend and frontend agents |
 
 ### When to Use Each Scope
@@ -144,7 +144,7 @@ docs/pre-dev/{feature}/
 
 **Target:** backend
 **Working Directory:** packages/api
-**Agent:** ring:backend-engineer-golang
+**Agent:** ring:backend-go
 
 ...task details...
 ```
@@ -217,7 +217,7 @@ Optimized order: [backend, backend, frontend, frontend]
 
 ### Coordinator Repository
 
-When `structure: multi-repo`, the repository where `/pre-dev-feature` is run becomes the "coordinator":
+When `structure: multi-repo`, the repository where `/ring:planning-small-features` is run becomes the "coordinator":
 
 - All pre-dev docs stay in coordinator
 - Task files are generated with clear module markers
@@ -317,10 +317,10 @@ API Pattern determines how the frontend communicates with backend services and a
 
 | API Pattern | Frontend Tasks | Agent |
 |-------------|----------------|-------|
-| `direct` | UI components, pages, forms | `ring:frontend-engineer` |
-| `direct` | Server Actions, data fetching | `ring:frontend-engineer` (Next.js Server Components) |
-| `bff` | API routes, data aggregation | `ring:frontend-bff-engineer-typescript` |
-| `bff` | UI components, pages | `ring:frontend-engineer` |
+| `direct` | UI components, pages, forms | `ring:frontend` |
+| `direct` | Server Actions, data fetching | `ring:frontend` (Next.js Server Components) |
+| `bff` | API routes, data aggregation | `ring:bff-ts` |
+| `bff` | UI components, pages | `ring:frontend` |
 
 ### Pattern in TopologyConfig
 

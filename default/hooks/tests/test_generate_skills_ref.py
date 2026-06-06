@@ -83,6 +83,42 @@ class TestParseFrontmatterFallback:
     def test_no_frontmatter(self):
         assert parse_frontmatter_fallback("# Just markdown") is None
 
+    def test_double_quoted_single_line_description_unquoted(self):
+        # Descriptions are now double-quoted single-line YAML strings; the
+        # fallback parser must strip the surrounding quotes.
+        content = (
+            '---\n'
+            'name: ring:test\n'
+            'description: "Doing a thing and then another thing."\n'
+            '---\n# Body\n'
+        )
+        result = parse_frontmatter_fallback(content)
+        assert result is not None
+        assert result["description"] == "Doing a thing and then another thing."
+
+    def test_single_quoted_description_unquoted(self):
+        content = (
+            "---\n"
+            "name: ring:test\n"
+            "description: 'Doing a thing.'\n"
+            "---\n# Body\n"
+        )
+        result = parse_frontmatter_fallback(content)
+        assert result is not None
+        assert result["description"] == "Doing a thing."
+
+    def test_unbalanced_quote_preserved(self):
+        # A leading quote with no matching trailing quote is left untouched.
+        content = (
+            '---\n'
+            'name: ring:test\n'
+            'description: "Quoted start no end\n'
+            '---\n# Body\n'
+        )
+        result = parse_frontmatter_fallback(content)
+        assert result is not None
+        assert result["description"] == '"Quoted start no end'
+
     def test_block_scalar_description_joined(self):
         content = (
             "---\n"
@@ -111,21 +147,58 @@ class TestParseFrontmatterFallback:
 
 class TestSkillConstructor:
     def test_basic_construction(self):
-        s = Skill(name="ring:test", description="d", directory="test")
+        s = Skill(
+            name="ring:test", description="d", directory="test", plugin="default"
+        )
         assert s.name == "ring:test"
         assert s.description == "d"
         assert s.directory == "test"
+        assert s.plugin == "default"
 
-    def test_categorize_pre_dev(self):
-        s = Skill(name="x", description="d", directory="pre-dev-prd-creation")
-        assert s.category == "Pre-Dev Workflow"
+    def test_categorize_default_plugin_is_core_workflow(self):
+        s = Skill(
+            name="x", description="d", directory="reviewing-code", plugin="default"
+        )
+        assert s.category == "Core Workflow"
 
-    def test_categorize_meta(self):
-        s = Skill(name="x", description="d", directory="using-ring")
+    def test_categorize_dev_team_plugin_is_development(self):
+        s = Skill(
+            name="x", description="d", directory="implementing-tasks", plugin="dev-team"
+        )
+        assert s.category == "Development"
+
+    def test_categorize_pm_team_plugin_is_pre_dev_planning(self):
+        s = Skill(
+            name="x", description="d", directory="writing-prds", plugin="pm-team"
+        )
+        assert s.category == "Pre-Dev Planning"
+
+    def test_categorize_tw_team_plugin_is_technical_writing(self):
+        s = Skill(
+            name="x", description="d", directory="reviewing-docs", plugin="tw-team"
+        )
+        assert s.category == "Technical Writing"
+
+    def test_categorize_using_prefix_overrides_plugin(self):
+        # using-* meta skills are grouped together regardless of plugin.
+        s = Skill(
+            name="x", description="d", directory="using-ring", plugin="default"
+        )
         assert s.category == "Meta Skills"
 
-    def test_categorize_other(self):
-        s = Skill(name="x", description="d", directory="random-thing")
+    def test_categorize_using_prefix_overrides_dev_team_plugin(self):
+        s = Skill(
+            name="x",
+            description="d",
+            directory="using-lib-commons",
+            plugin="dev-team",
+        )
+        assert s.category == "Meta Skills"
+
+    def test_categorize_unknown_plugin_is_other(self):
+        s = Skill(
+            name="x", description="d", directory="random-thing", plugin="mystery"
+        )
         assert s.category == "Other"
 
 
@@ -140,7 +213,12 @@ class TestGenerateMarkdown:
         assert "No skills found" in result
 
     def test_single_skill_basic(self):
-        s = Skill(name="ring:test", description="Test skill", directory="test")
+        s = Skill(
+            name="ring:test",
+            description="Test skill",
+            directory="test",
+            plugin="default",
+        )
         result = generate_markdown([s])
         assert "ring:test" in result
         assert "Test skill" in result
@@ -150,26 +228,49 @@ class TestGenerateMarkdown:
             name="ring:test",
             description="First line.\nSecond line.",
             directory="test",
+            plugin="default",
         )
         result = generate_markdown([s])
         assert "First line. Second line." in result
 
     def test_skills_grouped_by_category(self):
         skills = [
-            Skill(name="ring:a", description="d", directory="pre-dev-foo"),
-            Skill(name="ring:b", description="d", directory="using-ring"),
+            Skill(
+                name="ring:a", description="d", directory="writing-prds", plugin="pm-team"
+            ),
+            Skill(
+                name="ring:b", description="d", directory="using-ring", plugin="default"
+            ),
         ]
         result = generate_markdown(skills)
-        assert "Pre-Dev Workflow" in result
+        assert "Pre-Dev Planning" in result
         assert "Meta Skills" in result
 
     def test_skill_count_in_category_heading(self):
         skills = [
-            Skill(name="ring:a", description="d", directory="using-x"),
-            Skill(name="ring:b", description="d", directory="using-y"),
+            Skill(
+                name="ring:a", description="d", directory="using-x", plugin="default"
+            ),
+            Skill(
+                name="ring:b", description="d", directory="using-y", plugin="dev-team"
+            ),
         ]
         result = generate_markdown(skills)
         assert "Meta Skills (2 skills)" in result
+
+    def test_category_order_follows_plugin_order(self):
+        # Categories render in CATEGORY_ORDER: Core Workflow, Development,
+        # Pre-Dev Planning, Technical Writing, Meta Skills, Other.
+        skills = [
+            Skill(name="ring:tw", description="d", directory="reviewing-docs", plugin="tw-team"),
+            Skill(name="ring:core", description="d", directory="committing-changes", plugin="default"),
+            Skill(name="ring:dev", description="d", directory="implementing-tasks", plugin="dev-team"),
+        ]
+        result = generate_markdown(skills)
+        core_idx = result.index("Core Workflow")
+        dev_idx = result.index("Development")
+        tw_idx = result.index("Technical Writing")
+        assert core_idx < dev_idx < tw_idx
 
 
 # ---------------------------------------------------------------------------

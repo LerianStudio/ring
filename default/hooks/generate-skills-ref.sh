@@ -55,7 +55,19 @@ extract_field() {
             exit
         }
 
-        END { print value }
+        END {
+            # Strip a single pair of surrounding double or single quotes.
+            # Descriptions are now double-quoted single-line YAML strings;
+            # mirrors generate-skills-ref.py:_strip_quotes.
+            if (length(value) >= 2) {
+                first = substr(value, 1, 1)
+                last = substr(value, length(value), 1)
+                if (first == last && (first == "\"" || first == "\x27")) {
+                    value = substr(value, 2, length(value) - 2)
+                }
+            }
+            print value
+        }
     '
 }
 
@@ -101,17 +113,43 @@ parse_skill() {
     printf '%s\t%s\t%s\n' "$skill_dir" "$name" "$description"
 }
 
-# Categorize skill based on directory name
-# MUST stay in sync with generate-skills-ref.py CATEGORIES dict.
+# Map a plugin directory name to its category display name.
+# MUST stay in sync with generate-skills-ref.py PLUGIN_CATEGORIES.
+plugin_category() {
+    local plugin="$1"
+    case "$plugin" in
+        default) echo "Core Workflow" ;;
+        dev-team) echo "Development" ;;
+        pm-team) echo "Pre-Dev Planning" ;;
+        tw-team) echo "Technical Writing" ;;
+        *) echo "Other" ;;
+    esac
+}
+
+# Categorize a skill = its plugin's display name, with one directory-name
+# override: using-* meta skills are grouped together regardless of plugin.
+# Gerund skill names share no common prefixes, so plugin-based categorization
+# is the only durable scheme.
+# MUST stay in sync with generate-skills-ref.py Skill._categorize.
 categorize_skill() {
     local dir="$1"
+    local plugin="$2"
     case "$dir" in
-        pre-dev-*) echo "Pre-Dev Workflow" ;;
-        test-*|*-debugging|condition-*|defense-*|root-cause*) echo "Testing & Debugging" ;;
-        *-review|dispatching-*|sharing-*) echo "Collaboration" ;;
-        brainstorm|writing-plans|execute-plan|*worktree|subagent-driven*) echo "Planning & Execution" ;;
-        using-*|writing-skills|testing-skills*|testing-agents*) echo "Meta Skills" ;;
-        *) echo "Other" ;;
+        using-*) echo "Meta Skills" ;;
+        *) plugin_category "$plugin" ;;
+    esac
+}
+
+# Deterministic category display order, mirroring generate-skills-ref.py
+# CATEGORY_ORDER. Returns a zero-padded sort index for the given category.
+category_order_index() {
+    case "$1" in
+        "Core Workflow") echo "0" ;;
+        "Development") echo "1" ;;
+        "Pre-Dev Planning") echo "2" ;;
+        "Technical Writing") echo "3" ;;
+        "Meta Skills") echo "4" ;;
+        *) echo "5" ;;  # Other
     esac
 }
 
@@ -126,11 +164,8 @@ generate_markdown() {
     local skill_count=0
     local current_category=""
 
-    # Sort by category, then by name
-    while IFS=$'\t' read -r dir name desc; do
-        local category
-        category=$(categorize_skill "$dir")
-
+    # Input is pre-sorted TSV: category, name, desc (category resolved in main()).
+    while IFS=$'\t' read -r category name desc; do
         # Print category header if changed
         if [[ "$category" != "$current_category" ]]; then
             if [[ -n "$current_category" ]]; then
@@ -149,7 +184,7 @@ generate_markdown() {
     echo "## Usage"
     echo ""
     echo "To use a skill: Use the Skill tool with skill name"
-    echo "Example: \`ring:brainstorm\`"
+    echo "Example: \`ring:using-ring\`"
 
     # Output stats to stderr (like Python version)
     echo "" >&2
@@ -194,11 +229,13 @@ main() {
                 local skill_line
                 skill_line=$(parse_skill "$skill_file")
                 if [[ -n "$skill_line" ]]; then
-                    # Add category as first field for sorting
-                    local dir name desc cat
+                    # Resolve category from dir + plugin, then prefix a numeric
+                    # order index so sort(1) reproduces Python's CATEGORY_ORDER.
+                    local dir name desc cat order
                     IFS=$'\t' read -r dir name desc <<< "$skill_line"
-                    cat=$(categorize_skill "$dir")
-                    printf '%s\t%s\t%s\t%s\n' "$cat" "$dir" "$name" "$desc" >> "$tmpfile"
+                    cat=$(categorize_skill "$dir" "$plugin")
+                    order=$(category_order_index "$cat")
+                    printf '%s\t%s\t%s\t%s\n' "$order" "$cat" "$name" "$desc" >> "$tmpfile"
                 fi
             else
                 echo "Warning: No SKILL.md in $(basename "$skill_dir")" >&2
@@ -211,11 +248,10 @@ main() {
         exit 1
     fi
 
-    # Sort by category, then by name (matches Python: predefined-category order
-    # is approximated here by alphabetic — Python's deterministic group order
-    # is not perfectly reproducible in pure sort(1), but skills within each
-    # category are sorted by name identically).
-    sort -t$'\t' -k1,1 -k3,3 "$tmpfile" | cut -f2- | generate_markdown
+    # Sort by category order index (numeric, field 1) then skill name (field 3),
+    # then drop the order index so generate_markdown receives category/name/desc.
+    # This reproduces generate-skills-ref.py CATEGORY_ORDER exactly.
+    sort -t$'\t' -k1,1n -k3,3 "$tmpfile" | cut -f2- | generate_markdown
 }
 
 main "$@"

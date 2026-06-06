@@ -26,7 +26,7 @@ This file defines the specific standards for frontend development.
 | 11 | [Performance](#performance) | Code splitting, image optimization |
 | 12 | [Directory Structure](#directory-structure) | Next.js App Router layout |
 | 13 | [Forbidden Patterns](#forbidden-patterns) | Anti-patterns to avoid |
-| 14 | [Standards Compliance Categories](#standards-compliance-categories) | Categories for ring:dev-refactor |
+| 14 | [Standards Compliance Categories](#standards-compliance-categories) | Categories for ring:planning-backend-refactor |
 | 15 | [Form Field Abstraction Layer](#form-field-abstraction-layer) | **HARD GATE:** Field wrappers, dual-mode (sindarian-ui vs vanilla) |
 | 16 | [Provider Composition Pattern](#provider-composition-pattern) | Nested providers order, feature providers |
 | 17 | [Custom Hooks Patterns](#custom-hooks-patterns) | **HARD GATE:** usePagination, useCursorPagination, useCreateUpdateSheet, useStepper, useDebounce |
@@ -866,7 +866,7 @@ const handleClick = useCallback((id: string) => {
 
 ## Standards Compliance Categories
 
-**When invoked from ring:dev-refactor, check all categories:**
+**When invoked from ring:planning-backend-refactor, check all categories:**
 
 | Category | Ring Standard | What to Verify |
 |----------|--------------|----------------|

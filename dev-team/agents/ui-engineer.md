@@ -205,4 +205,4 @@ PASS — 8 tests, 0 failures
 ## Scope
 
 **Handles:** UI implementation from product-designer specs.
-**Does NOT handle:** Design specifications (use `frontend-designer`), general React without specs (use `frontend-engineer`), BFF/API routes (use `frontend-bff-engineer-typescript`).
+**Does NOT handle:** Design specifications (use `ui-designer`), general React without specs (use `frontend`), BFF/API routes (use `bff-ts`).

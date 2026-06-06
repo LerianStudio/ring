@@ -1,6 +1,6 @@
 # QA Analyst (Frontend) — Performance Testing Mode
 
-Extends `qa-analyst-frontend.v2.md`. Load when dispatched with `mode: performance`.
+Extends `qa-frontend.v2.md`. Load when dispatched with `mode: performance`.
 
 ## What to Test
 

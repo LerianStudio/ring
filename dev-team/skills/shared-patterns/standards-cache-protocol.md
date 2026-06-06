@@ -18,7 +18,7 @@ This document is the single source of truth for:
 
 ## Canonical `<standards>` Block Format
 
-Orchestrators (dev-cycle, codereview SKILL) MUST use this exact block shape when
+Orchestrators (ring:running-dev-cycle, ring:reviewing-code SKILL) MUST use this exact block shape when
 injecting cached standards into a reviewer's dispatch prompt:
 
 ```
@@ -100,7 +100,7 @@ At Step 1.5 of the cycle:
 5. MANDATORY: Save state to file.
 6. Blocker if ANY URL fails to fetch.
 
-At dispatch time (Step 3 of codereview, and elsewhere): build the `<standards>`
+At dispatch time (Step 3 of ring:reviewing-code, and elsewhere): build the `<standards>`
 block per the canonical format above, one `<standard>` entry per URL in the
 reviewer's slice.
 

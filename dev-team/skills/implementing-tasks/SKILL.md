@@ -1,10 +1,6 @@
 ---
-name: ring:dev-implementation
-description: |
-  Gate 0 of the development cycle. Executes code implementation using the appropriate
-  specialized backend agent based on task content and project language. Handles TDD,
-  coverage, docker-compose/local runtime, basic health/observability verification,
-  and delivery verification inside one backend-owned gate.
+name: ring:implementing-tasks
+description: "Implementing a single planned task (T-X.Y.Z) end-to-end: selects the right backend agent by language and service type, drives one TDD RED->GREEN turn, then verifies coverage, lint, license headers, runtime, and delivery before handoff. Runs as Gate 0 before ring:reviewing-code. Use to drive ONE task inside an already-running cycle. Skip when asked to implement a whole tasks.md or multiple tasks (use ring:running-dev-cycle)."
 ---
 
 # Code Implementation (Gate 0)
@@ -15,15 +11,15 @@ description: |
 - Ready to write code
 
 ## Skip when
-- Not inside a development cycle (ring:dev-cycle or ring:dev-refactor)
+- Not inside a development cycle (ring:running-dev-cycle or ring:planning-backend-refactor)
 - Task is documentation-only, configuration-only, or non-code
 - Implementation already completed for the current gate
 
 ## Sequence
-**Runs before:** ring:codereview
+**Runs before:** ring:reviewing-code
 
 ## Related
-**Complementary:** ring:dev-cycle, ring:test-driven-development, ring:codereview
+**Complementary:** ring:running-dev-cycle, ring:test-driven-development, ring:reviewing-code
 
 
 You orchestrate. Agents implement. Select the agent, prepare the prompt, track state, validate outputs.
@@ -47,9 +43,9 @@ Check `PROJECT_RULES.md` exists at `project_rules_path` → STOP if not found.
 
 | Language | Service Type | Agent |
 |----------|--------------|-------|
-| go | api, worker, batch, cli | ring:backend-engineer-golang |
-| typescript | api, worker | ring:backend-engineer-typescript |
-| typescript | frontend, bff | ring:frontend-bff-engineer-typescript |
+| go | api, worker, batch, cli | ring:backend-go |
+| typescript | api, worker | ring:backend-ts |
+| typescript | frontend, bff | ring:bff-ts |
 
 ## Step 3: Gate 0 — TDD (RED → GREEN)
 

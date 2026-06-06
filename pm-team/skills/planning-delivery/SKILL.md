@@ -1,10 +1,6 @@
 ---
-name: ring:pre-dev-delivery-planning
-description: |
-  Gate 9 (Full Track) / Gate 4 (Small Track): Delivery roadmap and timeline planning.
-  Transforms the phased plan (epics) into a realistic delivery schedule with critical
-  path analysis, resource allocation, and delivery breakdown aligned to plan phases.
-  MANDATORY gate for both workflows.
+name: ring:planning-delivery
+description: "Planning a dated delivery roadmap by turning tasks.md epics into a schedule: critical-path analysis, capacity and velocity estimation, sprint/cycle breakdown honoring plan-phase ordering, and risk buffers, emitting delivery-roadmap.md and .json. Mandatory Gate 9 (Full Track) / Gate 4 (Small Track); feeds ring:tracking-delivery. Use once phases and epics are validated. Skip for proofs-of-concept or research with no delivery deadline."
 ---
 
 # Delivery Planning — Realistic Roadmap with Critical Path
@@ -24,8 +20,8 @@ description: |
 
 ## Sequence
 
-**Runs before:** ring:dev-cycle
-**Runs after:** ring:pre-dev-phases-and-epics, ring:pre-dev-task-creation
+**Runs before:** ring:running-dev-cycle
+**Runs after:** ring:decomposing-phases-and-epics, ring:detailing-tasks
 
 
 Every roadmap must be grounded in reality, not optimism. Epics not validated, team composition unknown, or start date absent → STOP and gather the missing input before proceeding.

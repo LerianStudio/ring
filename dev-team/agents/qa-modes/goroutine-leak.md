@@ -1,6 +1,6 @@
 # QA Analyst — Goroutine Leak Detection Mode
 
-Extends `qa-analyst.v2.md`. Load this file when dispatched with `mode: goroutine-leak`.
+Extends `qa.v2.md`. Load this file when dispatched with `mode: goroutine-leak`.
 
 ## When Goroutine Leak Detection Applies
 

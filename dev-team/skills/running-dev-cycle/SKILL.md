@@ -1,12 +1,6 @@
 ---
-name: ring:dev-cycle
-description: |
-  Lean backend development cycle orchestrator with implementation-owned quality,
-  driven by a rolling-wave phased plan (tasks.md: Phase Overview + epics + inline tasks).
-  Iterates epics (E-X.Y) within the current phase; only the active wave is task-detailed,
-  later phases are elaborated at each phase boundary against the real codebase.
-  Backend engineers own TDD, coverage, docker-compose/local runtime, and delivery verification.
-  Epic-level review stays separate; user validation closes each epic.
+name: ring:running-dev-cycle
+description: "Running the backend dev cycle: implements every task in a rolling-wave tasks.md plan for a Go/TS service, driving specialist agents through Gate 0 implementation/TDD, Gate 8 parallel review, and Gate 9 validation per epic, elaborating later phases at each phase boundary. Use when starting or resuming a gated backend dev cycle with a tasks.md plan. Skip for frontend (use ring:running-dev-cycle-frontend) or docs-only work."
 ---
 
 # Development Cycle Orchestrator
@@ -19,7 +13,7 @@ description: |
 ## Skip when
 - No tasks file exists
 - Task is documentation-only or planning-only
-- Frontend project (use ring:dev-cycle-frontend instead)
+- Frontend project (use ring:running-dev-cycle-frontend instead)
 
 
 You orchestrate. Agents execute. You NEVER read, write, or edit source code directly.
@@ -30,16 +24,16 @@ Load the phased plan (tasks.md) from PM output and execute the lean backend cycl
 
 **Vocabulary:** Phase = independently verifiable milestone. Epic (E-X.Y) = value-driven increment, the UNIT this cycle iterates. Task (T-X.Y.Z) = dispatch-ready unit, the Gate 0 execution unit.
 
-**Announce at start:** "Using ring:dev-cycle lean backend flow (rolling-wave phased plan)."
+**Announce at start:** "Using ring:running-dev-cycle lean backend flow (rolling-wave phased plan)."
 
 ## Gate Map
 
 | Gate | Skill to Load | Agent to Dispatch | Cadence | Mode |
 |------|---------------|-------------------|---------|------|
-| 0 | ring:dev-implementation | ring:backend-engineer-* | Per task (T-X.Y.Z) | Write + Run |
-| 8 | ring:codereview | 9 default reviewers + triggered specialists in parallel | Per epic (E-X.Y) | Run |
-| 9 | ring:dev-validation | N/A (verification) | Per epic | Run |
-| 11.5 | (orchestrator + 1 planning agent) | ring:backend-engineer-* / ring:frontend-engineer / ring:codebase-explorer (ANALYSIS mode) | Per phase boundary | Plan only |
+| 0 | ring:implementing-tasks | ring:backend-go / ring:backend-ts | Per task (T-X.Y.Z) | Write + Run |
+| 8 | ring:reviewing-code | 9 default reviewers + triggered specialists in parallel | Per epic (E-X.Y) | Run |
+| 9 | ring:validating-acceptance-criteria | N/A (verification) | Per epic | Run |
+| 11.5 | (orchestrator + 1 planning agent) | ring:backend-go / ring:backend-ts / ring:frontend / ring:codebase-explorer (ANALYSIS mode) | Per phase boundary | Plan only |
 
 Gate 0 includes TDD RED/GREEN, coverage threshold enforcement, docker-compose/local runtime updates, basic health/observability verification, and delivery verification. Do not dispatch separate QA, SRE, or DevOps gates as part of this cycle. Step 11.5 (phase cadence) closes the just-finished phase and rolling-wave elaborates the next phase's epics into dispatch-ready tasks — read `gates/phase-boundary.md`.
 
@@ -112,7 +106,7 @@ If a task involves source code → dispatch specialist agent. No exceptions rega
 
 ## State Management
 
-State lives in `docs/ring:dev-cycle/current-cycle.json` (or `docs/ring:dev-refactor/current-cycle.json`).
+State lives in `docs/ring:running-dev-cycle/current-cycle.json` (or `docs/ring:planning-backend-refactor/current-cycle.json`).
 
 For state schema, persistence rules, and initialization logic, read `gates/state-schema.md` from this skill directory.
 
@@ -134,7 +128,7 @@ Read `gates/cycle-completion.md` from this skill directory and execute Steps 12.
 
 1. **Step 12.0** — Cycle Exit Verification (HARD GATE: every Gate 0 handoff has passing tests, coverage ≥ threshold, local runtime; plus multi-tenant dual-mode verified for all units)
 2. **Step 12.0.5b** — Gate 0.5D Migration Safety (conditional: runs only when SQL migration files appear in the cycle diff vs `origin/main`)
-3. **Step 12.1** — the one-and-only `ring:dev-report` dispatch, then Final Commit (which captures the feedback it generates)
+3. **Step 12.1** — the one-and-only `ring:writing-dev-reports` dispatch, then Final Commit (which captures the feedback it generates)
 
 ⛔ The cycle is incomplete until Step 12.1 finishes. Do NOT declare the cycle done from the Execution Order summary alone — the detailed, mandatory steps live in `gates/cycle-completion.md`.
 
@@ -212,7 +206,7 @@ A gate is complete ONLY when ALL components succeed:
 | Agent returns error | Retry with clearer instructions (max 3 attempts) |
 | State file corrupted | Rebuild from git log + last known state |
 | Gate stuck in loop | After 3 iterations, escalate to user |
-| Context limit reached | Use `/ring:create-handoff` → resume in new session |
+| Context limit reached | Use `/ring:creating-handoffs` → resume in new session |
 
 ## Input Sources
 
@@ -220,8 +214,8 @@ A gate is complete ONLY when ALL components succeed:
 |--------|------|
 | Tasks (PM output) | `docs/pre-dev/{feature}/tasks.md` |
 | Phase tasks | inside tasks.md, under each epic (phased plan) |
-| Refactor tasks | `docs/ring:dev-refactor/*/tasks.md` |
+| Refactor tasks | `docs/ring:planning-backend-refactor/*/tasks.md` |
 
 ## Frontend Handoff
 
-If frontend tasks are detected in a backend cycle → create a handoff file listing frontend requirements, API contracts, and test expectations. Frontend uses `ring:dev-cycle-frontend` separately.
+If frontend tasks are detected in a backend cycle → create a handoff file listing frontend requirements, API contracts, and test expectations. Frontend uses `ring:running-dev-cycle-frontend` separately.

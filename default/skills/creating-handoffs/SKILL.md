@@ -1,6 +1,6 @@
 ---
-name: ring:create-handoff
-description: Create handoff documents capturing session state for seamless context-clear and resume
+name: ring:creating-handoffs
+description: "Creating a handoff document that captures session state (completed work, decisions, open items, next steps) and delivering it via Plan Mode so the user gets the native 'clear context and continue implementing' resume option. Use when ending a session, when context grows large, or the user says 'handoff', 'save session', or 'context transfer'. Skip when context is minimal or work is fully complete with no resume planned."
 ---
 
 # Session Handoff Skill

@@ -1,28 +1,6 @@
 ---
-name: ring:migrate-observability
-description: |
-  Migrates a Lerian Go application's direct observability imports from
-  lib-commons (deprecated shims OR already-removed APIs) to lib-observability.
-  Operates in three compatible modes against the same known mapping table:
-    - pre-removal reference mode: when a removal commit is known, inspect the
-      parent/previous lib-commons ref to recover the source-side Deprecated
-      notices and exact migration scope.
-    - deprecated-shim mode: effective lib-commons still ships the shims with
-      `// Deprecated:` notices.
-    - removed-api/break-fix mode: lib-commons has already removed the observability
-      packages/symbols (sources absent, `go list` or `go build` fails on the
-      removed imports). The skill still migrates known source imports/symbols
-      by static source analysis of the application repo.
-      It also applies the companion dependency moves required by the same
-      lib-commons removal train: stable lib-streaming/lib-systemplane bumps and
-      direct systemplane imports moved out of lib-commons.
-  Targets are gated on the lib-observability target API, not on the presence of
-  source-side Deprecated notices. Adds lib-observability to go.mod and validates
-  the build. Scope is strictly observability: deprecated/removed observability
-  packages, commons/net/http observability middleware/span symbols, root commons
-  observability context helpers, commons/opentelemetry, and direct
-  commons/systemplane imports. Does NOT touch infrastructure clients or general
-  commons helpers.
+name: ring:migrating-to-lib-observability
+description: "Migrating a Lerian Go app off lib-commons observability imports (deprecated shims or removed APIs) to lib-observability via a fixed mapping table, then bumps go.mod and validates the build; ring:backend-go applies the edits. Covers log/zap/runtime/assert, opentelemetry/tracing, HTTP middleware, context helpers, and direct systemplane import moves. Use when lib-commons observability imports remain or the build breaks on removed APIs."
 ---
 
 # Migrate lib-commons Observability APIs to lib-observability
@@ -49,7 +27,7 @@ description: |
 **Runs after:** (none)
 
 ## Related
-**Complementary:** ring:using-ring, ring:dev-cycle, ring:codereview, ring:lint, ring:using-lib-commons
+**Complementary:** ring:using-ring, ring:running-dev-cycle, ring:reviewing-code, ring:fixing-lint, ring:using-lib-commons
 
 ---
 
@@ -613,7 +591,7 @@ For each found import, record:
 
 ## Step 3: Present Migration Plan and Confirm
 
-<dispatch_required agent="ring:backend-engineer-golang">
+<dispatch_required agent="ring:backend-go">
 Do not proceed with edits until user approves.
 </dispatch_required>
 
@@ -653,7 +631,7 @@ grep "lib-observability" go.mod
 
 ## Step 5: Apply Import Replacements
 
-<dispatch_required agent="ring:backend-engineer-golang">
+<dispatch_required agent="ring:backend-go">
 For each file identified in Step 2:
 1. Read the file
 2. Replace the import path using the mapping table

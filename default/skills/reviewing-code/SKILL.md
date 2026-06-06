@@ -1,11 +1,6 @@
 ---
-name: ring:codereview
-description: |
-  Gate 8 of development cycle - dispatches 9 default specialized reviewers in parallel
-  (code, business-logic, security, test, nil-safety, dead-code, performance,
-  multi-tenant, lib-commons), plus up to 3 conditional stack specialists when
-  their triggers match (lib-observability, lib-systemplane, lib-streaming).
-  Runs at EPIC cadence — one review per epic over the cumulative diff of its tasks, not per-task fragments. Report-only: no automatic remediation.
+name: ring:reviewing-code
+description: "Reviewing code by dispatching the default reviewer subagents in parallel (plus conditional specialists for lib-observability, lib-systemplane, or lib-streaming when the diff triggers them), then aggregating findings by severity into a report. Use as Gate 8 of ring:running-dev-cycle at epic cadence over the cumulative diff, or before merging. Report-only. Skip for a single-command Go pre-merge verdict (use ring:verifying-code)."
 ---
 
 # Code Review (Gate 8)
@@ -22,15 +17,15 @@ description: |
 - Code has not been modified since the last completed review cycle
 
 ## Sequence
-**Runs after:** ring:dev-implementation
-**Runs before:** ring:dev-validation
+**Runs after:** ring:implementing-tasks
+**Runs before:** ring:validating-acceptance-criteria
 
 ## Related
-**Complementary:** ring:dev-cycle, ring:dev-implementation
+**Complementary:** ring:running-dev-cycle, ring:implementing-tasks
 
 Dispatch the 9 default reviewer subagents in **parallel**, plus any triggered conditional specialists. Dispatch count is dynamic: 9 + triggered specialists, max 12. Do not say or imply all 12 always dispatch.
 
-**Announce at start:** "Using ring:codereview to dispatch 9 default reviewers plus triggered conditional specialists."
+**Announce at start:** "Using ring:reviewing-code to dispatch 9 default reviewers plus triggered conditional specialists."
 
 **Report-only boundary:** This skill does not remediate findings, dispatch implementation work, write comments into source files, generate external artifacts, invoke secondary review tools, or re-run reviewers automatically. It only dispatches the selected reviewers once and reports their findings in the current session.
 
@@ -39,14 +34,14 @@ Dispatch the 9 default reviewer subagents in **parallel**, plus any triggered co
 | # | Agent | Focus |
 |---|-------|-------|
 | 1 | `ring:code-reviewer` | Architecture, design patterns, code quality |
-| 2 | `ring:business-logic-reviewer` | Domain correctness, business rules, edge cases |
+| 2 | `ring:logic-reviewer` | Domain correctness, business rules, edge cases |
 | 3 | `ring:security-reviewer` | Vulnerabilities, authentication, OWASP risks |
 | 4 | `ring:test-reviewer` | Test quality, coverage, edge cases, anti-patterns |
-| 5 | `ring:nil-safety-reviewer` | Nil/null pointer safety for Go and TypeScript |
+| 5 | `ring:nil-reviewer` | Nil/null pointer safety for Go and TypeScript |
 | 6 | `ring:dead-code-reviewer` | Orphaned code detection, reachability analysis |
-| 7 | `ring:performance-reviewer` | Performance hotspots, allocations, goroutine leaks, N+1 |
-| 8 | `ring:multi-tenant-reviewer` | Multi-tenant patterns, tenantId propagation, DB isolation |
-| 9 | `ring:lib-commons-reviewer` | lib-commons package usage and reinvented-wheel opportunities |
+| 7 | `ring:perf-reviewer` | Performance hotspots, allocations, goroutine leaks, N+1 |
+| 8 | `ring:tenancy-reviewer` | Multi-tenant patterns, tenantId propagation, DB isolation |
+| 9 | `ring:commons-reviewer` | lib-commons package usage and reinvented-wheel opportunities |
 
 Base hard gate: all 9 default reviewers must PASS.
 
@@ -56,9 +51,9 @@ Run these only when the diff matches their trigger. If triggered, include the sp
 
 | Agent | Trigger |
 |-------|---------|
-| `ring:lib-observability-reviewer` | Diff touches tracing, metrics, logging, runtime recovery/panic safety, redaction, observability constants, or goroutines with recover/SafeGo implications. |
-| `ring:lib-systemplane-reviewer` | Diff touches runtime config, hot-reload knobs, admin config surface, tenant-scoped settings, or systemplane imports/config. |
-| `ring:lib-streaming-reviewer` | Diff touches business events, outbox, event producers, broker publishing, CloudEvents, or event manifests/catalogs. |
+| `ring:obs-reviewer` | Diff touches tracing, metrics, logging, runtime recovery/panic safety, redaction, observability constants, or goroutines with recover/SafeGo implications. |
+| `ring:systemplane-reviewer` | Diff touches runtime config, hot-reload knobs, admin config surface, tenant-scoped settings, or systemplane imports/config. |
+| `ring:streaming-reviewer` | Diff touches business events, outbox, event producers, broker publishing, CloudEvents, or event manifests/catalogs. |
 
 ## Role Clarification
 

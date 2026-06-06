@@ -1,5 +1,5 @@
 ---
-name: ring:business-logic-reviewer
+name: ring:logic-reviewer
 description: "Correctness Review: reviews domain correctness, business rules, edge cases, and requirements. Uses mental execution to trace code paths. Runs in parallel with other reviewers at Gate 8."
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: ring:repo-research-analyst
+name: ring:repo-researcher
 description: Codebase research specialist for pre-dev planning. Searches target repository for existing patterns, conventions, and prior solutions. Returns findings with exact file:line references for use in PRD/TRD creation.
 ---
 
@@ -159,4 +159,4 @@ No relevant prior solutions found in `docs/solutions/`.
 ## Scope
 
 **Handles:** Codebase pattern discovery, convention extraction, knowledge base search.
-**Does NOT handle:** External best practices (use `best-practices-researcher`), framework docs (use `framework-docs-researcher`), implementation (use engineer agents).
+**Does NOT handle:** External best practices (use `web-researcher`), framework docs (use `docs-researcher`), implementation (use engineer agents).

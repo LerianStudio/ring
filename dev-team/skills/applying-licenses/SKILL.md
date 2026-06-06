@@ -1,9 +1,6 @@
 ---
-name: ring:dev-licensing
-description: |
-  Apply or switch the license for a Lerian service repository. Supports Apache 2.0,
-  Elastic License v2, and Proprietary (Lerian Studio General License). Replaces/creates
-  LICENSE file, updates source file headers, updates SPDX identifiers, validates consistency.
+name: ring:applying-licenses
+description: "Applying or switching a repository's license (Apache 2.0, Elastic License v2, or Lerian Proprietary): rewrites the LICENSE file, updates Go/TS source headers, sets SPDX identifiers, and validates consistency after user confirmation. Use when asked to set, apply, or switch a license, or when scaffolding a service with no LICENSE. Skip when license, headers, and SPDX already match, or for non-code repos."
 ---
 
 # License Management
@@ -19,7 +16,7 @@ description: |
 - Non-code repositories (documentation-only, design assets)
 
 ## Related
-**Complementary:** ring:dev-cycle, ring:dev-implementation
+**Complementary:** ring:running-dev-cycle, ring:implementing-tasks
 
 
 You orchestrate. Agents update source headers. NEVER apply a license without user confirmation.
@@ -129,7 +126,7 @@ After confirmation:
 
 ```yaml
 Task:
-  subagent_type: "ring:backend-engineer-{language}"
+  subagent_type: "ring:backend-go"  # use "ring:backend-ts" for TS/JS sources
   description: "Update license headers to {target_license}"
   prompt: |
     Update all source file headers to {target_license} format.

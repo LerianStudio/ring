@@ -1,7 +1,7 @@
 {
   "name": "ring-pm-team",
   "version": "0.31.0",
-  "description": "Product team workflow: 18 skills + 4 research agents. Pre-dev planning with 5-gate (small features) and 10-gate (large features) orchestrators, delivery roadmap generation, delivery status tracking for evidence-based progress reporting, plus standalone streaming-event-mapping discovery. Includes parallel research agents, specialized code analysis, and Product Designer.",
+  "description": "Product team workflow: 18 skills + 4 research agents. Pre-dev planning with 5-gate (small features) and 10-gate (large features) orchestrators, delivery roadmap generation, delivery status tracking for evidence-based progress reporting, plus standalone mapping-streaming-events discovery. Includes parallel research agents, specialized code analysis, and Product Designer.",
   "author": {
     "name": "Lerian Studio",
     "email": "fred@lerian.studio",
@@ -37,8 +37,8 @@
       "Write"
     ],
     "defaultPrompt": [
-      "Plan a new feature using ring:pre-dev-feature.",
-      "Map the eventable points in this service using streaming-event-mapping."
+      "Plan a new feature using ring:planning-small-features.",
+      "Map the eventable points in this service using ring:mapping-streaming-events."
     ],
     "websiteURL": "https://github.com/lerianstudio/ring"
   }

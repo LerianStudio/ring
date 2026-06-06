@@ -153,7 +153,7 @@ COMMON LERIAN PATTERNS:
   Casdoor:         /api/health
 
 VERIFY by reading application source code. Do NOT guess.
-See ring:dev-readyz for the readiness contract; /readyz performs deep dependency checks with TLS verification, /health only signals process liveness.
+See ring:implementing-readyz for the readiness contract; /readyz performs deep dependency checks with TLS verification, /health only signals process liveness.
 ```
 
 ### Health Check Path Convention
@@ -165,7 +165,7 @@ VERIFY health endpoints by reading application source code:
 
 COMMON PATHS:
   - /health           → Most Go services (liveness)
-  - /readyz           → Readiness with dependency checks (ring:dev-readyz)
+  - /readyz           → Readiness with dependency checks (ring:implementing-readyz)
   - /healthz          → Alternative liveness convention
   - /api/admin/health/readyz → Next.js services (serves both liveness and readiness)
 

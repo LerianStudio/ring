@@ -980,7 +980,7 @@ func (h *GetAccountSummaryHandler) Handle(ctx context.Context, id uuid.UUID) (*A
 | Idempotency (idempotency.md) | MUST apply to command handlers that create resources | Not applicable (reads are idempotent by nature) |
 | Caching (caching.md) | Invalidate cache on command execution | Cache query results (Cache-Aside recommended) |
 
-### Detection Commands (for dev-refactor)
+### Detection Commands (for planning-backend-refactor)
 
 ```bash
 # Detect CQRS pattern: separate command/query directories

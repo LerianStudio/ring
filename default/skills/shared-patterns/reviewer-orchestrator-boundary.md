@@ -10,9 +10,9 @@ This document defines the mandatory separation of responsibilities between revie
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        ORCHESTRATOR                              │
-│  (ring:dev-cycle, user, or workflow coordinator)                     │
-│                                                                  │
+│                        ORCHESTRATOR                             │
+│  (ring:running-dev-cycle, user, or workflow coordinator)                │
+│                                                                 │
 │  1. Dispatches reviewers in parallel                            │
 │  2. Collects review reports                                     │
 │  3. Dispatches appropriate agent to fix issues                  │
@@ -23,15 +23,15 @@ This document defines the mandatory separation of responsibilities between revie
 ┌─────────────────────────────┐          ┌─────────────────────────────────┐
 │         REVIEWERS           │          │     IMPLEMENTATION AGENTS       │
 │                             │          │                                 │
-│ • ring:code-reviewer         │          │ • ring:backend-engineer-golang      │
-│ • ring:business-logic-reviewer│          │ • ring:backend-engineer-typescript  │
-│ • ring:security-reviewer     │          │ • ring:frontend-engineer            │
-│ • ring:test-reviewer         │          │                                 │
-│ • ring:nil-safety-reviewer   │          │                                 │
-│ • ring:dead-code-reviewer    │          │                                 │
-│ • ring:performance-reviewer  │          │                                 │
-│ • ring:multi-tenant-reviewer │          │                                 │
-│ • ring:lib-commons-reviewer  │          │                                 │
+│ • ring:code-reviewer        │          │ • ring:backend-go               │
+│ • ring:logic-reviewer       │          │ • ring:backend-ts               │
+│ • ring:security-reviewer    │          │ • ring:frontend                 │
+│ • ring:test-reviewer        │          │                                 │
+│ • ring:nil-reviewer         │          │                                 │
+│ • ring:dead-code-reviewer   │          │                                 │
+│ • ring:perf-reviewer        │          │                                 │
+│ • ring:tenancy-reviewer     │          │                                 │
+│ • ring:commons-reviewer     │          │                                 │
 │                             │          │                                 │
 │ OUTPUT: Report              │          │ OUTPUT: Code changes            │
 │ ACTION: NONE                │          │ ACTION: Edit, Create, Delete    │
@@ -144,9 +144,9 @@ See [shared-patterns/reviewer-orchestrator-boundary.md](../skills/shared-pattern
 
 ---
 
-## Integration with ring:dev-cycle
+## Integration with ring:running-dev-cycle
 
-The `ring:dev-cycle` skill enforces this boundary at Gate 8 (Review):
+The `ring:running-dev-cycle` skill enforces this boundary at Gate 8 (Review):
 
 1. **Dispatch the selected review pool in parallel**: all 9 default reviewers (code, business-logic, security, test, nil-safety, dead-code, performance, multi-tenant, lib-commons), plus triggered conditional specialists in the same batch
 2. **Collect structured reports** from each reviewer

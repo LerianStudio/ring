@@ -1,6 +1,6 @@
 # QA Analyst — Property-Based Testing Mode
 
-Extends `qa-analyst.v2.md`. Load this file when dispatched with `mode: property`.
+Extends `qa.v2.md`. Load this file when dispatched with `mode: property`.
 
 ## When Property Testing Applies
 

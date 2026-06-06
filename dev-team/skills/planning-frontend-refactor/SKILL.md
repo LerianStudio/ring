@@ -1,8 +1,6 @@
 ---
-name: ring:dev-refactor-frontend
-description: |
-  Analyzes frontend codebase against Ring standards and generates refactoring tasks
-  for ring:dev-cycle-frontend. Dispatches frontend-specific agents in ANALYSIS mode.
+name: ring:planning-frontend-refactor
+description: "Planning a frontend refactor: audits an existing React/Next.js frontend against Ring standards (architecture, Sindarian UI, accessibility, testing) and produces a prioritized task list (findings.md + tasks.md) for ring:running-dev-cycle-frontend. Plans only — no edits. Use when an existing frontend needs to meet standards or an audit is requested. Skip for greenfield, single-file fixes, or backend (use ring:planning-backend-refactor)."
 ---
 
 # Dev Refactor Frontend
@@ -13,15 +11,15 @@ description: |
 - Frontend project audit requested
 
 ## Skip when
-- Greenfield project → Use /ring:pre-dev-* instead
-- Single file fix → Use ring:dev-cycle-frontend directly
-- Backend-only project → Use ring:dev-refactor instead
+- Greenfield project → Use /ring:planning-small-features or /ring:planning-large-features instead
+- Single file fix → Use ring:running-dev-cycle-frontend directly
+- Backend-only project → Use ring:planning-backend-refactor instead
 
 ## Sequence
-**Runs before:** ring:dev-cycle-frontend
+**Runs before:** ring:running-dev-cycle-frontend
 
 
-Analyzes existing frontend codebase against Ring/Lerian standards and generates refactoring tasks for ring:dev-cycle-frontend.
+Analyzes existing frontend codebase against Ring/Lerian standards and generates refactoring tasks for ring:running-dev-cycle-frontend.
 
 You orchestrate. Agents analyze. NEVER use Bash/Grep/Read to analyze code — dispatch agents.
 
@@ -29,7 +27,7 @@ You orchestrate. Agents analyze. NEVER use Bash/Grep/Read to analyze code — di
 
 Every divergence from Ring standards = a mandatory gap. No exceptions.
 
-All divergences → FINDING-XXX → REFACTOR-XXX task → ring:dev-cycle-frontend input.
+All divergences → FINDING-XXX → REFACTOR-XXX task → ring:running-dev-cycle-frontend input.
 
 ## Architecture Pattern Applicability
 
@@ -58,7 +56,7 @@ STOP if any fetch fails.
 - Detect UI library mode: read `package.json`
   - `@lerianstudio/sindarian-ui` → `sindarian-ui`
   - Otherwise → `fallback-only`
-- If `go.mod` and no React → STOP: use `ring:dev-refactor`
+- If `go.mod` and no React → STOP: use `ring:planning-backend-refactor`
 
 ### Step 2: Generate Codebase Report
 
@@ -67,7 +65,7 @@ Dispatch `ring:codebase-explorer`:
 ```
 Generate comprehensive codebase report: project structure, React/Next.js patterns,
 component architecture, state management, forms, styling, testing approach,
-package.json dependencies. Output: docs/ring:dev-refactor-frontend/{timestamp}/codebase-report.md
+package.json dependencies. Output: docs/ring:planning-frontend-refactor/{timestamp}/codebase-report.md
 ```
 
 ### Step 3: Dispatch Frontend Specialist Agents (parallel)
@@ -77,7 +75,7 @@ Verify `codebase-report.md` exists before dispatching.
 **Dispatch all 3 in ONE message:**
 
 ```yaml
-Task 1: ring:frontend-engineer (MODE: ANALYSIS only)
+Task 1: ring:frontend (MODE: ANALYSIS only)
   - Load frontend.md via WebFetch
   - Check all 19 sections per standards-coverage-table.md
   - Flag framework/library mismatches vs standards
@@ -85,7 +83,7 @@ Task 1: ring:frontend-engineer (MODE: ANALYSIS only)
   - UI Library Mode: {ui_library_mode}
   - Output: Standards Coverage Table + ISSUE-XXX per finding
 
-Task 2: ring:qa-analyst-frontend (MODE: ANALYSIS only)
+Task 2: ring:qa-frontend (MODE: ANALYSIS only)
   - Check all 19 testing sections (ACC, VIS, E2E, PERF)
   - UI Library Mode: {ui_library_mode}
   - Output: Standards Coverage Table + ISSUE-XXX for gaps
@@ -93,7 +91,7 @@ Task 2: ring:qa-analyst-frontend (MODE: ANALYSIS only)
 Task 3: ring:ui-engineer (MODE: ANALYSIS only)
   - Check Sindarian UI component usage compliance
   - If ui_library_mode = "fallback-only", check custom component WCAG 2.1 AA accessibility, responsive/layout fallback behavior, and design-token/theme fallback usage
-  - For fallback-only mode, output ISSUE-XXX per violation plus a short note that frontend-engineer and qa-analyst-frontend own baseline implementation/testing coverage
+  - For fallback-only mode, output ISSUE-XXX per violation plus a short note that frontend and qa-frontend own baseline implementation/testing coverage
   - Output: ISSUE-XXX for non-compliant usage
 ```
 
@@ -101,11 +99,11 @@ Task 3: ring:ui-engineer (MODE: ANALYSIS only)
 
 After all agents complete:
 
-1. Save reports to `docs/ring:dev-refactor-frontend/{timestamp}/`
+1. Save reports to `docs/ring:planning-frontend-refactor/{timestamp}/`
 2. Map each ISSUE-XXX → FINDING-XXX
 3. Generate `findings.md`
 4. Map each FINDING-XXX → REFACTOR-XXX (1:1)
-5. Generate `tasks.md` (ring:dev-cycle-frontend compatible)
+5. Generate `tasks.md` (ring:running-dev-cycle-frontend compatible)
 
 **Findings template:**
 ```markdown
@@ -118,12 +116,12 @@ After all agents complete:
 
 ### Step 5: Visual Report + User Approval
 
-Generate visual HTML summary → `ring:visualize`.
+Generate visual HTML summary → `ring:visualizing`.
 Present to user. Wait for explicit APPROVED.
 
 ### Step 6: Save + Handoff
 
-Save all artifacts. Handoff to `ring:dev-cycle-frontend`.
+Save all artifacts. Handoff to `ring:running-dev-cycle-frontend`.
 
 ## Severity Reference
 

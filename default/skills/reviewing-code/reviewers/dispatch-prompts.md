@@ -57,7 +57,7 @@ Task:
 
 # Task 2: Business Logic Reviewer
 Task:
-  subagent_type: "ring:business-logic-reviewer"
+  subagent_type: "ring:logic-reviewer"
   description: "Business logic review for [unit_id]"
   prompt: |
     ## Business Logic Review Request
@@ -72,7 +72,7 @@ Task:
     ## Files Changed
     [implementation_files or "Use git diff"]
     ## Pre-Analysis Context
-    [preanalysis_state.context["ring:business-logic-reviewer"] or "No pre-analysis context available."]
+    [preanalysis_state.context["ring:logic-reviewer"] or "No pre-analysis context available."]
     ## Focus
     Domain correctness, requirements coverage, state transitions, financial invariants, business edge cases, and mental execution.
     ## Required Output
@@ -126,7 +126,7 @@ Task:
 
 # Task 5: Nil-Safety Reviewer
 Task:
-  subagent_type: "ring:nil-safety-reviewer"
+  subagent_type: "ring:nil-reviewer"
   description: "Nil/null safety review for [unit_id]"
   prompt: |
     ## Nil-Safety Review Request
@@ -141,7 +141,7 @@ Task:
     ## Files Changed
     [implementation_files or "Use git diff"]
     ## Pre-Analysis Context
-    [preanalysis_state.context["ring:nil-safety-reviewer"] or "No pre-analysis context available."]
+    [preanalysis_state.context["ring:nil-reviewer"] or "No pre-analysis context available."]
     ## Focus
     Nil/null sources, propagation, dereference points, map/type assertion safety, optional chaining, and API response consistency.
     ## Required Output
@@ -172,7 +172,7 @@ Task:
 
 # Task 7: Performance Reviewer
 Task:
-  subagent_type: "ring:performance-reviewer"
+  subagent_type: "ring:perf-reviewer"
   description: "Performance review for [unit_id]"
   prompt: |
     ## Performance Review Request
@@ -187,7 +187,7 @@ Task:
     ## Files Changed
     [implementation_files or "Use git diff"]
     ## Pre-Analysis Context
-    [preanalysis_state.context["ring:performance-reviewer"] or "No pre-analysis context available."]
+    [preanalysis_state.context["ring:perf-reviewer"] or "No pre-analysis context available."]
     ## Focus
     Hot-path allocations, goroutine leaks, N+1 queries, event-loop blocking, GC pressure, cgroup/runtime config, and connection pool sizing.
     ## Required Output
@@ -195,7 +195,7 @@ Task:
 
 # Task 8: Multi-Tenant Reviewer
 Task:
-  subagent_type: "ring:multi-tenant-reviewer"
+  subagent_type: "ring:tenancy-reviewer"
   description: "Multi-tenant review for [unit_id]"
   prompt: |
     ## Multi-Tenant Review Request
@@ -210,7 +210,7 @@ Task:
     ## Files Changed
     [implementation_files or "Use git diff"]
     ## Pre-Analysis Context
-    [preanalysis_state.context["ring:multi-tenant-reviewer"] or "No pre-analysis context available."]
+    [preanalysis_state.context["ring:tenancy-reviewer"] or "No pre-analysis context available."]
     ## Focus
     TenantId extraction, dispatch layer usage, database-per-tenant isolation, tenant-scoped resources, and tenant leak scenarios.
     ## Required Output
@@ -218,7 +218,7 @@ Task:
 
 # Task 9: lib-commons Reviewer
 Task:
-  subagent_type: "ring:lib-commons-reviewer"
+  subagent_type: "ring:commons-reviewer"
   description: "lib-commons usage review for [unit_id]"
   prompt: |
     ## lib-commons Usage Review Request
@@ -233,7 +233,7 @@ Task:
     ## Files Changed
     [implementation_files or "Use git diff"]
     ## Pre-Analysis Context
-    [preanalysis_state.context["ring:lib-commons-reviewer"] or "No pre-analysis context available."]
+    [preanalysis_state.context["ring:commons-reviewer"] or "No pre-analysis context available."]
     ## Focus
     Correct lib-commons usage, version consistency, deprecated imports, and reinvented shared infrastructure.
     ## Required Output
@@ -243,7 +243,7 @@ Task:
 # Trigger: diff touches tracing, metrics, logging, runtime recovery/panic safety,
 # redaction, observability constants, or goroutines with recover/SafeGo implications.
 Task:
-  subagent_type: "ring:lib-observability-reviewer"
+  subagent_type: "ring:obs-reviewer"
   description: "lib-observability review for [unit_id]"
   prompt: |
     ## lib-observability Review Request
@@ -260,7 +260,7 @@ Task:
     ## Trigger Matched
     This conditional specialist runs because the diff touches tracing, metrics, logging, runtime recovery/panic safety, redaction, observability constants, or goroutines with recover/SafeGo implications.
     ## Pre-Analysis Context
-    [preanalysis_state.context["ring:lib-observability-reviewer"] or "No pre-analysis context available."]
+    [preanalysis_state.context["ring:obs-reviewer"] or "No pre-analysis context available."]
     ## Focus
     Correct lib-observability usage: tracing propagation, metrics factory, structured logging, runtime SafeGo/recover, assertions, redaction, constants, and deprecated observability shim migration.
     ## Required Output
@@ -270,7 +270,7 @@ Task:
 # Trigger: diff touches runtime config, hot-reload knobs, admin config surface,
 # tenant-scoped settings, or systemplane imports/config.
 Task:
-  subagent_type: "ring:lib-systemplane-reviewer"
+  subagent_type: "ring:systemplane-reviewer"
   description: "lib-systemplane review for [unit_id]"
   prompt: |
     ## lib-systemplane Review Request
@@ -287,7 +287,7 @@ Task:
     ## Trigger Matched
     This conditional specialist runs because the diff touches runtime config, hot-reload knobs, admin config surface, tenant-scoped settings, or systemplane imports/config.
     ## Pre-Analysis Context
-    [preanalysis_state.context["ring:lib-systemplane-reviewer"] or "No pre-analysis context available."]
+    [preanalysis_state.context["ring:systemplane-reviewer"] or "No pre-analysis context available."]
     ## Focus
     Correct lib-systemplane usage: runtime-mutable config lifecycle, hot reload, tenant-scoped settings, admin authorizers, v4 residue, and DIY config-watching replacement.
     ## Required Output
@@ -297,7 +297,7 @@ Task:
 # Trigger: diff touches business events, outbox, event producers, broker publishing,
 # CloudEvents, or event manifests/catalogs.
 Task:
-  subagent_type: "ring:lib-streaming-reviewer"
+  subagent_type: "ring:streaming-reviewer"
   description: "lib-streaming review for [unit_id]"
   prompt: |
     ## lib-streaming Review Request
@@ -314,7 +314,7 @@ Task:
     ## Trigger Matched
     This conditional specialist runs because the diff touches business events, outbox, event producers, broker publishing, CloudEvents, or event manifests/catalogs.
     ## Pre-Analysis Context
-    [preanalysis_state.context["ring:lib-streaming-reviewer"] or "No pre-analysis context available."]
+    [preanalysis_state.context["ring:streaming-reviewer"] or "No pre-analysis context available."]
     ## Focus
     Correct lib-streaming usage: Builder/Emitter wiring, durable outbox, CloudEvents, Catalog, manifest, NoopEmitter fallback, and raw publisher avoidance for business events.
     ## Required Output

@@ -20,9 +20,9 @@ See [multi-tenant.md § Canonical Model Compliance](../../docs/standards/golang/
    - RabbitMQ: MUST use `tmrabbitmq.Manager` (Layer 1 — vhost isolation) + `X-Tenant-ID` header (Layer 2 — audit). Use `WithTLS()` for production (AWS AmazonMQ, CloudAMQP)
    - Circuit breaker: MUST have `client.WithCircuitBreaker` on Tenant Manager client
    - Backward compat: MUST have `TestMultiTenant_BackwardCompatibility` test
-   - Non-canonical files: MUST NOT have custom tenant packages (`internal/tenant/`, `pkg/multitenancy/`, custom middleware). See [dev-multi-tenant SKILL.md § Phase 3](../dev-multi-tenant/SKILL.md#phase-3-non-canonical-file-detection-mandatory) for specific grep commands.
+   - Non-canonical files: MUST NOT have custom tenant packages (`internal/tenant/`, `pkg/multitenancy/`, custom middleware). See [ring:adding-multi-tenancy SKILL.md § Phase 3](../adding-multi-tenancy/SKILL.md#phase-3-non-canonical-file-detection-mandatory) for specific grep commands.
    - Each non-compliant item → ISSUE-XXX with severity based on impact
-4. **If multi-tenant code is MISSING entirely** → ISSUE-XXX (CRITICAL): "Service does not support multi-tenant mode. MUST run ring:dev-multi-tenant."
+4. **If multi-tenant code is MISSING entirely** → ISSUE-XXX (CRITICAL): "Service does not support multi-tenant mode. MUST run ring:adding-multi-tenancy."
 5. **If non-compliant** → ISSUE-XXX per component: "Multi-tenant [component] is non-compliant. MUST be replaced with canonical lib-commons v5 pattern."
 6. **Backward compatibility:** Service MUST work with `MULTI_TENANT_ENABLED=false` (default) and without any `MULTI_TENANT_*` env vars
 
@@ -76,7 +76,7 @@ grep -rn "ErrTenantNotFound\|ErrCircuitBreakerOpen\|ErrManagerClosed\|ErrService
 ```
 - ISSUE if sentinel errors not handled → HIGH: "Multi-tenant error [name] not handled. See multi-tenant.md § Error Handling."
 
-### Single-Tenant Adaptability (for non-MT codebases analyzed by dev-refactor)
+### Single-Tenant Adaptability (for non-MT codebases analyzed by ring:planning-backend-refactor)
 ```bash
 # Check for global DB singletons (non-MT-adaptable)
 # This catches package-level var db = ... patterns, NOT struct field access like r.connection.GetDB()

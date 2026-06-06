@@ -17,7 +17,7 @@ This module covers standards compliance output format and self-verification chec
 
 ## Standards Compliance Output Format
 
-When producing a Standards Compliance report (used by ring:dev-refactor workflow), follow these output formats:
+When producing a Standards Compliance report (used by ring:planning-backend-refactor workflow), follow these output formats:
 
 ### If all Categories Are Compliant
 

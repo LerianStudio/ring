@@ -1,6 +1,6 @@
 ---
 name: ring:using-lib-commons
-description: Dual-mode skill for github.com/LerianStudio/lib-commons v5, Lerian's shared Go library — the non-observability surface. Sweep Mode dispatches parallel explorers to detect DIY implementations that should use lib-commons, with file:line replacement precision. Reference Mode catalogs lib-commons packages for lifecycle (Launcher), outbox repository, circuit breakers, tenant management, idempotency, security/TLS, database, messaging, HTTP toolkit. Observability (log, metrics, tracing, assertions, panic recovery, redaction) moved out of lib-commons into lib-observability v1.0.0 — see [[using-lib-observability]] and its sub-skills [[using-tracing]], [[using-runtime]], [[using-assert]]. Skip for non-Go code or Ring itself.
+description: "Using lib-commons v5, Lerian's shared Go library (non-observability surface), in two modes. Sweep Mode detects DIY code replaceable by lib-commons at file:line. Reference Mode catalogs lifecycle (Launcher), outbox repo, circuit breakers, tenant management, idempotency, security/TLS, database, and HTTP toolkit. Observability moved to ring:using-lib-observability. Go-only. Skip for non-Go."
 ---
 
 # ring:using-lib-commons
@@ -28,7 +28,7 @@ Reference mode:
 - Target codebase is Ring itself (no lib-commons dependency)
 
 ## Related
-**Similar:** ring:using-dev-team, ring:dev-refactor
+**Similar:** ring:using-dev-team, ring:planning-backend-refactor
 **Observability layer (moved to lib-observability):** [[using-lib-observability]], [[using-tracing]], [[using-runtime]], [[using-assert]]
 **Adjacent libs:** [[using-outbox]], [[using-lib-streaming]], [[using-lib-systemplane]]
 
@@ -148,7 +148,7 @@ Emit:
 MUST NOT invent findings. MUST NOT omit explorer findings. MUST NOT reclassify severity without justification.
 ```
 
-Surface report path + task count to user; offer handoff to `ring:dev-cycle`.
+Surface report path + task count to user; offer handoff to `ring:running-dev-cycle`.
 
 ---
 

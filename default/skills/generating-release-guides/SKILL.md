@@ -1,9 +1,6 @@
 ---
-name: ring:release-guide
-description: |
-  Generate Ops Update Guide from Git Diff. Produces internal Operations-facing
-  update/migration guides based on git diff analysis. Supports STRICT_NO_TOUCH (default)
-  and TEMP_CLONE_FOR_FRESH_REFS modes. Includes tag auto-detection and commit log analysis.
+name: ring:generating-release-guides
+description: "Generating an internal Operations-facing update/migration guide from the git diff between two refs, documenting per-change client impact, deploy ordering, monitoring, and rollback notes in English, pt-br, or both. Use when preparing a version release or recording what changed for the Ops team. Runs read-only by default and previews before writing. Skip with no git repo or a trivial single-file change."
 ---
 
 # Release Guide — Ops Update Guide Generator

@@ -1,6 +1,6 @@
 ---
 name: ring:using-tracing
-description: Dual-mode skill for github.com/LerianStudio/lib-observability/tracing — OpenTelemetry SDK lifecycle, trace context propagation across HTTP/gRPC/queues, span error and event recording, and struct-to-attribute conversion with PII redaction. Sweep Mode dispatches parallel explorers to find raw OTEL setup, hand-rolled header propagation, manual span attribute assembly, DIY redaction, and untraced boundaries. Reference Mode catalogs the API (Telemetry, TelemetryConfig, Redactor, propagation helpers, span handlers). Skip for non-Go services or frontend code.
+description: "Using lib-observability/tracing for OTEL provider lifecycle, trace-context propagation across HTTP/gRPC/queues, span error/event recording, and PII redaction, in two modes. Sweep Mode detects raw OTEL setup, hand-rolled header propagation, manual span-attribute assembly, and DIY redaction. Reference Mode catalogs Telemetry, Redactor, and propagation/span helpers. Go-only. Skip for non-Go or frontend code."
 ---
 
 # ring:using-tracing
@@ -54,7 +54,7 @@ Phase 1: Version Reconnaissance   → tracing-version-report.json
 Phase 2: CHANGELOG Delta Analysis → tracing-delta-report.json
 Phase 3: Multi-Angle DIY Sweep    → 6 × tracing-sweep-{N}-{angle}.json
 Phase 4: Consolidated Report      → tracing-sweep-report.md + tracing-sweep-tasks.json
-Phase 5: Handoff                  → offer ring:dev-cycle dispatch
+Phase 5: Handoff                  → offer ring:running-dev-cycle dispatch
 ```
 
 ## Phase 1: Version Reconnaissance
@@ -157,7 +157,7 @@ MUST NOT invent findings. MUST NOT omit explorer findings. MUST NOT reclassify s
 
 ## Phase 5: Handoff
 
-Surface report path + task count to the caller. Offer handoff to `ring:dev-cycle` for execution.
+Surface report path + task count to the caller. Offer handoff to `ring:running-dev-cycle` for execution.
 
 ---
 

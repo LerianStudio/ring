@@ -11,7 +11,7 @@ This module covers caching strategy patterns using lib-commons Redis integration
 | # | Section | Description |
 |---|---------|-------------|
 | 1 | [Caching Strategy Patterns (MANDATORY)](#caching-strategy-patterns-mandatory) | Cache-Aside, Write-Through, Write-Behind with lib-commons Redis |
-| 2 | [Cache Compliance Detection](#cache-compliance-detection) | Detection commands for dev-refactor strategy identification |
+| 2 | [Cache Compliance Detection](#cache-compliance-detection) | Detection commands for planning-backend-refactor strategy identification |
 
 ---
 
@@ -301,7 +301,7 @@ func (r *CachedRepository) FindByID(ctx context.Context, id uuid.UUID) (*entity.
 
 ## Cache Compliance Detection
 
-### Strategy Detection Commands (for dev-refactor)
+### Strategy Detection Commands (for planning-backend-refactor)
 
 ```bash
 # Detect Cache-Aside pattern: Get before DB query + Set after
@@ -332,7 +332,7 @@ grep -rn "func.*Update\|func.*Delete" internal/adapters/redis/ --include="*.go" 
 # Then verify each has a corresponding Del call
 ```
 
-### Compliance Checklist (for production-readiness-audit)
+### Compliance Checklist (for auditing-production-readiness)
 
 | Check | What it validates | Failure = |
 |-------|------------------|-----------|

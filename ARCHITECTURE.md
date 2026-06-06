@@ -117,28 +117,28 @@ default/agents/
 
 ```
 dev-team/agents/
-├── backend-engineer-golang.md         # Go backend specialist (`ring:backend-engineer-golang`)
-├── backend-engineer-typescript.md     # TypeScript backend specialist (`ring:backend-engineer-typescript`)
-├── devops-engineer.md                 # DevOps and infrastructure specialist (`ring:devops-engineer`)
-├── frontend-bff-engineer-typescript.md # BFF specialist (`ring:frontend-bff-engineer-typescript`)
-├── frontend-designer.md               # Visual design specialist (`ring:frontend-designer`)
-├── frontend-engineer.md               # Frontend engineer (`ring:frontend-engineer`)
-├── helm-engineer.md                   # Helm chart specialist (`ring:helm-engineer`)
+├── backend-go.md         # Go backend specialist (`ring:backend-go`)
+├── backend-ts.md     # TypeScript backend specialist (`ring:backend-ts`)
+├── devops.md                 # DevOps and infrastructure specialist (`ring:devops`)
+├── bff-ts.md # BFF specialist (`ring:bff-ts`)
+├── ui-designer.md               # Visual design specialist (`ring:ui-designer`)
+├── frontend.md               # Frontend engineer (`ring:frontend`)
+├── helm.md                   # Helm chart specialist (`ring:helm`)
 ├── code-reviewer.md                   # Foundation review (`ring:code-reviewer`)
-├── business-logic-reviewer.md         # Correctness review (`ring:business-logic-reviewer`)
+├── logic-reviewer.md         # Correctness review (`ring:logic-reviewer`)
 ├── security-reviewer.md               # Safety review (`ring:security-reviewer`)
 ├── test-reviewer.md                   # Test coverage and quality review (`ring:test-reviewer`)
-├── nil-safety-reviewer.md             # Null/nil safety analysis (`ring:nil-safety-reviewer`)
+├── nil-reviewer.md             # Null/nil safety analysis (`ring:nil-reviewer`)
 ├── dead-code-reviewer.md              # Dead code analysis (`ring:dead-code-reviewer`)
-├── lib-commons-reviewer.md            # lib-commons usage review (`ring:lib-commons-reviewer`)
-├── lib-observability-reviewer.md      # Conditional observability review (`ring:lib-observability-reviewer`)
-├── lib-systemplane-reviewer.md        # Conditional runtime-config review (`ring:lib-systemplane-reviewer`)
-├── lib-streaming-reviewer.md          # Conditional event producer review (`ring:lib-streaming-reviewer`)
-├── multi-tenant-reviewer.md           # Multi-tenant usage review (`ring:multi-tenant-reviewer`)
-├── performance-reviewer.md              # Performance review (`ring:performance-reviewer`)
-├── prompt-quality-reviewer.md         # Prompt quality specialist (`ring:prompt-quality-reviewer`)
-├── qa-analyst.md                      # Backend QA specialist (`ring:qa-analyst`)
-├── qa-analyst-frontend.md             # Frontend QA specialist (`ring:qa-analyst-frontend`)
+├── commons-reviewer.md            # lib-commons usage review (`ring:commons-reviewer`)
+├── obs-reviewer.md      # Conditional observability review (`ring:obs-reviewer`)
+├── systemplane-reviewer.md        # Conditional runtime-config review (`ring:systemplane-reviewer`)
+├── streaming-reviewer.md          # Conditional event producer review (`ring:streaming-reviewer`)
+├── tenancy-reviewer.md           # Multi-tenant usage review (`ring:tenancy-reviewer`)
+├── perf-reviewer.md              # Performance review (`ring:perf-reviewer`)
+├── prompt-reviewer.md         # Prompt quality specialist (`ring:prompt-reviewer`)
+├── qa.md                      # Backend QA specialist (`ring:qa`)
+├── qa-frontend.md             # Frontend QA specialist (`ring:qa-frontend`)
 ├── sre.md                             # Observability and reliability specialist (`ring:sre`)
 └── ui-engineer.md                     # UI component specialist (`ring:ui-engineer`)
 ```
@@ -147,11 +147,11 @@ dev-team/agents/
 
 - Invoked via Claude's `Task` tool with `subagent_type`
 - Invoked with specialized subagent_type for domain-specific analysis
-- Review agents run in parallel (9 defaults plus triggered specialists dispatch simultaneously via `ring:codereview` skill)
+- Review agents run in parallel (9 defaults plus triggered specialists dispatch simultaneously via `ring:reviewing-code` skill)
 - Developer agents provide specialized domain expertise
 - Return structured reports with severity-based findings
 
-**Note:** Parallel review orchestration is handled by the `ring:codereview` skill
+**Note:** Parallel review orchestration is handled by the `ring:reviewing-code` skill
 
 **Standards Compliance Output (refactor-capable dev-team agents):**
 
@@ -160,8 +160,8 @@ Refactor-capable ring-dev-team agents produce a `## Standards Compliance` sectio
 ```yaml
 - name: "Standards Compliance"
   pattern: "^## Standards Compliance"
-  required: false # In schema, but MANDATORY when invoked from ring:dev-refactor
-  description: "MANDATORY when invoked from ring:dev-refactor skill"
+  required: false # In schema, but MANDATORY when invoked from ring:planning-backend-refactor
+  description: "MANDATORY when invoked from ring:planning-backend-refactor skill"
 ```
 
 **Conditional Requirement: `invoked_from_dev_refactor`**
@@ -169,16 +169,16 @@ Refactor-capable ring-dev-team agents produce a `## Standards Compliance` sectio
 | Invocation Context            | Standards Compliance | Detection Mechanism                       |
 | ----------------------------- | -------------------- | ----------------------------------------- |
 | Direct agent call             | Optional             | N/A                                       |
-| Via `ring:dev-cycle` skill    | Optional             | N/A                                       |
-| Via `ring:dev-refactor` skill | **MANDATORY**        | Prompt contains `**MODE: ANALYSIS ONLY**` |
+| Via `ring:running-dev-cycle` skill    | Optional             | N/A                                       |
+| Via `ring:planning-backend-refactor` skill | **MANDATORY**        | Prompt contains `**MODE: ANALYSIS ONLY**` |
 
 **How Enforcement Works:**
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
-│  User invokes: ring:dev-refactor skill                      │
+│  User invokes: ring:planning-backend-refactor                       │
 │         ↓                                                           │
-│  ring:dev-refactor skill dispatches agents with prompt:                  │
+│  ring:planning-backend-refactor dispatches agents:                  │
 │  "**MODE: ANALYSIS ONLY** - Compare codebase with Ring standards"   │
 │         ↓                                                           │
 │  Agent detects "**MODE: ANALYSIS ONLY**" in prompt                  │
@@ -191,11 +191,11 @@ Refactor-capable ring-dev-team agents produce a `## Standards Compliance` sectio
 
 **Affected Agents:**
 
-- `ring:backend-engineer-golang` → loads `golang.md`
-- `ring:backend-engineer-typescript` → loads `typescript.md`
-- `ring:frontend-bff-engineer-typescript` → loads `typescript.md`
-- `ring:frontend-designer` → loads `frontend.md`
-- `ring:qa-analyst-frontend` → loads `frontend/testing-*.md` (accessibility/visual/e2e/performance)
+- `ring:backend-go` → loads `golang.md`
+- `ring:backend-ts` → loads `typescript.md`
+- `ring:bff-ts` → loads `typescript.md`
+- `ring:ui-designer` → loads `frontend.md`
+- `ring:qa-frontend` → loads `frontend/testing-*.md` (accessibility/visual/e2e/performance)
 
 **Output Format (when non-compliant):**
 
@@ -224,7 +224,7 @@ Refactor-capable ring-dev-team agents produce a `## Standards Compliance` sectio
 **Cross-References:**
 
 - CLAUDE.md: Standards Compliance (Conditional Output Section)
-- `dev-team/skills/dev-refactor/SKILL.md`: HARD GATES defining requirement
+- `dev-team/skills/planning-backend-refactor/SKILL.md`: HARD GATES defining requirement
 - `dev-team/hooks/session-start.sh`: Injects guidance at session start
 
 ### 3. Hooks (`hooks/`)
@@ -373,16 +373,16 @@ sequenceDiagram
     participant Claude
     participant Task Tool
     participant ring:code-reviewer
-    participant ring:business-logic-reviewer
+    participant ring:logic-reviewer
     participant ring:security-reviewer
     participant ring:test-reviewer
-    participant ring:nil-safety-reviewer
-    participant DCR as ring:dead-code-reviewer
-    participant PR as ring:performance-reviewer
-    participant MTR as ring:multi-tenant-reviewer
-    participant LCR as ring:lib-commons-reviewer
+    participant ring:nil-reviewer
+    participant ring:dead-code-reviewer
+    participant ring:perf-reviewer
+    participant ring:tenancy-reviewer
+    participant ring:commons-reviewer
 
-    User->>Claude: Use ring:codereview skill
+    User->>Claude: Use ring:reviewing-code skill
     Note over Claude: Skill provides<br/>parallel review workflow
 
     Claude->>Task Tool: Dispatch 9 default parallel tasks
@@ -390,36 +390,36 @@ sequenceDiagram
     par Parallel Execution
         Task Tool->>ring:code-reviewer: Review architecture
         and
-        Task Tool->>ring:business-logic-reviewer: Review correctness
+        Task Tool->>ring:logic-reviewer: Review correctness
         and
         Task Tool->>ring:security-reviewer: Review vulnerabilities
         and
         Task Tool->>ring:test-reviewer: Review test coverage
         and
-        Task Tool->>ring:nil-safety-reviewer: Review nil safety
+        Task Tool->>ring:nil-reviewer: Review nil safety
         and
-        Task Tool->>DCR: Review dead code
+        Task Tool->>ring:dead-code-reviewer: Review dead code
         and
-        Task Tool->>PR: Review performance
+        Task Tool->>ring:perf-reviewer: Review performance
         and
-        Task Tool->>MTR: Review multi-tenant usage
+        Task Tool->>ring:tenancy-reviewer: Review multi-tenant usage
         and
-        Task Tool->>LCR: Review lib-commons usage
+        Task Tool->>ring:commons-reviewer: Review lib-commons usage
     end
 
     opt Conditional specialists triggered by changed stack
-        Task Tool->>Task Tool: Dispatch lib-observability/lib-systemplane/lib-streaming reviewers in same batch
+        Task Tool->>Task Tool: Dispatch obs/systemplane/streaming reviewers in same batch
     end
 
     ring:code-reviewer-->>Claude: Return findings
-    ring:business-logic-reviewer-->>Claude: Return findings
+    ring:logic-reviewer-->>Claude: Return findings
     ring:security-reviewer-->>Claude: Return findings
     ring:test-reviewer-->>Claude: Return findings
-    ring:nil-safety-reviewer-->>Claude: Return findings
-    DCR-->>Claude: Return findings
-    PR-->>Claude: Return findings
-    MTR-->>Claude: Return findings
-    LCR-->>Claude: Return findings
+    ring:nil-reviewer-->>Claude: Return findings
+    ring:dead-code-reviewer-->>Claude: Return findings
+    ring:perf-reviewer-->>Claude: Return findings
+    ring:tenancy-reviewer-->>Claude: Return findings
+    ring:commons-reviewer-->>Claude: Return findings
 
     Note over Claude: Aggregate & prioritize by severity
     Claude->>User: Consolidated report
@@ -477,25 +477,25 @@ User Request → ring:using-ring check → Relevant skill?
 ### Pattern 2: Parallel Review Execution
 
 ```
-Review Request → ring:codereview skill → ring:review-slicer (classify)
+Review Request → ring:reviewing-code skill → ring:review-slicer (classify)
     ├─ Small/focused PR → 9 default Tasks in parallel (full diff)
     └─ Large/multi-theme PR → For EACH slice:
         ├─ ring:code-reviewer            ─┐
-        ├─ ring:business-logic-reviewer   │
+        ├─ ring:logic-reviewer   │
         ├─ ring:security-reviewer         │
         ├─ ring:test-reviewer             │
-        ├─ ring:nil-safety-reviewer       │
+        ├─ ring:nil-reviewer       │
         ├─ ring:dead-code-reviewer        ┼─→ Merge + dedup → Handle by severity
-        ├─ ring:performance-reviewer      │
-        ├─ ring:multi-tenant-reviewer     │
-        └─ ring:lib-commons-reviewer     ─┘
+        ├─ ring:perf-reviewer      │
+        ├─ ring:tenancy-reviewer     │
+        └─ ring:commons-reviewer     ─┘
 
         Conditional specialists join the same batch only when triggered:
-        ring:lib-observability-reviewer, ring:lib-systemplane-reviewer,
-        ring:lib-streaming-reviewer
+        ring:obs-reviewer, ring:systemplane-reviewer,
+        ring:streaming-reviewer
 ```
 
-**Implementation:** The `ring:review-slicer` agent classifies files into thematic slices for large PRs (15+ files). For each slice, the diagrammed 9 default reviewers always dispatch in parallel via a single message. Conditional specialists (`ring:lib-observability-reviewer`, `ring:lib-systemplane-reviewer`, `ring:lib-streaming-reviewer`) join that same batch only when their triggers match. Results are merged and deduplicated before consolidation. Small PRs skip slicing entirely (zero overhead).
+**Implementation:** The `ring:review-slicer` agent classifies files into thematic slices for large PRs (15+ files). For each slice, the diagrammed 9 default reviewers always dispatch in parallel via a single message. Conditional specialists (`ring:obs-reviewer`, `ring:systemplane-reviewer`, `ring:streaming-reviewer`) join that same batch only when their triggers match. Results are merged and deduplicated before consolidation. Small PRs skip slicing entirely (zero overhead).
 
 ### Pattern 3: Progressive Skill Execution
 
@@ -512,11 +512,11 @@ Complex Skill → TodoWrite tracking
 ### Pattern 4: Rolling-Wave Planning Hierarchy (pm-team → dev-team)
 
 ```
-ring:pre-dev-* (pm-team)
+ring:planning-* (pm-team)
     └─ tasks.md — phased plan, living document
        (Phase Overview + epics E-X.Y + Phase 1 tasks T-X.Y.Z)
             ↓
-ring:dev-cycle / ring:dev-cycle-frontend (dev-team)
+ring:running-dev-cycle / ring:running-dev-cycle-frontend (dev-team)
     ├─ Gate 0 per task          (TDD implementation)
     ├─ Gate 8/9 per epic        (review + validation; frontend: Gate 7 per epic, Gate 8 per task)
     └─ Phase boundary per phase (Step 11.5):
@@ -525,7 +525,7 @@ ring:dev-cycle / ring:dev-cycle-frontend (dev-team)
         against the codebase as it now exists
 ```
 
-**Implementation:** Only the active phase is task-detailed; later phases stay at epic level and are elaborated at each phase boundary (rolling wave — pre-written detail for a not-yet-built phase is stale by construction). `tasks.md` is the single living source of truth: gate orchestrators and `ring:executing-plans` (default plugin) write elaborated tasks back into it. Dev-cycle state persists with schema v2.0.0 (phases → epics → tasks). See `dev-team/skills/dev-cycle/gates/phase-boundary.md` and `dev-team/skills/shared-patterns/gate-cadence-classification.md`.
+**Implementation:** Only the active phase is task-detailed; later phases stay at epic level and are elaborated at each phase boundary (rolling wave — pre-written detail for a not-yet-built phase is stale by construction). `tasks.md` is the single living source of truth: gate orchestrators and `ring:executing-plans` (default plugin) write elaborated tasks back into it. Dev-cycle state persists with schema v2.0.0 (phases → epics → tasks). See `dev-team/skills/running-dev-cycle/gates/phase-boundary.md` and `dev-team/skills/shared-patterns/gate-cadence-classification.md`.
 
 ## Component Relationships
 
@@ -538,7 +538,7 @@ ring:dev-cycle / ring:dev-cycle-frontend (dev-team)
 
 **Interaction:**
 
-- Skills can invoke agents (e.g., ring:codereview skill dispatches review agents)
+- Skills can invoke agents (e.g., ring:reviewing-code skill dispatches review agents)
 - Agents don't typically invoke skills (they're independent analyzers)
 
 ### Skills ↔ Shared Patterns
@@ -631,7 +631,7 @@ SKILL.md frontmatter → generate-skills-ref.py → formatted overview → sessi
 1. Create `{plugin}/agents/{name}.md` with agent definition
 2. Include YAML frontmatter: `name`, `description`, `version`
 3. Invoke via Task tool with `subagent_type="ring:{name}"`
-4. Review agents can run in parallel via `ring:codereview` skill
+4. Review agents can run in parallel via `ring:reviewing-code` skill
 5. Developer agents provide domain expertise via direct Task invocation
 
 ### Adding Shared Patterns

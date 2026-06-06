@@ -1,6 +1,6 @@
 ---
-name: ring:visualize
-description: Generate beautiful, self-contained HTML artifacts for diagrams, reviews, plans, recaps, and complex tables. Use for technical visual judgment; skip for plain markdown, simple tables, mermaid.live links, or explicitly text-only output.
+name: ring:visualizing
+description: "Generating self-contained, Lerian-branded HTML artifacts — Mermaid diagrams, comparison tables/matrices, code diffs, dashboards, and plan/diff/recap reviews — from mandatory templates, then opening them in the browser. Use for architecture overviews, any table with 4+ rows or 3+ columns, or visual diff/plan/review output. Skip for simple tables that fit the terminal, mermaid.live links, or text-only answers."
 ---
 
 # Visual explainer

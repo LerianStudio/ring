@@ -1,12 +1,6 @@
 ---
 name: ring:creating-grafana-dashboards
-description: |
-  Author Grafana dashboards for Lerian Go services rooted in real lib-observability
-  telemetry (tracing, metrics, log, constants). Three phases — Sweep (telemetry inventory),
-  Iterate (PM deliberation on SLIs/SLOs and alerts), Author (Grafonnet libsonnet → JSON in CI)
-  — and installs a blocking CI drift gate. Use when scaffolding dashboards, building a
-  telemetry dictionary, or auditing observability. Skip if service is non-Go, emits no
-  telemetry, or task is just folder organization.
+description: "Authoring Grafana dashboards for Lerian Go services from lib-observability telemetry (tracing, metrics, log), plus a reference mode for RED/USE panel patterns and Grafonnet templates. Sweep mode inventories telemetry, runs PM deliberation on themes/SLIs/alerts, authors Grafonnet libsonnet compiled to JSON, and installs a CI drift gate. Use when scaffolding dashboards. Skip when the service is non-Go or emits no telemetry."
 ---
 
 # Creating Grafana Dashboards (lib-observability, PM-team)
@@ -29,17 +23,17 @@ Reference mode:
 ## Skip when
 
 - Service is not a Go project (lib-observability is Go-only at this skill's scope)
-- Service emits no telemetry (pre-instrumentation; instrument the service before dashboard authoring, then use ring:dev-implementation to verify observability checks pass)
+- Service emits no telemetry (pre-instrumentation; instrument the service before dashboard authoring, then use ring:implementing-tasks to verify observability checks pass)
 - Task is purely Grafana folder organization or dashboard import (no authoring)
 - Service is consumer-only sidecar with no metrics surface
 
 ## Sequence
 
-**Runs before:** ring:dev-cycle, ring:dev-cycle-frontend
+**Runs before:** ring:running-dev-cycle, ring:running-dev-cycle-frontend
 
 ## Related
 
-**Complementary:** ring:dev-implementation, ring:codebase-explorer, ring:streaming-event-mapping, ring:using-lib-observability, ring:using-tracing
+**Complementary:** ring:implementing-tasks, ring:codebase-explorer, ring:mapping-streaming-events, ring:using-lib-observability, ring:using-tracing
 **Similar:** ring:using-runtime, ring:using-assert
 
 ## Prerequisites
@@ -118,7 +112,7 @@ Drift gate spec: `sub-files/ci-drift-check.md`.
 | 3 | Dictionary Rendering | Orchestrator → markdown writer | Once per run |
 | 4 | Theme Proposal + Dashboard Plans | Orchestrator (LLM opinion via reference.md) | Once per run |
 | 5 | PM Iteration — NEVER SKIPPABLE | User (PM team) | Loops until APPROVED |
-| 6 | Grafonnet Authoring | ring:backend-engineer-golang per theme | Per approved theme |
+| 6 | Grafonnet Authoring | ring:backend-go per theme | Per approved theme |
 | 7 | CI Drift Gate Setup | Orchestrator | Once (idempotent) |
 
 Gates execute sequentially. Gate 1 parallelizes internally across 7 angles. Gate 6 parallelizes per approved theme.
@@ -173,7 +167,7 @@ Emit `/tmp/dashboards-recon.json`:
 
 **HARD GATE:**
 - If not Go → STOP.
-  - If no lib-observability tracing/metrics usage detected (canonical or deprecated shim) → STOP, surface "service is not instrumented; instrument the service before dashboard authoring, then use ring:dev-implementation to verify observability checks pass" to user.
+  - If no lib-observability tracing/metrics usage detected (canonical or deprecated shim) → STOP, surface "service is not instrumented; instrument the service before dashboard authoring, then use ring:implementing-tasks to verify observability checks pass" to user.
 - If service has < 3 metric/trace/log emissions → STOP, surface "insufficient telemetry surface for dashboards".
 
 ## Gate 1: Telemetry Sweep (7 Parallel Angles)
@@ -322,7 +316,7 @@ Present `sub-files/pm-iteration-prompts.md` checklist to PM team:
 
 ## Gate 6: Grafonnet Authoring (Per Approved Theme)
 
-For EACH approved theme, dispatch `ring:backend-engineer-golang` (Lerian's Go specialist; Grafonnet is jsonnet, but the engineer's discipline around code quality and reusability transfers — and they own the lib-commons mental model that makes label correctness checkable).
+For EACH approved theme, dispatch `ring:backend-go` (Lerian's Go specialist; Grafonnet is jsonnet, but the engineer's discipline around code quality and reusability transfers — and they own the lib-commons mental model that makes label correctness checkable).
 
 Per-theme dispatch:
 

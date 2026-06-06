@@ -27,7 +27,7 @@ Iterate `state.epics` once and assert both cycle-exit invariants. Both are HARD 
 4. **MANDATORY: ⛔ Save state to file — Write tool → [state.state_path]**
 ```
 
-**Note:** The standalone `ring:dev-multi-tenant` skill converts whole single-tenant codebases to dual-mode. dev-cycle handles multi-tenant compliance inline at Gate 0 (implementation plus delivery-verification check G).
+**Note:** The standalone `ring:adding-multi-tenancy` skill converts whole single-tenant codebases to dual-mode. dev-cycle handles multi-tenant compliance inline at Gate 0 (implementation plus delivery-verification check G).
 
 ### Step 12.0 Anti-Rationalization
 
@@ -145,13 +145,13 @@ state.gate_progress.migration_safety_verification = {
 
 1. **Calculate metrics:** total_duration_ms, average gate durations, review iterations, pass/fail ratio.
 
-2. **⛔ MANDATORY: Run ring:dev-report skill (the ONE AND ONLY dispatch).**
+2. **⛔ MANDATORY: Run ring:writing-dev-reports skill (the ONE AND ONLY dispatch).**
 
-   ring:dev-report reads `accumulated_metrics` from ALL epics in state and writes aggregate feedback to `docs/feedbacks/cycle-YYYY-MM-DD/`. It manages its own TodoWrite tracking.
+   ring:writing-dev-reports reads `accumulated_metrics` from ALL epics in state and writes aggregate feedback to `docs/feedbacks/cycle-YYYY-MM-DD/`. It manages its own TodoWrite tracking.
 
    ```yaml
    Skill tool:
-     skill: "ring:dev-report"
+     skill: "ring:writing-dev-reports"
    ```
 
    After it completes, set `feedback_loop_completed = true` at cycle level.
@@ -169,6 +169,6 @@ state.gate_progress.migration_safety_verification = {
 4. **FINAL COMMIT** (runs regardless of `commit_timing` — the cycle-metadata commit captures the dev-report feedback and finalized state, so nothing is left dangling):
    - `commit_timing == "at_end"`: include all changed files from the entire cycle (feature code + dev-report feedback + final state).
    - `commit_timing == "per_epic"` / `"per_task"`: feature code already committed; this commit captures the cycle-end artifacts (dev-report feedback, finalized state).
-   - Execute `/ring:commit` with message: `feat({cycle_id}): complete dev cycle for {feature_name}`.
+   - Execute `/ring:committing-changes` with message: `feat({cycle_id}): complete dev cycle for {feature_name}`.
 
 5. **Report:** "Cycle completed. Phases X/X, Epics X/X, Tasks Y, Time Xh Xm, Review iterations X."

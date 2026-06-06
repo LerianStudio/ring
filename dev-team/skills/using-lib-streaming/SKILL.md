@@ -1,6 +1,6 @@
 ---
 name: ring:using-lib-streaming
-description: Dual-mode skill for github.com/LerianStudio/lib-streaming, Lerian's producer-only event publication library (Kafka, SQS, RabbitMQ, EventBridge). Sweep Mode dispatches parallel explorers to find DIY publishers (franz-go, sarama, amqp091-go, watermill, raw AWS SDK calls) and re-implemented manifests / circuit breakers that should be replaced with lib-streaming. Reference Mode catalogs the public facade — Config, Catalog, Builder, Emitter, NoopEmitter, manifest, CloudEvents codec, errors, streamingtest — organised Bootstrap to Build to Emit to Test to Manifest. Skip for non-Go code, frontend code, consumer-only services, or projects that have no business-event surface. Adoption/reference companion to ring:dev-streaming-instrumentation (end-to-end 13-gate orchestration) and ring:streaming-event-mapping (PM-side event identification).
+description: "Using lib-streaming, Lerian's producer-only event publication library (Kafka/SQS/RabbitMQ/EventBridge), in two modes. Sweep Mode detects DIY publishers (franz-go, sarama, amqp091, watermill, raw AWS SDK) and re-rolled manifests/breakers. Reference Mode catalogs the Builder/Emitter/Catalog facade. Companion to ring:instrumenting-streaming-events. Go-only. Skip for non-Go or consumer-only."
 ---
 
 # ring:using-lib-streaming
@@ -32,8 +32,8 @@ Reference mode:
 
 ## Related
 
-- **ring:dev-streaming-instrumentation** — end-to-end 13-gate orchestration that *implements* lib-streaming in a target service. Use that after `ring:streaming-event-mapping` has produced a validated `docs/streaming/instrumentation-map.json`. This skill is the **adoption/reference** counterpart — it does not own the implementation cycle.
-- **ring:streaming-event-mapping** — PM-side identification of eventable points; produces the catalog and instrumentation map this skill's REFERENCE MODE consumes.
+- **ring:instrumenting-streaming-events** — end-to-end 13-gate orchestration that *implements* lib-streaming in a target service. Use that after `ring:mapping-streaming-events` has produced a validated `docs/streaming/instrumentation-map.json`. This skill is the **adoption/reference** counterpart — it does not own the implementation cycle.
+- **ring:mapping-streaming-events** — PM-side identification of eventable points; produces the catalog and instrumentation map this skill's REFERENCE MODE consumes.
 - **ring:using-lib-commons** — lib-streaming depends on lib-commons for circuit breaker, outbox repository, App lifecycle, runtime panic instrumentation, and assertions. The CB / outbox / runtime / assert API surface lives there.
 - **`ring:using-outbox`** — `OutboxWriter`, `TransactionalOutboxWriter`, `WithOutboxTx`, and route-aware envelope replay live in the outbox skill. This skill points at the boundary but does NOT duplicate the writer / dispatcher API.
 - **`ring:using-lib-observability`** — `log.Logger`, `metrics.MetricsFactory`, and `trace.Tracer` are owned there. Builder setters consume those types; this skill links rather than re-documents.
@@ -45,12 +45,12 @@ Reference mode:
 1. *Where in this codebase are we doing event publication the wrong way?* (Sweep Mode)
 2. *What is the right lib-streaming API for the thing I am building right now?* (Reference Mode)
 
-`ring:dev-streaming-instrumentation` is the **end-to-end implementation orchestrator** — it consumes a validated instrumentation map, walks a 13-gate cycle (catalog, producer bootstrap, emit instrumentation, outbox wiring, HTTP manifest, NoopEmitter fallback, integration + chaos tests, 9 default reviewers plus triggered specialists), and never lets the caller skip TDD. The two are complementary, not overlapping:
+`ring:instrumenting-streaming-events` is the **end-to-end implementation orchestrator** — it consumes a validated instrumentation map, walks a 13-gate cycle (catalog, producer bootstrap, emit instrumentation, outbox wiring, HTTP manifest, NoopEmitter fallback, integration + chaos tests, 9 default reviewers plus triggered specialists), and never lets the caller skip TDD. The two are complementary, not overlapping:
 
 - **Sweep finds the work.** Outputs are file:line replacement candidates and a task backlog.
 - **Implementation does the work.** Consumes the catalog + map, drives gates, owns the agent dispatch.
 
-If the user asks for a sweep, use this skill. If the user already has the map and wants emission wired into a service, hand off to `ring:dev-streaming-instrumentation`.
+If the user asks for a sweep, use this skill. If the user already has the map and wants emission wired into a service, hand off to `ring:instrumenting-streaming-events`.
 
 ## Mode Selection
 
@@ -194,7 +194,7 @@ MUST NOT invent findings. MUST NOT omit explorer findings. MUST NOT reclassify s
 MUST NOT merge cross-skill outbox findings into this report — surface them as a separate "Cross-skill handoff" section pointing to `ring:using-outbox`.
 ```
 
-Surface report path + task count to the user; if adoption is feasible (lib-commons v5 already pinned, target service has a real business-event surface), offer handoff to `ring:dev-streaming-instrumentation`. If the service has no validated instrumentation map yet, the handoff is to `ring:streaming-event-mapping` first.
+Surface report path + task count to the user; if adoption is feasible (lib-commons v5 already pinned, target service has a real business-event surface), offer handoff to `ring:instrumenting-streaming-events`. If the service has no validated instrumentation map yet, the handoff is to `ring:mapping-streaming-events` first.
 
 ---
 
@@ -462,7 +462,7 @@ Resolution lives in `streaming.ResolveDeliveryPolicy(definition, configOverride,
 | `OutboxMode` | `OutboxModeNever`, `OutboxModeFallbackOnCircuitOpen`, `OutboxModeAlways` | When to write the outbox envelope. `OutboxModeAlways` skips the broker entirely; `OutboxModeFallbackOnCircuitOpen` only writes when the breaker is OPEN AND an outbox writer is wired |
 | `DLQMode` | `DLQModeNever`, `DLQModeOnRoutableFailure` | Whether failures route to the per-route DLQ. `DLQModeOnRoutableFailure` covers every `ErrorClass` except `ClassValidation` and `ClassContextCanceled` |
 
-Three idiomatic postures match `ring:streaming-event-mapping` taxonomy:
+Three idiomatic postures match `ring:mapping-streaming-events` taxonomy:
 
 | Posture | Direct | Outbox | DLQ | Use when |
 |---|---|---|---|---|

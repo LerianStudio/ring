@@ -177,7 +177,7 @@ ALTER TABLE users DROP COLUMN old_column;
 
 ### Orchestrator behavior at Gate 0.5D
 
-At Gate 0.5D (`ring:dev-cycle` Step 12.0.5b), each BLOCKING finding is checked for an associated `-- ACKNOWLEDGE:` comment on the line immediately above:
+At Gate 0.5D (`ring:running-dev-cycle` Step 12.0.5b), each BLOCKING finding is checked for an associated `-- ACKNOWLEDGE:` comment on the line immediately above:
 
 1. **Finding has an ACKNOWLEDGE comment with non-empty rationale** → reclassified from `BLOCKING` to `ACKNOWLEDGE` severity. The cycle pauses at a user checkpoint that displays the finding and the rationale, and requires explicit user approval to proceed.
 2. **Finding has no ACKNOWLEDGE comment** (or the rationale is empty) → remains `BLOCKING`. The cycle HARD BLOCKS. There is no silent opt-out.
@@ -219,7 +219,7 @@ CREATE INDEX CONCURRENTLY idx_transactions_tenant_date
 
 ## Verification Commands
 
-These commands are used by Gate 0.5D (Migration Safety) at `ring:dev-cycle` Step 12.0.5b (post-cycle, conditional on SQL migration files present in the cycle diff against `origin/main`).
+These commands are used by Gate 0.5D (Migration Safety) at `ring:running-dev-cycle` Step 12.0.5b (post-cycle, conditional on SQL migration files present in the cycle diff against `origin/main`).
 
 ### Step 1: Detect migration files
 

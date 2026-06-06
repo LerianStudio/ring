@@ -45,7 +45,7 @@ This document contains detailed workflow instructions for adding skills, agents,
 
 ### Production Readiness Audit (ring-default)
 
-The **production-readiness-audit** skill (`ring:production-readiness-audit`) evaluates codebase production readiness across **44 dimensions** (43 base + 1 conditional multi-tenant) in 5 categories. **Invocation:** use the Skill tool or the `/ring:production-readiness-audit` command when preparing for production, conducting security/quality reviews, or assessing technical debt. **Batch behavior:** runs 10 explorer agents per batch and appends results incrementally to a single report file (`docs/audits/production-readiness-{date}-{time}.md`) to avoid context bloat. **Output:** scored report (0–430 base, max 440 with multi-tenant) with severity ratings and standards cross-reference. Implementation details: [default/skills/production-readiness-audit/SKILL.md](../default/skills/production-readiness-audit/SKILL.md).
+The **auditing-production-readiness** skill (`ring:auditing-production-readiness`) evaluates codebase production readiness across **44 dimensions** (43 base + 1 conditional multi-tenant) in 5 categories. **Invocation:** use the Skill tool or the `/ring:auditing-production-readiness` command when preparing for production, conducting security/quality reviews, or assessing technical debt. **Batch behavior:** runs 10 explorer agents per batch and appends results incrementally to a single report file (`docs/audits/production-readiness-{date}-{time}.md`) to avoid context bloat. **Output:** scored report (0–430 base, max 440 with multi-tenant) with severity ratings and standards cross-reference. Implementation details: [default/skills/auditing-production-readiness/SKILL.md](../default/skills/auditing-production-readiness/SKILL.md).
 
 ### For Product/Team-Specific Skills
 
@@ -112,13 +112,13 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 - Auto-loads when ring-dev-team plugin is enabled
 - Located: `dev-team/skills/using-dev-team/SKILL.md`
 - Agents (invoke as `ring:{agent-name}`):
-  - ring:backend-engineer-golang
-  - ring:backend-engineer-typescript
-  - ring:frontend-bff-engineer-typescript
-  - ring:frontend-designer
-  - ring:frontend-engineer
-  - ring:helm-engineer
-  - ring:prompt-quality-reviewer
+  - ring:backend-go
+  - ring:backend-ts
+  - ring:bff-ts
+  - ring:ui-designer
+  - ring:frontend
+  - ring:helm
+  - ring:prompt-reviewer
   - ring:ui-engineer
 
 ### Ring PM Team Plugin
@@ -134,10 +134,10 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 - Auto-loads when ring-tw-team plugin is enabled
 - Located: `tw-team/skills/using-tw-team/SKILL.md`
 - Agents (invoke as `ring:{agent-name}`):
-  - ring:functional-writer (guides)
+  - ring:guide-writer (guides)
   - ring:api-writer (API reference)
   - ring:docs-reviewer (quality review)
-- Commands: review-docs
+- Commands: reviewing-docs
 
 ### Hook Configuration
 
@@ -151,7 +151,7 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 
 1. Add to `dev-team/agents/your-reviewer.md` with a documented `## Output Format` body section (see [AGENT_DESIGN.md](AGENT_DESIGN.md))
 
-2. Reference in `default/skills/codereview/SKILL.md` under `Default Reviewers` or `Conditional Specialist Reviewers`
+2. Reference in `default/skills/reviewing-code/SKILL.md` under `Default Reviewers` or `Conditional Specialist Reviewers`
 
 3. Dispatch via Task tool:
 
@@ -165,34 +165,34 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 
 ## Pre-Dev Workflow
 
-### Simple Features (<2 days): `/ring:pre-dev-feature`
+### Simple Features (<2 days): `/ring:planning-small-features`
 
 ```
-├── Gate 0: pm-team/skills/pre-dev-research
+├── Gate 0: pm-team/skills/researching-features
 │   └── Output: docs/pre-dev/feature/research.md (parallel agents)
-├── Gate 1: pm-team/skills/pre-dev-prd-creation
+├── Gate 1: pm-team/skills/writing-prds
 │   └── Output: docs/pre-dev/feature/PRD.md
-├── Gate 2: pm-team/skills/pre-dev-trd-creation
+├── Gate 2: pm-team/skills/writing-trds
 │   └── Output: docs/pre-dev/feature/TRD.md
-└── Gate 3: pm-team/skills/pre-dev-phases-and-epics
+└── Gate 3: pm-team/skills/decomposing-phases-and-epics
     └── Output: docs/pre-dev/feature/tasks.md (phased plan, living document; Phase 1 detailed inline)
 ```
 
-### Complex Features (≥2 days): `/ring:pre-dev-full`
+### Complex Features (≥2 days): `/ring:planning-large-features`
 
 ```
 ├── Gate 0: Research Phase
-│   └── 3 parallel agents: repo-research, best-practices, framework-docs
+│   └── 3 parallel agents: repo-researcher, web-researcher, docs-researcher
 ├── Gates 1-3: Same as simple workflow
-├── Gate 4: pm-team/skills/pre-dev-api-design
+├── Gate 4: pm-team/skills/designing-api-contracts
 │   └── Output: docs/pre-dev/feature/API.md
-├── Gate 5: pm-team/skills/pre-dev-data-model
+├── Gate 5: pm-team/skills/designing-data-model
 │   └── Output: docs/pre-dev/feature/data-model.md
-├── Gate 6: pm-team/skills/pre-dev-dependency-map
+├── Gate 6: pm-team/skills/pinning-dependency-versions
 │   └── Output: docs/pre-dev/feature/dependencies.md
-├── Gate 7: pm-team/skills/pre-dev-phases-and-epics
+├── Gate 7: pm-team/skills/decomposing-phases-and-epics
 │   └── Output: docs/pre-dev/feature/tasks.md (phased plan, living document; phases + epics)
-└── Gate 8: pm-team/skills/pre-dev-task-creation
+└── Gate 8: pm-team/skills/detailing-tasks
     └── Output: docs/pre-dev/feature/tasks.md (Phase 1 epics detailed into tasks)
 ```
 
@@ -200,7 +200,7 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 
 ## Development Cycle (lean — cadence-classified)
 
-`ring:dev-cycle` is now a lean backend flow. Backend implementation owns TDD, coverage, docker-compose/local runtime, basic health/observability checks, and delivery verification in Gate 0.
+`ring:running-dev-cycle` is now a lean backend flow. Backend implementation owns TDD, coverage, docker-compose/local runtime, basic health/observability checks, and delivery verification in Gate 0.
 
 **Task cadence** (runs for each task T-X.Y.Z, or for the epic itself if no task breakdown):
 - Gate 0 — Implementation (includes Delivery Verification exit check inline)
@@ -214,10 +214,10 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 
 **Cycle cadence** (runs once per cycle at the end):
 - Multi-Tenant Verify
-- `ring:dev-report` aggregate
+- `ring:writing-dev-reports` aggregate
 - Final Commit
 
-Inputs for epic-cadence gates receive UNION of changed files across all tasks of the epic. Multi-tenant adaptation is integrated into Gate 0. All gates are MANDATORY. Invoke with `/ring:dev-cycle [tasks-file]` or Skill tool `ring:dev-cycle`. State is persisted to `docs/ring:dev-cycle/current-cycle.json` (schema v2.0.0: phases → epics → tasks). See `dev-team/skills/shared-patterns/gate-cadence-classification.md` for full taxonomy and [dev-team/skills/dev-cycle/SKILL.md](../dev-team/skills/dev-cycle/SKILL.md) for full protocol.
+Inputs for epic-cadence gates receive UNION of changed files across all tasks of the epic. Multi-tenant adaptation is integrated into Gate 0. All gates are MANDATORY. Invoke with `/ring:running-dev-cycle [tasks-file]` or Skill tool `ring:running-dev-cycle`. State is persisted to `docs/ring:running-dev-cycle/current-cycle.json` (schema v2.0.0: phases → epics → tasks). See `dev-team/skills/shared-patterns/gate-cadence-classification.md` for full taxonomy and [dev-team/skills/running-dev-cycle/SKILL.md](../dev-team/skills/running-dev-cycle/SKILL.md) for full protocol.
 
 ---
 
@@ -227,14 +227,14 @@ Inputs for epic-cadence gates receive UNION of changed files across all tasks of
 
 ```python
 review1  = Task("ring:code-reviewer")               # 20 min
-review2  = Task("ring:business-logic-reviewer")     # 20 min
+review2  = Task("ring:logic-reviewer")     # 20 min
 review3  = Task("ring:security-reviewer")           # 20 min
 review4  = Task("ring:test-reviewer")               # 20 min
-review5  = Task("ring:nil-safety-reviewer")         # 20 min
+review5  = Task("ring:nil-reviewer")         # 20 min
 review6  = Task("ring:dead-code-reviewer")          # 20 min
-review7  = Task("ring:performance-reviewer")        # 20 min
-review8  = Task("ring:multi-tenant-reviewer")       # 20 min
-review9  = Task("ring:lib-commons-reviewer")        # 20 min
+review7  = Task("ring:perf-reviewer")        # 20 min
+review8  = Task("ring:tenancy-reviewer")       # 20 min
+review9  = Task("ring:commons-reviewer")        # 20 min
 ```
 
 ### Run parallel (20 min total)
@@ -242,20 +242,20 @@ review9  = Task("ring:lib-commons-reviewer")        # 20 min
 ```python
 Task.parallel([
     ("ring:code-reviewer", prompt),
-    ("ring:business-logic-reviewer", prompt),
+    ("ring:logic-reviewer", prompt),
     ("ring:security-reviewer", prompt),
     ("ring:test-reviewer", prompt),
-    ("ring:nil-safety-reviewer", prompt),
+    ("ring:nil-reviewer", prompt),
     ("ring:dead-code-reviewer", prompt),
-    ("ring:performance-reviewer", prompt),
-    ("ring:multi-tenant-reviewer", prompt),
-    ("ring:lib-commons-reviewer", prompt)
+    ("ring:perf-reviewer", prompt),
+    ("ring:tenancy-reviewer", prompt),
+    ("ring:commons-reviewer", prompt)
 ])  # Single message, 9 default tool calls; add triggered specialists in same batch
 ```
 
 ### Key rule
 
-Always dispatch all 9 default reviewers in a single message with multiple Task tool calls. Add `ring:lib-observability-reviewer`, `ring:lib-systemplane-reviewer`, or `ring:lib-streaming-reviewer` to that same batch only when their stack triggers match.
+Always dispatch all 9 default reviewers in a single message with multiple Task tool calls. Add `ring:obs-reviewer`, `ring:systemplane-reviewer`, or `ring:streaming-reviewer` to that same batch only when their stack triggers match.
 
 ---
 
@@ -269,15 +269,15 @@ Always dispatch all 9 default reviewers in a single message with multiple Task t
 
 ## Reviewer-Pool Synchronization
 
-When adding or removing a code review agent in the `ring:codereview` pool:
+When adding or removing a code review agent in the `ring:reviewing-code` pool:
 
 **⛔ SEVEN-FILE REVIEWER-POOL SYNCHRONIZATION RULE:**
 
-1. Edit `default/skills/codereview/SKILL.md` — default reviewer table, conditional trigger table, dynamic dispatch count, status semantics, output format Reviewer Verdicts table
-2. Edit `default/skills/codereview/reviewers/dispatch-prompts.md` — add/remove default Task blocks or conditional Task blocks, renumber default tasks, and update eligibility rules
+1. Edit `default/skills/reviewing-code/SKILL.md` — default reviewer table, conditional trigger table, dynamic dispatch count, status semantics, output format Reviewer Verdicts table
+2. Edit `default/skills/reviewing-code/reviewers/dispatch-prompts.md` — add/remove default Task blocks or conditional Task blocks, renumber default tasks, and update eligibility rules
 3. Edit reviewer agent files in `dev-team/agents/*-reviewer.md` — active code-review reviewers live only in the dev-team plugin
 4. Edit `dev-team/hooks/validate-gate-progression.sh` — 9 default reviewer verdict requirements plus optional conditional verdict requirements
-5. Edit `dev-team/skills/dev-cycle/SKILL.md` and `dev-team/skills/dev-cycle/gates/gate-8-review.md` — Gate 8 state shape and dynamic reviewer references
+5. Edit `dev-team/skills/running-dev-cycle/SKILL.md` and `dev-team/skills/running-dev-cycle/gates/gate-8-review.md` — Gate 8 state shape and dynamic reviewer references
 6. Edit shared patterns that enumerate reviewers — `default/skills/shared-patterns/reviewer-slicing-strategy.md`, `default/skills/shared-patterns/reviewer-orchestrator-boundary.md`, `dev-team/skills/shared-patterns/shared-anti-rationalization.md`, `dev-team/skills/shared-patterns/gate-cadence-classification.md`
 7. Edit public/plugin docs — `CLAUDE.md`, `README.md`, `MANUAL.md`, `ARCHITECTURE.md`, `.claude-plugin/marketplace.json`, and installer messages
 
@@ -294,17 +294,17 @@ When adding or removing a code review agent in the `ring:codereview` pool:
 - `docs/WORKFLOWS.md` — workflow documentation
 - `MANUAL.md`, `README.md`, `ARCHITECTURE.md` — public-facing docs
 - `.claude-plugin/marketplace.json` — plugin descriptions + keywords
-- Any dev-team skill that dispatches `ring:codereview` (e.g., `dev-multi-tenant`, `dev-systemplane-migration`)
+- Any dev-team skill that dispatches `ring:reviewing-code` (e.g., `ring:adding-multi-tenancy`, `ring:migrating-to-lib-systemplane`)
 
 **⛔ CHECKLIST: Adding/Removing a Reviewer**
 
 ```
-Before committing changes to the codereview pool:
+Before committing changes to the reviewing-code pool:
 
-[ ] 1. Updated codereview/SKILL.md (dispatch + state + output format)?
+[ ] 1. Updated reviewing-code/SKILL.md (dispatch + state + output format)?
 [ ] 2. Updated frontmatter description in the new/removed reviewer agent (generic "Runs in parallel with other reviewers")?
 [ ] 3. Updated validate-gate-progression.sh (9 default verdicts + optional conditional verdicts)?
-[ ] 4. Updated dev-cycle/SKILL.md (Gate 8 + all "N reviewers" refs)?
+[ ] 4. Updated running-dev-cycle/SKILL.md (Gate 8 + all "N reviewers" refs)?
 [ ] 5. Updated shared-patterns files enumerating reviewers?
 [ ] 6. Swept secondary consumers (using-ring, writing-plans, docs, marketplace.json)?
 [ ] 7. Grep sanity: grep -rn "N reviewer|all N" --include="*.md" --include="*.sh" returns zero stale counts?
@@ -312,7 +312,7 @@ Before committing changes to the codereview pool:
 If any checkbox is no → Fix before committing.
 ```
 
-**Why this rule exists:** In 2026-04-18 dogfood, we discovered that when `performance-reviewer` was added to the pool some time prior, 7+ files were never updated. Adding 2 more reviewers then cascaded into ~65 stale references across 22 files. This rule makes the propagation explicit.
+**Why this rule exists:** In 2026-04-18 dogfood, we discovered that when `perf-reviewer` was added to the pool some time prior, 7+ files were never updated. Adding 2 more reviewers then cascaded into ~65 stale references across 22 files. This rule makes the propagation explicit.
 
 ---
 

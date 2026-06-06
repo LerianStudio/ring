@@ -93,7 +93,7 @@ efforts that MUST go through the full dev-cycle.
 
 ## Recommended Next Step
 
-`ring:dev-cycle` consuming `/tmp/assert-sweep-tasks.json` — N tasks generated,
+`ring:running-dev-cycle` consuming `/tmp/assert-sweep-tasks.json` — N tasks generated,
 grouped by severity, CRITICAL first. Angle 1 (zero-panic policy) and Angle 5
 (test-only invariants) MUST land before other tiers — both are production-safety
 risks.
@@ -101,11 +101,11 @@ risks.
 
 ---
 
-## Task Generation for ring:dev-cycle
+## Task Generation for ring:running-dev-cycle
 
 MANDATORY: The synthesizer MUST also emit `/tmp/assert-sweep-tasks.json` — a JSON
-array of tasks shaped for `ring:dev-cycle` consumption. The format matches what
-`ring:dev-refactor` produces.
+array of tasks shaped for `ring:running-dev-cycle` consumption. The format matches what
+`ring:planning-backend-refactor` produces.
 
 **Task grouping rules:**
 
@@ -206,7 +206,7 @@ lib-observability/assert sweep complete. Findings: <N> across <M> of 6 angles.
 Report: /tmp/assert-sweep-report.md
 Tasks:  /tmp/assert-sweep-tasks.json (<N> tasks)
 
-Next: Invoke ring:dev-cycle with the task file to execute fixes. CRITICAL tasks
+Next: Invoke ring:running-dev-cycle with the task file to execute fixes. CRITICAL tasks
 (Angle 1 zero-panic violations) and HIGH tasks (Angle 5 test-only invariants, Angle 3
 hand-rolled predicates) MUST be addressed before MEDIUM/LOW tiers.
 ```
@@ -1234,8 +1234,8 @@ This skill does not duplicate material available elsewhere. Use these pointers:
 | Full bootstrap sequence with all observability clients      | `ring:using-lib-observability`                                 |
 | lib-commons v5 deprecation shim — re-export aliases         | `ring:using-lib-commons` (compatibility window only)           |
 | Panic recovery + `SafeGo` + error reporter integration      | `ring:using-runtime`                                           |
-| Running a full codebase standards sweep                     | `ring:dev-refactor`                                            |
-| Consuming sweep tasks into a development cycle              | `ring:dev-cycle`                                               |
+| Running a full codebase standards sweep                     | `ring:planning-backend-refactor`                                            |
+| Consuming sweep tasks into a development cycle              | `ring:running-dev-cycle`                                               |
 
 `ring:using-runtime` is the natural companion to this skill — `runtime` protects
 against panics that would otherwise silently kill a goroutine; `assert` protects

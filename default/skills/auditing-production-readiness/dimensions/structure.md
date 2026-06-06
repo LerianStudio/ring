@@ -785,7 +785,7 @@ Audit nil/null pointer safety and dereference risks across the codebase for prod
 
 **Ring Standards (Source of Truth):**
 ---BEGIN STANDARDS---
-{INJECTED: Nil safety patterns — no dedicated standards file; patterns derived from ring:nil-safety-reviewer agent}
+{INJECTED: Nil safety patterns — no dedicated standards file; patterns derived from ring:nil-reviewer agent}
 ---END STANDARDS---
 
 **Search Patterns:**
@@ -970,7 +970,7 @@ Audit API versioning strategy, backward compatibility practices, and deprecation
 
 **Ring Standards (Source of Truth):**
 ---BEGIN STANDARDS---
-{INJECTED: API versioning patterns — no dedicated standards file; patterns derived from REST API design best practices and ring:production-readiness standards}
+{INJECTED: API versioning patterns — no dedicated standards file; patterns derived from REST API design best practices and production-readiness standards}
 ---END STANDARDS---
 
 **Search Patterns:**

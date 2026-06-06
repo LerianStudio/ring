@@ -1,8 +1,6 @@
 ---
-name: ring:dev-report
-description: |
-  Feedback loop skill — collects epic metrics, calculates quality scores, and writes
-  a structured development report for continuous improvement tracking.
+name: ring:writing-dev-reports
+description: "Writing a structured markdown dev report for a completed development epic: reads accumulated epic metrics (TDD, coverage, delivery, lint, file-size, license), computes a quality score with tiers, and records root-cause and next-cycle improvements. Use after an epic completes in ring:running-dev-cycle or when asked for a development feedback report. Skip for documentation-only epics or outside a dev cycle."
 ---
 
 # Dev Report — Feedback Loop
@@ -10,7 +8,7 @@ description: |
 ## When to use
 - After epic completion in any dev cycle
 - User requests a development report or feedback summary
-- ring:dev-cycle Gate 10 handoff
+- ring:running-dev-cycle Gate 10 handoff
 
 ## Skip when
 - Epic was documentation-only with no code changes
@@ -27,7 +25,7 @@ then gather the following per epic:
 ```yaml
 epic_id: {unit_id}
 completed_at: {ISO timestamp}
-agent_used: {ring:backend-engineer-golang | ring:frontend-engineer | etc.}
+agent_used: {ring:backend-go | ring:frontend | etc.}
 language: {go | typescript | python}
 service_type: {api | worker | batch | cli | frontend | bff}
 
@@ -76,7 +74,7 @@ Score tiers:
 
 ## Step 3: Write Report
 
-Save to `docs/ring:dev-report/{epic_id}-{timestamp}.md`:
+Save to `docs/ring:writing-dev-reports/{epic_id}-{timestamp}.md`:
 
 ```markdown
 # Dev Report: {epic_id}

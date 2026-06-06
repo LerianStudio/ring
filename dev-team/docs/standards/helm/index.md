@@ -41,7 +41,7 @@ This directory contains modular Helm chart standards for Lerian Studio. Load onl
 | 3 | [templates.md](templates.md) | Deployment pattern, security context, health checks, secrets, initContainers, envFrom, HPA, ConfigMap, dynamic env vars |
 | 4 | [dependencies.md](dependencies.md) | Subchart versions (PostgreSQL, MongoDB, RabbitMQ, Valkey, KEDA), bootstrap jobs |
 | 5 | [worker-patterns.md](worker-patterns.md) | Dual-mode KEDA ScaledJob + Deployment fallback, trigger authentication |
-| 6 | [compliance.md](compliance.md) | Standards Compliance output format for ring:helm-engineer |
+| 6 | [compliance.md](compliance.md) | Standards Compliance output format for ring:helm |
 
 ---
 

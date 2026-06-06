@@ -1,6 +1,6 @@
 ---
-name: ring:dev-multi-tenant
-description: Multi-tenant development cycle orchestrator following Ring Standards. Auto-detects service stack (PostgreSQL, MongoDB, Redis, RabbitMQ, S3) and executes gate-based implementation using tenantId from JWT for database-per-tenant isolation via the lib-commons v5 dispatch layer with event-driven tenant discovery (Redis Pub/Sub). Use to add tenant isolation to a Go service. Requires lib-commons v5 + lib-auth v2.
+name: ring:adding-multi-tenancy
+description: "Adding database-per-tenant isolation into a Go service end-to-end via an 11-gate cycle: detects the stack, audits compliance, then dispatches backend agents to implement tenantId-from-JWT routing through the lib-commons v5 dispatch layer (config, middleware, repositories, metrics, tests) and runs reviewers. Use when adding tenant isolation to a Go service. Skip for non-Go services or organization_id-style soft tenancy."
 ---
 
 # Multi-Tenant Development Cycle
@@ -18,7 +18,7 @@ description: Multi-tenant development cycle orchestrator following Ring Standard
 
 
 You orchestrate. Agents implement. NEVER use Edit/Write/Bash on Go source files.
-All code changes go through `Task(subagent_type="ring:backend-engineer-golang")`.
+All code changes go through `Task(subagent_type="ring:backend-go")`.
 TDD mandatory for all implementation gates (RED → GREEN → REFACTOR).
 
 ## Multi-Tenant Architecture
@@ -62,15 +62,15 @@ Isolation: `tenantId` from JWT → dispatch layer middleware → database-per-te
 |------|------|-----------|-------|
 | 0 | Stack Detection + Compliance Audit | Always | Orchestrator |
 | 1 | Codebase Analysis (multi-tenant focus) | Always | ring:codebase-explorer |
-| 1.5 | Implementation Preview | Always | ring:visualize |
-| 2 | lib-commons v5 + lib-auth v2 Upgrade | Skip only if both already pinned in go.mod | ring:backend-engineer-golang |
-| 3 | Multi-Tenant Configuration | Always | ring:backend-engineer-golang |
-| 4 | Tenant Middleware (TenantMiddleware with WithPG/WithMB) | Always | ring:backend-engineer-golang |
-| 5 | Repository Adaptation | Always per detected DB | ring:backend-engineer-golang |
-| 5.5 | M2M Secret Manager | Skip if service has no targetServices | ring:backend-engineer-golang |
-| 6 | RabbitMQ Multi-Tenant | Skip if no RabbitMQ | ring:backend-engineer-golang |
-| 7 | Metrics & Backward Compat | Always | ring:backend-engineer-golang |
-| 8 | Tests | Always | ring:backend-engineer-golang |
+| 1.5 | Implementation Preview | Always | ring:visualizing |
+| 2 | lib-commons v5 + lib-auth v2 Upgrade | Skip only if both already pinned in go.mod | ring:backend-go |
+| 3 | Multi-Tenant Configuration | Always | ring:backend-go |
+| 4 | Tenant Middleware (TenantMiddleware with WithPG/WithMB) | Always | ring:backend-go |
+| 5 | Repository Adaptation | Always per detected DB | ring:backend-go |
+| 5.5 | M2M Secret Manager | Skip if service has no targetServices | ring:backend-go |
+| 6 | RabbitMQ Multi-Tenant | Skip if no RabbitMQ | ring:backend-go |
+| 7 | Metrics & Backward Compat | Always | ring:backend-go |
+| 8 | Tests | Always | ring:backend-go |
 | 9 | Code Review | Always | 9 defaults + triggered specialists in parallel |
 | 10 | User Validation | Always | User |
 | 11 | Activation Guide | Always | Orchestrator |

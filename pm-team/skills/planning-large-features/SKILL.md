@@ -1,10 +1,6 @@
 ---
-name: ring:pre-dev-full
-description: |
-  Complete 10-gate pre-dev workflow for large features (>=2 days).
-  Orchestrates topology discovery, research, PRD, feature map, design validation,
-  TRD, API design, data model, dependency map, phases and epics, task creation,
-  and delivery planning in a sequential gated process with human approval at each gate.
+name: ring:planning-large-features
+description: "Planning the 10-gate Full Track pre-dev workflow (research, PRD, feature map, design validation, TRD, API design, data model, dependency map, phases and epics, task creation, delivery planning) with per-gate human approval. Use for features 2+ days that add dependencies, data models, multi-service integration, or new architecture. Skip for small features (use ring:planning-small-features). Plans only — no edits."
 ---
 
 # Full Track Pre-Dev Workflow (10 Gates)
@@ -20,50 +16,50 @@ description: |
 
 ## Skip when
 
-- Feature is simple (<2 days, existing patterns) - use ring:pre-dev-feature instead
+- Feature is simple (<2 days, existing patterns) - use ring:planning-small-features instead
 - No new dependencies, data models, or architecture patterns needed
 
 ## Sequence
 
-**Runs before:** ring:writing-plans, ring:dev-cycle
+**Runs before:** ring:writing-plans, ring:running-dev-cycle
 
 ## Related
 
-**Complementary:** ring:pre-dev-feature, ring:writing-plans, ring:worktree
+**Complementary:** ring:planning-small-features, ring:writing-plans, ring:creating-worktrees
 **Skills orchestrated:**
-- ring:pre-dev-research
-- ring:pre-dev-prd-creation
-- ring:pre-dev-feature-map
-- ring:pre-dev-design-validation
-- ring:pre-dev-trd-creation
-- ring:pre-dev-api-design
-- ring:pre-dev-data-model
-- ring:pre-dev-dependency-map
-- ring:pre-dev-phases-and-epics
-- ring:pre-dev-task-creation
-- ring:pre-dev-delivery-planning
+- ring:researching-features
+- ring:writing-prds
+- ring:mapping-feature-relationships
+- ring:validating-ux-completeness
+- ring:writing-trds
+- ring:designing-api-contracts
+- ring:designing-data-model
+- ring:pinning-dependency-versions
+- ring:decomposing-phases-and-epics
+- ring:detailing-tasks
+- ring:planning-delivery
 
 
 Running the **Full Track** pre-development workflow for features that take ≥2 days, add new external dependencies, create new data models, require multi-service integration, use new architecture patterns, or require team collaboration.
 
-For simple features (<2 days, existing patterns), use `ring:pre-dev-feature` instead.
+For simple features (<2 days, existing patterns), use `ring:planning-small-features` instead.
 
 ## Gate Map
 
 | Gate | Skill | Output | Track |
 |------|-------|--------|-------|
-| 0 | ring:pre-dev-research | research.md | Full |
-| 1 | ring:pre-dev-prd-creation | prd.md | Full |
-| 1.5 | ring:pre-dev-design-validation | design-validation.md | Full (if UI) |
-| 2 | ring:pre-dev-feature-map | feature-map.md | Full |
-| 2.5 | ring:pre-dev-design-validation | design-validation.md | Full (if UI, Large) |
-| 3 | ring:pre-dev-trd-creation | trd.md | Full |
-| 4 | ring:pre-dev-api-design | api-design.md | Full |
-| 5 | ring:pre-dev-data-model | data-model.md | Full |
-| 6 | ring:pre-dev-dependency-map | dependencies.md | Full |
-| 7 | ring:pre-dev-phases-and-epics | tasks.md (phased plan: phases + epics) | Full |
-| 8 | ring:pre-dev-task-creation | Phase 1 tasks written into tasks.md | Full |
-| 9 | ring:pre-dev-delivery-planning | delivery-roadmap.md + .json | Full |
+| 0 | ring:researching-features | research.md | Full |
+| 1 | ring:writing-prds | prd.md | Full |
+| 1.5 | ring:validating-ux-completeness | design-validation.md | Full (if UI) |
+| 2 | ring:mapping-feature-relationships | feature-map.md | Full |
+| 2.5 | ring:validating-ux-completeness | design-validation.md | Full (if UI, Large) |
+| 3 | ring:writing-trds | trd.md | Full |
+| 4 | ring:designing-api-contracts | api-design.md | Full |
+| 5 | ring:designing-data-model | data-model.md | Full |
+| 6 | ring:pinning-dependency-versions | dependencies.md | Full |
+| 7 | ring:decomposing-phases-and-epics | tasks.md (phased plan: phases + epics) | Full |
+| 8 | ring:detailing-tasks | Phase 1 tasks written into tasks.md | Full |
+| 9 | ring:planning-delivery | delivery-roadmap.md + .json | Full |
 
 All artifacts saved to: `docs/pre-dev/<feature-name>/`
 
@@ -124,4 +120,4 @@ AskUserQuestion at start: "Execution mode?"
 
 ## Completion
 
-After Gate 9 approved: artifacts are the execution baseline. Use `ring:dev-cycle` to execute.
+After Gate 9 approved: artifacts are the execution baseline. Use `ring:running-dev-cycle` to execute.

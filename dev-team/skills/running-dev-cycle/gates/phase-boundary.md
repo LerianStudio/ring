@@ -20,9 +20,9 @@ Depends on `state.phase_checkpoint`:
   2. Present: phase number + milestone, epics completed (ids + titles), key metrics (total duration, review iterations, issues by severity aggregated across the phase's epics), and the recorded deviations.
   3. **AskUserQuestion:** "Phase [N] ([milestone]) complete. How to proceed?"
      - (a) **Continue** — elaborate the next phase and resume the epic loop
-     - (b) **Pause** — stop here; resume later with `/ring:dev-cycle --resume` (re-enters this checkpoint)
+     - (b) **Pause** — stop here; resume later with `/ring:running-dev-cycle --resume` (re-enters this checkpoint)
      - (c) **Adjust plan first** — stop here so the user can edit tasks.md (reorder/add/drop later-phase epics or revise milestones) before elaboration; resume re-enters this checkpoint and re-reads the (now edited) plan
-  4. Handle: **Continue** → proceed to step 11.5.3. **Pause** → leave `status = "paused_for_phase_review"`, STOP, output resume command. **Adjust plan first** → leave `status = "paused_for_phase_review"`, STOP, output: `Cycle paused at phase boundary for plan adjustment. Edit tasks.md, then resume with /ring:dev-cycle --resume`.
+  4. Handle: **Continue** → proceed to step 11.5.3. **Pause** → leave `status = "paused_for_phase_review"`, STOP, output resume command. **Adjust plan first** → leave `status = "paused_for_phase_review"`, STOP, output: `Cycle paused at phase boundary for plan adjustment. Edit tasks.md, then resume with /ring:running-dev-cycle --resume`.
 
 - **`auto`:** Log the same summary (phase, epics completed, metrics, deviations) to the cycle output, set `status = "in_progress"`, and continue directly to step 11.5.3. No pause.
 
@@ -39,9 +39,9 @@ If a next phase exists → proceed to step 11.5.4.
 Dispatch **ONE** planning agent in **ANALYSIS / PLANNING mode — NO code changes, NO commits.** The agent writes tasks into tasks.md and returns a summary; it does not implement.
 
 **Agent selection** — by the dominant `Target:` across the next phase's epics:
-- All/most backend Go → `ring:backend-engineer-golang`
-- All/most backend TypeScript → `ring:backend-engineer-typescript`
-- All/most frontend → `ring:frontend-engineer`
+- All/most backend Go → `ring:backend-go`
+- All/most backend TypeScript → `ring:backend-ts`
+- All/most frontend → `ring:frontend`
 - Mixed targets → `ring:codebase-explorer`
 
 **Dispatch prompt MUST include:**
@@ -57,7 +57,7 @@ Epic blocks to break down (from tasks.md ## Summary + their epic sections):
 Recorded deviations from completed phases (these changed the codebase vs the original plan):
   {the ## Deviations section content}
 
-TASK-AUTHORING BAR (from ring:pre-dev-task-creation — non-negotiable):
+TASK-AUTHORING BAR (from ring:detailing-tasks — non-negotiable):
 - Break each epic into dispatch-ready tasks T-{phase}.{epicSeq}.{taskSeq}.
 - Each task carries: **Context** (with `file.go:42`-style refs into the codebase AS IT
   NOW EXISTS — read the real code, not the original plan's assumptions),

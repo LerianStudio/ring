@@ -25,11 +25,11 @@ Verify by asking: "Which Ring backend specialists are available?"
 ## What This Plugin Adds
 
 - **24 specialist agents** organized by role:
-  - **Backend (2):** backend-engineer-golang, backend-engineer-typescript
-  - **Frontend (4):** frontend-engineer, frontend-bff-engineer-typescript, ui-engineer, frontend-designer
-  - **Infrastructure (3):** devops-engineer, helm-engineer, sre
-  - **QA (2 × modes):** qa-analyst (6 modes: unit, fuzz, property, integration, chaos, goroutine-leak), qa-analyst-frontend (5 modes: unit, accessibility, visual, e2e, performance)
-  - **Code review pool (13):** code-reviewer, business-logic-reviewer, security-reviewer, test-reviewer, nil-safety-reviewer, dead-code-reviewer, performance-reviewer, multi-tenant-reviewer, lib-commons-reviewer, lib-observability-reviewer, lib-streaming-reviewer, lib-systemplane-reviewer, prompt-quality-reviewer
+  - **Backend (2):** backend-go, backend-ts
+  - **Frontend (4):** frontend, bff-ts, ui-engineer, ui-designer
+  - **Infrastructure (3):** devops, helm, sre
+  - **QA (2 × modes):** qa (6 modes: unit, fuzz, property, integration, chaos, goroutine-leak), qa-frontend (5 modes: unit, accessibility, visual, e2e, performance)
+  - **Code review pool (13):** code-reviewer, logic-reviewer, security-reviewer, test-reviewer, nil-reviewer, dead-code-reviewer, perf-reviewer, tenancy-reviewer, commons-reviewer, obs-reviewer, streaming-reviewer, systemplane-reviewer, prompt-reviewer
 - **33 dev-cycle skills:** lean backend cycle (Gate 0/8/9), lean frontend cycle (Gate 0/7/8) with quality checks, refactoring, simplification, delivery verification, observability migration, lib-streaming instrumentation, lib-systemplane migration, security audits
 
 ## Usage
@@ -37,8 +37,8 @@ Verify by asking: "Which Ring backend specialists are available?"
 Use OpenCode's native `skill` and agent mention syntax:
 
 ```
-use skill tool to load ring:dev-cycle
-@ring:backend-engineer-golang implement the user repository
+use skill tool to load ring:running-dev-cycle
+@ring:backend-go implement the user repository
 ```
 
 ## Updating

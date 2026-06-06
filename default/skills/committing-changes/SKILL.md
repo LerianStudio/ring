@@ -1,6 +1,6 @@
 ---
-name: ring:commit
-description: Smart commit organization with atomic grouping, conventional commits, and trailer management
+name: ring:committing-changes
+description: "Committing working-tree changes as atomic conventional commits: analyzes the diff, groups it into coherent commits, confirms the plan, then creates GPG-signed commits carrying the mandatory X-Lerian-Ref trailer and offers to push. Use when the user says 'commit' or has changes ready to record. Skip when the tree is clean, work is still in progress, or the user wants raw git commands without grouping."
 ---
 
 # Smart Commit Organization

@@ -1,6 +1,6 @@
 # QA Analyst (Frontend) — Visual Testing Mode
 
-Extends `qa-analyst-frontend.v2.md`. Load when dispatched with `mode: visual`.
+Extends `qa-frontend.v2.md`. Load when dispatched with `mode: visual`.
 
 ## What to Test
 

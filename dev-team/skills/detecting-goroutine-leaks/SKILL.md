@@ -1,9 +1,6 @@
 ---
-name: ring:dev-goroutine-leak-testing
-description: |
-  Goroutine leak detection skill — detects goroutine usage in Go code, runs goleak
-  to identify memory leaks, and dispatches ring:backend-engineer-golang to fix leaks
-  and create regression tests.
+name: ring:detecting-goroutine-leaks
+description: "Detecting goroutine leaks in Go: greps for goroutine patterns, audits goleak coverage (VerifyTestMain/VerifyNone), runs goleak, and dispatches ring:backend-go to fix leaks and add regression tests. Use after implementation or during review when code spawns goroutines or a leak is suspected. Runs before ring:reviewing-code. Skip for non-Go or code with no goroutines. Skip for panic/silent-death observability (use ring:using-runtime)."
 ---
 
 # Goroutine Leak Testing
@@ -21,11 +18,11 @@ description: |
 - Changes do not touch any concurrent code paths
 
 ## Sequence
-**Runs before:** ring:codereview
-**Runs after:** ring:dev-implementation
+**Runs before:** ring:reviewing-code
+**Runs after:** ring:implementing-tasks
 
 ## Related
-**Complementary:** ring:backend-engineer-golang
+**Complementary:** ring:backend-go
 
 
 Standards: WebFetch `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/architecture.md` → "Goroutine Leak Detection" section.
@@ -79,7 +76,7 @@ goleak.go:89: found unexpected goroutines:
 
 ```yaml
 Task:
-  subagent_type: "ring:backend-engineer-golang"
+  subagent_type: "ring:backend-go"
   description: "Fix goroutine leak in {package_path}"
   prompt: |
     Fix goroutine leak and add goleak regression test.
@@ -151,5 +148,5 @@ Leaks detected: N
 
 ## Actions
 {PASS: goleak present, no leaks}
-{or: Dispatched ring:backend-engineer-golang to fix N leaks}
+{or: Dispatched ring:backend-go to fix N leaks}
 ```

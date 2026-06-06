@@ -1,10 +1,6 @@
 ---
-name: ring:pre-dev-feature
-description: |
-  Lightweight 5-gate pre-dev workflow for small features (<2 days).
-  Orchestrates topology discovery, research, PRD with UX validation,
-  design validation, TRD, phases and epics, and delivery planning
-  in a sequential gated process with human approval at each gate.
+name: ring:planning-small-features
+description: "Planning the lightweight 5-gate Small Track pre-dev workflow (research, PRD with design validation, TRD, phases and epics, delivery planning) with human approval and state tracking at each gate. Use for features under 2 days that reuse existing patterns and add no new dependencies, data models, or services. Skip for larger or complex features — use ring:planning-large-features instead. Plans only — no edits."
 ---
 
 # Small Track Pre-Dev Workflow (5 Gates)
@@ -20,39 +16,39 @@ description: |
 
 ## Skip when
 
-- Feature is complex (>=2 days) - use ring:pre-dev-full instead
+- Feature is complex (>=2 days) - use ring:planning-large-features instead
 - Adds new dependencies, data models, or architecture patterns
 
 ## Sequence
 
-**Runs before:** ring:writing-plans, ring:dev-cycle
+**Runs before:** ring:writing-plans, ring:running-dev-cycle
 
 ## Related
 
-**Complementary:** ring:pre-dev-full, ring:writing-plans, ring:worktree
+**Complementary:** ring:planning-large-features, ring:writing-plans, ring:creating-worktrees
 **Skills orchestrated:**
-- ring:pre-dev-research
-- ring:pre-dev-prd-creation
-- ring:pre-dev-design-validation
-- ring:pre-dev-trd-creation
-- ring:pre-dev-phases-and-epics
-- ring:pre-dev-delivery-planning
+- ring:researching-features
+- ring:writing-prds
+- ring:validating-ux-completeness
+- ring:writing-trds
+- ring:decomposing-phases-and-epics
+- ring:planning-delivery
 
 
 Running the **Small Track** pre-development workflow for features that take <2 days, use existing patterns, add no new external dependencies, create no new data models, require no multi-service integration, and can be completed by a single developer.
 
-For complex features (any of the above false), use `ring:pre-dev-full` instead.
+For complex features (any of the above false), use `ring:planning-large-features` instead.
 
 ## Gate Map
 
 | Gate | Skill | Output |
 |------|-------|--------|
-| 0 | ring:pre-dev-research | research.md |
-| 1 | ring:pre-dev-prd-creation | prd.md |
-| 1.5 | ring:pre-dev-design-validation | design-validation.md (if UI) |
-| 2 | ring:pre-dev-trd-creation | trd.md |
-| 3 | ring:pre-dev-phases-and-epics | tasks.md (phased plan; Phase 1 detailed inline) |
-| 4 | ring:pre-dev-delivery-planning | delivery-roadmap.md + .json |
+| 0 | ring:researching-features | research.md |
+| 1 | ring:writing-prds | prd.md |
+| 1.5 | ring:validating-ux-completeness | design-validation.md (if UI) |
+| 2 | ring:writing-trds | trd.md |
+| 3 | ring:decomposing-phases-and-epics | tasks.md (phased plan; Phase 1 detailed inline) |
+| 4 | ring:planning-delivery | delivery-roadmap.md + .json |
 
 All artifacts saved to: `docs/pre-dev/<feature-name>/`
 
@@ -109,4 +105,4 @@ AskUserQuestion at start: "Execution mode?" Options: Automatic (pause only on fa
 
 ## Completion
 
-After Gate 4 approved: use `ring:dev-cycle` to execute tasks.
+After Gate 4 approved: use `ring:running-dev-cycle` to execute tasks.

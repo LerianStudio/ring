@@ -1,11 +1,6 @@
 ---
-name: ring:dev-k6-load-testing
-description: |
-  Load testing skill using k6 — generates tests following the Lerian k6 platform
-  conventions for execution on Palantir (Self-Service Testing).
-  Produces product directories, scenario YAMLs, helper clients, and bundleable
-  test scripts compatible with the LerianStudio/k6 platform/ structure.
-  Standalone skill, not gated — invoke on demand or as part of CI.
+name: ring:load-testing-with-k6
+description: "Load-testing with k6 for the LerianStudio/k6 Palantir platform: scaffolds product.yaml, smoke/load/stress/soak scenarios, a helper client, builds the webpack bundle, and verifies a local k6 run. Use when new API/gRPC endpoints or throughput-path changes need SLO validation under load, or a Palantir CI load gate is required. Skip when no network-facing endpoints are affected or changes are config-only or non-code."
 ---
 
 # k6 Load Testing (Palantir Platform)
@@ -24,7 +19,7 @@ description: |
 - Service has no network-facing interface
 
 ## Related
-**Complementary:** ring:dev-implementation, ring:codereview
+**Complementary:** ring:implementing-tasks, ring:reviewing-code
 
 
 This skill generates k6 load tests following the Lerian k6 platform conventions.

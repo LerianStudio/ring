@@ -22,32 +22,24 @@ from typing import Any, Dict, List, Optional
 # MUST stay in sync with validate-frontmatter.py:ALL_PLUGINS
 ALL_PLUGINS = ["default", "dev-team", "pm-team", "tw-team"]
 
-# Category patterns for grouping skills
-# MUST stay in sync with generate-skills-ref.sh categorize_skill case statement.
-CATEGORIES = {
-    "Pre-Dev Workflow": [r"^pre-dev-"],
-    "Testing & Debugging": [
-        r"^test-",
-        r"-debugging$",
-        r"^condition-",
-        r"^defense-",
-        r"^root-cause",
-    ],
-    "Collaboration": [r"-review$", r"^dispatching-", r"^sharing-"],
-    "Planning & Execution": [
-        r"^brainstorm$",
-        r"^writing-plans$",
-        r"^execute-plan$",
-        r"-worktrees$",
-        r"^subagent-driven",
-    ],
-    "Meta Skills": [
-        r"^using-",
-        r"^writing-skills$",
-        r"^testing-skills",
-        r"^testing-agents",
-    ],
+# Category = plugin display name. Gerund skill names share no common prefixes,
+# so pattern-based categorization is structurally unworkable; the scanner
+# already knows which plugin directory it is iterating, so we key off that.
+# MUST stay in sync with generate-skills-ref.sh PLUGIN_CATEGORIES + categorize_skill.
+PLUGIN_CATEGORIES = {
+    "default": "Core Workflow",
+    "dev-team": "Development",
+    "pm-team": "Pre-Dev Planning",
+    "tw-team": "Technical Writing",
 }
+
+# Single directory-name override: cross-cutting meta skills (using-*) are
+# grouped together regardless of which plugin ships them.
+META_SKILL_PATTERN = r"^using-"
+
+# Deterministic category display order. Plugin categories first (in plugin
+# order), then Meta Skills, then the Other fallback.
+CATEGORY_ORDER = list(PLUGIN_CATEGORIES.values()) + ["Meta Skills", "Other"]
 
 try:
     import yaml
@@ -66,19 +58,21 @@ class Skill:
         name: str,
         description: str,
         directory: str,
+        plugin: str,
     ):
         self.name = name
         self.description = description
         self.directory = directory
+        self.plugin = plugin
         self.category = self._categorize()
 
     def _categorize(self) -> str:
-        """Determine skill category based on directory name."""
-        for category, patterns in CATEGORIES.items():
-            for pattern in patterns:
-                if re.search(pattern, self.directory):
-                    return category
-        return "Other"
+        """Category is the plugin display name, with one directory-name
+        override: ``using-*`` meta skills are grouped together.
+        """
+        if re.search(META_SKILL_PATTERN, self.directory):
+            return "Meta Skills"
+        return PLUGIN_CATEGORIES.get(self.plugin, "Other")
 
     def __repr__(self):
         return f"Skill(name={self.name}, category={self.category})"
@@ -160,15 +154,31 @@ def parse_frontmatter_fallback(content: str) -> Optional[Dict[str, Any]]:
                     # For description, join all lines with spaces (block scalar);
                     # for name, the first line is the value.
                     if field == "description":
-                        result[field] = " ".join(lines)
+                        value = " ".join(lines)
                     else:
-                        result[field] = lines[0]
+                        value = lines[0]
+                    result[field] = _strip_quotes(value)
 
     return result if result else None
 
 
-def parse_skill_file(skill_path: Path) -> Optional[Skill]:
-    """Parse a SKILL.md file and extract metadata."""
+def _strip_quotes(value: str) -> str:
+    """Strip a single pair of surrounding double or single quotes.
+
+    Descriptions are now double-quoted single-line YAML strings; pyyaml
+    unquotes them automatically, but the regex fallback must do it itself.
+    """
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in ('"', "'"):
+        return value[1:-1]
+    return value
+
+
+def parse_skill_file(skill_path: Path, plugin: str = "") -> Optional[Skill]:
+    """Parse a SKILL.md file and extract metadata.
+
+    `plugin` is the owning plugin directory name and determines the skill's
+    category (see Skill._categorize).
+    """
     try:
         with open(skill_path, "r", encoding="utf-8") as f:
             content = f.read()
@@ -189,6 +199,7 @@ def parse_skill_file(skill_path: Path) -> Optional[Skill]:
             name=frontmatter["name"],
             description=description,
             directory=directory,
+            plugin=plugin,
         )
 
     except Exception as e:
@@ -196,8 +207,12 @@ def parse_skill_file(skill_path: Path) -> Optional[Skill]:
         return None
 
 
-def scan_skills_directory(skills_dir: Path) -> List[Skill]:
-    """Scan skills directory and parse all SKILL.md files."""
+def scan_skills_directory(skills_dir: Path, plugin: str = "") -> List[Skill]:
+    """Scan skills directory and parse all SKILL.md files.
+
+    `plugin` is the owning plugin directory name, threaded through so each
+    skill is categorized by the plugin that ships it.
+    """
     skills = []
 
     if not skills_dir.exists():
@@ -216,7 +231,7 @@ def scan_skills_directory(skills_dir: Path) -> List[Skill]:
             print(f"Warning: No SKILL.md in {skill_dir.name}", file=sys.stderr)
             continue
 
-        skill = parse_skill_file(skill_file)
+        skill = parse_skill_file(skill_file, plugin=plugin)
         if skill:
             skills.append(skill)
 
@@ -241,8 +256,7 @@ def generate_markdown(skills: List[Skill]) -> str:
         categorized[category].append(skill)
 
     # Sort categories (predefined order, then Other)
-    category_order = list(CATEGORIES.keys()) + ["Other"]
-    sorted_categories = [cat for cat in category_order if cat in categorized]
+    sorted_categories = [cat for cat in CATEGORY_ORDER if cat in categorized]
 
     # Build markdown
     lines = ["# Ring Skills Quick Reference\n"]
@@ -260,7 +274,7 @@ def generate_markdown(skills: List[Skill]) -> str:
     # Add usage section
     lines.append("## Usage\n")
     lines.append("To use a skill: Use the Skill tool with skill name")
-    lines.append("Example: `ring:brainstorm`")
+    lines.append("Example: `ring:using-ring`")
 
     return "\n".join(lines)
 
@@ -276,7 +290,7 @@ def scan_all_plugins(repo_root: Path, plugins: List[str]) -> List[Skill]:
         skills_dir = repo_root / plugin / "skills"
         if not skills_dir.is_dir():
             continue
-        aggregated.extend(scan_skills_directory(skills_dir))
+        aggregated.extend(scan_skills_directory(skills_dir, plugin=plugin))
     return aggregated
 
 

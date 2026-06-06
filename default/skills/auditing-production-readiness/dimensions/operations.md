@@ -546,7 +546,7 @@ Audit resilience patterns (circuit breakers, retries, timeouts, bulkheads) acros
 
 **Ring Standards (Source of Truth):**
 ---BEGIN STANDARDS---
-{INJECTED: Resilience patterns — no dedicated standards file; patterns derived from industry best practices and ring:production-readiness standards}
+{INJECTED: Resilience patterns — no dedicated standards file; patterns derived from industry best practices and production-readiness standards}
 ---END STANDARDS---
 
 **Search Patterns:**

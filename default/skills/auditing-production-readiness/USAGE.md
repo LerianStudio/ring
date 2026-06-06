@@ -1,6 +1,6 @@
 # Using Production Readiness Audit
 
-**Skill:** `ring:production-readiness-audit` · **Implementation:** [SKILL.md](SKILL.md)
+**Skill:** `ring:auditing-production-readiness` · **Implementation:** [SKILL.md](SKILL.md)
 
 ## Purpose
 
@@ -8,8 +8,8 @@ Evaluate codebase production readiness before deployment, during security/qualit
 
 ## Invocation
 
-- **Skill tool:** `Skill tool: "ring:production-readiness-audit"`
-- **Command (if available):** `/ring:production-readiness-audit` or `/ring:production-readiness-audit [options]`
+- **Skill tool:** `Skill tool: "ring:auditing-production-readiness"`
+- **Command (if available):** `/ring:auditing-production-readiness` or `/ring:auditing-production-readiness [options]`
 
 ## Batch behavior
 

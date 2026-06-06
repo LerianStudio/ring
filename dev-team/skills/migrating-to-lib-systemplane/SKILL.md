@@ -1,6 +1,6 @@
 ---
-name: ring:dev-systemplane-migration
-description: Migrates Lerian Go services from .env/YAML configuration of operational knobs (log levels, feature flags, rate limits, timeouts) to the lib-systemplane runtime config client — a hot-reloadable plane using Postgres LISTEN/NOTIFY or MongoDB change streams. Wires the standard `make systemplane-ddl` migration-only provisioning pipeline (generator + manifest + drift guard) — runtime DDL is forbidden in v1.6.0+. Use when adding hot-reloadable runtime configuration or migrating from v4 systemplane (formerly lib-commons/v5/commons/systemplane). Detects deleted v4 residue (Supervisor, BundleFactory, SYSTEMPLANE_* env vars) and runtime DDL anti-patterns.
+name: ring:migrating-to-lib-systemplane
+description: "Migrating Lerian Go services from .env/YAML operational knobs (log levels, feature flags, rate limits, timeouts) to the lib-systemplane hot-reloadable runtime config client, wiring the migration-only make systemplane-ddl pipeline (runtime DDL forbidden in v1.6.0+). Orchestrates an 11-gate cycle dispatching ring:backend-go. Use when adding hot-reloadable config or migrating off v4 systemplane. Skip for non-Go or static-only config."
 ---
 
 # Systemplane Migration (lib-systemplane)
@@ -19,7 +19,7 @@ description: Migrates Lerian Go services from .env/YAML configuration of operati
 
 
 You orchestrate. Agents implement. NEVER use Edit/Write/Bash on Go source files.
-All code changes go through `Task(subagent_type="ring:backend-engineer-golang")`.
+All code changes go through `Task(subagent_type="ring:backend-go")`.
 TDD mandatory for all implementation gates (RED → GREEN → REFACTOR).
 
 ## Systemplane Architecture
@@ -79,15 +79,15 @@ Any key storing credentials MUST use `RedactFull`.
 |------|------|-----------|-------|
 | 0 | Stack Detection + Compliance Audit | Always | Orchestrator |
 | 1 | Codebase Analysis (config focus) | Always | ring:codebase-explorer |
-| 1.5 | Implementation Preview | Always | ring:visualize |
-| 2 | lib-commons v5 Upgrade + v4 Removal | Skip only if v5 in go.mod AND zero v4 imports | ring:backend-engineer-golang |
-| 3 | Client Construction + Key Registration | Always | ring:backend-engineer-golang |
-| 3.5 | DDL Provisioning (`make systemplane-ddl`) | Always — STANDARD provisioning mechanism | ring:backend-engineer-golang |
-| 4 | OnChange Subscriptions | Always unless zero hot-reloadable keys (justify) | ring:backend-engineer-golang |
-| 5 | Config Bridge | Skip if no Config struct reads need live values | ring:backend-engineer-golang |
-| 6 | Admin HTTP Mount + Authorizer | Skip only if service has no admin surface (justify) | ring:backend-engineer-golang |
-| 7 | Wiring + Lifecycle + Backward Compat | Always — NEVER skippable | ring:backend-engineer-golang |
-| 8 | Tests | Always | ring:backend-engineer-golang |
+| 1.5 | Implementation Preview | Always | ring:visualizing |
+| 2 | lib-commons v5 Upgrade + v4 Removal | Skip only if v5 in go.mod AND zero v4 imports | ring:backend-go |
+| 3 | Client Construction + Key Registration | Always | ring:backend-go |
+| 3.5 | DDL Provisioning (`make systemplane-ddl`) | Always — STANDARD provisioning mechanism | ring:backend-go |
+| 4 | OnChange Subscriptions | Always unless zero hot-reloadable keys (justify) | ring:backend-go |
+| 5 | Config Bridge | Skip if no Config struct reads need live values | ring:backend-go |
+| 6 | Admin HTTP Mount + Authorizer | Skip only if service has no admin surface (justify) | ring:backend-go |
+| 7 | Wiring + Lifecycle + Backward Compat | Always — NEVER skippable | ring:backend-go |
+| 8 | Tests | Always | ring:backend-go |
 | 9 | Code Review | Always | 9 defaults + triggered specialists in parallel |
 | 10 | User Validation | Always | User |
 | 11 | Activation Guide | Always | Orchestrator |

@@ -1,10 +1,6 @@
 ---
-name: ring:dev-verify-code
-description: |
-  Atomic code verification for Go projects — run everything, get a MERGE_READY or NEEDS_FIX
-  verdict. Phase 1 runs static analysis in parallel (lint, vet, imports, format, docs, unit
-  tests). Phase 2 runs integration and E2E tests sequentially. Phase 3 presents a summary.
-  Works OUTSIDE the full dev-cycle for quick pre-merge checks.
+name: ring:verifying-code
+description: "Verifying a Go project: runs every quality check (lint, vet, imports, format, docs, unit, integration, E2E) and returns a single MERGE_READY or NEEDS_FIX verdict. Report-only: never fixes anything. Use for a quick pre-merge or pre-PR check outside a full dev-cycle. Skip when not a Go project, when you want a single command, or when already inside ring:running-dev-cycle (use its gates)."
 ---
 
 # Code Verification
@@ -17,10 +13,10 @@ description: |
 ## Skip when
 - Project is not Go (no go.mod found)
 - User only wants to run a single specific command
-- Already inside a ring:dev-cycle execution (use the cycle gates instead)
+- Already inside a ring:running-dev-cycle execution (use the cycle gates instead)
 
 ## Related
-**Complementary:** ring:dev-cycle, ring:codereview
+**Complementary:** ring:running-dev-cycle, ring:reviewing-code
 
 
 Run everything. Get a verdict. **This skill only REPORTS — it does NOT fix anything.**

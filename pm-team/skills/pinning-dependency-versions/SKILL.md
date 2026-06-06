@@ -1,9 +1,6 @@
 ---
-name: ring:pre-dev-dependency-map
-description: |
-  Gate 6: Technology choices document - explicit, versioned, validated technology
-  selections with justifications. Large Track only. HARD BLOCK: Must load Ring Standards
-  and PROJECT_RULES.md before proceeding.
+name: ring:pinning-dependency-versions
+description: "Pinning an explicit versioned dependency manifest (dependencies.md plus PROJECT_RULES.md): exact package versions, CVE and license checks, compatibility matrices, and per-component cost analysis against Ring Standards. Gate 6 of ring:planning-large-features, runs after ring:designing-data-model. Use when the data model is validated and you are about to lock products and versions. Skip for Small Track or when versions are already locked."
 ---
 
 # Dependency Map — Explicit Technology Choices
@@ -22,8 +19,8 @@ description: |
 
 ## Sequence
 
-**Runs before:** ring:pre-dev-phases-and-epics
-**Runs after:** ring:pre-dev-data-model
+**Runs before:** ring:decomposing-phases-and-epics
+**Runs after:** ring:designing-data-model
 
 
 Every technology choice must be explicit, versioned, validated against Ring Standards, and justified. The Dependency Map answers WHAT specific products, versions, packages, and infrastructure will be used.

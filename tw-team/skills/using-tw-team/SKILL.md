@@ -1,9 +1,6 @@
 ---
 name: ring:using-tw-team
-description: |
-  Technical writing specialists for functional and API documentation. Dispatch when
-  you need to create guides, conceptual docs, or API references following established
-  documentation standards.
+description: "Using the ring-tw-team plugin and orchestrating its documentation specialists in parallel: guide-writer (guides/concepts/tutorials), api-writer (REST API reference), and docs-reviewer (quality review). Use when creating functional or API documentation, or reviewing doc quality. Skip when writing code (use dev-team) or writing plans (use pm-team)."
 ---
 
 # Using Ring Technical Writing Specialists
@@ -17,7 +14,7 @@ description: |
 ## Skip when
 - Writing code → use dev-team agents
 - Writing plans → use pm-team agents
-- General code review → use `ring:codereview` with dev-team reviewer agents
+- General code review → use `ring:reviewing-code` with dev-team reviewer agents
 
 ## Related
 **Similar:** ring:using-ring, ring:using-dev-team
@@ -30,7 +27,7 @@ The ring-tw-team plugin provides specialized agents for technical documentation.
 
 | Agent | Specialization | Use When |
 |-------|---------------|----------|
-| `ring:functional-writer` | Conceptual docs, guides, tutorials, best practices, workflows | Writing product guides, tutorials, "how to" content |
+| `ring:guide-writer` | Conceptual docs, guides, tutorials, best practices, workflows | Writing product guides, tutorials, "how to" content |
 | `ring:api-writer` | REST API reference, endpoints, schemas, errors, field descriptions | Documenting API endpoints, request/response examples |
 | `ring:docs-reviewer` | Voice/tone, structure, completeness, clarity, accuracy | Reviewing drafts, pre-publication quality check |
 
@@ -65,7 +62,7 @@ The ring-tw-team plugin provides specialized agents for technical documentation.
 **Parallel dispatch** for comprehensive documentation (single turn, multiple Tasks):
 
 ```
-Task #1: functional-writer (write the guide)
+Task #1: guide-writer (write the guide)
 Task #2: api-writer (write API reference)
 (Both run in parallel)
 
@@ -85,16 +82,16 @@ Emit both Task calls in a SINGLE TURN as one atomic batch. If your runtime expos
 
 ## Available in This Plugin
 
-**Agents:** functional-writer, api-writer, docs-reviewer
+**Agents:** guide-writer, api-writer, docs-reviewer
 
 **Skills:**
 - using-tw-team: Plugin introduction
-- documentation-structure: Hierarchy and organization
-- voice-and-tone: Voice guidelines
-- review-docs: Quality checklist
+- structuring-documentation: Hierarchy and organization
+- applying-voice-and-tone: Voice guidelines
+- reviewing-docs: Quality checklist
 
 **Commands:**
-- /review-docs: Review existing docs
+- /ring:reviewing-docs: Review existing docs
 
 ---
 
@@ -114,7 +111,7 @@ Emit both Task calls in a SINGLE TURN as one atomic batch. If your runtime expos
 - **Let specialists apply standards** – They know voice, tone, structure
 - **Combine with other plugins** – API writers + backend engineers for accuracy
 
-> ✅ "I need documentation for the new feature. Let me dispatch functional-writer."
+> ✅ "I need documentation for the new feature. Let me dispatch guide-writer."
 >
 > ❌ "I'll manually write all the documentation myself."
 

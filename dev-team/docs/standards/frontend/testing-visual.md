@@ -4,7 +4,7 @@
 
 This module covers visual and snapshot testing patterns for React/Next.js applications. Ensures UI consistency through snapshot testing, responsive coverage, and component state verification.
 
-> **Gate Reference:** This module is loaded by `ring:qa-analyst-frontend` at Gate 4 (Visual Testing).
+> **Gate Reference:** This module is loaded by `ring:qa-frontend` at Gate 4 (Visual Testing).
 
 ---
 

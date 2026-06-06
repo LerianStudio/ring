@@ -1,5 +1,5 @@
 ---
-name: ring:lib-observability-reviewer
+name: ring:obs-reviewer
 description: Conditional Gate 8 specialist for lib-observability, tracing, metrics, logging, runtime recovery, panic safety, redaction, constants, and SafeGo implications.
 ---
 

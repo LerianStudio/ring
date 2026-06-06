@@ -4,7 +4,7 @@
 
 ⛔ **Phase gate:** Before entering Gate 0 for the current epic, confirm its phase (`state.phases[]` lookup via `epic.phase`) has status `detailed` or `in_progress`. An epic in an un-elaborated (`epic-level`) phase is NOT dispatch-ready — its `tasks[]` is empty. The hook also blocks this; do not attempt it.
 
-**REQUIRED SUB-SKILL:** Use ring:dev-implementation
+**REQUIRED SUB-SKILL:** Use ring:implementing-tasks
 
 **Execution Unit:** Epic-itself (if no task breakdown) or a Task T-X.Y.Z (if epic has tasks). Either way, the unit is a TASK-LEVEL scope.
 
@@ -17,16 +17,16 @@ MUST execute the **Before Gate 0 (epic start)** row from the State Persistence C
 
 CANNOT proceed to sub-steps 2.1–2.3 without completing this checkpoint. (The `epic.base_sha` captured here is the lower bound of the Gate 8 cumulative review diff — the SHA before the epic's first task.)
 
-### ⛔ MANDATORY: Invoke ring:dev-implementation Skill (not inline execution)
+### ⛔ MANDATORY: Invoke ring:implementing-tasks Skill (not inline execution)
 
 See [shared-patterns/shared-orchestrator-principle.md](../../shared-patterns/shared-orchestrator-principle.md) for full details.
 
 **⛔ FORBIDDEN: Executing TDD-RED/GREEN logic directly from this step.**
-MUST invoke the ring:dev-implementation skill via the Skill tool; it handles all TDD phases, agent selection, agent dispatch, standards verification, and fix iteration.
+MUST invoke the ring:implementing-tasks skill via the Skill tool; it handles all TDD phases, agent selection, agent dispatch, standards verification, and fix iteration.
 
 ### ⛔ Post-Generation Panic Check (MANDATORY)
 
-After ring:dev-implementation completes, verify generated code:
+After ring:implementing-tasks completes, verify generated code:
 
 | Check | Command | Expected | If Found |
 |-------|---------|----------|----------|
@@ -44,10 +44,10 @@ See [shared-patterns/file-size-enforcement.md](../../shared-patterns/file-size-e
 **Summary:** Soft limit 1000 lines per file; hard block at 1500 lines. Files in the 1001-1500 band require cohesion review — keep if coherent (state machine, parser, schema, table-driven tests, tightly-coupled domain logic), split if fragmentable without artificial boundaries. Files > 1500 lines are hard-blocked unless explicit cohesion justification is documented in the PR description. Enforcement points:
 
 - **Gate 0:** Implementation agent receives file-size instructions; orchestrator runs verification command after agent completes. Files 1001-1500 → cohesion review; files > 1500 → hard block.
-- **Gate 0 exit check (inline in ring:dev-implementation's Delivery Verification Exit Check):** Delivery verification runs 7 checks as exit criteria: (A) file-size, (B) license headers, (C) linting, (D) migration safety, (E) vulnerability scanning, (F) API backward compatibility, (G) multi-tenant dual-mode. Any FAIL → ring:dev-implementation re-iterates with specific fix instructions.
+- **Gate 0 exit check (inline in ring:implementing-tasks's Delivery Verification Exit Check):** Delivery verification runs 7 checks as exit criteria: (A) file-size, (B) license headers, (C) linting, (D) migration safety, (E) vulnerability scanning, (F) API backward compatibility, (G) multi-tenant dual-mode. Any FAIL → ring:implementing-tasks re-iterates with specific fix instructions.
 - **Gate 8:** Code reviewers MUST flag any file > 1000 lines as a MEDIUM+ issue (apply cohesion judgment); files > 1500 lines are CRITICAL.
 
-### Step 2.1: Prepare Input for ring:dev-implementation Skill
+### Step 2.1: Prepare Input for ring:implementing-tasks Skill
 
 ```text
 current_task = state.epics[current_epic_index].tasks[current_task_index]
@@ -75,14 +75,14 @@ implementation_input = {
 }
 ```
 
-### Step 2.2: Invoke ring:dev-implementation Skill
+### Step 2.2: Invoke ring:implementing-tasks Skill
 
 ```text
 1. Record gate start timestamp
 
-2. REQUIRED: Invoke ring:dev-implementation skill with structured input:
+2. REQUIRED: Invoke ring:implementing-tasks skill with structured input:
 
-   Skill("ring:dev-implementation") with input:
+   Skill("ring:implementing-tasks") with input:
      unit_id: implementation_input.unit_id
      requirements: implementation_input.requirements
      language: implementation_input.language
@@ -121,7 +121,7 @@ implementation_input = {
 ### Step 2.3: Gate 0 Complete
 
 ```text
-5. When ring:dev-implementation skill returns PASS:
+5. When ring:implementing-tasks skill returns PASS:
 
    REQUIRED: Parse from skill output:
    - agent_used: extract from "## Implementation Summary"
@@ -131,7 +131,7 @@ implementation_input = {
    - standards_compliance: extract from Standards Coverage Table
 
    - agent_outputs.implementation = {
-       skill: "ring:dev-implementation",
+       skill: "ring:implementing-tasks",
        agent: "[agent used by skill]",
        output: "[full skill output]",
        timestamp: "[ISO timestamp]",
@@ -158,7 +158,7 @@ implementation_input = {
    ┌─────────────────────────────────────────────────┐
    │ ✓ GATE 0 COMPLETE                              │
    ├─────────────────────────────────────────────────┤
-   │ Skill: ring:dev-implementation                  │
+   │ Skill: ring:implementing-tasks                  │
    │ Agent: [agent_used]                             │
    │ TDD-RED:   FAIL captured ✓                     │
    │ TDD-GREEN: PASS verified ✓                     │
@@ -176,10 +176,10 @@ implementation_input = {
 ### Step 2.3.1: Delivery Verification Exit Check (MANDATORY before Gate 0 completion)
 
 After Gate 0 PASS, delivery verification runs AS EXIT CRITERIA (not as a separate gate).
-This check is performed inside `ring:dev-implementation` as its Delivery Verification
+This check is performed inside `ring:implementing-tasks` as its Delivery Verification
 Exit Check. The orchestrator DOES NOT dispatch a separate skill.
 
-Verify that the dev-implementation handoff includes `delivery_verification` field:
+Verify that the ring:implementing-tasks handoff includes `delivery_verification` field:
 
   required_handoff_fields:
     - implementation_summary
@@ -199,7 +199,7 @@ IF delivery_verification.result == "PASS":
   → Gate 0 is complete
 
 IF delivery_verification.result == "PARTIAL" or "FAIL":
-  → Return control to dev-implementation with remediation instructions (max 2 retries)
+  → Return control to ring:implementing-tasks with remediation instructions (max 2 retries)
   → After 2 retries → escalate to user
 
 Anti-Rationalization:
@@ -214,12 +214,12 @@ No separate `state.gate_progress.delivery_verification` field — delivery verif
 
 | Rationalization | Why It's WRONG | Required Action |
 |-----------------|----------------|-----------------|
-| "I can run TDD-RED/GREEN directly from here" | Inline TDD = skipping the skill. Skill has iteration logic and validation. | **Invoke Skill("ring:dev-implementation")** |
-| "I already know which agent to dispatch" | Agent selection is the SKILL's job, not the orchestrator's. | **Invoke Skill("ring:dev-implementation")** |
-| "The TDD steps are documented here, I'll follow them" | These steps are REFERENCE, not EXECUTABLE. The skill is executable. | **Invoke Skill("ring:dev-implementation")** |
-| "Skill adds overhead for simple tasks" | Overhead = compliance checks. Simple ≠ exempt. | **Invoke Skill("ring:dev-implementation")** |
-| "I'll dispatch the agent and verify output myself" | Self-verification skips the skill's re-dispatch loop. | **Invoke Skill("ring:dev-implementation")** |
-| "Agent already did TDD internally" | Internal ≠ verified by skill. Skill validates output structure. | **Invoke Skill("ring:dev-implementation")** |
+| "I can run TDD-RED/GREEN directly from here" | Inline TDD = skipping the skill. Skill has iteration logic and validation. | **Invoke Skill("ring:implementing-tasks")** |
+| "I already know which agent to dispatch" | Agent selection is the SKILL's job, not the orchestrator's. | **Invoke Skill("ring:implementing-tasks")** |
+| "The TDD steps are documented here, I'll follow them" | These steps are REFERENCE, not EXECUTABLE. The skill is executable. | **Invoke Skill("ring:implementing-tasks")** |
+| "Skill adds overhead for simple tasks" | Overhead = compliance checks. Simple ≠ exempt. | **Invoke Skill("ring:implementing-tasks")** |
+| "I'll dispatch the agent and verify output myself" | Self-verification skips the skill's re-dispatch loop. | **Invoke Skill("ring:implementing-tasks")** |
+| "Agent already did TDD internally" | Internal ≠ verified by skill. Skill validates output structure. | **Invoke Skill("ring:implementing-tasks")** |
 
 ### Step 2.4: Task Checkpoint (Conditional — `manual_per_task` only)
 
@@ -229,12 +229,12 @@ This is the ONLY per-task pause. It fires after the task's Gate 0 completes (the
 
 0. **COMMIT CHECK (before checkpoint):**
    - if `commit_timing == "per_task"`:
-     - Execute `/ring:commit` command with message: `feat({task_id}): {task_title}`
+     - Execute `/ring:committing-changes` command with message: `feat({task_id}): {task_title}`
      - Include all changed files from this task
    - else: Skip commit (will happen at epic or cycle end)
 
 0b. **VISUAL CHANGE REPORT (opt-in):**
-   - If `state.visual_report_granularity == "task"`: invoke `Skill("ring:visualize")` for a per-task code-diff and tell the user the path.
+   - If `state.visual_report_granularity == "task"`: invoke `Skill("ring:visualizing")` for a per-task code-diff and tell the user the path.
    - Default (`"none"`): skip.
 
 1. Set `status = "paused_for_approval"`, save state

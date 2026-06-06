@@ -253,7 +253,7 @@ def _rewrite_link_paths(body: str, lookup: dict[str, str], team: str) -> str:
       1. ../<other-skill>/  ->  ../ring-<team-of-other>-<other-skill>/
          (covers SKILL.md and shared-patterns/* refs to sibling skills)
       2. ../../../../<plug>/skills/shared-patterns/X  ->  ../../<plug>/shared-patterns/X
-         (covers default/skills/codereview/reviewers/* and similar cross-plugin refs)
+         (covers default/skills/reviewing-code/reviewers/* and similar cross-plugin refs)
       3. ../../../../skills/shared-patterns/X         ->  ../../shared-patterns/X
          (handles the malformed default/skills/.../dimensions/* link variant
           if it happens to resolve in the mirrored layout)

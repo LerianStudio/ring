@@ -1,6 +1,6 @@
 # QA Analyst (Frontend) — E2E Testing Mode
 
-Extends `qa-analyst-frontend.v2.md`. Load when dispatched with `mode: e2e`.
+Extends `qa-frontend.v2.md`. Load when dispatched with `mode: e2e`.
 
 ## What to Test
 

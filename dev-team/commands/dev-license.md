@@ -69,8 +69,8 @@ Apply or switch the license for the current repository.
 
 | Command | Description |
 |---------|-------------|
-| `/ring:dev-cycle` | Development cycle (includes license check at Gate 0) |
-| `/ring:dev-refactor` | Codebase analysis (may detect license inconsistencies) |
+| `/ring:running-dev-cycle` | Development cycle (includes license check at Gate 0) |
+| `/ring:planning-backend-refactor` | Codebase analysis (may detect license inconsistencies) |
 
 ---
 
@@ -79,7 +79,7 @@ Apply or switch the license for the current repository.
 **This command MUST load the skill for complete workflow execution.**
 
 ```
-Use Skill tool: ring:dev-licensing
+Use Skill tool: ring:applying-licenses
 ```
 
 The skill contains the complete 4-gate workflow with:

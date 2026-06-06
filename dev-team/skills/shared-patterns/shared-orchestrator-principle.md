@@ -35,15 +35,15 @@ If you catch yourself thinking "this is faster than dispatching", "the agent wou
 
 | File Type / Task | Agent to Dispatch |
 |------------------|-------------------|
-| `*.go` files | `ring:backend-engineer-golang` |
-| `*.ts` backend (Express, Fastify, NestJS) | `ring:backend-engineer-typescript` |
-| `*.tsx` / `*.jsx` React components | `ring:frontend-engineer` |
-| BFF / API Gateway layer | `ring:frontend-bff-engineer-typescript` |
-| UI/UX review, design system | `ring:frontend-designer` |
-| Local Dockerfile/docker-compose, backend observability, backend tests | matching `ring:backend-engineer-*` |
-| Helm charts / Kubernetes manifests | `ring:helm-engineer` |
+| `*.go` files | `ring:backend-go` |
+| `*.ts` backend (Express, Fastify, NestJS) | `ring:backend-ts` |
+| `*.tsx` / `*.jsx` React components | `ring:frontend` |
+| BFF / API Gateway layer | `ring:bff-ts` |
+| UI/UX review, design system | `ring:ui-designer` |
+| Local Dockerfile/docker-compose, backend observability, backend tests | matching `ring:backend-go` / `ring:backend-ts` |
+| Helm charts / Kubernetes manifests | `ring:helm` |
 
-Code review always dispatches the full reviewer pool **in parallel** — see `ring:codereview`. For the complete agent roster across all plugins, see `ring:using-dev-team`. For the gate→agent map and cadences, see `ring:dev-cycle` SKILL.md Gate Map and `shared-patterns/gate-cadence-classification.md`.
+Code review always dispatches the full reviewer pool **in parallel** — see `ring:reviewing-code`. For the complete agent roster across all plugins, see `ring:using-dev-team`. For the gate→agent map and cadences, see `ring:running-dev-cycle` SKILL.md Gate Map and `shared-patterns/gate-cadence-classification.md`.
 
 ## Anti-Rationalization
 

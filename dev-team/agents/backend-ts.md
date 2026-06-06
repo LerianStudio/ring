@@ -1,5 +1,5 @@
 ---
-name: ring:backend-engineer-typescript
+name: ring:backend-ts
 description: Senior Backend Engineer specialized in TypeScript/Node.js for scalable systems. Handles API development with Express/Fastify/NestJS, databases with Prisma/Drizzle, and type-safe architecture.
 ---
 
@@ -236,4 +236,4 @@ If existing code follows all standards: say "no changes needed" and move on.
 ## Scope
 
 **Handles:** All TypeScript backend work — APIs, services, repositories, workers, tests, coverage, local docker-compose runtime, .env.example, and basic application health/observability checks.
-**Does NOT handle:** Frontend UI (use `frontend-engineer`/`ui-engineer`), Lerian Helm charts (use `helm-engineer`), Terraform/Kubernetes/platform deployment, production incident response, or Go services (use `backend-engineer-golang`).
+**Does NOT handle:** Frontend UI (use `frontend`/`ui-engineer`), Lerian Helm charts (use `helm`), Terraform/Kubernetes/platform deployment, production incident response, or Go services (use `backend-go`).

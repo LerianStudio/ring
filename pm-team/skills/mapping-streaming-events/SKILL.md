@@ -1,12 +1,6 @@
 ---
-name: ring:streaming-event-mapping
-description: |
-  Identify "eventable points" in a Lerian Go service where lib-streaming should emit business
-  events to per-tenant SaaS subscribers. Three passes (Survey, Slice, Mark) produce a
-  PM-validated event catalog (Markdown) and instrumentation map (JSON) for
-  ring:dev-streaming-instrumentation. Enforces the past-tense durable tenant-scoped scope fence
-  and CRITICAL/IMPORTANT/OBSERVATIONAL/CUSTOM postures. Skip on non-Go, infra-only, or
-  consumer-only services.
+name: ring:mapping-streaming-events
+description: "Mapping the eventable points in a Lerian Go service where lib-streaming should emit past-tense, durable, tenant-scoped business events, producing a PM-validated event catalog and instrumentation-map.json for ring:instrumenting-streaming-events. Three-pass discovery (Survey, Slice, Mark) with a scope fence and delivery postures. Use to inventory eventable points. Skip on non-Go, infra-only, or consumer-only services."
 ---
 
 # Streaming Event Mapping (lib-streaming, PM-team)
@@ -15,7 +9,7 @@ description: |
 
 - User requests an event catalog, eventable-point inventory, or "where should we emit events" map
 - PM team prepares a Lerian Go service for client-facing event streaming subscriptions
-- Pre-flight to ring:dev-streaming-instrumentation
+- Pre-flight to ring:instrumenting-streaming-events
 - Task mentions "event mapping", "streaming inventory", "eventable points", "client event subscription"
 
 ## Skip when
@@ -27,11 +21,11 @@ description: |
 
 ## Sequence
 
-**Runs before:** ring:dev-streaming-instrumentation
+**Runs before:** ring:instrumenting-streaming-events
 
 ## Related
 
-**Complementary:** ring:dev-streaming-instrumentation, ring:codebase-explorer, ring:pre-dev-feature-map
+**Complementary:** ring:instrumenting-streaming-events, ring:codebase-explorer, ring:mapping-feature-relationships
 
 ## Prerequisites
 
@@ -42,7 +36,7 @@ description: |
 
 Orchestrates 3-pass codebase discovery to produce an event catalog and instrumentation map for lib-streaming. You orchestrate. Agents explore. You NEVER read, write, or edit source code directly.
 
-**Announce at start:** "Using ring:streaming-event-mapping through 7 gates (0-7)."
+**Announce at start:** "Using ring:mapping-streaming-events through 7 gates (0-7)."
 
 ## Streaming Architecture
 
@@ -247,14 +241,14 @@ Produce `docs/streaming/handoff-to-skill2.md` summarizing:
 - Inputs ready for Skill #2 (instrumentation-map.json, event-catalog.md)
 - Catalog summary (service, event counts by posture)
 - Outbox required flag
-- Next command: `Skill: ring:dev-streaming-instrumentation`
+- Next command: `Skill: ring:instrumenting-streaming-events`
 
 ## State Persistence
 
 Save to `docs/streaming/_state.json`:
 ```json
 {
-  "skill": "streaming-event-mapping",
+  "skill": "mapping-streaming-events",
   "service_name": "<from Gate 0>",
   "current_gate": 0,
   "gates": {"0": "PENDING", "1": "PENDING", "2": "PENDING", "3": "PENDING", "4": "PENDING", "5": "PENDING", "6": "PENDING_USER_APPROVAL", "7": "PENDING"},

@@ -1082,7 +1082,7 @@ _ = app.Shutdown()  // WRONG: Errors must be logged
 
 Services missing the `/readyz` endpoint cause Kubernetes to route traffic to unready pods.
 
-**⛔ HARD GATE:** All services MUST implement both `/health` and `/readyz` endpoints. See `ring:dev-readyz` skill for the full readiness contract (deep dependency checks with TLS verification and startup self-probe).
+**⛔ HARD GATE:** All services MUST implement both `/health` and `/readyz` endpoints. See `ring:implementing-readyz` skill for the full readiness contract (deep dependency checks with TLS verification and startup self-probe).
 
 ### Endpoint Distinction (MANDATORY)
 
@@ -1111,7 +1111,7 @@ f.Get("/health", func(c *fiber.Ctx) error {
 })
 
 // Readiness check - returns 200 only if all dependencies are ready
-// Used by Kubernetes readiness probe. See ring:dev-readyz for full contract.
+// Used by Kubernetes readiness probe. See ring:implementing-readyz for full contract.
 f.Get("/readyz", func(c *fiber.Ctx) error {
     ctx := c.UserContext()
 
@@ -1169,7 +1169,7 @@ f.Get("/readyz", func(c *fiber.Ctx) error {
 })
 ```
 
-Steady-state observability lives in the readyz metrics (Gate 5 of `ring:dev-readyz`): `readyz_check_status`, `readyz_check_duration`, `readyz_aggregate_status`. Logs are diagnostic, not aggregation.
+Steady-state observability lives in the readyz metrics (Gate 5 of `ring:implementing-readyz`): `readyz_check_status`, `readyz_check_duration`, `readyz_aggregate_status`. Logs are diagnostic, not aggregation.
 
 ### Kubernetes Configuration (REQUIRED)
 

@@ -1,5 +1,5 @@
 ---
-name: ring:helm-engineer
+name: ring:helm
 description: Specialist Helm Chart Engineer for Lerian platform. Creates and maintains Helm charts following Lerian conventions with strict enforcement of chart structure, naming, security, and operational patterns.
 ---
 
@@ -187,4 +187,4 @@ If existing chart follows all Lerian conventions: say "no changes needed" and mo
 ## Scope
 
 **Handles:** Lerian-specific Helm charts — naming, env coverage, KEDA patterns, AWS IAM sidecar.
-**Does NOT handle:** Application code (use `backend-engineer-*`), Docker/Terraform (use `devops-engineer`), production monitoring (use `sre`).
+**Does NOT handle:** Application code (use `backend-go`/`backend-ts`), Docker/Terraform (use `devops`), production monitoring (use `sre`).

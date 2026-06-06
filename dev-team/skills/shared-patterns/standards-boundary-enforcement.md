@@ -98,7 +98,7 @@ Each agent MUST:
 
 **These are items agents commonly invent that are not typically in standards. Always verify in WebFetch result before flagging.**
 
-#### ring:backend-engineer-golang → golang.md
+#### ring:backend-go → golang.md
 
 | Common Hallucination | Action |
 |---------------------|--------|
@@ -107,7 +107,7 @@ Each agent MUST:
 | Gin instead of Fiber | Check actual HTTP framework in golang.md |
 | GORM instead of pgx | Check actual ORM/driver in golang.md |
 
-#### ring:backend-engineer-typescript → typescript.md
+#### ring:backend-ts → typescript.md
 
 | Common Hallucination | Action |
 |---------------------|--------|
@@ -116,7 +116,7 @@ Each agent MUST:
 | Jest | Verify testing framework in typescript.md |
 | InversifyJS | Verify DI framework in typescript.md |
 
-#### ring:frontend-designer → frontend.md
+#### ring:ui-designer → frontend.md
 
 | Common Hallucination | Action |
 |---------------------|--------|

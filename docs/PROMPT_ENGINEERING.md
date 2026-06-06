@@ -422,7 +422,7 @@ Any occurrence = IMMEDIATE REJECTION.
 
 ---
 
-<dispatch_required agent="ring:backend-engineer-golang">
+<dispatch_required agent="ring:backend-go">
 Implement user authentication endpoint with JWT validation.
 </dispatch_required>
 
@@ -430,9 +430,9 @@ MUST use Task tool with specified agent.
 
 ---
 
-<parallel_dispatch agents="ring:backend-engineer-golang, ring:backend-engineer-typescript, ring:code-reviewer">
+<parallel_dispatch agents="ring:backend-go, ring:backend-ts, ring:code-reviewer">
 Analyze codebase against Ring standards. Backend engineers own implementation quality, coverage, local runtime, and health/observability checks in the active dev-cycle. All agents receive same context:
-- Codebase Report: docs/ring:dev-refactor/{timestamp}/codebase-report.md
+- Codebase Report: docs/ring:planning-backend-refactor/{timestamp}/codebase-report.md
 - Project Rules: docs/PROJECT_RULES.md
 </parallel_dispatch>
 

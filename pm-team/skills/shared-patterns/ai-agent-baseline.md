@@ -2,7 +2,7 @@
 description: |
   Canonical source for AI-agent-hours definition across pm-team skills.
   Defines baseline execution model, capacity utilization, and usage patterns.
-  Referenced by: ring:pre-dev-phases-and-epics (Gate 7), ring:pre-dev-delivery-planning (Gate 9).
+  Referenced by: ring:decomposing-phases-and-epics (Gate 7), ring:planning-delivery (Gate 9).
 ---
 
 # AI Agent Baseline Definition
@@ -10,18 +10,18 @@ description: |
 **Canonical source for AI-agent-hours definition across pm-team skills.**
 
 This pattern is referenced by:
-- `ring:pre-dev-phases-and-epics` (Gate 7)
-- `ring:pre-dev-delivery-planning` (Gate 9)
+- `ring:decomposing-phases-and-epics` (Gate 7)
+- `ring:planning-delivery` (Gate 9)
 
 ---
 
-## Baseline: AI Agent via ring:dev-cycle (Lerian Standard)
+## Baseline: AI Agent via ring:running-dev-cycle (Lerian Standard)
 
 All time estimates in pm-team workflows use **AI-agent-hours** as the baseline unit.
 
 ### What "AI-agent-hours" Means
 
-- **Executor:** AI agent implementing via ring:dev-cycle
+- **Executor:** AI agent implementing via ring:running-dev-cycle
 - **Includes:** TDD, automated code review, SRE validation, DevOps setup
 - **Execution:** Fully automated through dev-team gates
 - **Quality:** Production-ready (all gates passed)
@@ -39,14 +39,14 @@ All time estimates in pm-team workflows use **AI-agent-hours** as the baseline u
 ### Why This Baseline?
 
 **Lerian Context:**
-- All development uses ring:dev-cycle (AI Agent execution)
+- All development uses ring:running-dev-cycle (AI Agent execution)
 - Consistent measurement: AI work is predictable and repeatable
 - Transparent separation: AI implementation time vs human validation time
 - Trackable: Can measure AI estimate vs actual execution time
 
 ### Capacity: 90% (Fixed)
 
-AI Agent via ring:dev-cycle has minimal but real overhead:
+AI Agent via ring:running-dev-cycle has minimal but real overhead:
 
 | Overhead Type | Impact |
 |---------------|--------|
@@ -79,7 +79,7 @@ AI Agent via ring:dev-cycle has minimal but real overhead:
 ```markdown
 **Effort Estimate:**
 - AI Estimate: 4.5 AI-agent-hours
-- Baseline: AI Agent via ring:dev-cycle
+- Baseline: AI Agent via ring:running-dev-cycle
 - Confidence: High
 ```
 
@@ -115,7 +115,7 @@ Teams should track actual vs estimated to improve accuracy:
 ```markdown
 Task T-001:
 - AI Estimated: 4h
-- AI Actual (ring:dev-cycle): 3.5h
+- AI Actual (ring:running-dev-cycle): 3.5h
 - Variance: -12.5% (AI faster than estimated)
 
 Task T-002:

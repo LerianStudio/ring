@@ -1,6 +1,6 @@
 ---
-name: ring:production-readiness-audit
-description: Ring-standards-aligned production readiness audit across Structure, Security, Operations, Quality, and Infrastructure — 43 base dimensions + 1 conditional (multi-tenant) = up to 44 dimensions. Use before production deployment, periodic reviews, onboarding, or major releases. Skip for prototypes, libraries, or single-dimension checks. Runs explorers in batches of 10 and produces a scored report (0-430 base, max 440 with multi-tenant) with severity ratings.
+name: ring:auditing-production-readiness
+description: "Auditing a service's production readiness against Ring engineering standards across base dimensions plus a conditional multi-tenant dimension, then emitting a scored report and an HTML dashboard. Use before production deploy, periodic review, onboarding, or a major release. Skip for prototypes, libraries, or single-dimension checks."
 ---
 
 # Production Readiness Audit
@@ -26,7 +26,7 @@ description: Ring-standards-aligned production readiness audit across Structure,
 
 A multi-agent audit system evaluating **43 base dimensions + 1 conditional (multi-tenant) = up to 44 dimensions** across 5 categories, aligned with Ring development standards. Detects project stack, loads relevant standards via WebFetch, runs explorers in **batches of 10**, appending results incrementally to a single report file.
 
-**Announce at start:** "Using ring:production-readiness-audit to audit {N} dimensions in 5 batches."
+**Announce at start:** "Using ring:auditing-production-readiness to audit {N} dimensions in 5 batches."
 
 ## Audit Dimensions
 
@@ -131,7 +131,7 @@ The STOP-CHECK, anti-trickle, and self-verify guards above remain binding regard
 
 ### Step 8: Visual Dashboard (MANDATORY)
 
-Invoke `Skill("ring:visualize")` to produce an HTML dashboard at `docs/audits/production-readiness-{timestamp}-dashboard.html`.
+Invoke `Skill("ring:visualizing")` to produce an HTML dashboard at `docs/audits/production-readiness-{timestamp}-dashboard.html`.
 
 Dashboard sections:
 1. Score Hero (score/max, readiness badge, color-coded)

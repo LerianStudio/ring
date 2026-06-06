@@ -40,39 +40,39 @@ Ring solves this by:
 
 - `ring:review-slicer` - Review slicer (groups large multi-themed PRs into thematic slices for focused parallel review)
 - `ring:codebase-explorer` - Deep architecture analysis (deep-analysis, complements built-in Explore)
-- Use `ring:codereview` skill to orchestrate parallel review workflow
+- Use `ring:reviewing-code` skill to orchestrate parallel review workflow
 
 **Developer Agents (dev-team plugin):**
 
-- `ring:backend-engineer-golang` - Go backend specialist for financial systems
-- `ring:backend-engineer-typescript` - TypeScript/Node.js backend specialist (Express, NestJS, Fastify)
-- `ring:frontend-bff-engineer-typescript` - BFF & React/Next.js frontend with Clean Architecture
-- `ring:frontend-designer` - Visual design specialist
-- `ring:frontend-engineer` - Senior Frontend Engineer (React/Next.js)
-- `ring:devops-engineer` - DevOps and infrastructure specialist
-- `ring:prompt-quality-reviewer` - Agent Quality Analyst
-- `ring:qa-analyst` - Backend QA specialist (unit, integration, load, chaos)
-- `ring:qa-analyst-frontend` - Frontend QA specialist (accessibility, visual, E2E, performance)
+- `ring:backend-go` - Go backend specialist for financial systems
+- `ring:backend-ts` - TypeScript/Node.js backend specialist (Express, NestJS, Fastify)
+- `ring:bff-ts` - BFF & React/Next.js frontend with Clean Architecture
+- `ring:ui-designer` - Visual design specialist
+- `ring:frontend` - Senior Frontend Engineer (React/Next.js)
+- `ring:devops` - DevOps and infrastructure specialist
+- `ring:prompt-reviewer` - Agent Quality Analyst
+- `ring:qa` - Backend QA specialist (unit, integration, load, chaos)
+- `ring:qa-frontend` - Frontend QA specialist (accessibility, visual, E2E, performance)
 - `ring:sre` - Observability and reliability specialist
 - `ring:ui-engineer` - UI component specialist (design systems, accessibility)
-- `ring:helm-engineer` - Helm chart specialist (chart structure, security, Lerian conventions)
+- `ring:helm` - Helm chart specialist (chart structure, security, Lerian conventions)
 - `ring:code-reviewer` - Foundation review (architecture, code quality, design patterns)
-- `ring:business-logic-reviewer` - Correctness review (domain logic, requirements, edge cases)
+- `ring:logic-reviewer` - Correctness review (domain logic, requirements, edge cases)
 - `ring:security-reviewer` - Safety review (vulnerabilities, OWASP, authentication)
 - `ring:test-reviewer` - Test quality review (coverage, edge cases, assertions, test anti-patterns)
-- `ring:nil-safety-reviewer` - Nil/null safety review (traces pointer risks, missing guards, panic paths)
+- `ring:nil-reviewer` - Nil/null safety review (traces pointer risks, missing guards, panic paths)
 - `ring:dead-code-reviewer` - Dead code review (orphaned code detection, reachability analysis, dead dependency chains)
-- `ring:lib-commons-reviewer` - lib-commons package usage review (lifecycle, tenancy, http, idempotency, security, database, messaging, outbox; reinvented-wheel opportunities)
-- `ring:lib-observability-reviewer` - Conditional specialist for tracing, metrics, logging, runtime recovery, redaction, constants, and SafeGo implications
-- `ring:lib-systemplane-reviewer` - Conditional specialist for runtime config, hot-reload knobs, admin config, tenant-scoped settings, and systemplane imports
-- `ring:lib-streaming-reviewer` - Conditional specialist for business events, outbox, producers, broker publishing, CloudEvents, manifests, and catalogs
-- `ring:multi-tenant-reviewer` - Multi-tenant usage review (lib-commons/multitenancy patterns, tenant isolation, JWT tenantId propagation)
-- `ring:performance-reviewer` - Performance review (code hotspots, infra misconfigurations, Go/TypeScript/Python)
+- `ring:commons-reviewer` - lib-commons package usage review (lifecycle, tenancy, http, idempotency, security, database, messaging, outbox; reinvented-wheel opportunities)
+- `ring:obs-reviewer` - Conditional specialist for tracing, metrics, logging, runtime recovery, redaction, constants, and SafeGo implications
+- `ring:systemplane-reviewer` - Conditional specialist for runtime config, hot-reload knobs, admin config, tenant-scoped settings, and systemplane imports
+- `ring:streaming-reviewer` - Conditional specialist for business events, outbox, producers, broker publishing, CloudEvents, manifests, and catalogs
+- `ring:tenancy-reviewer` - Multi-tenant usage review (lib-commons/multitenancy patterns, tenant isolation, JWT tenantId propagation)
+- `ring:perf-reviewer` - Performance review (code hotspots, infra misconfigurations, Go/TypeScript/Python)
 
 > **Standards Compliance:** Refactor-capable dev-team agents produce a `## Standards Compliance` output section with conditional requirement:
 >
-> - **Optional** when invoked directly or via `ring:dev-cycle`
-> - **MANDATORY** when invoked from `ring:dev-refactor` (triggered by `**MODE: ANALYSIS ONLY**` in prompt)
+> - **Optional** when invoked directly or via `ring:running-dev-cycle`
+> - **MANDATORY** when invoked from `ring:planning-backend-refactor` (triggered by `**MODE: ANALYSIS ONLY**` in prompt)
 >
 > When mandatory, agents load Ring standards via WebFetch and produce comparison tables with:
 >
@@ -80,18 +80,18 @@ Ring solves this by:
 > - Severity classification (Critical/High/Medium/Low)
 > - File locations and migration recommendations
 >
-> See `dev-team/docs/standards/*.md` for standards source. Cross-references: CLAUDE.md (Standards Compliance section), `dev-team/skills/dev-refactor/SKILL.md`
+> See `dev-team/docs/standards/*.md` for standards source. Cross-references: CLAUDE.md (Standards Compliance section), `dev-team/skills/planning-backend-refactor/SKILL.md`
 
 **Product Research Agents (ring-pm-team plugin):**
 
-- `ring:repo-research-analyst` - Repository structure and codebase analysis
-- `ring:best-practices-researcher` - Industry best practices research
-- `ring:framework-docs-researcher` - Framework documentation research
+- `ring:repo-researcher` - Repository structure and codebase analysis
+- `ring:web-researcher` - Industry best practices research
+- `ring:docs-researcher` - Framework documentation research
 - `ring:product-designer` - Product design and UX research
 
 **Technical Writing Agents (ring-tw-team plugin):**
 
-- `ring:functional-writer` - Functional documentation (guides, tutorials, conceptual docs)
+- `ring:guide-writer` - Functional documentation (guides, tutorials, conceptual docs)
 - `ring:api-writer` - API reference documentation (endpoints, schemas, examples)
 - `ring:docs-reviewer` - Documentation quality review (voice, tone, structure, completeness)
 
@@ -211,7 +211,7 @@ git clone https://github.com/lerianstudio/ring.git ~/ring
 
 ### Code Analysis Pipeline
 
-The codereview pipeline uses [Mithril](https://github.com/LerianStudio/mithril), an external code analysis tool installed via `go install`. Mithril performs static analysis, AST extraction, call graph generation, and context compilation for AI-assisted code review.
+The `ring:reviewing-code` pipeline uses [Mithril](https://github.com/LerianStudio/mithril), an external code analysis tool installed via `go install`. Mithril performs static analysis, AST extraction, call graph generation, and context compilation for AI-assisted code review.
 
 Install via `go install github.com/lerianstudio/mithril@latest`. See the [Mithril repository](https://github.com/LerianStudio/mithril) for full installation details and release notes.
 
@@ -223,8 +223,8 @@ When you start a new Claude Code session with Ring installed, you'll see:
 ## Available Skills:
 - ring:using-ring (Check for skills BEFORE any task)
 - ring:test-driven-development (RED-GREEN-REFACTOR cycle)
-- ring:codereview (9 defaults + conditional specialist dispatch)
-- ring:explore-codebase (Two-phase codebase exploration)
+- ring:reviewing-code (9 defaults + conditional specialist dispatch)
+- ring:exploring-codebases (Two-phase codebase exploration)
 ... and 73 more skills
 ```
 
@@ -255,13 +255,13 @@ REFACTOR → Clean up → Stay green
 **Testing & Quality (2):**
 
 - `ring:test-driven-development` - Write test first, watch fail, minimal code
-- `ring:lint` - Parallel lint fixing with agent dispatch
+- `ring:fixing-lint` - Parallel lint fixing with agent dispatch
 
 **Collaboration & Planning (5):**
 
-- `ring:codereview` - **Parallel 9 defaults + conditional specialist dispatch** with severity-based handling
-- `ring:worktree` - Isolated development
-- `ring:commit` - Smart commit organization with atomic grouping, conventional commits, and trailers
+- `ring:reviewing-code` - **Parallel 9 defaults + conditional specialist dispatch** with severity-based handling
+- `ring:creating-worktrees` - Isolated development
+- `ring:committing-changes` - Smart commit organization with atomic grouping, conventional commits, and trailers
 - `ring:writing-plans` - Author phased implementation plans (phase → epic → task) from a spec; first phase detailed into dispatch-ready tasks, later phases epic-level for rolling-wave elaboration
 - `ring:executing-plans` - Rolling-wave execution of a phased plan: implement the detailed phase, checkpoint with the user, elaborate the next phase against the real codebase, repeat
 
@@ -273,67 +273,67 @@ REFACTOR → Clean up → Stay green
 
 **Integration (1):**
 
-- `ring:gandalf-webhook` - Send tasks to Gandalf (AI team member) via webhook for Slack, Google Workspace, and Jira interactions
+- `ring:delegating-to-gandalf` - Send tasks to Gandalf (AI team member) via webhook for Slack, Google Workspace, and Jira interactions
 
 **Session & Learning (4):**
 
-- `ring:explore-codebase` - Two-phase codebase exploration
-- `ring:release-guide` - Generate Ops Update Guide from git diff analysis
-- `ring:visualize` - Generate self-contained HTML pages to visually explain systems, code changes, and data
-- `ring:create-handoff` - Create handoff documents capturing session state for seamless context-clear and resume
+- `ring:exploring-codebases` - Two-phase codebase exploration
+- `ring:generating-release-guides` - Generate Ops Update Guide from git diff analysis
+- `ring:visualizing` - Generate self-contained HTML pages to visually explain systems, code changes, and data
+- `ring:creating-handoffs` - Create handoff documents capturing session state for seamless context-clear and resume
 
 **Audit & Readiness (1):**
 
-- `ring:production-readiness-audit` - 44-dimension production readiness audit; runs explorers in batches of up to 10, appends incrementally to a single report; output: scored report (0-430, max 440 with multi-tenant) with severity ratings. See [default/skills/production-readiness-audit/SKILL.md](default/skills/production-readiness-audit/SKILL.md) for invocation and implementation details.
+- `ring:auditing-production-readiness` - 44-dimension production readiness audit; runs explorers in batches of up to 10, appends incrementally to a single report; output: scored report (0-430, max 440 with multi-tenant) with severity ratings. See [default/skills/auditing-production-readiness/SKILL.md](default/skills/auditing-production-readiness/SKILL.md) for invocation and implementation details.
 
 ### Developer Skills (ring-dev-team plugin - 33 skills)
 
 **Orchestration & Refactoring (7):**
 
 - `ring:using-dev-team` - Introduction to developer specialist agents
-- `ring:dev-cycle` - Lean backend development cycle orchestrator driven by a rolling-wave phased plan (phases → epics E-X.Y → tasks T-X.Y.Z): Gate 0 implementation-owned TDD/coverage/docker-compose/runtime/delivery verification per task, Gate 8 review + Gate 9 validation per epic, phase boundary (Step 11.5) closes each phase and elaborates the next against the real codebase
-- `ring:dev-cycle-frontend` - Lean frontend development cycle orchestrator on the same rolling-wave phased plan (Gate 0 per task, Gate 7 review per epic, Gate 8 validation per task, phase boundary per phase)
-- `ring:dev-refactor` - Backend/codebase standards analysis
-- `ring:dev-refactor-frontend` - Frontend standards analysis and task generation
-- `ring:dev-simplify` - Whole-codebase structural simplification sweep (hunts unjustified abstractions, adapters, shims; KILL/REVIEW/KEEP output; DELETE-by-default burden of proof for pre-public applications)
-- `ring:dev-cycle-management` - Development cycle state management (phase/epic status reporting and cancellation)
+- `ring:running-dev-cycle` - Lean backend development cycle orchestrator driven by a rolling-wave phased plan (phases → epics E-X.Y → tasks T-X.Y.Z): Gate 0 implementation-owned TDD/coverage/docker-compose/runtime/delivery verification per task, Gate 8 review + Gate 9 validation per epic, phase boundary (Step 11.5) closes each phase and elaborates the next against the real codebase
+- `ring:running-dev-cycle-frontend` - Lean frontend development cycle orchestrator on the same rolling-wave phased plan (Gate 0 per task, Gate 7 review per epic, Gate 8 validation per task, phase boundary per phase)
+- `ring:planning-backend-refactor` - Backend/codebase standards analysis
+- `ring:planning-frontend-refactor` - Frontend standards analysis and task generation
+- `ring:planning-codebase-simplification` - Whole-codebase structural simplification sweep (hunts unjustified abstractions, adapters, shims; KILL/REVIEW/KEEP output; DELETE-by-default burden of proof for pre-public applications)
+- `ring:managing-dev-cycle` - Development cycle state management (phase/epic status reporting and cancellation)
 
 **Backend Gate Skills:**
 
-- `ring:dev-implementation` - Gate 0: TDD implementation
-- `ring:dev-multi-tenant` - Multi-tenant adaptation (database-per-tenant isolation, integrated into Gate 0)
-- `ring:dev-docker-security` - Docker image security audit for Docker Hub Health Score grade A
-- `ring:dev-helm` - Helm chart creation and maintenance following Lerian conventions
-- `ring:dev-service-discovery` - Service/module/resource hierarchy scanner for dispatch layer
-- `ring:dev-readyz` - Comprehensive readiness probes (/readyz) with per-dependency status and TLS validation
-- `ring:dev-streaming-instrumentation` - Wire lib-streaming event emission from a validated instrumentation map
+- `ring:implementing-tasks` - Gate 0: TDD implementation
+- `ring:adding-multi-tenancy` - Multi-tenant adaptation (database-per-tenant isolation, integrated into Gate 0)
+- `ring:hardening-dockerfiles` - Docker image security audit for Docker Hub Health Score grade A
+- `ring:creating-helm-charts` - Helm chart creation and maintenance following Lerian conventions
+- `ring:mapping-service-resources` - Service/module/resource hierarchy scanner for dispatch layer
+- `ring:implementing-readyz` - Comprehensive readiness probes (/readyz) with per-dependency status and TLS validation
+- `ring:instrumenting-streaming-events` - Wire lib-streaming event emission from a validated instrumentation map
 
 **Testing & Validation:**
 
-- `ring:dev-goroutine-leak-testing` - Goroutine leak detection and regression testing
-- `ring:dev-k6-load-testing` - k6 load test generation following Lerian platform conventions
-- `ring:dev-validation` - Gate 9: User approval
-- `ring:dev-report` - Assertiveness scoring and metrics
-- `ring:dev-verify-code` - Atomic Go code verification with MERGE_READY/NEEDS_FIX verdict
+- `ring:detecting-goroutine-leaks` - Goroutine leak detection and regression testing
+- `ring:load-testing-with-k6` - k6 load test generation following Lerian platform conventions
+- `ring:validating-acceptance-criteria` - Gate 9: User approval
+- `ring:writing-dev-reports` - Assertiveness scoring and metrics
+- `ring:verifying-code` - Atomic Go code verification with MERGE_READY/NEEDS_FIX verdict
 
 **Migration & Reference (6):**
 
 - `ring:using-lib-commons` - Comprehensive reference for lib-commons v5.0.2 (Lerian's shared Go library with 30+ packages)
 - `ring:using-runtime` - Deep reference and 6-angle audit for lib-observability/runtime: SafeGo, panic recovery, observability trident, policy selection, framework integration. Catches naked goroutine launches that cause silent production failures.
 - `ring:using-assert` - Deep reference and 6-angle audit for lib-observability/assert: production runtime assertions with observability trident, full domain predicate catalog (double-entry, transaction state machine, financial validations), AssertionError unwrapping patterns. Converts financial invariants into production-enforced rules.
-- `ring:dev-systemplane-migration` - Migrate Lerian Go services from .env/YAML config to systemplane (database-backed hot-reloadable config)
-- `ring:dev-llms-txt` - Generate or audit llms.txt files following llmstxt.org spec for AI-friendly repository entry points
-- `ring:dev-licensing` - Repository license management (Apache 2.0, Elastic v2, Proprietary)
+- `ring:migrating-to-lib-systemplane` - Migrate Lerian Go services from .env/YAML config to systemplane (database-backed hot-reloadable config)
+- `ring:generating-llms-txt` - Generate or audit llms.txt files following llmstxt.org spec for AI-friendly repository entry points
+- `ring:applying-licenses` - Repository license management (Apache 2.0, Elastic v2, Proprietary)
 
 **Security (1):**
 
-- `ring:dev-dep-security-check` - Supply-chain gate for dependency installations (validates identity, vulnerabilities, suspicious signals)
+- `ring:auditing-dependency-security` - Supply-chain gate for dependency installations (validates identity, vulnerabilities, suspicious signals)
 
 **Frontend Quality Skills (1):**
 
-- `ring:dev-frontend-quality` - Frontend quality checks in modes `accessibility` (axe-core/WCAG), `visual` (snapshots/viewports), `e2e` (Playwright 3-browser), `performance` (Lighthouse/Core Web Vitals), or `all`; dispatches `ring:qa-analyst-frontend`
+- `ring:checking-frontend-quality` - Frontend quality checks in modes `accessibility` (axe-core/WCAG), `visual` (snapshots/viewports), `e2e` (Playwright 3-browser), `performance` (Lighthouse/Core Web Vitals), or `all`; dispatches `ring:qa-frontend`
 
-> Frontend and backend dev-cycle workflows both use `ring:codereview` (core plugin) as the review gate.
+> Frontend and backend dev-cycle workflows both use `ring:reviewing-code` (core plugin) as the review gate.
 
 ### Product Planning Skills (ring-pm-team plugin - 18 skills)
 
@@ -341,36 +341,36 @@ REFACTOR → Clean up → Stay green
 
 - `ring:using-pm-team` - Introduction to product planning workflow
 
-0. `ring:pre-dev-research` - Research phase (parallel agents)
-1. `ring:pre-dev-prd-creation` - Business requirements (WHAT/WHY)
-2. `ring:pre-dev-feature-map` - Feature relationships
-3. `ring:pre-dev-trd-creation` - Technical architecture (HOW)
-4. `ring:pre-dev-api-design` - Component contracts
-5. `ring:pre-dev-data-model` - Entity relationships
-6. `ring:pre-dev-dependency-map` - Technology selection
-7. `ring:pre-dev-phases-and-epics` - Phased plan: phases + epics, rolling wave
-8. `ring:pre-dev-task-creation` - Phase 1 task detailing: dispatch-ready tasks, no code
+0. `ring:researching-features` - Research phase (parallel agents)
+1. `ring:writing-prds` - Business requirements (WHAT/WHY)
+2. `ring:mapping-feature-relationships` - Feature relationships
+3. `ring:writing-trds` - Technical architecture (HOW)
+4. `ring:designing-api-contracts` - Component contracts
+5. `ring:designing-data-model` - Entity relationships
+6. `ring:pinning-dependency-versions` - Technology selection
+7. `ring:decomposing-phases-and-epics` - Phased plan: phases + epics, rolling wave
+8. `ring:detailing-tasks` - Phase 1 task detailing: dispatch-ready tasks, no code
 
 **Workflow Orchestrators:**
 
-- `ring:pre-dev-feature` - 5-gate orchestrator for small features (<2 days)
-- `ring:pre-dev-full` - 10-gate orchestrator for large features (>=2 days)
+- `ring:planning-small-features` - 5-gate orchestrator for small features (<2 days)
+- `ring:planning-large-features` - 10-gate orchestrator for large features (>=2 days)
 
 **Additional Planning Skills:**
 
-- `ring:pre-dev-design-validation` - Gate 1.5/2.5: Design validation for UI features
-- `ring:pre-dev-delivery-planning` - Gate 4 (Small) / Gate 9 (Large): Delivery roadmap and timeline
-- `ring:delivery-status` - Delivery progress tracking against roadmap
-- `ring:deep-doc-review` - Deep cross-reference review of pre-dev documentation artifacts
+- `ring:validating-ux-completeness` - Gate 1.5/2.5: Design validation for UI features
+- `ring:planning-delivery` - Gate 4 (Small) / Gate 9 (Large): Delivery roadmap and timeline
+- `ring:tracking-delivery` - Delivery progress tracking against roadmap
+- `ring:reconciling-predev-docs` - Deep cross-reference review of pre-dev documentation artifacts
 
 ### Technical Writing Skills (ring-tw-team plugin - 4 skills)
 
 **Documentation Creation:**
 
 - `ring:using-tw-team` - Introduction to technical writing specialists
-- `ring:documentation-structure` - Document hierarchy and organization
-- `ring:voice-and-tone` - Voice and tone guidelines (assertive, encouraging, human)
-- `ring:review-docs` - Quality checklist and review process
+- `ring:structuring-documentation` - Document hierarchy and organization
+- `ring:applying-voice-and-tone` - Voice and tone guidelines (assertive, encouraging, human)
+- `ring:reviewing-docs` - Quality checklist and review process
 
 ## 💡 Usage Examples
 
@@ -378,11 +378,11 @@ REFACTOR → Clean up → Stay green
 
 ```
 User: "Add user authentication to the app"
-Claude: I'm using ring:pre-dev-feature to scope this feature...
+Claude: I'm using ring:planning-small-features to scope this feature...
         [Pre-dev workflow: PRD, TRD, tasks]
 Claude: I'm using ring:test-driven-development to implement...
         [RED-GREEN-REFACTOR cycle for each component]
-Claude: I'm using ring:codereview to validate...
+Claude: I'm using ring:reviewing-code to validate...
         [9 defaults + conditional specialist parallel dispatch]
 ```
 
@@ -413,10 +413,10 @@ Claude: I'll use the pre-dev workflow to plan this systematically...
 ```
 User: "Review my authentication implementation"
 Claude: Dispatching all 9 default reviewers plus triggered conditional specialists in parallel...
-        [Launches ring:code-reviewer, ring:business-logic-reviewer, ring:security-reviewer,
-         ring:test-reviewer, ring:nil-safety-reviewer,
-         ring:dead-code-reviewer, ring:performance-reviewer, ring:multi-tenant-reviewer,
-         ring:lib-commons-reviewer simultaneously]
+        [Launches ring:code-reviewer, ring:logic-reviewer, ring:security-reviewer,
+         ring:test-reviewer, ring:nil-reviewer,
+         ring:dead-code-reviewer, ring:perf-reviewer, ring:tenancy-reviewer,
+         ring:commons-reviewer simultaneously]
         Conditional specialists trigger only when the diff touches their stack:
         lib-observability, lib-systemplane, or lib-streaming.
 
@@ -467,33 +467,37 @@ ring/                                  # Monorepo root
 │   └── docs/                       # Documentation
 ├── dev-team/                      # Developer Agents plugin (ring-dev-team) - 33 skills, 24 agents
 │   └── agents/                      # 24 specialized developer/reviewer agents
-│       ├── backend-engineer-golang.md       # Go backend specialist (`ring:backend-engineer-golang`)
-│       ├── backend-engineer-typescript.md   # TypeScript/Node.js backend specialist (`ring:backend-engineer-typescript`)
-│       ├── frontend-bff-engineer-typescript.md # BFF & React/Next.js specialist (`ring:frontend-bff-engineer-typescript`)
-│       ├── devops-engineer.md              # DevOps and infrastructure specialist (`ring:devops-engineer`)
-│       ├── frontend-designer.md             # Visual design specialist (`ring:frontend-designer`)
-│       ├── frontend-engineer.md             # Frontend engineer (`ring:frontend-engineer`)
-│       ├── helm-engineer.md                 # Helm chart specialist (`ring:helm-engineer`)
+│       ├── backend-go.md       # Go backend specialist (`ring:backend-go`)
+│       ├── backend-ts.md   # TypeScript/Node.js backend specialist (`ring:backend-ts`)
+│       ├── bff-ts.md # BFF & React/Next.js specialist (`ring:bff-ts`)
+│       ├── devops.md              # DevOps and infrastructure specialist (`ring:devops`)
+│       ├── ui-designer.md             # Visual design specialist (`ring:ui-designer`)
+│       ├── frontend.md             # Frontend engineer (`ring:frontend`)
+│       ├── helm.md                 # Helm chart specialist (`ring:helm`)
 │       ├── code-reviewer.md                 # Foundation review (`ring:code-reviewer`)
-│       ├── business-logic-reviewer.md       # Correctness review (`ring:business-logic-reviewer`)
+│       ├── logic-reviewer.md       # Correctness review (`ring:logic-reviewer`)
 │       ├── security-reviewer.md             # Safety review (`ring:security-reviewer`)
 │       ├── test-reviewer.md                 # Test quality review (`ring:test-reviewer`)
-│       ├── nil-safety-reviewer.md           # Nil/null safety review (`ring:nil-safety-reviewer`)
+│       ├── nil-reviewer.md           # Nil/null safety review (`ring:nil-reviewer`)
 │       ├── dead-code-reviewer.md            # Dead code analysis (`ring:dead-code-reviewer`)
-│       ├── lib-commons-reviewer.md          # lib-commons usage review (`ring:lib-commons-reviewer`)
-│       ├── lib-observability-reviewer.md    # Conditional observability review (`ring:lib-observability-reviewer`)
-│       ├── lib-systemplane-reviewer.md      # Conditional runtime-config review (`ring:lib-systemplane-reviewer`)
-│       ├── lib-streaming-reviewer.md        # Conditional event producer review (`ring:lib-streaming-reviewer`)
-│       ├── multi-tenant-reviewer.md         # Multi-tenant usage review (`ring:multi-tenant-reviewer`)
-│       ├── performance-reviewer.md          # Performance review (`ring:performance-reviewer`)
-│       ├── prompt-quality-reviewer.md       # Agent quality reviewer (`ring:prompt-quality-reviewer`)
-│       ├── qa-analyst.md                    # Backend QA specialist (`ring:qa-analyst`)
-│       ├── qa-analyst-frontend.md           # Frontend QA specialist (`ring:qa-analyst-frontend`)
+│       ├── commons-reviewer.md          # lib-commons usage review (`ring:commons-reviewer`)
+│       ├── obs-reviewer.md    # Conditional observability review (`ring:obs-reviewer`)
+│       ├── systemplane-reviewer.md      # Conditional runtime-config review (`ring:systemplane-reviewer`)
+│       ├── streaming-reviewer.md        # Conditional event producer review (`ring:streaming-reviewer`)
+│       ├── tenancy-reviewer.md         # Multi-tenant usage review (`ring:tenancy-reviewer`)
+│       ├── perf-reviewer.md          # Performance review (`ring:perf-reviewer`)
+│       ├── prompt-reviewer.md       # Agent quality reviewer (`ring:prompt-reviewer`)
+│       ├── qa.md                    # Backend QA specialist (`ring:qa`)
+│       ├── qa-frontend.md           # Frontend QA specialist (`ring:qa-frontend`)
 │       ├── sre.md                           # Observability and reliability specialist (`ring:sre`)
 │       └── ui-engineer.md                   # UI component specialist (`ring:ui-engineer`)
 ├── pm-team/                    # Product Planning plugin (ring-pm-team)
 │   └── skills/                      # 18 product planning skills
-│       └── pre-dev-*/              # PRD, TRD, API, Data, Tasks
+│       ├── writing-prds/          # PRD authoring
+│       ├── writing-trds/          # TRD authoring
+│       ├── designing-api-contracts/ # API contract design
+│       ├── designing-data-model/   # Data model design
+│       └── detailing-tasks/        # Task detailing
 └── tw-team/                         # Technical Writing plugin (ring-tw-team)
     ├── skills/                      # 4 documentation skills
     ├── agents/                      # 3 technical writing agents

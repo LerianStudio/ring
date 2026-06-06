@@ -2,7 +2,7 @@
 
 ## Standards Compliance Output Format
 
-When invoked from the `ring:dev-refactor` skill with a codebase-report.md, `ring:helm-engineer` MUST produce a Standards Compliance section comparing the chart against Lerian Helm conventions.
+When invoked from the `ring:planning-backend-refactor` skill with a codebase-report.md, `ring:helm` MUST produce a Standards Compliance section comparing the chart against Lerian Helm conventions.
 
 ### Output Format
 

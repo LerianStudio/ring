@@ -1,15 +1,12 @@
 ---
-name: ring:dev-frontend-quality
-description: |
-  Runs frontend quality checks in one of four modes — accessibility | visual |
-  e2e | performance — or `all` to run every mode. Dispatches ring:qa-analyst-frontend
-  with a mode parameter; the deep per-mode logic lives in the agent's mode files.
+name: ring:checking-frontend-quality
+description: "Checking frontend quality against changed UI via ring:qa-frontend in accessibility, visual, e2e, or performance mode and aggregating pass/fail verdicts. Use when a frontend change needs standalone a11y, visual-snapshot, Playwright e2e, or Lighthouse/Core-Web-Vitals validation outside the dev cycle. Skip for backend-only or non-UI work, or inside ring:running-dev-cycle-frontend, which already runs these in Gate 0."
 ---
 
 # Frontend Quality Checks
 
 ## When to use
-- A frontend task needs standalone quality validation outside ring:dev-cycle-frontend
+- A frontend task needs standalone quality validation outside ring:running-dev-cycle-frontend
   (which owns these checks in Gate 0).
 - You want to run one specific check (a11y, visual, e2e, or performance) against
   changed UI components, or `all` of them at once.
@@ -18,10 +15,10 @@ description: |
 - Backend-only project with no UI components.
 - Task is documentation-only, configuration-only, or non-code.
 - Changes limited to build tooling, CI/CD, or infrastructure.
-- Inside ring:dev-cycle-frontend — that orchestrator already runs these in Gate 0.
+- Inside ring:running-dev-cycle-frontend — that orchestrator already runs these in Gate 0.
 
 ## Related
-**Complementary:** ring:dev-cycle-frontend, ring:qa-analyst-frontend
+**Complementary:** ring:running-dev-cycle-frontend, ring:qa-frontend
 
 ## Modes
 
@@ -34,7 +31,7 @@ description: |
 | `all` | Runs all four modes in parallel and aggregates the verdicts |
 
 The deep per-mode requirements live in the agent's mode files
-(`dev-team/agents/qa-analyst-frontend-modes/{accessibility,visual,e2e,performance}.md`).
+(`dev-team/agents/qa-frontend-modes/{accessibility,visual,e2e,performance}.md`).
 Do not duplicate them here.
 
 ## Step 1: Validate Input
@@ -49,7 +46,7 @@ For a single mode, dispatch the QA analyst with the selected mode:
 
 ```yaml
 Task:
-  subagent_type: "ring:qa-analyst-frontend"
+  subagent_type: "ring:qa-frontend"
   description: "Frontend {mode} checks for {unit_id}"
   prompt: |
     mode: {mode}
@@ -59,7 +56,7 @@ Task:
     # optional, when relevant to the mode:
     # user_flows_path, performance_baseline, components_list
 
-    Load qa-analyst-frontend-modes/{mode}.md and follow it.
+    Load qa-frontend-modes/{mode}.md and follow it.
 ```
 
 For `mode: all`, dispatch the four modes **in parallel** (one Task batch — four

@@ -1,9 +1,6 @@
 ---
-name: ring:dev-helm
-description: |
-  Mandatory skill for creating and maintaining Helm charts following Lerian conventions.
-  Enforces standardized chart structure, values organization, template patterns,
-  security defaults, and dependency management.
+name: ring:creating-helm-charts
+description: "Creating Helm charts to Lerian conventions via ring:helm: standardized chart structure, full env-var coverage from .env.example, security defaults (runAsNonRoot, readOnlyRootFilesystem), ClusterIP-only services, and health probes; validates helm lint and template render. Use when creating, modifying, or reviewing a chart, or migrating docker-compose to Helm. Skip for app-code-only changes or docker-compose-only deployments."
 ---
 
 # Helm Chart Creation & Maintenance
@@ -16,19 +13,19 @@ description: |
 
 ## Skip when
 - Modifying only application code (no chart changes)
-- Working on non-Helm deployment (docker-compose only) → use backend engineer via ring:dev-implementation
+- Working on non-Helm deployment (docker-compose only) → use backend engineer via ring:implementing-tasks
 
 ## Sequence
 Standalone/on-demand. Not part of the lean backend dev-cycle.
 
 ## Related
-**Complementary:** ring:dev-implementation
+**Complementary:** ring:implementing-tasks
 
 
 **Standards reference:** `dev-team/docs/standards/helm/`
-**Executor agent:** `ring:helm-engineer`
+**Executor agent:** `ring:helm`
 
-You orchestrate. `ring:helm-engineer` creates chart files.
+You orchestrate. `ring:helm` creates chart files.
 
 ## Step 1: Validate Input
 
@@ -48,7 +45,7 @@ Exceptions (no -helm suffix):
 
 ```yaml
 Task:
-  subagent_type: "ring:helm-engineer"
+  subagent_type: "ring:helm"
   description: "Create Helm chart for {service_name}"
   prompt: |
     ## Helm Chart Creation

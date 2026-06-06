@@ -1,6 +1,6 @@
 ---
-name: ring:dev-service-discovery
-description: Scans a Go project and identifies the Service → Module → Resource hierarchy for dispatch layer registration. Detects modules, resources per module (PostgreSQL, MongoDB, RabbitMQ), database names, MongoDB indexes, and shared databases. Generates MongoDB index migration pairs (.up.json/.down.json), detects existing PostgreSQL migrations, produces a visual HTML report, and offers opt-in S3 upload. Use before ring:dev-multi-tenant on a new service or when mapping resources for dispatch.
+name: ring:mapping-service-resources
+description: "Mapping a Go service's Service -> Module -> Resource hierarchy for dispatch-layer registration: detects modules and per-module PostgreSQL/MongoDB/RabbitMQ resources, database names, and shared databases, generates MongoDB index migration pairs (.up.json/.down.json), detects existing Postgres migrations, emits an HTML report, and offers opt-in S3 upload. Use before ring:adding-multi-tenancy on a new service. Skip for non-Go projects."
 ---
 
 # Service Discovery
@@ -8,7 +8,7 @@ description: Scans a Go project and identifies the Service → Module → Resour
 ## When to use
 - User wants to know what to provision in dispatch layer for a service
 - User asks "what services/modules/resources does this project have?"
-- Before running ring:dev-multi-tenant on a new service
+- Before running ring:adding-multi-tenancy on a new service
 - User asks about MongoDB indexes in a project
 
 ## Skip when
@@ -17,7 +17,7 @@ description: Scans a Go project and identifies the Service → Module → Resour
 - Project has no external dependencies
 
 ## Related
-**Complementary:** ring:dev-multi-tenant, ring:dev-implementation
+**Complementary:** ring:adding-multi-tenancy, ring:implementing-tasks
 
 ## Prerequisites
 - Go project with go.mod in the current working directory
@@ -143,7 +143,7 @@ If a `.up.sql` exists without `.down.sql` → flag in Phase 5 HTML report (golan
 
 ## Phase 5: Generate HTML Report
 
-Dispatch `ring:visualize`:
+Dispatch `ring:visualizing`:
 
 ```
 Generate HTML report showing:

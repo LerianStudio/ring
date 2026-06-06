@@ -24,19 +24,19 @@ Verify by asking: "List the Ring pre-dev planning gates."
 
 ## What This Plugin Adds
 
-- **4 research agents:** best-practices-researcher, framework-docs-researcher, repo-research-analyst, product-designer
+- **4 research agents:** web-researcher, docs-researcher, repo-researcher, product-designer
 - **18 skills** organized in three groups:
-  - **Orchestrators (2):** `ring:pre-dev-feature` (5-gate, small features <2 days), `ring:pre-dev-full` (10-gate, large features ≥2 days)
-  - **Pre-dev planning gates (11):** research, design-validation, PRD-creation, feature-map, TRD-creation, API-design, data-model, dependency-map, phases-and-epics, task-creation, delivery-planning
-  - **Standalone utilities (5):** `ring:streaming-event-mapping`, `ring:delivery-status`, `ring:creating-grafana-dashboards`, `ring:deep-doc-review`, `ring:using-pm-team`
+  - **Orchestrators (2):** `ring:planning-small-features` (5-gate, small features <2 days), `ring:planning-large-features` (10-gate, large features ≥2 days)
+  - **Pre-dev planning gates (11):** `ring:researching-features`, `ring:validating-ux-completeness`, `ring:writing-prds`, `ring:mapping-feature-relationships`, `ring:writing-trds`, `ring:designing-api-contracts`, `ring:designing-data-model`, `ring:pinning-dependency-versions`, `ring:decomposing-phases-and-epics`, `ring:detailing-tasks`, `ring:planning-delivery`
+  - **Standalone utilities (5):** `ring:mapping-streaming-events`, `ring:tracking-delivery`, `ring:creating-grafana-dashboards`, `ring:reconciling-predev-docs`, `ring:using-pm-team`
 
 ## Usage
 
 Use OpenCode's native `skill` tool:
 
 ```
-use skill tool to load ring:pre-dev-feature
-use skill tool to load ring:pre-dev-full
+use skill tool to load ring:planning-small-features
+use skill tool to load ring:planning-large-features
 ```
 
 ## Updating

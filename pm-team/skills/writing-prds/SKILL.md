@@ -1,8 +1,6 @@
 ---
-name: ring:pre-dev-prd-creation
-description: |
-  Gate 1: Business requirements document - defines WHAT/WHY before HOW.
-  Creates PRD with problem definition, user stories, success metrics.
+name: ring:writing-prds
+description: "Writing a Product Requirements Document that defines WHAT and WHY: problem, user personas, As/I-want/So-that stories, success metrics, and explicit scope, then dispatching UX validation. Gate 1 of ring:using-pm-team; stays technology-free (no architecture, frameworks, or schemas). Use when starting a new feature or asked to plan, design, or produce requirements. Skip when a validated PRD exists, for pure technical changes, or bug fixes."
 ---
 
 # PRD Creation — Business Before Technical
@@ -22,7 +20,7 @@ description: |
 
 ## Sequence
 
-**Runs before:** ring:pre-dev-feature-map, ring:pre-dev-trd-creation
+**Runs before:** ring:mapping-feature-relationships, ring:writing-trds
 
 
 The PRD defines WHAT we're building and WHY it matters to users and business. It never answers HOW we'll build it (that's TRD) or WHERE components will live.

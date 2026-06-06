@@ -1,8 +1,6 @@
 ---
-name: ring:worktree
-description: |
-  Isolated workspace creation - creates git worktrees with smart directory selection
-  and safety verification for parallel feature development.
+name: ring:creating-worktrees
+description: "Creating an isolated git worktree for parallel branch work: selects the directory by priority order, verifies/adds .gitignore safety, auto-installs the detected toolchain's dependencies, runs a baseline test, and reports readiness. Use before a feature that needs isolation from the main workspace or before executing an implementation plan. Skip for a quick fix on the current branch or when already in the feature's worktree."
 ---
 
 # Using Git Worktrees
@@ -22,7 +20,7 @@ description: |
 
 Git worktrees create isolated workspaces sharing the same repository for parallel branch work.
 
-**Announce at start:** "Using ring:worktree skill to set up isolated workspace."
+**Announce at start:** "Using ring:creating-worktrees skill to set up isolated workspace."
 
 ## Directory Selection (priority order)
 
@@ -88,4 +86,4 @@ npm test / cargo test / pytest / go test ./...
 
 ## Integration
 
-Pairs with **finishing-a-development-branch** for cleanup and **ring:dev-cycle** for work.
+Pairs with **finishing-a-development-branch** for cleanup and **ring:running-dev-cycle** for work.

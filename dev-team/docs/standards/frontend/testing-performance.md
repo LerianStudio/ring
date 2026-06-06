@@ -4,7 +4,7 @@
 
 This module covers frontend performance testing patterns for React/Next.js applications. Ensures Core Web Vitals compliance, Lighthouse scores, bundle size control, and Server Component optimization.
 
-> **Gate Reference:** This module is loaded by `ring:qa-analyst-frontend` at Gate 6 (Performance Testing).
+> **Gate Reference:** This module is loaded by `ring:qa-frontend` at Gate 6 (Performance Testing).
 
 ---
 

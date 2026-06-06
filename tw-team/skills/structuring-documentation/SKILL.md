@@ -1,8 +1,6 @@
 ---
-name: ring:documentation-structure
-description: |
-  Patterns for organizing and structuring documentation including hierarchy,
-  navigation, and information architecture.
+name: ring:structuring-documentation
+description: "Structuring documentation: content hierarchy, overview/conceptual/task page structures, section dividers, navigation, tables-vs-lists, code placement, cross-linking, and page-length targets. Use when planning doc structure, organizing a content hierarchy, splitting content across pages, or designing navigation. Skip when writing the actual content, or checking voice (use ring:applying-voice-and-tone)."
 ---
 
 # Documentation Structure
@@ -14,11 +12,11 @@ description: |
 - Creating navigation patterns
 
 ## Skip when
-- Writing content → dispatch the functional-writer or api-writer agent
-- Checking voice → use voice-and-tone
+- Writing content → dispatch the guide-writer or api-writer agent
+- Checking voice → use ring:applying-voice-and-tone
 
 ## Related
-**Complementary:** ring:voice-and-tone, ring:review-docs
+**Complementary:** ring:applying-voice-and-tone, ring:reviewing-docs
 
 Good structure helps users find what they need quickly. Organize content by user tasks and mental models, not by internal system organization.
 

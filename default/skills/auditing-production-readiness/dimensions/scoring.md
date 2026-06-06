@@ -46,7 +46,7 @@
 ## Usage Example
 
 ```
-User: /production-readiness-audit
+User: /ring:auditing-production-readiness
 ```
 
 ---
@@ -127,9 +127,9 @@ Write: docs/audits/production-readiness-{YYYY-MM-DDTHH:MM:SS}.md
 
 **MANDATORY: Generate a visual HTML dashboard from the audit results.**
 
-Invokes `Skill("ring:visualize")` to produce a self-contained HTML page showing the production readiness score and findings visually. The markdown report is exhaustive (thousands of lines) — the HTML dashboard provides an executive overview that opens in the browser.
+Invokes `Skill("ring:visualizing")` to produce a self-contained HTML page showing the production readiness score and findings visually. The markdown report is exhaustive (thousands of lines) — the HTML dashboard provides an executive overview that opens in the browser.
 
-**Read templates first:** Read `default/skills/visualize/templates/code-diff.html` for severity badges and KPI card patterns, AND read `default/skills/visualize/templates/data-table.html` for table/heatmap patterns. Combine patterns for an audit dashboard layout. Also read `default/skills/visualize/references/responsive-nav.md` for section navigation (7 sections require sidebar TOC).
+**Read templates first:** Read `default/skills/visualizing/templates/code-diff.html` for severity badges and KPI card patterns, AND read `default/skills/visualizing/templates/data-table.html` for table/heatmap patterns. Combine patterns for an audit dashboard layout. Also read `default/skills/visualizing/references/responsive-nav.md` for section navigation (7 sections require sidebar TOC).
 
 **Generate the HTML dashboard with these sections:**
 
@@ -195,7 +195,7 @@ Users can customize the audit:
 ### Scope Limiting
 
 ```
-User: /production-readiness-audit --modules=matching,ingestion
+User: /ring:auditing-production-readiness --modules=matching,ingestion
 ```
 
 Only audit specified modules.
@@ -203,7 +203,7 @@ Only audit specified modules.
 ### Dimension Selection
 
 ```
-User: /production-readiness-audit --dimensions=security
+User: /ring:auditing-production-readiness --dimensions=security
 ```
 
 Run only security-related auditors (6, 7, 8, 9, 37, 41, 43, 44, 33).
@@ -211,7 +211,7 @@ Run only security-related auditors (6, 7, 8, 9, 37, 41, 43, 44, 33).
 ### Output Format
 
 ```
-User: /production-readiness-audit --format=json
+User: /ring:auditing-production-readiness --format=json
 ```
 
 Output structured JSON instead of markdown.
@@ -219,7 +219,7 @@ Output structured JSON instead of markdown.
 ### Standards Override
 
 ```
-User: /production-readiness-audit --no-standards
+User: /ring:auditing-production-readiness --no-standards
 ```
 
 Run without Ring standards injection (generic mode, equivalent to v2.0 behavior).

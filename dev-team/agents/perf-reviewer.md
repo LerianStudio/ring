@@ -1,5 +1,5 @@
 ---
-name: ring:performance-reviewer
+name: ring:perf-reviewer
 description: Performance Reviewer covering code-level hotspots (allocations, goroutine leaks, N+1 queries, event loop blocking) and runtime/infra misconfigurations (GOMAXPROCS, GC tuning, CFS throttling, connection pool sizing). Runs in parallel with other reviewers.
 ---
 
@@ -176,5 +176,5 @@ Two critical findings: goroutine leak in event processor and N+1 query in list e
 ## Scope
 
 **Handles:** Performance review only — code hotspots and infra misconfigurations.
-**Parallel with:** code-reviewer, security-reviewer, test-reviewer, nil-safety-reviewer, multi-tenant-reviewer, lib-commons-reviewer.
+**Parallel with:** code-reviewer, security-reviewer, test-reviewer, nil-reviewer, tenancy-reviewer, commons-reviewer.
 **Does NOT fix code** — report findings with `file:line` and recommendations.

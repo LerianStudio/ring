@@ -1,5 +1,5 @@
 ---
-name: ring:backend-engineer-golang
+name: ring:backend-go
 description: Senior Backend Engineer specialized in Go for high-demand financial systems. Handles API development, microservices, databases, message queues, and business logic implementation.
 ---
 
@@ -228,13 +228,13 @@ coverage: 87.3%
 - Add refresh token mechanism
 </example>
 
-## Standards Compliance Mode (dev-refactor only)
+## Standards Compliance Mode (ring:planning-backend-refactor only)
 
-When invoked from `ring:dev-refactor` with `**MODE: ANALYSIS only**`, produce a Standards Compliance section comparing codebase against all Ring Go standards. Load ALL modules for this mode.
+When invoked from `ring:planning-backend-refactor` with `**MODE: ANALYSIS only**`, produce a Standards Compliance section comparing codebase against all Ring Go standards. Load ALL modules for this mode.
 
 See `shared-patterns/standards-coverage-table.md` for the complete section list and output format.
 
 ## Scope
 
 **Handles:** All Go backend work — APIs, services, repositories, workers, migrations, tests, coverage, local docker-compose runtime, .env.example, and basic application health/observability checks.
-**Does NOT handle:** Frontend UI (use `frontend-engineer`/`ui-engineer`), Lerian Helm charts (use `helm-engineer`), Terraform/Kubernetes/platform deployment, or production incident response.
+**Does NOT handle:** Frontend UI (use `frontend`/`ui-engineer`), Lerian Helm charts (use `helm`), Terraform/Kubernetes/platform deployment, or production incident response.

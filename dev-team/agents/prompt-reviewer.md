@@ -1,5 +1,5 @@
 ---
-name: ring:prompt-quality-reviewer
+name: ring:prompt-reviewer
 description: Expert Agent Quality Analyst evaluating AI agent executions against best practices, identifying prompt deficiencies, calculating quality scores, and generating precise improvement suggestions.
 ---
 
@@ -26,8 +26,8 @@ Check each agent for mandatory sections: `## Standards Loading`, `## Blocker Cri
 Identify all agents that executed in the task:
 ```
 Task T-001:
-├── ring:backend-engineer-golang (Gate 0)
-├── ring:backend-engineer-typescript (Gate 0, if TS)
+├── ring:backend-go (Gate 0)
+├── ring:backend-ts (Gate 0, if TS)
 └── ring:code-reviewer (Gate 8)
 ```
 
@@ -80,9 +80,9 @@ Total Expected = MUST rules + MUST NOT rules + required_sections + ASK WHEN + DE
 For each gap, provide:
 
 <example title="Precise improvement suggestion">
-### Improvement: Add TDD RED Phase Enforcement (ring:backend-engineer-golang)
+### Improvement: Add TDD RED Phase Enforcement (ring:backend-go)
 
-**File:** `dev-team/agents/backend-engineer-golang.md`
+**File:** `dev-team/agents/backend-go.md`
 **Gap:** Agent proceeds to GREEN without showing test failure output.
 **Root Cause:** Rule stated but no required output format and no blocking language.
 
@@ -152,12 +152,12 @@ Report which agent-design standards were verified, which sections were missing, 
 
 | Agent | Gate | Assertiveness | Rating | Key Gap |
 |-------|------|---------------|--------|---------|
-| ring:backend-engineer-golang | 0 | 92.0% | Excellent | — |
-| ring:backend-engineer-typescript | 0 | 67.3% | Needs Attention | TDD RED skipped |
+| ring:backend-go | 0 | 92.0% | Excellent | — |
+| ring:backend-ts | 0 | 67.3% | Needs Attention | TDD RED skipped |
 
 ## Gaps Identified
 
-### ring:backend-engineer-typescript (67.3%)
+### ring:backend-ts (67.3%)
 
 **Expected Behaviors:** 12 | **Correct:** 8 | **Gaps:** 4
 
@@ -177,7 +177,7 @@ Report which agent-design standards were verified, which sections were missing, 
 
 | File | Changes | Expected Assertiveness Gain |
 |------|---------|---------------------------|
-| dev-team/agents/qa-analyst.md | TDD enforcement, pressure table | +25% |
+| dev-team/agents/qa.md | TDD enforcement, pressure table | +25% |
 ```
 
 ## When No Gaps Found
@@ -187,4 +187,4 @@ If all agents ≥90% assertiveness: document what worked well, no improvements n
 ## Scope
 
 **Handles:** Agent prompt quality analysis — gaps, assertiveness scores, improvement suggestions.
-**Does NOT handle:** Codebase standards compliance (use `backend-engineer-*`), direct agent file modifications (suggests only).
+**Does NOT handle:** Codebase standards compliance (use `backend-go`/`backend-ts`), direct agent file modifications (suggests only).

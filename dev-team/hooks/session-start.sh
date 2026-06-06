@@ -61,10 +61,10 @@ ${agents_table}
 | Invocation Context | Standards Compliance | Detection |
 |--------------------|---------------------|-----------|
 | Direct agent call | Optional | N/A |
-| Via \`ring:dev-cycle\` | Optional | N/A |
-| Via \`ring:dev-refactor\` | **MANDATORY** | Prompt contains \`**MODE: ANALYSIS ONLY**\` |
+| Via \`ring:running-dev-cycle\` | Optional | N/A |
+| Via \`ring:planning-backend-refactor\` | **MANDATORY** | Prompt contains \`**MODE: ANALYSIS ONLY**\` |
 
-**When MANDATORY (ring:dev-refactor invocation):**
+**When MANDATORY (ring:planning-backend-refactor invocation):**
 1. Agent receives prompt with \`**MODE: ANALYSIS ONLY**\`
 2. Agent MUST load Ring standards via WebFetch
 3. Agent MUST output \`## Standards Compliance\` section with:
@@ -72,7 +72,7 @@ ${agents_table}
    - Severity classification (Critical/High/Medium/Low)
    - File locations and migration recommendations
 
-**Cross-references:** CLAUDE.md (Standards Compliance section), \`dev-team/skills/dev-refactor/SKILL.md\`
+**Cross-references:** CLAUDE.md (Standards Compliance section), \`dev-team/skills/planning-backend-refactor/SKILL.md\`
 
 For full details: Skill tool with \"ring:using-dev-team\"
 </ring-dev-team-system>"
@@ -104,7 +104,7 @@ else
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "<ring-dev-team-system>\n**Developer Specialists Available**\n\n**Standards Compliance Output (Conditional Requirement):**\n- **Optional** for direct invocations or dev-cycle\n- **MANDATORY** when invoked from `ring:dev-refactor` skill\n- Detection: Prompt contains `**MODE: ANALYSIS ONLY**`\n\nWhen MANDATORY: Agent loads Ring standards via WebFetch and outputs comparison tables.\n\nFor full list: Skill tool with \"ring:using-dev-team\"\n</ring-dev-team-system>"
+    "additionalContext": "<ring-dev-team-system>\n**Developer Specialists Available**\n\n**Standards Compliance Output (Conditional Requirement):**\n- **Optional** for direct invocations or dev-cycle\n- **MANDATORY** when invoked from `ring:planning-backend-refactor` skill\n- Detection: Prompt contains `**MODE: ANALYSIS ONLY**`\n\nWhen MANDATORY: Agent loads Ring standards via WebFetch and outputs comparison tables.\n\nFor full list: Skill tool with \"ring:using-dev-team\"\n</ring-dev-team-system>"
   }
 }
 EOF

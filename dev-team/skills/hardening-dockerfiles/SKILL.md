@@ -1,9 +1,6 @@
 ---
-name: ring:dev-docker-security
-description: |
-  Creates or audits Dockerfiles to achieve Docker Hub Health Score grade A.
-  Enforces non-root user, minimal base images, supply chain attestations,
-  and zero fixable CVEs.
+name: ring:hardening-dockerfiles
+description: "Hardening Dockerfiles to reach Docker Hub Health Score grade A: enforcing a non-root USER, minimal/distroless multi-stage base images, no fixable critical/high CVEs, no AGPL-3.0 deps, and SBOM+provenance attestations. Use when creating a new Dockerfile, auditing one for security, or preparing images for Docker Hub publication. Skip when the project has no Dockerfile, changes are app-code-only, or you consume pre-built images."
 ---
 
 # Docker Security (Health Score Grade A)
@@ -20,7 +17,7 @@ description: |
 - Using pre-built images without custom Dockerfile
 
 ## Related
-**Complementary:** ring:dev-implementation, ring:dev-helm
+**Complementary:** ring:implementing-tasks, ring:creating-helm-charts
 
 
 General Dockerfile patterns: `dev-team/docs/standards/devops.md#containers`.

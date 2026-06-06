@@ -93,17 +93,17 @@ efforts that MUST go through the full dev-cycle.
 
 ## Recommended Next Step
 
-`ring:dev-cycle` consuming `/tmp/runtime-sweep-tasks.json` — N tasks generated,
+`ring:running-dev-cycle` consuming `/tmp/runtime-sweep-tasks.json` — N tasks generated,
 grouped by severity, CRITICAL first.
 ```
 
 ---
 
-## Task Generation for ring:dev-cycle
+## Task Generation for ring:running-dev-cycle
 
 MANDATORY: The synthesizer MUST also emit `/tmp/runtime-sweep-tasks.json` — a JSON
-array of tasks shaped for `ring:dev-cycle` consumption. The format matches what
-`ring:dev-refactor`, `ring:using-lib-observability`, and `ring:using-lib-commons`
+array of tasks shaped for `ring:running-dev-cycle` consumption. The format matches what
+`ring:planning-backend-refactor`, `ring:using-lib-observability`, and `ring:using-lib-commons`
 produce, so the downstream cycle doesn't need to special-case runtime sweeps.
 
 **Task grouping rules:**
@@ -194,7 +194,7 @@ lib-observability/runtime sweep complete. Findings: <N> across <M> of 6 angles.
 Report: /tmp/runtime-sweep-report.md
 Tasks:  /tmp/runtime-sweep-tasks.json (<N> tasks)
 
-Next: Invoke ring:dev-cycle with the task file to execute fixes. CRITICAL tasks
+Next: Invoke ring:running-dev-cycle with the task file to execute fixes. CRITICAL tasks
 (Angles 1 and 2 — naked goroutines and unobservable defer recover) MUST be addressed
 before the HIGH/MEDIUM tier. Angle 3 (InitPanicMetrics) is trivial and SHOULD land
 first so all subsequent fixes emit metrics from the first run.
@@ -693,7 +693,7 @@ trigger, assert.
 
 `lib-observability/runtime` does not leak goroutines by itself, but the code that uses it might.
 Pair panic-recovery tests with `goleak` to catch goroutines that should have exited but
-didn't. See `ring:dev-goroutine-leak-testing` skill for the full pattern.
+didn't. See `ring:detecting-goroutine-leaks` skill for the full pattern.
 
 ```go
 func TestMain(m *testing.M) {
@@ -961,9 +961,9 @@ Explicit pointers rather than duplicated content:
 | Full bootstrap sequence snippet (all packages wired)     | `ring:using-lib-commons` Section 2 "Common Initialization Pattern"                          |
 | Single-angle panic-handling sweep (higher level)         | `ring:using-lib-commons` Angle 15 "Panic handling DIY"                                      |
 | The other half of the invisible-failure story            | `ring:using-assert` (assertion failures, not panics)                                        |
-| Goroutine leak detection (companion to panic testing)    | `ring:dev-goroutine-leak-testing`                                                           |
-| Overall development cycle that consumes sweep tasks      | `ring:dev-cycle`                                                                            |
-| Generic codebase refactoring sweep                       | `ring:dev-refactor`                                                                         |
+| Goroutine leak detection (companion to panic testing)    | `ring:detecting-goroutine-leaks`                                                           |
+| Overall development cycle that consumes sweep tasks      | `ring:running-dev-cycle`                                                                            |
+| Generic codebase refactoring sweep                       | `ring:planning-backend-refactor`                                                                         |
 | Standards for Go code                                    | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang.md` |
 
 MUST NOT duplicate content from the sources above. When the reader needs that content,

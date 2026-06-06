@@ -1,6 +1,6 @@
 ---
 name: ring:using-lib-systemplane
-description: Dual-mode skill for github.com/LerianStudio/lib-systemplane, Lerian's dual-backend (Postgres LISTEN/NOTIFY or MongoDB change streams) hot-reload runtime configuration plane. Sweep Mode dispatches 7 parallel explorers to detect DIY runtime-config wiring (env reload via SIGHUP, fsnotify/viper.WatchConfig, raw pgx LISTEN, hand-rolled change-stream watchers, manual tenant-scoping, hand-built admin CRUD UIs, v4 systemplane residue + runtime DDL provisioning anti-pattern). Reference Mode catalogs the API by lifecycle (construct → register → start → read/write/subscribe → close), the migration-only provisioning artifacts (`SchemaSQL()` + `DefaultSeedSQL()` vendored via `make systemplane-ddl`), tenant-scoped overrides, the Fiber admin surface, redaction policies, and the test harness. For end-to-end migration use ring:dev-systemplane-migration. Skip for non-Go or frontend code.
+description: "Using lib-systemplane, the hot-reload runtime-config plane (Postgres LISTEN/NOTIFY or MongoDB change streams), in two modes. Sweep Mode detects DIY config reload (SIGHUP, fsnotify, viper, pgx LISTEN), manual tenant-scoping, hand-built admin CRUD, and v4 residue. Reference Mode catalogs client lifecycle and migration-only provisioning. Go-only. Gated migration goes to ring:migrating-to-lib-systemplane. Skip for non-Go."
 ---
 
 # ring:using-lib-systemplane
@@ -29,7 +29,7 @@ Reference mode:
 - Task is documentation-only or non-code
 
 ## Related
-**Migration partner:** [[ring:dev-systemplane-migration]] — end-to-end 11-gate migration cycle. This skill is the **adoption/reference** counterpart; the migration skill is the **transformation pipeline**.
+**Migration partner:** `ring:migrating-to-lib-systemplane` — end-to-end 11-gate migration cycle. This skill is the **adoption/reference** counterpart; the migration skill is the **transformation pipeline**.
 **Similar:** [[ring:using-lib-commons]], [[ring:using-lib-observability]], [[ring:using-runtime]], [[ring:using-assert]]
 
 ---
@@ -53,7 +53,7 @@ Reference mode:
 - **Tenant context:** `github.com/LerianStudio/lib-commons/v5 v5.0.2` (via `tenant-manager/core`)
 - **Observability:** `github.com/LerianStudio/lib-observability v1.0.0` (`log.Logger`, `tracing.Telemetry`, `runtime.RecoverAndLog`)
 - **Dual backend:** Postgres 13+ (LISTEN/NOTIFY) **or** MongoDB 4.4+ (change streams; polling fallback for standalone deployments)
-- **Provisioning:** migration-only via `systemplane.SchemaSQL()` + `systemplane.DefaultSeedSQL()` public artifacts. Runtime DDL hook (`runSchema`) was removed in v1.6.0. Consumers vendor the artifacts into their own SQL migration pipeline via the `make systemplane-ddl` generator pattern — see [[ring:dev-systemplane-migration]] Gate 3.5 and `multi-tenant.md` §27 "Cold-tenant resolution"
+- **Provisioning:** migration-only via `systemplane.SchemaSQL()` + `systemplane.DefaultSeedSQL()` public artifacts. Runtime DDL hook (`runSchema`) was removed in v1.6.0. Consumers vendor the artifacts into their own SQL migration pipeline via the `make systemplane-ddl` generator pattern — see `ring:migrating-to-lib-systemplane` Gate 3.5 and `multi-tenant.md` §27 "Cold-tenant resolution"
 - **License:** Elastic 2.0
 - **Scope:** runtime-mutable knobs only — never bootstrap-only material (DSNs, TLS, listen addresses, secrets)
 
@@ -247,7 +247,7 @@ MUST NOT omit explorer findings.
 MUST NOT reclassify severity without justification.
 ```
 
-Surface report path + task count to user; offer handoff to `ring:dev-systemplane-migration` for the gated implementation cycle, or to `ring:dev-cycle` for ad-hoc remediation.
+Surface report path + task count to user; offer handoff to `ring:migrating-to-lib-systemplane` for the gated implementation cycle, or to `ring:running-dev-cycle` for ad-hoc remediation.
 
 ---
 
@@ -536,7 +536,7 @@ lib-systemplane v1.6.0+ publishes the DDL it needs as two public functions and r
 | `systemplane.SchemaSQL() string` | Byte-faithful DDL for `systemplane_entries` table + `systemplane_notify_v3` function + 2 triggers (fully idempotent: `CREATE TABLE IF NOT EXISTS` / `CREATE OR REPLACE` / `DROP TRIGGER IF EXISTS`). Channel `systemplane_changes`, table `systemplane_entries` are fixed (no placeholders). | `migrations/NNN_systemplane_schema.up.sql` (`down` = drop triggers + function, never the table) |
 | `systemplane.DefaultSeedSQL() string` | `INSERT ... ON CONFLICT (namespace, key) DO NOTHING` over the universal default keys (the lib's own runtime knobs). | `migrations/NNN+1_systemplane_default_seed.up.sql` (`down` = value-guarded DELETE of the universal keys) |
 
-**Canonical scaffold:** `make systemplane-ddl` (generator under `cmd/generate-systemplane-ddl/`) vendors both artifacts into append-only migrations + a `migrations/systemplane_ddl_manifest.json`, then emits a third project-seed migration derived from the service's own registrations via a bootstrap seam returning `[]SystemplaneSeedEntry`. The full pattern (seam contract, manifest, drift guard, MT/ST symmetry) is normative in `multi-tenant.md` §27 "Cold-tenant resolution" and operational in [[ring:dev-systemplane-migration]] Gate 3.5. Reference implementation: `plugin-br-bank-transfer` (`cmd/generate-systemplane-ddl/`, `internal/bootstrap/systemplane_ddl_gen.go`, `migrations/000011..000013_systemplane_*`).
+**Canonical scaffold:** `make systemplane-ddl` (generator under `cmd/generate-systemplane-ddl/`) vendors both artifacts into append-only migrations + a `migrations/systemplane_ddl_manifest.json`, then emits a third project-seed migration derived from the service's own registrations via a bootstrap seam returning `[]SystemplaneSeedEntry`. The full pattern (seam contract, manifest, drift guard, MT/ST symmetry) is normative in `multi-tenant.md` §27 "Cold-tenant resolution" and operational in `ring:migrating-to-lib-systemplane` Gate 3.5. Reference implementation: `plugin-br-bank-transfer` (`cmd/generate-systemplane-ddl/`, `internal/bootstrap/systemplane_ddl_gen.go`, `migrations/000011..000013_systemplane_*`).
 
 **Invariants (locked):**
 
@@ -551,7 +551,7 @@ Systemplane is for **runtime-mutable knobs only**. Bootstrap-only configuration 
 
 ## 14. Cross-references
 
-- [[ring:dev-systemplane-migration]] — gated end-to-end migration cycle (stack detection → v5 upgrade → register → subscribe → admin mount → tests → review). Use after this skill identifies adoption opportunities.
+- `ring:migrating-to-lib-systemplane` — gated end-to-end migration cycle (stack detection → v5 upgrade → register → subscribe → admin mount → tests → review). Use after this skill identifies adoption opportunities.
 - [[ring:using-lib-commons]] — tenant-manager/core, idempotency, DLQ, webhook delivery, and the broader v5 surface that composes with systemplane.
 - [[ring:using-lib-observability]] — `log.Logger`, `tracing.Telemetry`, `runtime.RecoverAndLog` — the three injected by `WithLogger` / `WithTelemetry`.
 - [[ring:using-runtime]] — panic-observability trident used internally for the subscribe goroutine and callback shields. Match the same policy elsewhere in your service.

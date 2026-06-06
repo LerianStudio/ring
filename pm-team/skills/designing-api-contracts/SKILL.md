@@ -1,8 +1,6 @@
 ---
-name: ring:pre-dev-api-design
-description: |
-  Gate 4: API contracts document - defines component interfaces and data contracts
-  before protocol/technology selection. Large Track only.
+name: ring:designing-api-contracts
+description: "Designing API contracts (component interfaces, request/response schemas, error catalog, versioning, pagination) from the validated TRD, before any protocol or technology selection. Gate 4 of ring:planning-large-features, Large Track only; runs after ring:writing-trds, before ring:designing-data-model. Use when a multi-component system needs integration contracts. Skip for Small Track, a single-component system, or an unvalidated TRD."
 ---
 
 # API/Contract Design — Defining Component Interfaces
@@ -22,8 +20,8 @@ description: |
 
 ## Sequence
 
-**Runs before:** ring:pre-dev-data-model
-**Runs after:** ring:pre-dev-trd-creation
+**Runs before:** ring:designing-data-model
+**Runs after:** ring:writing-trds
 
 
 Defines WHAT data and operations components expose and consume, before protocol or technology selection. Contracts enable parallel team work and prevent integration failures discovered during development.

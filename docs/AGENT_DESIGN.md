@@ -20,7 +20,7 @@ The agent's body `## Output Format` section MUST instruct the agent to produce t
 - `## Testing`
 - `## Next Steps`
 
-**Used by:** `ring:backend-engineer-golang`, `ring:backend-engineer-typescript`, `ring:frontend-bff-engineer-typescript`
+**Used by:** `ring:backend-go`, `ring:backend-ts`, `ring:bff-ts`
 
 ---
 
@@ -35,7 +35,7 @@ The agent's body `## Output Format` section MUST instruct the agent to produce:
 - `## Recommendations`
 - `## Next Steps`
 
-**Used by:** `ring:frontend-designer`
+**Used by:** `ring:ui-designer`
 
 ---
 
@@ -51,12 +51,12 @@ The agent's body `## Output Format` section MUST instruct the agent to produce:
 - `## Standards Compliance Report`
 - `## Next Steps`
 
-**Used by:** `ring:code-reviewer`, `ring:business-logic-reviewer`, `ring:security-reviewer`, `ring:test-reviewer`, `ring:nil-safety-reviewer`, `ring:dead-code-reviewer`, `ring:performance-reviewer`, `ring:multi-tenant-reviewer`, `ring:lib-commons-reviewer`, `ring:lib-observability-reviewer`, `ring:lib-systemplane-reviewer`, `ring:lib-streaming-reviewer`
+**Used by:** `ring:code-reviewer`, `ring:logic-reviewer`, `ring:security-reviewer`, `ring:test-reviewer`, `ring:nil-reviewer`, `ring:dead-code-reviewer`, `ring:perf-reviewer`, `ring:tenancy-reviewer`, `ring:commons-reviewer`, `ring:obs-reviewer`, `ring:systemplane-reviewer`, `ring:streaming-reviewer`
 
 **Verdict contract:** `PASS` is allowed only with zero eligible findings. Any eligible issue means `FAIL`. Missing context means `NEEDS_DISCUSSION`. Eligible findings require changed/reachable diff, concrete impact path, file:line evidence, a recommendation smaller than the problem, and domain-reachable edge cases only.
 
-**Note:** `ring:business-logic-reviewer` and `ring:security-reviewer` extend the base Reviewer archetype with additional domain-specific sections:
-- `ring:business-logic-reviewer` adds: `## Mental Execution Analysis`, `## Business Requirements Coverage`, `## Edge Cases Analysis`
+**Note:** `ring:logic-reviewer` and `ring:security-reviewer` extend the base Reviewer archetype with additional domain-specific sections:
+- `ring:logic-reviewer` adds: `## Mental Execution Analysis`, `## Business Requirements Coverage`, `## Edge Cases Analysis`
 - `ring:security-reviewer` adds: `## OWASP Top 10 Coverage`, `## Compliance Status`
 
 ---
@@ -102,7 +102,7 @@ The `ring-dev-team` agents include a **Standards Compliance** output section tha
 All ring-dev-team agents document a `## Standards Compliance` section in their body `## Output Format`:
 
 - Section name: `## Standards Compliance`
-- Required: optional by default; MANDATORY when invoked from `ring:dev-refactor`
+- Required: optional by default; MANDATORY when invoked from `ring:planning-backend-refactor`
 - Purpose: comparison of codebase against Lerian/Ring standards
 
 ### Conditional Requirement: `invoked_from_dev_refactor`
@@ -110,11 +110,11 @@ All ring-dev-team agents document a `## Standards Compliance` section in their b
 | Context | Standards Compliance Required | Enforcement |
 |---------|------------------------------|-------------|
 | Direct agent invocation | Optional | Agent may include if relevant |
-| Via `ring:dev-cycle` | Optional | Agent may include if relevant |
-| Via `ring:dev-refactor` | **MANDATORY** | Prompt includes `MODE: ANALYSIS ONLY` |
+| Via `ring:running-dev-cycle` | Optional | Agent may include if relevant |
+| Via `ring:planning-backend-refactor` | **MANDATORY** | Prompt includes `MODE: ANALYSIS ONLY` |
 
 **How It's Triggered:**
-1. User invokes `/ring:dev-refactor` command
+1. User invokes `/ring:planning-backend-refactor` command
 2. The skill dispatches agents with prompts starting with `**MODE: ANALYSIS ONLY**`
 3. This prompt pattern signals to agents that Standards Compliance output is MANDATORY
 4. Agents load Ring standards via WebFetch and produce comparison tables
@@ -137,10 +137,10 @@ All ring-dev-team agents support Standards Compliance:
 
 | Agent | Standards Source | Categories Checked |
 |-------|------------------|-------------------|
-| `ring:backend-engineer-golang` | `golang.md` | lib-commons, Error Handling, Logging, Config |
-| `ring:backend-engineer-typescript` | `typescript.md` | Type Safety, Error Handling, Validation |
-| `ring:frontend-bff-engineer-typescript` | `frontend.md` | Component patterns, State management |
-| `ring:frontend-designer` | `frontend.md` | Accessibility, Design patterns |
+| `ring:backend-go` | `golang.md` | lib-commons, Error Handling, Logging, Config |
+| `ring:backend-ts` | `typescript.md` | Type Safety, Error Handling, Validation |
+| `ring:bff-ts` | `frontend.md` | Component patterns, State management |
+| `ring:ui-designer` | `frontend.md` | Accessibility, Design patterns |
 
 Backend dev-cycle note: Go/TypeScript backend engineers own docker-compose/local runtime, coverage, TDD evidence, and basic health/observability checks during Gate 0. QA/SRE/DevOps specialists are not part of the active backend dev-cycle.
 
@@ -192,7 +192,7 @@ No migration actions required.
 
 | Document | Location | What It Contains |
 |----------|----------|-----------------|
-| **Skill Definition** | `dev-team/skills/dev-refactor/SKILL.md` | HARD GATES requiring Standards Compliance |
+| **Skill Definition** | `dev-team/skills/planning-backend-refactor/SKILL.md` | HARD GATES requiring Standards Compliance |
 | **Standards Source** | `dev-team/docs/standards/*.md` | Source of truth for compliance checks |
 | **Agent Definitions** | `dev-team/agents/*.md` | Body `## Output Format` section documents Standards Compliance |
 | **Session Hook** | `dev-team/hooks/session-start.sh` | Injects Standards Compliance guidance |

@@ -1,6 +1,6 @@
 ---
-name: ring:dev-cycle-management
-description: Development cycle state management — status reporting and cycle cancellation
+name: ring:managing-dev-cycle
+description: "Managing an in-progress development cycle without driving it: status reports phase, epic/gate progress, assertiveness, and elapsed time from current-cycle.json; cancel confirms, marks the cycle cancelled, and writes a partial feedback report. Use when checking the status of, or cancelling, a running dev cycle. Skip when no cycle is active or the question is general project status, not cycle-specific."
 ---
 
 # Cycle Management
@@ -34,8 +34,8 @@ If no mode is provided, default to `status`.
 
 Both modes read from the same state files. Check for an active cycle in this order:
 
-1. `docs/ring:dev-cycle/current-cycle.json`
-2. `docs/ring:dev-refactor/current-cycle.json`
+1. `docs/ring:running-dev-cycle/current-cycle.json`
+2. `docs/ring:planning-backend-refactor/current-cycle.json`
 
 If neither file exists or both contain a terminal status (`completed`, `cancelled`), report that no cycle is active and exit with the appropriate "no cycle" message for the current mode.
 
@@ -72,14 +72,14 @@ Epics:
 
 Current:
   Epic: E-2.3 - Implementar refresh token
-  Gate 0→8→9 lean flow (ring:dev-implementation)
+  Gate 0→8→9 lean flow (ring:implementing-tasks)
   Iterations: 1
 
 Metrics (completed epics):
   Average Assertiveness: 89%
   Total Duration: 1h 45m
 
-State file: docs/ring:dev-cycle/current-cycle.json (or docs/ring:dev-refactor/current-cycle.json)
+State file: docs/ring:running-dev-cycle/current-cycle.json (or docs/ring:planning-backend-refactor/current-cycle.json)
 ```
 
 ### When No Cycle is Running (Status Mode)
@@ -88,10 +88,10 @@ State file: docs/ring:dev-cycle/current-cycle.json (or docs/ring:dev-refactor/cu
 No development cycle in progress.
 
 Start a new cycle with:
-  /ring:dev-cycle docs/tasks/your-tasks.md
+  /ring:running-dev-cycle docs/tasks/your-tasks.md
 
 Or resume an interrupted cycle:
-  /ring:dev-cycle --resume
+  /ring:running-dev-cycle --resume
 ```
 
 ### Execution Steps (Status)
@@ -148,11 +148,11 @@ Cycle ID: 2024-01-15-143000
 Status: cancelled
 Completed: 3/5 epics
 
-State saved to: docs/ring:dev-cycle/current-cycle.json (or docs/ring:dev-refactor/current-cycle.json)
+State saved to: docs/ring:running-dev-cycle/current-cycle.json (or docs/ring:planning-backend-refactor/current-cycle.json)
 Partial report: docs/dev-team/feedback/cycle-2024-01-15-partial.md
 
 To resume later:
-  /ring:dev-cycle --resume
+  /ring:running-dev-cycle --resume
 ```
 
 ### When No Cycle is Running (Cancel Mode)
@@ -161,7 +161,7 @@ To resume later:
 No development cycle to cancel.
 
 Check status with:
-  ring:dev-cycle-management (mode=status)
+  ring:managing-dev-cycle (mode=status)
 ```
 
 ### Execution Steps (Cancel)
@@ -181,13 +181,13 @@ Check status with:
 
 | Skill | Description |
 |-------|-------------|
-| `ring:dev-cycle` | Start or resume cycle |
-| `ring:dev-cycle-management` (mode=cancel) | Cancel running cycle |
-| `ring:dev-cycle-management` (mode=status) | Check current status |
-| `ring:dev-report` | View feedback report |
+| `ring:running-dev-cycle` | Start or resume cycle |
+| `ring:managing-dev-cycle` (mode=cancel) | Cancel running cycle |
+| `ring:managing-dev-cycle` (mode=status) | Check current status |
+| `ring:writing-dev-reports` | View feedback report |
 
 ---
 
 Now executing the requested mode...
 
-Read state from: `docs/ring:dev-cycle/current-cycle.json` or `docs/ring:dev-refactor/current-cycle.json`
+Read state from: `docs/ring:running-dev-cycle/current-cycle.json` or `docs/ring:planning-backend-refactor/current-cycle.json`

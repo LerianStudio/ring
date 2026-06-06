@@ -1,9 +1,6 @@
 ---
-name: ring:dev-dep-security-check
-description: |
-  Intercepts and audits dependency installations (pip, npm, go) before they execute.
-  Validates package identity, checks vulnerabilities, flags supply-chain risk signals,
-  and enforces hash pinning in lockfiles.
+name: ring:auditing-dependency-security
+description: "Auditing a dependency for supply-chain risk before install (pip/npm/go/cargo): checks typosquatting, maintainer/age risk, vulnerability DBs (OSV, GHSA, Socket), and lockfile hash pinning, then emits a risk score and approve/conditional/escalate/block decision. Use when adding or updating a dependency, reviewing a dependency PR, or investigating a compromise. Skip when no new dependency is involved or it is already vetted."
 ---
 
 # Dependency Security Check
@@ -21,7 +18,7 @@ description: |
 - Dependency is already vetted and pinned in lockfile
 
 ## Related
-**Complementary:** ring:dev-docker-security, ring:dev-implementation
+**Complementary:** ring:hardening-dockerfiles, ring:implementing-tasks
 
 
 Supply-chain gate for every install command in a Lerian codebase.

@@ -62,7 +62,7 @@
     },
     {
       "name": "ring-pm-team",
-      "description": "Product team workflow: 18 skills + 4 research agents. Pre-dev planning with 5-gate (small features) and 10-gate (large features) orchestrators, delivery roadmap generation, delivery status tracking for evidence-based progress reporting, plus standalone streaming-event-mapping discovery. Includes parallel research agents, specialized code analysis, and Product Designer.",
+      "description": "Product team workflow: 18 skills + 4 research agents. Pre-dev planning with 5-gate (small features) and 10-gate (large features) orchestrators, delivery roadmap generation, delivery status tracking for evidence-based progress reporting, plus standalone mapping-streaming-events discovery. Includes parallel research agents, specialized code analysis, and Product Designer.",
       "version": "0.31.0",
       "source": "./pm-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/main/pm-team",
@@ -84,7 +84,7 @@
     },
     {
       "name": "ring-tw-team",
-      "description": "Technical writing specialists for functional and API documentation. 3 specialized agents (functional-writer, api-writer, docs-reviewer) and 4 documentation skills covering voice/tone, structure, API field descriptions, and quality review. Enforces clear, consistent documentation standards.",
+      "description": "Technical writing specialists for functional and API documentation. 3 specialized agents (guide-writer, api-writer, docs-reviewer) and 4 documentation skills covering voice/tone, structure, API field descriptions, and quality review. Enforces clear, consistent documentation standards.",
       "version": "0.5.0",
       "source": "./tw-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/main/tw-team",

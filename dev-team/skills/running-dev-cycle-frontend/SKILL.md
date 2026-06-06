@@ -1,9 +1,6 @@
 ---
-name: ring:dev-cycle-frontend
-description: |
-  Frontend development cycle orchestrator with lean gates. Loads tasks from PM team output
-  or backend handoff and executes through Gate 0 implementation-owned checks,
-  Gate 7 review, and Gate 8 validation.
+name: ring:running-dev-cycle-frontend
+description: "Running the frontend (React/Next.js/TS) dev cycle from a tasks.md or backend handoff: drives frontend agents through Gate 0 TDD plus accessibility/visual/E2E/perf checks, Gate 7 parallel review, and Gate 8 user validation, with rolling-wave phase boundaries. Use when starting or resuming a gated frontend dev cycle. Skip for backend (use ring:running-dev-cycle) or docs-only work."
 ---
 
 # Frontend Development Cycle Orchestrator
@@ -16,14 +13,14 @@ description: |
 ## Skip when
 - No tasks file exists
 - Task is documentation-only or planning-only
-- Backend project — use ring:dev-cycle instead
+- Backend project — use ring:running-dev-cycle instead
 
 ## Sequence
-**Runs before:** ring:dev-report
+**Runs before:** ring:writing-dev-reports
 
 
 You orchestrate. Agents execute. NEVER read/write/edit source files (*.ts, *.tsx, *.jsx, *.css) directly.
-All code changes go through `Task(subagent_type=...)`. Announce at start: "Using ring:dev-cycle-frontend with lean gate flow (Gate 0, 7, 8)."
+All code changes go through `Task(subagent_type=...)`. Announce at start: "Using ring:running-dev-cycle-frontend with lean gate flow (Gate 0, 7, 8)."
 
 ## Step 0: Pre-Execution Setup (MANDATORY)
 
@@ -39,7 +36,7 @@ All code changes go through `Task(subagent_type=...)`. Announce at start: "Using
    WebFetch → testing-accessibility.md, testing-visual.md, testing-e2e.md, testing-performance.md, devops.md, sre.md
    Store in state.cached_standards.
 
-3. Load backend handoff if available: docs/ring:dev-cycle/handoff-frontend.json
+3. Load backend handoff if available: docs/ring:running-dev-cycle/handoff-frontend.json
 
 4. Verify PROJECT_RULES.md exists → STOP if missing.
 
@@ -50,9 +47,9 @@ All code changes go through `Task(subagent_type=...)`. Announce at start: "Using
 
 | Gate | Cadence | Skill | Agent | Purpose |
 |------|---------|-------|-------|---------|
-| 0 | task | ring:dev-implementation | ring:frontend-engineer / ring:ui-engineer / ring:frontend-bff-engineer-typescript | TDD, coverage, accessibility, visual/E2E/perf checks, local runtime |
-| 7 | epic | ring:codereview | 9 defaults + triggered specialists via ring:codereview | Code review |
-| 8 | task | ring:dev-validation | User | Acceptance sign-off |
+| 0 | task | ring:implementing-tasks | ring:frontend / ring:ui-engineer / ring:bff-ts | TDD, coverage, accessibility, visual/E2E/perf checks, local runtime |
+| 7 | epic | ring:reviewing-code | 9 defaults + triggered specialists via ring:reviewing-code | Code review |
+| 8 | task | ring:validating-acceptance-criteria | User | Acceptance sign-off |
 
 All listed gates are MANDATORY. No exceptions.
 
@@ -60,10 +57,10 @@ All listed gates are MANDATORY. No exceptions.
 
 | Condition | Agent |
 |-----------|-------|
-| React/Next.js component | ring:frontend-engineer |
+| React/Next.js component | ring:frontend |
 | Design system / Sindarian UI | ring:ui-engineer |
-| BFF / API aggregation | ring:frontend-bff-engineer-typescript |
-| Mixed | frontend-engineer first, then frontend-bff-engineer-typescript |
+| BFF / API aggregation | ring:bff-ts |
+| Mixed | frontend first, then bff-ts |
 
 Pass `ui_library_mode` to every Gate 0 agent.
 
@@ -110,7 +107,7 @@ phase completes its Gate 0/7/8 flow, fire the phase boundary exactly once:
 1. Checkpoint with the user: summarize the completed phase (epics done, review/validation
    outcomes) and confirm intent to continue.
 2. Elaborate the next phase's tasks inline under each epic, following the
-   ring:pre-dev-task-creation format (Context, Implementation vision, Files, Verification,
+   ring:detailing-tasks format (Context, Implementation vision, Files, Verification,
    Done when). Detail exactly one phase ahead — never further.
 3. Set state.current_phase to the next phase and resume execution from its first epic.
 ```
@@ -132,21 +129,21 @@ Sub-skill MUST be loaded before dispatching the agent.
 
 ## Gate 7: Reviewers
 
-Invoke `Skill("ring:codereview")`. The codereview skill dispatches its 9 default reviewers plus triggered conditional specialists in parallel and applies its own pass/fail rules.
+Invoke `Skill("ring:reviewing-code")`. The ring:reviewing-code skill dispatches its 9 default reviewers plus triggered conditional specialists in parallel and applies its own pass/fail rules.
 
 ## Gate Completion Criteria
 
 | Gate | Required for COMPLETE |
 |------|-----------------------|
 | 0 | TDD RED captured (behavioral) + GREEN passes; visual: implementation complete |
-| 7 | ring:codereview PASS (all 9 defaults and triggered specialists) |
+| 7 | ring:reviewing-code PASS (all 9 defaults and triggered specialists) |
 | 8 | Explicit "APPROVED" from user |
 
 Former Gates 1-6 checks are owned by Gate 0 implementation and local verification.
 
 ## State Management
 
-State: `docs/ring:dev-cycle-frontend/current-cycle.json` (state schema v2.0.0).
+State: `docs/ring:running-dev-cycle-frontend/current-cycle.json` (state schema v2.0.0).
 
 Write after EVERY gate. If write fails → STOP.
 

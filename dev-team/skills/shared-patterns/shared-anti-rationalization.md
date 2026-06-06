@@ -154,11 +154,11 @@ See [shared-patterns/standards-boundary-enforcement.md](standards-boundary-enfor
 | "Previous gate passed, this one will too" | Each gate is independent. No assumptions. | **Execute full gate requirements** |
 | "Small change, skip full process" | Size doesn't determine requirements. | **Follow complete process** |
 | "Already tested manually" | Manual testing ≠ gate compliance. | **Execute automated verification** |
-| "It's faster to do it directly" | Speed ≠ correct process. The ring:dev-cycle exists for a reason. | **Follow ring:dev-cycle gates. No shortcuts.** |
+| "It's faster to do it directly" | Speed ≠ correct process. The ring:running-dev-cycle exists for a reason. | **Follow ring:running-dev-cycle gates. No shortcuts.** |
 | "These are simple changes" | Simplicity doesn't justify skipping gates. Simple bugs cause complex incidents. | **all gates mandatory regardless of perceived simplicity.** |
 | "I know this code well, skip validation" | Familiarity breeds blind spots. Gates catch what you miss. | **Execute all gates. No expertise exemption.** |
 | "Deadline is tight, skip non-critical gates" | No gate is "non-critical". Each catches different issues. | **all gates are mandatory. Negotiate deadline, not quality.** |
-| "This is just a hotfix" | Hotfixes are highest-risk changes. They need MORE scrutiny, not less. | **Full ring:dev-cycle for all changes including hotfixes.** |
+| "This is just a hotfix" | Hotfixes are highest-risk changes. They need MORE scrutiny, not less. | **Full ring:running-dev-cycle for all changes including hotfixes.** |
 
 ### Refactor Gap Tracking
 

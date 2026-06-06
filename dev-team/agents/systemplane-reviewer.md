@@ -1,5 +1,5 @@
 ---
-name: ring:lib-systemplane-reviewer
+name: ring:systemplane-reviewer
 description: Conditional Gate 8 specialist for lib-systemplane, runtime config, hot-reload knobs, admin config surfaces, tenant-scoped settings, and systemplane imports/config.
 ---
 

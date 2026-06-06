@@ -1,8 +1,6 @@
 ---
 name: ring:test-driven-development
-description: |
-  RED-GREEN-REFACTOR implementation methodology - write failing test first,
-  minimal implementation to pass, then refactor. Ensures tests verify behavior.
+description: "Enforcing the RED-GREEN-REFACTOR loop: write one failing test and watch it fail, write minimal code to pass, then refactor green. Use when starting implementation of a new feature or bugfix, or writing any new production code. Requires pasted failure output as proof of RED; code written before its test must be deleted, not stashed. Skip for exploratory spikes or when only modifying existing tests."
 ---
 
 # Test-Driven Development (TDD)

@@ -1,11 +1,6 @@
 ---
-name: ring:dev-readyz
-description: |
-  Readiness implementation orchestrator for Lerian services. Drives a 12-gate cycle that
-  detects stack, audits existing /readyz compliance, dispatches language-specific engineers
-  (Go / TypeScript / Next.js) to implement the canonical /readyz contract, ValidateSaaSTLS()
-  enforcement, metrics emission, startup self-probe, graceful-drain coupling, circuit-breaker
-  integration, and multi-tenant carve-out — then runs 9 default reviewers plus triggered specialists in parallel.
+name: ring:implementing-readyz
+description: "Implementing the canonical /readyz readiness-probe contract across Go, TypeScript, and Next.js via a 12-gate cycle: detects stack, audits compliance, then dispatches agents to build the dependency probe, url.Parse TLS detection, ValidateSaaSTLS enforcement, metrics, startup self-probe, and graceful drain, then runs reviewers. Use when a service lacks or has incomplete /readyz. Skip for libraries, CLI tools, or batch jobs."
 ---
 
 # Readyz & Self-Probe Development Cycle
@@ -24,18 +19,18 @@ description: |
 
 
 You orchestrate. Agents implement. NEVER use Edit/Write/Bash on source files.
-All code changes go through `Task(subagent_type="ring:backend-engineer-{language}")`.
+All code changes go through `Task(subagent_type="ring:backend-go")` or `Task(subagent_type="ring:backend-ts")` (by language).
 TDD mandatory for all implementation gates (RED → GREEN → REFACTOR).
 
 **Agents:**
 
 | Who | Responsibility |
 |-----|----------------|
-| ring:backend-engineer-golang | Go services |
-| ring:backend-engineer-typescript | TypeScript backend/BFF |
-| ring:frontend-bff-engineer-typescript | Next.js BFF |
+| ring:backend-go | Go services |
+| ring:backend-ts | TypeScript backend/BFF |
+| ring:bff-ts | Next.js BFF |
 | ring:codebase-explorer | Gate 1 analysis |
-| ring:visualize | Gate 1.5 HTML preview |
+| ring:visualizing | Gate 1.5 HTML preview |
 | 9 defaults + triggered specialists | Gate 9 |
 
 ## Readiness Architecture
@@ -48,7 +43,7 @@ TDD mandatory for all implementation gates (RED → GREEN → REFACTOR).
 |----------|-----|
 | Ring SRE standards | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/sre.md` |
 | Go bootstrap standards | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang/bootstrap.md` |
-| This skill (authoritative) | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/skills/dev-readyz/SKILL.md` |
+| This skill (authoritative) | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/skills/implementing-readyz/SKILL.md` |
 
 **Canonical response contract:**
 
@@ -100,7 +95,7 @@ INFO/ERROR are not used by the probe handler. Steady-state observability is the 
 
 **Mandatory agent instruction (include in EVERY dispatch):**
 
-> WebFetch `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/skills/dev-readyz/SKILL.md` and `sre.md`.
+> WebFetch `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/skills/implementing-readyz/SKILL.md` and `sre.md`.
 > Follow the canonical response contract exactly. Five-value status vocabulary.
 > Aggregation: 503 iff any check is `down` or `degraded`.
 > Probe logging: success at DEBUG, failure at WARN. No INFO from the probe handler.
@@ -113,14 +108,14 @@ INFO/ERROR are not used by the probe handler. Steady-state observability is the 
 |------|------|-----------|-------|
 | 0 | Stack Detection + /readyz Compliance Audit | Always | Orchestrator |
 | 1 | Codebase Analysis | Always | ring:codebase-explorer |
-| 1.5 | Implementation Preview (HTML report) | Always | ring:visualize |
-| 2 | /readyz Endpoint Implementation | Always | ring:backend-engineer-{language} |
-| 3 | TLS Detection (url.Parse) | Always | ring:backend-engineer-{language} |
-| 4 | SaaS TLS Enforcement (ValidateSaaSTLS) | Always | ring:backend-engineer-{language} |
-| 5 | Metrics Emission | Always | ring:backend-engineer-{language} |
-| 6 | Circuit Breaker + Multi-Tenant Carve-Out | Skip only if no breakers AND single-tenant | ring:backend-engineer-{language} |
-| 7 | Startup Self-Probe + /health + Graceful Drain | Always — NEVER skippable | ring:backend-engineer-{language} |
-| 8 | Tests | Always | ring:backend-engineer-{language} |
+| 1.5 | Implementation Preview (HTML report) | Always | ring:visualizing |
+| 2 | /readyz Endpoint Implementation | Always | ring:backend-go / ring:backend-ts (by language) |
+| 3 | TLS Detection (url.Parse) | Always | ring:backend-go / ring:backend-ts (by language) |
+| 4 | SaaS TLS Enforcement (ValidateSaaSTLS) | Always | ring:backend-go / ring:backend-ts (by language) |
+| 5 | Metrics Emission | Always | ring:backend-go / ring:backend-ts (by language) |
+| 6 | Circuit Breaker + Multi-Tenant Carve-Out | Skip only if no breakers AND single-tenant | ring:backend-go / ring:backend-ts (by language) |
+| 7 | Startup Self-Probe + /health + Graceful Drain | Always — NEVER skippable | ring:backend-go / ring:backend-ts (by language) |
+| 8 | Tests | Always | ring:backend-go / ring:backend-ts (by language) |
 | 9 | Code Review | Always | 9 defaults + triggered specialists in parallel |
 | 10 | User Validation | Always | User |
 | 11 | Activation Guide | Always | Orchestrator |

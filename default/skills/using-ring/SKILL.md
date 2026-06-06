@@ -1,8 +1,6 @@
 ---
 name: ring:using-ring
-description: |
-  Mandatory orchestrator protocol - establishes ORCHESTRATOR principle (dispatch agents,
-  don't operate directly) and skill discovery workflow for every conversation.
+description: "Enforcing Ring's orchestrator protocol every conversation: dispatch specialist/Explore agents instead of operating tools directly, honor the >3-file hard gate, and run skill discovery before any task. Use at conversation start, before any task, when a request matches auto-trigger phrases (fix issues, refactor, find where, visualize), or when tempted to read/edit files directly. Never skip — mandatory."
 ---
 
 # Using Ring (Orchestrator Protocol)
@@ -39,7 +37,7 @@ IF A SKILL APPLIES TO YOUR TASK, YOU DO NOT HAVE A CHOICE. YOU MUST USE IT.
 | "apply fixes", "fix errors", "fix warnings", "fix linting" | Launch specialist agent |
 | "update across", "change all", "refactor" | Launch specialist agent |
 | "find where", "search for", "understand how" | Launch Explore agent |
-| "draw diagram", "visualize", "comparison table" | Load ring:visualize skill |
+| "draw diagram", "visualize", "comparison table" | Load ring:visualizing skill |
 
 ## Mandatory First Response Protocol
 
@@ -70,7 +68,7 @@ IF A SKILL APPLIES TO YOUR TASK, YOU DO NOT HAVE A CHOICE. YOU MUST USE IT.
 | Explore/find/understand/search | **Explore** |
 | Plan implementation, break down features | **Plan** |
 | Multi-step research, complex investigation | **general-purpose** |
-| Code review | 9 default reviewers plus triggered conditional specialists via ring:codereview skill |
+| Code review | 9 default reviewers plus triggered conditional specialists via ring:reviewing-code skill |
 | Implementation plan document | ring:writing-plans |
 
 **Ring reviewers: always parallel in a single turn with multiple Task calls.**

@@ -1,6 +1,6 @@
 ---
 name: ring:using-runtime
-description: Dual-mode skill for lib-observability/runtime — the panic observability trident that turns silent goroutine deaths into production signal. Sweep Mode dispatches 6 parallel explorers to find naked goroutines, unobservable defer recover(), and missing panic-metric init. Reference Mode catalogs the API (SafeGo, RecoverWithPolicy, InitPanicMetrics) and framework integrations (Fiber, gRPC, RabbitMQ). Skip for non-Go or frontend code.
+description: "Using lib-observability/runtime, which turns silent goroutine deaths into log/span/metric signal, in two modes. Sweep Mode detects naked goroutines, unobservable defer recover(), missing InitPanicMetrics, and lib-commons/v5 shim imports. Reference Mode catalogs SafeGo, RecoverWithPolicy, the policy decision tree, and Fiber/gRPC/RabbitMQ integration. Go-only. Skip for non-Go or frontend code."
 ---
 
 # ring:using-runtime
@@ -154,7 +154,7 @@ Dispatch synthesizer to read all 6 files and emit:
 1. `/tmp/runtime-sweep-report.md`
 2. `/tmp/runtime-sweep-tasks.json`
 
-Surface report path + task count; offer handoff to `ring:dev-cycle`.
+Surface report path + task count; offer handoff to `ring:running-dev-cycle`.
 
 ---
 

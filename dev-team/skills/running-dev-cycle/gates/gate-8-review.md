@@ -2,9 +2,9 @@
 
 ⛔ **CADENCE:** This gate runs ONCE per epic, NOT per task. Reviewers see the CUMULATIVE diff of all tasks in the epic — cross-task interaction bugs (contract drift, hidden coupling, duplicated logic) are MORE visible at this cadence, not less.
 
-**REQUIRED SUB-SKILL:** Use `ring:codereview`
+**REQUIRED SUB-SKILL:** Use `ring:reviewing-code`
 
-### Step 10.1: Prepare Input for ring:codereview Skill
+### Step 10.1: Prepare Input for ring:reviewing-code Skill
 
 ⛔ **Input scope:** EPIC-level. `base_sha` is the SHA before the FIRST task's Gate 0 (i.e., the epic's starting commit); `head_sha` is the current HEAD after all tasks up to this point. The resulting diff covers ALL tasks of the epic.
 
@@ -31,14 +31,14 @@ review_input = {
 }
 ```
 
-### Step 10.2: Invoke ring:codereview Skill
+### Step 10.2: Invoke ring:reviewing-code Skill
 
 ```text
 1. Record gate start timestamp
 
-2. Invoke ring:codereview skill with structured input:
+2. Invoke ring:reviewing-code skill with structured input:
 
-   Skill("ring:codereview") with input:
+   Skill("ring:reviewing-code") with input:
      unit_id: review_input.unit_id                    # TASK id
      base_sha: review_input.base_sha                  # SHA before first task
      head_sha: review_input.head_sha                  # Current HEAD (cumulative diff)
@@ -49,8 +49,8 @@ review_input = {
 
    The skill handles:
    - Dispatching all 9 default reviewers plus triggered specialists in PARALLEL (single message)
-   - Defaults: ring:code-reviewer, ring:business-logic-reviewer, ring:security-reviewer, ring:test-reviewer, ring:nil-safety-reviewer, ring:dead-code-reviewer, ring:performance-reviewer, ring:multi-tenant-reviewer, ring:lib-commons-reviewer
-   - Conditional specialists: ring:lib-observability-reviewer, ring:lib-systemplane-reviewer, ring:lib-streaming-reviewer when their triggers match
+   - Defaults: ring:code-reviewer, ring:logic-reviewer, ring:security-reviewer, ring:test-reviewer, ring:nil-reviewer, ring:dead-code-reviewer, ring:perf-reviewer, ring:tenancy-reviewer, ring:commons-reviewer
+   - Conditional specialists: ring:obs-reviewer, ring:systemplane-reviewer, ring:streaming-reviewer when their triggers match
    - Aggregating issues by severity (CRITICAL/HIGH/MEDIUM/LOW/COSMETIC)
    - Reporting findings only; remediation and re-review are orchestrator responsibilities after this skill returns
 
@@ -66,7 +66,7 @@ review_input = {
 
    if skill output contains "Status: ISSUES_FOUND":
       → Gate 8 BLOCKED.
-      → Dispatch fixes to the appropriate implementation agent, then re-run ring:codereview.
+      → Dispatch fixes to the appropriate implementation agent, then re-run ring:reviewing-code.
 
    if skill output contains "Status: INCOMPLETE":
       → Gate 8 INCOMPLETE. Fix dispatch/reviewer failure before proceeding.
@@ -77,7 +77,7 @@ review_input = {
 ### Step 10.3: Gate 8 Complete
 
 ```text
-5. When ring:codereview skill returns PASS:
+5. When ring:reviewing-code skill returns PASS:
 
    Parse from skill output:
    - default_reviewers_passed: extract default reviewer PASS count from "## Reviewer Verdicts" (must be "9/9")
@@ -90,7 +90,7 @@ review_input = {
    - iterations: extract from "Iterations:" line
 
    - agent_outputs.review = {
-       skill: "ring:codereview",
+       skill: "ring:reviewing-code",
        output: "[full skill output]",
        iterations: [count],
        timestamp: "[ISO timestamp]",
@@ -104,7 +104,7 @@ review_input = {
          issues_count: N,
          issues: []  // Structured issues - see schema below
        },
-       business_logic_reviewer: {
+       logic_reviewer: {
          verdict: "PASS",
          issues_count: N,
          issues: []
@@ -114,7 +114,7 @@ review_input = {
          issues_count: N,
          issues: []
        },
-       nil_safety_reviewer: {
+       nil_reviewer: {
          verdict: "PASS",
          issues_count: N,
          issues: []
@@ -129,17 +129,17 @@ review_input = {
          issues_count: N,
          issues: []
        },
-       performance_reviewer: {
+       perf_reviewer: {
          verdict: "PASS",
          issues_count: N,
          issues: []
        },
-       multi_tenant_reviewer: {
+       tenancy_reviewer: {
          verdict: "PASS",
          issues_count: N,
          issues: []
        },
-       lib_commons_reviewer: {
+       commons_reviewer: {
          verdict: "PASS",
          issues_count: N,
          issues: []

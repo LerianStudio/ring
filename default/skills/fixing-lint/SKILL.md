@@ -1,14 +1,12 @@
 ---
-name: ring:lint
-description: |
-  Parallel lint fixing pattern - runs lint checks, groups issues into independent
-  streams, and dispatches AI agents to fix all issues until the codebase is clean.
+name: ring:fixing-lint
+description: "Fixing lint to a clean state: runs the linter, groups reported issues into independent streams, and dispatches one parallel fixer agent per stream (ring:backend-go for Go, ring:general-purpose otherwise), iterating until clean. Use when a codebase has lint errors across multiple files. Skip for a single error (fix directly), already-passing lint, or view-only requests; security lints are reported, not auto-fixed."
 ---
 
 # Linting Codebase
 
 ## When to use
-- User runs /ring:lint command
+- User runs /ring:fixing-lint command
 - Codebase has lint issues that need fixing
 - Multiple lint errors across different files/components
 
@@ -117,6 +115,6 @@ After 5 iterations: report remaining issues and ask user.
 | Issue Type | Agent |
 |------------|-------|
 | TypeScript/JavaScript | `ring:general-purpose` |
-| Go | `ring:backend-engineer-golang` |
+| Go | `ring:backend-go` |
 | Security lints | `ring:security-reviewer` for report/analysis only — security findings are **not auto-fixed**; escalate to human review |
 | Style/formatting | `ring:general-purpose` |

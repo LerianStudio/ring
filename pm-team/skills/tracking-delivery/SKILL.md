@@ -1,29 +1,26 @@
 ---
-name: ring:delivery-status
-description: |
-  Delivery status tracking and progress reporting. Analyzes repository against
-  delivery roadmap to calculate actual vs planned progress, identify delays,
-  and provide insights on velocity and risk trends.
+name: ring:tracking-delivery
+description: "Tracking actual delivery progress against plan by scanning repo branches, commits, and PRs, matching work to roadmap epics and tasks.md, and producing an evidence-linked status report with per-task completion, variance, critical-path impact, and velocity/risk insights. Consumes the roadmap from ring:planning-delivery. Use for status updates or sprint checkpoints. Skip when no roadmap exists or the repo has no activity yet."
 ---
 
 # Delivery Status Tracking — Evidence-Based Progress Reporting
 
 ## When to use
 
-- Delivery roadmap exists (from ring:pre-dev-delivery-planning)
+- Delivery roadmap exists (from ring:planning-delivery)
 - Need to check progress against plan
 - Stakeholders requesting status update
 - Regular checkpoint (weekly/sprint end)
 
 ## Skip when
 
-- No delivery roadmap → create one first with ring:pre-dev-delivery-planning
+- No delivery roadmap → create one first with ring:planning-delivery
 - Planning phase only → execute tasks first
 - No repository activity → nothing to analyze
 
 ## Sequence
 
-**Runs after:** ring:pre-dev-delivery-planning, ring:dev-cycle
+**Runs after:** ring:planning-delivery, ring:running-dev-cycle
 
 
 Every status report must be grounded in repository evidence, not estimates or verbal updates. Status answers WHAT is actually done vs what was planned.

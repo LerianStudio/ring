@@ -1,5 +1,5 @@
 ---
-name: ring:framework-docs-researcher
+name: ring:docs-researcher
 description: Tech stack analysis specialist for pre-dev planning. Detects project tech stack from manifest files and fetches relevant framework/library documentation. Identifies version constraints and implementation patterns from official docs.
 ---
 
@@ -164,4 +164,4 @@ Based on official documentation:
 ## Scope
 
 **Handles:** Tech stack detection, framework documentation, version analysis.
-**Does NOT handle:** Codebase pattern search (use `repo-research-analyst`), external best practices (use `best-practices-researcher`).
+**Does NOT handle:** Codebase pattern search (use `repo-researcher`), external best practices (use `web-researcher`).

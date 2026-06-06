@@ -573,7 +573,7 @@ Status icons: PASS (>=7), WARN (4-6), FAIL (<4), N/A (conditional not active)
 | 30 | Domain Modeling | domain.md + domain-modeling.md | ToEntity, Always-Valid | {PASS/FAIL} | {x}/10 |
 | 31 | Linting & Code Quality | quality.md | Linting | {PASS/FAIL} | {x}/10 |
 | 32 | Makefile & Dev Tooling | devops.md | Makefile Standards | {PASS/FAIL} | {x}/10 |
-| 35 | Nil/Null Safety | (nil-safety-reviewer) | Nil Patterns | {PASS/FAIL} | {x}/10 |
+| 35 | Nil/Null Safety | (nil-reviewer) | Nil Patterns | {PASS/FAIL} | {x}/10 |
 | 36 | Resilience Patterns | (generic) | Resilience Patterns | {PASS/FAIL} | {x}/10 |
 | 37 | Secret Scanning | (generic) | Secret Detection | {PASS/FAIL} | {x}/10 |
 | 38 | API Versioning | api-patterns.md | API Versioning | {PASS/FAIL} | {x}/10 |

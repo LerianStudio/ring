@@ -1,9 +1,6 @@
 ---
-name: ring:pre-dev-design-validation
-description: |
-  Gate 1.5/2.5: Design Validation - verifies UX specifications are complete
-  before proceeding to technical architecture. Checklist-based validation
-  that prevents incomplete designs from reaching implementation.
+name: ring:validating-ux-completeness
+description: "Validating that UX specifications are complete before technical design: a read-only checklist over wireframes, states, responsive behavior, accessibility, and component-library alignment, emitting a DESIGN VALIDATED / NEEDS REVISION verdict. Gate 1.5/2.5, runs after ring:writing-prds or ring:mapping-feature-relationships, before ring:writing-trds. Use to check UI design completeness. Skip for backend-only, API-only, or no-UI work."
 ---
 
 # Design Validation Gate
@@ -23,8 +20,8 @@ description: |
 
 ## Sequence
 
-**Runs before:** ring:pre-dev-trd-creation
-**Runs after:** ring:pre-dev-prd-creation, ring:pre-dev-feature-map
+**Runs before:** ring:writing-trds
+**Runs after:** ring:writing-prds, ring:mapping-feature-relationships
 
 
 Verifies that UX specifications are COMPLETE before investing in technical architecture. This is a VALIDATION gate — it checks existing artifacts, does not create new ones.
@@ -134,6 +131,6 @@ If artifacts do not exist → STOP. Return to previous gate.
 - [Specific gap 2]
 
 ## Next Step
-VALIDATED → Proceed to ring:pre-dev-trd-creation
+VALIDATED → Proceed to ring:writing-trds
 REVISION → Return to product-designer with gap list
 ```

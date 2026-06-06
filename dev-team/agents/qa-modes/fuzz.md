@@ -1,6 +1,6 @@
 # QA Analyst — Fuzz Testing Mode
 
-Extends `qa-analyst.v2.md`. Load this file when dispatched with `mode: fuzz`.
+Extends `qa.v2.md`. Load this file when dispatched with `mode: fuzz`.
 
 ## When Fuzz Testing Applies
 

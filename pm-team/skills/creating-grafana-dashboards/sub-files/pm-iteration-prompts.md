@@ -157,7 +157,7 @@ with tenant_id but spans missing it). These will weaken dashboards built on thos
 primitives.
 
 Path forward:
-  FIX FIRST          → block dashboard work, surface tasks via ring:dev-cycle to fix instrumentation
+  FIX FIRST          → block dashboard work, surface tasks via ring:running-dev-cycle to fix instrumentation
   ACCEPT             → proceed with dashboards; inconsistencies degrade exemplars/correlation but don't break anything
   PARTIAL: {list}    → fix specific subset before proceeding
 ```
@@ -194,7 +194,7 @@ The orchestrator interprets PM responses and re-enters Gate 4 selectively:
 | `REJECT` | Drop theme from approval list |
 | `ADJUST {panel}: {threshold}` | Patch in plan file, no full Q4 loop |
 | `ADD theme {name}: {desc}` | Q4 light: propose new plan grounded in dictionary |
-| `FIX FIRST` (Q8) | Halt skill, generate task list via ring:dev-cycle handoff |
+| `FIX FIRST` (Q8) | Halt skill, generate task list via ring:running-dev-cycle handoff |
 | `APPROVED` | Proceed to Gate 6 |
 
 ---

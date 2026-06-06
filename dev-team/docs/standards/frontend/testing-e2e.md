@@ -4,7 +4,7 @@
 
 This module covers end-to-end testing patterns for React/Next.js applications using Playwright. E2E tests validate complete user flows from the product-designer's specifications.
 
-> **Gate Reference:** This module is loaded by `ring:qa-analyst-frontend` at Gate 5 (E2E Testing).
+> **Gate Reference:** This module is loaded by `ring:qa-frontend` at Gate 5 (E2E Testing).
 
 ---
 

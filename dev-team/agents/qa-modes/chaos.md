@@ -1,6 +1,6 @@
 # QA Analyst — Chaos Testing Mode
 
-Extends `qa-analyst.v2.md`. Load this file when dispatched with `mode: chaos`.
+Extends `qa.v2.md`. Load this file when dispatched with `mode: chaos`.
 
 ## When Chaos Testing Applies
 

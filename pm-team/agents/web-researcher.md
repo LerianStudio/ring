@@ -1,5 +1,5 @@
 ---
-name: ring:best-practices-researcher
+name: ring:web-researcher
 description: External research specialist for pre-dev planning. Searches web and documentation for industry best practices, open source examples, and authoritative guidance. Primary agent for greenfield features where codebase patterns don't exist.
 ---
 
@@ -129,4 +129,4 @@ You will receive a `research_mode` parameter:
 ## Scope
 
 **Handles:** External research — best practices, standards, open source patterns.
-**Does NOT handle:** Codebase pattern search (use `repo-research-analyst`), framework version detection (use `framework-docs-researcher`).
+**Does NOT handle:** Codebase pattern search (use `repo-researcher`), framework version detection (use `docs-researcher`).

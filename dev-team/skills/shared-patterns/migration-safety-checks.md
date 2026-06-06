@@ -4,7 +4,7 @@
 
 See [migration-safety.md](../../docs/standards/golang/migration-safety.md) for the complete standard including expand-contract pattern, multi-tenant considerations, and anti-rationalization table.
 
-**Home:** These checks are executed by [`ring:dev-cycle` Step 12.0.5b](../dev-cycle/SKILL.md) — Gate 0.5D, a post-cycle conditional gate that runs once per cycle when SQL migration files are present in the diff against `origin/main`.
+**Home:** These checks are executed by [`ring:running-dev-cycle` Step 12.0.5b](../running-dev-cycle/SKILL.md) — Gate 0.5D, a post-cycle conditional gate that runs once per cycle when SQL migration files are present in the diff against `origin/main`.
 
 ## When This Applies
 

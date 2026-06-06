@@ -1,6 +1,6 @@
 ---
 name: ring:using-outbox
-description: Dual-mode skill for the transactional outbox pattern across lib-streaming (writer side) and lib-commons/v5/commons/outbox (repository + relay side). Sweep Mode dispatches 6 parallel explorers to find DIY outbox tables, hand-rolled relay loops, send-and-pray emits, missing WithOutboxTx wrapping, synchronous broker calls inside DB transactions, and hand-rolled idempotency keys. Reference Mode catalogs OutboxWriter / TransactionalOutboxWriter / WithOutboxTx / OutboxRepository / OutboxEnvelope plus relay wiring. Skip for non-Go services or services that emit nothing.
+description: "Using the transactional-outbox pattern across lib-streaming (writer) and lib-commons/v5/commons/outbox (repository + relay), in two modes. Sweep Mode detects DIY outbox tables, hand-rolled relay loops, send-and-pray emits, missing WithOutboxTx wrapping, and broker calls inside DB transactions. Reference Mode catalogs the writer/repository/envelope API and relay wiring. Go-only. Skip for non-Go or read-only services."
 ---
 
 # ring:using-outbox
@@ -28,7 +28,7 @@ Reference mode:
 ## Related
 **Parent surface:** ring:using-lib-streaming (full streaming bus)
 **Repository side:** ring:using-lib-commons (lib-commons/outbox dispatcher, repository, handler registry)
-**Adjacent:** ring:dev-streaming-instrumentation (eventable-point identification → emit wiring), ring:using-runtime (panic-safe relay loops), ring:using-assert (invariant checks on envelope decode)
+**Adjacent:** ring:instrumenting-streaming-events (eventable-point identification → emit wiring), ring:using-runtime (panic-safe relay loops), ring:using-assert (invariant checks on envelope decode)
 
 ---
 
@@ -216,7 +216,7 @@ MUST NOT invent findings. MUST cite file:line for every finding. MUST preserve
 explorer severity unless evidence contradicts it (justify in notes).
 ```
 
-Surface the report path + task count; offer handoff to `ring:dev-cycle`.
+Surface the report path + task count; offer handoff to `ring:running-dev-cycle`.
 
 ---
 

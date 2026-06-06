@@ -100,12 +100,12 @@ Read docs/PROJECT_RULES.md
 
 | Agent | Standards File | URL |
 |-------|---------------|-----|
-| `ring:backend-engineer-golang` | golang.md | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang.md` |
-| `ring:backend-engineer-typescript` | typescript.md | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md` |
-| `frontend-bff-engineer-typescript` | typescript.md | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md` |
-| `ring:frontend-engineer` | frontend.md | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/frontend.md` |
-| `ring:frontend-designer` | frontend.md | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/frontend.md` |
-| `prompt-quality-reviewer` | N/A | Domain-independent (no standards WebFetch required) |
+| `ring:backend-go` | golang.md | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/golang.md` |
+| `ring:backend-ts` | typescript.md | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md` |
+| `bff-ts` | typescript.md | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md` |
+| `ring:frontend` | frontend.md | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/frontend.md` |
+| `ring:ui-designer` | frontend.md | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/frontend.md` |
+| `prompt-reviewer` | N/A | Domain-independent (no standards WebFetch required) |
 
 ---
 
