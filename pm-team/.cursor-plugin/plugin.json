@@ -2,7 +2,7 @@
   "name": "ring-pm-team",
   "displayName": "Ring PM Team",
   "description": "Pre-dev planning workflows: 4-gate and 8-gate orchestrators for PRD, TRD, OpenAPI contracts, schema design, and a phased plan. 14 skills + 4 research agents.",
-  "version": "0.32.0",
+  "version": "0.32.1",
   "author": {
     "name": "Lerian Studio",
     "email": "fred@lerian.studio"
