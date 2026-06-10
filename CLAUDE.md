@@ -88,10 +88,10 @@ When adding/removing a code review agent in `ring:reviewing-code` pool:
 | ---------------- | -------------- | ------ | ------ |
 | ring-default     | `default/`     | 16     | 2      |
 | ring-dev-team    | `dev-team/`    | 33     | 24     |
-| ring-pm-team     | `pm-team/`     | 18     | 4      |
+| ring-pm-team     | `pm-team/`     | 14     | 4      |
 | ring-tw-team     | `tw-team/`     | 4      | 3      |
 
-**Total: 71 skills, 33 agents across 4 plugins.** Plugin versions in `.claude-plugin/marketplace.json`.
+**Total: 67 skills, 33 agents across 4 plugins.** Plugin versions in `.claude-plugin/marketplace.json`.
 
 Each plugin contains: `skills/`, `agents/`, `hooks/`, plus per-harness install manifests `.codex-plugin/`, `.cursor-plugin/`, and `.opencode/` (alongside the marketplace-wide `.claude-plugin/marketplace.json` at repo root). See [README.md](README.md#architecture) for full directory structure.
 
@@ -105,8 +105,8 @@ Each plugin contains: `skills/`, `agents/`, `hooks/`, plus per-harness install m
 | Add agent | Create `*/agents/name.md` → verify required sections per [Agent Design](docs/AGENT_DESIGN.md) |
 | Modify hooks | Edit `*/hooks/hooks.json` → test with `bash */hooks/session-start.sh` |
 | Code review | `ring:reviewing-code` dispatches 9 default reviewers plus triggered conditional specialists |
-| Pre-dev (small) | `ring:planning-small-features` → 5-gate workflow |
-| Pre-dev (large) | `ring:planning-large-features` → 10-gate workflow |
+| Pre-dev (small) | `ring:planning-small-features` → 4-gate workflow |
+| Pre-dev (large) | `ring:planning-large-features` → 8-gate workflow |
 | Dev cycle backend | `ring:running-dev-cycle` → rolling-wave phased cycle (Gate 0 per task, Gate 8/9 per epic, Step 11.5 phase boundary) |
 | Dev cycle frontend | `ring:running-dev-cycle-frontend` → rolling-wave phased cycle (Gate 0 per task, Gate 7 per epic, Gate 8 per task, phase boundary) |
 

@@ -1,6 +1,6 @@
 ---
 name: ring:writing-trds
-description: "Writing a Technical Requirements Document that defines HOW and WHERE using technology-agnostic patterns: architecture style, component boundaries, data and integration design, auth/pagination, and BFF contracts for fullstack. Gate 3 (Full) / Gate 2 (Small) of ring:using-pm-team; runs after ring:writing-prds; names zero concrete products. Use when the PRD passed validation. Skip when the PRD is unvalidated or documented."
+description: "Writing a Technical Requirements Document that designs the technical architecture of the system or feature: components and boundaries, data flow, integration points, and failure modes — in technology-agnostic patterns, plus auth/pagination and BFF contracts for fullstack. Gate 3 of ring:planning-large-features (after ring:mapping-feature-relationships, before ring:designing-api-contracts) and Gate 2 of ring:planning-small-features (after ring:writing-prds, before ring:writing-plans). Use when the PRD passed validation. Skip when the PRD is unvalidated or the architecture is already documented."
 ---
 
 # TRD Creation — Architecture Before Implementation
@@ -8,24 +8,21 @@ description: "Writing a Technical Requirements Document that defines HOW and WHE
 ## When to use
 
 - PRD passed Gate 1
-- Feature Map passed Gate 2 (Full Track only)
-- Design Validation passed Gate 1.5 (Small Track) / Gate 2.5 (Full Track) (if feature has UI)
+- Feature Map passed Gate 2 (Large Track only)
 - About to design technical architecture
 
 ## Skip when
 
 - PRD not validated → complete Gate 1 first
-- Design Validation not passed (for UI features) → complete Gate 1.5/2.5 first
-- Architecture already documented → proceed to API Design
+- Architecture already documented → proceed to API Design (Large) or plan (Small)
 - Pure business requirement change → update PRD
 
 ## Sequence
 
-**Runs before:** ring:designing-api-contracts, ring:decomposing-phases-and-epics
-**Runs after:** ring:writing-prds, ring:mapping-feature-relationships, ring:validating-ux-completeness
+**Runs before:** ring:designing-api-contracts (Large Track) / ring:writing-plans (Small Track)
+**Runs after:** ring:mapping-feature-relationships (Large Track) / ring:writing-prds (Small Track)
 
-
-The TRD defines HOW to architect the solution and WHERE components will live — using technology-agnostic patterns before concrete technology choices.
+The TRD designs the technical architecture of the system or feature: components and their boundaries, data flow between them, integration points, and failure modes — using technology-agnostic patterns before concrete technology choices.
 
 ## Handling Missing Information
 
@@ -36,15 +33,14 @@ When specific details are not provided (tech stack, architecture, team size, dep
 - Flag assumptions that carry high risk for the reader to validate (mark as `⚠️ Assumption:`)
 - The only valid exception: tech stack ambiguity in Step 0 when auto-detection fails and no codebase files exist to infer from
 
-## Step -1: Design Validation Check (UI Features Only)
+## Step -1: Design Validation Check (UI Features Only, Conditional)
 
 Read PRD and detect UI indicators (user stories with "see", "view", "click", "page", "screen", "button", "form"; features involving login, dashboard, settings, reports, notifications).
 
 **If feature has UI:**
-- Check `docs/pre-dev/{feature}/design-validation.md`
-- If missing → STOP: "Run ring:validating-ux-completeness before TRD"
-- If verdict ≠ "DESIGN VALIDATED" → STOP: "Fix design gaps and re-run validation"
-- If "DESIGN VALIDATED" → proceed
+- Check `docs/pre-dev/{feature}/design-validation.md` (produced by a standalone ring:validating-ux-completeness run, if one happened)
+- If present → honor its verdict: "DESIGN VALIDATED" proceeds; any other verdict means fix the listed design gaps before (or alongside) the TRD
+- If absent → **proceed** and add to `## Assumptions`: `⚠️ UX risk: no design validation ran for this UI feature — consider a standalone ring:validating-ux-completeness pass`
 
 **If backend-only:** Skip to Step 0.
 
@@ -68,7 +64,7 @@ Read PRD and detect UI indicators (user stories with "see", "view", "click", "pa
 WebFetch base URL: `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/`
 
 ### Step 0.3: Read PROJECT_RULES.md
-Check: `docs/PROJECT_RULES.md` → `docs/STANDARDS.md` (legacy) → note for creation at Gate 6 if not found.
+Check: `docs/PROJECT_RULES.md` → `docs/STANDARDS.md` (legacy) → if neither exists, note the absence and proceed with Ring standards.
 
 ### Step 0.4: Analyze PRD and Suggest Technologies
 Read PRD, extract requirements, suggest technologies per category, confirm with user.
@@ -76,15 +72,16 @@ Read PRD, extract requirements, suggest technologies per category, confirm with 
 **AskUserQuestion:** "What deployment model?" Options: Cloud, On-Premise, Hybrid
 
 ### Step 0.5: Document in TRD Metadata
-TRD header must include: `feature`, `gate: 3`, `deployment.model`, `tech_stack.primary`, `tech_stack.standards_loaded[]`, `project_technologies[]` (category, prd_requirement, choice, rationale per decision). This flows to Gates 4-6.
+TRD header must include: `feature`, `gate: 3` (Large) / `gate: 2` (Small), `deployment.model`, `tech_stack.primary`, `tech_stack.standards_loaded[]`, `project_technologies[]` (category, prd_requirement, choice, rationale per decision). On Large Track this flows to Gates 4–6.
 
 ## Mandatory Workflow
 
 | Phase | Activities |
 |-------|------------|
-| **1. Analysis** | PRD (required); Feature Map (optional); identify NFRs (performance, security, scalability); map domains to components |
-| **2. Architecture Definition** | Choose style (Microservices, Modular Monolith, Serverless); design components with boundaries; define interfaces; model data architecture; plan integration patterns; design security |
-| **3. Gate 3 Validation** | All domains mapped; component boundaries clear; interfaces technology-agnostic; data ownership explicit; quality attributes achievable; no specific products named |
+| **1. Analysis** | PRD (required); Feature Map (Large Track); identify NFRs (performance, security, scalability); map domains to components |
+| **2. Architecture Definition** | Choose style (Microservices, Modular Monolith, Serverless); design components with explicit boundaries; define interfaces; model data flow end-to-end; plan integration points and patterns; design security |
+| **3. Failure Modes** | For each component and integration point: what fails, how it is detected, how the system degrades or recovers (timeout/retry/circuit-break/fallback); consistency under partial failure |
+| **4. Gate Validation** | All domains mapped; component boundaries clear; interfaces technology-agnostic; data ownership explicit; failure modes covered; quality attributes achievable; no specific products named |
 
 ## Technology Abstraction Rules
 
@@ -174,18 +171,19 @@ Document in TRD: `API Patterns → Pagination → Strategy + Rationale`
 - **Consequences**: [Impact of decision]
 ```
 
-## Gate 3 Validation Checklist
+## Gate Validation Checklist (Gate 3 Large / Gate 2 Small)
 
 | Category | Requirements |
 |----------|--------------|
 | **Architecture Completeness** | All PRD features mapped; DDD boundaries; clear responsibilities; stable interfaces |
-| **Data Design** | Ownership explicit; models support PRD; consistency strategy; flows documented |
+| **Data Design** | Ownership explicit; models support PRD; consistency strategy; flows documented end-to-end |
+| **Failure Modes** | Each component and integration point has failure behavior defined: detection, degradation, recovery |
 | **Quality Attributes** | Performance targets set; security addressed; scalability path clear |
 | **Integration Readiness** | External deps identified (by capability); patterns selected; errors considered |
 | **Technology Agnostic** | Zero product names; capabilities abstract; can swap tech without redesign |
 | **Design System** (UI) | Library specified; CSS framework; theme variables; component matrix; variant mapping |
 
-**Gate Result:** ✅ PASS → API Design | ⚠️ CONDITIONAL (remove product names) | ❌ FAIL (too coupled)
+**Gate Result:** ✅ PASS → API Design / Gate 4 (Large) or plan / Gate 3 (Small) | ⚠️ CONDITIONAL (remove product names) | ❌ FAIL (too coupled or failure modes missing)
 
 ## Document Placement
 

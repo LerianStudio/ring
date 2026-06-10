@@ -1,32 +1,32 @@
 ---
 name: ring:designing-data-model
-description: "Designing the data model (entities, fields, relationships, per-service ownership) from the Gate 4 API design and TRD, before database selection; no SQL, ORM, or migration syntax. Gate 5 of ring:planning-large-features; runs after ring:designing-api-contracts, before ring:pinning-dependency-versions. Use when the system stores persistent data. Skip for Small Track, no persistent data, or an unvalidated API design."
+description: "Designing the physical data model as a real stack-native schema (schema.sql with CREATE TABLE DDL, indexes, and constraints for Postgres/Go; schema.prisma for Prisma/TS; Postgres schema.sql as fallback) from the Gate 4 OpenAPI spec and TRD. Gate 5 of ring:planning-large-features; runs after ring:designing-api-contracts, before ring:pinning-dependency-versions. Use when the system stores persistent data. Skip for Small Track, no persistent data, or an unvalidated API contract."
 ---
 
-# Data Modeling — Defining Data Structures
+# Data Modeling — Producing the Stack-Native Schema
 
 ## When to use
 
-- API Design passed Gate 4 validation
+- OpenAPI spec passed Gate 4 validation (or Gate 4 SKIPPED for features with no API surface)
 - System stores persistent data
-- Multiple entities with relationships
 - Large Track workflow (2+ day features)
 
 ## Skip when
 
-- Small Track workflow → skip to Task Breakdown
+- Small Track workflow → skip to ring:writing-plans
 - No persistent data → skip to Dependency Map
-- API Design not validated → complete Gate 4 first
+- OpenAPI spec not validated (and Gate 4 not SKIPPED) → complete Gate 4 first
 
 ## Sequence
 
 **Runs before:** ring:pinning-dependency-versions
 **Runs after:** ring:designing-api-contracts
 
-
-Defines WHAT data exists, HOW entities relate, and WHO owns what data — before database technology selection.
+The deliverable is a REAL, stack-native schema file — DDL that becomes migrations, not markdown tables. The DDL **IS** the deliverable: `CREATE TABLE`, indexes, and constraints are required, not forbidden.
 
 ## Phase 0: Database Field Naming Strategy (MANDATORY)
+
+See [shared-patterns/standards-discovery.md](../shared-patterns/standards-discovery.md) for the complete workflow.
 
 ### Step 1: Check for Gate 4 API standards
 If `docs/pre-dev/{feature}/api-standards-ref.md` exists, auto-detect naming convention.
@@ -56,70 +56,76 @@ AskUserQuestion: "How should database fields be named?"
 
 **Option: Load from doc** — WebFetch or read, extract field definitions, save to `db-standards-ref.md`.
 
+## Phase 1: Stack Detection (MANDATORY)
+
+Determine the schema format from the TopologyConfig (research.md frontmatter) plus repo manifests:
+
+| Evidence | Format | Output File |
+|----------|--------|-------------|
+| `language: golang` in TopologyConfig, `go.mod` present, Postgres in TRD/stack | PostgreSQL DDL | `docs/pre-dev/{feature}/schema.sql` |
+| `prisma/` directory or `@prisma/client` in package.json | Prisma schema | `docs/pre-dev/{feature}/schema.prisma` |
+| Other stack with a native schema format (e.g., Drizzle, SQLAlchemy) | That stack's native format | `docs/pre-dev/{feature}/schema.{ext}` |
+| Undetectable / greenfield | PostgreSQL DDL (Lerian default) | `docs/pre-dev/{feature}/schema.sql` |
+
+Postgres is the Lerian default. When in doubt, write `schema.sql`.
+
 ## Mandatory Workflow
 
 | Phase | Activities |
 |-------|------------|
-| **1. Entity Identification** | From API Design (Gate 4) and TRD (Gate 3): identify all entities; determine aggregate boundaries; map ownership per service |
-| **2. Schema Definition** | Per entity: define fields with types, constraints, indexes; apply naming strategy from Phase 0 |
-| **3. Relationship Mapping** | Define relationships (one-to-one, one-to-many, many-to-many); document foreign keys; specify cascade behavior |
-| **4. Gate 5 Validation** | All entities documented; relationships complete; ownership clear; field naming consistent; no tech-specific syntax |
+| **2. Entity Identification** | From OpenAPI spec (Gate 4 schemas) and TRD (Gate 3): identify all persisted entities; determine aggregate boundaries; map ownership per service |
+| **3. Schema Authoring** | Write the schema file: tables/models with typed columns, PK/FK constraints, NOT NULL, CHECK/enum constraints, indexes for known query patterns; apply naming from Phase 0 |
+| **4. Validation** | Run the Gate 5 checklist; verify the file parses (e.g., `psql --dry-run`-style review or `npx prisma validate`) |
 
-## Entity Template
+## Schema Requirements
 
-```markdown
-### Entity: {EntityName}
+The schema file MUST be migration-ready:
 
-**Ownership:** {service-name}
-**Primary persistence:** Relational | Document | Key-value | Time-series
+- Every table/model: explicit PK (`uuid` default at Lerian), `created_at`/`updated_at` timestamps (UTC, `timestamptz`)
+- Foreign keys with explicit `ON DELETE` behavior — no implicit cascade decisions
+- Lifecycle states as `CHECK` constraints or native enums (`ACTIVE`, `INACTIVE`, ...)
+- Indexes for every query pattern implied by the OpenAPI list/filter operations
+- Soft-delete (`deleted_at`) only where the TRD requires retention
+- **Entity ownership** documented as comment headers per table/model: `-- owner: {service-name}` (or `/// owner:` in Prisma). Multi-service writes to one table are a design smell — flag them.
 
-| Field | Type | Required | Constraints | Notes |
-|-------|------|----------|-------------|-------|
-| id | uuid | Yes | PK, unique | Auto-generated |
-| name | string | Yes | max 255 chars | |
-| status | enum | Yes | ACTIVE, INACTIVE, BLOCKED | |
-| created_at | timestamp | Yes | UTC | |
-| updated_at | timestamp | Yes | UTC | |
+ER diagram, if useful, goes in a comment header at the top of the schema file or in the TRD — there is no separate `data-model.md` appendix.
 
-**Indexes:** [field combinations worth indexing for query patterns]
+### schema.sql sketch
 
-**Relationships:**
-- has-many: {RelatedEntity} via {foreign_key}
-- belongs-to: {ParentEntity} via {foreign_key}
+```sql
+-- owner: accounts-service
+CREATE TABLE accounts (
+    id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    name        varchar(255) NOT NULL,
+    status      varchar(16) NOT NULL CHECK (status IN ('ACTIVE','INACTIVE','BLOCKED')),
+    created_at  timestamptz NOT NULL DEFAULT now(),
+    updated_at  timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX idx_accounts_status ON accounts (status);
 ```
-
-## Data Rules
-
-### Include
-- Entity names and descriptions
-- Field names (following naming strategy), types, constraints
-- Relationships and cardinality
-- Data ownership per entity
-- Lifecycle states (ACTIVE, INACTIVE, etc.)
-- Data retention rules
-
-### Never Include
-- Database-specific syntax (PostgreSQL, MongoDB)
-- SQL DDL statements (`CREATE TABLE`)
-- ORM annotations (`@Column`, `json:"field"`)
-- Migration scripts
-- Query patterns (belong in tasks)
-
-## Topology-Aware Output
-
-| Structure | Files Generated |
-|-----------|-----------------|
-| single-repo | `docs/pre-dev/{feature}/data-model.md` |
-| monorepo | Root `docs/pre-dev/{feature}/data-model.md` |
-| multi-repo | Both repos: `{backend.path}/docs/pre-dev/{feature}/data-model.md` + frontend copy |
 
 ## Gate 5 Validation Checklist
 
 | Category | Requirements |
 |----------|--------------|
-| **Entity Completeness** | All API Design entities have data models; ownership clear; lifecycle states documented |
-| **Schema Quality** | All required fields defined; types precise; constraints documented; naming consistent with db-standards-ref.md |
-| **Relationships** | All entity relationships documented; cardinality correct; cascade rules specified |
-| **No Implementation** | Zero SQL syntax; zero ORM annotations; zero database-specific types; zero migration scripts |
+| **Valid schema** | File parses in its native tooling; format matches detected stack; migration-ready (no pseudo-DDL) |
+| **Entity Completeness** | Every persisted OpenAPI schema has a table/model; ownership comment per entity; lifecycle states constrained |
+| **Schema Quality** | Precise column types; NOT NULL/CHECK/unique constraints explicit; naming consistent with db-standards-ref.md |
+| **Relationships** | All FKs declared with explicit ON DELETE behavior; cardinality matches the TRD; join/lookup indexes present |
+| **API Alignment** | Every column maps to an OpenAPI schema field per the naming strategy (or is documented as internal-only) |
 
-**Gate Result:** ✅ PASS → Dependency Map | ⚠️ CONDITIONAL (fix naming/missing entities) | ❌ FAIL (incomplete schema)
+**Gate Result:** ✅ PASS → Dependency Map | ⚠️ CONDITIONAL (fix naming/missing indexes) | ❌ FAIL (missing entities or non-parsing schema)
+
+## Topology-Aware Output
+
+| Structure | Files Generated |
+|-----------|-----------------|
+| single-repo | `docs/pre-dev/{feature}/schema.sql` (or `.prisma`) |
+| monorepo | Root `docs/pre-dev/{feature}/schema.sql` (or `.prisma`) |
+| multi-repo | `{backend.path}/docs/pre-dev/{feature}/schema.sql` (or `.prisma`) + frontend copy |
+
+## Related
+
+- ring:designing-api-contracts — produces the OpenAPI spec the schema is derived from
+- ring:pinning-dependency-versions — consumes the schema to pin database products and versions

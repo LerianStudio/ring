@@ -1,25 +1,25 @@
 ---
 name: ring:pinning-dependency-versions
-description: "Pinning an explicit versioned dependency manifest (dependencies.md plus PROJECT_RULES.md): exact package versions, CVE and license checks, compatibility matrices, and per-component cost analysis against Ring Standards. Gate 6 of ring:planning-large-features, runs after ring:designing-data-model. Use when the data model is validated and you are about to lock products and versions. Skip for Small Track or when versions are already locked."
+description: "Pinning an explicit versioned dependency manifest (dependencies.md plus PROJECT_RULES.md): exact package versions, CVE and license checks, compatibility matrices, and per-component cost analysis against Ring Standards. Gate 6 of ring:planning-large-features; runs after ring:designing-data-model, before ring:writing-plans. Use when the schema is validated and you are about to lock products and versions. Skip for Small Track or when versions are already locked."
 ---
 
 # Dependency Map — Explicit Technology Choices
 
 ## When to use
 
-- Data Model passed Gate 5 validation
+- Schema (schema.sql / schema.prisma) passed Gate 5 validation
 - About to select specific technologies
 - Large Track workflow (2+ day features)
 
 ## Skip when
 
-- Small Track workflow → skip to Task Breakdown
-- Technologies already locked → skip to Task Breakdown
-- Data Model not validated → complete Gate 5 first
+- Small Track workflow → skip to ring:writing-plans
+- Technologies already locked → skip to ring:writing-plans
+- Schema not validated → complete Gate 5 first
 
 ## Sequence
 
-**Runs before:** ring:decomposing-phases-and-epics
+**Runs before:** ring:writing-plans
 **Runs after:** ring:designing-data-model
 
 
@@ -49,7 +49,7 @@ Using TRD `project_technologies[]`, create `docs/PROJECT_RULES.md` with: deploym
 
 | Phase | Activities |
 |-------|------------|
-| **1. Evaluation** | Ring Standards loaded; map TRD components to tech candidates; validate against Ring Standards; map Data Model to storage; map API contracts to protocols; check team expertise; estimate costs |
+| **1. Evaluation** | Ring Standards loaded; map TRD components to tech candidates; validate against Ring Standards; map the schema file (schema.sql / schema.prisma) to storage; map openapi.yaml contracts to protocols; check team expertise; estimate costs |
 | **2. Selection** | Per technology: check Ring Standards (mandatory/prohibited), specify exact version, list alternatives with trade-offs, verify compatibility, check security (CVEs), validate licenses, calculate costs |
 | **3. Gate 6 Validation** | All dependencies explicit; no conflicts; no critical CVEs; licenses compliant; costs documented; all components mapped |
 
@@ -123,4 +123,4 @@ Using TRD `project_technologies[]`, create `docs/PROJECT_RULES.md` with: deploym
 | **Security** | No critical CVEs; licenses compliant; security deps included |
 | **Costs** | Cost per component documented; shared vs dedicated decisions made |
 
-**Gate Result:** ✅ PASS → Task Breakdown | ⚠️ CONDITIONAL (version gaps or cost estimates missing) | ❌ FAIL (unresolved conflicts or CVEs)
+**Gate Result:** ✅ PASS → Plan (ring:writing-plans) | ⚠️ CONDITIONAL (version gaps or cost estimates missing) | ❌ FAIL (unresolved conflicts or CVEs)

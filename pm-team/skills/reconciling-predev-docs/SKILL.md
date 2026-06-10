@@ -1,6 +1,6 @@
 ---
 name: ring:reconciling-predev-docs
-description: "Reconciling pre-dev artifacts (PRD, TRD, API design, data model, tasks.md, dependency map) against each other to surface contradictions and gaps that break implementation, then applying approved corrections before ring:running-dev-cycle. Use after ring:planning-small-features or ring:planning-large-features. Skip for end-user docs (use ring:reviewing-docs), code review (use ring:reviewing-code), or before the docs exist."
+description: "Reconciling pre-dev artifacts (research.md, prd.md, feature-map.md, trd.md, openapi.yaml, schema file, dependencies.md, plan.md) against each other to surface contradictions and gaps that break implementation, then applying approved corrections before ring:running-dev-cycle. Use after ring:planning-small-features or ring:planning-large-features. Skip for end-user docs (use ring:reviewing-docs), code review (use ring:reviewing-code), or before the docs exist."
 ---
 
 # Deep Doc Review
@@ -10,7 +10,7 @@ description: "Reconciling pre-dev artifacts (PRD, TRD, API design, data model, t
 - Before starting dev-cycle (validate doc quality as a pre-gate)
 - After completing pre-dev workflow (ring:planning-small-features or ring:planning-large-features)
 - When user requests project documentation review
-- After significant changes to reference docs (PRD, TRD, API design, data model)
+- After significant changes to reference docs (PRD, TRD, OpenAPI spec, schema, plan)
 
 ## Skip when
 
@@ -25,7 +25,7 @@ description: "Reconciling pre-dev artifacts (PRD, TRD, API design, data model, t
 
 ## Related
 
-**Complementary:** ring:writing-prds, ring:writing-trds, ring:designing-api-contracts, ring:designing-data-model, ring:decomposing-phases-and-epics
+**Complementary:** ring:writing-prds, ring:writing-trds, ring:designing-api-contracts, ring:designing-data-model, ring:writing-plans
 **Differentiation:** ring:reviewing-code reviews code. ring:reconciling-predev-docs reviews documentation artifacts against each other.
 
 
@@ -44,7 +44,7 @@ If user specified files, use those. Otherwise, auto-discover:
 - `docs/` (general project docs)
 - Root directory (README, CHANGELOG, ARCHITECTURE)
 
-**Include:** PRD, TRD, API design, data model, phased plan (tasks.md), task specs, dependency map, delivery plan, research docs, coding standards, README, CHANGELOG
+**Include:** research.md, prd.md, feature-map.md, trd.md, openapi.yaml, schema file (schema.sql / schema.prisma), dependencies.md, plan.md, design-validation.md (if present), coding standards, README, CHANGELOG
 
 **Exclude:** generated files, node_modules, build artifacts, binary files, test fixtures
 
@@ -56,7 +56,7 @@ Show doc list and ask: "Are there additional documents to include or any to excl
 
 ### Step 0.3: Load All Docs
 
-Read each document. Build a cross-reference map: entities, fields, endpoints, and decisions mentioned in each doc.
+Read each document. Build a cross-reference map: entities, fields, endpoints, and decisions mentioned in each doc. Parse openapi.yaml and the schema file as machine-readable specs (paths, operations, components; tables, columns, types) — not prose.
 
 ## Phase 1: Cross-Reference Analysis
 
@@ -64,12 +64,17 @@ For each pair of docs that share entities or concepts, check for contradictions:
 
 | Cross-Reference | What to Check |
 |----------------|---------------|
+| research.md ↔ TRD | Chosen architecture traces to research findings; rejected alternatives not silently reintroduced |
 | PRD ↔ TRD | TRD covers all PRD requirements; TRD doesn't add new requirements; NFRs align |
-| TRD ↔ API Design | API operations match TRD component interfaces; data shapes consistent |
-| API Design ↔ Data Model | API response fields exist in data model; field names consistent; types compatible |
-| Data Model ↔ Task Breakdown | All entities have creation/migration tasks; relationships implemented |
-| TRD ↔ Dependency Map | All TRD components have explicit dependencies; no undeclared tech |
-| PRD ↔ Tasks | All PRD features have at least one task; task deliverables match PRD goals |
+| PRD ↔ feature-map.md | Every in-scope PRD feature appears in the map; `## Phases` cover full PRD scope (Large) |
+| TRD ↔ openapi.yaml | Paths/operations match TRD component interfaces and data flow; spec is valid OpenAPI 3.1 |
+| openapi.yaml ↔ schema file | Request/response schema fields exist as columns; names consistent; types compatible (machine-readable cross-check) |
+| TRD ↔ schema file | All TRD entities have tables/models; relationships and constraints match the architecture |
+| schema file ↔ plan.md | All entities have creation/migration tasks; relationships implemented |
+| TRD ↔ dependencies.md | All TRD components have explicit pinned dependencies; no undeclared tech |
+| feature-map.md ↔ plan.md | plan.md phases mirror feature-map `## Phases` one-to-one (Large) |
+| PRD ↔ plan.md | Every PRD requirement covered by at least one epic/task; acceptance criteria traceable |
+| design-validation.md ↔ TRD/plan.md (optional, if present) | UI surfaces honor the standalone UX verdict; flagged gaps have tasks |
 
 ## Phase 2: Intra-Document Quality
 

@@ -1,21 +1,20 @@
 ---
 name: ring:designing-api-contracts
-description: "Designing API contracts (component interfaces, request/response schemas, error catalog, versioning, pagination) from the validated TRD, before any protocol or technology selection. Gate 4 of ring:planning-large-features, Large Track only; runs after ring:writing-trds, before ring:designing-data-model. Use when a multi-component system needs integration contracts. Skip for Small Track, a single-component system, or an unvalidated TRD."
+description: "Designing the API contract as a real OpenAPI 3.1 specification (openapi.yaml with full paths, operations, schemas, components, Lerian error envelope, and auth schemes) from the validated TRD. Gate 4 of ring:planning-large-features, Large Track only; runs after ring:writing-trds, before ring:designing-data-model. Use when a system exposes APIs that components or clients consume. Skip for Small Track, a system with no API surface, or an unvalidated TRD."
 ---
 
-# API/Contract Design — Defining Component Interfaces
+# API Contract Design — Producing the OpenAPI Spec
 
 ## When to use
 
 - TRD passed Gate 3 validation
-- System has multiple components that need to integrate
-- Building APIs (internal or external)
+- System exposes APIs (internal or external) that components or clients consume
 - Large Track workflow (2+ day features)
 
 ## Skip when
 
-- Small Track workflow → skip to Task Breakdown
-- Single component system → skip to Data Model
+- Small Track workflow → skip to ring:writing-plans
+- No API surface (batch job, library, internal worker) → skip to Data Model
 - TRD not validated → complete Gate 3 first
 
 ## Sequence
@@ -23,12 +22,11 @@ description: "Designing API contracts (component interfaces, request/response sc
 **Runs before:** ring:designing-data-model
 **Runs after:** ring:writing-trds
 
-
-Defines WHAT data and operations components expose and consume, before protocol or technology selection. Contracts enable parallel team work and prevent integration failures discovered during development.
+The deliverable is a REAL, machine-consumable **OpenAPI 3.1 spec** — not markdown tables. Implementation agents generate handlers, clients, and tests directly from this file. If it doesn't lint, the gate doesn't pass.
 
 ## Phase 0: API Standards Discovery (MANDATORY)
 
-Check if organizational naming standards exist.
+Check if organizational naming standards exist. See [shared-patterns/standards-discovery.md](../shared-patterns/standards-discovery.md) for the complete workflow.
 
 AskUserQuestion: "Do you have a data dictionary or API field naming standards to reference?"
 - "No — Use industry best practices"
@@ -45,71 +43,100 @@ AskUserQuestion: "Do you have a data dictionary or API field naming standards to
 
 Save to `docs/pre-dev/{feature}/api-standards-ref.md`.
 
+**If no standards:** Use Lerian/industry defaults and record them in api-standards-ref.md:
+- Field naming: camelCase
+- IDs: UUID v4
+- Timestamps: ISO 8601 UTC
+- Pagination: `items`, `page`, `limit`, `next_cursor`, `prev_cursor`
+
 ## Mandatory Workflow
 
 | Phase | Activities |
 |-------|------------|
-| **1. Contract Discovery** | From TRD: identify all component interfaces; list operations each component exposes; define data contracts per operation |
-| **2. Contract Definition** | Per operation: request schema, response schema, error conditions, versioning; apply API standards if loaded |
-| **3. Gate 4 Validation** | All component interfaces defined; contracts complete; naming consistent with standards; error handling specified; versioning strategy documented |
+| **1. Surface Discovery** | From TRD: identify every API-exposing component; list resources and operations; map auth requirements per surface |
+| **2. Spec Authoring** | Write `openapi.yaml`: info, servers, tags, paths with full operations, components (schemas, parameters, responses, securitySchemes); apply naming from api-standards-ref.md |
+| **3. Validation** | Lint the spec; run the Gate 4 checklist |
 
-## Contract Rules
+## Spec Requirements
 
-### Include
-- Operation names and descriptions
-- Request schema (fields, types, required/optional, validation)
-- Response schema (fields, types, nullable)
-- Error catalog (code, HTTP status, condition, resolution)
-- Versioning strategy (backward compatibility, deprecation)
-- Pagination specification (if list operations)
+**File:** `docs/pre-dev/{feature}/openapi.yaml` — `openapi: 3.1.0`.
 
-### Never Include
-- Protocol selection (REST vs gRPC → TRD)
-- Implementation libraries (which HTTP framework)
-- Infrastructure choices (caching layer, CDN)
-- Code structure (packages, files)
+Every operation MUST have:
+- `operationId` (unique, lowerCamelCase verb-noun: `createAccount`, `listTransactions`)
+- `summary`, `tags`
+- Request body schema via `$ref` to `components/schemas` (no inline anonymous objects for domain types)
+- All success responses with schemas
+- All expected error responses (400/401/403/404/409/422/500 as applicable) referencing the error envelope
+- `security` requirement (or explicit `security: []` for public endpoints)
 
-## API Standards Application
+Components MUST define:
+- All domain schemas with types, formats, `required` arrays, constraints (`maxLength`, `enum`, `pattern`), and `examples`
+- Shared parameters (pagination, path IDs)
+- Reusable error responses
+- `securitySchemes` matching the feature's auth requirements from the TRD (e.g., OAuth2/OIDC client credentials, bearer JWT, API key). Do NOT invent auth the TRD doesn't require.
 
-**If api-standards-ref.md loaded:**
+List operations MUST use the Lerian pagination envelope: `items` plus `limit` and `page` (offset mode) or `next_cursor`/`prev_cursor` (cursor mode).
 
-Use extracted naming for all field definitions. Document in output: "Fields follow [source] convention."
+## Lerian Error Envelope (MANDATORY)
 
-**If no standards:** Use industry defaults:
-- Field naming: camelCase
-- IDs: UUID v4
-- Timestamps: ISO 8601 UTC
-- Pagination: `page`, `limit`, `totalItems`, `nextCursor`
-- Errors: `{ "code": "ERROR_CODE", "message": "...", "details": {} }`
+All error responses reference one shared schema:
 
-## Output Format
+```yaml
+components:
+  schemas:
+    Error:
+      type: object
+      required: [code, title, message]
+      properties:
+        code:
+          type: string
+          description: Stable machine-readable error code
+          examples: ["ACC-0007"]
+        title:
+          type: string
+          examples: ["Entity Not Found"]
+        message:
+          type: string
+          description: Human-readable explanation with resolution guidance
+        fields:
+          type: object
+          additionalProperties: { type: string }
+          description: Per-field validation messages (422 only)
+```
 
-**File:** `docs/pre-dev/{feature}/api-design.md`
+Maintain an error catalog as `description` text on the Error schema or a top-level `x-error-catalog` extension: every code, its HTTP status, trigger condition, and resolution.
 
-Required sections:
-1. **Standards Reference** — Source used (or "industry defaults")
-2. **Component Interface Map** — Table of components + operations
-3. **Operation Contracts** — Per operation: request/response schema, errors
-4. **Shared Schemas** — Reusable data types
-5. **Error Catalog** — All error codes used across operations
-6. **Versioning Strategy** — Breaking vs non-breaking changes, deprecation policy
+## Validation (Gate 4)
+
+Lint before declaring the gate passed. Optional but recommended:
+
+```bash
+npx @stoplight/spectral-cli lint docs/pre-dev/{feature}/openapi.yaml
+# or
+npx @redocly/cli lint docs/pre-dev/{feature}/openapi.yaml
+```
+
+If neither tool is available, verify the YAML parses and every `$ref` resolves.
+
+| Category | Requirements |
+|----------|--------------|
+| **Valid spec** | Parses as YAML; `openapi: 3.1.0`; lints clean (spectral/redocly if available); all `$ref`s resolve |
+| **Completeness** | Every TRD API-exposing component has paths; every operation has request/response schemas and error responses |
+| **Naming Consistency** | Fields follow api-standards-ref.md convention throughout; operationIds consistent; no mixed conventions |
+| **Error Handling** | All error responses use the Lerian envelope; catalog covers every code with status and resolution |
+| **Auth** | securitySchemes match TRD auth requirements; every operation declares security (or explicit `security: []`) |
+
+**Gate Result:** ✅ PASS → Data Model | ⚠️ CONDITIONAL (naming/lint warnings to fix) | ❌ FAIL (invalid spec or missing operations)
 
 ## Topology-Aware Output
 
 | Structure | Files Generated |
 |-----------|-----------------|
-| single-repo | `docs/pre-dev/{feature}/api-design.md` |
-| monorepo | Root `docs/pre-dev/{feature}/api-design.md` |
-| multi-repo | Both: `{backend.path}/docs/pre-dev/{feature}/api-design.md` + frontend copy |
+| single-repo | `docs/pre-dev/{feature}/openapi.yaml` |
+| monorepo | Root `docs/pre-dev/{feature}/openapi.yaml` |
+| multi-repo | Both: `{backend.path}/docs/pre-dev/{feature}/openapi.yaml` + frontend copy |
 
-## Gate 4 Validation Checklist
+## Related
 
-| Category | Requirements |
-|----------|--------------|
-| **Completeness** | All TRD components have interfaces; all operations defined; request/response complete |
-| **Naming Consistency** | Fields follow declared naming convention throughout; no mixed conventions |
-| **Error Handling** | All error conditions documented; HTTP status codes correct; resolution guidance present |
-| **Versioning** | Version strategy documented; backward compatibility rules clear |
-| **No Implementation** | Zero protocol specifics; zero framework names; zero infrastructure names |
-
-**Gate Result:** ✅ PASS → Data Model | ⚠️ CONDITIONAL (fix naming/missing fields) | ❌ FAIL (incomplete contracts)
+- ring:writing-trds — produces the TRD this spec is derived from
+- ring:designing-data-model — consumes the spec's schemas to derive the physical schema

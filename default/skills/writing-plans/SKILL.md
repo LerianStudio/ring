@@ -16,7 +16,7 @@ description: "Writing a rolling-wave phased implementation plan from a spec befo
 - Spec is still in brainstorming; the plan would lock premature decisions
 
 ## Sequence
-**Runs after:** ring:exploring-codebases, ring:pre-dev-* skills (Gates 0-9 outputs feed the spec)
+**Runs after:** ring:exploring-codebases, ring:planning-large-features (gates 0-6 artifacts) or ring:planning-small-features (gates 0-2 artifacts) — their outputs feed the spec
 **Runs before:** ring:executing-plans (rolling-wave execution) or ring:running-dev-cycle (gated subagent workflow)
 
 ## Related
@@ -32,6 +32,8 @@ The plan is a **rolling-wave document**. Only the first phase is detailed to tas
 
 **Default save path:** `docs/plans/YYYY-MM-DD-<feature-name>.md`
 (User preferences override.)
+
+**Invoked from pre-dev:** when dispatched as the final gate of ring:planning-large-features or ring:planning-small-features, the spec inputs are the pre-dev artifacts — trd.md (plus feature-map.md, openapi.yaml, the schema file, and dependencies.md on the Large track). On Large, plan phases MUST mirror feature-map.md phases one-to-one. Output path is `docs/pre-dev/{feature}/plan.md`, overriding the default above; standalone invocations keep the default. plan.md is always a SINGLE document per feature: on multi-module topologies (monorepo fullstack / multi-repo), each epic carries one line `**Target:** backend | frontend | infra` (placed right before `**Status:**`); for multi-repo features the orchestrator copies plan.md into each repo and the local dev-cycle executes only epics whose Target matches that repo. No per-module plan splits.
 
 ## Standards
 
@@ -121,7 +123,10 @@ If the snippet exists to "save the implementer time", delete it. If it exists be
 **Scope:** [subsystems/directories touched — coarse-grained for later phases]
 **Dependencies:** [epics or phases that must land first, or "none"]
 **Done when:** [observable acceptance criteria]
+**Status:** Pending
 ```
+
+`**Status:**` lifecycle: Pending → Doing → Done | Failed. It is the write target for ring:running-dev-cycle epic checkpoints; ring:executing-plans may ignore it.
 
 For Phase 1 epics, tasks follow immediately below the epic block. For later phases, the epic block is the whole entry — tasks are added during execution.
 
@@ -196,20 +201,20 @@ After saving the plan, offer execution choice:
 
 **If Rolling-Wave chosen:** Continue with ring:executing-plans in this session.
 
-**If Subagent-Orchestrated chosen:** Hand off to ring:running-dev-cycle, which owns implementation across Gates 0–10.
+**If Subagent-Orchestrated chosen:** Hand off to ring:running-dev-cycle, which owns implementation across the lean cycle (Gate 0 per task, Gates 8/9 per epic, phase boundaries per phase).
 
 ## Verification Checklist
 
 Before marking the plan complete:
 - [ ] Plan header present (Goal, Architecture, Tech Stack, Phase Overview)
 - [ ] Every phase ends in working, testable software
-- [ ] Every epic has Goal, Scope, Dependencies, Done-when
+- [ ] Every epic has Goal, Scope, Dependencies, Done-when, Status
 - [ ] Phase 1 epics fully broken into dispatch-ready tasks; later phases epic-level only
 - [ ] No vague tasks in the detailed wave (no "appropriate", "TBD", unnamed edge cases)
 - [ ] Code snippets only where the Code Snippet Policy justifies them
 - [ ] Contract consistency across epics
 - [ ] Self-review checklist applied
-- [ ] Plan saved to `docs/plans/YYYY-MM-DD-<feature-name>.md`
+- [ ] Plan saved to `docs/plans/YYYY-MM-DD-<feature-name>.md` (or `docs/pre-dev/{feature}/plan.md` when invoked from pre-dev)
 - [ ] Execution handoff offered
 
 ## Worked Example
@@ -221,6 +226,7 @@ Before marking the plan complete:
 **Scope:** `internal/service/`, `internal/handler/`
 **Dependencies:** none
 **Done when:** integration test fetches a seeded transaction by ID; unknown ID returns 404
+**Status:** Pending
 
 #### Task 1.1.1: Implement GetTransactionByID service method
 
@@ -246,6 +252,7 @@ Before marking the plan complete:
 **Scope:** `internal/service/`, `internal/handler/`, repository query layer
 **Dependencies:** Epic 1.1 (read path patterns established there)
 **Done when:** paginated listing works against seeded data; cursor round-trips; page size capped at 100
+**Status:** Pending
 
 *(No tasks yet — elaborated by ring:executing-plans after Phase 1 lands, against the read-path patterns Phase 1 actually established.)*
 </example>

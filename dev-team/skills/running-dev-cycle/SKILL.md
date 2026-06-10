@@ -1,17 +1,17 @@
 ---
 name: ring:running-dev-cycle
-description: "Running the backend dev cycle: implements every task in a rolling-wave tasks.md plan for a Go/TS service, driving specialist agents through Gate 0 implementation/TDD, Gate 8 parallel review, and Gate 9 validation per epic, elaborating later phases at each phase boundary. Use when starting or resuming a gated backend dev cycle with a tasks.md plan. Skip for frontend (use ring:running-dev-cycle-frontend) or docs-only work."
+description: "Running the backend dev cycle: implements every task in a rolling-wave plan.md (ring:writing-plans format) for a Go/TS service, driving specialist agents through Gate 0 implementation/TDD, Gate 8 parallel review, and Gate 9 validation per epic, elaborating later phases at each phase boundary. Use when starting or resuming a gated backend dev cycle with a plan.md (legacy tasks.md only for cycles already in flight; new cycles need the canonical plan format). Skip for frontend (use ring:running-dev-cycle-frontend) or docs-only work."
 ---
 
 # Development Cycle Orchestrator
 
 ## When to use
-- Starting a new development cycle with a phased plan (tasks.md from pre-dev)
+- Starting a new development cycle with a phased plan (plan.md from pre-dev or standalone ring:writing-plans)
 - Resuming an interrupted development cycle
 - Need structured, gate-based epic execution with quality checkpoints and phase cadence
 
 ## Skip when
-- No tasks file exists
+- No plan file exists
 - Task is documentation-only or planning-only
 - Frontend project (use ring:running-dev-cycle-frontend instead)
 
@@ -20,9 +20,9 @@ You orchestrate. Agents execute. You NEVER read, write, or edit source code dire
 
 ## How This Works
 
-Load the phased plan (tasks.md) from PM output and execute the lean backend cycle. tasks.md is a rolling-wave phased plan: a `## Phase Overview` table (phases + milestone + status), a `## Summary` table whose rows are epics (E-X.Y), and inline dispatch-ready tasks (T-X.Y.Z) written under each epic of the currently-detailed wave. Only the active wave is task-detailed; later phases are epic-level and get elaborated at each phase boundary. Backend implementation owns local runtime and quality so the flow does not dispatch separate QA, SRE, or DevOps gates.
+Load the phased plan (plan.md, ring:writing-plans canonical format) and execute the lean backend cycle. The plan is rolling-wave phased: a `## Phase Overview` table (phases + milestone + status), phase sections containing `### Epic N.M:` headings (each epic carries a `**Status:**` line: Pending/Doing/Done/Failed), and inline dispatch-ready `#### Task N.M.T:` blocks written under each epic of the currently-detailed wave. Only the active wave is task-detailed; later phases are epic-level and get elaborated at each phase boundary. Backend implementation owns local runtime and quality so the flow does not dispatch separate QA, SRE, or DevOps gates.
 
-**Vocabulary:** Phase = independently verifiable milestone. Epic (E-X.Y) = value-driven increment, the UNIT this cycle iterates. Task (T-X.Y.Z) = dispatch-ready unit, the Gate 0 execution unit.
+**Vocabulary:** Phase = independently verifiable milestone. Epic (Epic N.M) = value-driven increment, the UNIT this cycle iterates. Task (Task N.M.T) = dispatch-ready unit, the Gate 0 execution unit.
 
 **Announce at start:** "Using ring:running-dev-cycle lean backend flow (rolling-wave phased plan)."
 
@@ -30,8 +30,8 @@ Load the phased plan (tasks.md) from PM output and execute the lean backend cycl
 
 | Gate | Skill to Load | Agent to Dispatch | Cadence | Mode |
 |------|---------------|-------------------|---------|------|
-| 0 | ring:implementing-tasks | ring:backend-go / ring:backend-ts | Per task (T-X.Y.Z) | Write + Run |
-| 8 | ring:reviewing-code | 9 default reviewers + triggered specialists in parallel | Per epic (E-X.Y) | Run |
+| 0 | ring:implementing-tasks | ring:backend-go / ring:backend-ts | Per task (Task N.M.T) | Write + Run |
+| 8 | ring:reviewing-code | 9 default reviewers + triggered specialists in parallel | Per epic (Epic N.M) | Run |
 | 9 | ring:validating-acceptance-criteria | N/A (verification) | Per epic | Run |
 | 11.5 | (orchestrator + 1 planning agent) | ring:backend-go / ring:backend-ts / ring:frontend / ring:codebase-explorer (ANALYSIS mode) | Per phase boundary | Plan only |
 
@@ -42,9 +42,9 @@ Gate 0 includes TDD RED/GREEN, coverage threshold enforcement, docker-compose/lo
 ```yaml
 for each phase (current wave; starts at Phase 1, the only detailed phase at init):
 
-  for each epic in this phase (Summary order):
+  for each epic in this phase (plan order):
 
-    # 1. TASK-LEVEL build (per task T-X.Y.Z, or epic-itself if no task breakdown)
+    # 1. TASK-LEVEL build (per task Task N.M.T, or epic-itself if no task breakdown)
     for each task:
       Gate 0  # build task
       [checkpoint if manual_per_task mode]
@@ -212,8 +212,10 @@ A gate is complete ONLY when ALL components succeed:
 
 | Source | Path |
 |--------|------|
-| Tasks (PM output) | `docs/pre-dev/{feature}/tasks.md` |
-| Phase tasks | inside tasks.md, under each epic (phased plan) |
+| Plan (pre-dev flow) | `docs/pre-dev/{feature}/plan.md` |
+| Plan (standalone ring:writing-plans) | `docs/plans/*.md` |
+| Legacy tasks (in-flight cycles ONLY) | `docs/pre-dev/{feature}/tasks.md` (old `## Summary` table + E-/T- ids) — accepted only when `current-cycle.json` already exists (init is not re-run); new cycles MUST start from the canonical plan format |
+| Phase tasks | inside the plan, under each epic (`#### Task N.M.T:` blocks) |
 | Refactor tasks | `docs/ring:planning-backend-refactor/*/tasks.md` |
 
 ## Frontend Handoff

@@ -8,12 +8,12 @@ description: Classification of dev-cycle gates by execution cadence (task/epic/p
 ## Four Cadences
 
 ### Task Cadence
-Runs for every task (T-X.Y.Z), the dispatch-ready unit under its epic. Input scoped to a single unit.
+Runs for every task (Task N.M.T), the dispatch-ready unit under its epic. Input scoped to a single unit.
 - Backend: Gate 0 (Implementation + TDD + coverage + docker-compose/local runtime + delivery verify)
 - Frontend: Gate 0 (Implementation-owned quality), Gate 8 (Validation)
 
 ### Epic Cadence
-Runs once per epic (E-X.Y), after all of its tasks complete their task-level gates. Input is
+Runs once per epic (Epic N.M), after all of its tasks complete their task-level gates. Input is
 UNION of all the epic's tasks' changes.
 - Backend: Gate 8 (Review — 9 default reviewers plus triggered specialists), Gate 9 (Validation — aggregates every task's acceptance criteria + one human approval, after Gate 8)
 - Frontend: Gate 7 (Review)

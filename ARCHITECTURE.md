@@ -13,7 +13,7 @@
 
 ## Overview
 
-Ring is a **Claude Code plugin marketplace** that provides a comprehensive skills library and workflow system with **4 active plugins** (71 skills, 33 agents). It extends Claude Code's capabilities through structured, reusable patterns that enforce proven software engineering practices across the software delivery value chain: Product Planning → Development → Documentation.
+Ring is a **Claude Code plugin marketplace** that provides a comprehensive skills library and workflow system with **4 active plugins** (67 skills, 33 agents). It extends Claude Code's capabilities through structured, reusable patterns that enforce proven software engineering practices across the software delivery value chain: Product Planning → Development → Documentation.
 
 Beyond Claude Code, each Ring plugin ships native install manifests for Codex (`<plugin>/.codex-plugin/`), Cursor (`<plugin>/.cursor-plugin/`), and OpenCode (`<plugin>/.opencode/`), plus a `ring-install.sh` symlink installer for local-dev workflows targeting Claude Code, Factory AI, OpenCode, and Codex.
 
@@ -40,7 +40,7 @@ Ring operates on three core principles:
 │  │  └──────────────────────┘  └──────────────────────┘                       │  │
 │  │  ┌──────────────────────┐  ┌──────────────────────┐                       │  │
 │  │  │ ring-pm-team         │  │ ring-tw-team         │                       │  │
-│  │  │ Skills(18) Agents(4) │  │ Skills(4) Agents(3)  │                       │  │
+│  │  │ Skills(14) Agents(4) │  │ Skills(4) Agents(3)  │                       │  │
 │  │  └──────────────────────┘  └──────────────────────┘                       │  │
 │  └───────────────────────────────────────────────────────────────────────────┘  │
 │                                                                                  │
@@ -72,7 +72,7 @@ _Versions managed in `.claude-plugin/marketplace.json`_
 | -------------------- | ------------------------------------ | -------------------------------- |
 | **ring-default**     | Core skills library                  | 16 skills, 2 agents               |
 | **ring-dev-team**    | Developer agents                     | 33 skills, 24 agents              |
-| **ring-pm-team**     | Product planning workflows           | 18 skills, 4 agents               |
+| **ring-pm-team**     | Product planning workflows           | 14 skills, 4 agents               |
 | **ring-tw-team**     | Technical writing specialists        | 4 skills, 3 agents                |
 
 ## Component Hierarchy
@@ -512,9 +512,9 @@ Complex Skill → TodoWrite tracking
 ### Pattern 4: Rolling-Wave Planning Hierarchy (pm-team → dev-team)
 
 ```
-ring:planning-* (pm-team)
-    └─ tasks.md — phased plan, living document
-       (Phase Overview + epics E-X.Y + Phase 1 tasks T-X.Y.Z)
+ring:planning-* (pm-team) → ring:writing-plans (default)
+    └─ plan.md — phased plan, living document
+       (Phase Overview + epics `Epic N.M` + Phase 1 tasks `Task N.M.T`)
             ↓
 ring:running-dev-cycle / ring:running-dev-cycle-frontend (dev-team)
     ├─ Gate 0 per task          (TDD implementation)
@@ -525,7 +525,7 @@ ring:running-dev-cycle / ring:running-dev-cycle-frontend (dev-team)
         against the codebase as it now exists
 ```
 
-**Implementation:** Only the active phase is task-detailed; later phases stay at epic level and are elaborated at each phase boundary (rolling wave — pre-written detail for a not-yet-built phase is stale by construction). `tasks.md` is the single living source of truth: gate orchestrators and `ring:executing-plans` (default plugin) write elaborated tasks back into it. Dev-cycle state persists with schema v2.0.0 (phases → epics → tasks). See `dev-team/skills/running-dev-cycle/gates/phase-boundary.md` and `dev-team/skills/shared-patterns/gate-cadence-classification.md`.
+**Implementation:** Only the active phase is task-detailed; later phases stay at epic level and are elaborated at each phase boundary (rolling wave — pre-written detail for a not-yet-built phase is stale by construction). `plan.md` is the single living source of truth: dev-cycle orchestrators and `ring:executing-plans` (default plugin) write elaborated tasks back into it. Dev-cycle state persists with schema v2.0.0 (phases → epics → tasks). See `dev-team/skills/running-dev-cycle/gates/phase-boundary.md` and `dev-team/skills/shared-patterns/gate-cadence-classification.md`.
 
 ## Component Relationships
 
@@ -735,9 +735,9 @@ _Component counts reflect current state; plugin versions managed in `.claude-plu
 | Active Plugins            | 4          | All plugin directories |
 | Skills (ring-default)     | 16         | `default/skills/`      |
 | Skills (ring-dev-team)    | 33         | `dev-team/skills/`     |
-| Skills (ring-pm-team)     | 18         | `pm-team/skills/`      |
+| Skills (ring-pm-team)     | 14         | `pm-team/skills/`      |
 | Skills (ring-tw-team)     | 4          | `tw-team/skills/`      |
-| **Total Skills**          | **71**     | **All plugins**        |
+| **Total Skills**          | **67**     | **All plugins**        |
 | Agents (ring-default)     | 2          | `default/agents/`      |
 | Agents (ring-dev-team)    | 24         | `dev-team/agents/`     |
 | Agents (ring-pm-team)     | 4          | `pm-team/agents/`      |

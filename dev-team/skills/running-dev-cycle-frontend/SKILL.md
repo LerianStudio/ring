@@ -1,17 +1,17 @@
 ---
 name: ring:running-dev-cycle-frontend
-description: "Running the frontend (React/Next.js/TS) dev cycle from a tasks.md or backend handoff: drives frontend agents through Gate 0 TDD plus accessibility/visual/E2E/perf checks, Gate 7 parallel review, and Gate 8 user validation, with rolling-wave phase boundaries. Use when starting or resuming a gated frontend dev cycle. Skip for backend (use ring:running-dev-cycle) or docs-only work."
+description: "Running the frontend (React/Next.js/TS) dev cycle from a plan.md (ring:writing-plans format; legacy tasks.md only for in-flight cycles) or backend handoff: drives frontend agents through Gate 0 TDD plus accessibility/visual/E2E/perf checks, Gate 7 parallel review, and Gate 8 user validation, with rolling-wave phase boundaries. Use when starting or resuming a gated frontend dev cycle. Skip for backend (use ring:running-dev-cycle) or docs-only work."
 ---
 
 # Frontend Development Cycle Orchestrator
 
 ## When to use
-- Starting a new frontend development cycle with a task file
+- Starting a new frontend development cycle with a plan file (plan.md, canonical ring:writing-plans format; legacy tasks.md is accepted ONLY for cycles already in flight — `current-cycle.json` exists, init is not re-run)
 - Resuming an interrupted frontend development cycle (--resume flag)
 - After backend dev cycle completes (consuming handoff)
 
 ## Skip when
-- No tasks file exists
+- No plan file exists
 - Task is documentation-only or planning-only
 - Backend project — use ring:running-dev-cycle instead
 
@@ -104,13 +104,24 @@ Phases group epics and are elaborated one at a time. After the last epic of the 
 phase completes its Gate 0/7/8 flow, fire the phase boundary exactly once:
 
 ```
-1. Checkpoint with the user: summarize the completed phase (epics done, review/validation
+1. Close the finished phase in the plan: set its `## Phase Overview` Status cell →
+   `Complete` (Edit on the plan file; skip silently if the table is absent —
+   FALLBACK single-phase plan).
+2. Checkpoint with the user: summarize the completed phase (epics done, review/validation
    outcomes) and confirm intent to continue.
-2. Elaborate the next phase's tasks inline under each epic, following the
-   ring:detailing-tasks format (Context, Implementation vision, Files, Verification,
-   Done when). Detail exactly one phase ahead — never further.
-3. Set state.current_phase to the next phase and resume execution from its first epic.
+3. Elaborate the next phase's tasks inline under each epic as `#### Task N.M.T:`
+   blocks, following the ring:writing-plans Task Format (`- [ ] Done` checkbox
+   immediately under the heading, then Context, Implementation vision, Files,
+   Verification, Done when). Detail exactly one phase ahead — never further.
+4. Set the newly elaborated phase's Phase Overview Status cell → `Detailed`.
+5. Set state.current_phase to the next phase and resume execution from its first epic.
 ```
+
+**Epic `**Status:**` lifecycle writes (same contract as ring:running-dev-cycle):** the plan's
+epic `**Status:**` line is the write target throughout the epic loop — `Pending` → `Doing`
+before the epic's first Gate 0, `Doing` → `Done` after the epic passes Gate 7/8 and its
+checkpoint, `Doing` → `Failed` on a hard block. Edit the plan file at each of these
+transitions, alongside the state write.
 
 Do not elaborate more than one phase ahead — detail decays before execution reaches it.
 
@@ -165,7 +176,7 @@ Write after EVERY gate. If write fails → STOP.
 }
 ```
 
-Each entry in `epics[]` (E-X.Y) carries its own `tasks[]` array (T-X.Y.Z). Gate 0/8
+Each entry in `epics[]` (Epic N.M) carries its own `tasks[]` array (Task N.M.T). Gate 0/8
 run at task cadence over `epics[current_epic_index].tasks[current_task_index]`; Gate 7
 runs at epic cadence over the union of that epic's tasks.
 

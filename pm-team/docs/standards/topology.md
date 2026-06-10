@@ -15,7 +15,7 @@ Standards for project structure discovery and multi-module coordination in Ring 
 | 5 | [Context Switching](#5-context-switching) | when to prompt for directory change |
 | 6 | [Multi-Repo Coordination](#6-multi-repo-coordination) | handling separate repositories |
 | 7 | [PROJECT_RULES.md Hierarchy](#7-project_rulesmd-hierarchy) | rule precedence in multi-module projects |
-| 8 | [API Pattern](#8-api-pattern) | direct, bff, other - determines agent assignment |
+| 8 | [API Pattern](#8-api-pattern) | bff or none - determines agent assignment |
 | 9 | [Documentation Placement](#9-documentation-placement) | Where docs are stored per structure |
 
 ---
@@ -46,9 +46,9 @@ Repository structure affects how docs are organized and how tasks are distribute
 
 | Structure | When | Doc Location | Task Distribution |
 |-----------|------|--------------|-------------------|
-| `single-repo` | All code in one repo, same directory | Unified in `docs/pre-dev/{feature}/` | All tasks in single `tasks.md` |
-| `monorepo` | Multiple packages in one repo (e.g., `packages/*`) | Per-module optional | Tasks tagged with `target:` |
-| `multi-repo` | Separate repos for backend/frontend | Coordinator repo | Tasks split into `_{module}.tasks.md` |
+| `single-repo` | All code in one repo, same directory | Unified in `docs/pre-dev/{feature}/` | Single `plan.md` |
+| `monorepo` | Multiple packages in one repo (e.g., `packages/*`) | Module-specific docs may live per module | Single `plan.md`; epics tagged with `**Target:**` |
+| `multi-repo` | Separate repos for backend/frontend | Coordinator repo | Single `plan.md` copied into each repo; local dev-cycle executes only epics whose `**Target:**` matches |
 
 ### Structure Detection Hints
 
@@ -126,51 +126,58 @@ topology:
 
 ## 4. Module Organization
 
+`doc_organization` governs where module-specific supporting docs (ux-criteria.md, wireframes/, openapi.yaml, schema files) live. It does NOT split the plan: **plan.md is always a single document per feature**, at the feature's pre-dev directory in the primary repo.
+
 ### Unified Organization (Default)
 
-All tasks in single `tasks.md` with `target:` tags:
+All docs in the feature's pre-dev directory:
 
 ```
 docs/pre-dev/{feature}/
 ├── research.md
 ├── prd.md
 ├── trd.md
-└── tasks.md          # All tasks with target: tags
+└── plan.md           # Single plan; epics carry **Target:** tags on multi-module topologies
 ```
 
-**Task format:**
+**Epic format (multi-module topologies):**
 ```markdown
-## Task 3: Create User API Endpoint
+### Epic 1.2: User API Endpoint
+
+...epic details...
 
 **Target:** backend
-**Working Directory:** packages/api
-**Agent:** ring:backend-go
-
-...task details...
+**Status:** Pending
 ```
+
+The `**Target:** backend | frontend | infra` line is optional, placed right before `**Status:**`, and only used on monorepo fullstack / multi-repo topologies.
 
 ### Per-Module Organization
 
-Separate task files per module:
+Module-specific supporting docs move to module directories; the plan does not split:
 
 ```
 docs/pre-dev/{feature}/
 ├── research.md
 ├── prd.md
 ├── trd.md
-├── tasks.md          # Index with all tasks
-├── backend/
-│   └── tasks.md      # Backend tasks only
-└── frontend/
-    └── tasks.md      # Frontend tasks only
+└── plan.md           # Single plan — never split per module
+
+{backend.path}/docs/pre-dev/{feature}/
+├── openapi.yaml
+└── schema.sql        # or schema.prisma
+
+{frontend.path}/docs/pre-dev/{feature}/
+├── ux-criteria.md
+└── wireframes/
 ```
 
 ### When to Use Each
 
 | Organization | When | Benefits |
 |--------------|------|----------|
-| `unified` | Small features, tight integration | Single source of truth, easier to track |
-| `per-module` | Large features, separate teams, multi-repo | Independent execution, easier distribution |
+| `unified` | Small features, tight integration | Everything in one place |
+| `per-module` | Large features, separate teams, multi-repo | Module docs live next to the code they describe |
 
 ---
 
@@ -180,10 +187,10 @@ docs/pre-dev/{feature}/
 
 | Scenario | Action |
 |----------|--------|
-| Task `target:` differs from current module | Prompt user for confirmation |
+| Epic `**Target:**` differs from current module | Prompt user for confirmation |
 | First task of execution | Set initial module (no prompt) |
 | Returning to previously visited module | No prompt (context cached) |
-| Shared task (`target: shared`) | Execute in root directory |
+| Epic with no `**Target:**` line | Execute in primary repo root |
 
 ### Context Switch Prompt
 
@@ -227,9 +234,10 @@ When `structure: multi-repo`, the repository where `/ring:planning-small-feature
 
 **Automatic Placement:** Documents are now automatically written to the correct repository based on `doc_placement: distributed`.
 
-- Shared documents (research.md, prd.md, trd.md) are written to both repos
-- Backend documents (api-design.md, data-model.md, tasks.md) go to backend repo
-- Frontend documents (ux-criteria.md, wireframes/, tasks.md) go to frontend repo
+- Shared documents (research.md, prd.md, trd.md, plan.md) are written to both repos — plan.md is the SAME single document in each copy
+- Backend documents (openapi.yaml, schema.sql/schema.prisma) go to backend repo
+- Frontend documents (ux-criteria.md, wireframes/) go to frontend repo
+- Each repo's local dev-cycle executes only epics whose `**Target:**` matches that repo
 
 **See Section 9 (Documentation Placement)** for complete placement rules.
 
@@ -292,35 +300,28 @@ When same rule exists in both:
 
 ## 8. API Pattern
 
-API Pattern determines how the frontend communicates with backend services and affects agent assignment.
+API Pattern determines how the frontend communicates with backend services and affects agent assignment. Canonical source: [topology-discovery.md](../../skills/shared-patterns/topology-discovery.md) — only two values exist.
 
 ### Pattern Options
 
 | Pattern | Description | Use When |
 |---------|-------------|----------|
-| `direct` | Frontend calls backend APIs directly | Single backend, simple CRUD, no aggregation |
-| `bff` | Frontend calls BFF layer which aggregates backends | Multiple backends, complex transformations, sensitive keys |
-| `other` | Custom pattern (GraphQL, tRPC, gateway) | Existing patterns, specific requirements |
+| `bff` | Frontend calls a BFF layer (Next.js API Routes → backends) | Any dynamic data — MANDATORY, not a choice |
+| `none` | No API layer | Static frontend with no backend calls |
 
-### Pattern Decision Criteria
+`direct` is **FORBIDDEN** (API keys exposed in browser, CORS, no server-side validation/caching) and `other` was removed. Client-side code MUST NEVER call backend APIs, databases, or external services directly.
 
-| Criteria | Direct | BFF |
-|----------|--------|-----|
-| Number of backend services | 1 | 2+ |
-| Data aggregation needed | No | Yes |
-| Complex transformations | No | Yes |
-| API calls per page | <3 | 3+ |
-| Sensitive keys to hide | No | Yes |
-| Request optimization | Not needed | Needed |
+### Pattern Decision
+
+Dynamic data? Yes → `bff` (mandatory). No → `none` (static frontend).
 
 ### Agent Assignment by Pattern
 
 | API Pattern | Frontend Tasks | Agent |
 |-------------|----------------|-------|
-| `direct` | UI components, pages, forms | `ring:frontend` |
-| `direct` | Server Actions, data fetching | `ring:frontend` (Next.js Server Components) |
 | `bff` | API routes, data aggregation | `ring:bff-ts` |
 | `bff` | UI components, pages | `ring:frontend` |
+| `none` | UI components, pages, forms | `ring:frontend` |
 
 ### Pattern in TopologyConfig
 
@@ -328,15 +329,15 @@ API Pattern determines how the frontend communicates with backend services and a
 topology:
   scope: fullstack
   structure: single-repo
-  api_pattern: bff  # Determines agent assignment
+  api_pattern: bff  # MANDATORY if dynamic data; "none" if static
 ```
 
 ### Defaults
 
 | Scope | Default Pattern | Rationale |
 |-------|-----------------|-----------|
-| `fullstack` | `direct` | Simpler architecture, most features don't need BFF |
-| `frontend-only` | N/A | Frontend-only already implies client-side |
+| `fullstack` | `bff` | Fullstack implies dynamic data; BFF is mandatory for it |
+| `frontend-only` | `bff` or `none` | Per Q5: dynamic data → bff, static → none |
 | `backend-only` | N/A | No frontend to consider |
 
 ---
@@ -359,13 +360,14 @@ Documentation placement determines where pre-dev artifacts are written based on 
 |----------|------|-------------|----------|------------|
 | research.md | Shared | Root | Root | Both repos |
 | prd.md | Shared | Root | Root | Both repos |
+| feature-map.md | Shared | Root | Root | Both repos |
 | trd.md | Shared | Root | Root | Both repos |
 | ux-criteria.md | Frontend | Root | Frontend module | Frontend repo |
 | wireframes/ | Frontend | Root | Frontend module | Frontend repo |
-| api-design.md | Backend | Root | Backend module | Backend repo |
-| data-model.md | Backend | Root | Backend module | Backend repo |
-| dependency-map.md | Split | Root | Root + modules | Per repo |
-| tasks.md | Split | Root | Root + modules | Per repo |
+| openapi.yaml | Backend | Root | Backend module | Backend repo |
+| schema.sql / schema.prisma | Backend | Root | Backend module | Backend repo |
+| dependencies.md | Split | Root | Root + modules | Per repo |
+| plan.md | Single | Root | Root | Copied to each repo (same document; Target-filtered execution) |
 
 ### Single-Repo (unified)
 
@@ -375,13 +377,14 @@ All documentation stays in the repository root:
 docs/pre-dev/{feature}/
 ├── research.md
 ├── prd.md
+├── feature-map.md
 ├── ux-criteria.md
 ├── wireframes/
 ├── trd.md
-├── api-design.md
-├── data-model.md
-├── dependency-map.md
-└── tasks.md
+├── openapi.yaml
+├── schema.sql         # or schema.prisma (stack-native)
+├── dependencies.md
+└── plan.md
 ```
 
 ### Monorepo (per-module)
@@ -394,21 +397,19 @@ docs/pre-dev/{feature}/
 ├── research.md
 ├── prd.md
 ├── trd.md
-└── tasks.md           # Index with all tasks
+└── plan.md            # Single plan — epics carry **Target:** tags; never split per module
 
 # Backend module
 {backend.path}/docs/pre-dev/{feature}/
-├── api-design.md
-├── data-model.md
-├── dependency-map.md  # Backend dependencies
-└── tasks.md           # Backend tasks only
+├── openapi.yaml
+├── schema.sql         # or schema.prisma (stack-native)
+└── dependencies.md    # Backend dependencies
 
 # Frontend module
 {frontend.path}/docs/pre-dev/{feature}/
 ├── ux-criteria.md
 ├── wireframes/
-├── dependency-map.md  # Frontend dependencies
-└── tasks.md           # Frontend tasks only
+└── dependencies.md    # Frontend dependencies
 ```
 
 ### Multi-Repo (distributed)
@@ -421,10 +422,10 @@ Shared docs copied to both repos, module-specific docs in respective repos:
 ├── research.md        # Copy of shared
 ├── prd.md             # Copy of shared
 ├── trd.md             # Copy of shared
-├── api-design.md
-├── data-model.md
-├── dependency-map.md
-└── tasks.md           # Backend tasks only
+├── openapi.yaml
+├── schema.sql         # or schema.prisma (stack-native)
+├── dependencies.md
+└── plan.md            # Copy of the single plan — local dev-cycle executes only epics with **Target:** backend
 
 # Frontend repository
 {frontend.path}/docs/pre-dev/{feature}/
@@ -433,8 +434,8 @@ Shared docs copied to both repos, module-specific docs in respective repos:
 ├── trd.md             # Copy of shared
 ├── ux-criteria.md
 ├── wireframes/
-├── dependency-map.md
-└── tasks.md           # Frontend tasks only
+├── dependencies.md
+└── plan.md            # Copy of the single plan — local dev-cycle executes only epics with **Target:** frontend
 ```
 
 ### Implementation Notes
@@ -460,8 +461,8 @@ When implementing topology support:
 
 - [ ] TopologyConfig persisted in research.md frontmatter
 - [ ] All gates read topology from frontmatter
-- [ ] Tasks have `target:` and `working_directory:` fields
+- [ ] Epics carry `**Target:**` tags on multi-module topologies (right before `**Status:**`)
 - [ ] Execution skills implement context switching
-- [ ] Multi-repo generates per-module task files
+- [ ] Multi-repo copies the single plan.md into each repo (Target-filtered execution)
 - [ ] PROJECT_RULES.md hierarchy respected
 - [ ] api_pattern captured for fullstack features

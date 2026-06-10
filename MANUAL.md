@@ -1,6 +1,6 @@
 # Ring Marketplace Manual
 
-Quick reference guide for the Ring skills library and workflow system. This monorepo provides 4 plugins with 71 skills and 33 agents for enforcing proven software engineering practices across the entire software delivery value chain.
+Quick reference guide for the Ring skills library and workflow system. This monorepo provides 4 plugins with 67 skills and 33 agents for enforcing proven software engineering practices across the entire software delivery value chain.
 
 ---
 
@@ -18,7 +18,7 @@ Quick reference guide for the Ring skills library and workflow system. This mono
 │  └───────────────┘  └───────────────┘                                              │
 │  ┌───────────────┐  ┌───────────────┐                                              │
 │  │ ring-pm-team  │  │ ring-tw-team  │                                              │
-│  │  Skills(18)   │  │  Skills(4)    │                                              │
+│  │  Skills(14)   │  │  Skills(4)    │                                              │
 │  │  Agents(4)    │  │  Agents(3)    │                                              │
 │  └───────────────┘  └───────────────┘                                              │
 └────────────────────────────────────────────────────────────────────────────────────┘
@@ -76,7 +76,7 @@ Beyond Claude Code (source of truth), Ring is installable in Codex, Cursor, and 
 
 ## 💡 About Skills
 
-Skills (71) are the primary invocation mechanism for Ring. They can be invoked directly by users (`Skill tool: "ring:skill-name"`) or applied automatically by Claude Code when it detects they're applicable. They handle testing, debugging, verification, planning, code review enforcement, and more.
+Skills (67) are the primary invocation mechanism for Ring. They can be invoked directly by users (`Skill tool: "ring:skill-name"`) or applied automatically by Claude Code when it detects they're applicable. They handle testing, debugging, verification, planning, code review enforcement, and more.
 
 Examples: ring:test-driven-development, ring:reviewing-code, ring:auditing-production-readiness (44-dimension audit, up to 10 explorers per batch, incremental report 0-430, max 440 with multi-tenant; see [default/skills/auditing-production-readiness/SKILL.md](default/skills/auditing-production-readiness/SKILL.md)), etc.
 
@@ -209,9 +209,9 @@ For documentation creation and review:
 
 ### New Feature Development
 
-1. **Plan** → Use `ring:planning-small-features` skill (or `ring:planning-large-features` if complex) — produces a rolling-wave phased plan (`tasks.md`: phases → epics E-X.Y → tasks T-X.Y.Z; only Phase 1 task-detailed)
+1. **Plan** → Use `ring:planning-small-features` skill (or `ring:planning-large-features` if complex) — produces a rolling-wave phased plan (`plan.md`: phases → epics `Epic N.M` → tasks `Task N.M.T`; only Phase 1 task-detailed)
 2. **Isolate** → Use `ring:creating-worktrees` skill
-3. **Implement** → Use `ring:running-dev-cycle` skill (consumes `tasks.md`: Gate 0 TDD per task, review/validation per epic, phase-boundary elaboration of the next phase) — or `ring:test-driven-development` directly for ad-hoc changes
+3. **Implement** → Use `ring:running-dev-cycle` skill (consumes `plan.md`: Gate 0 TDD per task, review/validation per epic, phase-boundary elaboration of the next phase) — or `ring:test-driven-development` directly for ad-hoc changes
 4. **Review** → Use `ring:reviewing-code` skill (dispatches 9 defaults plus triggered specialists; runs at epic cadence inside dev-cycle)
 5. **Commit** → Use `ring:committing-changes` skill
 
@@ -307,7 +307,7 @@ These enforce quality standards:
 ### Session Startup
 
 1. SessionStart hook runs automatically
-2. All 71 skills are auto-discovered and available
+2. All 67 skills are auto-discovered and available
 3. `ring:using-ring` workflow is activated (skill checking is now mandatory)
 
 ### Agent Dispatching

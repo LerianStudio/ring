@@ -25,7 +25,7 @@ Check each agent for mandatory sections: `## Standards Loading`, `## Blocker Cri
 
 Identify all agents that executed in the task:
 ```
-Task T-001:
+Task 1.1.1:
 ├── ring:backend-go (Gate 0)
 ├── ring:backend-ts (Gate 0, if TS)
 └── ring:code-reviewer (Gate 8)
@@ -142,7 +142,7 @@ Report which agent-design standards were verified, which sections were missing, 
 
 | Metric | Value |
 |--------|-------|
-| Task Analyzed | T-XXX |
+| Task Analyzed | Task N.M.T |
 | Agents Analyzed | N |
 | Average Assertiveness | XX.X% |
 | Total Gaps | N |

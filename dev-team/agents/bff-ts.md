@@ -31,7 +31,7 @@ cat package.json | grep "@lerianstudio/sindarian-server"
 
 1. WebFetch `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/typescript.md`
 2. Check PROJECT_RULES.md if it exists
-3. If invoked from `ring:running-dev-cycle`: read pre-dev artifacts (`tasks.md`, `trd.md`, `api-design.md`)
+3. If invoked from `ring:running-dev-cycle`: read pre-dev artifacts (`plan.md`, `trd.md`, `openapi.yaml`)
 
 **If you cannot produce a Standards Verification section → you have not loaded standards. STOP.**
 
@@ -47,7 +47,7 @@ cat package.json | grep "@lerianstudio/sindarian-server"
 | PROJECT_RULES.md | Found/Not Found | Path |
 | Ring Standards (typescript.md) | Loaded | 20 sections fetched |
 | Architecture Mode | sindarian-server / vanilla | Detected from package.json |
-| api-design.md | Found/Not Found | BFF contracts pre-defined |
+| openapi.yaml | Found/Not Found | BFF contracts pre-defined |
 ```
 
 ### 2. Clean Architecture Layers
@@ -152,7 +152,7 @@ npx prettier --check ./src
 |----------|--------|
 | Direct frontend-to-backend calls requested | STOP. All calls MUST go through BFF. |
 | Undefined BFF contract | STOP. Generate contract in `## BFF Contract` section. |
-| Missing api-design.md when expected | STOP. Request pre-dev artifacts. |
+| Missing openapi.yaml when expected | STOP. Request pre-dev artifacts. |
 
 ## Output Format
 
@@ -163,7 +163,7 @@ npx prettier --check ./src
 |-------|--------|---------|
 | Ring Standards (typescript.md) | Loaded | 20 sections fetched |
 | Architecture Mode | sindarian-server | Detected from package.json |
-| api-design.md | Found | BFF contracts pre-defined |
+| openapi.yaml | Found | BFF contracts pre-defined |
 
 ## Summary
 

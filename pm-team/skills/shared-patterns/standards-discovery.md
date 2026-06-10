@@ -3,8 +3,8 @@
 **Reusable workflow for loading organizational naming standards.**
 
 This pattern is used in:
-- Gate 4 (API Design) → `api-standards-ref.md` (API field naming)
-- Gate 5 (Data Model) → `db-standards-ref.md` (Database field naming)
+- Gate 4 (API Design) → `api-standards-ref.md` (API field naming, feeds `openapi.yaml`)
+- Gate 5 (Data Model) → `db-standards-ref.md` (Database field naming, feeds `schema.sql` / `schema.prisma`)
 
 ---
 

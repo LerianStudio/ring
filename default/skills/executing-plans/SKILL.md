@@ -1,6 +1,6 @@
 ---
 name: ring:executing-plans
-description: "Executing a phased plan from ring:writing-plans in rolling waves: implements the detailed phase task-by-task with TDD and signed commits via ring:committing-changes, checkpoints at each phase boundary, then elaborates the next phase. Use when a phased plan exists and inline execution is preferred over subagent orchestration. Skip when no plan exists (use ring:writing-plans) or a tasks.md dev cycle is wanted (use ring:running-dev-cycle)."
+description: "Executing a phased plan from ring:writing-plans in rolling waves: implements the detailed phase task-by-task with TDD and signed commits via ring:committing-changes, checkpoints at each phase boundary, then elaborates the next phase. Use when a phased plan exists and inline execution is preferred over subagent orchestration. Skip when no plan exists (use ring:writing-plans) or a plan-driven subagent dev cycle is wanted (use ring:running-dev-cycle)."
 ---
 
 # Executing Plans

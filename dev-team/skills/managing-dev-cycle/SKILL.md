@@ -67,11 +67,11 @@ Phase: Phase 2 - Core flows
 
 Epics:
   Completed: 2/5
-  In Progress: 1/5 (E-2.3)
+  In Progress: 1/5 (Epic 2.3)
   Pending: 2/5
 
 Current:
-  Epic: E-2.3 - Implementar refresh token
+  Epic: Epic 2.3 - Implementar refresh token
   Gate 0→8→9 lean flow (ring:implementing-tasks)
   Iterations: 1
 
@@ -88,7 +88,7 @@ State file: docs/ring:running-dev-cycle/current-cycle.json (or docs/ring:plannin
 No development cycle in progress.
 
 Start a new cycle with:
-  /ring:running-dev-cycle docs/tasks/your-tasks.md
+  /ring:running-dev-cycle docs/pre-dev/{feature}/plan.md
 
 Or resume an interrupted cycle:
   /ring:running-dev-cycle --resume

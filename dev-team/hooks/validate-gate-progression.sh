@@ -3,8 +3,8 @@
 # PreToolUse hook for the lean backend ring:running-dev-cycle.
 # Phased rolling-wave model (state v2.0.0): epics[] iterate, tasks[] are the Gate 0 unit.
 # Active backend gates:
-#   Gate 0: implementation-owned TDD, coverage, local runtime, delivery verification (per task T-X.Y.Z)
-#   Gate 8: epic-level review (per epic E-X.Y)
+#   Gate 0: implementation-owned TDD, coverage, local runtime, delivery verification (per task N.M.T)
+#   Gate 8: epic-level review (per epic N.M)
 #   Gate 9: user validation (not programmatically checked)
 # Also guards: an epic in an un-elaborated phase MUST NOT enter Gate 0.
 
@@ -68,7 +68,7 @@ validate_gate_0_for_task() {
   local idx="$1"
   local task_id tdd_red tdd_green delivery coverage threshold runtime_verified
 
-  task_id=$(echo "$STATE" | jq -r ".epics[$CURRENT_EPIC_INDEX].tasks[$idx].id // \"T-???\"")
+  task_id=$(echo "$STATE" | jq -r ".epics[$CURRENT_EPIC_INDEX].tasks[$idx].id // \"task-?\"")
 
   tdd_red=$(echo "$STATE" | jq -r ".epics[$CURRENT_EPIC_INDEX].tasks[$idx].gate_progress.implementation.tdd_red.status // \"pending\"")
   tdd_green=$(echo "$STATE" | jq -r ".epics[$CURRENT_EPIC_INDEX].tasks[$idx].gate_progress.implementation.tdd_green.status // \"pending\"")
@@ -211,7 +211,7 @@ if [[ ${#errors[@]} -gt 0 ]]; then
     hookSpecificOutput: {
       hookEventName: "PreToolUse",
       permissionDecision: "deny",
-      permissionDecisionReason: ("Lean backend dev-cycle progression blocked:\n" + ($errors | map("- " + .) | join("\n")) + "\n\nRecovery: complete Gate 0 (per task T-X.Y.Z) via ring:implementing-tasks for every task of the current epic, then run Gate 8 (per epic) via ring:reviewing-code before Gate 9 validation. On a phase-not-elaborated error: run the phase boundary (Step 11.5, gates/phase-boundary.md) to elaborate the epic phase before entering Gate 0.")
+      permissionDecisionReason: ("Lean backend dev-cycle progression blocked:\n" + ($errors | map("- " + .) | join("\n")) + "\n\nRecovery: complete Gate 0 (per task N.M.T) via ring:implementing-tasks for every task of the current epic, then run Gate 8 (per epic) via ring:reviewing-code before Gate 9 validation. On a phase-not-elaborated error: run the phase boundary (Step 11.5, gates/phase-boundary.md) to elaborate the epic phase before entering Gate 0.")
     }
   }'
   exit 0

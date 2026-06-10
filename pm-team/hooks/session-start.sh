@@ -24,16 +24,12 @@ get_output_file() {
   local skill_name="$1"
   case "$skill_name" in
     researching-features)            echo "research.md" ;;
-    writing-prds)                    echo "PRD.md" ;;
+    writing-prds)                    echo "prd.md" ;;
     mapping-feature-relationships)   echo "feature-map.md" ;;
-    writing-trds)                    echo "TRD.md" ;;
-    designing-api-contracts)         echo "API.md" ;;
-    designing-data-model)            echo "data-model.md" ;;
+    writing-trds)                    echo "trd.md" ;;
+    designing-api-contracts)         echo "openapi.yaml" ;;
+    designing-data-model)            echo "schema.sql (or schema.prisma)" ;;
     pinning-dependency-versions)     echo "dependencies.md" ;;
-    decomposing-phases-and-epics)    echo "tasks.md" ;;
-    detailing-tasks)                 echo "tasks.md" ;;
-    validating-ux-completeness)      echo "design-validation.md" ;;
-    planning-delivery)               echo "delivery-planning.md" ;;
     *)                               echo "${skill_name}.md" ;;
   esac
 }
@@ -118,7 +114,7 @@ if [ -d "$PLUGIN_ROOT/skills" ]; then
     context="<ring-pm-team-system>
 **Pre-Dev Planning Skills**
 
-${skill_count}-gate structured feature planning (use via Skill tool):
+Structured feature planning — 8-gate Large track / 4-gate Small track; the final gate is \`ring:writing-plans\` (default plugin) producing plan.md (use via Skill tool):
 
 | Skill | Gate | Output |
 |-------|------|--------|
@@ -144,7 +140,7 @@ EOF
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "<ring-pm-team-system>\n**Pre-Dev Planning Skills**\n\n11-gate structured feature planning (use via Skill tool):\n\n| Skill | Gate | Output |\n|-------|------|--------|\n| `ring:researching-features` | 0 | research.md |\n| `ring:writing-prds` | 1 | PRD.md |\n| `ring:validating-ux-completeness` | 1.5 | design-validation.md |\n| `ring:mapping-feature-relationships` | 2 | feature-map.md |\n| `ring:writing-trds` | 3 | TRD.md |\n| `ring:designing-api-contracts` | 4 | API.md |\n| `ring:designing-data-model` | 5 | data-model.md |\n| `ring:pinning-dependency-versions` | 6 | dependencies.md |\n| `ring:decomposing-phases-and-epics` | 7 | tasks.md |\n| `ring:detailing-tasks` | 8 | tasks.md |\n| `ring:planning-delivery` | 9 | delivery-planning.md |\n\n**Standalone Discovery Skills** (use via Skill tool):\n\n| Skill | Output |\n|-------|--------|\n| `ring:mapping-streaming-events` | docs/streaming/event-catalog.md, instrumentation-map.json |\n\nFor full details: Skill tool with \"ring:using-pm-team\"\n</ring-pm-team-system>"
+    "additionalContext": "<ring-pm-team-system>\n**Pre-Dev Planning Skills**\n\nStructured feature planning — 8-gate Large track / 4-gate Small track (use via Skill tool):\n\n**Large track (8 gates):**\n\n| Skill | Gate | Output |\n|-------|------|--------|\n| `ring:researching-features` | 0 | research.md |\n| `ring:writing-prds` | 1 | prd.md |\n| `ring:mapping-feature-relationships` | 2 | feature-map.md |\n| `ring:writing-trds` | 3 | trd.md |\n| `ring:designing-api-contracts` | 4 | openapi.yaml |\n| `ring:designing-data-model` | 5 | schema.sql (or schema.prisma) |\n| `ring:pinning-dependency-versions` | 6 | dependencies.md |\n| `ring:writing-plans` (default plugin) | 7 | plan.md |\n\n**Small track (4 gates):**\n\n| Skill | Gate | Output |\n|-------|------|--------|\n| `ring:researching-features` | 0 | research.md |\n| `ring:writing-prds` | 1 | prd.md |\n| `ring:writing-trds` | 2 | trd.md |\n| `ring:writing-plans` (default plugin) | 3 | plan.md |\n\n**Standalone Discovery Skills** (use via Skill tool):\n\n| Skill | Output |\n|-------|--------|\n| `ring:mapping-streaming-events` | docs/streaming/event-catalog.md, instrumentation-map.json |\n| `ring:validating-ux-completeness` | design-validation.md |\n\nFor full details: Skill tool with \"ring:using-pm-team\"\n</ring-pm-team-system>"
   }
 }
 EOF
@@ -155,7 +151,7 @@ else
 {
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "<ring-pm-team-system>\n**Pre-Dev Planning Skills** (11 gates)\n\nFor full list: Skill tool with \"ring:using-pm-team\"\n</ring-pm-team-system>"
+    "additionalContext": "<ring-pm-team-system>\n**Pre-Dev Planning Skills** (8-gate Large / 4-gate Small)\n\nFor full list: Skill tool with \"ring:using-pm-team\"\n</ring-pm-team-system>"
   }
 }
 EOF

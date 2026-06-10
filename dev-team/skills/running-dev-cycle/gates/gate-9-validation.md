@@ -11,7 +11,7 @@ For the current epic:
 
 2. Aggregate acceptance criteria across ALL tasks of the epic:
    - Build the criteria set by reading, for EACH task of the epic:
-     * The task's "Done when" acceptance criteria (from its tasks.md block), AND
+     * The task's "Done when" acceptance criteria (from its `#### Task N.M.T:` block in the plan), AND
      * The delivery-verification evidence already written at Gate 0:
        `state.epics[i].tasks[j].gate_progress.implementation`
        (delivery_verified, and the requirements_delivered mapping produced by
@@ -102,12 +102,12 @@ For the current epic:
 
 5. **Handle response:**
 
-⛔ **Phase-boundary routing (Continue / Integration Test resume):** after marking the epic `✅ Done`, determine the next epic in `## Summary` order. If the next epic's `phase` differs from the just-completed epic's `phase`, OR there is no next epic → the current phase is closing: enter **Step 11.5 (Phase Boundary)** — read `gates/phase-boundary.md` — instead of advancing `current_epic_index` directly. Otherwise advance to the next epic in the same phase.
+⛔ **Phase-boundary routing (Continue / Integration Test resume):** after marking the epic `Done`, determine the next epic in plan order. If the next epic's `phase` differs from the just-completed epic's `phase`, OR there is no next epic → the current phase is closing: enter **Step 11.5 (Phase Boundary)** — read `gates/phase-boundary.md` — instead of advancing `current_epic_index` directly. Otherwise advance to the next epic in the same phase.
 
 | Response | Action |
 |----------|--------|
-| Continue | Set `epic.status = "completed"`, tasks.md Status → `✅ Done`. **If next epic is in the same phase:** set cycle `status = "in_progress"`, `current_epic_index += 1`, `current_task_index = 0`, `current_gate = 0`, save, proceed to the next epic. **If next epic crosses a phase boundary or no epic remains:** enter Step 11.5 (gates/phase-boundary.md). |
-| Integration Test | Set `epic.status = "completed"`, tasks.md Status → `✅ Done`. Set cycle `status = "paused_for_integration_testing"`. Save. Output: `Cycle paused for integration testing. Resume with /ring:running-dev-cycle --resume`. STOP. (On resume, apply the phase-boundary routing above.) |
+| Continue | Set `epic.status = "completed"`, plan epic `**Status:**` → `Done`. **If next epic is in the same phase:** set cycle `status = "in_progress"`, `current_epic_index += 1`, `current_task_index = 0`, `current_gate = 0`, save, proceed to the next epic. **If next epic crosses a phase boundary or no epic remains:** enter Step 11.5 (gates/phase-boundary.md). |
+| Integration Test | Set `epic.status = "completed"`, plan epic `**Status:**` → `Done`. Set cycle `status = "paused_for_integration_testing"`. Save. Output: `Cycle paused for integration testing. Resume with /ring:running-dev-cycle --resume`. STOP. (On resume, apply the phase-boundary routing above.) |
 | Stop Here | Leave `epic.status = "in_progress"` (NOT completed; the cycle re-enters this checkpoint on resume). Set cycle `status = "paused"`. Save. Output: `Cycle paused after epic [epic_id]. Resume with /ring:running-dev-cycle --resume`. STOP. |
 
 **Note:** Epics without a task breakdown (FALLBACK plans) treat the epic-itself as a single task; their aggregated criteria set is just that one unit's acceptance criteria.

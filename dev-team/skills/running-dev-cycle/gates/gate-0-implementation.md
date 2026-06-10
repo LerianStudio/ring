@@ -1,18 +1,18 @@
 ## Step 2: Gate 0 - Implementation (Per Execution Unit)
 
-ℹ️ **CADENCE:** Task-level. Execution unit is always a task T-X.Y.Z (or the epic-itself when the epic has no task breakdown — FALLBACK plans). Writes to `state.epics[i].tasks[j].gate_progress.implementation`. Epic-level review (Gate 8) MUST NOT be dispatched from inside this step — it runs after the task loop.
+ℹ️ **CADENCE:** Task-level. Execution unit is always a task Task N.M.T (or the epic-itself when the epic has no task breakdown — FALLBACK plans). Writes to `state.epics[i].tasks[j].gate_progress.implementation`. Epic-level review (Gate 8) MUST NOT be dispatched from inside this step — it runs after the task loop.
 
 ⛔ **Phase gate:** Before entering Gate 0 for the current epic, confirm its phase (`state.phases[]` lookup via `epic.phase`) has status `detailed` or `in_progress`. An epic in an un-elaborated (`epic-level`) phase is NOT dispatch-ready — its `tasks[]` is empty. The hook also blocks this; do not attempt it.
 
 **REQUIRED SUB-SKILL:** Use ring:implementing-tasks
 
-**Execution Unit:** Epic-itself (if no task breakdown) or a Task T-X.Y.Z (if epic has tasks). Either way, the unit is a TASK-LEVEL scope.
+**Execution Unit:** Epic-itself (if no task breakdown) or a Task N.M.T (if epic has tasks). Either way, the unit is a TASK-LEVEL scope.
 
 ### Pre-Dispatch: Before Gate 0 Checkpoint (MANDATORY)
 
 MUST execute the **Before Gate 0 (epic start)** row from the State Persistence Checkpoints table before sub-steps 2.1–2.3:
 - Set `epic.status = "in_progress"` in state JSON
-- Update tasks.md Status → `🔄 Doing` (per tasks.md Status update rules in that table)
+- Update the epic's plan `**Status:**` line → `Doing` (per the plan Status update rules in that table)
 - Write state to file
 
 CANNOT proceed to sub-steps 2.1–2.3 without completing this checkpoint. (The `epic.base_sha` captured here is the lower bound of the Gate 8 cumulative review diff — the SHA before the epic's first task.)
@@ -52,17 +52,17 @@ See [shared-patterns/file-size-enforcement.md](../../shared-patterns/file-size-e
 ```text
 current_task = state.epics[current_epic_index].tasks[current_task_index]
 
-Gather from current execution unit (a task T-X.Y.Z, or the epic-itself for FALLBACK plans):
+Gather from current execution unit (a task Task N.M.T, or the epic-itself for FALLBACK plans):
 
 implementation_input = {
   // REQUIRED - the current task's identity
-  unit_id: current_task.id,  // T-X.Y.Z (or the epic id for the synthetic epic-itself unit)
+  unit_id: current_task.id,  // Task N.M.T (or the epic id for the synthetic epic-itself unit)
 
-  // REQUIRED - the task's FULL block from tasks.md (read live from state.source_file
+  // REQUIRED - the task's FULL block from the plan (read live from state.source_file
   //            under this epic): Context (with file:line refs), Implementation vision,
   //            Files, Verification, Done when. This replaces legacy acceptance_criteria
   //            sourcing — the dispatch-ready task block IS the requirement.
-  requirements: current_task_block_from_tasks_md,
+  requirements: current_task_block_from_plan,
 
   // REQUIRED - detected from project / inherited from the epic
   language: epic.language,  // "go" | "typescript" | "python"

@@ -221,7 +221,7 @@ factory := libMetrics.NewFactory(tel.Meter())
 
 ## Integration with Task Creation
 
-When creating Phase 1 tasks with code examples (Gate 8), apply these rules:
+When creating Phase 1 tasks with code examples (plan gate, ring:writing-plans), apply these rules:
 
 1. **Step 1 (Write failing test)**: Tests can use custom test helpers
 2. **Step 3 (Write implementation)**: Implementation MUST use lib-commons for non-observability infrastructure and lib-observability for logging/telemetry

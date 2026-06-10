@@ -18,7 +18,7 @@ These scenarios apply to ALL gates and CANNOT be used to bypass ANY gate require
 |---------------|---------|----------------|
 | **Skip Research** | "We already know the approach" | "Assumptions without research = missed requirements. Research is MANDATORY." |
 | **Skip PRD** | "Requirements are obvious" | "Obvious to you ≠ obvious to team. PRD ensures shared understanding." |
-| **Rush Task Breakdown** | "Just give rough estimates" | "Rough estimates = scope creep. Detailed breakdown is REQUIRED." |
+| **Rush the Plan** | "Just give a rough plan" | "A rough plan = scope creep. The plan gate (ring:writing-plans) with Phase 1 detailed into tasks is REQUIRED." |
 
 ## Combined Pressure Scenarios (MOST DANGEROUS)
 

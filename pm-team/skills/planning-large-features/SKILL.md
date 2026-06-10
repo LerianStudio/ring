@@ -1,9 +1,9 @@
 ---
 name: ring:planning-large-features
-description: "Planning the 10-gate Full Track pre-dev workflow (research, PRD, feature map, design validation, TRD, API design, data model, dependency map, phases and epics, task creation, delivery planning) with per-gate human approval. Use for features 2+ days that add dependencies, data models, multi-service integration, or new architecture. Skip for small features (use ring:planning-small-features). Plans only — no edits."
+description: "Planning the 8-gate Large Track pre-dev workflow (research, PRD, feature map, TRD, API contract, data model, dependency map, plan) with per-gate human approval. Use for features 2+ days that add dependencies, data models, multi-service integration, or new architecture. Skip for small features (use ring:planning-small-features). Plans only — no edits."
 ---
 
-# Full Track Pre-Dev Workflow (10 Gates)
+# Large Track Pre-Dev Workflow (8 Gates)
 
 ## When to use
 
@@ -21,45 +21,38 @@ description: "Planning the 10-gate Full Track pre-dev workflow (research, PRD, f
 
 ## Sequence
 
-**Runs before:** ring:writing-plans, ring:running-dev-cycle
+**Runs before:** ring:running-dev-cycle, ring:executing-plans
 
 ## Related
 
-**Complementary:** ring:planning-small-features, ring:writing-plans, ring:creating-worktrees
+**Complementary:** ring:planning-small-features, ring:creating-worktrees, ring:product-designer + ring:validating-ux-completeness (standalone UX step, recommended when feature has UI)
 **Skills orchestrated:**
 - ring:researching-features
 - ring:writing-prds
 - ring:mapping-feature-relationships
-- ring:validating-ux-completeness
 - ring:writing-trds
 - ring:designing-api-contracts
 - ring:designing-data-model
 - ring:pinning-dependency-versions
-- ring:decomposing-phases-and-epics
-- ring:detailing-tasks
-- ring:planning-delivery
+- ring:writing-plans
 
 
-Running the **Full Track** pre-development workflow for features that take ≥2 days, add new external dependencies, create new data models, require multi-service integration, use new architecture patterns, or require team collaboration.
+Running the **Large Track** pre-development workflow for features that take ≥2 days, add new external dependencies, create new data models, require multi-service integration, use new architecture patterns, or require team collaboration.
 
 For simple features (<2 days, existing patterns), use `ring:planning-small-features` instead.
 
 ## Gate Map
 
-| Gate | Skill | Output | Track |
-|------|-------|--------|-------|
-| 0 | ring:researching-features | research.md | Full |
-| 1 | ring:writing-prds | prd.md | Full |
-| 1.5 | ring:validating-ux-completeness | design-validation.md | Full (if UI) |
-| 2 | ring:mapping-feature-relationships | feature-map.md | Full |
-| 2.5 | ring:validating-ux-completeness | design-validation.md | Full (if UI, Large) |
-| 3 | ring:writing-trds | trd.md | Full |
-| 4 | ring:designing-api-contracts | api-design.md | Full |
-| 5 | ring:designing-data-model | data-model.md | Full |
-| 6 | ring:pinning-dependency-versions | dependencies.md | Full |
-| 7 | ring:decomposing-phases-and-epics | tasks.md (phased plan: phases + epics) | Full |
-| 8 | ring:detailing-tasks | Phase 1 tasks written into tasks.md | Full |
-| 9 | ring:planning-delivery | delivery-roadmap.md + .json | Full |
+| Gate | Skill | Output |
+|------|-------|--------|
+| 0 | ring:researching-features | research.md |
+| 1 | ring:writing-prds | prd.md |
+| 2 | ring:mapping-feature-relationships | feature-map.md |
+| 3 | ring:writing-trds | trd.md |
+| 4 | ring:designing-api-contracts | openapi.yaml |
+| 5 | ring:designing-data-model | schema.sql / schema.prisma (stack-native) |
+| 6 | ring:pinning-dependency-versions | dependencies.md |
+| 7 | ring:writing-plans | plan.md |
 
 All artifacts saved to: `docs/pre-dev/<feature-name>/`
 
@@ -88,29 +81,31 @@ Execute topology discovery per [shared-patterns/topology-discovery.md](../shared
 Each gate invokes its sub-skill. Human approval required at each gate before proceeding.
 
 **Gate execution rules:**
-- Gate 1.5 / 2.5 (Design Validation): only if Q4=Yes
-- Gate 2 (Feature Map): always for Full Track
-- Gates 4-6 (API Design, Data Model, Dependency Map): always for Full Track
-- Gate 8 (Task Creation): always for Full Track
+- Gates 0-3, 6, and 7 always run for Large Track
+- Gate 4 (API contract) runs only if the feature has an API surface; otherwise record it as `"SKIPPED"` in workflow-state.json
+- Gate 5 (Data model) runs only if the feature has persistent data; otherwise record it as `"SKIPPED"` in workflow-state.json
+- Gate 7 (Plan): invoke `ring:writing-plans` with trd.md as spec input plus feature-map.md, openapi.yaml, the schema file, and dependencies.md as supporting inputs, passing `TopologyConfig`. **Binding constraint:** plan phases mirror feature-map.md `## Phases` one-to-one. Output path: `docs/pre-dev/{feature}/plan.md` (overrides the writing-plans default). plan.md is always a SINGLE document per feature. **Topology clause:** when `TopologyConfig` structure is monorepo or multi-repo, each epic carries one line `**Target:** backend | frontend | infra` (placed right before `**Status:**`); for multi-repo, the orchestrator copies plan.md into each repo and the local dev-cycle executes only epics whose Target matches that repo. No per-module plan splits.
+
+**Standalone UX step (if Q4=Yes):** after Gate 1 approval, RECOMMEND running `ring:product-designer` + `ring:validating-ux-completeness` before Gate 3. It is optional, not a gate, and not tracked in workflow-state.json. If design-validation.md exists when Gate 3 runs, the TRD honors its verdict; if absent, proceed and note the UX risk.
 
 ## Gate Progress Tracking
 
 Save state to `docs/pre-dev/{feature}/workflow-state.json`:
 ```json
 {
-  "track": "full",
+  "track": "large",
   "feature": "{feature-name}",
   "currentGate": 0,
   "gates": {
-    "0": "PENDING", "1": "PENDING", "1.5": "SKIP|PENDING",
-    "2": "PENDING", "2.5": "SKIP|PENDING", "3": "PENDING",
-    "4": "PENDING", "5": "PENDING", "6": "PENDING",
-    "7": "PENDING", "8": "PENDING", "9": "PENDING"
+    "0": "PENDING", "1": "PENDING", "2": "PENDING", "3": "PENDING",
+    "4": "PENDING|SKIPPED", "5": "PENDING|SKIPPED", "6": "PENDING", "7": "PENDING"
   },
   "topology": {},
   "inputs": {"hasUI": false, "authRequired": false, "licenseRequired": false, "uiLibrary": null, "styling": null}
 }
 ```
+
+Legal gate values: `PENDING`, `APPROVED`, `SKIPPED` (gates 4/5 only, per the conditional execution rules above).
 
 ## Execution Mode
 
@@ -120,4 +115,4 @@ AskUserQuestion at start: "Execution mode?"
 
 ## Completion
 
-After Gate 9 approved: artifacts are the execution baseline. Use `ring:running-dev-cycle` to execute.
+After Gate 7 approved: `docs/pre-dev/{feature}/plan.md` is the single execution document. Execute with `ring:running-dev-cycle` (subagent orchestration) or `ring:executing-plans` (inline).

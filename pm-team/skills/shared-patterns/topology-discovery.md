@@ -33,7 +33,7 @@ Q3: Module paths (only if monorepo or multi-repo)
 └─ Frontend path: user input
 
 Q4: Doc organization? (only if fullstack)
-├─ unified → Single tasks.md with target tags
+├─ unified → Single plan.md with target tags
 └─ per-module → Separate task files per module
 
 Q5: Dynamic Data? (only if scope=fullstack or frontend-only)
@@ -139,7 +139,7 @@ find . -maxdepth 3 -name "package.json" -o -name "go.mod" | head -10
   "options": [
     {
       "label": "Unified (Recommended)",
-      "description": "Single tasks.md with module tags - easier to track progress"
+      "description": "Single plan.md with module tags - easier to track progress"
     },
     {
       "label": "Per-module",
@@ -349,8 +349,10 @@ All subsequent gates MUST read the topology from the research.md frontmatter.
 |---------------|---------------------|
 | Gate 0: Research | Persist config, dispatch agents per module path |
 | Gate 1: PRD | Include module-specific requirements |
-| Gate 2/3: TRD | Architecture per module |
-| Gate 7: Task Breakdown | Tag tasks with `target:` and `working_directory:` |
+| Gate 3 (Large) / Gate 2 (Small): TRD | Architecture per module |
+| Gate 4: API Contract (Large) | openapi.yaml at backend module path |
+| Gate 5: Data Model (Large) | Stack-native schema file per backend stack |
+| Gate 7 (Large) / Gate 3 (Small): Plan (ring:writing-plans) | Tag tasks with `target:` and `working_directory:` |
 | Execution | Context switching between modules |
 
 ---
@@ -390,8 +392,7 @@ def get_doc_path(doc_type: str, feature_name: str, topology: dict) -> str | list
 
     Args:
         doc_type: One of 'research', 'prd', 'trd', 'ux-criteria', 'wireframes',
-                  'api-design', 'data-model', 'dependency-map', 'tasks',
-                  'delivery-roadmap', 'delivery-roadmap-json'
+                  'openapi', 'schema', 'dependency-map', 'plan'
         feature_name: The feature name in kebab-case
         topology: The TopologyConfig dictionary
 
@@ -405,8 +406,8 @@ def get_doc_path(doc_type: str, feature_name: str, topology: dict) -> str | list
     if structure == 'single-repo':
         return f"docs/pre-dev/{feature_name}/"
 
-    # Shared documents (research, prd, trd, delivery-roadmap)
-    if doc_type in ['research', 'prd', 'trd', 'delivery-roadmap', 'delivery-roadmap-json']:
+    # Shared documents (research, prd, trd)
+    if doc_type in ['research', 'prd', 'trd']:
         if structure == 'monorepo':
             return f"docs/pre-dev/{feature_name}/"
         else:  # multi-repo
@@ -423,13 +424,13 @@ def get_doc_path(doc_type: str, feature_name: str, topology: dict) -> str | list
         frontend_path = modules.get('frontend', {}).get('path', '.')
         return f"{frontend_path}/docs/pre-dev/{feature_name}/"
 
-    # Backend documents (api-design, data-model)
-    if doc_type in ['api-design', 'data-model']:
+    # Backend documents (openapi.yaml, schema file)
+    if doc_type in ['openapi', 'schema']:
         backend_path = modules.get('backend', {}).get('path', '.')
         return f"{backend_path}/docs/pre-dev/{feature_name}/"
 
-    # Split documents (dependency-map, tasks)
-    if doc_type in ['dependency-map', 'tasks']:
+    # Split documents (dependency-map, plan)
+    if doc_type in ['dependency-map', 'plan']:
         # Return paths for both modules - skill handles split logic
         if structure == 'monorepo':
             backend_path = modules.get('backend', {}).get('path', '.')
@@ -460,12 +461,10 @@ def get_doc_path(doc_type: str, feature_name: str, topology: dict) -> str | list
 | trd.md | Shared | Root (monorepo) or both repos (multi-repo) |
 | ux-criteria.md | Frontend | Frontend module/repo path |
 | wireframes/ | Frontend | Frontend module/repo path |
-| api-design.md | Backend | Backend module/repo path |
-| data-model.md | Backend | Backend module/repo path |
+| openapi.yaml | Backend | Backend module/repo path |
+| schema.sql / schema.prisma | Backend | Backend module/repo path |
 | dependency-map.md | Split | Index at root, module-specific at module paths |
-| tasks.md | Split | Index at root, filtered tasks at module paths |
-| delivery-roadmap.md | Shared | Root (monorepo) or both repos (multi-repo) |
-| delivery-roadmap.json | Shared | Root (monorepo) or both repos (multi-repo) |
+| plan.md | Split | Index at root, filtered tasks at module paths |
 
 ### Multi-Repo Document Synchronization
 

@@ -303,18 +303,20 @@ Typical PM team output structure:
 
 ```text
 docs/pre-dev/{feature-name}/
+├── research.md
 ├── prd.md              → PRD path: docs/pre-dev/auth-system/prd.md
-├── trd.md              → TRD path: docs/pre-dev/auth-system/trd.md
 ├── feature-map.md      → Feature Map path: docs/pre-dev/auth-system/feature-map.md
-├── api-design.md
-├── data-model.md
-└── tasks.md
+├── trd.md              → TRD path: docs/pre-dev/auth-system/trd.md
+├── openapi.yaml
+├── schema.sql          (or schema.prisma — stack-native)
+├── dependencies.md
+└── plan.md
 ```
 
 #### Common Patterns
 
-- `/ring:planning-large-features` output: `docs/pre-dev/{feature}/prd.md`, `trd.md`, `feature-map.md`
-- `/ring:planning-small-features` output: `docs/pre-dev/{feature}/prd.md`, `feature-map.md`
+- `/ring:planning-large-features` output: `docs/pre-dev/{feature}/research.md`, `prd.md`, `feature-map.md`, `trd.md`, `openapi.yaml`, `schema.sql`/`schema.prisma`, `dependencies.md`, `plan.md`
+- `/ring:planning-small-features` output: `docs/pre-dev/{feature}/research.md`, `prd.md`, `trd.md`, `plan.md`
 - Custom locations: User may have docs in different paths (e.g., `requirements/`, `specs/`)
 
 #### Then
@@ -403,7 +405,7 @@ Present to user for review, then proceed to Step 1.
 
 ⛔ **CANNOT PROCEED — PM DOCUMENTS REQUIRED.** Development cannot start without PM documents. The user MUST create PRD, TRD, and/or Feature Map first using PM team skills:
 
-- `/ring:planning-large-features` → features ≥2 days (9 gates)
+- `/ring:planning-large-features` → features ≥2 days (8 gates)
 - `/ring:planning-small-features` → features <2 days (4 gates)
 
 These guide creation of the PRD, TRD, and Feature Map (technology choices, feature relationships). After completing pre-dev, run `/ring:running-dev-cycle` again.

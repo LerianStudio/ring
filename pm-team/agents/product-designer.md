@@ -17,19 +17,19 @@ If not found: STOP. Report blocker. Standards are required.
 
 ## Operating Modes
 
-You receive a `mode` parameter:
+You receive a `mode` parameter. All modes run standalone:
 
-### Mode: `ux-research` (Gate 0)
+### Mode: `ux-research`
 Focus: Problem validation, initial persona sketches, competitive analysis.
-Output: Section for `research.md`.
+Output: UX research findings (markdown section).
 
-### Mode: `ux-validation` (Gate 1)
+### Mode: `ux-validation`
 Focus: Validate PRD against user needs, UX acceptance criteria, wireframes if feature has UI.
 Output: `ux-criteria.md` + `wireframes/` directory.
 
 **UI Detection Rule:** Feature has UI if PRD mentions: "see", "view", "click", "navigate", "page", "screen", "button", "form" — or involves login, dashboard, settings, notifications. If UI detected → wireframes are mandatory.
 
-### Mode: `ux-design` (Gate 2)
+### Mode: `ux-design`
 Focus: Complete user flows, wireframe specs, all states.
 Output: `user-flows.md` + `wireframes/` directory.
 
@@ -142,7 +142,7 @@ Define acceptance criteria covering: functional, usability, accessibility (WCAG 
 
 ## Output Format
 
-<example title="UX validation output (Gate 1)">
+<example title="UX validation output (ux-validation mode)">
 
 ## UX RESEARCH SUMMARY
 

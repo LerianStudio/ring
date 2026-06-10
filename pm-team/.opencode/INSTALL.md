@@ -25,10 +25,10 @@ Verify by asking: "List the Ring pre-dev planning gates."
 ## What This Plugin Adds
 
 - **4 research agents:** web-researcher, docs-researcher, repo-researcher, product-designer
-- **18 skills** organized in three groups:
-  - **Orchestrators (2):** `ring:planning-small-features` (5-gate, small features <2 days), `ring:planning-large-features` (10-gate, large features ≥2 days)
-  - **Pre-dev planning gates (11):** `ring:researching-features`, `ring:validating-ux-completeness`, `ring:writing-prds`, `ring:mapping-feature-relationships`, `ring:writing-trds`, `ring:designing-api-contracts`, `ring:designing-data-model`, `ring:pinning-dependency-versions`, `ring:decomposing-phases-and-epics`, `ring:detailing-tasks`, `ring:planning-delivery`
-  - **Standalone utilities (5):** `ring:mapping-streaming-events`, `ring:tracking-delivery`, `ring:creating-grafana-dashboards`, `ring:reconciling-predev-docs`, `ring:using-pm-team`
+- **14 skills** organized in three groups:
+  - **Orchestrators (2):** `ring:planning-small-features` (4-gate, small features <2 days), `ring:planning-large-features` (8-gate, large features ≥2 days; both tracks end with `ring:writing-plans` from ring-default producing plan.md)
+  - **Pre-dev planning gates (7):** `ring:researching-features`, `ring:writing-prds`, `ring:mapping-feature-relationships`, `ring:writing-trds`, `ring:designing-api-contracts`, `ring:designing-data-model`, `ring:pinning-dependency-versions`
+  - **Standalone utilities (5):** `ring:mapping-streaming-events`, `ring:validating-ux-completeness`, `ring:creating-grafana-dashboards`, `ring:reconciling-predev-docs`, `ring:using-pm-team`
 
 ## Usage
 

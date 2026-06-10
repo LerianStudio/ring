@@ -13,7 +13,7 @@ epic = state.epics[state.current_epic_index]
 
 review_input = {
   // REQUIRED - EPIC-level
-  unit_id: epic.id,  // EPIC id (E-X.Y)
+  unit_id: epic.id,  // EPIC id (Epic N.M)
   base_sha: epic.base_sha,            // SHA before the FIRST task started
   head_sha: [current HEAD],           // SHA after all tasks up to this point
 
@@ -39,7 +39,7 @@ review_input = {
 2. Invoke ring:reviewing-code skill with structured input:
 
    Skill("ring:reviewing-code") with input:
-     unit_id: review_input.unit_id                    # TASK id
+     unit_id: review_input.unit_id                    # EPIC id (Epic N.M)
      base_sha: review_input.base_sha                  # SHA before first task
      head_sha: review_input.head_sha                  # Current HEAD (cumulative diff)
      implementation_summary: review_input.implementation_summary

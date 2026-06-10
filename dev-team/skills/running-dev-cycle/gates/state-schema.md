@@ -2,13 +2,14 @@
 
 ### State Path Selection (MANDATORY)
 
-The state file path depends on the **source of tasks**:
+The state file path depends on the **source of the plan**:
 
-| Task Source | State Path | Use Case |
+| Plan Source | State Path | Use Case |
 |-------------|------------|----------|
 | `docs/ring:planning-backend-refactor/*/tasks.md` | `docs/ring:planning-backend-refactor/current-cycle.json` | Refactoring existing code |
-| `docs/pre-dev/*/tasks.md` | `docs/ring:running-dev-cycle/current-cycle.json` | New feature development |
-| Any other path | `docs/ring:running-dev-cycle/current-cycle.json` | Default for manual tasks |
+| `docs/pre-dev/*/plan.md` | `docs/ring:running-dev-cycle/current-cycle.json` | New feature development. Legacy `tasks.md` (old `## Summary` table + E-/T- ids) is accepted ONLY for cycles already in flight — a `current-cycle.json` already exists and init is not re-run on them. New cycles MUST start from the canonical plan format. |
+| `docs/plans/*.md` (standalone ring:writing-plans) | `docs/ring:running-dev-cycle/current-cycle.json` | Standalone plan execution |
+| Any other path | `docs/ring:running-dev-cycle/current-cycle.json` | Default for manual plans |
 
 **Detection Logic:**
 ```text
@@ -30,7 +31,7 @@ State is persisted to `{state_path}` (either `docs/ring:running-dev-cycle/curren
   "cycle_id": "uuid",
   "started_at": "ISO timestamp",
   "updated_at": "ISO timestamp",
-  "source_file": "path/to/tasks.md",
+  "source_file": "path/to/plan.md",
   "state_path": "docs/ring:running-dev-cycle/current-cycle.json | docs/ring:planning-backend-refactor/current-cycle.json",
   "cycle_type": "feature | refactor",
   "execution_mode": "manual_per_task|manual_per_epic|automatic",
@@ -50,7 +51,7 @@ State is persisted to `{state_path}` (either `docs/ring:running-dev-cycle/curren
   },
   "status": "in_progress|completed|failed|paused|paused_for_approval|paused_for_testing|paused_for_epic_approval|paused_for_integration_testing|paused_for_phase_review",
   "feedback_loop_completed": false,
-  "_comment_phases": "Parsed from the tasks.md '## Phase Overview' table at init. status mirrors the Phase Overview Status cell: 'epic-level' (not yet task-detailed) | 'detailed' (tasks written, ready to enter Gate 0) | 'in_progress' (epics of this phase executing) | 'complete' (all epics done). FALLBACK: a tasks.md without a '## Phase Overview' (ring:planning-backend-refactor output, flat plans) synthesizes a single phase 1 with status 'detailed' containing all epics.",
+  "_comment_phases": "Parsed from the plan's '## Phase Overview' table at init. status mirrors the Phase Overview Status cell: 'epic-level' (not yet task-detailed) | 'detailed' (tasks written, ready to enter Gate 0) | 'in_progress' (epics of this phase executing) | 'complete' (all epics done). FALLBACK: a plan without a '## Phase Overview' (ring:planning-backend-refactor output, flat plans) synthesizes a single phase 1 with status 'detailed' containing all epics.",
   "phases": [
     {"phase": 1, "milestone": "what works at the end", "status": "detailed"},
     {"phase": 2, "milestone": "what works at the end", "status": "epic-level"}
@@ -77,7 +78,7 @@ State is persisted to `{state_path}` (either `docs/ring:running-dev-cycle/curren
   },
   "epics": [
     {
-      "id": "E-1.1",
+      "id": "Epic 1.1",
       "title": "Epic title",
       "phase": 1,
       "status": "pending|in_progress|completed|failed|blocked",
@@ -98,7 +99,7 @@ State is persisted to `{state_path}` (either `docs/ring:running-dev-cycle/curren
       "_comment_task_gate_progress": "Task-level gate_progress holds ONLY implementation (Gate 0). Gate 0 includes TDD, coverage, local docker-compose/runtime, and delivery verification. Epic-level review (Gate 8) AND validation (Gate 9) live in epic.gate_progress, not here. An epic with no task breakdown of its own (FALLBACK plans) carries one synthetic task entry (the epic-itself unit), so every Gate 0 handoff lives under tasks[] uniformly. Later-phase epics carry tasks: [] until elaborated at their phase boundary (Step 11.5).",
       "tasks": [
         {
-          "id": "T-1.1.1",
+          "id": "Task 1.1.1",
           "status": "pending|completed",
           "gate_progress": {
             "implementation": {
@@ -204,15 +205,26 @@ State schema is `version: "2.0.0"` (phased rolling-wave model).
 
 ### Initialization (Parse the Phased Plan)
 
-At cycle init, parse `state.source_file` (tasks.md):
+At cycle init, parse `state.source_file` (plan.md, ring:writing-plans canonical format):
 
-1. **Phase Overview** (`## Phase Overview` table: `| Phase | Milestone | Epics | Status |`) → `phases[]`. Map the Status cell: `Epic-level` → `"epic-level"`, `Detailed` → `"detailed"`, `Complete` → `"complete"`. Set `current_phase` to the lowest phase whose status is `detailed` (the active wave; normally Phase 1).
-2. **Summary** (`## Summary` table: `| Epic | Title | Phase | Type | Hours | Confidence | Blocks | Status |`) → ALL epics load into `epics[]`, each with its `phase` field from the Phase column. Skip rows whose first cell is `TOTAL` or empty.
-3. **Task blocks** — for each epic in a `detailed` phase, parse the inline `#### Task T-X.Y.Z` blocks under its epic section into `epics[i].tasks[]` (id, and the implementation gate_progress skeleton). Epics in `epic-level` phases load with `tasks: []` — they are elaborated at their phase boundary (Step 11.5).
+1. **Phase Overview** (`## Phase Overview` table: `| Phase | Milestone | Epics | Status |`) → `phases[]`. Map the Status cell: `Epic-level` → `"epic-level"`, `Detailed` → `"detailed"`, `Complete` → `"complete"`. Set `current_phase` to the lowest phase whose status is `detailed` (the active wave; normally Phase 1). This table contract is unchanged.
+2. **Epic registry** — ALL epics load into `epics[]` from the `### Epic N.M:` headings under each phase section (`## Phase N:` ...). There is NO `## Summary` table — do not look for one. Each epic's `phase` field comes from the phase section it sits under (and from `N` in its id). Each epic block carries a `**Status:**` line (`Pending` / `Doing` / `Done` / `Failed` — plain words are the contract; emoji decoration optional). Read it into `epic.status` at init; this line is also the write target for epic status updates.
+
+   **Plan Status word ↔ `epic.status` enum mapping (both directions):**
+
+   | Plan `**Status:**` word | `epic.status` enum value |
+   |-------------------------|--------------------------|
+   | `Pending` | `pending` |
+   | `Doing` | `in_progress` |
+   | `Done` | `completed` |
+   | `Failed` | `failed` |
+
+   On init (read): the plan word on the left sets the enum value on the right. On epic checkpoints (write): the enum transition on the right writes the plan word on the left (e.g., `epic.status = "in_progress"` → plan line becomes `Doing`). The enum value `blocked` has no plan word — a blocked epic keeps `Doing` in the plan until it resolves to `Done` or `Failed`.
+3. **Task blocks** — for each epic in a `detailed` phase, parse the inline `#### Task N.M.T:` blocks under its epic section into `epics[i].tasks[]` (id, and the implementation gate_progress skeleton). Epics in `epic-level` phases load with `tasks: []` — they are elaborated at their phase boundary (Step 11.5).
 
 **FALLBACK — no `## Phase Overview`** (ring:planning-backend-refactor output, flat plans):
 - Synthesize a single `phases[] = [{phase: 1, milestone: "<feature> (flat plan)", status: "detailed"}]`, `current_phase = 1`. Every epic gets `phase: 1`.
-- If an epic has no inline task breakdown, keep the existing synthetic single-unit mechanism: one `tasks[]` entry representing the epic itself (the epic-itself unit), so every Gate 0 handoff lives under `tasks[]` uniformly.
+- If an epic has no inline task breakdown, keep the existing synthetic single-unit mechanism: one `tasks[]` entry representing the epic itself (the epic-itself unit, id = the epic's id), so every Gate 0 handoff lives under `tasks[]` uniformly.
 
 ### ⛔ Phase-Elaboration Invariant
 
@@ -347,35 +359,35 @@ Write tool:
 
 | Checkpoint | Cadence | MUST Update | MUST Write File |
 |------------|---------|-------------|-----------------|
-| **Before Gate 0 (epic start)** | Epic | `epic.status = "in_progress"` + `epic.base_sha = current HEAD SHA` (review-diff lower bound) in JSON **+ tasks.md Status → `🔄 Doing`** | ✅ YES |
+| **Before Gate 0 (epic start)** | Epic | `epic.status = "in_progress"` + `epic.base_sha = current HEAD SHA` (review-diff lower bound) in JSON **+ plan epic `**Status:**` → `Doing`** | ✅ YES |
 | Gate 0 TDD (RED→GREEN) | Task | `state.epics[i].tasks[j].gate_progress.implementation.tdd_red` (status + failure_output), `.tdd_green` (status + test_pass_output), `.implementation.status` | ✅ YES |
 | Gate 0 exit (Quality + Delivery Verification) | Task | `state.epics[i].tasks[j].gate_progress.implementation.delivery_verified = true` + `.standards_compliance` + `.coverage_actual` + `.coverage_threshold` + `.local_runtime_verified` + `.files_changed` (union consumed by Gate 8) | ✅ YES |
 | Step 2.4 (Task Checkpoint) | Task | `status = "paused_for_approval"` (task-level checkpoint; set only when `execution_mode = manual_per_task`; fires after Gate 0) | ✅ YES |
 | Gate 8 (Review) | Epic | `state.epics[i].gate_progress.review.status` + `agent_outputs.review` (reviewers see cumulative epic diff) | ✅ YES |
 | Gate 9 (Validation) | Epic | `state.epics[i].gate_progress.validation.status` + `.result` + `.criteria_results` (aggregated across ALL tasks; runs after Gate 8 passes) | ✅ YES |
-| Step 11.1 (Epic Approval) | Epic | `epic.status = "completed"` in JSON **+ tasks.md Status → `✅ Done`** + `epic.accumulated_metrics` populated (gate_durations_ms, review_iterations, testing_iterations, issues_by_severity); NO dev-report dispatch here (runs ONCE at Step 12.1) | ✅ YES |
-| Step 11.5 (Phase Boundary) | Phase | At phase close: tasks.md Phase Overview Status → `Complete`, `phases[]` status → `complete`, `status = "paused_for_phase_review"` (manual checkpoint). After elaboration: new phase `phases[]` status → `detailed`, Phase Overview Status → `Detailed`, load new tasks into `epics[].tasks[]`, `current_phase += 1`. See gates/phase-boundary.md. | ✅ YES |
+| Step 11.1 (Epic Approval) | Epic | `epic.status = "completed"` in JSON **+ plan epic `**Status:**` → `Done`** + `epic.accumulated_metrics` populated (gate_durations_ms, review_iterations, testing_iterations, issues_by_severity); NO dev-report dispatch here (runs ONCE at Step 12.1) | ✅ YES |
+| Step 11.5 (Phase Boundary) | Phase | At phase close: plan Phase Overview Status → `Complete`, `phases[]` status → `complete`, `status = "paused_for_phase_review"` (manual checkpoint). After elaboration: new phase `phases[]` status → `detailed`, Phase Overview Status → `Detailed`, load new tasks into `epics[].tasks[]`, `current_phase += 1`. See gates/phase-boundary.md. | ✅ YES |
 | Step 12.0.5b (Gate 0.5D — Migration Safety, conditional) | Cycle | `state.gate_progress.migration_safety_verification = {status: "completed" \| "skipped" \| "blocked" \| "acknowledged", reason, files_checked, findings: {BLOCKING: [], WARN: [], ACKNOWLEDGE: []}, user_acknowledgment}` | ✅ YES |
 | Step 12.1 (Cycle end — dev-report) | Cycle | `state.feedback_loop_completed = true` after the ONE AND ONLY `ring:writing-dev-reports` dispatch | ✅ YES |
-| HARD BLOCK (any gate) | Epic | `epic.status = "failed"` in JSON **+ tasks.md Status → `❌ Failed`** | ✅ YES |
+| HARD BLOCK (any gate) | Epic | `epic.status = "failed"` in JSON **+ plan epic `**Status:**` → `Failed`** | ✅ YES |
 
-**tasks.md Status update rules (apply at the epic checkpoints above):**
+**Plan Status update rules (apply at the epic checkpoints above):**
 
 ```text
-If state.source_file is absent or file does not exist → log warning "tasks.md Status updates skipped: source_file missing" and skip all status updates for this cycle.
+If state.source_file is absent or file does not exist → log warning "plan Status updates skipped: source_file missing" and skip all status updates for this cycle.
 
 epic_id = state.epics[state.current_epic_index].id
-# Always the parent EPIC ID (E-X.Y) — do NOT use current_task_index
-# Rows where column 1 is "TOTAL" or empty → skip, not an epic row
+# Always the parent EPIC ID (Epic N.M) — do NOT use current_task_index
 
-Use Edit tool on state.source_file (tasks.md):
-- Find the row starting with `| {epic_id} |` in the `## Summary` table
-- Before Gate 0: replace `⏸️ Pending` with `🔄 Doing`
-  - If already `🔄 Doing` (resumed cycle) → skip, no change needed
-- Step 11.1 (all tasks done, user approved): replace `🔄 Doing` with `✅ Done`
-- HARD BLOCK (any gate, epic abandoned): replace `🔄 Doing` with `❌ Failed`
-  - If row shows `⏸️ Pending` (unexpected) → replace with target value anyway
-- If row not found or no Status column → log warning "Status update skipped: epic {epic_id} row not found in {source_file}" and continue, do not abort
+Use Edit tool on state.source_file (the plan):
+- Find the `### {epic_id}:` heading and edit the `**Status:**` line in its block
+- Plain words are the contract (Pending/Doing/Done/Failed); emoji decoration is optional — match whatever the line currently carries when replacing
+- Before Gate 0: replace `Pending` with `Doing`
+  - If already `Doing` (resumed cycle) → skip, no change needed
+- Step 11.1 (all tasks done, user approved): replace `Doing` with `Done`
+- HARD BLOCK (any gate, epic abandoned): replace `Doing` with `Failed`
+  - If the line shows `Pending` (unexpected) → replace with target value anyway
+- If the epic heading or its `**Status:**` line is not found → log warning "Status update skipped: epic {epic_id} Status line not found in {source_file}" and continue, do not abort
 
 **Phase Overview Status sync (Step 11.5 — phase boundary):**
 - Find the row starting with `| {phase} |` in the `## Phase Overview` table

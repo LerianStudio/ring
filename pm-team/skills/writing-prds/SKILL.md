@@ -1,9 +1,9 @@
 ---
 name: ring:writing-prds
-description: "Writing a Product Requirements Document that defines WHAT and WHY: problem, user personas, As/I-want/So-that stories, success metrics, and explicit scope, then dispatching UX validation. Gate 1 of ring:using-pm-team; stays technology-free (no architecture, frameworks, or schemas). Use when starting a new feature or asked to plan, design, or produce requirements. Skip when a validated PRD exists, for pure technical changes, or bug fixes."
+description: "Writing a Product Requirements Document that explains to the squad WHAT is being built and WHY: problem, explicit scope in/out, functional requirements, and testable acceptance criteria. Gate 1 of ring:using-pm-team; runs after ring:researching-features and stays technology-free (no architecture, frameworks, or schemas). Use when starting a new feature or asked to plan or produce requirements. Skip when a validated PRD exists, for pure technical changes, or bug fixes."
 ---
 
-# PRD Creation — Business Before Technical
+# PRD Creation — WHAT and WHY Before HOW
 
 ## When to use
 
@@ -14,36 +14,34 @@ description: "Writing a Product Requirements Document that defines WHAT and WHY:
 
 ## Skip when
 
-- PRD already exists and validated → proceed to Gate 2
-- Pure technical task without business impact → TRD directly
+- PRD already exists and validated → proceed to next gate
+- Pure technical task without product impact → TRD directly
 - Bug fix → systematic-debugging
 
 ## Sequence
 
-**Runs before:** ring:mapping-feature-relationships, ring:writing-trds
+**Runs after:** ring:researching-features (Gate 0)
+**Runs before:** ring:mapping-feature-relationships (Gate 2, Large track) or ring:writing-trds (Gate 2, Small track)
 
 
-The PRD defines WHAT we're building and WHY it matters to users and business. It never answers HOW we'll build it (that's TRD) or WHERE components will live.
+The PRD is a squad-facing explanation of the product/feature being built: what it does, why it exists, what is in and out of scope, and how the squad knows it's done. It never answers HOW to build it (that's TRD) or WHERE components will live.
 
 ## Mandatory Workflow
 
 | Phase | Activities |
 |-------|------------|
 | **0. Load Research** | Check `docs/pre-dev/{feature}/research.md`; reference codebase patterns and findings with `file:line` notation |
-| **1. Problem Discovery** | Define problem without solution bias; identify specific users; quantify pain with metrics/evidence |
-| **2. Business Requirements** | Executive summary (3 sentences); user personas; user stories (As/I want/So that); success metrics (measurable); scope boundaries (in/out) |
-| **3. Gate 1 Validation** | Problem articulated; impact quantified; users identified; features address problem; metrics measurable; scope explicit |
-| **4. UX Validation** | Dispatch `product-designer` to validate PRD against user needs and create `ux-criteria.md` |
+| **1. Problem Definition** | State the problem without solution bias; explain why it matters now; cite evidence from research.md |
+| **2. Requirements** | Executive summary (3 sentences); functional requirements (WHAT the feature does); testable acceptance criteria per requirement; explicit scope boundaries (in/out) |
+| **3. Gate 1 Validation** | Problem articulated; requirements address problem; acceptance criteria testable; scope explicit; zero technology content |
 
 ## Include in PRD
 
-- Problem definition and user pain points
-- User personas (demographics, goals, frustrations)
-- User stories with acceptance criteria
-- Feature requirements (WHAT not HOW)
-- Success metrics (adoption, satisfaction, KPIs)
+- Problem definition and why it matters
+- Feature description: what it does, observable behavior
+- Functional requirements (WHAT not HOW)
+- Acceptance criteria (testable, per requirement)
 - Scope boundaries (in/out explicitly)
-- Go-to-market considerations
 
 ## Never Include in PRD
 
@@ -53,17 +51,19 @@ The PRD defines WHAT we're building and WHY it matters to users and business. It
 - Database schemas or API specifications
 - Code examples or package dependencies
 - Infrastructure needs or deployment strategies
+- Personas, demographics, market analysis, go-to-market plans
+- Adoption/satisfaction KPIs or business metric targets
 
 **Separation rules:**
 - Technology name → Dependency Map
 - "How to build" → TRD
-- Implementation detail → Tasks/Subtasks
+- Implementation detail → Plan tasks
 - System behavior → TRD
 
-## Security Requirements Discovery (Business Level)
+## Security Requirements Discovery (Functional Level)
 
-| Business Question | If Yes → Document |
-|-------------------|-------------------|
+| Question | If Yes → Document |
+|----------|-------------------|
 | Feature handles user-specific data? | "Users can only access their own [data type]" |
 | Different user roles with different permissions? | "Admins can [X], regular users can [Y]" |
 | Need to identify who performed an action? | "Audit trail required for [action type]" |
@@ -73,31 +73,30 @@ The PRD defines WHAT we're building and WHY it matters to users and business. It
 Include: "Only authenticated users can access", "Users can only view/edit their own records", "Admin approval required for [action]"
 Exclude: JWT tokens, Access Manager integration, OAuth2 flow — these go in TRD.
 
-## Operational Dashboard Discovery (Business Level)
+## Operational Dashboard Discovery
 
-During PRD creation for features involving data that accumulates over time (transactions, events, operations), ask:
+For features involving data that accumulates over time (transactions, events, operations), ask:
 
-AskUserQuestion: "Will an operator or business manager need a consolidated view of this feature's data to make decisions?"
-- "Yes — Business dashboard needed"
+AskUserQuestion: "Will an operator need a consolidated view of this feature's data to make decisions?"
+- "Yes — Operational dashboard needed"
 - "No — Infrastructure/backend only"
 - "Not sure — Needs discussion"
 
-**If "Yes":** Document in PRD under "Dashboard Requirements": consumer persona, decisions supported, key metrics, refresh cadence.
+**If "Yes":** Document in PRD under "Dashboard Requirements": who consumes it, decisions supported, key data shown, refresh cadence.
 
 ## Gate 1 Validation Checklist
 
 | Category | Requirements |
 |----------|--------------|
-| **Problem Clarity** | Problem stated without solution; specific user identified; pain quantified |
-| **Requirements** | User stories follow As/I want/So that; acceptance criteria testable; all PRD features address problem |
-| **Metrics** | Success metrics measurable; baseline + target defined; timeframe specified |
+| **Problem Clarity** | Problem stated without solution; why-now explained; grounded in research.md |
+| **Requirements** | Every requirement describes observable behavior; acceptance criteria testable; all requirements trace to the problem |
 | **Scope** | In-scope features explicit; out-of-scope stated; boundaries clear |
 | **Technology-Free** | Zero technology names; zero implementation details; zero framework mentions |
 
-**Gate Result:** ✅ PASS → Feature Map or TRD | ❌ FAIL (re-work technical content or missing requirements)
+**Gate Result:** ✅ PASS → next gate | ❌ FAIL (re-work technical content or missing requirements)
 
 ## Output
 
 **File:** `docs/pre-dev/{feature}/prd.md`
 
-After Gate 1 passes: dispatch `ring:product-designer` to validate UX and create `docs/pre-dev/{feature}/ux-criteria.md`.
+After Gate 1 passes: Large track → `ring:mapping-feature-relationships` (Gate 2); Small track → `ring:writing-trds` (Gate 2). If the feature has UI, the orchestrator may recommend a standalone product-designer + `ring:validating-ux-completeness` run before the TRD (optional, not a gate).

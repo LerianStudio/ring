@@ -11,7 +11,7 @@ description: "Planning a backend refactor: audits an existing Go or TypeScript b
 - Project audit requested
 
 ## Skip when
-- Greenfield project → Use /pre-dev-* instead
+- Greenfield project → Use ring:planning-large-features or ring:planning-small-features instead
 - Single file fix → Use ring:running-dev-cycle directly
 - Frontend project → Use ring:planning-frontend-refactor
 

@@ -6,7 +6,7 @@
 
 **Proven engineering practices, enforced through skills.**
 
-Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **4 active plugins**, **71 skills**, and **33 agents** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
+Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **4 active plugins**, **67 skills**, and **33 agents** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
 
 ## ✨ Why Ring?
 
@@ -21,7 +21,7 @@ Without Ring, AI assistants often:
 Ring solves this by:
 
 - **Enforcing proven workflows** - Test-driven development, systematic debugging, proper planning
-- **Providing 71 specialized skills** (16 core + 33 dev-team + 18 product planning + 4 technical writing)
+- **Providing 67 specialized skills** (16 core + 33 dev-team + 14 product planning + 4 technical writing)
 - **33 specialized agents** - 2 planning/analysis + 24 developer/reviewer + 4 product research + 3 technical writing
 - **Automating skill discovery** - Skills load automatically at session start
 - **Preventing common failures** - Built-in anti-patterns and mandatory checklists
@@ -248,7 +248,7 @@ GREEN → Minimal code → Watch it pass
 REFACTOR → Clean up → Stay green
 ```
 
-## 📚 All 71 Skills (Across 4 Plugins)
+## 📚 All 67 Skills (Across 4 Plugins)
 
 ### Core Skills (ring-default plugin - 16 skills)
 
@@ -291,7 +291,7 @@ REFACTOR → Clean up → Stay green
 **Orchestration & Refactoring (7):**
 
 - `ring:using-dev-team` - Introduction to developer specialist agents
-- `ring:running-dev-cycle` - Lean backend development cycle orchestrator driven by a rolling-wave phased plan (phases → epics E-X.Y → tasks T-X.Y.Z): Gate 0 implementation-owned TDD/coverage/docker-compose/runtime/delivery verification per task, Gate 8 review + Gate 9 validation per epic, phase boundary (Step 11.5) closes each phase and elaborates the next against the real codebase
+- `ring:running-dev-cycle` - Lean backend development cycle orchestrator driven by a rolling-wave phased plan (phases → epics `Epic N.M` → tasks `Task N.M.T`): Gate 0 implementation-owned TDD/coverage/docker-compose/runtime/delivery verification per task, Gate 8 review + Gate 9 validation per epic, phase boundary (Step 11.5) closes each phase and elaborates the next against the real codebase
 - `ring:running-dev-cycle-frontend` - Lean frontend development cycle orchestrator on the same rolling-wave phased plan (Gate 0 per task, Gate 7 review per epic, Gate 8 validation per task, phase boundary per phase)
 - `ring:planning-backend-refactor` - Backend/codebase standards analysis
 - `ring:planning-frontend-refactor` - Frontend standards analysis and task generation
@@ -335,33 +335,32 @@ REFACTOR → Clean up → Stay green
 
 > Frontend and backend dev-cycle workflows both use `ring:reviewing-code` (core plugin) as the review gate.
 
-### Product Planning Skills (ring-pm-team plugin - 18 skills)
+### Product Planning Skills (ring-pm-team plugin - 14 skills)
 
-**Pre-Development Workflow (includes ring:using-pm-team + 9 gates):**
+**Pre-Development Workflow (includes ring:using-pm-team + 7 gate skills; Large track gate numbers shown):**
 
 - `ring:using-pm-team` - Introduction to product planning workflow
 
-0. `ring:researching-features` - Research phase (parallel agents)
-1. `ring:writing-prds` - Business requirements (WHAT/WHY)
-2. `ring:mapping-feature-relationships` - Feature relationships
+0. `ring:researching-features` - Deep technical/product research (parallel agents)
+1. `ring:writing-prds` - Squad-facing product requirements (WHAT/WHY)
+2. `ring:mapping-feature-relationships` - Feature relationships and phasing (Large only)
 3. `ring:writing-trds` - Technical architecture (HOW)
-4. `ring:designing-api-contracts` - Component contracts
-5. `ring:designing-data-model` - Entity relationships
+4. `ring:designing-api-contracts` - OpenAPI 3.1 contract (openapi.yaml)
+5. `ring:designing-data-model` - Stack-native schema (schema.sql / schema.prisma)
 6. `ring:pinning-dependency-versions` - Technology selection
-7. `ring:decomposing-phases-and-epics` - Phased plan: phases + epics, rolling wave
-8. `ring:detailing-tasks` - Phase 1 task detailing: dispatch-ready tasks, no code
+7. `ring:writing-plans` (ring-default) - Single execution plan (plan.md), invoked by the orchestrator
 
 **Workflow Orchestrators:**
 
-- `ring:planning-small-features` - 5-gate orchestrator for small features (<2 days)
-- `ring:planning-large-features` - 10-gate orchestrator for large features (>=2 days)
+- `ring:planning-small-features` - 4-gate orchestrator for small features (<2 days)
+- `ring:planning-large-features` - 8-gate orchestrator for large features (>=2 days)
 
 **Additional Planning Skills:**
 
-- `ring:validating-ux-completeness` - Gate 1.5/2.5: Design validation for UI features
-- `ring:planning-delivery` - Gate 4 (Small) / Gate 9 (Large): Delivery roadmap and timeline
-- `ring:tracking-delivery` - Delivery progress tracking against roadmap
+- `ring:validating-ux-completeness` - Standalone UX validation for UI features (run before the TRD)
 - `ring:reconciling-predev-docs` - Deep cross-reference review of pre-dev documentation artifacts
+- `ring:mapping-streaming-events` - Standalone streaming-event discovery (event catalog + instrumentation map)
+- `ring:creating-grafana-dashboards` - Grafana dashboard generation for instrumented services
 
 ### Technical Writing Skills (ring-tw-team plugin - 4 skills)
 
@@ -379,7 +378,7 @@ REFACTOR → Clean up → Stay green
 ```
 User: "Add user authentication to the app"
 Claude: I'm using ring:planning-small-features to scope this feature...
-        [Pre-dev workflow: PRD, TRD, tasks]
+        [Pre-dev workflow: PRD, TRD, plan]
 Claude: I'm using ring:test-driven-development to implement...
         [RED-GREEN-REFACTOR cycle for each component]
 Claude: I'm using ring:reviewing-code to validate...
@@ -405,7 +404,7 @@ Claude: I'll use the pre-dev workflow to plan this systematically...
         Gate 1: PRD Creation [Business requirements]
         Gate 2: Feature Map [Domain groupings]
         Gate 3: TRD Creation [Architecture patterns]
-        ... [Through all 10 gates]
+        ... [Through all 8 gates]
 ```
 
 ### Code Review (Parallel, 9 Defaults + Conditional Specialists)
@@ -492,12 +491,12 @@ ring/                                  # Monorepo root
 │       ├── sre.md                           # Observability and reliability specialist (`ring:sre`)
 │       └── ui-engineer.md                   # UI component specialist (`ring:ui-engineer`)
 ├── pm-team/                    # Product Planning plugin (ring-pm-team)
-│   └── skills/                      # 18 product planning skills
+│   └── skills/                      # 14 product planning skills
 │       ├── writing-prds/          # PRD authoring
 │       ├── writing-trds/          # TRD authoring
-│       ├── designing-api-contracts/ # API contract design
-│       ├── designing-data-model/   # Data model design
-│       └── detailing-tasks/        # Task detailing
+│       ├── designing-api-contracts/ # OpenAPI contract design
+│       ├── designing-data-model/   # Stack-native schema design
+│       └── pinning-dependency-versions/ # Dependency pinning
 └── tw-team/                         # Technical Writing plugin (ring-tw-team)
     ├── skills/                      # 4 documentation skills
     ├── agents/                      # 3 technical writing agents

@@ -123,10 +123,10 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 
 ### Ring PM Team Plugin
 
-- `ring:using-pm-team` → Pre-dev workflow skills (8 gates)
+- `ring:using-pm-team` → Pre-dev workflow skills (8-gate Large / 4-gate Small)
 - Auto-loads when ring-pm-team plugin is enabled
 - Located: `pm-team/skills/using-pm-team/SKILL.md`
-- Skills: 8 pre-dev gates for feature planning
+- Skills: 7 gate skills + 2 orchestrators + standalone utilities; both tracks end with `ring:writing-plans` (default plugin)
 
 ### Ring TW Team Plugin
 
@@ -165,36 +165,41 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 
 ## Pre-Dev Workflow
 
-### Simple Features (<2 days): `/ring:planning-small-features`
+### Simple Features (<2 days): `/ring:planning-small-features` — 4 gates
 
 ```
 ├── Gate 0: pm-team/skills/researching-features
-│   └── Output: docs/pre-dev/feature/research.md (parallel agents)
+│   └── Output: docs/pre-dev/feature/research.md (3 parallel agents: repo-, web-, docs-researcher)
 ├── Gate 1: pm-team/skills/writing-prds
-│   └── Output: docs/pre-dev/feature/PRD.md
+│   └── Output: docs/pre-dev/feature/prd.md
 ├── Gate 2: pm-team/skills/writing-trds
-│   └── Output: docs/pre-dev/feature/TRD.md
-└── Gate 3: pm-team/skills/decomposing-phases-and-epics
-    └── Output: docs/pre-dev/feature/tasks.md (phased plan, living document; Phase 1 detailed inline)
+│   └── Output: docs/pre-dev/feature/trd.md
+└── Gate 3: default/skills/writing-plans (invoked by orchestrator)
+    └── Output: docs/pre-dev/feature/plan.md (phased plan, living document; Phase 1 detailed into tasks)
 ```
 
-### Complex Features (≥2 days): `/ring:planning-large-features`
+### Complex Features (≥2 days): `/ring:planning-large-features` — 8 gates
 
 ```
-├── Gate 0: Research Phase
-│   └── 3 parallel agents: repo-researcher, web-researcher, docs-researcher
-├── Gates 1-3: Same as simple workflow
+├── Gate 0: pm-team/skills/researching-features
+│   └── Output: docs/pre-dev/feature/research.md (3 parallel agents: repo-, web-, docs-researcher)
+├── Gate 1: pm-team/skills/writing-prds
+│   └── Output: docs/pre-dev/feature/prd.md
+├── Gate 2: pm-team/skills/mapping-feature-relationships
+│   └── Output: docs/pre-dev/feature/feature-map.md (defines phasing; phases mirror plan.md one-to-one)
+├── Gate 3: pm-team/skills/writing-trds
+│   └── Output: docs/pre-dev/feature/trd.md
 ├── Gate 4: pm-team/skills/designing-api-contracts
-│   └── Output: docs/pre-dev/feature/API.md
+│   └── Output: docs/pre-dev/feature/openapi.yaml (OpenAPI 3.1)
 ├── Gate 5: pm-team/skills/designing-data-model
-│   └── Output: docs/pre-dev/feature/data-model.md
+│   └── Output: docs/pre-dev/feature/schema.sql (or schema.prisma — stack-native)
 ├── Gate 6: pm-team/skills/pinning-dependency-versions
 │   └── Output: docs/pre-dev/feature/dependencies.md
-├── Gate 7: pm-team/skills/decomposing-phases-and-epics
-│   └── Output: docs/pre-dev/feature/tasks.md (phased plan, living document; phases + epics)
-└── Gate 8: pm-team/skills/detailing-tasks
-    └── Output: docs/pre-dev/feature/tasks.md (Phase 1 epics detailed into tasks)
+└── Gate 7: default/skills/writing-plans (invoked by orchestrator)
+    └── Output: docs/pre-dev/feature/plan.md (all phases with epics; Phase 1 epics detailed into tasks)
 ```
+
+When the feature has UI, the orchestrator recommends running `ring:validating-ux-completeness` (standalone, with the product-designer agent) between the PRD and TRD — not a gate, not tracked in workflow state.
 
 ---
 
@@ -202,7 +207,7 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 
 `ring:running-dev-cycle` is now a lean backend flow. Backend implementation owns TDD, coverage, docker-compose/local runtime, basic health/observability checks, and delivery verification in Gate 0.
 
-**Task cadence** (runs for each task T-X.Y.Z, or for the epic itself if no task breakdown):
+**Task cadence** (runs for each task `Task N.M.T`, or for the epic itself if no task breakdown):
 - Gate 0 — Implementation (includes Delivery Verification exit check inline)
 
 **Epic cadence** (runs once per epic, after all its tasks complete Gate 0):
@@ -210,14 +215,14 @@ Each plugin auto-loads a `using-{plugin}` skill via SessionStart hook to introdu
 - Gate 9 — Validation (aggregates EVERY task's acceptance criteria + one human approval, after Gate 8 passes)
 
 **Phase cadence** (runs once per phase transition — rolling wave):
-- Step 11.5 — Phase Boundary (close phase in tasks.md, user checkpoint, elaborate next phase's epics into tasks against the codebase as it now exists)
+- Step 11.5 — Phase Boundary (close phase in plan.md, user checkpoint, elaborate next phase's epics into tasks against the codebase as it now exists)
 
 **Cycle cadence** (runs once per cycle at the end):
 - Multi-Tenant Verify
 - `ring:writing-dev-reports` aggregate
 - Final Commit
 
-Inputs for epic-cadence gates receive UNION of changed files across all tasks of the epic. Multi-tenant adaptation is integrated into Gate 0. All gates are MANDATORY. Invoke with `/ring:running-dev-cycle [tasks-file]` or Skill tool `ring:running-dev-cycle`. State is persisted to `docs/ring:running-dev-cycle/current-cycle.json` (schema v2.0.0: phases → epics → tasks). See `dev-team/skills/shared-patterns/gate-cadence-classification.md` for full taxonomy and [dev-team/skills/running-dev-cycle/SKILL.md](../dev-team/skills/running-dev-cycle/SKILL.md) for full protocol.
+Inputs for epic-cadence gates receive UNION of changed files across all tasks of the epic. Multi-tenant adaptation is integrated into Gate 0. All gates are MANDATORY. Invoke with `/ring:running-dev-cycle [plan-file]` or Skill tool `ring:running-dev-cycle`. State is persisted to `docs/ring:running-dev-cycle/current-cycle.json` (schema v2.0.0: phases → epics → tasks). See `dev-team/skills/shared-patterns/gate-cadence-classification.md` for full taxonomy and [dev-team/skills/running-dev-cycle/SKILL.md](../dev-team/skills/running-dev-cycle/SKILL.md) for full protocol.
 
 ---
 

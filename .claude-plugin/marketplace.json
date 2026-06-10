@@ -1,6 +1,6 @@
 {
   "name": "ring",
-  "description": "Lerian Studio plugin marketplace: Core software engineering skills (TDD, debugging, code review), specialized developer agents (Backend, DevOps, Frontend, QA, SRE) plus 12 code-review reviewers (9 default hard-gate reviewers and 3 conditional stack specialists), product planning workflows (10-gate pre-dev system), and technical writing specialists for documentation.",
+  "description": "Lerian Studio plugin marketplace: Core software engineering skills (TDD, debugging, code review), specialized developer agents (Backend, DevOps, Frontend, QA, SRE) plus 12 code-review reviewers (9 default hard-gate reviewers and 3 conditional stack specialists), product planning workflows (8-gate pre-dev system), and technical writing specialists for documentation.",
   "owner": {
     "name": "Presenter Name",
     "email": "fred@fredamaral.com.br"
@@ -62,7 +62,7 @@
     },
     {
       "name": "ring-pm-team",
-      "description": "Product team workflow: 18 skills + 4 research agents. Pre-dev planning with 5-gate (small features) and 10-gate (large features) orchestrators, delivery roadmap generation, delivery status tracking for evidence-based progress reporting, plus standalone mapping-streaming-events discovery. Includes parallel research agents, specialized code analysis, and Product Designer.",
+      "description": "Product team workflow: 14 skills + 4 research agents. Pre-dev planning with 4-gate (small features) and 8-gate (large features) orchestrators producing machine-consumable specs (prd, trd, openapi.yaml, schema, plan.md), plus standalone mapping-streaming-events discovery and UX validation. Includes parallel research agents, specialized code analysis, and Product Designer.",
       "version": "0.32.0",
       "source": "./pm-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/main/pm-team",
