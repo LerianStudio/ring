@@ -25,15 +25,20 @@ POST http://gandalf.heron-justitia.ts.net:18792/task
 
 ### `publish` — instant (<1s)
 
-Write content to Alfarrábio, get URL back.
+Write content to Alfarrábio, get URL back. Files land under `content/misc/` and the
+returned URL is always `https://alfarrabio.lerian.net/misc/<slug>.html`.
+
+**Send complete HTML** — Alfarrábio renders HTML only, so `content` should be a full
+HTML document (`<!DOCTYPE html>` … `</html>`). Markdown and plain text are accepted but
+auto-converted to a basic HTML page; for anything beyond simple prose, send your own HTML.
 
 ```bash
 curl -s -X POST http://gandalf.heron-justitia.ts.net:18792/task \
   -H "Content-Type: application/json" \
-  -d '{"action": "publish", "message": "Report Title", "content": "<html>...</html>"}'
+  -d '{"action": "publish", "message": "Report Title", "content": "<!DOCTYPE html><html>...</html>"}'
 ```
 
-Response: `{"ok": true, "task_id": "...", "status": "done", "response": "https://alfarrabio.lerian.net/..."}`
+Response: `{"ok": true, "task_id": "...", "status": "done", "response": "https://alfarrabio.lerian.net/misc/report-title.html"}`
 
 ### `notify` — instant (<1s)
 
@@ -74,7 +79,7 @@ done
 |-------|----------|-------------|
 | `message` | Yes | What to do. For `publish`, becomes the report title. |
 | `action` | No | `publish`, `notify`, `ask` (default). |
-| `content` | **Required for `publish`** | HTML/markdown/text for `publish`. Max 5MB. Omit for `notify` and `ask`. |
+| `content` | **Required for `publish`** | Full HTML document for `publish` (Markdown/text accepted but auto-converted; Alfarrábio renders HTML only). Max 5MB. Omit for `notify` and `ask`. |
 | `context` | No | What you're working on (repo, PR, feature). |
 
 `publish` and `notify` are synchronous — no polling needed.
@@ -83,7 +88,7 @@ done
 
 | Need | Action | Speed |
 |------|--------|-------|
-| Publish HTML/markdown report | `publish` | <1s |
+| Publish HTML report (full HTML doc) | `publish` | <1s |
 | Send Slack notification | `notify` | <1s |
 | Ask business/product question | `ask` | 30-60s |
 | Complex cross-tool task | `ask` | 30-300s |
