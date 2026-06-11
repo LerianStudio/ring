@@ -17,6 +17,20 @@
 - Added explicit dependency-blocker handling for transitive modules that still import removed lib-commons observability packages after the target application bumps to a removal release.
 - Tightened root opentelemetry qualifier migration so agents rewrite selector expressions only, never `go.opentelemetry.io` module import paths.
 
+## [1.75.0] — 2026-06-11
+
+### Added — Optional Lerian Map Sync in `ring:running-dev-cycle`
+
+- The development cycle can now keep the Lerian Map kanban board in sync as epics/tasks move through the gates. Strictly **optional and default-off** — when not enabled, the cycle behaves exactly as before (zero Gandalf calls) and no mandatory gate is weakened.
+- **Two new optional cycle-init questions**, asked after execution mode and before commit timing:
+  - **Lerian Map Sync?** (`No` default / `Yes — sync`).
+  - **Testing gate** (`Gate (wait)` / `Bypass`, only asked when sync = Yes) — controls whether the card waits at `Testing` for the user's explicit OK before the PR is opened. Does **not** override the critical Gate 9 acceptance, which always requires explicit user approval per epic.
+- **Async fire-and-forget board updates via Gandalf.** All Map I/O goes through the `gandalf-webhook` (no direct Map API call, no new agent, no new credential). Each checkpoint POSTs one transition, gets a `task_id` back in <1s, and continues — Gandalf's background worker applies the update. The cycle never polls or blocks. Visible dispatch log line per push.
+- **Repo-based board discovery.** Discovers the product by matching the normalized git remote against the Map's native `repositoryUrl` field; features matched by name (no slug); units matched via `[map:#<board_task_id>]` tags with title-matching fallback. Tags can be auto-injected into the plan after the first discovery (with user confirmation).
+- **Status mapped to the real board columns:** `To do → In Progress (Gate 0) → Testing (gates done, awaiting user test) → To Review (PR open) → Done (push to ≥ develop)`, with `Blocked`/`On Hold`/`Canceled` off-path. **`Done` is gated on commit+push-to-develop (PR merge), not Gate 9.**
+- **Deferred reconciliation** when Gandalf is unreachable: three states per transition (`pending → dispatched → synced`), best-effort non-blocking verification and pending-drain at the next checkpoint / `--resume` / end of cycle, idempotent absolute-column pushes, and an end-of-cycle pending report.
+- **State schema:** additive optional `lerian_map_sync` object in `current-cycle.json` (`gates/state-schema.md`), absent when the feature is off.
+
 ## [1.56.1] — 2026-04-17
 
 ### Fixed — Restore Gate 0.5D (Migration Safety) as standalone conditional gate

@@ -38,6 +38,32 @@ State is persisted to `{state_path}` (either `docs/ring:running-dev-cycle/curren
   "commit_timing": "per_task|per_epic|at_end",
   "_comment_phase_checkpoint": "Asked at cycle init alongside execution_mode. 'manual' (default): AskUserQuestion at each phase boundary (Step 11.5) before elaborating the next phase. 'auto': log a phase summary and continue without pausing.",
   "phase_checkpoint": "manual|auto",
+  "_comment_lerian_map_sync": "OPTIONAL / ADDITIVE. Present ONLY when the user answered 'Yes — sync' to the cycle-init Lerian Map Sync question (SKILL.md Execution Modes, question 3). Absent or enabled:false ⇒ feature off ⇒ zero Gandalf calls ⇒ today's behavior. All Map I/O is async fire-and-forget via the gandalf-webhook; the cycle never polls/blocks. See SKILL.md '## Lerian Map Sync (optional)' for full mechanics. status_enum is READ from the board at runtime (never hardcoded); discovery (productId/teamId/milestoneId) is DISCOVERED by Gandalf from the repo's git remote, not hardcoded.",
+  "lerian_map_sync": {
+    "enabled": true,
+    "transport": "gandalf",
+    "testing_gate": "gate|bypass",
+    "discovery": {
+      "repo": "LerianStudio/br-slc",
+      "feature_slug": "slc-v1",
+      "branch": "feat/slc-e1.1-bounded-contexts"
+    },
+    "board": { "discovered": true, "productId": 13, "teamId": 5, "milestoneId": 433 },
+    "status_enum": ["backlog","todo","in_progress","testing","to_review","on_hold","blocked","done","canceled"],
+    "status_map": { "gate0": "in_progress", "awaiting_test": "testing", "pr_open": "to_review", "pushed_develop": "done" },
+    "matches": [
+      {
+        "unit_id": "Task 1.1.1",
+        "board_task_id": 1222,
+        "matched": true,
+        "desired_status": "in_progress",
+        "synced_status": "todo",
+        "dispatch": { "task_id": "a1b2c3", "to": "in_progress", "dispatched_at": "2026-06-11T15:00:00Z", "state": "pending|dispatched|synced" }
+      }
+    ],
+    "pending": [],
+    "degraded": false
+  },
   "_comment_cached_standards": "Populated by Step 1.5 (Standards Pre-Cache). Dictionary of URL → {fetched_at, content}. Sub-skills MUST read from here instead of calling WebFetch.",
   "cached_standards": {},
   "_comment_visual_report_granularity": "Opt-in code-diff report via ring:visualizing: 'none' (default, no report) | 'epic' (aggregate per epic) | 'task' (per task).",
