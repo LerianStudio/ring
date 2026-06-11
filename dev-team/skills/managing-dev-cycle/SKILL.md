@@ -50,6 +50,7 @@ Display the current development cycle status.
 Displays:
 - Current cycle ID and start time
 - Current phase (if `phases[]` is present in state)
+- Task source (`plan_file` / `plan_file_synced` / `lerian_map`; absent in older state files → infer `plan_file_synced` when `lerian_map_sync.enabled == true`, else `plan_file`). For `lerian_map`, also show the board/milestone identity (`lerian_map_sync.board` + `lerian_map_source`)
 - Epics: total, completed, in progress, pending
 - Current epic and gate being executed
 - Assertiveness score (if epics completed)
@@ -64,6 +65,7 @@ Cycle ID: 2024-01-15-143000
 Started: 2024-01-15 14:30:00
 Status: in_progress
 Phase: Phase 2 - Core flows
+Task source: lerian_map — product 13 / team 5, milestone Desenvolvimento (433)
 
 Epics:
   Completed: 2/5
@@ -98,7 +100,7 @@ Or resume an interrupted cycle:
 
 1. **Discover state file** — check both paths per "Shared: State File Discovery" above
 2. **Read JSON** — parse `current-cycle.json`
-3. **Extract fields** — cycle ID, start time, status (incl. `paused_for_epic_approval`, `paused_for_phase_review`), `current_phase` and `phases[]` (if present), `epics[]` list, `current_epic_index`/gate, iterations
+3. **Extract fields** — cycle ID, start time, status (incl. `paused_for_epic_approval`, `paused_for_phase_review`), `current_phase` and `phases[]` (if present), `task_source` (with the inference fallback above) plus `lerian_map_sync.board`/`lerian_map_source` when `task_source == "lerian_map"`, `epics[]` list, `current_epic_index`/gate, iterations
 4. **Compute metrics** — count completed/in-progress/pending epics from `epics[]`, calculate elapsed time, average assertiveness score across completed epics
 5. **Display** — format and present the output as shown above
 

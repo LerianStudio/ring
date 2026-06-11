@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Added — Lerian Map as an optional task source in `ring:running-dev-cycle`
+
+- The Lerian Map board can now BE the task source for a dev cycle, not just a status mirror. Strictly **opt-in** — users who don't use the Map see zero behavior change (zero Gandalf calls).
+- **Cycle-init question 3 changed** from the Yes/No "Lerian Map Sync?" question to a single-select **Task source** question with three mutually exclusive options, explicitly chosen by the user (no silent default): `Local plan` (`task_source = "plan_file"`, today's default behavior), `Local plan + Map sync` (`"plan_file_synced"`, exactly the existing sync behavior), and `Lerian Map (board is the source)` (`"lerian_map"`, new — source mode implies status sync). Resumed cycles without `task_source` infer it from `lerian_map_sync.enabled` and are never re-asked.
+- **Board-as-source flow** (`SKILL.md` → `## Lerian Map as Task Source (optional)`): discovery handshake + milestone resolution, Gandalf fetch (milestone → features → tasks incl. `body`), body-hygiene validation for the current milestone (elaborate via ONE ANALYSIS-mode planning agent + push back, or abort), and materialization of a derived `docs/ring:running-dev-cycle/plan-from-map.md` in canonical ring:writing-plans format (`milestone` = Phase, `feature` = Epic, `task` = Task, `body` = dispatch-ready block; headings tagged `[map:#<id>]`). All existing gates run unchanged against the derived plan; the board stays the source of truth for WHAT and STATUS.
+- **Rolling-wave write-back:** at each phase boundary (new Step 11.5.5b in `gates/phase-boundary.md`), elaborated task blocks are pushed to the matching Map task `body`; board/local mismatches are surfaced for user reconciliation — never silently created/deleted. Mid-cycle deviations from Gate 8/9 also write back, async fire-and-forget.
+- **Degradation:** at INIT an unreachable Map means the source is unavailable → Retry / fall back to a local plan / Abort. DURING the cycle, outages degrade exactly like sync mode (pending + degraded, fire-and-forget reconciliation) and never block gates.
+- **State schema** (additive): `task_source` enum + optional `lerian_map_source` object (milestone identity; per-unit ids stay in the `[map:#<id>]` tags + `lerian_map_sync.matches[]`, the existing sync-mode pattern). `ring:managing-dev-cycle` status now shows the task source and, for `lerian_map`, the board/milestone identity.
+
 ### Changed — Expand observability migration to context and HTTP/gRPC middleware
 
 - `ring:migrate-observability` now treats deprecated `commons/net/http` HTTP/gRPC logging and telemetry middleware symbols as symbol-level migration targets to `lib-observability/middleware`, while keeping non-observability HTTP helpers in lib-commons.

@@ -9,6 +9,7 @@ The state file path depends on the **source of the plan**:
 | `docs/ring:planning-backend-refactor/*/tasks.md` | `docs/ring:planning-backend-refactor/current-cycle.json` | Refactoring existing code |
 | `docs/pre-dev/*/plan.md` | `docs/ring:running-dev-cycle/current-cycle.json` | New feature development. Legacy `tasks.md` (old `## Summary` table + E-/T- ids) is accepted ONLY for cycles already in flight — a `current-cycle.json` already exists and init is not re-run on them. New cycles MUST start from the canonical plan format. |
 | `docs/plans/*.md` (standalone ring:writing-plans) | `docs/ring:running-dev-cycle/current-cycle.json` | Standalone plan execution |
+| `docs/ring:running-dev-cycle/plan-from-map.md` (derived, `task_source == "lerian_map"`) | `docs/ring:running-dev-cycle/current-cycle.json` | Board-as-source mode: the derived plan is materialized from the Lerian Map at init (SKILL.md `## Lerian Map as Task Source (optional)`) and parses identically to a canonical plan |
 | Any other path | `docs/ring:running-dev-cycle/current-cycle.json` | Default for manual plans |
 
 **Detection Logic:**
@@ -34,11 +35,13 @@ State is persisted to `{state_path}` (either `docs/ring:running-dev-cycle/curren
   "source_file": "path/to/plan.md",
   "state_path": "docs/ring:running-dev-cycle/current-cycle.json | docs/ring:planning-backend-refactor/current-cycle.json",
   "cycle_type": "feature | refactor",
+  "_comment_task_source": "Where this cycle's tasks come from (cycle-init question 3, SKILL.md Execution Modes — single-select, explicitly chosen by the user). 'plan_file' = local plan.md, zero Gandalf/Map calls (today's default behavior). 'plan_file_synced' = local plan.md is the source + status pushed to the Lerian Map board (lerian_map_sync.enabled = true). 'lerian_map' = the board IS the task source: source_file points at the derived docs/ring:running-dev-cycle/plan-from-map.md and lerian_map_sync.enabled = true (source mode implies sync). RESUME INFERENCE (backward compatibility): a current-cycle.json without task_source infers 'plan_file_synced' when lerian_map_sync.enabled == true, else 'plan_file' — NEVER re-ask on resume.",
+  "task_source": "plan_file|plan_file_synced|lerian_map",
   "execution_mode": "manual_per_task|manual_per_epic|automatic",
   "commit_timing": "per_task|per_epic|at_end",
   "_comment_phase_checkpoint": "Asked at cycle init alongside execution_mode. 'manual' (default): AskUserQuestion at each phase boundary (Step 11.5) before elaborating the next phase. 'auto': log a phase summary and continue without pausing.",
   "phase_checkpoint": "manual|auto",
-  "_comment_lerian_map_sync": "OPTIONAL / ADDITIVE. Present ONLY when the user answered 'Yes — sync' to the cycle-init Lerian Map Sync question (SKILL.md Execution Modes, question 3). Absent or enabled:false ⇒ feature off ⇒ zero Gandalf calls ⇒ today's behavior. All Map I/O is async fire-and-forget via the gandalf-webhook; the cycle never polls/blocks. See SKILL.md '## Lerian Map Sync (optional)' for full mechanics. status_enum is READ from the board at runtime (never hardcoded); discovery (productId/teamId/milestoneId) is DISCOVERED by Gandalf from the repo's git remote, not hardcoded.",
+  "_comment_lerian_map_sync": "OPTIONAL / ADDITIVE. Present ONLY when task_source is 'plan_file_synced' or 'lerian_map' (cycle-init Task source question, SKILL.md Execution Modes, question 3). Absent or enabled:false ⇒ feature off ⇒ zero Gandalf calls ⇒ today's behavior. All Map I/O is async fire-and-forget via the gandalf-webhook; the cycle never polls/blocks. See SKILL.md '## Lerian Map Sync (optional)' for full mechanics. status_enum is READ from the board at runtime (never hardcoded); discovery (productId/teamId/milestoneId) is DISCOVERED by Gandalf from the repo's git remote, not hardcoded.",
   "lerian_map_sync": {
     "enabled": true,
     "transport": "gandalf",
@@ -63,6 +66,12 @@ State is persisted to `{state_path}` (either `docs/ring:running-dev-cycle/curren
     ],
     "pending": [],
     "degraded": false
+  },
+  "_comment_lerian_map_source": "Present ONLY when task_source == 'lerian_map' (SKILL.md '## Lerian Map as Task Source (optional)'). Identity of the board milestone being executed as the task source. PRECEDENCE: in source mode lerian_map_source.milestone_id is CANONICAL; lerian_map_sync.board.milestoneId is a discovery-time echo only and MUST be overwritten to match it (or dropped in source mode) — never read board.milestoneId for source-mode decisions. Board/product identity stays in lerian_map_sync.board (discovery handshake, not duplicated); per-epic/per-task board ids live in the [map:#<id>] tags of the derived plan and in lerian_map_sync.matches[] — the same pattern sync mode already uses.",
+  "lerian_map_source": {
+    "milestone_id": 433,
+    "milestone_name": "Desenvolvimento",
+    "fetched_at": "2026-06-11T15:00:00Z"
   },
   "_comment_cached_standards": "Populated by Step 1.5 (Standards Pre-Cache). Dictionary of URL → {fetched_at, content}. Sub-skills MUST read from here instead of calling WebFetch.",
   "cached_standards": {},
@@ -231,7 +240,7 @@ State schema is `version: "2.0.0"` (phased rolling-wave model).
 
 ### Initialization (Parse the Phased Plan)
 
-At cycle init, parse `state.source_file` (plan.md, ring:writing-plans canonical format):
+At cycle init, parse `state.source_file` (plan.md, ring:writing-plans canonical format). In `lerian_map` mode (`task_source == "lerian_map"`), `source_file` is the derived `docs/ring:running-dev-cycle/plan-from-map.md` materialized from the board before this step (SKILL.md `## Lerian Map as Task Source (optional)`) — it is canonical-format and everything below applies unchanged:
 
 1. **Phase Overview** (`## Phase Overview` table: `| Phase | Milestone | Epics | Status |`) → `phases[]`. Map the Status cell: `Epic-level` → `"epic-level"`, `Detailed` → `"detailed"`, `Complete` → `"complete"`. Set `current_phase` to the lowest phase whose status is `detailed` (the active wave; normally Phase 1). This table contract is unchanged.
 2. **Epic registry** — ALL epics load into `epics[]` from the `### Epic N.M:` headings under each phase section (`## Phase N:` ...). There is NO `## Summary` table — do not look for one. Each epic's `phase` field comes from the phase section it sits under (and from `N` in its id). Each epic block carries a `**Status:**` line (`Pending` / `Doing` / `Done` / `Failed` — plain words are the contract; emoji decoration optional). Read it into `epic.status` at init; this line is also the write target for epic status updates.
@@ -246,7 +255,7 @@ At cycle init, parse `state.source_file` (plan.md, ring:writing-plans canonical 
    | `Failed` | `failed` |
 
    On init (read): the plan word on the left sets the enum value on the right. On epic checkpoints (write): the enum transition on the right writes the plan word on the left (e.g., `epic.status = "in_progress"` → plan line becomes `Doing`). The enum value `blocked` has no plan word — a blocked epic keeps `Doing` in the plan until it resolves to `Done` or `Failed`.
-3. **Task blocks** — for each epic in a `detailed` phase, parse the inline `#### Task N.M.T:` blocks under its epic section into `epics[i].tasks[]` (id, and the implementation gate_progress skeleton). Epics in `epic-level` phases load with `tasks: []` — they are elaborated at their phase boundary (Step 11.5).
+3. **Task blocks** — for each epic in a `detailed` phase, parse the inline `#### Task N.M.T:` blocks under its epic section into `epics[i].tasks[]` (id, and the implementation gate_progress skeleton). A task block whose checkbox is already checked (`- [x] Done` — e.g. a `done` board task in a `lerian_map`-derived plan) loads with `status: "completed"` and `gate_progress.implementation.status: "completed"` — Gate 0 skips it; execution resumes from the first unchecked task. Epics in `epic-level` phases load with `tasks: []` — they are elaborated at their phase boundary (Step 11.5). In `lerian_map` mode the derived plan DOES carry tagged, empty-body `#### Task N.M.T: … [map:#<id>]` stubs under epic-level phases (they already exist on the board with ids) — the parser ignores those too until their phase is elaborated.
 
 **FALLBACK — no `## Phase Overview`** (ring:planning-backend-refactor output, flat plans):
 - Synthesize a single `phases[] = [{phase: 1, milestone: "<feature> (flat plan)", status: "detailed"}]`, `current_phase = 1`. Every epic gets `phase: 1`.
