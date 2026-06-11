@@ -77,6 +77,8 @@ implementation_input = {
 }
 ```
 
+ℹ️ When `state.task_source == "lerian_map"`, the task block read from the (derived) plan originated from the Map task `body` — same contract, no behavioral change here (see SKILL.md `## Lerian Map as Task Source (optional)`).
+
 ### Step 2.2: Invoke ring:implementing-tasks Skill
 
 ```text

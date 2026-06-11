@@ -71,6 +71,11 @@ TASK-AUTHORING BAR (from the ring:writing-plans Task Format — non-negotiable):
 - NO "TBD" / "TODO" / "figure out during implementation" — the detailed wave admits no deferrals.
 - Touch ONLY Phase {next_phase}'s epic blocks. Do NOT detail any later phase.
 
+{Include ONLY when state.task_source == "lerian_map":}
+BOARD-AS-SOURCE MODE: this plan is derived from the Lerian Map. Fill the existing tagged
+`#### Task N.M.T: … [map:#<id>]` stubs IN PLACE, preserving every `[map:#<id>]` tag
+verbatim. Create an untagged new task block ONLY when no board stub fits the work.
+
 RETURN: a summary of tasks written per epic, AND flag any epic whose scope no longer
 matches the codebase reality (deviations made it redundant, larger, smaller, or wrong).
 ```
@@ -86,6 +91,14 @@ After the agent returns, the orchestrator verifies (this is the elaboration's qu
 5. **Scope divergence** — if the agent flagged any epic whose scope no longer matches reality → surface it to the user BEFORE continuing (even when `phase_checkpoint == "auto"` — a scope mismatch is a plan-correctness signal, not a routine pause). Let the user accept the agent's adjusted scope, edit the plan, or drop the epic.
 
 If any check fails → re-dispatch the planning agent with the specific gap, or (for scope divergence) resolve with the user. Do NOT enter Gate 0 on an incompletely elaborated phase.
+
+### Step 11.5.5b: Lerian Map Source Write-Back (Conditional — `state.task_source == "lerian_map"` only)
+
+Runs after Step 11.5.5 validates the elaboration, ONLY in board-as-source mode. Mechanics and degradation rules live in SKILL.md `## Lerian Map as Task Source (optional)` — not duplicated here:
+
+0. **Fetch (best-effort):** fetch the next milestone's tasks via Gandalf — ids + titles + a body-empty flag — as the reconciliation baseline. On fetch failure → log a warning, set `state.lerian_map_sync.degraded = true`, SKIP reconciliation (step 2) for this boundary, and re-attempt at the next trigger (next checkpoint / `--resume` / end of cycle). NEVER blocks the boundary; the body write-back (step 1) still fires from the local `[map:#<id>]` tags.
+1. **Body write-back:** for each task block the planning agent wrote into the derived plan (Step 11.5.4), push the block to the matching Map task `body` via Gandalf — matched by the `[map:#<id>]` tag. Async fire-and-forget, same `pending → dispatched → synced` rules as status pushes; NEVER blocks the boundary.
+2. **Reconciliation:** a next-milestone board task with no counterpart task block, or an agent-created task block with no board counterpart → surface it to the user before resuming the epic loop (same treatment as Step 11.5.5's scope-divergence rule — even when `phase_checkpoint == "auto"`). The user reconciles (add the block, create/drop the board task on the Map themselves, or drop the local block). Do NOT silently create or delete board tasks.
 
 ### Step 11.5.6: Update State and Resume the Epic Loop
 

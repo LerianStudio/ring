@@ -11,7 +11,7 @@ description: "Running the backend dev cycle: implements every task in a rolling-
 - Need structured, gate-based epic execution with quality checkpoints and phase cadence
 
 ## Skip when
-- No plan file exists
+- No plan file exists AND the Lerian Map is not the task source (in `lerian_map` mode no local plan is required — the cycle materializes one from the board)
 - Task is documentation-only or planning-only
 - Frontend project (use ring:running-dev-cycle-frontend instead)
 
@@ -20,7 +20,7 @@ You orchestrate. Agents execute. You NEVER read, write, or edit source code dire
 
 ## How This Works
 
-Load the phased plan (plan.md, ring:writing-plans canonical format) and execute the lean backend cycle. The plan is rolling-wave phased: a `## Phase Overview` table (phases + milestone + status), phase sections containing `### Epic N.M:` headings (each epic carries a `**Status:**` line: Pending/Doing/Done/Failed), and inline dispatch-ready `#### Task N.M.T:` blocks written under each epic of the currently-detailed wave. Only the active wave is task-detailed; later phases are epic-level and get elaborated at each phase boundary. Backend implementation owns local runtime and quality so the flow does not dispatch separate QA, SRE, or DevOps gates.
+Load the phased plan (plan.md, ring:writing-plans canonical format) and execute the lean backend cycle. **Exception — board as source:** when cycle-init question 3 (Task source) = `Lerian Map (board is the source)`, do NOT require a plan path — run the Init flow in `## Lerian Map as Task Source (optional)` to materialize the derived plan first, then proceed identically against it. The plan is rolling-wave phased: a `## Phase Overview` table (phases + milestone + status), phase sections containing `### Epic N.M:` headings (each epic carries a `**Status:**` line: Pending/Doing/Done/Failed), and inline dispatch-ready `#### Task N.M.T:` blocks written under each epic of the currently-detailed wave. Only the active wave is task-detailed; later phases are epic-level and get elaborated at each phase boundary. Backend implementation owns local runtime and quality so the flow does not dispatch separate QA, SRE, or DevOps gates.
 
 **Vocabulary:** Phase = independently verifiable milestone. Epic (Epic N.M) = value-driven increment, the UNIT this cycle iterates. Task (Task N.M.T) = dispatch-ready unit, the Gate 0 execution unit.
 
@@ -40,6 +40,9 @@ Gate 0 includes TDD RED/GREEN, coverage threshold enforcement, docker-compose/lo
 ## Execution Order
 
 ```yaml
+# INIT: when task_source == "lerian_map", materialize the derived plan from the board first
+# (see "## Lerian Map as Task Source (optional)") — every loop below runs unchanged against it
+
 for each phase (current wave; starts at Phase 1, the only detailed phase at init):
 
   for each epic in this phase (plan order):
@@ -134,7 +137,7 @@ Read `gates/cycle-completion.md` from this skill directory and execute Steps 12.
 
 ## Execution Modes
 
-Ask user at cycle start (two independent questions):
+Ask user at cycle start (independent questions, in the order given at the end of this section):
 
 **1. Execution mode** (epic/task checkpoint cadence):
 
@@ -153,23 +156,32 @@ Ask user at cycle start (two independent questions):
 
 Mode and phase_checkpoint affect CHECKPOINTS (user approval pauses), not GATES. All listed gates execute regardless of mode. The phase boundary's elaboration step runs in BOTH phase_checkpoint values — only the pause differs.
 
-**3. Lerian Map Sync** (OPTIONAL — default No; see `## Lerian Map Sync (optional)`):
+**3. Task source** (`state.task_source`; see `## Lerian Map Sync (optional)` and `## Lerian Map as Task Source (optional)`):
 
-Ask AFTER execution mode and BEFORE commit timing (the Map decision — esp. `Done` = push-to-develop — influences how the user thinks about commit cadence). Both questions are optional and default to today's behavior (No → zero Gandalf calls, feature fully off).
+Ask AFTER execution mode and BEFORE commit timing (the Map decision — esp. `Done` = push-to-develop — influences how the user thinks about commit cadence). The Map options are opt-in: users who don't use the Map pick `Local plan` and see zero behavior change (zero Gandalf calls, feature fully off).
+
+⛔ **HARD REQUIREMENT: single-select (`multiSelect: false`), exactly ONE option, explicitly selected by the user — NO silent default applied without asking.**
 
 ```yaml
 AskUserQuestion:
-  question: "Do these activities have a mapping in the Lerian Map (kanban board)?"
-  header: "Lerian Map Sync"
+  question: "Where do this cycle's tasks come from?"
+  header: "Task source"
+  multiSelect: false
   options:
-    - label: "No"          # default → no board sync, no Gandalf calls
-    - label: "Yes — sync"  # → run the Lerian Map Sync handshake (see "Lerian Map Sync (optional)")
+    - label: "Local plan"                        # → task_source = "plan_file"
+    - label: "Local plan + Map sync"             # → task_source = "plan_file_synced"
+    - label: "Lerian Map (board is the source)"  # → task_source = "lerian_map"
 ```
 
-- **No:** set `state.lerian_map_sync.enabled = false` (or omit the object); skip the Testing-gate question; behave exactly as today.
-- **Yes — sync:** set `state.lerian_map_sync.enabled = true`, then ask the Testing-gate question below, and run the discovery handshake (see `## Lerian Map Sync (optional)`) before the first Gate 0.
+| Option | `state.task_source` | Behavior |
+|--------|---------------------|----------|
+| **Local plan** | `"plan_file"` | plan.md is the source. No board involvement — set `state.lerian_map_sync.enabled = false` (or omit the object), skip the Testing-gate question, **zero Gandalf/Map calls ever**. Today's default behavior. |
+| **Local plan + Map sync** | `"plan_file_synced"` | plan.md is the source; status is pushed to the board at the existing hooks (exactly the `## Lerian Map Sync (optional)` behavior). Set `state.lerian_map_sync.enabled = true`, then ask the Testing-gate question, and run the discovery handshake before the first Gate 0. |
+| **Lerian Map (board is the source)** | `"lerian_map"` | The Lerian Map board IS the task source — see `## Lerian Map as Task Source (optional)`. Also set `state.lerian_map_sync.enabled = true` (source mode implies status sync) and ask the Testing-gate question. |
 
-**4. Testing gate** (OPTIONAL — only asked when Lerian Map Sync = Yes; stored in `state.lerian_map_sync.testing_gate`):
+**Resume backward compatibility:** if an existing `current-cycle.json` has no `task_source` field, infer `"plan_file_synced"` when `lerian_map_sync.enabled == true`, else `"plan_file"`. NEVER re-ask this question on resume.
+
+**4. Testing gate** (OPTIONAL — only asked when the task source involves the Map (`plan_file_synced` or `lerian_map`); stored in `state.lerian_map_sync.testing_gate`):
 
 ```yaml
 AskUserQuestion:
@@ -182,7 +194,9 @@ AskUserQuestion:
 
 ⚠️ **Does NOT override Gate 9.** Gate 9 (validation/acceptance) is a CRITICAL, non-bypassable gate that always requires explicit user approval per epic (Step 11.1). The Testing gate is a SEPARATE, Map-aware control over the *manual-test wait before PR/develop* — it can only relax that extra Testing wait, never the mandatory Gate 9 acceptance.
 
-**Resulting cycle-init question order:** execution mode → phase checkpoint → **Lerian Map Sync?** → **Testing gate** (only if sync = Yes) → commit timing.
+**5. Commit timing** (`state.commit_timing ∈ {per_task, per_epic, at_end}`): when commits happen during the cycle — see `## Commit Timing` for what each value commits at which gate.
+
+**Resulting cycle-init question order:** execution mode → phase checkpoint → **Task source** → **Testing gate** (only when the source involves the Map) → commit timing.
 
 ## Custom Instructions
 
@@ -209,13 +223,13 @@ If user provides custom context at cycle start, store in `state.custom_prompt` a
 
 ## Lerian Map Sync (optional)
 
-**OPTIONAL and default-off.** When enabled (cycle-init question 3 = `Yes — sync`), this feature keeps the Lerian Map kanban board in sync as epics/tasks move through the gates. When off (the default), the cycle behaves exactly as before — **zero Gandalf calls**. The feature **never blocks gate execution** and **never weakens any mandatory gate** (Gate 9 acceptance still requires explicit user approval per epic, regardless of the Testing-gate setting).
+**OPTIONAL and opt-in.** When enabled (cycle-init question 3 Task source = `Local plan + Map sync`, or implied by `Lerian Map (board is the source)` — see `## Lerian Map as Task Source (optional)`), this feature keeps the Lerian Map kanban board in sync as epics/tasks move through the gates. When off (`Local plan`), the cycle behaves exactly as before — **zero Gandalf calls**. The feature **never blocks gate execution** and **never weakens any mandatory gate** (Gate 9 acceptance still requires explicit user approval per epic, regardless of the Testing-gate setting).
 
 **Hard rule:** the synced status follows the **real board columns exactly** — no invented stand-in statuses. Column enum strings are **read from the board at runtime via Gandalf, never hardcoded**.
 
 ### Discovery handshake (run once, after the cycle-init questions, before the first Gate 0)
 
-When Map sync = Yes, run a one-time handshake (each Gandalf ask is a fresh, self-contained session carrying the full discovery payload):
+When `state.lerian_map_sync.enabled`, run a one-time handshake (each Gandalf ask is a fresh, self-contained session carrying the full discovery payload):
 
 1. **Fetch board tasks via Gandalf** for this repo's product. Discovery is **repo-driven**: map the local git remote to a product via the Map's native **`repositoryUrl`** field on `GET /products` (no manual `productId`/`teamId`/`milestoneId`). Normalize the remote first (`git@github.com:org/repo.git` → `https://github.com/org/repo`).
 2. **Match board cards ↔ local plan units.** Features are matched **by NAME** (e.g. `"E-1.1 …"` / the epic title) — Map features have **no `slug` field**, so name is the feature key (the `docs/pre-dev/{feature}/` path slug has no API equivalent and is only a weak hint). The deterministic per-task matching key is the **`[map:#<board_task_id>]` tag** embedded in the plan/task block; when a tag is present Gandalf skips fuzzy matching entirely. **Title-matching is the fallback** when no tag is present.
@@ -310,6 +324,60 @@ When `state.lerian_map_sync.enabled`, the orchestrator fires the async, fire-and
 - **Known frictions:** no feature slug (match by name — fragile → use `[map:#id]` tags); `iterationId` can be `null`; `GET /teams` currently returns 500 (use `teamId` from the tasks payload instead).
 - **Discovery path:** `repo → /products(repositoryUrl) → /features?productId(name) → /tasks?featureId`.
 
+## Lerian Map as Task Source (optional)
+
+**OPTIONAL.** Active only when `state.task_source == "lerian_map"` (cycle-init question 3 = `Lerian Map (board is the source)`). In this mode the Lerian Map board — not a local plan.md — is the source of truth for WHAT to build and for STATUS. The cycle materializes a derived plan from the board at init, then runs every existing gate unchanged against it. Reuses the discovery handshake, Gandalf transport, status mapping, checkpoint hooks, and degradation rules from `## Lerian Map Sync (optional)` — none of that is duplicated here.
+
+**Hierarchy mapping (Map → plan):**
+
+| Lerian Map | Plan (canonical ring:writing-plans format) |
+|------------|--------------------------------------------|
+| `milestone` | Phase (`## Phase N:` section + Phase Overview row) |
+| `feature` | Epic (`### Epic N.M:`) |
+| `task` | Task (`#### Task N.M.T:`) |
+| `task.body` (markdown, ≤ 20,000 chars) | The dispatch-ready task block: Context (with file:line refs), Implementation vision, Files, Verification, Done when |
+
+### Init flow (source = lerian_map; runs once, instead of loading a local plan)
+
+1. **Discover the board** — run the discovery handshake from `## Lerian Map Sync (optional)` SCOPED for source mode: execute handshake step 1 (repo-driven product discovery) and step 5 (persist into state); SKIP handshake steps 2–4 (card ↔ plan matching, preview, tag auto-injection — there is no local plan to match). Additionally resolve the **milestone** to execute: candidates are milestones that are not fully `done`/`canceled`, lowest `order` first; if more than one candidate exists, AskUserQuestion to pick one. Persist the milestone identity into `state.lerian_map_source` (canonical — see `gates/state-schema.md`).
+2. **Fetch the source data via Gandalf** (`action: ask`, self-contained prompt): milestone → features → tasks, requesting for each task: `id`, `title`, `body`, `status`, `priority`, `feature.{id,name}`, `milestone.{id,name,order}`. After the fetch, populate `state.lerian_map_sync.matches[]` from the resolved milestone's tasks: every unit is board-born, so it is matched by construction.
+3. **Body hygiene validation (current milestone ONLY):** every current-milestone task must carry a `body` that is a dispatch-ready block. Sufficiency = the Step 11.5.5 validation bar (`gates/phase-boundary.md`): no "TBD"/vague deferrals; Context with file:line refs; Implementation vision; Files; Verification; Done when. For any current-milestone task with an empty/insufficient body → AskUserQuestion:
+   - **(a) Elaborate now** — dispatch ONE planning agent in ANALYSIS mode (same mechanism as Step 11.5.4 in `gates/phase-boundary.md`) to produce the dispatch-ready block, then push it to the Map task `body` via Gandalf. A SYNCHRONOUS push is acceptable here — init is the strict point and the body must land before the source is trusted; mid-cycle body pushes stay fire-and-forget.
+   - **(b) Abort init** — stop so the user fills the board first.
+
+   Future-milestone tasks are EXPECTED to have empty bodies — that is the rolling wave; they get elaborated at phase boundaries (Step 11.5).
+4. **Materialize the derived plan** — write `docs/ring:running-dev-cycle/plan-from-map.md` in the canonical ring:writing-plans format, generated from the fetched board data: `## Phase Overview` table from milestones, `### Epic N.M:` sections from features, `#### Task N.M.T:` blocks from task bodies. Phases are renumbered 1..N from the milestones sorted by `milestone.order` (orders need not be contiguous). Phase Overview Status cells: milestones earlier than the resolved one → `Complete`; the resolved milestone → `Detailed`; later ones → `Epic-level`. Tag EVERY epic and task heading with the `[map:#<id>]` convention (the deterministic matching key — see `## Lerian Map Sync (optional)`). Future-milestone tasks ARE materialized as tagged `#### Task N.M.T: … [map:#<id>]` headings with EMPTY bodies — they already exist on the board and carry ids; the init parser ignores them (`gates/state-schema.md`: their epics load with `tasks: []`) until their phase is elaborated at its boundary. Map each fetched board status into the plan `**Status:**` word:
+
+   | Fetched board status | Plan `**Status:**` word |
+   |----------------------|-------------------------|
+   | `done` | `Done` |
+   | `in_progress` / `testing` / `to_review` | `Doing` |
+   | anything else (`backlog`, `todo`, `on_hold`, `blocked`, `canceled`) | `Pending` |
+
+   The table maps per-TASK board statuses, but in the canonical plan format the `**Status:**` line exists per-EPIC (task blocks carry `- [ ] Done` checkboxes, not Status lines). Apply it as follows:
+   - **Epic aggregation:** derive each epic's `**Status:**` word by aggregating its tasks' mapped words: all `Done` → `Done`; any `Doing` → `Doing`; otherwise `Pending`.
+   - **Checkbox materialization:** each `done` board task is materialized with its checkbox checked (`- [x] Done`) so completion is visible in the derived plan.
+   - **Gate 0 implication:** tasks materialized as `- [x] Done` are already complete and are NOT re-executed at Gate 0 — skip them; a mid-flight milestone resumes from the first unchecked task.
+
+   Set `state.source_file` to this derived plan. From here on, ALL existing gates (0 / 8 / 9 / 11.5 / 12.x) run unchanged against it.
+5. **Source-of-truth rule:** the derived plan is an internal, regenerable execution artifact; the board remains the source of truth for WHAT and STATUS. Manual edits to the derived plan that change task content MUST be pushed back to the corresponding Map task `body` (matched via the `[map:#<id>]` tag — see write-back rules below).
+
+**Resume rule:** on `--resume` with `task_source == "lerian_map"` and the derived plan missing from disk, re-run init steps 2 + 4 (fetch + materialize) before resuming the gates — state indices stay authoritative. If the Map is unreachable during this regeneration → treat it as the INIT degradation case below (Retry / fall back / Abort).
+
+### During the cycle
+
+- **Status:** flows to the board via the existing checkpoint hooks (`## Lerian Map Sync (optional)` → Checkpoint hooks). No changes — source mode implies status sync.
+- **Body write-back:** when Gate 8/9 outcomes cause a documented deviation from a task's plan block (the block's content changes), push the updated block to that task's Map `body` — async fire-and-forget, same `pending → dispatched → synced` degradation rules as status pushes. NEVER blocks a gate.
+
+### Phase boundary (Step 11.5)
+
+After the planning agent elaborates the next phase's tasks into the derived plan, push each elaborated task block to the matching Map task `body` (match by `[map:#<id>]`). **Reconciliation:** board/local mismatches are surfaced to the user — never silently created or deleted; the full rule (and its best-effort board fetch) lives in `gates/phase-boundary.md` Step 11.5.5b. This is the rolling-wave behavior: future milestones start with empty bodies and get filled as development reaches them.
+
+### Graceful degradation (source mode is stricter than sync mode at init)
+
+- **At INIT:** Gandalf/Map unreachable = the task source itself is unavailable → AskUserQuestion: **Retry** / **Fall back to a local plan** (switch `state.task_source` to `"plan_file"` AND set `state.lerian_map_sync.enabled = false` — or remove the `lerian_map_sync` object entirely, incl. `testing_gate` — so no sync hook ever fires; ask for the plan path; zero further Map calls) / **Abort**.
+- **DURING the cycle:** the derived plan already holds everything the gates need, so Map outages degrade exactly like sync mode (`pending` + `degraded`, fire-and-forget reconciliation — see `## Lerian Map Sync (optional)`) and NEVER block gates.
+
 ## Blocker Handling
 
 | Blocker | Action |
@@ -350,6 +418,7 @@ A gate is complete ONLY when ALL components succeed:
 |--------|------|
 | Plan (pre-dev flow) | `docs/pre-dev/{feature}/plan.md` |
 | Plan (standalone ring:writing-plans) | `docs/plans/*.md` |
+| Derived plan (Lerian Map as task source) | `docs/ring:running-dev-cycle/plan-from-map.md` — materialized at init when `task_source == "lerian_map"`; see `## Lerian Map as Task Source (optional)` |
 | Legacy tasks (in-flight cycles ONLY) | `docs/pre-dev/{feature}/tasks.md` (old `## Summary` table + E-/T- ids) — accepted only when `current-cycle.json` already exists (init is not re-run); new cycles MUST start from the canonical plan format |
 | Phase tasks | inside the plan, under each epic (`#### Task N.M.T:` blocks) |
 | Refactor tasks | `docs/ring:planning-backend-refactor/*/tasks.md` |
