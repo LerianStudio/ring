@@ -30,7 +30,7 @@
     {
       "name": "ring-dev-team",
       "description": "24 specialized developer agents + 33 development skills: Backend 10-gate dev cycle + lean frontend cycle (Gate 0, 7, 8) with quality checks (accessibility, visual, E2E, performance) + Frontend refactoring + whole-codebase simplification sweep + delivery verification + service discovery + cycle management + lib-streaming end-to-end instrumentation. Includes backend/frontend specialists, DevOps, QA, SRE, 9 default code-review reviewers, and 3 conditional stack specialists consolidated into the dev-team plugin. Complete development team coverage with TDD, observability, and security best practices.",
-      "version": "1.76.0",
+      "version": "1.77.0",
       "source": "./dev-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/main/dev-team",
       "repository": "https://github.com/lerianstudio/ring/tree/main/dev-team",
@@ -104,5 +104,5 @@
       ]
     }
   ],
-  "version": "0.372.0"
+  "version": "0.373.0"
 }
