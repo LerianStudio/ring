@@ -172,3 +172,8 @@ state.gate_progress.migration_safety_verification = {
    - Execute `/ring:committing-changes` with message: `feat({cycle_id}): complete dev cycle for {feature_name}`.
 
 5. **Report:** "Cycle completed. Phases X/X, Epics X/X, Tasks Y, Time Xh Xm, Review iterations X."
+
+6. **Lerian Map Sync (only when `state.lerian_map_sync.enabled`):**
+   - **`done` push:** a unit flips to the terminal `done` column **only when its commit is pushed to the repo (≥ `develop`)** — the push-to-develop / PR-merge event, **NOT Gate 9**. When the Final Commit is pushed to at least `develop`, fire the async board push → absolute column `done` for the affected units. (If this cycle does not push to `develop`, the units remain in `to_review` / `testing` and flip to `done` later via the PR-merge event.)
+   - **Deferred reconciliation:** drain the `state.lerian_map_sync.pending` queue (oldest → newest) and do one batched non-blocking verification of outstanding `dispatched` task_ids, flipping any confirmed ones to `synced`; clear `degraded` when nothing is `pending`.
+   - **End-of-cycle report:** print outstanding items, e.g. `⚠️ Lerian Map Sync: 2 dispatched (awaiting confirmation), 1 pending (Gandalf was down)`. All Map I/O here is non-blocking — see SKILL.md '## Lerian Map Sync (optional)'.

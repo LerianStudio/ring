@@ -17,6 +17,8 @@ MUST execute the **Before Gate 0 (epic start)** row from the State Persistence C
 
 CANNOT proceed to sub-steps 2.1–2.3 without completing this checkpoint. (The `epic.base_sha` captured here is the lower bound of the Gate 8 cumulative review diff — the SHA before the epic's first task.)
 
+**Lerian Map Sync hook (only when `state.lerian_map_sync.enabled`):** at this epic-start checkpoint, fire the async fire-and-forget board push for this unit → absolute column `in_progress` (set only if the card is currently `backlog`/`todo`). Non-blocking: POST, record `{task_id, dispatched_at, state: "dispatched"}`, log the dispatch line, continue. On POST failure keep it `pending` + `degraded` and continue. See SKILL.md '## Lerian Map Sync (optional)'.
+
 ### ⛔ MANDATORY: Invoke ring:implementing-tasks Skill (not inline execution)
 
 See [shared-patterns/shared-orchestrator-principle.md](../../shared-patterns/shared-orchestrator-principle.md) for full details.

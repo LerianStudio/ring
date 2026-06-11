@@ -153,6 +153,37 @@ Ask user at cycle start (two independent questions):
 
 Mode and phase_checkpoint affect CHECKPOINTS (user approval pauses), not GATES. All listed gates execute regardless of mode. The phase boundary's elaboration step runs in BOTH phase_checkpoint values — only the pause differs.
 
+**3. Lerian Map Sync** (OPTIONAL — default No; see `## Lerian Map Sync (optional)`):
+
+Ask AFTER execution mode and BEFORE commit timing (the Map decision — esp. `Done` = push-to-develop — influences how the user thinks about commit cadence). Both questions are optional and default to today's behavior (No → zero Gandalf calls, feature fully off).
+
+```yaml
+AskUserQuestion:
+  question: "Do these activities have a mapping in the Lerian Map (kanban board)?"
+  header: "Lerian Map Sync"
+  options:
+    - label: "No"          # default → no board sync, no Gandalf calls
+    - label: "Yes — sync"  # → run the Lerian Map Sync handshake (see "Lerian Map Sync (optional)")
+```
+
+- **No:** set `state.lerian_map_sync.enabled = false` (or omit the object); skip the Testing-gate question; behave exactly as today.
+- **Yes — sync:** set `state.lerian_map_sync.enabled = true`, then ask the Testing-gate question below, and run the discovery handshake (see `## Lerian Map Sync (optional)`) before the first Gate 0.
+
+**4. Testing gate** (OPTIONAL — only asked when Lerian Map Sync = Yes; stored in `state.lerian_map_sync.testing_gate`):
+
+```yaml
+AskUserQuestion:
+  question: "When a card reaches Testing, wait for your explicit OK before opening the PR (→ develop)?"
+  header: "Testing gate"
+  options:
+    - label: "Gate (wait)"   # card parks in Testing; cycle pauses until you test + say OK, THEN opens PR → To Review
+    - label: "Bypass"        # after Gate 9, auto-advance: open PR → To Review without waiting for a manual-test OK
+```
+
+⚠️ **Does NOT override Gate 9.** Gate 9 (validation/acceptance) is a CRITICAL, non-bypassable gate that always requires explicit user approval per epic (Step 11.1). The Testing gate is a SEPARATE, Map-aware control over the *manual-test wait before PR/develop* — it can only relax that extra Testing wait, never the mandatory Gate 9 acceptance.
+
+**Resulting cycle-init question order:** execution mode → phase checkpoint → **Lerian Map Sync?** → **Testing gate** (only if sync = Yes) → commit timing.
+
 ## Custom Instructions
 
 If user provides custom context at cycle start, store in `state.custom_prompt` and inject at the top of every agent dispatch:
@@ -176,6 +207,109 @@ If user provides custom context at cycle start, store in `state.custom_prompt` a
 
 `commit_timing ∈ {per_task, per_epic, at_end}`. Convention: `feat|fix|test|chore(scope): description` — keep commits atomic per gate.
 
+## Lerian Map Sync (optional)
+
+**OPTIONAL and default-off.** When enabled (cycle-init question 3 = `Yes — sync`), this feature keeps the Lerian Map kanban board in sync as epics/tasks move through the gates. When off (the default), the cycle behaves exactly as before — **zero Gandalf calls**. The feature **never blocks gate execution** and **never weakens any mandatory gate** (Gate 9 acceptance still requires explicit user approval per epic, regardless of the Testing-gate setting).
+
+**Hard rule:** the synced status follows the **real board columns exactly** — no invented stand-in statuses. Column enum strings are **read from the board at runtime via Gandalf, never hardcoded**.
+
+### Discovery handshake (run once, after the cycle-init questions, before the first Gate 0)
+
+When Map sync = Yes, run a one-time handshake (each Gandalf ask is a fresh, self-contained session carrying the full discovery payload):
+
+1. **Fetch board tasks via Gandalf** for this repo's product. Discovery is **repo-driven**: map the local git remote to a product via the Map's native **`repositoryUrl`** field on `GET /products` (no manual `productId`/`teamId`/`milestoneId`). Normalize the remote first (`git@github.com:org/repo.git` → `https://github.com/org/repo`).
+2. **Match board cards ↔ local plan units.** Features are matched **by NAME** (e.g. `"E-1.1 …"` / the epic title) — Map features have **no `slug` field**, so name is the feature key (the `docs/pre-dev/{feature}/` path slug has no API equivalent and is only a weak hint). The deterministic per-task matching key is the **`[map:#<board_task_id>]` tag** embedded in the plan/task block; when a tag is present Gandalf skips fuzzy matching entirely. **Title-matching is the fallback** when no tag is present.
+3. **Preview + confirm.** Show a preview table (local ↔ board, with each card's current column) and ask the user to confirm the match before any write.
+4. **Auto-inject tags (with confirmation).** After the first successful discovery, offer to **auto-inject** the resolved `[map:#<board_task_id>]` tags into the plan so future runs are deterministic and rename-proof.
+5. **Persist** the mapping + the board's real status enum into `state.lerian_map_sync` (see `gates/state-schema.md`).
+
+**Discovery path that works (validated):** `repo → /products(repositoryUrl) → /features?productId(name) → /tasks?featureId`.
+
+### Status mapping (dev-cycle stage → real board column)
+
+| Dev-cycle event | Board column | Notes |
+|-----------------|--------------|-------|
+| Unit loaded, not started | `To do` | baseline; only set if currently in `Backlog` |
+| Gate 0 begins (coding/TDD) — epic start | `In Progress` | unit is actively being built |
+| All gates passed (incl. Gate 8 review + Gate 9), awaiting user manual test | `Testing` | the "Em Teste" the user actually tests; STAYS here through approval. Gate 8 is an INTERNAL dev-cycle review — it does NOT get its own board column. |
+| User approved → PR opened, awaiting human merge-review | `To Review` | matches the board order `Testing → To Review → Done` |
+| PR merged → committed AND pushed to repo (≥ `develop`) | `Done` | ⭐ the **ONLY** trigger for `Done` — the push-to-develop / PR-merge event, **NOT Gate 9** |
+| A gate fails hard / external blocker | `Blocked` | off-path |
+| Cycle parked for non-blocking reasons | `On Hold` | off-path / optional / manual |
+| Unit dropped | `Canceled` | off-path / optional / manual |
+
+**Lifecycle (monotonic, matches board column order):** `To do → In Progress → Testing → To Review → Done`, with `Blocked`/`On Hold`/`Canceled` off-path.
+
+The `Testing → To Review` hop depends on the **Testing gate** (cycle-init question 4):
+- **`gate` (wait):** card parks in `Testing`; the cycle waits for the user's OK, then opens the PR → `To Review`. (SLC rule — human tests the epic before the PR.)
+- **`bypass`:** the card still passes *through* `Testing` (status is set) but the cycle does not block; it auto-opens the PR → `To Review`. **Gate 9 acceptance still applies** — bypass only relaxes the manual-test wait, never Gate 9.
+
+### Gandalf integration mechanics
+
+All Map I/O goes **through the Gandalf webhook** (`default/skills/gandalf-webhook`) — never a direct Map API call from dev-cycle. This keeps the dev-team plugin free of Map credentials / instance coupling and works for any Map instance. **No new agent and no new credential** are introduced; the existing webhook is reused.
+
+- **Self-contained prompts:** every ask is a fresh Gandalf session — each message carries the discovery payload (repo, feature name, task ids/titles, board ids) and the **absolute target column**.
+- **Fetch + enum read:** the first ask returns both the matched cards AND the list of valid status values for that board (so column strings are never hardcoded).
+- **Status push — ASYNC FIRE-AND-FORGET (never blocks dev):** at each checkpoint the dev-cycle sends ONE webhook POST and immediately gets back a `task_id`; Gandalf's **background worker** performs the actual board update. The dev-cycle **does NOT poll or wait** — it records the dispatch and continues to the next gate/task. The slow work lives on Gandalf's side, off the critical path.
+- **Visible dispatch log line:** when the hook fires, log a line so the user sees it working in the background, e.g.
+  `🔄 Lerian Map Sync: dispatched Task 1.1.1 → In Progress (gandalf task a1b2c3, background)`
+  and record `{task_id, dispatched_at, state: "dispatched"}` in `current-cycle.json`.
+
+### Graceful degradation + deferred reconciliation
+
+Map sync **never blocks gate execution**. Each transition moves through **three states**:
+
+```
+pending    → the dev-cycle wants this column but hasn't fired the hook yet (or the POST failed)
+dispatched → the webhook POST succeeded; Gandalf has a task_id and is updating in background (NOT yet confirmed)
+synced     → confirmed applied on the board
+```
+
+State tracks, per matched unit, `desired_status` (what the dev-cycle wants) vs `synced_status` (last *confirmed*), the dispatch record (`task_id`, `dispatched_at`, `state`), plus an ordered **pending queue** (`state.lerian_map_sync.pending`) and a `degraded` flag.
+
+Rules:
+1. **Fire, don't wait:** at a checkpoint, POST the transition → on a successful POST, mark `dispatched` with the `task_id` and move on immediately (no polling).
+2. **POST itself fails** (Gandalf unreachable / off-Tailscale / timeout): keep the transition `pending`, set `degraded: true`, **log a warning, continue the cycle**.
+3. **Best-effort verification (non-blocking):** opportunistically — at the *next* checkpoint, on `--resume`, and at end of cycle — do ONE batched read of outstanding `dispatched` task_ids; any that completed flip to `synced`. Never blocks; if the read fails, items stay `dispatched` and are re-checked later.
+4. **Drain pending:** at the same triggers, retry `pending` transitions (oldest → newest). A Gandalf that comes back mid- or post-cycle gets the board caught up automatically; when nothing is `pending`, clear `degraded`.
+5. **Idempotent pushes:** each push sets an **absolute column** (status = X), never a relative move — safe to replay even if a partial update landed.
+6. **End-of-cycle report:** print outstanding items at Step 12.1, e.g.
+   `⚠️ Lerian Map Sync: 2 dispatched (awaiting confirmation), 1 pending (Gandalf was down)`.
+
+### Checkpoint hooks (where the async push fires)
+
+When `state.lerian_map_sync.enabled`, the orchestrator fires the async, fire-and-forget board push at these existing checkpoints (each is non-blocking and never gates execution):
+
+| Cycle event | Hook location | Absolute column pushed |
+|-------------|---------------|------------------------|
+| Epic start (Before Gate 0) | `gates/gate-0-implementation.md` Pre-Dispatch checkpoint | `in_progress` |
+| Epic validated, awaiting user test (Gate 9 pass → Step 11.1) | `gates/gate-9-validation.md` Step 11.1 | `testing` (stays here through approval) |
+| User approved → PR opened | Step 11.1 advance (and end-of-cycle / PR-open path) | `to_review` (gated by `testing_gate`) |
+| Push to repo ≥ `develop` (PR merge) | `gates/cycle-completion.md` Step 12.1 (Final Commit / push) | `done` — ONLY trigger for `done`, NOT Gate 9 |
+| Hard block at any gate | Blocker Handling | `blocked` |
+
+### Validated facts (live Gandalf test, 2026-06-11, `br-slc`)
+
+- **Product discovery:** `GET /products` exposes a native **`repositoryUrl`** field. `https://github.com/LerianStudio/br-slc` → `productId=13` (SLC), `teamId=5`. Exact match, no ambiguity.
+- **Feature discovery:** `GET /features?productId=13` → matched **by name** `"E-1.1 …"` → `featureId=245` (status `backlog`, `iterationId: null`). **No `slug` field exists.**
+- **Tasks:** `GET /tasks?featureId=245` → 4 cards, matched 4/4 to local T-1.1.1–T-1.1.4 → board ids **1222, 1223, 1224, 1225**, all `todo`, milestone `Desenvolvimento` (id=433).
+- **Status enum (EXACT API slugs + ids):**
+
+  | id | slug | label | terminal |
+  |----|------|-------|----------|
+  | 1 | `backlog` | Backlog | no |
+  | 2 | `todo` | To do | no |
+  | 3 | `in_progress` | In Progress | no |
+  | 8 | `testing` | Testing | no |
+  | 9 | `to_review` | To Review | no |
+  | 5 | `on_hold` | On Hold | no |
+  | 6 | `blocked` | Blocked | no |
+  | 4 | `done` | Done | **yes** |
+  | 7 | `canceled` | Canceled | **yes** |
+
+- **Known frictions:** no feature slug (match by name — fragile → use `[map:#id]` tags); `iterationId` can be `null`; `GET /teams` currently returns 500 (use `teamId` from the tasks payload instead).
+- **Discovery path:** `repo → /products(repositoryUrl) → /features?productId(name) → /tasks?featureId`.
+
 ## Blocker Handling
 
 | Blocker | Action |
@@ -184,6 +318,8 @@ If user provides custom context at cycle start, store in `state.custom_prompt` a
 | Missing PROJECT_RULES.md | STOP. Create using template. |
 | Agent error | STOP. Diagnose and report. |
 | Architectural decision needed | STOP. Present options to user. |
+
+When `state.lerian_map_sync.enabled` and a gate hard-blocks (failure / external blocker), fire the async board push → absolute column `blocked` for the affected unit (non-blocking, fire-and-forget) before stopping. See `## Lerian Map Sync (optional)`.
 
 ## Gate Completion Rules
 

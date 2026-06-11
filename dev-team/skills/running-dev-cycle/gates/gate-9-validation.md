@@ -55,6 +55,8 @@ For the current epic:
 
 > The per-task pause for `manual_per_task` mode lives after Gate 0 (see the `[checkpoint if manual_per_task mode]` step in the Execution Order). There is NO per-task validation pause here — Gate 9 validation is epic-level only.
 
+**Lerian Map Sync hook (only when `state.lerian_map_sync.enabled`):** once Gate 9 passes and the epic enters this checkpoint awaiting the user's manual test, fire the async board push → absolute column `testing` (the card STAYS in `testing` through approval). When the user advances (Continue / Integration Test below) and the PR is opened, fire `to_review` — gated by `state.lerian_map_sync.testing_gate`: `gate` waits for the user's OK before opening the PR; `bypass` auto-opens it. ⚠️ This is independent of and never overrides Gate 9 acceptance. All pushes are non-blocking (fire-and-forget); see SKILL.md '## Lerian Map Sync (optional)'.
+
 0. **COMMIT CHECK (before checkpoint):**
    - `commit_timing == "per_epic"` → execute `/ring:committing-changes` with message `feat({epic_id}): {epic_title}`, including all files changed across the epic's tasks.
    - `commit_timing == "per_task"` → already committed per task.
