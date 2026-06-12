@@ -19,6 +19,20 @@ For the current epic:
    - If the epic itself carries epic-level acceptance_criteria, include those too.
    - ⛔ Every task's criteria MUST appear in the aggregated set. A criterion
      defined on any task of the epic that is dropped here is a silent bug.
+   - EXCEPTION — tasks skipped at the Map Body Hard Gate (`tasks[j].status ==
+     "blocked"`, set by `gates/gate-0-implementation.md` Step 2.1.5 option b):
+     EXCLUDE them from the criteria aggregation (they have no Gate 0 evidence)
+     and from Gate 8's cumulative-diff expectations. Report each in
+     criteria_results as `{task_id, criterion: "—", status: "SKIPPED (no body)"}`.
+     Skipped tasks do NOT trigger the step-4 FAIL loop. The epic may pass Gate 9
+     with skipped tasks ONLY via explicit user acknowledgment at the Step 11.1
+     human approval — list them in the Step 11.1 summary. Skipped tasks force
+     the Step 11.1 checkpoint EVEN when `execution_mode == "automatic"` — a
+     task with no implementation contract is a plan-correctness signal, not a
+     routine pause (same treatment as Step 11.5.5's scope-divergence rule).
+     The skipped task's board card stays `blocked` and never advances; the
+     epic's own card (if any) follows the normal `testing` / `to_review` /
+     `done` pushes unaffected.
 
 3. Mark PASS/FAIL per aggregated criterion — DO NOT re-run tests or review:
    For each criterion in the aggregated set:
@@ -49,7 +63,7 @@ For the current epic:
 
 ## Step 11.1: Epic Approval Checkpoint (Conditional)
 
-**Checkpoint depends on `execution_mode`:** `manual_per_task` / `manual_per_epic` → Execute | `automatic` → Skip
+**Checkpoint depends on `execution_mode`:** `manual_per_task` / `manual_per_epic` → Execute | `automatic` → Skip (EXCEPTION: an epic with `SKIPPED (no body)` tasks forces this checkpoint even in `automatic` — see the Step 11 aggregation exception)
 
 ⛔ **This checkpoint gates ADVANCEMENT, not correctness.** Criterion correctness was settled in Step 11 — a FAIL there already looped back to Gate 0, so this point is reached only with `validation.result == "approved"`. Here the user decides whether to advance: Continue / Integration Test (both accept the epic and move on) or Stop Here (pause the cycle). Self-approval by the orchestrator is PROHIBITED — the orchestrator never advances on the user's behalf.
 

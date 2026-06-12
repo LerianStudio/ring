@@ -61,7 +61,9 @@ State is persisted to `{state_path}` (either `docs/ring:running-dev-cycle/curren
         "matched": true,
         "desired_status": "in_progress",
         "synced_status": "todo",
-        "dispatch": { "task_id": "a1b2c3", "to": "in_progress", "dispatched_at": "2026-06-11T15:00:00Z", "state": "pending|dispatched|synced" }
+        "dispatch": { "task_id": "a1b2c3", "to": "in_progress", "dispatched_at": "2026-06-11T15:00:00Z", "state": "pending|dispatched|synced" },
+        "_comment_body_dispatch": "Mirrors dispatch (same pending|dispatched|synced lifecycle) but tracks pushes of the task BODY (the dispatch-ready requirement block) instead of status. Written by phase-boundary write-back (Step 11.5.5b) and the Map Body Hard Gate (gate-0-implementation.md Step 2.1.5).",
+        "body_dispatch": { "task_id": "d4e5f6", "dispatched_at": "2026-06-11T15:00:00Z", "state": "pending|dispatched|synced" }
       }
     ],
     "pending": [],
@@ -135,7 +137,8 @@ State is persisted to `{state_path}` (either `docs/ring:running-dev-cycle/curren
       "tasks": [
         {
           "id": "Task 1.1.1",
-          "status": "pending|completed",
+          "_comment_task_status": "blocked = skipped at the Map Body Hard Gate (gate-0-implementation.md Step 2.1.5, option b) — recorded so resume can reconstruct skipped tasks; excluded from Gate 8/9 expectations per gates/gate-9-validation.md.",
+          "status": "pending|completed|blocked",
           "gate_progress": {
             "implementation": {
               "status": "pending|in_progress|completed",

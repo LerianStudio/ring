@@ -77,7 +77,23 @@ implementation_input = {
 }
 ```
 
-ℹ️ When `state.task_source == "lerian_map"`, the task block read from the (derived) plan originated from the Map task `body` — same contract, no behavioral change here (see SKILL.md `## Lerian Map as Task Source (optional)`).
+### ⛔ Step 2.1.5: Map Body Hard Gate (MANDATORY — `state.task_source == "lerian_map"` only)
+
+When `state.task_source == "lerian_map"`, the task block read from the (derived) plan originated from the Map task `body` (see SKILL.md `## Lerian Map as Task Source (optional)`). Before Step 2.2, verify `implementation_input.requirements` meets the sufficiency bar (the Step 11.5.5 validation bar in `gates/phase-boundary.md`): no "TBD"/vague deferrals; Context with file:line refs; Implementation vision; Files; Verification; Done when.
+
+**The gate FAILS ONLY when the local requirement block itself is insufficient (empty, title-only, or below the bar) — that is the product contract.** Board lag is NOT a failure: when the block is SUFFICIENT but its body push is not yet confirmed (`matches[].body_dispatch.state != "synced"`), perform ONE best-effort confirmation/retry of the push, then PROCEED regardless, logging a warning — never block on board lag.
+
+**⛔ PROHIBITION: a Map task with only a title is NOT executable. If the block is empty, title-only, or insufficient → DO NOT dispatch.** The requirement block IS the implementation contract; executing from a title alone produces unverifiable work. This failure is handled by the options below, NOT by the generic Blocker Handling table; only option (c) Pause stops the cycle.
+
+On failure, AskUserQuestion:
+
+| Option | Action |
+|--------|--------|
+| (a) **Elaborate now** | Dispatch ONE planning agent in ANALYSIS mode (same mechanism as SKILL.md init step 3a / `gates/phase-boundary.md` Step 11.5.4) to produce the dispatch-ready block. **Map reachable:** push the block to the Map task `body` SYNCHRONOUSLY and confirm (`matches[].body_dispatch.state = "synced"`) BEFORE Gate 0 dispatch — the board never shows an executing task without its description. **Map unreachable (degraded):** write the block to the derived plan, queue the body push as `pending` in `matches[].body_dispatch` for the standard reconciliation triggers, and PROCEED — never-block wins; the board converges when the Map returns. Then re-run this gate. |
+| (b) **Skip this task** | Set `tasks[j].status = "blocked"`, fire the `blocked` sync hook (async, fire-and-forget; the task's board card stays `blocked` and never advances), move to the next task, and surface the skipped task at the epic checkpoint (Step 11.1). Skipped tasks are excluded from Gate 8's cumulative-diff expectations and Gate 9's criteria aggregation — see `gates/gate-9-validation.md` (`SKIPPED (no body)`). |
+| (c) **Pause the cycle** | Set `status = "paused"`, save state, STOP, output the resume command. |
+
+This check is a BACKSTOP — init step 3 (body hygiene) and phase-boundary elaboration (Step 11.5.4 / 11.5.5b) normally guarantee bodies exist. It catches drift two ways: a board edited mid-cycle or a derived plan regenerated from a degraded board produce an insufficient local block → gate FAILURE; a silently failed elaboration write-back leaves the local block sufficient but the board stale → the best-effort retry path above, never a failure.
 
 ### Step 2.2: Invoke ring:implementing-tasks Skill
 

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Added — ⛔ Map body hard gate in `lerian_map` source mode (`ring:running-dev-cycle`)
+
+- A Map task with only a title is now NOT executable: the task's Map `body` (the dispatch-ready requirement block) is MANDATORY before execution — the body IS the implementation contract. New ⛔ HARD BLOCK at every Gate 0 dispatch (`gates/gate-0-implementation.md` Step 2.1.5 — Map Body Hard Gate): the gate FAILS ONLY when the local requirement block is empty, title-only, or below the Step 11.5.5 sufficiency bar. Board lag is NOT a failure — a sufficient block with an unconfirmed body push gets ONE best-effort confirmation/retry, then the cycle PROCEEDS with a warning (never blocks on board lag). Options on failure: Elaborate now (ANALYSIS-mode planning agent; synchronous confirmed push when the Map is reachable, degraded fallback queues the push as `pending` and proceeds) / Skip this task (`status = "blocked"` + `blocked` sync hook + surfaced at the epic checkpoint) / Pause the cycle.
+- Skipped tasks are excluded from Gate 8's cumulative-diff expectations and Gate 9's criteria aggregation, reported as `SKIPPED (no body)`; the epic passes Gate 9 with skipped tasks only via explicit user acknowledgment at the Step 11.1 approval, and the skipped card stays `blocked` on the board. State schema (additive): task `status` enum gains `"blocked"`, and `lerian_map_sync.matches[]` gains a `body_dispatch` record (mirrors the status `dispatch` lifecycle) so body pushes are trackable.
+- Init step 3 body hygiene hardened from advisory to mandatory (current-milestone tasks without sufficient body CANNOT enter the cycle). The gate is a backstop for drift: boards edited mid-cycle, silent write-back failures, derived plans regenerated from a degraded board.
+
 ### Added — Lerian Map as an optional task source in `ring:running-dev-cycle`
 
 - The Lerian Map board can now BE the task source for a dev cycle, not just a status mirror. Strictly **opt-in** — users who don't use the Map see zero behavior change (zero Gandalf calls).
