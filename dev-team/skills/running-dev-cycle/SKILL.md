@@ -231,6 +231,7 @@ If user provides custom context at cycle start, store in `state.custom_prompt` a
 
 When `state.lerian_map_sync.enabled`, run a one-time handshake (each Gandalf ask is a fresh, self-contained session carrying the full discovery payload):
 
+0. **Resolve the acting user (local — no Gandalf call; both Map modes):** the human this cycle's board writes are attributed to. Primary source: `git config user.email` + `git config user.name` in the repo (matches who signs the cycle's commits; per-machine, so a different person running the cycle in their clone is attributed automatically). Fallbacks in order: the session user's email when git config is unset; else unresolved. Store `state.lerian_map_sync.acting_user = {email, name, source, resolved_at}` — or object-level `acting_user = null` when unresolved (no partial record; see `gates/state-schema.md`). Best-effort — an unresolved identity NEVER blocks the cycle (see `### Author attribution (on-behalf-of)`).
 1. **Fetch board tasks via Gandalf** for this repo's product. Discovery is **repo-driven**: map the local git remote to a product via the Map's native **`repositoryUrl`** field on `GET /products` (no manual `productId`/`teamId`/`milestoneId`). Normalize the remote first (`git@github.com:org/repo.git` → `https://github.com/org/repo`).
 2. **Match board cards ↔ local plan units.** Features are matched **by NAME** (e.g. `"E-1.1 …"` / the epic title) — Map features have **no `slug` field**, so name is the feature key (the `docs/pre-dev/{feature}/` path slug has no API equivalent and is only a weak hint). The deterministic per-task matching key is the **`[map:#<board_task_id>]` tag** embedded in the plan/task block; when a tag is present Gandalf skips fuzzy matching entirely. **Title-matching is the fallback** when no tag is present.
 3. **Preview + confirm.** Show a preview table (local ↔ board, with each card's current column) and ask the user to confirm the match before any write.
@@ -268,6 +269,28 @@ All Map I/O goes **through the Gandalf webhook** (`default/skills/gandalf-webhoo
 - **Visible dispatch log line:** when the hook fires, log a line so the user sees it working in the background, e.g.
   `🔄 Lerian Map Sync: dispatched Task 1.1.1 → In Progress (gandalf task a1b2c3, background)`
   and record `{task_id, dispatched_at, state: "dispatched"}` in `current-cycle.json`.
+- **Author attribution:** every write ask carries the acting-user attribution line — see `### Author attribution (on-behalf-of)`.
+
+### Author attribution (on-behalf-of)
+
+Without attribution, every board write shows Gandalf's own Map account as the author instead of the person running the cycle. The Map API supports impersonation (`X-On-Behalf-Of` header + an impersonate-scoped key — validated via live probe) and has user-lookup endpoints to resolve email → userId. **The key/auth is Gandalf's internal concern — Ring never sees or stores any secret.**
+
+**Rule — EVERY write ask** (status pushes, date stamps, feature status / `repositoryPath`, body write-backs, comment POST/UPDATE) includes one line:
+
+> Attribute this write to the user with email {acting_user.email} ({acting_user.name}) — resolve to the Map user and write on their behalf (X-On-Behalf-Of). If impersonation is unavailable, write under your own identity and — for comments only — prepend the first line `_em nome de {name} <{email}>_` yourself.
+
+When `name` is null (session source), omit the parenthesized name and use the email alone — in both the attribution line and the em-nome-de line (`_em nome de <{email}>_`).
+
+Email → Map userId resolution is Gandalf's job at write time — Ring stores NO Map userId, keeping it free of Map user-table coupling. The acting user comes from `state.lerian_map_sync.acting_user`, resolved once at handshake step 0. This rule lives HERE only — the hook sites already say "the same ask/push carries…"; do NOT repeat the attribution line per hook.
+
+**Fallback (never a strict point) — two branches:**
+
+1. **Impersonation unavailable** — handled GANDALF-side via the template line above (Ring never sees write outcomes — pushes are fire-and-forget — so the conditional must run where the outcome is known): the write proceeds under Gandalf's own identity, and comments alone gain the `_em nome de {name} <{email}>_` line, prepended ABOVE the template's first line (the comment cap becomes ~11 lines in fallback mode). Status / date / feature writes proceed without attribution.
+2. **`acting_user` is null** — handled RING-side (no line possible — the user is unknown): omit the attribution line entirely; all writes proceed under Gandalf's identity, with no em-nome-de line.
+
+Neither branch is ever a strict point — NEVER blocks.
+
+**UPDATEs × attribution:** UPDATEs preserve an existing `em nome de` first line verbatim and never add one to an attributed comment; instruct Gandalf to perform the UPDATE under the same identity that authored the comment (falling back to its own identity only if that fails — best-effort).
 
 ### Graceful degradation + deferred reconciliation
 
@@ -391,7 +414,7 @@ Task-completed comment template (compact markdown, ~10 lines max):
 
 ### Init flow (source = lerian_map; runs once, instead of loading a local plan)
 
-1. **Discover the board** — run the discovery handshake from `## Lerian Map Sync (optional)` SCOPED for source mode: execute handshake step 1 (repo-driven product discovery) and step 5 (persist into state); SKIP handshake steps 2–4 (card ↔ plan matching, preview, tag auto-injection — there is no local plan to match). Additionally resolve the **milestone** to execute: candidates are milestones that are not fully `done`/`canceled`, lowest `order` first; if more than one candidate exists, AskUserQuestion to pick one. Persist the milestone identity into `state.lerian_map_source` (canonical — see `gates/state-schema.md`).
+1. **Discover the board** — run the discovery handshake from `## Lerian Map Sync (optional)` SCOPED for source mode: execute handshake step 0 (acting-user resolution — attribution applies in source mode too), step 1 (repo-driven product discovery), and step 5 (persist into state); SKIP handshake steps 2–4 (card ↔ plan matching, preview, tag auto-injection — there is no local plan to match). Additionally resolve the **milestone** to execute: candidates are milestones that are not fully `done`/`canceled`, lowest `order` first; if more than one candidate exists, AskUserQuestion to pick one. Persist the milestone identity into `state.lerian_map_source` (canonical — see `gates/state-schema.md`).
 2. **Fetch the source data via Gandalf** (`action: ask`, self-contained prompt): milestone → features → tasks, requesting for each task: `id`, `title`, `body`, `status`, `priority`, `feature.{id,name}`, `milestone.{id,name,order}`. After the fetch, populate `state.lerian_map_sync.matches[]` from the resolved milestone's tasks: every unit is board-born, so it is matched by construction.
 3. **⛔ Body hygiene validation (current milestone ONLY — MANDATORY):** a current-milestone task without a sufficient `body` CANNOT enter the cycle — no exceptions; the context MUST be given. Sufficiency = the Step 11.5.5 validation bar (`gates/phase-boundary.md`): no "TBD"/vague deferrals; Context with file:line refs; Implementation vision; Files; Verification; Done when. For any current-milestone task with an empty/insufficient body → AskUserQuestion:
    - **(a) Elaborate now** — dispatch ONE planning agent in ANALYSIS mode (same mechanism as Step 11.5.4 in `gates/phase-boundary.md`) to produce the dispatch-ready block, then push it to the Map task `body` via Gandalf. The push is SYNCHRONOUS — init is the strict point and the body must land before the source is trusted; mid-cycle body pushes stay fire-and-forget — EXCEPT the Step 2.1.5 hard-gate remediation (`gates/gate-0-implementation.md`), which is synchronous when the Map is reachable (degraded fallback: queue + proceed).
