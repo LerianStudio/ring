@@ -17,7 +17,7 @@ MUST execute the **Before Gate 0 (epic start)** row from the State Persistence C
 
 CANNOT proceed to sub-steps 2.1–2.3 without completing this checkpoint. (The `epic.base_sha` captured here is the lower bound of the Gate 8 cumulative review diff — the SHA before the epic's first task.)
 
-**Lerian Map Sync hook (only when `state.lerian_map_sync.enabled`):** at this epic-start checkpoint, fire the async fire-and-forget board push for this unit → absolute column `in_progress` (set only if the card is currently `backlog`/`todo`). Non-blocking: POST, record `{task_id, dispatched_at, state: "dispatched"}`, log the dispatch line, continue. On POST failure keep it `pending` + `degraded` and continue. See SKILL.md '## Lerian Map Sync (optional)'.
+**Lerian Map Sync hook (only when `state.lerian_map_sync.enabled`) — PER-TASK cadence:** fire the async fire-and-forget board push at the start of EACH task's Gate 0 — at this checkpoint for the epic's first task, then before each subsequent task's Step 2.1 — for that task's card → absolute column `in_progress` (the card moves only if currently `backlog`/`todo`, evaluated per task card). The same push also stamps the task's `startDate` and carries the set-if-empty parent-feature start-date + feature `status → in_progress` instructions per SKILL.md '### Date stamping (start/end)' and '### Evidence & enrichment (comments, feature status, repositoryPath)'. Non-blocking: POST, record `{task_id, dispatched_at, state: "dispatched"}`, log the dispatch line, continue. On POST failure keep it `pending` + `degraded` and continue. See SKILL.md '## Lerian Map Sync (optional)'.
 
 ### ⛔ MANDATORY: Invoke ring:implementing-tasks Skill (not inline execution)
 
@@ -90,7 +90,7 @@ On failure, AskUserQuestion:
 | Option | Action |
 |--------|--------|
 | (a) **Elaborate now** | Dispatch ONE planning agent in ANALYSIS mode (same mechanism as SKILL.md init step 3a / `gates/phase-boundary.md` Step 11.5.4) to produce the dispatch-ready block. **Map reachable:** push the block to the Map task `body` SYNCHRONOUSLY and confirm (`matches[].body_dispatch.state = "synced"`) BEFORE Gate 0 dispatch — the board never shows an executing task without its description. **Map unreachable (degraded):** write the block to the derived plan, queue the body push as `pending` in `matches[].body_dispatch` for the standard reconciliation triggers, and PROCEED — never-block wins; the board converges when the Map returns. Then re-run this gate. |
-| (b) **Skip this task** | Set `tasks[j].status = "blocked"`, fire the `blocked` sync hook (async, fire-and-forget; the task's board card stays `blocked` and never advances), move to the next task, and surface the skipped task at the epic checkpoint (Step 11.1). Skipped tasks are excluded from Gate 8's cumulative-diff expectations and Gate 9's criteria aggregation — see `gates/gate-9-validation.md` (`SKIPPED (no body)`). |
+| (b) **Skip this task** | Set `tasks[j].status = "blocked"`, fire the `blocked` sync hook (async, fire-and-forget; the task's board card stays `blocked` and never advances) — the same push posts the ONE skip-explanation comment on the card per SKILL.md '### Evidence & enrichment (comments, feature status, repositoryPath)' — move to the next task, and surface the skipped task at the epic checkpoint (Step 11.1). Skipped tasks are excluded from Gate 8's cumulative-diff expectations and Gate 9's criteria aggregation — see `gates/gate-9-validation.md` (`SKIPPED (no body)`). |
 | (c) **Pause the cycle** | Set `status = "paused"`, save state, STOP, output the resume command. |
 
 This check is a BACKSTOP — init step 3 (body hygiene) and phase-boundary elaboration (Step 11.5.4 / 11.5.5b) normally guarantee bodies exist. It catches drift two ways: a board edited mid-cycle or a derived plan regenerated from a degraded board produce an insufficient local block → gate FAILURE; a silently failed elaboration write-back leaves the local block sufficient but the board stale → the best-effort retry path above, never a failure.
@@ -229,6 +229,8 @@ Anti-Rationalization:
 | "I'll just skip this check if Gate 0 passed" | Gate 0 passing without `delivery_verification` means Gate 0 is incomplete. | **Verify `delivery_verification` exists in handoff. If absent → Gate 0 failed.** |
 
 No separate `state.gate_progress.delivery_verification` field — delivery verification is a sub-check of implementation, tracked inline under `state.epics[i].tasks[j].gate_progress.implementation`.
+
+**Lerian Map Sync evidence comment (only when `state.lerian_map_sync.enabled` AND `commit_timing == "per_task"`):** after the task's Gate 0 completes (delivery verification PASS + the per-task commit), post the ONE consolidated task-completed evidence comment on the task's card (commit SHAs, TDD evidence, verification, PR link when available) per SKILL.md '### Evidence & enrichment (comments, feature status, repositoryPath)'. The comment POSTs once, at the task's COMMIT moment, so SHAs always exist: with `per_epic` the POST defers to the Step 11.1 epic commit; with `at_end` to the `done` push. A Gate 0 re-entry (Gate 9 criterion FAIL → rebuild) UPDATEs the existing comment (located via the card's comment list) — never a second POST. Best-effort fire-and-forget, never retried by reconciliation.
 
 ### Anti-Rationalization: Gate 0 Skill Invocation
 

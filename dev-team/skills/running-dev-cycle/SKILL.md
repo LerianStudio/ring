@@ -235,7 +235,7 @@ When `state.lerian_map_sync.enabled`, run a one-time handshake (each Gandalf ask
 2. **Match board cards ↔ local plan units.** Features are matched **by NAME** (e.g. `"E-1.1 …"` / the epic title) — Map features have **no `slug` field**, so name is the feature key (the `docs/pre-dev/{feature}/` path slug has no API equivalent and is only a weak hint). The deterministic per-task matching key is the **`[map:#<board_task_id>]` tag** embedded in the plan/task block; when a tag is present Gandalf skips fuzzy matching entirely. **Title-matching is the fallback** when no tag is present.
 3. **Preview + confirm.** Show a preview table (local ↔ board, with each card's current column) and ask the user to confirm the match before any write.
 4. **Auto-inject tags (with confirmation).** After the first successful discovery, offer to **auto-inject** the resolved `[map:#<board_task_id>]` tags into the plan so future runs are deterministic and rename-proof.
-5. **Persist** the mapping + the board's real status enum into `state.lerian_map_sync` (see `gates/state-schema.md`).
+5. **Persist** the mapping + the board's real status enum into `state.lerian_map_sync` (see `gates/state-schema.md`). In the same ask, instruct Gandalf to set each matched feature's `repositoryPath` to the repo URL — set-if-empty, best-effort, once per cycle (see `### Evidence & enrichment (comments, feature status, repositoryPath)`).
 
 **Discovery path that works (validated):** `repo → /products(repositoryUrl) → /features?productId(name) → /tasks?featureId`.
 
@@ -244,7 +244,7 @@ When `state.lerian_map_sync.enabled`, run a one-time handshake (each Gandalf ask
 | Dev-cycle event | Board column | Notes |
 |-----------------|--------------|-------|
 | Unit loaded, not started | `To do` | baseline; only set if currently in `Backlog` |
-| Gate 0 begins (coding/TDD) — epic start | `In Progress` | unit is actively being built |
+| Gate 0 begins (coding/TDD) — each task's Gate 0 begin (per-task cadence) | `In Progress` | unit is actively being built; the card moves only if currently `Backlog`/`To do`, evaluated per task card |
 | All gates passed (incl. Gate 8 review + Gate 9), awaiting user manual test | `Testing` | the "Em Teste" the user actually tests; STAYS here through approval. Gate 8 is an INTERNAL dev-cycle review — it does NOT get its own board column. |
 | User approved → PR opened, awaiting human merge-review | `To Review` | matches the board order `Testing → To Review → Done` |
 | PR merged → committed AND pushed to repo (≥ `develop`) | `Done` | ⭐ the **ONLY** trigger for `Done` — the push-to-develop / PR-merge event, **NOT Gate 9** |
@@ -296,11 +296,61 @@ When `state.lerian_map_sync.enabled`, the orchestrator fires the async, fire-and
 
 | Cycle event | Hook location | Absolute column pushed |
 |-------------|---------------|------------------------|
-| Epic start (Before Gate 0) | `gates/gate-0-implementation.md` Pre-Dispatch checkpoint | `in_progress` |
+| Task start (each task's Gate 0 begin) | `gates/gate-0-implementation.md` Pre-Dispatch checkpoint (fires per task) | `in_progress` |
 | Epic validated, awaiting user test (Gate 9 pass → Step 11.1) | `gates/gate-9-validation.md` Step 11.1 | `testing` (stays here through approval) |
 | User approved → PR opened | Step 11.1 advance (and end-of-cycle / PR-open path) | `to_review` (gated by `testing_gate`) |
 | Push to repo ≥ `develop` (PR merge) | `gates/cycle-completion.md` Step 12.1 (Final Commit / push) | `done` — ONLY trigger for `done`, NOT Gate 9 |
+| Task commit moment (per `commit_timing`) | `gates/gate-0-implementation.md` Gate 0 completion (`per_task`) / `gates/gate-9-validation.md` Step 11.1 epic commit (`per_epic`) / `gates/cycle-completion.md` `done` push (`at_end`) | — none (comment-only ask: the task evidence comment POST — see `### Evidence & enrichment`) |
 | Hard block at any gate | Blocker Handling | `blocked` |
+
+The `in_progress` and `done` pushes also stamp start/end dates and carry the enrichment instructions — see `### Date stamping (start/end)` and `### Evidence & enrichment (comments, feature status, repositoryPath)` below.
+
+### Date stamping (start/end)
+
+The Map UI has INÍCIO (start) and FIM (end) date columns for features and tasks. When sync is enabled (BOTH `plan_file_synced` and `lerian_map` — the hooks are shared), the existing pushes also stamp these dates so the board reflects real execution timing. Dates ride INSIDE the existing pushes — same Gandalf ask, same fire-and-forget posture, same degradation/reconciliation rules: **no new push types, no new strict points, no impact on never-block**. A failed push retries dates together with the status via the existing reconciliation. The date value is captured when the transition is first queued/dispatched and carried in the push payload — a retried push stamps the original event date, never "today at retry time" (a payload field on the queued transition, not a new dispatch record). Task fields are `startDate` / `endDate` (date `YYYY-MM-DD`, nullable — validated via live Gandalf probe); for features, instruct Gandalf to "set the feature's start/end date" — the exact feature field names are resolved by Gandalf at push time, never guessed here.
+
+| Date | Riding push | Rule |
+|------|-------------|------|
+| Task `startDate` | `in_progress` (each task's Gate 0 begin) | Set to the event date ONLY if currently null/empty. NEVER overwrite a manually set date. |
+| Task `endDate` | `done` (push-to-develop) | Set if empty or future; keep existing past dates. |
+| Feature start date | EVERY `in_progress` push (same Gandalf ask) carries the set-if-empty instruction — idempotent; "first" is an outcome, not a tracked condition | Set only if empty. `lerian_map` mode knows `feature.id` from the init fetch; `plan_file_synced` mode may not — then instruct Gandalf to resolve the card's parent feature and stamp it, best-effort. |
+| Feature end date | `done` (push-to-develop / PR-merge — Step 12.1 or the later PR-merge event; NOT epic completion) | Set only if empty. Instruct Gandalf, in the same ask, to stamp the feature end date only if all of that feature's board tasks are terminal (`done`/`canceled`) — Gandalf evaluates against the live board at push time. Any open task (e.g. a `blocked`/skipped task from the Map Body Hard Gate) → not stamped — a later cycle or a human stamps it. |
+
+**No new state:** date stamping is idempotent by construction (set-if-empty), so it does NOT need its own dispatch record — do NOT invent one. The status `dispatch` and `body_dispatch` records (`gates/state-schema.md`) remain the only sync-state tracked.
+
+### Evidence & enrichment (comments, feature status, repositoryPath)
+
+Beyond columns and dates, the pushes also fill everything else the Map API supports today. API facts (live Gandalf probe): task comments exist (`POST /tasks/{id}/comments`, markdown body ≤ 10,000 chars, CRUD); features carry a `status` enum (`backlog|planned|in_progress|completed|delayed`), a `description` (≤ 500 chars), and a `repositoryPath`; `iterationId` is REQUIRED when feature status is `in_progress`/`completed`/`delayed`. **Features do NOT have comments — only tasks do.** Everything below rides the existing pushes/asks (fire-and-forget, existing degradation; comments excepted from retry — see the rule below): **no new STATUS push types — the single addition is one comment-only ask at each task's commit moment — no new strict points, no new state records**.
+
+**Evidence comments — max ONE comment per card per event (no spam):**
+
+| Event | Card | Comment content |
+|-------|------|-----------------|
+| Task completed — POSTs ONCE, at the task's COMMIT moment per `commit_timing`: `per_task` → Gate 0 completion (after delivery verification + commit); `per_epic` → the Step 11.1 epic commit; `at_end` → the `done` push (full evidence posted then). Commit SHAs therefore always exist at POST time. | Task card | ONE consolidated comment: commit SHA(s), TDD evidence (tests added, coverage % vs threshold), verification command + outcome, PR link when available (in `lerian_map` mode tasks are the cards, so the PR ref lands here). A still-pending PR link is filled in at the `to_review` push (when the PR opens) via comment UPDATE; the `done` push re-asserts it idempotently — never a second comment. Template below. |
+| Epic approved (Gate 9 pass → Step 11.1) | The epic's matched card — ONLY when it is a TASK-type card | ONE comment: review summary (reviewers passed, findings fixed), aggregated criteria PASS, PR link. If the epic matched a FEATURE (normal in `plan_file_synced` name-matching) → post NOTHING (features have no comments) — the per-task comments carry the evidence. In `lerian_map` mode this event posts NO extra comment either (cards are tasks; their per-task comments already carry it). |
+| Task skipped by the Map Body Hard Gate (`gates/gate-0-implementation.md` Step 2.1.5 option b) | Task card | ONE comment alongside the existing `blocked` push: "skipped: no implementation contract (empty/insufficient body)". |
+
+Task-completed comment template (compact markdown, ~10 lines max):
+
+```text
+**✅ Task completed by dev-cycle**
+- Commits: <sha1>, <sha2>
+- Tests: <N added>, coverage <X%> (threshold <Y%>)
+- Verification: `<command>` → <outcome>
+- PR: <link | pending>
+```
+
+**Idempotency/retry rule (comments only):** comments are best-effort fire-and-forget and are NOT retried by the reconciliation — a retried push MUST NOT double-post a comment. Dates and status retry as already documented; comments don't.
+
+**UPDATE, never re-POST:** after the initial POST, every later touch is a comment UPDATE — instruct Gandalf to locate the existing comment via the card's comment list. The lifecycle: POST once at the task's commit moment (table above) → a Gate 0 re-entry (Gate 9 criterion FAIL → rebuild) UPDATEs the existing evidence comment with the new evidence → the `to_review` push fills the pending PR link (into the task evidence comments AND the epic-approved comment when one exists) → the `done` push re-asserts the link idempotently. Max ONE comment per card per event holds in every path.
+
+**Feature status sync** (set in the SAME asks that stamp the feature dates — see `### Date stamping (start/end)`):
+
+- With the feature start-date instruction: also move feature `status` → `in_progress` ONLY if currently `backlog`/`planned`.
+- With the feature end-date instruction: also move feature `status` → `completed` — same guard as the end date (Gandalf evaluates all-tasks-terminal against the live board at push time).
+- `iterationId` caveat: REQUIRED for `in_progress`/`completed`/`delayed` — instruct Gandalf to resolve/keep the feature's current iteration best-effort; if it cannot, skip the status change, log a warning, NEVER block.
+
+**`repositoryPath`:** during the discovery handshake persist step (step 5), instruct Gandalf to set the feature's `repositoryPath` to the repo URL — set-if-empty, best-effort, once per cycle (in `lerian_map` mode this rides the first ask after the init step 2 fetch).
 
 ### Validated facts (live Gandalf test, 2026-06-11, `br-slc`)
 
