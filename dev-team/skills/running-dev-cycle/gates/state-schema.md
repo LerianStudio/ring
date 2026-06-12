@@ -46,6 +46,8 @@ State is persisted to `{state_path}` (either `docs/ring:running-dev-cycle/curren
     "enabled": true,
     "transport": "gandalf",
     "testing_gate": "gate|bypass",
+    "_comment_acting_user": "Resolved at discovery handshake step 0: WHO runs the cycle, for board-write attribution (X-On-Behalf-Of via Gandalf — SKILL.md '### Author attribution (on-behalf-of)'). Sources in fallback order: git config user.email/user.name in the repo ('git_config') → the session user's email ('session', name may be null — email used alone). Absent/null when unresolved: object-level acting_user: null, never a partial record and no 'null' source value. Best-effort: null NEVER blocks the cycle — the attribution line is omitted and writes proceed under Gandalf's own identity (the impersonation-unavailable case is handled Gandalf-side inside the ask template). NO secrets and NO Map userId stored here — the impersonation key lives in Gandalf, and email→userId resolution is Gandalf's job at write time.",
+    "acting_user": { "email": "dev@lerian.studio", "name": "Dev Name", "source": "git_config|session", "resolved_at": "2026-06-11T15:00:00Z" },
     "discovery": {
       "repo": "LerianStudio/br-slc",
       "feature_slug": "slc-v1",
