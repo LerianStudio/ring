@@ -32,7 +32,11 @@ The wrapper is **two packages** in `lib-commons/v5` (minimum **v5.6.0**):
 
 **`openapi.ServeSpec(app, api, logger, prefix, title)`** mounts `{prefix}/openapi.json`, `{prefix}/openapi.yaml`, `{prefix}/docs` (Scalar UI). It normalizes `prefix` (leading slash, no trailing) and HTML-escapes the docs-page title and spec URL. **Gate this behind the service's `Swagger.Enabled`** flag — never serve unconditionally.
 
-**`openapi.DeclareBearerAuth(api)`** registers the `BearerAuth` security scheme *component* (`components.securitySchemes`) so per-operation `Security` references resolve — it does NOT add a per-operation requirement (that stays the handler/registration's job). Wire it iff the API advertises bearer auth — runtime enforcement is separate (lib-auth middleware); omitting it only means the spec doesn't *document* the scheme.
+**`openapi.DeclareBearerAuth(api)`** registers the `BearerAuth` security scheme *component* (`components.securitySchemes`) so `Security` references resolve — it does NOT attach the requirement to anything. **The scheme component alone advertises ZERO secured operations.** To make the spec say "auth required" you MUST also attach a requirement, one of:
+- **Global default** (covers every op in one line, drift-safe): `api.OpenAPI().Security = []map[string][]string{{"BearerAuth": {}}}` right after `openapi.New`.
+- **Per-operation**: `Security: []map[string][]string{{"BearerAuth": {}}}` on each `huma.Operation`.
+
+`DeclareBearerAuth` without a requirement is the classic regression: a JWT-enforced API whose spec advertises every endpoint as public. **Public endpoints** (no auth middleware at runtime) must override the global default with an explicit empty requirement: `Security: []map[string][]string{}` on the operation — a *non-nil empty slice*, which Huma renders as `security: []` because `Operation.Security` marshals with `omitNil` (Go `json:"...,omitempty"` would drop it and silently re-inherit the global default). Getting this wrong makes the spec lie about which routes need a token — see also the constraint-as-validation caveat under Dependency facts.
 
 **`problem.Install()`** is the crux. It is a `sync.Once` override of the process-global `huma.NewError`, so EVERY error Huma builds — domain errors via `MapError` and the framework's own validation/404/422 errors — becomes a `*problem.Detail`. Merge semantics:
 - **status >= 500**: body scrubbed to the static `"internal error"`, NO `errs` folded. This is the central info-leak guard — even a careless `huma.Error500(rawErr.Error())` cannot leak an internal cause.
@@ -51,6 +55,7 @@ The wrapper is **two packages** in `lib-commons/v5` (minimum **v5.6.0**):
 - **huma version MUST match** what the pinned lib-commons build uses (`danielgtaylor/huma/v2 v2.38.0` at v5.6.0). A mismatch is module-graph skew that the security-scan/SBOM gate will flag.
 - **`humafiber` drags `gofiber/fiber/v3` as an indirect dep** — this is EXPECTED, not a bug. `humafiber` is one package importing both Fiber majors; Go compiles the whole package, so importing it for the v2 funcs pulls v3 into the graph. Only the v2 path compiles into the binary. `govulncheck` stays quiet (v3 unreachable); Trivy/SBOM may flag *future* fiber/v3 CVEs — a waivable false positive, NOT a reason to avoid the wrapper.
 - Test the API through the real `*fiber.App` via `app.Test`, not `humatest` (the humatest adapter diverges on `Unwrap`).
+- **Huma schema-constraint struct tags are VALIDATION, not documentation.** `minLength`/`maxLength`/`minItems`/`maxItems`/`minimum`/`maximum`/`pattern`/`enum` are enforced by Huma at the framework layer — a violating request is rejected with a 422 *before* the handler runs. Adding one to "make the spec match the runtime limit" silently relocates rejection from the handler (its domain `400`/coded error) to Huma's `422`, changing the error contract and making the handler's coded path unreachable for that field. The runtime limit is usually already enforced by a `validate:` tag (go-playground); duplicating it as a Huma constraint moves the enforcement layer. Treat constraint tags as a behavioral change (needs error-contract + test updates), never a doc-only edit. By contrast `doc:`/`example:` tags ARE pure documentation and safe to add freely. Decisive test: if a unit test's expected status flips, it's behavioral.
 
 **Mandatory agent instruction (include in EVERY dispatch):**
 
@@ -58,6 +63,8 @@ The wrapper is **two packages** in `lib-commons/v5` (minimum **v5.6.0**):
 > `problem.Install()` MUST be called before ANY Huma operation is registered, on BOTH the runtime API and any spec-gen API, or the runtime error bodies and the committed spec diverge.
 > Match the huma version the pinned lib-commons uses (v2.38.0 @ v5.6.0). The indirect `fiber/v3` is expected — do not try to remove it.
 > Serve the spec only via `openapi.ServeSpec`, gated on the Swagger-enabled flag. Never rely on Huma auto-mount.
+> If the API uses bearer auth, `DeclareBearerAuth` alone advertises nothing — attach a security requirement (global `api.OpenAPI().Security` default or per-op) and override genuinely-public ops with `Security: []map[string][]string{}`.
+> Make the generated spec rich, not hollow: `doc:` + `example:` tags on request/response DTO fields, and `info.Contact`/`info.License` + top-level `Tags` (with descriptions) on the document. Do NOT add `minLength`/`maxLength`/`maxItems` etc. as a doc gesture — those are enforced validation (see Dependency facts).
 > Preserve the service's existing per-rail code taxonomy verbatim — only rewire the wrapper call into `problem.MapError`.
 > TDD: RED → GREEN → REFACTOR for every gate. Test via `app.Test`, not humatest.
 
@@ -71,7 +78,8 @@ The wrapper is **two packages** in `lib-commons/v5` (minimum **v5.6.0**):
 | 2 | lib-commons v5.6.0+ + huma version alignment | Always | ring:backend-go |
 | 3 | `openapi.New` + `problem.Install` on BOTH paths | Always | ring:backend-go |
 | 4 | Per-rail `problem.MapError` wiring | Skip only if zero domain-error mapping (bare framework errors only) | ring:backend-go |
-| 5 | `ServeSpec` (gated) + `DeclareBearerAuth` | Always | ring:backend-go |
+| 5 | `ServeSpec` (gated) + bearer auth (scheme + requirement + public overrides) | Always | ring:backend-go |
+| 5.5 | Spec richness + document metadata (`doc:`/`example:`, contact/license/tags) | If the API advertises a spec to clients | ring:backend-go |
 | 6 | Delete the local wrapper | Migration mode only (skip for greenfield) | ring:backend-go |
 | 7 | Regenerate spec + prove rename-only | Always | ring:backend-go |
 | 8 | Tests (build + unit `-race` + spec-drift gate) | Always | ring:backend-go |
@@ -125,9 +133,23 @@ Replace the service's existing domain-error→HTTP translation with `problem.Map
 - Bare rail: empty `fallbackCode`; `Code` is omitted from the body.
 Verify the mapped status semantics are unchanged from before (this gate is a rewire, not a re-design).
 
-## Gate 5: `ServeSpec` (gated) + `DeclareBearerAuth`
+## Gate 5: `ServeSpec` (gated) + bearer auth (scheme + requirement + public overrides)
 
-Mount the spec via `openapi.ServeSpec(app, api, logger, prefix, title)` behind the Swagger-enabled flag. If the API uses bearer auth and should advertise it, call `openapi.DeclareBearerAuth(api)` before registration. Confirm the served paths match the service's existing convention (no path drift).
+Mount the spec via `openapi.ServeSpec(app, api, logger, prefix, title)` behind the Swagger-enabled flag. Confirm the served paths match the service's existing convention (no path drift).
+
+If the API uses bearer auth, wiring it correctly is THREE steps, not one:
+1. `openapi.DeclareBearerAuth(api)` before registration — registers the scheme *component*.
+2. Attach the requirement, or the spec advertises every op as public: a **global default** `api.OpenAPI().Security = []map[string][]string{{"BearerAuth": {}}}` (one line, covers all ops, drift-safe) or **per-operation** `Security` on each `huma.Operation`.
+3. **Override genuinely-public ops** (no auth middleware at runtime) with `Security: []map[string][]string{}` (non-nil empty → Huma renders `security: []`). Skipping this makes the spec claim a token is required where it isn't.
+
+Cross-check the spec's security against the real middleware chains: every op the spec marks secured must actually enforce auth at runtime, and every public route must carry the empty override. A spec that disagrees with the middleware is a contract bug, not cosmetics.
+
+## Gate 5.5: Spec richness + document metadata
+
+Only when the service advertises a spec to clients. A spec that lints but carries hollow schemas is low-value. Ensure:
+- **Field documentation:** `doc:` and `example:` tags on request/response DTO fields (the leaf structs Huma reflects — for a `Body <Type>` marker the leaf lives in the sibling DTO file, not the `*_huma.go` wrapper; only structs reachable from a registered `huma.Register` Input/Output or `r.Schema(reflect.TypeOf(...))` are reflected, so tags on inert internal structs do nothing — confirm each example appears in the regenerated spec).
+- **Document metadata:** `info.Contact`, `info.License`, document `Servers` (via `openapi.Config.Servers`), and a top-level `Tags` array whose entries carry descriptions covering every operation-tag string in use. Contact/License/Tags are set post-`New` (`api.OpenAPI().Info`/`.Tags`); like every spec mutation they must be applied identically on BOTH the runtime and spec-gen assembly paths if the service has two (the drift/byte-identity gate enforces this).
+- **Do NOT** reach for `minLength`/`maxLength`/`maxItems` to "enrich" — those are enforced validation, not docs (see Dependency facts). `doc:`/`example:` are the documentation surface.
 
 ## Gate 6: Delete the local wrapper (migration mode)
 
@@ -165,9 +187,9 @@ Intra-repo `replace` directives (module wiring within a multi-module repo) are f
 | Severity | Criteria |
 |----------|----------|
 | CRITICAL | `problem.Install()` missing on the runtime OR spec-gen path (runtime/spec divergence); a surviving hand-rolled `huma.NewError` override or local wrapper still in the binary; a `>=500` body leaking a raw cause (bypassing the central scrub) |
-| HIGH | Per-rail `MapError` not wired (errors not RFC 9457); local wrapper not fully deleted (dangling refs / dead code); committed spec not regenerated (drift gate red); a consumer PR pinned to a pre-release lib-commons version (merge gate red) |
-| MEDIUM | huma version skew vs the lib-commons build (graph/SBOM flag); `ServeSpec` not gated on the Swagger flag (prod spec exposure); treating the indirect `fiber/v3` as a bug to remove |
-| LOW | `DeclareBearerAuth` omitted when the API uses bearer auth (spec doesn't advertise it); asserting on the absent `type` field; spec `Servers` left unset when the service should advertise one |
+| HIGH | Per-rail `MapError` not wired (errors not RFC 9457); local wrapper not fully deleted (dangling refs / dead code); committed spec not regenerated (drift gate red); a consumer PR pinned to a pre-release lib-commons version (merge gate red); `DeclareBearerAuth` wired but NO security requirement attached (global or per-op) — the spec advertises every operation as unauthenticated while the runtime enforces JWT (the spec lies about the security contract); a genuinely-public route missing its `Security: []map[string][]string{}` override (spec demands a token the route doesn't); a Huma schema-constraint tag (`minLength`/`maxLength`/`maxItems`…) added as a doc gesture, silently moving rejection from the handler's `400` to Huma's `422` (error-contract change) |
+| MEDIUM | huma version skew vs the lib-commons build (graph/SBOM flag); `ServeSpec` not gated on the Swagger flag (prod spec exposure); treating the indirect `fiber/v3` as a bug to remove; a client-facing spec with hollow schemas — DTO fields lacking `doc:`/`example:` — or missing document metadata (contact / license / top-level tags with descriptions) |
+| LOW | `DeclareBearerAuth` omitted entirely on a bearer API (scheme undocumented — less harmful than a scheme with no requirement, which actively misleads); asserting on the absent `type` field; spec `Servers` left unset when the service should advertise one |
 
 ## Related
 
