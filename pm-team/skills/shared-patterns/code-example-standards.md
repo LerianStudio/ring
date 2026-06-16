@@ -9,7 +9,7 @@ This file defines MANDATORY rules for code examples in pre-dev documents (PRDs, 
 MUST use the canonical Lerian libraries instead of creating custom utilities when generating Go code examples. Four libraries cover the surface:
 
 - **lib-commons** (v5) — HTTP, DB drivers, idempotency, security/TLS, lifecycle, outbox, tenant management, RabbitMQ command queues
-- **lib-observability** (v1.0.0) — logging, metrics, tracing, OTel constants, assertions, panic recovery (see [[using-lib-observability]], [[using-tracing]])
+- **lib-observability** (v1.1.0) — logging, metrics, tracing, OTel constants, assertions, panic recovery (see [[using-lib-observability]], [[using-tracing]])
 - **lib-systemplane** — hot-reloadable runtime config (Postgres LISTEN/NOTIFY + MongoDB change streams) (see [[using-lib-systemplane]])
 - **lib-streaming** — past-tense, durable, tenant-scoped business event emission (CloudEvents, outbox-backed) (see [[using-lib-streaming]], [[using-outbox]])
 
