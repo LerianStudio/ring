@@ -1,6 +1,6 @@
 ---
 name: ring:using-lib-observability
-description: "Using lib-observability v1.0.0, Lerian's OpenTelemetry foundation (lib-commons, lib-systemplane, lib-streaming depend on it), in two modes. Sweep Mode detects DIY zap/slog logging, raw OTel metrics, hand-rolled redaction, and hard-coded attribute strings. Reference Mode catalogs the log, metrics, zap, redaction, and constants packages. Go-only. Skip for non-Go or assert/runtime/tracing."
+description: "Using lib-observability v1.1.0, Lerian's OpenTelemetry foundation (lib-commons, lib-systemplane, lib-streaming depend on it), in two modes. Sweep Mode detects DIY zap/slog logging, raw OTel metrics, hand-rolled redaction, and hard-coded attribute strings. Reference Mode catalogs the log, metrics, zap, redaction, and constants packages. Go-only. Skip for non-Go or assert/runtime/tracing."
 ---
 
 # ring:using-lib-observability
@@ -276,7 +276,7 @@ Surface report path + task count to user; offer handoff to `ring:running-dev-cyc
 
 # REFERENCE MODE
 
-Module: `github.com/LerianStudio/lib-observability` @ `v1.0.0`
+Module: `github.com/LerianStudio/lib-observability` @ `v1.1.0`
 Go: `1.25.9` | OTel: `1.43.0` / `log v0.19.0` | zap: `1.28.0`
 
 ## Package Index

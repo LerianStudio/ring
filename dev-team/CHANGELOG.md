@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed — Bump observability stack to lib-commons v5.7.0 + lib-observability v1.1.0
+
+- Updated the documented stable targets across the dev-team and pm-team skill set to lib-commons `v5.7.0` and lib-observability `v1.1.0`: `dev-team/agents/backend-go.md`, `dev-team/skills/using-lib-observability/SKILL.md`, `dev-team/skills/using-lib-systemplane/SKILL.md` (companion dependency), and `pm-team/skills/shared-patterns/code-example-standards.md`. Historical migration-baseline notes (e.g. the `v5.2.0` / `v1.0.0` pins) are left unchanged as provenance.
+
 ### Added — Author attribution (on-behalf-of) on Lerian Map writes (`ring:running-dev-cycle`)
 
 - Board writes are now attributed to the person RUNNING the cycle instead of Gandalf's own Map account. A new discovery-handshake step (step 0, both Map modes) resolves the acting user — `git config user.email`/`user.name` in the repo (matches who signs the cycle's commits, per-machine) → session user's email (name may be null — email used alone) → object-level `acting_user: null` when unresolved — stored in `lerian_map_sync.acting_user` (best-effort, never blocking). EVERY write ask (status pushes, date stamps, feature status/`repositoryPath`, body write-backs, comment POST/UPDATE) carries one attribution line; Gandalf resolves email → Map userId at write time and writes with `X-On-Behalf-Of` (impersonate-scoped key held by Gandalf — Ring never sees or stores any secret or Map userId). Fallback in two branches: impersonation-unavailable is delegated to GANDALF inside the ask template (Ring never sees write outcomes — pushes are fire-and-forget) — write under its own identity, and for comments prepend `_em nome de {name} <{email}>_` above the template's first line (~11-line cap in fallback mode); an unresolved `acting_user` omits the attribution line entirely (Ring-side — no em-nome-de possible). UPDATEs preserve an existing em-nome-de first line verbatim, never add one to an attributed comment, and run under the authoring identity (best-effort). See `SKILL.md` → `### Author attribution (on-behalf-of)`.
