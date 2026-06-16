@@ -37,16 +37,17 @@ This skill replaces imports/usages of lib-commons observability APIs
 with their canonical lib-observability equivalents.
 
 **Stable target baseline for this migration:**
-- `github.com/LerianStudio/lib-commons/v5` >= `v5.2.0`
-- `github.com/LerianStudio/lib-observability` >= `v1.0.0`
+- `github.com/LerianStudio/lib-commons/v5` >= `v5.7.0`
+- `github.com/LerianStudio/lib-observability` >= `v1.1.0`
 - `github.com/LerianStudio/lib-auth/v2` >= `v2.8.0` when present
 - `github.com/LerianStudio/lib-license-go/v2` >= `v2.3.5` when present
 - `github.com/LerianStudio/lib-streaming` >= `v1.3.1` when present
 - `github.com/LerianStudio/lib-systemplane` >= `v1.0.0` when systemplane is used
 
-`lib-commons/v5.2.0` is the first stable lib-commons release where the
-deprecated observability shims are removed. `lib-observability/v1.0.0` is the
-first stable lib-observability release. `lib-auth/v2.8.0` and
+`lib-commons/v5.7.0` is the current stable lib-commons target for this
+migration (the deprecated observability shims were first removed in `v5.2.0`).
+`lib-observability/v1.1.0` is the current stable lib-observability target
+release (`v1.0.0` was the first stable release). `lib-auth/v2.8.0` and
 `lib-license-go/v2.3.5` are the first stable companion releases known to be
 compatible with the removed lib-commons observability APIs. `lib-streaming/v1.3.1`
 is the first stable streaming release in this validation set that no longer
@@ -367,7 +368,7 @@ Migration rule:
    if [ -z "$LIB_OBSERVABILITY_DIR" ]; then
      GONOSUMDB="github.com/LerianStudio/lib-observability" \
      GOPRIVATE="github.com/LerianStudio/lib-observability" \
-       go get github.com/LerianStudio/lib-observability@v1.0.0
+       go get github.com/LerianStudio/lib-observability@v1.1.0
      LIB_OBSERVABILITY_DIR=$(go list -m -f '{{.Dir}}' github.com/LerianStudio/lib-observability)
    fi
    DOC_PATH="${LIB_COMMONS_DIR}/commons/log/doc.go"
@@ -607,21 +608,26 @@ If dry_run=true from input, skip this step and show diffs only.
 
 ---
 
-## Step 4: Add lib-observability to go.mod
+## Step 4: Bump lib-commons and add lib-observability in go.mod
 
 ```bash
 # lib-observability may not yet be indexed by the Go sum database.
 # Always use GONOSUMDB + GOPRIVATE to avoid sum.golang.org 404 errors.
-GONOSUMDB="github.com/LerianStudio/lib-observability" \
-GOPRIVATE="github.com/LerianStudio/lib-observability" \
-  go get github.com/LerianStudio/lib-observability@v1.0.0
-# v1.0.0 is the stable target baseline for this migration.
+# Bump both modules together: lib-commons to the current stable target and
+# lib-observability to the current stable target.
+GONOSUMDB="github.com/LerianStudio/*" \
+GOPRIVATE="github.com/LerianStudio/*" \
+  go get github.com/LerianStudio/lib-commons/v5@v5.7.0 \
+         github.com/LerianStudio/lib-observability@v1.1.0
+# v5.7.0 is the stable lib-commons target baseline and v1.1.0 is the stable
+# lib-observability target baseline for this migration.
 ```
 
-Verify it appears in go.mod:
+Verify both appear in go.mod:
 ```bash
-grep "lib-observability" go.mod
-# Expected: github.com/LerianStudio/lib-observability v1.0.0
+grep -E "lib-commons|lib-observability" go.mod
+# Expected: github.com/LerianStudio/lib-commons/v5 v5.7.0
+# Expected: github.com/LerianStudio/lib-observability v1.1.0
 # Note: the entry may be marked "// indirect" at this stage — import paths have
 # not been updated yet (that happens in Step 5). The "// indirect" marker is
 # removed after Step 5 (import replacements) and Step 6 (go mod tidy).
