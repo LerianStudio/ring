@@ -17,11 +17,11 @@ Depends on `state.phase_checkpoint`:
 
 - **`manual` (default):**
   1. Set cycle `status = "paused_for_phase_review"`, save state.
-  2. Present: phase number + milestone, epics completed (ids + titles), key metrics (total duration, review iterations, issues by severity aggregated across the phase's epics), and the recorded deviations.
-  3. **AskUserQuestion:** "Phase [N] ([milestone]) complete. How to proceed?"
+  2. Present: phase number + phase name (from the plan's Phase heading — NOT a Map milestone; Phases are internal rolling-wave structure only), epics completed (ids + titles), key metrics (total duration, review iterations, issues by severity aggregated across the phase's epics), and the recorded deviations.
+  3. **AskUserQuestion:** "Phase [N] ([phase name]) complete. How to proceed?"
      - (a) **Continue** — elaborate the next phase and resume the epic loop
      - (b) **Pause** — stop here; resume later with `/ring:running-dev-cycle --resume` (re-enters this checkpoint)
-     - (c) **Adjust plan first** — stop here so the user can edit the plan (reorder/add/drop later-phase epics or revise milestones) before elaboration; resume re-enters this checkpoint and re-reads the (now edited) plan
+     - (c) **Adjust plan first** — stop here so the user can edit the plan (reorder/add/drop later-phase epics or rename phases) before elaboration; resume re-enters this checkpoint and re-reads the (now edited) plan
   4. Handle: **Continue** → proceed to step 11.5.3. **Pause** → leave `status = "paused_for_phase_review"`, STOP, output resume command. **Adjust plan first** → leave `status = "paused_for_phase_review"`, STOP, output: `Cycle paused at phase boundary for plan adjustment. Edit the plan file, then resume with /ring:running-dev-cycle --resume`.
 
 - **`auto`:** Log the same summary (phase, epics completed, metrics, deviations) to the cycle output, set `status = "in_progress"`, and continue directly to step 11.5.3. No pause.
@@ -50,7 +50,7 @@ MODE: ANALYSIS / PLANNING ONLY. Do NOT write, edit, or run application code.
 Do NOT commit. Your deliverable is dispatch-ready tasks written into the plan.
 
 Plan path: {state.source_file}
-Phase to elaborate: Phase {next_phase} — {milestone}
+Phase to elaborate: Phase {next_phase} — {phase name}
 Epic blocks to break down (the next phase's `### Epic N.M:` sections, verbatim):
   {the next phase's epic blocks verbatim}
 Recorded deviations from completed phases (these changed the codebase vs the original plan):
@@ -72,15 +72,17 @@ TASK-AUTHORING BAR (from the ring:writing-plans Task Format — non-negotiable):
 - Touch ONLY Phase {next_phase}'s epic blocks. Do NOT detail any later phase.
 
 {Include ONLY when state.task_source == "lerian_map":}
-BOARD-AS-SOURCE MODE: this plan is derived from the Lerian Map. Each epic carries a
-`[map:#<card_id>]` tag at the EPIC heading — preserve it verbatim. Tasks are the epic
-card's checklist item names (`#### Task N.M.T:` headings, no tag); fill their bodies IN
-PLACE with the dispatch-ready contract. ⛔ Do NOT rename task headings during elaboration —
-only fill their bodies. The `#### Task N.M.T:` name MUST stay aligned with its checklist
-item's `text` on the board; `checklist_item_id` is the stable merge key, so a rename would
-silently desync plan text from the board (caught only post-hoc by Step 11.5.5b
-reconciliation). Create a new `#### Task N.M.T:` block ONLY when
-the work needs a task the checklist does not yet name (it will be added to the card's
+BOARD-AS-SOURCE MODE: this plan is derived from the Lerian Map. All dev epic-cards live
+under the SINGLE `(board.featureId, board.dev_milestone_id)` `Desenvolvimento` milestone —
+there is NO per-phase milestone (a Plan Phase is internal rolling-wave structure only,
+NEVER a Map milestone). Each epic carries a `[map:#<card_id>]` tag at the EPIC heading —
+preserve it verbatim. Tasks are the epic card's checklist item names (`#### Task N.M.T:`
+headings, no tag); fill their bodies IN PLACE with the dispatch-ready contract. ⛔ Do NOT
+rename task headings during elaboration — only fill their bodies. The `#### Task N.M.T:`
+name MUST stay aligned with its checklist item's `text` on the board; `checklist_item_id`
+is the stable merge key, so a rename would silently desync plan text from the board (caught
+only post-hoc by Step 11.5.5b reconciliation). Create a new `#### Task N.M.T:` block ONLY
+when the work needs a task the checklist does not yet name (it will be added to the card's
 checklist at the Step 11.5.5b write-back).
 
 RETURN: a summary of tasks written per epic, AND flag any epic whose scope no longer
@@ -101,13 +103,16 @@ If any check fails → re-dispatch the planning agent with the specific gap, or 
 
 ### Step 11.5.5b: Lerian Map Write-Back (Conditional — when `state.lerian_map_sync.enabled`)
 
-Runs after Step 11.5.5 validates the elaboration, whenever Map sync is enabled (BOTH `plan_file_synced` and `lerian_map`). ⛔ The **checklist-item ensure** (step 1a) runs in BOTH modes — newly-elaborated tasks MUST get a `done` target on the board, else the cycle-completion `done` flip silently no-ops (the discovery handshake only ensured items for tasks known at init; later-phase tasks need it here). The **macro-body push** (step 1b) runs in `lerian_map` (board-as-source) ONLY — in `plan_file_synced` the user owns the card body, so it is NOT overwritten. Mechanics and degradation rules live in SKILL.md `## Lerian Map Sync (optional)` / `## Lerian Map as Task Source (optional)` — not duplicated here:
+Runs after Step 11.5.5 validates the elaboration, whenever Map sync is enabled (BOTH `plan_file_synced` and `lerian_map`). ⛔ The **epic-card + checklist-item ensure** (step 1a) runs in BOTH modes — each newly-elaborated epic MUST have a task-card on the board and each newly-elaborated task MUST get a `done` target (checklist item) on that card, else the cycle-completion `done` flip silently no-ops (the discovery handshake only created cards/items for epics+tasks known at init; later-phase epics+tasks need it here — this is the rolling-wave create). The **macro-body push** (step 1b) runs in `lerian_map` (board-as-source) ONLY — in `plan_file_synced` the user owns the card body, so it is NOT overwritten. ⛔ ALL newly-created cards attach to the SAME `(board.featureId, board.dev_milestone_id)` `Desenvolvimento` milestone — there is NO "next milestone" per phase (a Plan Phase is never a Map milestone). Mechanics and degradation rules live in SKILL.md `## Lerian Map Sync (optional)` / `## Lerian Map as Task Source (optional)` — not duplicated here:
 
-0. **Fetch (best-effort):** fetch the next milestone's epic cards (Map `tipo: Task`) via Gandalf — card ids + titles + each card's `checklist` (`{id, text, done}[]`) — as the reconciliation baseline. On fetch failure → log a warning, set `state.lerian_map_sync.degraded = true`, SKIP reconciliation (step 2) for this boundary, and re-attempt at the next trigger (next checkpoint / `--resume` / end of cycle). NEVER blocks the boundary; the step-1 write-back still fires from the local `[map:#<card_id>]` epic tags.
+0. **Fetch (best-effort):** fetch the feature's existing `Desenvolvimento`-milestone cards (Map `tipo: Task`, by `board.featureId` + `board.dev_milestone_id`) via Gandalf — card ids + titles + each card's `checklist` (`{id, text, done}[]`) — as the reconciliation baseline. On fetch failure → log a warning, set `state.lerian_map_sync.degraded = true`, SKIP reconciliation (step 2) for this boundary, and re-attempt at the next trigger (next checkpoint / `--resume` / end of cycle). NEVER blocks the boundary; the step-1 write-back still fires from the local `[map:#<card_id>]` epic tags.
 1. **Write-back** — for each next-phase epic the planning agent elaborated (Step 11.5.4), matched by the `[map:#<card_id>]` tag at the EPIC level:
-   - **1a. Checklist-item ensure (BOTH modes — `plan_file_synced` AND `lerian_map`):** ensure ONE checklist item exists per newly-elaborated task — instruct Gandalf to MERGE BY `checklist_item_id` (read-modify-write the card's `checklist` array — create missing items keyed by `text` = task name, NEVER replace the whole array), recording `task_matches[].checklist_item_id` + `done_dispatch`. This guarantees every task has a `done` target BEFORE its cycle-completion flip — without it, later-phase tasks would `done`-flip into the void. Async fire-and-forget; NEVER blocks the boundary.
+   - **1a. Epic-card + checklist-item ensure (BOTH modes — `plan_file_synced` AND `lerian_map`):** MERGE-BY-ID create-if-absent, in two parts (rolling-wave create):
+     - **Epic card:** if the epic has no `[map:#<card_id>]` tag yet (a freshly-elaborated epic with no board counterpart), CREATE its task-card (`tipo: Task`) under `(board.featureId, board.dev_milestone_id)` — match an existing card first by its `[map:#<card_id>]` tag (and, absent a tag, by epic title against the step-0 baseline) and REUSE that card_id; create ONLY when no match exists. Record `epic_matches[].card_id` and inject the `[map:#<card_id>]` tag at the epic heading in the plan.
+     - **Checklist items:** ensure ONE checklist item exists per newly-elaborated task on that card — instruct Gandalf to MERGE BY `checklist_item_id` (read-modify-write the card's `checklist` array — create missing items keyed by `text` = task name, NEVER replace the whole array), recording `task_matches[].checklist_item_id` + `done_dispatch`. This guarantees every task has a `done` target BEFORE its cycle-completion flip — without it, later-phase tasks would `done`-flip into the void.
+     - ⛔ ALL created cards attach to the SAME `(board.featureId, board.dev_milestone_id)` `Desenvolvimento` milestone — NOT a "next milestone". Async fire-and-forget; NEVER blocks the boundary.
    - **1b. Macro-body push (`lerian_map` ONLY):** push the epic's MACRO OVERVIEW (what the epic is + a short, direct summary of each task — NOT the full dispatch-ready contract) to the epic card `body`, recorded in `epic_matches[].body_dispatch` (same `pending → dispatched → synced` lifecycle). ⛔ STOP pushing the 20k dispatch-ready contracts to the Map — the contract lives ONLY in the derived plan; the board receives the macro skeleton only. In `plan_file_synced` SKIP this — the card body belongs to the user, never overwritten. A push that fails or stays unconfirmed (`*_dispatch.state != "synced"`) is retried by the standard reconciliation triggers until the board converges — never a Gate 0 block, since the local plan block is the contract.
-2. **Reconciliation** (run ONLY after the Step 1 write-back has CONVERGED — `epic_matches[].body_dispatch` AND `task_matches[].done_dispatch` confirmed `synced`; while any is still `pending`/`dispatched`, DEFER reconciliation to the next trigger so an unconfirmed async push is not mistaken for a real divergence)**:** a next-milestone board card with no counterpart epic block, an agent-created epic block with no board card, or a checklist item with no task block (or vice versa) → surface it to the user before resuming the epic loop (same treatment as Step 11.5.5's scope-divergence rule — even when `phase_checkpoint == "auto"`). The user reconciles (add the block, create/drop the board card or checklist item on the Map themselves, or drop the local block). Do NOT silently create or delete board cards or checklist items.
+2. **Reconciliation** (run ONLY after the Step 1 write-back has CONVERGED — `epic_matches[].body_dispatch` AND `task_matches[].done_dispatch` confirmed `synced`; while any is still `pending`/`dispatched`, DEFER reconciliation to the next trigger so an unconfirmed async push is not mistaken for a real divergence)**:** the flow MAY now create cards/items (it just did, in Step 1a — so a `Desenvolvimento` card with no counterpart epic block or an epic block with no card is reconciled by the Step-1a create, not by surfacing). What remains for the user: a board card or checklist item that the user wants REMOVED has no counterpart and must NOT be auto-deleted — surface any such orphan to the user before resuming the epic loop (same treatment as Step 11.5.5's scope-divergence rule — even when `phase_checkpoint == "auto"`). ⛔ DELETING cards or checklist items stays user-only — never silent. ⛔ The **Feature** (`/features`) is never created, edited, or deleted by the flow — only the human touches it. The user reconciles deletions (drop the board card or checklist item on the Map themselves, or drop the local block).
 
 ### Step 11.5.6: Update State and Resume the Epic Loop
 

@@ -93,7 +93,7 @@ On failure, AskUserQuestion:
 | (b) **Skip this task** | Set `tasks[j].status = "blocked"`, fire the per-task evidence comment on the EPIC card (the skip-explanation, tagged `**Task N.M.T:** …`) per SKILL.md '### Evidence & enrichment (comments, repositoryPath)' — async fire-and-forget — move to the next task, and surface the skipped task at the epic checkpoint (Step 11.1). The epic card's own status follows its normal lifecycle, unaffected by a skipped task. Skipped tasks are excluded from Gate 8's cumulative-diff expectations and Gate 9's criteria aggregation — see `gates/gate-9-validation.md` (`SKIPPED (no contract)`). |
 | (c) **Pause the cycle** | Set `status = "paused"`, save state, STOP, output the resume command. |
 
-This check is a BACKSTOP — init step 3 (elaboration) and phase-boundary elaboration (Step 11.5.4 / 11.5.5b) normally guarantee the plan blocks exist. It catches drift: a derived plan regenerated from a board with a future-milestone epic (task-name stubs, empty bodies) reaching Gate 0 before its phase was elaborated produces an insufficient local block → gate FAILURE, resolved by option (a).
+This check is a BACKSTOP — init step 3 (elaboration) and phase-boundary elaboration (Step 11.5.4 / 11.5.5b) normally guarantee the plan blocks exist. It catches drift: a derived plan regenerated from a board with an un-elaborated later-phase epic (task-name stubs, empty bodies — all under the single `Desenvolvimento` milestone) reaching Gate 0 before its phase was elaborated produces an insufficient local block → gate FAILURE, resolved by option (a).
 
 ### Step 2.2: Invoke ring:implementing-tasks Skill
 

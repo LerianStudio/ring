@@ -50,8 +50,8 @@ Display the current development cycle status.
 Displays:
 - Current cycle ID and start time
 - Current phase (if `phases[]` is present in state)
-- Task source (`plan_file` / `plan_file_synced` / `lerian_map`; absent in older state files → infer `plan_file_synced` when `lerian_map_sync.enabled == true`, else `plan_file`). For `lerian_map`, also show the board/milestone identity (`lerian_map_sync.board` + `lerian_map_source`)
-- Map sync (only when `lerian_map_sync.enabled`): epics → cards and tasks → checklist items, with synced counts from `lerian_map_sync.epic_matches[]` (epic card status) and `lerian_map_sync.task_matches[]` (checklist `done` flips). Each Epic maps to one Map epic task-card; each Task to a checklist item inside its epic's card
+- Task source (`plan_file` / `plan_file_synced` / `lerian_map`; absent in older state files → infer `plan_file_synced` when `lerian_map_sync.enabled == true`, else `plan_file`). For `lerian_map`, also show the board identity — `lerian_map_sync.board.featureId` + `lerian_map_sync.board.dev_milestone_name` (the feature's `Desenvolvimento` milestone, read from persisted state — not looked up fresh) + `lerian_map_source`
+- Map sync (only when `lerian_map_sync.enabled`): synced counts from `lerian_map_sync.epic_matches[]` (epic card status) and `lerian_map_sync.task_matches[]` (checklist `done` flips). For the epic↔card / task↔checklist mapping mechanics, see ring:running-dev-cycle `## Lerian Map Sync (optional)` (canonical — not restated here)
 - Epics: total, completed, in progress, pending
 - Current epic and gate being executed
 - Assertiveness score (if epics completed)
@@ -66,7 +66,7 @@ Cycle ID: 2024-01-15-143000
 Started: 2024-01-15 14:30:00
 Status: in_progress
 Phase: Phase 2 - Core flows
-Task source: lerian_map — product 13 / team 5, milestone Desenvolvimento (433)
+Task source: lerian_map — product 13 / team 5, feature 77, milestone Desenvolvimento (433)
 Map sync: epics→cards 2/5 synced, tasks→checklist 7/12 done
 
 Epics:
