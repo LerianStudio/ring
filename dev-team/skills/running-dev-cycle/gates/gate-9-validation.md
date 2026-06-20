@@ -23,16 +23,16 @@ For the current epic:
      "blocked"`, set by `gates/gate-0-implementation.md` Step 2.1.5 option b):
      EXCLUDE them from the criteria aggregation (they have no Gate 0 evidence)
      and from Gate 8's cumulative-diff expectations. Report each in
-     criteria_results as `{task_id, criterion: "—", status: "SKIPPED (no body)"}`.
+     criteria_results as `{task_id, criterion: "—", status: "SKIPPED (no contract)"}`.
      Skipped tasks do NOT trigger the step-4 FAIL loop. The epic may pass Gate 9
      with skipped tasks ONLY via explicit user acknowledgment at the Step 11.1
      human approval — list them in the Step 11.1 summary. Skipped tasks force
      the Step 11.1 checkpoint EVEN when `execution_mode == "automatic"` — a
      task with no implementation contract is a plan-correctness signal, not a
      routine pause (same treatment as Step 11.5.5's scope-divergence rule).
-     The skipped task's board card stays `blocked` and never advances; the
-     epic's own card (if any) follows the normal `testing` / `to_review` /
-     `done` pushes unaffected.
+     A skipped task's checklist item stays `done=false` (never flips); the
+     epic card follows the normal `testing` / `to_review` / `done` status
+     pushes unaffected.
 
 3. Mark PASS/FAIL per aggregated criterion — DO NOT re-run tests or review:
    For each criterion in the aggregated set:
@@ -63,13 +63,13 @@ For the current epic:
 
 ## Step 11.1: Epic Approval Checkpoint (Conditional)
 
-**Checkpoint depends on `execution_mode`:** `manual_per_task` / `manual_per_epic` → Execute | `automatic` → Skip (EXCEPTION: an epic with `SKIPPED (no body)` tasks forces this checkpoint even in `automatic` — see the Step 11 aggregation exception)
+**Checkpoint depends on `execution_mode`:** `manual_per_task` / `manual_per_epic` → Execute | `automatic` → Skip (EXCEPTION: an epic with `SKIPPED (no contract)` tasks forces this checkpoint even in `automatic` — see the Step 11 aggregation exception)
 
 ⛔ **This checkpoint gates ADVANCEMENT, not correctness.** Criterion correctness was settled in Step 11 — a FAIL there already looped back to Gate 0, so this point is reached only with `validation.result == "approved"`. Here the user decides whether to advance: Continue / Integration Test (both accept the epic and move on) or Stop Here (pause the cycle). Self-approval by the orchestrator is PROHIBITED — the orchestrator never advances on the user's behalf.
 
 > The per-task pause for `manual_per_task` mode lives after Gate 0 (see the `[checkpoint if manual_per_task mode]` step in the Execution Order). There is NO per-task validation pause here — Gate 9 validation is epic-level only.
 
-**Lerian Map Sync hook (only when `state.lerian_map_sync.enabled`):** once Gate 9 passes and the epic enters this checkpoint awaiting the user's manual test, fire the async board push → absolute column `testing` (the card STAYS in `testing` through approval). When the epic's matched board card is a TASK-type card, the same flow also posts the ONE epic-approved evidence comment (review summary, aggregated criteria PASS, PR link) per SKILL.md '### Evidence & enrichment (comments, feature status, repositoryPath)' — if the epic matched a FEATURE (normal in `plan_file_synced` name-matching) or in `lerian_map` mode, post NOTHING (features have no comments; the per-task comments carry the evidence). With `commit_timing == "per_epic"`, the Step 11.1 epic commit is also the COMMIT moment where each task's evidence comment POSTs (see the same SKILL.md section). When the user advances (Continue / Integration Test below) and the PR is opened, fire `to_review` — the same push fills the pending PR link into the task evidence comments (and the epic-approved comment when one exists) via comment UPDATE — gated by `state.lerian_map_sync.testing_gate`: `gate` waits for the user's OK before opening the PR; `bypass` auto-opens it. ⚠️ This is independent of and never overrides Gate 9 acceptance. All pushes are non-blocking (fire-and-forget); see SKILL.md '## Lerian Map Sync (optional)'.
+**Lerian Map Sync hook (only when `state.lerian_map_sync.enabled`):** once Gate 9 passes and the epic enters this checkpoint awaiting the user's manual test, fire the async board push → absolute column `testing` on the EPIC `card_id` (`epic_matches[].status_dispatch`; the card STAYS in `testing` through approval). The same flow posts the ONE epic-approved evidence comment (review summary, aggregated criteria PASS, PR link) on the EPIC card per SKILL.md '### Evidence & enrichment (comments, repositoryPath)' — an Epic IS a task-card now, so it is always commentable; there is no FEATURE branch and nothing-to-post case. With `commit_timing == "per_epic"`, the Step 11.1 epic commit is also the COMMIT moment where each task's evidence comment POSTs on the epic card, tagged `**Task N.M.T:** …` (see the same SKILL.md section). When the user advances (Continue / Integration Test below) and the PR is opened, fire `to_review` on the EPIC `card_id` — the same push fills the pending PR link into the per-task evidence comments and the epic-approved comment via comment UPDATE — gated by `state.lerian_map_sync.testing_gate`: `gate` waits for the user's OK before opening the PR; `bypass` auto-opens it. ⚠️ This is independent of and never overrides Gate 9 acceptance. All pushes are non-blocking (fire-and-forget); see SKILL.md '## Lerian Map Sync (optional)'.
 
 0. **COMMIT CHECK (before checkpoint):**
    - `commit_timing == "per_epic"` → execute `/ring:committing-changes` with message `feat({epic_id}): {epic_title}`, including all files changed across the epic's tasks.

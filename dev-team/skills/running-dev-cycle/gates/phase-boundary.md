@@ -72,9 +72,16 @@ TASK-AUTHORING BAR (from the ring:writing-plans Task Format — non-negotiable):
 - Touch ONLY Phase {next_phase}'s epic blocks. Do NOT detail any later phase.
 
 {Include ONLY when state.task_source == "lerian_map":}
-BOARD-AS-SOURCE MODE: this plan is derived from the Lerian Map. Fill the existing tagged
-`#### Task N.M.T: … [map:#<id>]` stubs IN PLACE, preserving every `[map:#<id>]` tag
-verbatim. Create an untagged new task block ONLY when no board stub fits the work.
+BOARD-AS-SOURCE MODE: this plan is derived from the Lerian Map. Each epic carries a
+`[map:#<card_id>]` tag at the EPIC heading — preserve it verbatim. Tasks are the epic
+card's checklist item names (`#### Task N.M.T:` headings, no tag); fill their bodies IN
+PLACE with the dispatch-ready contract. ⛔ Do NOT rename task headings during elaboration —
+only fill their bodies. The `#### Task N.M.T:` name MUST stay aligned with its checklist
+item's `text` on the board; `checklist_item_id` is the stable merge key, so a rename would
+silently desync plan text from the board (caught only post-hoc by Step 11.5.5b
+reconciliation). Create a new `#### Task N.M.T:` block ONLY when
+the work needs a task the checklist does not yet name (it will be added to the card's
+checklist at the Step 11.5.5b write-back).
 
 RETURN: a summary of tasks written per epic, AND flag any epic whose scope no longer
 matches the codebase reality (deviations made it redundant, larger, smaller, or wrong).
@@ -96,9 +103,9 @@ If any check fails → re-dispatch the planning agent with the specific gap, or 
 
 Runs after Step 11.5.5 validates the elaboration, ONLY in board-as-source mode. Mechanics and degradation rules live in SKILL.md `## Lerian Map as Task Source (optional)` — not duplicated here:
 
-0. **Fetch (best-effort):** fetch the next milestone's tasks via Gandalf — ids + titles + a body-empty flag — as the reconciliation baseline. On fetch failure → log a warning, set `state.lerian_map_sync.degraded = true`, SKIP reconciliation (step 2) for this boundary, and re-attempt at the next trigger (next checkpoint / `--resume` / end of cycle). NEVER blocks the boundary; the body write-back (step 1) still fires from the local `[map:#<id>]` tags.
-1. **Body write-back:** for each task block the planning agent wrote into the derived plan (Step 11.5.4), push the block to the matching Map task `body` via Gandalf — matched by the `[map:#<id>]` tag, recorded in `state.lerian_map_sync.matches[].body_dispatch` (same `pending → dispatched → synced` lifecycle as status pushes). Async fire-and-forget; NEVER blocks the boundary. A push that fails or stays unconfirmed (`body_dispatch.state != "synced"`) gets ONE best-effort confirmation/retry at that task's ⛔ Map Body Hard Gate (`gates/gate-0-implementation.md` Step 2.1.5) before dispatch — also non-blocking, since the local block is the contract; the standard reconciliation triggers keep retrying until the board converges.
-2. **Reconciliation:** a next-milestone board task with no counterpart task block, or an agent-created task block with no board counterpart → surface it to the user before resuming the epic loop (same treatment as Step 11.5.5's scope-divergence rule — even when `phase_checkpoint == "auto"`). The user reconciles (add the block, create/drop the board task on the Map themselves, or drop the local block). Do NOT silently create or delete board tasks.
+0. **Fetch (best-effort):** fetch the next milestone's epic cards (Map `tipo: Task`) via Gandalf — card ids + titles + each card's `checklist` (`{id, text, done}[]`) — as the reconciliation baseline. On fetch failure → log a warning, set `state.lerian_map_sync.degraded = true`, SKIP reconciliation (step 2) for this boundary, and re-attempt at the next trigger (next checkpoint / `--resume` / end of cycle). NEVER blocks the boundary; the macro-body write-back (step 1) still fires from the local `[map:#<card_id>]` epic tags.
+1. **Macro-body + checklist write-back:** for each next-phase epic the planning agent elaborated (Step 11.5.4), push the epic's MACRO OVERVIEW (what the epic is + a short, direct summary of each task — NOT the full dispatch-ready contract) to the matching epic card `body` via Gandalf — matched by the `[map:#<card_id>]` tag at the EPIC level, recorded in `state.lerian_map_sync.epic_matches[].body_dispatch` (same `pending → dispatched → synced` lifecycle as status pushes). The SAME push ENSURES one checklist item exists per task: instruct Gandalf to MERGE BY `checklist_item_id` (read-modify-write the card's `checklist` array — create missing items keyed by `text` = task name, NEVER replace the whole array), recorded in `task_matches[].done_dispatch`/`checklist_item_id`. ⛔ STOP pushing the 20k dispatch-ready contracts to the Map — the contract lives ONLY in the derived plan; the board receives the macro skeleton only. Async fire-and-forget; NEVER blocks the boundary. A push that fails or stays unconfirmed (`epic_matches[].body_dispatch.state != "synced"`) is retried by the standard reconciliation triggers until the board converges — never a Gate 0 block, since the local plan block is the contract.
+2. **Reconciliation** (run ONLY after the Step 1 write-back has CONVERGED — `epic_matches[].body_dispatch` AND `task_matches[].done_dispatch` confirmed `synced`; while any is still `pending`/`dispatched`, DEFER reconciliation to the next trigger so an unconfirmed async push is not mistaken for a real divergence)**:** a next-milestone board card with no counterpart epic block, an agent-created epic block with no board card, or a checklist item with no task block (or vice versa) → surface it to the user before resuming the epic loop (same treatment as Step 11.5.5's scope-divergence rule — even when `phase_checkpoint == "auto"`). The user reconciles (add the block, create/drop the board card or checklist item on the Map themselves, or drop the local block). Do NOT silently create or delete board cards or checklist items.
 
 ### Step 11.5.6: Update State and Resume the Epic Loop
 

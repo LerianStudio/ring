@@ -55,23 +55,34 @@ State is persisted to `{state_path}` (either `docs/ring:running-dev-cycle/curren
     },
     "board": { "discovered": true, "productId": 13, "teamId": 5, "milestoneId": 433 },
     "status_enum": ["backlog","todo","in_progress","testing","to_review","on_hold","blocked","done","canceled"],
-    "status_map": { "gate0": "in_progress", "awaiting_test": "testing", "pr_open": "to_review", "pushed_develop": "done" },
-    "matches": [
+    "status_map": { "epic_start": "in_progress", "epic_validated": "testing", "pr_open": "to_review", "pushed_develop": "done" },
+    "_comment_epic_matches": "ONE entry per Epic (Epic N.M) — the Epic maps to a Map Task-card (`tipo: Task`). card_id is that card's id. status_dispatch tracks the 9-column STATUS push (epic lifecycle: in_progress → testing → to_review → done, plus blocked/on_hold/canceled off-path), targeting card_id; pushes are ABSOLUTE-COLUMN (status = X), never a relative move — safe to replay. body_dispatch tracks the MACRO OVERVIEW push to the card DESCRIÇÃO body (what the epic is + a short direct summary of each task) — NOT the full dispatch-ready contract, which lives ONLY in plan.md. body_dispatch also ensures one checklist item exists per task. Both records use the same pending|dispatched|synced lifecycle. status_dispatch is written at the epic-level status hooks (gate-0 Pre-Dispatch epic start, gate-9 Step 11.1, cycle-completion Step 12.1); body_dispatch is written by the phase-boundary write-back (Step 11.5.5b).",
+    "epic_matches": [
       {
-        "unit_id": "Task 1.1.1",
-        "board_task_id": 1222,
+        "epic_id": "Epic 1.1",
+        "card_id": 1222,
         "matched": true,
         "desired_status": "in_progress",
         "synced_status": "todo",
-        "dispatch": { "task_id": "a1b2c3", "to": "in_progress", "dispatched_at": "2026-06-11T15:00:00Z", "state": "pending|dispatched|synced" },
-        "_comment_body_dispatch": "Mirrors dispatch (same pending|dispatched|synced lifecycle) but tracks pushes of the task BODY (the dispatch-ready requirement block) instead of status. Written by phase-boundary write-back (Step 11.5.5b) and the Map Body Hard Gate (gate-0-implementation.md Step 2.1.5).",
+        "status_dispatch": { "task_id": "a1b2c3", "to": "in_progress", "dispatched_at": "2026-06-11T15:00:00Z", "state": "pending|dispatched|synced" },
         "body_dispatch": { "task_id": "d4e5f6", "dispatched_at": "2026-06-11T15:00:00Z", "state": "pending|dispatched|synced" }
+      }
+    ],
+    "_comment_task_matches": "ONE entry per Task (Task N.M.T) — each Task maps to a CHECKLIST ITEM {id, text, done} inside its Epic's card. The plan-side key is unit_id (e.g. 'Task 1.1.1') — deliberately NOT renamed to task_id, which is reserved for the Gandalf dispatch id inside the *_dispatch objects; unit_id (plan side) + checklist_item_id (board side) together express the mapping, mirroring epic_id + card_id in epic_matches. checklist_item_id is the item's id; checklist_item.text = the task name. card_id is the SAME card as the task's parent epic in epic_matches — MULTIPLE task_matches share one card_id (their epic). done flips true ONLY at push to repo ≥ develop (same terminal rule as the epic `done` status), NOT at Gate 9. done_dispatch tracks that checklist flip. ⛔ IDEMPOTENCY: the checklist push MERGES BY checklist_item_id (read-modify-write of the card's checklist array) — it MUST NEVER replace the whole array. A retried push re-asserts the same item id safely.",
+    "task_matches": [
+      {
+        "unit_id": "Task 1.1.1",
+        "epic_id": "Epic 1.1",
+        "card_id": 1222,
+        "checklist_item_id": "uuid-or-map-id",
+        "done": false,
+        "done_dispatch": { "task_id": "g7h8i9", "dispatched_at": "2026-06-11T15:00:00Z", "state": "pending|dispatched|synced" }
       }
     ],
     "pending": [],
     "degraded": false
   },
-  "_comment_lerian_map_source": "Present ONLY when task_source == 'lerian_map' (SKILL.md '## Lerian Map as Task Source (optional)'). Identity of the board milestone being executed as the task source. PRECEDENCE: in source mode lerian_map_source.milestone_id is CANONICAL; lerian_map_sync.board.milestoneId is a discovery-time echo only and MUST be overwritten to match it (or dropped in source mode) — never read board.milestoneId for source-mode decisions. Board/product identity stays in lerian_map_sync.board (discovery handshake, not duplicated); per-epic/per-task board ids live in the [map:#<id>] tags of the derived plan and in lerian_map_sync.matches[] — the same pattern sync mode already uses.",
+  "_comment_lerian_map_source": "Present ONLY when task_source == 'lerian_map' (SKILL.md '## Lerian Map as Task Source (optional)'). Identity of the board milestone being executed as the task source. PRECEDENCE: in source mode lerian_map_source.milestone_id is CANONICAL; lerian_map_sync.board.milestoneId is a discovery-time echo only and MUST be overwritten to match it (or dropped in source mode) — never read board.milestoneId for source-mode decisions. Board/product identity stays in lerian_map_sync.board (discovery handshake, not duplicated); per-epic board ids (card_id) live in the [map:#<card_id>] tags of the derived plan (tagged at the epic level) and in lerian_map_sync.epic_matches[]; per-task ids (checklist_item_id) live in lerian_map_sync.task_matches[] — the same pattern sync mode already uses.",
   "lerian_map_source": {
     "milestone_id": 433,
     "milestone_name": "Desenvolvimento",
