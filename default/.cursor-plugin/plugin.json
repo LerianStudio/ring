@@ -2,7 +2,7 @@
   "name": "ring-default",
   "displayName": "Ring Default",
   "description": "Core skills library for the Lerian Team: TDD, code review, collaboration patterns, and proven techniques. 16 essential skills for software engineering excellence, including plan authoring and execution.",
-  "version": "1.35.1",
+  "version": "1.36.0",
   "author": {
     "name": "Lerian Studio",
     "email": "fred@lerian.studio"
