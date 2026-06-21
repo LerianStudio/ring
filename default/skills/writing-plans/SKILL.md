@@ -35,6 +35,12 @@ The plan is a **rolling-wave document**. Only the first phase is detailed to tas
 
 **Invoked from pre-dev:** when dispatched as the final gate of ring:planning-large-features or ring:planning-small-features, the spec inputs are the pre-dev artifacts — trd.md (plus feature-map.md, openapi.yaml, the schema file, and dependencies.md on the Large track). On Large, plan phases MUST mirror feature-map.md phases one-to-one. Output path is `docs/pre-dev/{feature}/plan.md`, overriding the default above; standalone invocations keep the default. plan.md is always a SINGLE document per feature: on multi-module topologies (monorepo fullstack / multi-repo), each epic carries one line `**Target:** backend | frontend | infra` (placed right before `**Status:**`); for multi-repo features the orchestrator copies plan.md into each repo and the local dev-cycle executes only epics whose Target matches that repo. No per-module plan splits.
 
+## Plan Language
+
+Before authoring, ask which language the plan's **prose** should be written in — using the question/ask tool the harness provides (e.g. `AskUserQuestion` in Claude Code). Offer three options: **English** (default), **Brazilian Portuguese (pt-BR)**, **Spanish**. If the user skips or no question tool is available, default to English.
+
+The choice covers narrative prose only — Goal, Architecture, Context, Implementation vision, and other descriptions. Everything a downstream skill or agent parses stays verbatim English regardless of choice: section headers and format keywords, `**Status:**` values (Pending/Doing/Done/Failed), Phase-Overview status cells (Detailed/Epic-level/Complete), `**Target:**` values, file paths, commands, code snippets, and identifiers. Translating those breaks ring:executing-plans and ring:running-dev-cycle status matching.
+
 ## Standards
 
 Do NOT fetch standards documents while planning — standards compliance is enforced by the implementation agents and reviewers downstream. Plans reference DRY, YAGNI, and TDD generically.
@@ -91,8 +97,9 @@ If the snippet exists to "save the implementer time", delete it. If it exists be
 ```markdown
 # [Feature Name] Implementation Plan
 
-> **For implementers:** Use ring:executing-plans (rolling wave: implement the
-> detailed phase → user checkpoint → detail the next phase → implement → repeat),
+> **For implementers:** Use ring:executing-plans (rolling wave: dispatch each
+> wave — a phase or one epic, your choice — as a workflow → review → user
+> checkpoint → detail the next phase against the real code → repeat),
 > or ring:running-dev-cycle for the full subagent-orchestrated workflow.
 > This document is the living source of truth — task elaboration for later
 > phases is written back into it during execution.
@@ -193,7 +200,7 @@ After saving the plan, offer execution choice:
 
 > Plan complete and saved to `docs/plans/<filename>.md`. Two execution options:
 >
-> **1. Rolling-Wave Execution (this session)** — Use ring:executing-plans: implement Phase 1, checkpoint with you, elaborate Phase 2 into tasks against the real codebase, implement, and repeat. Best for iterative delivery with course-correction between phases.
+> **1. Rolling-Wave Execution (this session)** — Use ring:executing-plans: you supervise while one workflow per wave-unit (a whole phase, or one epic at a time — you choose at start) implements its tasks; you review what returns, checkpoint, then elaborate the next phase into tasks against the real landed code, and repeat. Best for iterative delivery with course-correction between waves.
 >
 > **2. Subagent-Orchestrated (ring:running-dev-cycle)** — lean backend cycle (Gate 0/8/9) with parallel specialist dispatch. Best for production work that must pass through the full review pool.
 >
@@ -206,6 +213,7 @@ After saving the plan, offer execution choice:
 ## Verification Checklist
 
 Before marking the plan complete:
+- [ ] Plan language confirmed with user (prose only; structural tokens, paths, and code stay English)
 - [ ] Plan header present (Goal, Architecture, Tech Stack, Phase Overview)
 - [ ] Every phase ends in working, testable software
 - [ ] Every epic has Goal, Scope, Dependencies, Done-when, Status

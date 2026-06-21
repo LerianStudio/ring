@@ -1,13 +1,13 @@
 ---
 name: ring:executing-plans
-description: "Executing a phased plan from ring:writing-plans in rolling waves: implements the detailed phase task-by-task with TDD and signed commits via ring:committing-changes, checkpoints at each phase boundary, then elaborates the next phase. Use when a phased plan exists and inline execution is preferred over subagent orchestration. Skip when no plan exists (use ring:writing-plans) or a plan-driven subagent dev cycle is wanted (use ring:running-dev-cycle)."
+description: "Executing a phased plan from ring:writing-plans in rolling waves: the main agent supervises, dispatching one workflow per wave-unit (phase or epic — user's choice) that implements its tasks with TDD and signed commits via ring:committing-changes, reviews the returned work, checkpoints with the user, then elaborates the next phase against the real landed code. Use when a phased plan exists and you want session-supervised execution with a human reviewing each wave. Skip when no plan exists (use ring:writing-plans) or the full gated specialist + reviewer pool is wanted (use ring:running-dev-cycle)."
 ---
 
 # Executing Plans
 
 ## When to use
 - A phased plan exists (typically produced by ring:writing-plans)
-- Inline execution in this session is preferred over full subagent orchestration
+- You want to supervise execution from this session — review each dispatched wave, checkpoint between phases — rather than hand off to the full gated dev cycle
 - Work benefits from phase checkpoints and course-correction between phases
 
 ## Skip when
@@ -24,7 +24,7 @@ description: "Executing a phased plan from ring:writing-plans in rolling waves: 
 
 ---
 
-The loop: **implement the detailed phase → phase checkpoint → elaborate the next phase → repeat.** The plan document is the living source of truth — elaboration writes tasks back into it.
+The loop: **dispatch the current wave as a workflow → review the returned work → phase checkpoint → elaborate the next phase against the real landed code → dispatch the next wave → repeat.** The main agent stays the supervisor and reviewer; the dispatched workflow does the task-by-task implementation. The plan document is the living source of truth — elaboration writes tasks back into it.
 
 **Announce at start:** "Using ring:executing-plans to implement this plan."
 
@@ -45,18 +45,23 @@ The loop: **implement the detailed phase → phase checkpoint → elaborate the 
 | Later phases already task-detailed | Warn — those tasks are stale risk; treat as drafts to re-validate at elaboration time |
 | Stylistic / "nice to have" | Note but proceed |
 
-### Step 2: Implement the Current Phase
+**Then choose dispatch granularity.** Ask the user — using the question/ask tool the harness provides (e.g. `AskUserQuestion` in Claude Code) — whether to dispatch **one workflow per phase** (the whole phase runs as a single wave) or **one workflow per epic** (finer-grained: the main agent reviews and course-corrects between epics inside a phase). Default to per-phase if the user skips. This sets the wave-unit for the rest of execution.
 
-For each task in the detailed phase, in order:
+### Step 2: Dispatch and Supervise the Current Wave
 
-1. Mark as in-progress in the task tracker
-2. Implement per the task's **Implementation vision** — its decisions are binding; raise a blocker rather than silently diverging
-3. Use ring:test-driven-development for new production code: write the failing test first from the task's **Verification** intent, capture the RED output, then implement
-4. Run the task's verification; paste the output
-5. Close the task with ring:committing-changes (atomic, signed)
-6. Mark as completed only after verification passes — tick the task's `- [ ] Done` checkbox in the plan document
+Dispatch the wave-unit chosen in Step 1 — a whole phase, or a single epic — as **one workflow** covering all its tasks. The main agent does not implement; it supervises and reviews.
 
-**Do not skip the RED phase.** The plan carries no test code — writing the failing test from the verification intent IS the task's first step.
+The dispatched workflow runs each task in the unit, in dependency order, and for every task MUST:
+
+1. Implement per the task's **Implementation vision** — its decisions are binding; raise a blocker rather than silently diverging
+2. Use ring:test-driven-development for new production code: write the failing test first from the task's **Verification** intent, capture the RED output, then implement
+3. Run the task's verification; capture the output
+4. Close the task with ring:committing-changes (atomic, signed)
+5. Tick the task's `- [ ] Done` checkbox in the plan document only after verification passes
+
+**Do not skip the RED phase.** The plan carries no test code — the failing test comes from the verification intent.
+
+When the workflow returns, the main agent **reviews** the wave as supervisor: confirm each task's tests actually ran and passed, commits are atomic and signed, the implementation matches the vision, and nothing was silently deferred. Bounce anything that fails review into a follow-up dispatch before moving on. If the wave-unit is an epic and the phase has more epics, dispatch the next epic; advance to the checkpoint only once the phase has no tasks left.
 
 ### Step 3: Phase Checkpoint (user gate)
 
@@ -74,7 +79,7 @@ After the checkpoint, detail the next phase before implementing it:
 2. Fold in learnings and deviations from completed phases; if reality diverged enough to change an epic's scope or approach, surface that to the user before proceeding
 3. Break each epic into dispatch-ready tasks using the **Task Format from ring:writing-plans** (load that skill if the format is not in context) — same bar: context with file:line references, implementation vision with decisions made, exact files, verification, done-when
 4. Write the tasks into the plan document under their epics; flip the phase's Status to `Detailed`
-5. Return to Step 2 with the newly detailed phase
+5. Return to Step 2 — dispatch the newly detailed wave (per the granularity chosen in Step 1) and await its return
 
 Repeat Steps 2–4 until every phase is complete.
 
@@ -114,6 +119,8 @@ For production work, hand off to ring:reviewing-code to run the review pool agai
 ## Remember
 
 - Review the plan critically first — fix gaps before executing
+- Choose dispatch granularity up front — one workflow per phase, or one per epic
+- The main agent supervises and reviews; the dispatched workflow implements
 - One detailed wave at a time — never elaborate two phases ahead
 - The plan document is living: tick tasks, flip statuses, record deviations
 - Don't skip verifications (RED phase included)
@@ -125,6 +132,8 @@ For production work, hand off to ring:reviewing-code to run the review pool agai
 ## Verification Checklist
 
 Before marking the plan complete:
+- [ ] Dispatch granularity (phase or epic) chosen with the user
+- [ ] Every dispatched wave reviewed by the main agent before its checkpoint
 - [ ] Every phase implemented and verified, in order
 - [ ] Every phase boundary checkpointed with the user (or continuous mode explicitly pre-authorized)
 - [ ] Every later phase elaborated into tasks before implementation, against the real codebase
