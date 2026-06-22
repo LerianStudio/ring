@@ -41,7 +41,7 @@ State is persisted to `{state_path}` (either `docs/ring:running-dev-cycle/curren
   "commit_timing": "per_task|per_epic|at_end",
   "_comment_phase_checkpoint": "Asked at cycle init alongside execution_mode. 'manual' (default): AskUserQuestion at each phase boundary (Step 11.5) before elaborating the next phase. 'auto': log a phase summary and continue without pausing.",
   "phase_checkpoint": "manual|auto",
-  "_comment_lerian_map_sync": "OPTIONAL / ADDITIVE. Present ONLY when task_source is 'plan_file_synced' or 'lerian_map' (cycle-init Task source question, SKILL.md Execution Modes, question 3). Absent or enabled:false ⇒ feature off ⇒ zero Gandalf calls ⇒ today's behavior. All Map I/O is async fire-and-forget via the gandalf-webhook; the cycle never polls/blocks. See SKILL.md '## Lerian Map Sync (optional)' for full mechanics. status_enum is READ from the board at runtime (never hardcoded); discovery (productId/teamId/milestoneId) is DISCOVERED by Gandalf from the repo's git remote, not hardcoded.",
+  "_comment_lerian_map_sync": "OPTIONAL / ADDITIVE. Present ONLY when task_source is 'plan_file_synced' or 'lerian_map' (cycle-init Task source question, SKILL.md Execution Modes, question 3). Absent or enabled:false ⇒ feature off ⇒ zero Gandalf calls ⇒ today's behavior. All Map I/O is async fire-and-forget via the gandalf-webhook; the cycle never polls/blocks. See SKILL.md '## Lerian Map Sync (optional)' for full mechanics. status_enum is READ from the board at runtime (never hardcoded); discovery is DISCOVERED by Gandalf from the repo's git remote, not hardcoded: repo → /products(repositoryUrl) → /features (resolve the Feature by name → featureId, the ANCHOR) → resolve the feature's `Desenvolvimento` milestone BY NAME → dev_milestone_id. The flow CREATEs epic-cards under (featureId, dev_milestone_id) with a one-time preview+confirm; it NEVER creates/edits the Feature (human-only) or any milestone (template-supplied).",
   "lerian_map_sync": {
     "enabled": true,
     "transport": "gandalf",
@@ -53,25 +53,37 @@ State is persisted to `{state_path}` (either `docs/ring:running-dev-cycle/curren
       "feature_slug": "slc-v1",
       "branch": "feat/slc-e1.1-bounded-contexts"
     },
-    "board": { "discovered": true, "productId": 13, "teamId": 5, "milestoneId": 433 },
+    "_comment_board": "Discovery-time board identity. ANCHOR: featureId — the human-created Feature (GET /features, resolved by name; AskUserQuestion if ambiguous) under which this cycle's epic-cards live. The flow NEVER creates/edits the Feature; the HUMAN creates it in the Map UI, which copies the fixed milestone template (Planejamento, Desenvolvimento, Documentação, Testes Internos, Teste Taura, Release). dev_milestone_id / dev_milestone_name = the feature's `Desenvolvimento` milestone, RESOLVED BY NAME (not by order, not a phase) — the milestone dev epic-cards attach to by NATURE. A Plan Phase is internal rolling-wave structure ONLY and is NEVER a milestone — MUST NOT map Phase → milestone. milestoneId is the legacy/echo of dev_milestone_id, kept for back-compat; prefer dev_milestone_id. productId/teamId stay as discovered from /products(repositoryUrl).",
+    "board": { "discovered": true, "productId": 13, "teamId": 5, "featureId": 77, "dev_milestone_id": 433, "dev_milestone_name": "Desenvolvimento", "milestoneId": 433 },
     "status_enum": ["backlog","todo","in_progress","testing","to_review","on_hold","blocked","done","canceled"],
-    "status_map": { "gate0": "in_progress", "awaiting_test": "testing", "pr_open": "to_review", "pushed_develop": "done" },
-    "matches": [
+    "status_map": { "epic_start": "in_progress", "epic_validated": "testing", "pr_open": "to_review", "pushed_develop": "done" },
+    "_comment_epic_matches": "ONE entry per Epic (Epic N.M) — the Epic maps to a Map Task-card (`tipo: Task`) attached to (board.featureId, board.dev_milestone_id = the feature's `Desenvolvimento` milestone). card_id is that card's id — ASSIGNED BY THE FLOW when it POSTs the card during the discovery handshake's create-with-preview step (SKILL.md `### Discovery handshake`), NOT pre-existing; a card already on the board (matched by name / `[map:#<card_id>]` tag) reuses its id instead of being duplicated. status_dispatch tracks the 9-column STATUS push (epic lifecycle: in_progress → testing → to_review → done, plus blocked/on_hold/canceled off-path), targeting card_id; pushes are ABSOLUTE-COLUMN (status = X), never a relative move — safe to replay. body_dispatch tracks the MACRO OVERVIEW push to the card DESCRIÇÃO body (what the epic is + a short direct summary of each task) — NOT the full dispatch-ready contract, which lives ONLY in plan.md. body_dispatch tracks the macro-body push; the per-task checklist-item ensure is a separate concern tracked in task_matches[].done_dispatch. All records use the same pending|dispatched|synced lifecycle. status_dispatch is written at the epic-level status hooks (gate-0 Pre-Dispatch epic start, gate-9 Step 11.1, cycle-completion Step 12.1); the body_dispatch / checklist-ensure mechanics and their per-mode gating live in gates/phase-boundary.md Step 11.5.5b (the canonical source — not restated here).",
+    "epic_matches": [
       {
-        "unit_id": "Task 1.1.1",
-        "board_task_id": 1222,
+        "epic_id": "Epic 1.1",
+        "card_id": 1222,
         "matched": true,
         "desired_status": "in_progress",
         "synced_status": "todo",
-        "dispatch": { "task_id": "a1b2c3", "to": "in_progress", "dispatched_at": "2026-06-11T15:00:00Z", "state": "pending|dispatched|synced" },
-        "_comment_body_dispatch": "Mirrors dispatch (same pending|dispatched|synced lifecycle) but tracks pushes of the task BODY (the dispatch-ready requirement block) instead of status. Written by phase-boundary write-back (Step 11.5.5b) and the Map Body Hard Gate (gate-0-implementation.md Step 2.1.5).",
+        "status_dispatch": { "task_id": "a1b2c3", "to": "in_progress", "dispatched_at": "2026-06-11T15:00:00Z", "state": "pending|dispatched|synced" },
         "body_dispatch": { "task_id": "d4e5f6", "dispatched_at": "2026-06-11T15:00:00Z", "state": "pending|dispatched|synced" }
+      }
+    ],
+    "_comment_task_matches": "ONE entry per Task (Task N.M.T) — each Task maps to a CHECKLIST ITEM {id, text, done} inside its Epic's card. The plan-side key is unit_id (e.g. 'Task 1.1.1') — deliberately NOT renamed to task_id, which is reserved for the Gandalf dispatch id inside the *_dispatch objects; unit_id (plan side) + checklist_item_id (board side) together express the mapping, mirroring epic_id + card_id in epic_matches. checklist_item_id is the item's id; checklist_item.text = the task name. card_id is the SAME card as the task's parent epic in epic_matches — MULTIPLE task_matches share one card_id (their epic). done flips true ONLY at push to repo ≥ develop (same terminal rule as the epic `done` status), NOT at Gate 9. done_dispatch tracks that checklist flip. ⛔ IDEMPOTENCY: the checklist push MERGES BY checklist_item_id (read-modify-write of the card's checklist array) — it MUST NEVER replace the whole array. A retried push re-asserts the same item id safely.",
+    "task_matches": [
+      {
+        "unit_id": "Task 1.1.1",
+        "epic_id": "Epic 1.1",
+        "card_id": 1222,
+        "checklist_item_id": "uuid-or-map-id",
+        "done": false,
+        "done_dispatch": { "task_id": "g7h8i9", "dispatched_at": "2026-06-11T15:00:00Z", "state": "pending|dispatched|synced" }
       }
     ],
     "pending": [],
     "degraded": false
   },
-  "_comment_lerian_map_source": "Present ONLY when task_source == 'lerian_map' (SKILL.md '## Lerian Map as Task Source (optional)'). Identity of the board milestone being executed as the task source. PRECEDENCE: in source mode lerian_map_source.milestone_id is CANONICAL; lerian_map_sync.board.milestoneId is a discovery-time echo only and MUST be overwritten to match it (or dropped in source mode) — never read board.milestoneId for source-mode decisions. Board/product identity stays in lerian_map_sync.board (discovery handshake, not duplicated); per-epic/per-task board ids live in the [map:#<id>] tags of the derived plan and in lerian_map_sync.matches[] — the same pattern sync mode already uses.",
+  "_comment_lerian_map_source": "Present ONLY when task_source == 'lerian_map' (SKILL.md '## Lerian Map as Task Source (optional)'). Identity of the source milestone — ALWAYS the feature's `Desenvolvimento` milestone, RESOLVED BY NAME (NOT a phase, NOT the lowest-order not-done milestone — the board has no phase concept; dev epic-cards attach to `Desenvolvimento` by nature). The derived plan materializes all `Desenvolvimento` cards under a SINGLE Phase 1; later phases come from rolling-wave elaboration, never from milestones. PRECEDENCE: in source mode lerian_map_source.milestone_id is CANONICAL (= board.dev_milestone_id); lerian_map_sync.board.milestoneId is a discovery-time echo only — normalize it ONCE at discovery (set board.milestoneId = board.dev_milestone_id, or drop the field in source mode); it is NOT a runtime reconciliation rule. Never read board.milestoneId for source-mode decisions. Feature/product identity stays in lerian_map_sync.board (board.featureId anchor + dev_milestone_id; discovery handshake, not duplicated); per-epic board ids (card_id) live in the [map:#<card_id>] tags of the derived plan (tagged at the epic level) and in lerian_map_sync.epic_matches[]; per-task ids (checklist_item_id) live in lerian_map_sync.task_matches[] — the same pattern sync mode already uses.",
   "lerian_map_source": {
     "milestone_id": 433,
     "milestone_name": "Desenvolvimento",
