@@ -526,6 +526,17 @@ class ErrorBoundary extends Component<Props, State> {
 </ErrorBoundary>
 ```
 
+#### Advanced Composition Patterns
+
+For comprehensive guidance on composition patterns that prevent boolean prop
+proliferation, compound component architecture, state lifting, and React 19
+patterns — use skill `ring:applying-composition-patterns`.
+
+Trigger indicators:
+- Component accepts >3 boolean props
+- Multiple conditional rendering branches based on boolean flags
+- Component file exceeds 200 lines with >3 useState/useEffect hooks
+
 ---
 
 ## File Organization (MANDATORY)

@@ -48,6 +48,7 @@ All code changes go through `Task(subagent_type=...)`. Announce at start: "Using
 | Gate | Cadence | Skill | Agent | Purpose |
 |------|---------|-------|-------|---------|
 | 0 | task | ring:implementing-tasks | ring:frontend / ring:ui-engineer / ring:bff-ts | TDD, coverage, accessibility, visual/E2E/perf checks, local runtime |
+| 0.5 | task (conditional) | ring:applying-composition-patterns | ring:frontend | Composition refactoring when complexity signals detected |
 | 7 | epic | ring:reviewing-code | 9 defaults + triggered specialists via ring:reviewing-code | Code review |
 | 8 | task | ring:validating-acceptance-criteria | User | Acceptance sign-off |
 
@@ -138,6 +139,38 @@ Do not elaborate more than one phase ahead — detail decays before execution re
 
 Sub-skill MUST be loaded before dispatching the agent.
 
+## Gate 0.5: Composition Complexity Scan (Conditional)
+
+After Gate 0 passes, scan changed `.tsx`/`.jsx` files for composition complexity signals.
+If no signals are detected, skip this gate entirely (zero overhead).
+
+### Detection Heuristics
+
+| Signal | Threshold | Detection |
+|--------|-----------|-----------|
+| Boolean prop count | >=3 boolean props in Props type/interface | Grep: `prop?: boolean` or `prop: boolean` |
+| File size + hooks | >200 lines AND >3 useState/useEffect | Line count + hook grep |
+| Conditional branches | >=3 ternaries or `&&` chains tied to boolean props | Pattern: `{isX && ...}` or `isX ? ... : ...` |
+
+### When Triggers Hit
+
+1. `Skill("ring:applying-composition-patterns")` — load the composition patterns skill
+2. Dispatch `ring:frontend` with flagged files + skill content as context
+3. Agent applies patterns in priority order:
+   - 1.1 Eliminate boolean prop proliferation (CRITICAL)
+   - 1.2 Extract compound components if applicable
+   - 2.x Lift state only if warranted
+   - 3-4 Apply only if natural fit
+4. Re-run tests — all MUST pass; coverage MUST NOT decrease vs Gate 0
+5. Commit separately: `refactor(component): apply composition patterns to <ComponentName>`
+
+### Safety
+
+- If refactoring breaks tests irrecoverably → rollback to Gate 0 state, skip Gate 0.5,
+  proceed to Gate 7 with note: "Composition refactoring attempted but reverted — review flagged files manually"
+- Coverage after refactoring MUST be >= Gate 0 coverage
+- Behavior MUST NOT change — refactor structure only (same props in = same render out)
+
 ## Gate 7: Reviewers
 
 Invoke `Skill("ring:reviewing-code")`. The ring:reviewing-code skill dispatches its 9 default reviewers plus triggered conditional specialists in parallel and applies its own pass/fail rules.
@@ -147,6 +180,7 @@ Invoke `Skill("ring:reviewing-code")`. The ring:reviewing-code skill dispatches 
 | Gate | Required for COMPLETE |
 |------|-----------------------|
 | 0 | TDD RED captured (behavioral) + GREEN passes; visual: implementation complete |
+| 0.5 | Conditional: no complexity signals OR refactored + tests pass + coverage >= Gate 0 |
 | 7 | ring:reviewing-code PASS (all 9 defaults and triggered specialists) |
 | 8 | Explicit "APPROVED" from user |
 
