@@ -11,7 +11,7 @@ argument-hint: "[base-branch]"
 - Preparing a pull request for review and need a comprehensive description
 - Generating a PR title automatically from commit message analysis
 - Classifying the type of change (bug fix, feature, breaking change)
-- Saving a reusable PR description to `docs/pr-descriptions/<branch-name>.md`
+- Saving a reusable PR description to `docs/pr-descriptions/<branch-name-with-hyphens>.md`
 
 ## Skip when
 - The PR is a single trivial commit with an obvious description
@@ -24,10 +24,10 @@ argument-hint: "[base-branch]"
 
 - **MANDATORY**: Identify actual branch point to avoid analyzing entire development history
 - Detect the base branch (develop, main, master) that the current branch was created from
-- **CRITICAL**: Use `git log --oneline --decorate --graph -10` to identify the true branch start point
-- **NEVER** use `git log main..HEAD` or `git diff main...HEAD` as this includes all history
-- **CORRECT APPROACH**: Use `git diff HEAD~n..HEAD` where n = number of commits on the current branch
-- **CORRECT APPROACH**: Use `git log --oneline HEAD~n..HEAD` to get only branch-specific commits
+- **CORRECT APPROACH**: Use `git merge-base HEAD <base-branch>` to find the true divergence point
+- **CORRECT APPROACH**: Use `git log --oneline $(git merge-base HEAD <base-branch>)..HEAD` for branch-specific commits
+- **CORRECT APPROACH**: Use `git diff $(git merge-base HEAD <base-branch>)..HEAD` for branch-specific changes
+- **NEVER** rely on manual `HEAD~n` counting — it breaks on merges, rebases, and long-lived branches
 - Run `git status --porcelain` to identify uncommitted files (excluded from PR)
 - **Enforce that PR analyzes ONLY commits made on the current feature branch, not development history**
 - Determine if this is a bug fix, feature, or breaking change based on actual branch commits
@@ -45,8 +45,8 @@ argument-hint: "[base-branch]"
 - Include summary of changes and motivation based on ONLY branch-specific commits
 - Pre-fill appropriate checkboxes based on change analysis
 - Suggest testing strategies
-- Derive the output filename from the current branch name (e.g., `feature/FE-157` -> `FE-157.md`)
-- Save to `docs/pr-descriptions/<branch-name>.md` (create directory if needed)
+- Derive the output filename from the full branch name with slashes replaced by hyphens (e.g., `feature/FE-157` -> `feature-FE-157.md`)
+- Save to `docs/pr-descriptions/<derived-filename>` (create directory if needed)
 
 ## CRITICAL Implementation Steps
 
@@ -165,4 +165,4 @@ The skill generates pull requests following this exact structure:
 - **Precise Scope**: Prevents inclusion of entire development history in PR description
 - Generated PRs reflect actual feature branch changes, not cumulative project history
 - Breaking changes are flagged based on actual branch commits only
-- Generated PR descriptions are saved to `docs/pr-descriptions/<branch-name>.md` for easy copying to GitHub/GitLab
+- Generated PR descriptions are saved to `docs/pr-descriptions/<branch-name-with-hyphens>.md` for easy copying to GitHub/GitLab

@@ -235,6 +235,7 @@ const ComposerSubmit = () => {
 // Export as compound component
 const Composer = {
   Provider: ComposerProvider,
+  Context: ComposerContext, // exported for external consumers (e.g. buttons outside Frame)
   Frame: ComposerFrame,
   Input: ComposerInput,
   Submit: ComposerSubmit,
@@ -546,6 +547,7 @@ const ForwardMessageDialog = () => {
   )
 }
 
+// ComposerContext is exported from the Composer module for external consumers
 // This button lives OUTSIDE Composer.Frame but can still submit based on its context!
 const ForwardButton = () => {
   const {
@@ -891,7 +893,7 @@ Use children when composing static structure.
 
 **Impact: MEDIUM**
 
-React 19+ only. Don't use `forwardRef`; use `use()` instead of `useContext()`.
+React 19+ only. Prefer `ref` as a regular prop over `forwardRef`; prefer `use()` over `useContext()` for new components.
 
 ### 4.1 React 19 API Changes
 
@@ -899,7 +901,7 @@ React 19+ only. Don't use `forwardRef`; use `use()` instead of `useContext()`.
 
 > **React 19+ only.** Skip this if you're on React 18 or earlier.
 
-In React 19, `ref` is now a regular prop (no `forwardRef` wrapper needed), and `use()` replaces `useContext()`.
+In React 19, `ref` is a regular prop (making `forwardRef` unnecessary for new components), and `use()` is the preferred alternative to `useContext()`. Both `forwardRef` and `useContext` still work but are discouraged in new code.
 
 **Incorrect: forwardRef in React 19**
 

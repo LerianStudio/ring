@@ -162,7 +162,7 @@ If no signals are detected, skip this gate entirely (zero overhead).
    - 2.x Lift state only if warranted
    - 3-4 Apply only if natural fit
 4. Re-run tests — all MUST pass; coverage MUST NOT decrease vs Gate 0
-5. Commit separately: `refactor(component): apply composition patterns to <ComponentName>`
+5. Commit via `ring:committing-changes` — expected message: `refactor(component): apply composition patterns to <ComponentName>`
 
 ### Safety
 

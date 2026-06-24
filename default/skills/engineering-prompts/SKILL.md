@@ -24,10 +24,11 @@ argument-hint: "<prompt-goal>"
 
 **THIS SKILL ONLY GENERATES PROMPTS. IT NEVER:**
 
-- Reads, analyzes, or modifies any files in the codebase (except `docs/prompts/` for saving)
+- Proactively explores, modifies, or debugs any files in the codebase
 - Attempts to fix, debug, or improve code in the project
 - Performs the task described in the user's input
-- Explores the codebase in any way
+
+**Allowed reads:** Files the user explicitly references as input context, and `docs/prompts/` for saving output.
 
 **THE INPUT IS A DESCRIPTION OF WHAT THE PROMPT SHOULD DO, NOT A TASK TO PERFORM.**
 
