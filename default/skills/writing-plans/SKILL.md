@@ -100,7 +100,9 @@ If the snippet exists to "save the implementer time", delete it. If it exists be
 > **For implementers:** Use ring:executing-plans (rolling wave: dispatch each
 > wave — a phase or one epic, your choice — as a workflow → review → user
 > checkpoint → detail the next phase against the real code → repeat),
-> or ring:running-dev-cycle for the full subagent-orchestrated workflow.
+> ring:dispatching-workflows to run each phase as a reviewed multi-agent
+> workflow (review + contrarian baked in), or ring:running-dev-cycle for the
+> full subagent-orchestrated workflow.
 > This document is the living source of truth — task elaboration for later
 > phases is written back into it during execution.
 
@@ -196,17 +198,19 @@ If you find issues, fix them inline. No need to re-review — just fix and move 
 
 ## Execution Handoff
 
-After saving the plan, offer execution choice:
+After saving the plan, announce the save, then collect the execution choice **using the question/ask tool the harness provides** (e.g. `AskUserQuestion` in Claude Code). If no question tool is available, present the options as a prose prompt and ask which to use. The three options:
 
-> Plan complete and saved to `docs/plans/<filename>.md`. Two execution options:
+> Plan complete and saved to `docs/plans/<filename>.md`. Pick how to execute it:
 >
-> **1. Rolling-Wave Execution (this session)** — Use ring:executing-plans: you supervise while one workflow per wave-unit (a whole phase, or one epic at a time — you choose at start) implements its tasks; you review what returns, checkpoint, then elaborate the next phase into tasks against the real landed code, and repeat. Best for iterative delivery with course-correction between waves.
+> **1. Rolling-Wave Execution (this session)** — Use ring:executing-plans: you supervise while one workflow per wave-unit (a whole phase, or one epic at a time — you choose at start) implements its tasks; you review what returns, checkpoint, then elaborate the next phase into tasks against the real landed code, and repeat. Lightest: one supervised subagent per wave, reviewed after it returns. Best for iterative delivery with course-correction between waves.
 >
-> **2. Subagent-Orchestrated (ring:running-dev-cycle)** — lean backend cycle (Gate 0/8/9) with parallel specialist dispatch. Best for production work that must pass through the full review pool.
+> **2. Reviewed Multi-Agent Workflows (this session)** — Use ring:dispatching-workflows: the same rolling wave, but each phase runs as a multi-agent workflow harness that implements, reviews, and runs an adversarial contrarian pass internally before returning verified work. Best when you want review and a contrarian baked into every wave, without the full gated cycle.
 >
-> Which approach?
+> **3. Subagent-Orchestrated (ring:running-dev-cycle)** — lean backend cycle (Gate 0/8/9) with parallel specialist dispatch. Heaviest: full review pool per epic. Best for production work that must pass through the full review pool.
 
 **If Rolling-Wave chosen:** Continue with ring:executing-plans in this session.
+
+**If Reviewed Multi-Agent Workflows chosen:** Continue with ring:dispatching-workflows in this session.
 
 **If Subagent-Orchestrated chosen:** Hand off to ring:running-dev-cycle, which owns implementation across the lean cycle (Gate 0 per task, Gates 8/9 per epic, phase boundaries per phase).
 

@@ -1,6 +1,6 @@
 # Ring Marketplace Manual
 
-Quick reference guide for the Ring skills library and workflow system. This monorepo provides 4 plugins with 67 skills and 33 agents for enforcing proven software engineering practices across the entire software delivery value chain.
+Quick reference guide for the Ring skills library and workflow system. This monorepo provides 4 plugins with 75 skills and 33 agents for enforcing proven software engineering practices across the entire software delivery value chain.
 
 ---
 
@@ -307,7 +307,7 @@ These enforce quality standards:
 ### Session Startup
 
 1. SessionStart hook runs automatically
-2. All 67 skills are auto-discovered and available
+2. All 75 skills are auto-discovered and available
 3. `ring:using-ring` workflow is activated (skill checking is now mandatory)
 
 ### Agent Dispatching

@@ -13,6 +13,7 @@ description: "Executing a phased plan from ring:writing-plans in rolling waves: 
 ## Skip when
 - Plan doesn't exist yet — use ring:writing-plans first
 - Production-grade work requiring the full review pool — use ring:running-dev-cycle instead (lean backend cycle, Gate 0/8/9, dispatches specialists in parallel)
+- Each wave should run as a multi-agent harness with review and a contrarian pass baked in — use ring:dispatching-workflows (this skill dispatches one supervised subagent per wave; review happens after it returns)
 - Plan covers multiple independent subsystems — split into separate plans before executing
 
 ## Sequence
