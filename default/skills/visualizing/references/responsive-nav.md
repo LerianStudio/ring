@@ -159,7 +159,7 @@ Adjust `margin: 0 -40px` and `padding-left/right: 40px` to match your `body` pad
 
 ## JavaScript scroll spy
 
-Place before `</body>`, after any Mermaid init:
+Place before `</body>`, after any diagram init:
 
 ```html
 <script>

@@ -426,158 +426,279 @@ li::before {
 }
 ```
 
-## Mermaid zoom controls
+### List markers overlapping container borders
 
-Mermaid diagrams are often too small to read comfortably, especially complex flowcharts and sequence diagrams. Add zoom controls to every `.mermaid-wrap` container.
+By default, `list-style-position: outside` places list markers (bullets, numbers) outside the content box. When lists are inside bordered containers (cards, callout boxes), the markers can overlap or extend beyond the border.
+
+```css
+/* WRONG: markers overlap container border */
+.card ol, .card ul {
+  padding-left: 20px;  /* not enough for outside markers */
+}
+
+/* RIGHT: use inside positioning */
+.card ol, .card ul {
+  list-style-position: inside;
+}
+
+/* OR: adequate padding for outside markers */
+.card ol, .card ul {
+  padding-left: 2em;  /* ~32px gives room for markers */
+}
+
+/* OR: custom markers with absolute positioning (most control) */
+.card ol {
+  list-style: none;
+  padding-left: 0;
+  counter-reset: item;
+}
+.card ol li {
+  counter-increment: item;
+  padding-left: 2em;
+  position: relative;
+}
+.card ol li::before {
+  content: counter(item) ".";
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-weight: 600;
+}
+```
+
+**Rule of thumb:** Any `<ol>` or `<ul>` inside a bordered container needs either `list-style-position: inside` or `padding-left: 2em` minimum. The default 20px padding is not enough for outside-positioned markers.
+
+## Code blocks
+
+Code blocks need explicit whitespace preservation and a max-height constraint. Without these, code runs together and long files overwhelm the page.
+
+### Basic pattern
+
+```css
+.code-block {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  overflow-x: auto;
+  /* CRITICAL: preserve line breaks and indentation */
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Constrain height for long code */
+.code-block--scroll {
+  max-height: 400px;
+  overflow-y: auto;
+}
+```
+
+```html
+<pre class="code-block code-block--scroll"><code>// Your code here
+function example() {
+  return true;
+}</code></pre>
+```
+
+### With file header
+
+```css
+.code-file {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.code-file__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.code-file__body {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.5;
+  padding: 16px;
+  background: var(--surface-elevated);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 500px;
+  overflow: auto;
+}
+```
+
+```html
+<div class="code-file">
+  <div class="code-file__header">
+    <span>src/extension.ts</span>
+  </div>
+  <pre class="code-file__body"><code>export function activate() {
+  // ...
+}</code></pre>
+</div>
+```
+
+For syntax coloring inside these blocks, use Highlight.js (see `./libraries.md`). For diff/review views, use `@pierre/diffs` instead.
+
+### Implementation plans: don't dump full files
+
+For implementation plans and architecture docs, **don't display entire source files inline**. Instead:
+
+1. **Show structure, not code:**
+   ```html
+   <div class="file-structure">
+     <div class="file-structure__path">src/extension.ts</div>
+     <ul class="file-structure__outline">
+       <li><code>BOOMERANG_INSTRUCTIONS</code> — System prompt for autonomous mode</li>
+       <li><code>clearState()</code> — Reset extension state</li>
+       <li><code>updateStatus()</code> — Update UI status indicator</li>
+       <li><code>/boomerang</code> command — Start autonomous task</li>
+       <li><code>before_agent_start</code> hook — Inject instructions</li>
+       <li><code>agent_end</code> hook — Generate summary</li>
+     </ul>
+   </div>
+   ```
+
+2. **Use collapsible sections for full code:**
+   ```html
+   <details class="collapsible">
+     <summary>Full implementation (87 lines)</summary>
+     <pre class="code-file__body"><code>...</code></pre>
+   </details>
+   ```
+
+3. **Show key snippets only:**
+   ```html
+   <p>The core logic intercepts task completion:</p>
+   <pre class="code-block"><code>pi.on("agent_end", async () => {
+     const summary = generateSummary(workEntries);
+     boomerangComplete = true;
+   });</code></pre>
+   ```
+
+**Anti-patterns:**
+- Displaying full source files inline (100+ lines overwhelming the page)
+- Code blocks without `white-space: pre-wrap` (code runs together into an unreadable wall)
+- No height constraint on long code (page becomes endless scroll)
+
+If someone needs the full file, put it in a collapsible section or link to it.
+
+## Directory tree
+
+For file structures, use `<pre>` with monospace + `white-space: pre`. Tree connectors (`├──`, `└──`, `│`) only work when vertically aligned — they become noise if text wraps.
+
+```css
+.dir-tree {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.7;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.dir-tree .ann { color: var(--text-muted); font-size: 11px; font-style: italic; }
+.dir-tree .hl  { color: var(--accent); font-weight: 600; }
+```
+
+```html
+<pre class="dir-tree">my-project/
+├── src/
+│   ├── <span class="hl">index.ts</span>       <span class="ann">— entry point</span>
+│   ├── services/
+│   │   └── <span class="hl">api.py</span>     <span class="ann">(142 lines)</span>
+│   └── utils/
+├── tests/            <span class="ann">(14 test files)</span>
+└── README.md</pre>
+```
+
+For labeled trees, wrap in a card. For side-by-side comparisons, put two cards in a grid:
+
+```css
+.dir-tree-card { border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.dir-tree-card__header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--border);
+  font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: 1.5px;
+}
+.dir-tree-card .dir-tree { border: none; border-radius: 0; }
+
+/* Side-by-side: two .dir-tree-card in a grid */
+.dir-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+@media (max-width: 900px) { .dir-compare { grid-template-columns: 1fr; } }
+```
+
+**Never** render tree connectors inside wrapping text (`white-space: normal`), flex children, or grid items — the vertical pipes lose alignment and the hierarchy becomes unreadable.
+
+## Diagram shell (D2 SVG pan/zoom engine)
+
+D2 diagrams are static inline SVGs (see `./libraries.md` "D2 diagrams"). The canonical `.diagram-shell` wraps any inline `<svg>` in a toolbar plus a pan/zoom viewport. Copy this CSS from `../templates/diagram.html` — it is the source of truth. The engine is **SVG-agnostic**: it reads the SVG's `viewBox` and works on any inline SVG, which is why `slide-deck.html` reuses it unchanged.
 
 ### CSS
 
 ```css
-.mermaid-wrap {
-  position: relative;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 32px 24px;
-  overflow: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
-}
-.mermaid-wrap::-webkit-scrollbar { width: 6px; height: 6px; }
-.mermaid-wrap::-webkit-scrollbar-track { background: transparent; }
-.mermaid-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-.mermaid-wrap::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
-
-.mermaid-wrap .mermaid {
-  transition: transform 0.2s ease;
-  transform-origin: top center;
-}
-
-.zoom-controls {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  display: flex;
-  gap: 2px;
-  z-index: 10;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 2px;
-}
-
-.zoom-controls button {
-  width: 28px;
-  height: 28px;
-  border: none;
-  background: transparent;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 14px;
-  cursor: pointer;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.zoom-controls button:hover {
-  background: var(--border);
-  color: var(--text);
-}
-
-.mermaid-wrap.is-zoomed { cursor: grab; }
-.mermaid-wrap.is-panning { cursor: grabbing; user-select: none; }
-
-@media (prefers-reduced-motion: reduce) {
-  .mermaid-wrap .mermaid { transition: none; }
-}
+.diagram-shell{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:hidden;margin:8px 0 24px}
+.diagram-toolbar{display:flex;gap:6px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--surface-muted)}
+.diagram-toolbar .title{font-size:13px;font-weight:600;color:var(--text)}
+.diagram-toolbar .spacer{flex:1}
+.diagram-label{font-size:12px;color:var(--text-muted);font-family:var(--font-mono);min-width:42px;text-align:right}
+.diagram-toolbar button{font:inherit;font-size:14px;width:30px;height:30px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--border-strong);background:var(--surface);color:var(--text-secondary);border-radius:6px;cursor:pointer;transition:.15s}
+.diagram-toolbar button:hover{border-color:var(--accent);color:var(--text)}
+.diagram-viewport{position:relative;height:600px;overflow:hidden;cursor:grab;background-image:radial-gradient(circle at 1px 1px,var(--border) 1px,transparent 0);background-size:22px 22px}
+.diagram-viewport.grabbing{cursor:grabbing}
+.diagram-canvas{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform}
+.diagram-canvas svg{display:block}
+.diagram-shell:fullscreen{border-radius:0}
+.diagram-shell:fullscreen .diagram-viewport{height:calc(100vh - 51px)}
 ```
 
 ### HTML
 
 ```html
-<div class="mermaid-wrap">
-  <div class="zoom-controls">
-    <button onclick="zoomDiagram(this, 1.2)" title="Zoom in">+</button>
-    <button onclick="zoomDiagram(this, 0.8)" title="Zoom out">&minus;</button>
-    <button onclick="resetZoom(this)" title="Reset zoom">&#8634;</button>
+<div class="diagram-shell">
+  <div class="diagram-toolbar">
+    <span class="title">Diagram name</span>
+    <span class="spacer"></span>
+    <span class="diagram-label">100%</span>
+    <button data-a="out" title="Zoom out">−</button>
+    <button data-a="in" title="Zoom in">+</button>
+    <button data-a="one" title="100%">1:1</button>
+    <button data-a="fit" title="Fit">⤢</button>
+    <button data-a="full" title="Fullscreen">⛶</button>
   </div>
-  <pre class="mermaid">
-    graph TD
-      A --> B
-  </pre>
+  <div class="diagram-viewport">
+    <div class="diagram-canvas">
+      <!-- Paste the D2-generated <svg> here (after stripping <?xml?>). -->
+    </div>
+  </div>
 </div>
 ```
 
-### JavaScript
+### Engine behavior
 
-Add once at the end of the page. Handles button clicks and scroll-to-zoom on all `.mermaid-wrap` containers:
+The generic engine (full implementation in `../templates/diagram.html`'s `<script>`) drives every `.diagram-shell` on the page. It removes the SVG's fixed `width`/`height`, reads the `viewBox` for natural dimensions, then provides:
 
-```javascript
-function updateZoomState(wrap) {
-  var target = wrap.querySelector('.mermaid');
-  var zoom = parseFloat(target.dataset.zoom || '1');
-  wrap.classList.toggle('is-zoomed', zoom > 1);
-}
+- **Toolbar buttons:** zoom out (`−`), zoom in (`+`), reset to `1:1`, fit-to-viewport (`⤢`), and fullscreen (`⛶`).
+- **Ctrl/Cmd + wheel** to zoom toward the cursor; plain wheel pans.
+- **Drag to pan** (cursor switches to `grabbing`).
+- **Double-click to fit.**
+- **ResizeObserver** re-fits the diagram when the viewport resizes.
 
-function zoomDiagram(btn, factor) {
-  var wrap = btn.closest('.mermaid-wrap');
-  var target = wrap.querySelector('.mermaid');
-  var current = parseFloat(target.dataset.zoom || '1');
-  var next = Math.min(Math.max(current * factor, 0.3), 5);
-  target.dataset.zoom = next;
-  target.style.transform = 'scale(' + next + ')';
-  updateZoomState(wrap);
-}
-
-function resetZoom(btn) {
-  var wrap = btn.closest('.mermaid-wrap');
-  var target = wrap.querySelector('.mermaid');
-  target.dataset.zoom = '1';
-  target.style.transform = 'scale(1)';
-  updateZoomState(wrap);
-}
-
-document.querySelectorAll('.mermaid-wrap').forEach(function(wrap) {
-  // Ctrl/Cmd + scroll to zoom
-  wrap.addEventListener('wheel', function(e) {
-    if (!e.ctrlKey && !e.metaKey) return;
-    e.preventDefault();
-    var target = wrap.querySelector('.mermaid');
-    var current = parseFloat(target.dataset.zoom || '1');
-    var factor = e.deltaY < 0 ? 1.1 : 0.9;
-    var next = Math.min(Math.max(current * factor, 0.3), 5);
-    target.dataset.zoom = next;
-    target.style.transform = 'scale(' + next + ')';
-    updateZoomState(wrap);
-  }, { passive: false });
-
-  // Click-and-drag to pan when zoomed
-  var startX, startY, scrollL, scrollT;
-  wrap.addEventListener('mousedown', function(e) {
-    if (e.target.closest('.zoom-controls')) return;
-    var target = wrap.querySelector('.mermaid');
-    if (parseFloat(target.dataset.zoom || '1') <= 1) return;
-    wrap.classList.add('is-panning');
-    startX = e.clientX;
-    startY = e.clientY;
-    scrollL = wrap.scrollLeft;
-    scrollT = wrap.scrollTop;
-  });
-  window.addEventListener('mousemove', function(e) {
-    if (!wrap.classList.contains('is-panning')) return;
-    wrap.scrollLeft = scrollL - (e.clientX - startX);
-    wrap.scrollTop = scrollT - (e.clientY - startY);
-  });
-  window.addEventListener('mouseup', function() {
-    wrap.classList.remove('is-panning');
-  });
-});
-```
-
-Scroll-to-zoom requires Ctrl/Cmd+scroll to avoid hijacking normal page scroll. Click-and-drag panning activates only when zoomed in (zoom > 1). Cursor changes to `grab`/`grabbing` to signal the behavior. The zoom range is capped at 0.3x-5x.
+Zoom is capped to a sane range and the live percentage shows in `.diagram-label`. Because it keys off `viewBox` alone, paste any inline SVG into `.diagram-canvas` and it works with no wiring.
 
 ## Grid layouts
 
@@ -1250,6 +1371,231 @@ details.collapsible .collapsible__body {
   </div>
 </details>
 ```
+
+## Prose page elements
+
+Patterns for documentation, articles, and other reading-first content. The key difference from visual explanations: optimize for sustained reading, not scanning.
+
+### Body text settings
+
+```css
+/* Comfortable reading baseline */
+.prose {
+  font-size: clamp(17px, 1.1vw + 14px, 19px);
+  line-height: 1.7;
+  max-width: 65ch;  /* ~600-680px */
+  text-wrap: pretty;
+}
+
+.prose p {
+  margin-bottom: 1.5em;
+}
+
+/* Narrow column for essays/literary content */
+.prose--narrow {
+  max-width: 60ch;
+  line-height: 1.8;
+}
+
+/* Wide column for technical content with code */
+.prose--wide {
+  max-width: 75ch;
+  line-height: 1.6;
+}
+```
+
+### Lead paragraph
+
+Opening paragraph styled distinctly from body text.
+
+```css
+/* Larger size */
+.lead {
+  font-size: 20px;
+  line-height: 1.6;
+  color: var(--text);
+  margin-bottom: 32px;
+}
+
+/* With drop cap */
+.lead--dropcap::first-letter {
+  float: left;
+  font-family: var(--font-display);
+  font-size: 64px;
+  font-weight: 600;
+  line-height: 0.85;
+  padding-right: 12px;
+  padding-top: 6px;
+  color: var(--accent);
+}
+```
+
+### Pull quotes
+
+Key insights pulled out for emphasis. Use sparingly — one or two per article maximum.
+
+```css
+/* Border left — most versatile */
+.pullquote {
+  margin: 48px 0;
+  padding-left: 24px;
+  border-left: 3px solid var(--accent);
+}
+.pullquote p {
+  font-size: 22px;
+  font-style: italic;
+  line-height: 1.4;
+  color: var(--text);
+  margin: 0;
+}
+
+/* Centered with quotation mark */
+.pullquote--centered {
+  margin: 56px 0;
+  padding: 32px 40px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+  position: relative;
+}
+.pullquote--centered::before {
+  content: '"';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg);
+  padding: 0 16px;
+  font-family: var(--font-display);
+  font-size: 48px;
+  color: var(--accent);
+  line-height: 1;
+}
+```
+
+### Section dividers
+
+```css
+/* Horizontal rule */
+hr {
+  border: none;
+  height: 1px;
+  background: var(--border);
+  margin: 48px 0;
+}
+
+/* Ornamental divider — use: <div class="divider">* * *</div> */
+.divider {
+  text-align: center;
+  margin: 48px 0;
+  color: var(--text-muted);
+  font-size: 18px;
+  letter-spacing: 12px;
+}
+```
+
+### Article hero patterns
+
+```css
+/* Centered minimal — essays, personal posts */
+.hero--centered {
+  text-align: center;
+  padding: 80px 24px 64px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+.hero__category {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+.hero__title {
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: 600;
+  line-height: 1.15;
+  margin-bottom: 16px;
+}
+.hero__subtitle {
+  font-size: 20px;
+  font-style: italic;
+  color: var(--text-muted);
+  max-width: 600px;
+  margin: 0 auto 24px;
+}
+.hero__meta {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Left-aligned editorial — features, documentation */
+.hero--editorial {
+  padding: 100px 40px 60px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.hero--editorial .hero__title {
+  font-size: clamp(40px, 7vw, 72px);
+  font-weight: 800;
+  line-height: 1.0;
+  letter-spacing: -2px;
+}
+```
+
+### Callout boxes
+
+For warnings, tips, notes, and key takeaways.
+
+```css
+.callout {
+  padding: 16px 20px;
+  border-radius: var(--radius);
+  border-left: 4px solid var(--callout-border);
+  background: var(--callout-bg);
+  margin: 24px 0;
+}
+
+.callout--info {
+  --callout-border: var(--accent);
+  --callout-bg: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.callout--warning {
+  --callout-border: var(--warning);
+  --callout-bg: color-mix(in srgb, var(--warning) 10%, transparent);
+}
+
+.callout--success {
+  --callout-border: var(--success);
+  --callout-bg: color-mix(in srgb, var(--success) 10%, transparent);
+}
+
+.callout__title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--callout-border);
+}
+
+/* Lists inside callouts need padding fix (see "List markers overlapping container borders") */
+.callout ul, .callout ol {
+  padding-left: 1.5em;
+  margin: 8px 0 0 0;
+}
+```
+
+### Prose anti-patterns
+
+Avoid these in reading-first content:
+- Body text smaller than 16px
+- Line-height below 1.5
+- Measure wider than 75ch (text spanning full viewport)
+- Pull quotes every other paragraph
+- Drop caps on every section
+- Busy background patterns behind text
+
+Note: a `data-theme` JS toggle is unnecessary here. The standard template bakes both palettes into `prefers-color-scheme`; prose inherits that dual theme for free.
 
 ## Generated images
 

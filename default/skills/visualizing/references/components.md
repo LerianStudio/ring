@@ -54,7 +54,7 @@ Placeholder-only slots:
 | Artifact evidence comment | Preserve source reasoning inside generated HTML. | Brief, thesis, source facts, non-invention boundary. | Not needed. |
 | Summary band | Give the 10-second judgment. | Claim, status, evidence. | `css-patterns.md#summary-band` |
 | Source summary row | Show compact source facts with equal scan weight. | Entity, count, status, reference. | `css-patterns.md` |
-| Legend | Explain meaningful visual encoding. | Encoding labels and meanings. | `css-patterns.md`, `libraries.md` for Mermaid legends. |
+| Legend | Explain meaningful visual encoding. | Encoding labels and meanings. | `css-patterns.md`, `libraries.md` for D2 legends. |
 | Evidence block | Keep proof beside claims. | Claim, excerpt or reference. | `css-patterns.md#evidence-block` |
 | Callout | Surface one warning, constraint, or note. | Claim and severity or status. | `css-patterns.md` |
 | Decision rail | Show ordered evidence-backed choices. | Decision, evidence, outcome. | `css-patterns.md#decision-rail` |
@@ -63,8 +63,8 @@ Placeholder-only slots:
 | Quadrant | Group axis-map items into four named regions. | Entity, x meaning, y meaning. | `css-patterns.md` |
 | Swimlane | Align work by owner, phase, boundary, or system. | Owner or phase plus items. | `css-patterns.md#swimlane-canvas` |
 | Timeline item | Show ordered events. | Date or phase, event, status. | `css-patterns.md` |
-| Entity node | Represent a real source entity. | Entity name and role. | `css-patterns.md`, `libraries.md` for Mermaid. |
-| Boundary group | Show ownership, domain, layer, or trust boundary. | Boundary name and member entities. | `css-patterns.md`, `libraries.md` for Mermaid subgraphs. |
+| Entity node | Represent a real source entity. | Entity name and role. | `css-patterns.md`, `libraries.md` for D2. |
+| Boundary group | Show ownership, domain, layer, or trust boundary. | Boundary name and member entities. | `css-patterns.md`, `libraries.md` for D2 containers. |
 | Connector legend | Explain lines and arrows. | Relationship labels and meanings. | `css-patterns.md`, `libraries.md` |
 | Status badge set | Normalize status labels. | Status taxonomy and labels. | `css-patterns.md` |
 | Finding card | Summarize a review finding. | Severity, claim, path, evidence, action. | `css-patterns.md` |

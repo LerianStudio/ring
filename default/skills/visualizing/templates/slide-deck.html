@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lerian slide deck template - visualizing</title>
+<!-- ============================================
+     LERIAN SLIDE DECK TEMPLATE v1.0.0
+     Source: Lerian product-console design system (standard.html tokens)
+
+     USAGE: Copy this entire file as the foundation for any
+     slide-deck output. The <style> block, SlideEngine, D2 pan/zoom
+     engine, and nav chrome are the reusable foundation.
+
+     DIAGRAMS: rendered by the D2 CLI to a STATIC inline SVG (dark/light
+     baked in by D2 — no client-side diagram library). See the Lerian D2
+     preamble + generation command in templates/diagram.html, and the
+     .slide--diagram demo below.
+       d2 --theme=0 --dark-theme=200 --layout=elk in.d2 out.svg
+     Strip the leading <?xml?> line, paste the <svg> into .diagram-canvas.
+
+     FOUNDATION / DEMO BOUNDARY:
+     Copy the foundation (tokens, engine, chrome, D2 diagram-shell,
+     branding). Replace ALL skeleton slide content with
+     source-grounded slides. The demo slides below are minimal
+     placeholders — one per slide type — to show structure.
+     DO NOT COPY the demo slide text into real outputs.
+
+     ARTIFACT SHELL GUIDANCE:
+     A deck is a viewport-fit presentation surface: each slide is
+     exactly 100dvh, scroll-snapped. Restrained by default,
+     structurally clear, visually richer only when the source
+     material earns it. Lerian branding lives on the title slide
+     and the persistent wordmark (a deck has no scrolling footer).
+     ============================================ -->
+
+<!-- ========== FONTS ========== -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  /* ==========================================================================
+     LERIAN SLIDE DECK FOUNDATION
+     Tokens bound to the canonical Lerian OKLCH palette (standard.html).
+     Dark-first — presentations project better dark — with a light mode via
+     prefers-color-scheme. Token NAMES match the SlideEngine/CSS references;
+     their VALUES are pure Lerian.
+     ========================================================================== */
+
+  /* ========== DESIGN TOKENS: DARK (default) ========== */
+  :root {
+    /* --- Fonts (Inter is the Lerian brand body font — MANDATORY) --- */
+    --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', ui-monospace, monospace;
+
+    /* --- Surfaces --- */
+    --bg: oklch(27.4% 0.006 286.0);              /* zinc-800 */
+    --surface: oklch(37% 0.013 285.8);
+    --surface2: oklch(33% 0.010 285.9);          /* between bg and surface */
+    --surface-elevated: oklch(44.2% 0.017 285.8);
+
+    /* --- Borders --- */
+    --border: oklch(44.2% 0.017 285.8);
+    --border-bright: oklch(55.2% 0.016 285.9);
+
+    /* --- Text --- */
+    --text: oklch(96.7% 0.001 286.4);
+    --text-dim: oklch(70.5% 0.015 286.1);
+
+    /* --- Brand Accent (Sunglow) --- */
+    --accent: oklch(84.8% 0.166 88.9);           /* #FDCB28 */
+    --accent-dim: rgba(253, 203, 40, 0.15);
+
+    /* --- Code surface --- */
+    --code-bg: oklch(22% 0.005 286.0);
+    --code-text: oklch(90% 0.004 286.2);
+
+    /* --- Semantic Status --- */
+    --success: oklch(72% 0.18 150.0);
+    --success-dim: rgba(91, 205, 134, 0.12);
+    --error: oklch(68% 0.20 25.3);
+    --error-dim: rgba(240, 110, 67, 0.12);
+    --info: oklch(70% 0.15 250.0);
+    --info-dim: rgba(96, 165, 250, 0.12);
+
+    /* --- Extended node palette (diagram variety) --- */
+    --de-york: oklch(75.6% 0.147 150.0);
+    --tangerine: oklch(78.4% 0.106 43.7);
+  }
+
+  /* ========== DESIGN TOKENS: LIGHT MODE ========== */
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: oklch(96.7% 0.001 286.4);            /* zinc-100 */
+      --surface: oklch(99% 0.002 286.4);
+      --surface2: oklch(96% 0.003 286.4);
+      --surface-elevated: oklch(98.5% 0.003 286.4);
+
+      --border: oklch(91.9% 0.004 286.3);
+      --border-bright: oklch(87.1% 0.006 286.3);
+
+      --text: oklch(27.4% 0.006 286.0);
+      --text-dim: oklch(44.2% 0.017 285.8);
+
+      --accent: oklch(76.7% 0.159 83.8);         /* sunglow-500, darker for light bg contrast */
+      --accent-dim: rgba(237, 172, 5, 0.12);
+
+      --code-bg: oklch(24% 0.006 286.0);
+      --code-text: oklch(92% 0.003 286.2);
+
+      --success: oklch(62.7% 0.194 149.2);
+      --success-dim: rgba(22, 163, 74, 0.10);
+      --error: oklch(63.7% 0.208 25.3);
+      --error-dim: rgba(239, 68, 68, 0.10);
+      --info: oklch(54.6% 0.215 262.9);
+      --info-dim: rgba(37, 99, 235, 0.10);
+
+      --de-york: oklch(55% 0.138 149.0);
+      --tangerine: oklch(66.5% 0.176 38.6);
+    }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--text);
+    background: var(--bg);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ============ DECK ENGINE ============ */
+  .deck {
+    height: 100dvh;
+    overflow-y: auto;
+    scroll-snap-type: y mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .slide {
+    height: 100dvh;
+    scroll-snap-align: start;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: clamp(40px, 6vh, 80px) clamp(40px, 8vw, 120px);
+    isolation: isolate;
+    opacity: 0;
+    transform: translateY(40px) scale(0.98);
+    transition:
+      opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .slide.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  .slide .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition:
+      opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .slide.visible .reveal { opacity: 1; transform: none; }
+  .slide.visible .reveal:nth-child(1) { transition-delay: 0.1s; }
+  .slide.visible .reveal:nth-child(2) { transition-delay: 0.2s; }
+  .slide.visible .reveal:nth-child(3) { transition-delay: 0.3s; }
+  .slide.visible .reveal:nth-child(4) { transition-delay: 0.4s; }
+  .slide.visible .reveal:nth-child(5) { transition-delay: 0.5s; }
+  .slide.visible .reveal:nth-child(6) { transition-delay: 0.6s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slide, .slide .reveal {
+      opacity: 1 !important;
+      transform: none !important;
+      transition: none !important;
+    }
+  }
+
+  /* ============ NAV CHROME ============ */
+  .deck-progress {
+    position: fixed; top: 0; left: 0; height: 3px;
+    background: var(--accent); z-index: 100;
+    transition: width 0.3s ease; pointer-events: none;
+  }
+
+  .deck-dots {
+    position: fixed; right: clamp(12px, 2vw, 24px); top: 50%;
+    transform: translateY(-50%); display: flex; flex-direction: column;
+    gap: 8px; z-index: 100; padding: 8px;
+    background: color-mix(in srgb, var(--bg) 60%, transparent 40%);
+    border-radius: 20px;
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  }
+
+  .deck-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--text-dim); opacity: 0.3; border: none; padding: 0;
+    cursor: pointer; transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .deck-dot:hover { opacity: 0.6; }
+  .deck-dot.active { opacity: 1; transform: scale(1.5); background: var(--accent); }
+
+  .deck-counter {
+    position: fixed; bottom: clamp(12px, 2vh, 24px); right: clamp(12px, 2vw, 24px);
+    font-family: var(--font-mono); font-size: 12px; color: var(--text-dim);
+    z-index: 100; font-variant-numeric: tabular-nums;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  .deck-hints {
+    position: fixed; bottom: clamp(12px, 2vh, 24px); left: 50%;
+    transform: translateX(-50%); font-family: var(--font-mono);
+    font-size: 11px; color: var(--text-dim); opacity: 0.6; z-index: 100;
+    transition: opacity 0.5s ease; white-space: nowrap;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+  .deck-hints.faded { opacity: 0; pointer-events: none; }
+
+  /* ============ PERSISTENT LERIAN WORDMARK ============ */
+  /* A deck has no scrolling footer, so brand identity lives here:
+     a small fixed wordmark, bottom-left, visible on any slide. */
+  .deck-wordmark {
+    position: fixed; bottom: clamp(12px, 2vh, 24px); left: clamp(12px, 2vw, 24px);
+    z-index: 100; display: flex; align-items: center; gap: 8px;
+    opacity: 0.55; transition: opacity 0.2s ease;
+    text-decoration: none; color: var(--text-dim);
+  }
+  .deck-wordmark:hover { opacity: 1; }
+  .deck-wordmark .logo-mark { height: 16px; width: auto; color: var(--text-dim); display: block; }
+  .deck-wordmark .deck-wordmark-text {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.5px;
+    text-transform: uppercase; white-space: nowrap;
+  }
+
+  /* ============ SHARED SLIDE ELEMENTS ============ */
+  .slide__display {
+    font-size: clamp(48px, 10vw, 120px);
+    font-weight: 800;
+    letter-spacing: -3px;
+    line-height: 0.95;
+    text-wrap: balance;
+  }
+
+  .slide__heading {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+
+  .slide__body {
+    font-size: clamp(16px, 2.2vw, 22px);
+    line-height: 1.6;
+    color: var(--text-dim);
+    text-wrap: pretty;
+  }
+
+  .slide__subtitle {
+    font-family: var(--font-mono);
+    font-size: clamp(12px, 1.5vw, 18px);
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .slide__label {
+    font-family: var(--font-mono);
+    font-size: clamp(10px, 1.2vw, 13px);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--accent);
+    margin-bottom: 12px;
+  }
+
+  /* ============ DECORATIVE SVG ============ */
+  .slide__decor {
+    position: absolute;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ============ SLIDE TYPE: TITLE ============ */
+  .slide--title {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    background-image: radial-gradient(ellipse at 50% 30%, var(--accent-dim) 0%, transparent 50%);
+  }
+
+  .slide--title .slide__display { color: var(--accent); }
+
+  /* Lerian brand logo on the title slide */
+  .slide--title .slide__logo {
+    width: clamp(120px, 16vw, 200px);
+    height: auto;
+    color: var(--text);
+    margin-bottom: clamp(24px, 4vh, 48px);
+  }
+
+  /* ============ SLIDE TYPE: DIVIDER ============ */
+  .slide--divider { justify-content: center; }
+
+  .slide--divider .slide__number {
+    font-size: clamp(100px, 22vw, 260px);
+    font-weight: 200;
+    line-height: 0.85;
+    opacity: 0.08;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -55%);
+    pointer-events: none;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+  }
+
+  /* ============ SLIDE TYPE: CONTENT ============ */
+  .slide--content .slide__inner {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    gap: clamp(24px, 4vw, 60px);
+    align-items: center;
+    width: 100%;
+  }
+
+  .slide__bullets {
+    list-style: none;
+    padding: 0;
+  }
+
+  .slide__bullets li {
+    padding: 10px 0 10px 24px;
+    position: relative;
+    font-size: clamp(16px, 2vw, 22px);
+    line-height: 1.5;
+    color: var(--text-dim);
+  }
+
+  .slide__bullets li::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 18px;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .slide__aside {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 200px;
+  }
+
+  /* ============ SLIDE TYPE: SPLIT ============ */
+  .slide--split { padding: 0; }
+
+  .slide--split .slide__panels {
+    display: grid;
+    grid-template-columns: 3fr 2fr;
+    height: 100%;
+  }
+
+  .slide--split .slide__panel {
+    padding: clamp(40px, 6vh, 80px) clamp(32px, 4vw, 60px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .slide--split .slide__panel--primary { background: var(--surface); }
+  .slide--split .slide__panel--secondary {
+    background: var(--surface2);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* ============ SLIDE TYPE: DIAGRAM ============ */
+  /* Diagrams are static D2-rendered inline SVGs (dark/light baked in by D2).
+     The .diagram-shell > .diagram-viewport > .diagram-canvas structure and the
+     generic SVG pan/zoom engine mirror templates/diagram.html. In a slide the
+     shell flexes to fill the viewport instead of a fixed 600px height. */
+  .slide--diagram {
+    padding: clamp(24px, 4vh, 48px) clamp(24px, 4vw, 60px);
+  }
+  .slide--diagram .slide__heading { margin-bottom: clamp(8px, 1.5vh, 20px); }
+
+  .diagram-shell {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,0,0,.05));
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
+  .diagram-toolbar {
+    display: flex; gap: 6px; align-items: center;
+    padding: 8px 12px; border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .diagram-toolbar .title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .diagram-toolbar .spacer { flex: 1; }
+  .diagram-label { font-size: 12px; color: var(--text-dim); font-family: var(--font-mono); min-width: 42px; text-align: right; }
+  .diagram-toolbar button {
+    font: inherit; font-size: 14px; width: 30px; height: 30px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border-bright); background: var(--surface);
+    color: var(--text-dim); border-radius: 6px; cursor: pointer; transition: .15s;
+  }
+  .diagram-toolbar button:hover { border-color: var(--accent); color: var(--text); }
+  .diagram-viewport {
+    position: relative; flex: 1; min-height: 0; overflow: hidden; cursor: grab;
+    background-image: radial-gradient(circle at 1px 1px, var(--border) 1px, transparent 0);
+    background-size: 22px 22px;
+  }
+  .diagram-viewport.grabbing { cursor: grabbing; }
+  .diagram-canvas { position: absolute; top: 0; left: 0; transform-origin: 0 0; will-change: transform; }
+  .diagram-canvas svg { display: block; }
+  .diagram-shell:fullscreen { border-radius: 0; }
+  .diagram-shell:fullscreen .diagram-viewport { height: calc(100vh - 47px); }
+
+  /* ============ SLIDE TYPE: DASHBOARD ============ */
+  .slide--dashboard .slide__kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(clamp(140px, 20vw, 220px), 1fr));
+    gap: clamp(12px, 2vw, 24px);
+  }
+
+  .slide__kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: clamp(16px, 3vh, 32px) clamp(16px, 2vw, 24px);
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .slide__kpi-val {
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .slide__kpi-label {
+    font-family: var(--font-mono);
+    font-size: clamp(9px, 1.2vw, 13px);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+    margin-top: 8px;
+  }
+
+  .slide__kpi-trend {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    margin-top: 4px;
+  }
+
+  /* ============ SLIDE TYPE: TABLE ============ */
+  .slide--table { padding: clamp(24px, 4vh, 48px) clamp(24px, 4vw, 60px); }
+
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+  }
+  .table-scroll { overflow-x: auto; }
+
+  .data-table { width: 100%; border-collapse: collapse; }
+
+  .data-table th {
+    background: var(--surface2);
+    font-family: var(--font-mono);
+    font-size: clamp(10px, 1.3vw, 14px);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    text-align: left;
+    padding: clamp(10px, 1.5vh, 16px) clamp(14px, 2vw, 24px);
+    border-bottom: 2px solid var(--border-bright);
+    white-space: nowrap;
+  }
+
+  .data-table td {
+    padding: clamp(10px, 1.5vh, 16px) clamp(14px, 2vw, 24px);
+    border-bottom: 1px solid var(--border);
+    font-size: clamp(14px, 1.8vw, 20px);
+    vertical-align: top;
+  }
+  .data-table tbody tr:last-child td { border-bottom: none; }
+  .data-table tbody tr:nth-child(even) { background: var(--surface2); }
+  .data-table tbody tr { transition: background 0.15s; }
+  .data-table tbody tr:hover { background: var(--accent-dim); }
+  .data-table code {
+    font-family: var(--font-mono); font-size: 0.85em;
+    background: var(--accent-dim); color: var(--accent);
+    padding: 1px 5px; border-radius: 3px;
+  }
+
+  /* ============ SLIDE TYPE: CODE ============ */
+  .slide--code { align-items: center; }
+
+  .slide__code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: clamp(24px, 4vh, 48px) clamp(24px, 4vw, 48px);
+    max-width: 900px;
+    width: 100%;
+    position: relative;
+  }
+
+  .slide__code-filename {
+    position: absolute;
+    top: -12px; left: 24px;
+    font-family: var(--font-mono);
+    font-size: 11px; font-weight: 600;
+    padding: 4px 12px; border-radius: 4px;
+    background: var(--accent); color: oklch(27.4% 0.006 286.0);
+  }
+
+  .slide__code-block pre { margin: 0; overflow-x: auto; }
+  .slide__code-block code {
+    font-family: var(--font-mono);
+    font-size: clamp(14px, 1.6vw, 18px);
+    line-height: 1.7;
+    color: var(--code-text);
+  }
+  .slide__code-block .hl { color: var(--accent); }
+  .slide__code-block .cm { color: var(--text-dim); }
+
+  /* ============ SLIDE TYPE: QUOTE ============ */
+  .slide--quote {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: clamp(60px, 10vh, 120px) clamp(60px, 12vw, 200px);
+  }
+
+  .slide__quote-mark {
+    font-size: clamp(80px, 14vw, 180px);
+    line-height: 0.5;
+    opacity: 0.1;
+    font-family: Georgia, serif;
+    pointer-events: none;
+    margin-bottom: -20px;
+    color: var(--accent);
+  }
+
+  .slide--quote blockquote {
+    font-size: clamp(24px, 4vw, 48px);
+    font-weight: 600;
+    line-height: 1.35;
+    letter-spacing: -0.5px;
+  }
+
+  .slide--quote cite {
+    font-family: var(--font-mono);
+    font-size: clamp(11px, 1.4vw, 14px);
+    font-style: normal;
+    margin-top: clamp(16px, 3vh, 32px);
+    display: block;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  /* ============ SLIDE TYPE: FULL-BLEED ============ */
+  .slide--bleed {
+    padding: 0;
+    justify-content: flex-end;
+  }
+
+  .slide__bg {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center;
+    z-index: 0;
+  }
+
+  /* Lerian gradient fallback when no generated image is supplied:
+     deep zinc base into a warm sunglow-tinted corner. */
+  .slide__bg--gradient {
+    background:
+      radial-gradient(ellipse at 80% 20%, rgba(253, 203, 40, 0.22) 0%, transparent 55%),
+      linear-gradient(135deg, oklch(22% 0.006 286.0) 0%, oklch(30% 0.010 286.0) 100%);
+  }
+
+  .slide__scrim {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.2) 40%, transparent 100%);
+    z-index: 1;
+  }
+
+  .slide--bleed .slide__content {
+    position: relative; z-index: 2;
+    padding: clamp(40px, 6vh, 80px) clamp(40px, 8vw, 120px);
+    color: #ffffff;
+  }
+  .slide--bleed .slide__heading { color: #ffffff; }
+  .slide--bleed .slide__subtitle { color: rgba(255,255,255,0.7); }
+
+  /* ============ RESPONSIVE HEIGHT BREAKPOINTS ============ */
+  @media (max-height: 700px) {
+    .slide { padding: clamp(24px, 4vh, 40px) clamp(32px, 6vw, 80px); }
+    .slide__display { font-size: clamp(36px, 8vw, 72px); }
+    .slide--divider .slide__number { font-size: clamp(80px, 16vw, 160px); }
+  }
+
+  @media (max-height: 600px) {
+    .slide__decor { display: none; }
+    .slide--quote { padding: clamp(32px, 6vh, 60px) clamp(40px, 8vw, 100px); }
+    .slide__quote-mark { display: none; }
+  }
+
+  @media (max-height: 500px) {
+    .slide { padding: clamp(16px, 3vh, 24px) clamp(24px, 5vw, 48px); }
+    .deck-dots { display: none; }
+    .slide__display { font-size: clamp(28px, 7vw, 48px); }
+  }
+
+  @media (max-width: 768px) {
+    .slide--content .slide__inner { grid-template-columns: 1fr; }
+    .slide--content .slide__aside { display: none; }
+    .slide--split .slide__panels { grid-template-columns: 1fr; }
+    .slide--dashboard .slide__kpis { grid-template-columns: repeat(2, 1fr); }
+    .deck-wordmark .deck-wordmark-text { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ========== DEMO DECK: DO NOT COPY SLIDE CONTENT INTO REAL OUTPUTS ==========
+     The 10 sections below are a minimal SKELETON — one example per slide type —
+     to demonstrate structure, the engine, and Lerian branding. When building a
+     real deck, replace ALL slide content (text, numbers, code, tables, diagrams)
+     with source-grounded material. Keep the <style>, SlideEngine, D2 pan/zoom
+     engine, title-slide logo, and persistent wordmark.
+     ============================================================================ -->
+
+<div class="deck">
+
+  <!-- SLIDE 1: TITLE — carries the Lerian brand logo -->
+  <section class="slide slide--title">
+    <svg class="slide__decor" style="top:0;right:0;" width="120" height="120" viewBox="0 0 120 120">
+      <line x1="120" y1="0" x2="120" y2="40" stroke="var(--accent)" stroke-width="2" opacity="0.18"/>
+      <line x1="80" y1="0" x2="120" y2="0" stroke="var(--accent)" stroke-width="2" opacity="0.18"/>
+    </svg>
+    <svg class="slide__decor" style="bottom:0;left:0;" width="120" height="120" viewBox="0 0 120 120">
+      <line x1="0" y1="80" x2="0" y2="120" stroke="var(--accent)" stroke-width="2" opacity="0.18"/>
+      <line x1="0" y1="120" x2="40" y2="120" stroke="var(--accent)" stroke-width="2" opacity="0.18"/>
+    </svg>
+    <svg class="slide__logo reveal" viewBox="0 0 1090.88 280" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-label="Lerian Studio">
+      <path fill-rule="evenodd" d="M619.42,29.69c0,15.43-10.87,27.93-27.93,27.93s-27.93-12.51-27.93-27.93,10.86-27.93,27.92-27.93,27.93,12.51,27.93,27.93h0ZM158.64,242.4v33.54H12.13v-33.55h48.36c3.16,0,5.73-2.57,5.73-5.73V87.77c0-3.16-2.57-5.73-5.73-5.73H7.85v-34.31h98.33v188.94c0,3.16,2.57,5.73,5.73,5.73h46.74ZM168.85,179.86c0,58.52,37.29,98.33,99.47,98.33,49.15,0,79.7-30.6,86.27-67.08h-40.69c-6.29,24.54-26.97,33.91-48.61,33.91-48.85,0-53.41-45.18-53.83-55-.04-1.02.77-1.87,1.79-1.87h143.61c.76-5.26,1.13-10.42,1.13-15.44,0-32.71-20.25-91.92-95.33-91.92-57.04,0-93.8,41.26-93.81,99.07ZM314.47,158.39l-99.49.02c-1.08,0-1.94-.96-1.78-2.02,4.49-31.28,30.98-42.82,50.98-42.82,33.88,0,48.71,21.59,52.08,42.79.17,1.08-.69,2.04-1.78,2.04h0ZM867.2,83.16h0s0,0,0,0h0ZM826.87,83.16h40.33v192.83h-40.32v-24.53c0-3.09-3.92-4.41-5.79-1.95-.18.23-.35.47-.53.71h0s0,.02,0,.02h0c-.11.16-.23.32-.35.47-7.92,10.56-20.68,27.53-56.24,27.53-60.83,0-91.19-46.33-91.19-98.7,0-61.42,40.37-98.72,91.17-98.72,36.73,0,48.44,15.73,56.64,26.75l.49.66c1.86,2.49,5.81,1.18,5.81-1.93v-23.14ZM770.75,115.48c34.78,0,56.14,27.81,56.14,64.8h0c0,42-26.32,63.68-56.14,63.68-34.83,0-56.14-27.43-56.14-64.43,0-42.07,26.11-64.05,56.14-64.05ZM1063.39,101.7c14.42,14.06,21.64,36.67,21.64,67.8v106.25h-41.06v-103.99c0-43.98-22.35-56.14-45.96-56.14-31.99,0-51.6,23.22-51.6,62.92v97.21h-40.68V83.15h39.93v25.07c0,3.11,3.95,4.4,5.82,1.92,8.55-11.4,26.72-29.52,55.98-29.52,37.55,0,55.75,20.88,55.93,21.08ZM657.42,275.94v-33.54h0s-37.37,0-37.37,0c-3.16,0-5.73-2.57-5.73-5.73V83.14h-81.34v34.31h37.54c3.16,0,5.73,2.57,5.73,5.73v113.48c0,3.16-2.57,5.73-5.73,5.73h-38.14v33.55h125.03ZM499.27,119.27c0,.13-.1.23-.23.23h0s-36.31,0-36.31,0c-28.68,0-28.65,24.99-28.64,43.62,0,.46,0,.92,0,1.37v111.24c0,.13-.1.23-.23.23h-41.01c-.13,0-.23-.1-.23-.23V83.27c0-.13.1-.23.23-.23h36.49c.13,0,.23.1.23.23v24.03c0,4.05,5.24,5.65,7.49,2.28.22-.32.43-.64.65-.97,8.18-12.25,18.71-28.02,52.51-28.02h9.05v38.68Z"/>
+    </svg>
+    <h1 class="slide__display reveal">Deck Title Goes Here</h1>
+    <div class="reveal">
+      <p class="slide__subtitle" style="margin-top:clamp(16px,2vh,32px);">Subtitle, presenter, or date</p>
+    </div>
+  </section>
+
+  <!-- SLIDE 2: SECTION DIVIDER -->
+  <section class="slide slide--divider" style="background-image:radial-gradient(ellipse at 80% 60%, var(--accent-dim) 0%, transparent 40%);">
+    <span class="slide__number">01</span>
+    <div>
+      <h2 class="slide__heading reveal">Section Title</h2>
+      <p class="slide__subtitle reveal" style="margin-top:12px;">Optional subheading for this section</p>
+    </div>
+  </section>
+
+  <!-- SLIDE 3: CONTENT (left-heavy, optional aside) -->
+  <section class="slide slide--content" style="background-image:radial-gradient(ellipse at 20% 80%, var(--accent-dim) 0%, transparent 45%);">
+    <div class="slide__inner">
+      <div>
+        <p class="slide__label reveal">Label</p>
+        <h2 class="slide__heading reveal">Content Heading</h2>
+        <ul class="slide__bullets">
+          <li class="reveal">First point — keep each bullet to two lines max</li>
+          <li class="reveal">Second point — five to six bullets per slide</li>
+          <li class="reveal">Third point — split across slides if denser</li>
+          <li class="reveal">Fourth point — one focal idea per slide</li>
+        </ul>
+      </div>
+      <div class="slide__aside reveal">
+        <svg viewBox="0 0 160 160" width="160" height="160">
+          <circle cx="80" cy="80" r="60" fill="none" stroke="var(--accent)" stroke-width="2" opacity="0.35"/>
+          <circle cx="80" cy="80" r="40" fill="none" stroke="var(--accent)" stroke-width="1.5" opacity="0.22" stroke-dasharray="4 4"/>
+          <circle cx="80" cy="80" r="8" fill="var(--accent)" opacity="0.5"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 4: SPLIT (before/after, text+contrast) -->
+  <section class="slide slide--split">
+    <div class="slide__panels">
+      <div class="slide__panel slide__panel--primary">
+        <p class="slide__label reveal" style="color:var(--error);">Before</p>
+        <h2 class="slide__heading reveal" style="font-size:clamp(22px,3.5vw,36px);">Left Panel</h2>
+        <ul class="slide__bullets" style="margin-top:16px;">
+          <li class="reveal">Primary panel takes the wider 3fr column</li>
+          <li class="reveal">Each panel has its own surface tier</li>
+          <li class="reveal">Good for before/after or text+diagram</li>
+        </ul>
+      </div>
+      <div class="slide__panel slide__panel--secondary">
+        <p class="slide__label reveal" style="color:var(--success);">After</p>
+        <h2 class="slide__heading reveal" style="font-size:clamp(22px,3.5vw,36px);">Right Panel</h2>
+        <ul class="slide__bullets" style="margin-top:16px;">
+          <li class="reveal">Secondary panel is the narrower 2fr column</li>
+          <li class="reveal">Zero slide padding — panels fill edge to edge</li>
+          <li class="reveal">Stacks to one column under 768px</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 5: DIAGRAM (static D2-rendered inline SVG — dark/light baked in by D2; max 8-10 nodes at presentation scale) -->
+  <section class="slide slide--diagram">
+    <h2 class="slide__heading reveal">Diagram Title</h2>
+    <!-- DEMO SVG — generated by: d2 --theme=0 --dark-theme=200 --layout=elk demo.d2 demo.svg
+         (then strip the leading <?xml?> line). Replace this entire .diagram-shell SVG
+         with your own D2 output. The pan/zoom engine reads the SVG viewBox and works as-is. -->
+    <div class="diagram-shell reveal">
+      <div class="diagram-toolbar">
+        <span class="title">Diagram name</span>
+        <span class="spacer"></span>
+        <span class="diagram-label">100%</span>
+        <button data-a="out" title="Zoom out">&minus;</button>
+        <button data-a="in" title="Zoom in">+</button>
+        <button data-a="one" title="100%">1:1</button>
+        <button data-a="fit" title="Fit">&#x2922;</button>
+        <button data-a="full" title="Fullscreen">&#x26F6;</button>
+      </div>
+      <div class="diagram-viewport">
+        <div class="diagram-canvas">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" data-d2-version="0.7.1" preserveAspectRatio="xMinYMin meet" viewBox="0 0 131 424"><svg class="d2-2133515523 d2-svg" width="131" height="424" viewBox="-5 -5 131 424"><rect x="-5.000000" y="-5.000000" width="131.000000" height="424.000000" rx="0.000000" class=" fill-N7" stroke-width="0" /><style type="text/css"><![CDATA[
+.d2-2133515523 .text-bold {
+	font-family: "d2-2133515523-font-bold";
+}
+@font-face {
+	font-family: d2-2133515523-font-bold;
+	src: url("data:application/font-woff;base64,d09GRgABAAAAAAkAAAoAAAAADnQAAguFAAAAAAAAAAAAAAAAAAAAAAAAAABPUy8yAAAA9AAAAGAAAABgXxHXrmNtYXAAAAFUAAAAbgAAAJQCUAMyZ2x5ZgAAAcQAAAMgAAADtAGLbRJoZWFkAAAE5AAAADYAAAA2G38e1GhoZWEAAAUcAAAAJAAAACQKfwXNaG10eAAABUAAAAA4AAAAOBfiAfZsb2NhAAAFeAAAAB4AAAAeB+oHGm1heHAAAAWYAAAAIAAAACAAJgD3bmFtZQAABbgAAAMoAAAIKgjwVkFwb3N0AAAI4AAAAB0AAAAg/9EAMgADAioCvAAFAAACigJYAAAASwKKAlgAAAFeADIBKQAAAgsHAwMEAwICBGAAAvcAAAADAAAAAAAAAABBREJPACAAIP//Au7/BgAAA9gBESAAAZ8AAAAAAfAClAAAACAAA3icdMw9rkFRAEbRdd65j+unUJqOUicxBFGoJCLGYAKIRsIMRKUzs0+iZrc7WSiqgqHGHmMjVWtiamZuYWllbWNrl/Dr5JVnHrnnlmsuOeeUYw4f+3vFn6rxr6Or1dM34A0AAP//AQAA//9J4x9wAAB4nGSSP2wbZRjGn++zc1bMmeTiPxfXiZ34693FR31O7vPdNXGMbXpxIvCpbRICiLRBkZCAtg6iDqm6dCkLuGJohooiBgRiYkCdqMRcIXUrElOlsDB08hAxVKmNzm5FUIdv+V7p+T3P874YwjmAbtN9BDCMEYwhDnBpWlK4prGQwx2HyQFHI1LoHB3r/viDlgvmckF96k7m+tYW8S7S/WeX3/e2t//ZKpW63/16v3uLXL0P0N5TgJ6hbQxDAqIhrqmqxgQhEOVRprHQ36NfjURSkaCYfPrwl4ffzjyYIW8uLs41efFK9wvafta6excACDwAB7SNgO+LS95tfwjq/9NZ2oaIWH9iJhLxmCAwFpe4aRVVxryDld16vbV0fuVaddGlbW3zbGO78JisfsT1gTbrHdIwvQMdGMqqmpNIcNO2iqqmGdQq2jY3E3JIVVlWiMcSsjwgkFj1hrnONmaMPH/t7elFtfSxe/pT/a2pqqbm5/X1Un2hKc4aH6bV7GRmcuzkq4V6wX63eEq/kExlJtJpKTu+vmRvngbByd4h+Y0c4USfr/6HHBC5aTuyIJDk0k5t5XPXWJ5YYlNWpTI7bkQXlA2xvLu61iqn5a3JRq3qxUc+mEr5uWhf9y9yhHFk/qfs+w9N+yl93QAv+iCSWf7sjTOXS8sXCkHa/TNcn7PsOfXiN/e0U1lbfL21er5VqVxyo8qwzaffO5EmCzmrAKDXgwPgMX1EVYgAQojgyxd8GiJHGEHqJb6g9SseJCSJyo7r7lQqTddtVvKGkTfy+ee5yq211d3ynletNfx4/r5qAPmaHGGsv3GZH99QSKpdCwdTDTU+ER6PJEcnyjHSececGxq6EQzmzO4BCKTeIWnSFuS+K8tiluPwOI+zY2Vj86zbkK7v7bFJMRmWo474ycbvV4SbN68+0BUheEkQB7cjAqRHOogAPMDlRMK34zg8cO+n/Wo4Gg4OR8O1W9+TzhPF0zRPedIdxfMM+IN0Xtxz7TbpdEdBej/TeazRR3gFkLJ+Ydz061IMQ1EMg87rjOn+w78AAAD//wEAAP//g13DdAABAAAAAguFQlrQ+18PPPUAAQPoAAAAANhdoIQAAAAA3WYvNv43/sQIbQPxAAEAAwACAAAAAAAAAAEAAAPY/u8AAAiY/jf+NwhtAAEAAAAAAAAAAAAAAAAAAAAOArIAUAI9//oBLQBNAlQATQIsACMB0wAkAgYAJAEUADcCKwAkAY4AQQF/ABECCwAMARQAQQAA/60AAAAsAFAAXAB+AL4A6gEeASoBVgF2AZwBuAHEAdoAAAABAAAADgCQAAwAYwAHAAEAAAAAAAAAAAAAAAAABAADeJyclM9uG1UUxn9ObNMKwQJFVbqJ7oJFkejYVEnVNiuH1IpFFAePC0JCSBPP+I8ynhl5Jg7hCVjzFrxFVzwEz4FYo/l87NgF0SaKknx37vnznXO+c4Ed/mabSvUh8Ec9MVxhr35ueIsH9RPD27TrW4arPKn9abhGWJsbrvN5rWf4I95WfzP8gP3qT4YfslttG/6YZ9Udw59sO/4y/Cn7vF3gCrzgV8MVdskMb7HDj4a3eYTFrFR5RNNwjc/YM1xnD+gzoSBmQsIIx5AJI66YEZHjEzFjwpCIEEeHFjGFviYEQo7Rf34N8CmYESjimAJHjE9MQM7YIv4ir5RzZRzqNLO7FgVjAi7kcUlAgiNlREpCxKXiFBRkvKJBg5yB+GYU5HjkTIjxSJkxokGXNqf0GTMhx9FWpJKZT8qQgmsC5XdmUXZmQERCbqyuSAjF04lfJO8Opzi6ZLJdj3y6EeFLHN/Ju+SWyvYrPP26NWabeZdsAubqZ6yuxLq51gTHui3ztvhWuOAV7l792WTy/h6F+l8o8gVXmn+oSSVikuDcLi18Kch3j3Ec6dzBV0e+p0OfE7q8oa9zix49WpzRp8Nr+Xbp4fiaLmccy6MjvLhrSzFn/IDjGzqyKWNH1p/FxCJ+JjN15+I4Ux1TMvW8ZO6p1kgV3n3C5Q6lG+rI5TPQHpWWTvNLtGcBI1NFJoZT9XKpjdz6F5oipqqlnO3tfbkNc9u95RbfkGqHS7UuOJWTWzB631S9dzRzrR+PgJCUC1kMSJnSoOBGvM8JuCLGcazunWhLClornzLPjVQSMRWDDonizMj0NzDd+MZ9sKF7Z29JKP+S6eWqqvtkcerV7YzeqHvLO9+6HK1NoGFTTdfUNBDXxLQfaafW+fvyzfW6pTzliJSY8F8vwDM8muxzwCFjZRjoZm6vQ1MvRJOXHKr6SyJZDaXnyCIc4PGcAw54yfN3+rhk4oyLW3FZz93imCO6HH5QFQv7Lke8Xn37/6y/i2lTtTierk4v7j3FJ3dQ6xfas9v3sqeJlZOYW7TbrTgjYFpycbvrNbnHeP8AAAD//wEAAP//9LdPUXicYmBmAIP/5xiMGLAAAAAAAP//AQAA//8vAQIDAAAA");
+}]]></style><style type="text/css"><![CDATA[.shape {
+  shape-rendering: geometricPrecision;
+  stroke-linejoin: round;
+}
+.connection {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.blend {
+  mix-blend-mode: multiply;
+  opacity: 0.5;
+}
+
+		.d2-2133515523 .fill-N1{fill:#0A0F25;}
+		.d2-2133515523 .fill-N2{fill:#676C7E;}
+		.d2-2133515523 .fill-N3{fill:#9499AB;}
+		.d2-2133515523 .fill-N4{fill:#CFD2DD;}
+		.d2-2133515523 .fill-N5{fill:#DEE1EB;}
+		.d2-2133515523 .fill-N6{fill:#EEF1F8;}
+		.d2-2133515523 .fill-N7{fill:#FFFFFF;}
+		.d2-2133515523 .fill-B1{fill:#0D32B2;}
+		.d2-2133515523 .fill-B2{fill:#0D32B2;}
+		.d2-2133515523 .fill-B3{fill:#E3E9FD;}
+		.d2-2133515523 .fill-B4{fill:#E3E9FD;}
+		.d2-2133515523 .fill-B5{fill:#EDF0FD;}
+		.d2-2133515523 .fill-B6{fill:#F7F8FE;}
+		.d2-2133515523 .fill-AA2{fill:#4A6FF3;}
+		.d2-2133515523 .fill-AA4{fill:#EDF0FD;}
+		.d2-2133515523 .fill-AA5{fill:#F7F8FE;}
+		.d2-2133515523 .fill-AB4{fill:#EDF0FD;}
+		.d2-2133515523 .fill-AB5{fill:#F7F8FE;}
+		.d2-2133515523 .stroke-N1{stroke:#0A0F25;}
+		.d2-2133515523 .stroke-N2{stroke:#676C7E;}
+		.d2-2133515523 .stroke-N3{stroke:#9499AB;}
+		.d2-2133515523 .stroke-N4{stroke:#CFD2DD;}
+		.d2-2133515523 .stroke-N5{stroke:#DEE1EB;}
+		.d2-2133515523 .stroke-N6{stroke:#EEF1F8;}
+		.d2-2133515523 .stroke-N7{stroke:#FFFFFF;}
+		.d2-2133515523 .stroke-B1{stroke:#0D32B2;}
+		.d2-2133515523 .stroke-B2{stroke:#0D32B2;}
+		.d2-2133515523 .stroke-B3{stroke:#E3E9FD;}
+		.d2-2133515523 .stroke-B4{stroke:#E3E9FD;}
+		.d2-2133515523 .stroke-B5{stroke:#EDF0FD;}
+		.d2-2133515523 .stroke-B6{stroke:#F7F8FE;}
+		.d2-2133515523 .stroke-AA2{stroke:#4A6FF3;}
+		.d2-2133515523 .stroke-AA4{stroke:#EDF0FD;}
+		.d2-2133515523 .stroke-AA5{stroke:#F7F8FE;}
+		.d2-2133515523 .stroke-AB4{stroke:#EDF0FD;}
+		.d2-2133515523 .stroke-AB5{stroke:#F7F8FE;}
+		.d2-2133515523 .background-color-N1{background-color:#0A0F25;}
+		.d2-2133515523 .background-color-N2{background-color:#676C7E;}
+		.d2-2133515523 .background-color-N3{background-color:#9499AB;}
+		.d2-2133515523 .background-color-N4{background-color:#CFD2DD;}
+		.d2-2133515523 .background-color-N5{background-color:#DEE1EB;}
+		.d2-2133515523 .background-color-N6{background-color:#EEF1F8;}
+		.d2-2133515523 .background-color-N7{background-color:#FFFFFF;}
+		.d2-2133515523 .background-color-B1{background-color:#0D32B2;}
+		.d2-2133515523 .background-color-B2{background-color:#0D32B2;}
+		.d2-2133515523 .background-color-B3{background-color:#E3E9FD;}
+		.d2-2133515523 .background-color-B4{background-color:#E3E9FD;}
+		.d2-2133515523 .background-color-B5{background-color:#EDF0FD;}
+		.d2-2133515523 .background-color-B6{background-color:#F7F8FE;}
+		.d2-2133515523 .background-color-AA2{background-color:#4A6FF3;}
+		.d2-2133515523 .background-color-AA4{background-color:#EDF0FD;}
+		.d2-2133515523 .background-color-AA5{background-color:#F7F8FE;}
+		.d2-2133515523 .background-color-AB4{background-color:#EDF0FD;}
+		.d2-2133515523 .background-color-AB5{background-color:#F7F8FE;}
+		.d2-2133515523 .color-N1{color:#0A0F25;}
+		.d2-2133515523 .color-N2{color:#676C7E;}
+		.d2-2133515523 .color-N3{color:#9499AB;}
+		.d2-2133515523 .color-N4{color:#CFD2DD;}
+		.d2-2133515523 .color-N5{color:#DEE1EB;}
+		.d2-2133515523 .color-N6{color:#EEF1F8;}
+		.d2-2133515523 .color-N7{color:#FFFFFF;}
+		.d2-2133515523 .color-B1{color:#0D32B2;}
+		.d2-2133515523 .color-B2{color:#0D32B2;}
+		.d2-2133515523 .color-B3{color:#E3E9FD;}
+		.d2-2133515523 .color-B4{color:#E3E9FD;}
+		.d2-2133515523 .color-B5{color:#EDF0FD;}
+		.d2-2133515523 .color-B6{color:#F7F8FE;}
+		.d2-2133515523 .color-AA2{color:#4A6FF3;}
+		.d2-2133515523 .color-AA4{color:#EDF0FD;}
+		.d2-2133515523 .color-AA5{color:#F7F8FE;}
+		.d2-2133515523 .color-AB4{color:#EDF0FD;}
+		.d2-2133515523 .color-AB5{color:#F7F8FE;}.appendix text.text{fill:#0A0F25}.md{--color-fg-default:#0A0F25;--color-fg-muted:#676C7E;--color-fg-subtle:#9499AB;--color-canvas-default:#FFFFFF;--color-canvas-subtle:#EEF1F8;--color-border-default:#0D32B2;--color-border-muted:#0D32B2;--color-neutral-muted:#EEF1F8;--color-accent-fg:#0D32B2;--color-accent-emphasis:#0D32B2;--color-attention-subtle:#676C7E;--color-danger-fg:red;}.sketch-overlay-B1{fill:url(#streaks-darker-d2-2133515523);mix-blend-mode:lighten}.sketch-overlay-B2{fill:url(#streaks-darker-d2-2133515523);mix-blend-mode:lighten}.sketch-overlay-B3{fill:url(#streaks-bright-d2-2133515523);mix-blend-mode:darken}.sketch-overlay-B4{fill:url(#streaks-bright-d2-2133515523);mix-blend-mode:darken}.sketch-overlay-B5{fill:url(#streaks-bright-d2-2133515523);mix-blend-mode:darken}.sketch-overlay-B6{fill:url(#streaks-bright-d2-2133515523);mix-blend-mode:darken}.sketch-overlay-AA2{fill:url(#streaks-dark-d2-2133515523);mix-blend-mode:overlay}.sketch-overlay-AA4{fill:url(#streaks-bright-d2-2133515523);mix-blend-mode:darken}.sketch-overlay-AA5{fill:url(#streaks-bright-d2-2133515523);mix-blend-mode:darken}.sketch-overlay-AB4{fill:url(#streaks-bright-d2-2133515523);mix-blend-mode:darken}.sketch-overlay-AB5{fill:url(#streaks-bright-d2-2133515523);mix-blend-mode:darken}.sketch-overlay-N1{fill:url(#streaks-darker-d2-2133515523);mix-blend-mode:lighten}.sketch-overlay-N2{fill:url(#streaks-dark-d2-2133515523);mix-blend-mode:overlay}.sketch-overlay-N3{fill:url(#streaks-normal-d2-2133515523);mix-blend-mode:color-burn}.sketch-overlay-N4{fill:url(#streaks-normal-d2-2133515523);mix-blend-mode:color-burn}.sketch-overlay-N5{fill:url(#streaks-bright-d2-2133515523);mix-blend-mode:darken}.sketch-overlay-N6{fill:url(#streaks-bright-d2-2133515523);mix-blend-mode:darken}.sketch-overlay-N7{fill:url(#streaks-bright-d2-2133515523);mix-blend-mode:darken}.light-code{display: block}.dark-code{display: none}@media screen and (prefers-color-scheme:dark){
+		.d2-2133515523 .fill-N1{fill:#CDD6F4;}
+		.d2-2133515523 .fill-N2{fill:#BAC2DE;}
+		.d2-2133515523 .fill-N3{fill:#A6ADC8;}
+		.d2-2133515523 .fill-N4{fill:#585B70;}
+		.d2-2133515523 .fill-N5{fill:#45475A;}
+		.d2-2133515523 .fill-N6{fill:#313244;}
+		.d2-2133515523 .fill-N7{fill:#1E1E2E;}
+		.d2-2133515523 .fill-B1{fill:#CBA6f7;}
+		.d2-2133515523 .fill-B2{fill:#CBA6f7;}
+		.d2-2133515523 .fill-B3{fill:#6C7086;}
+		.d2-2133515523 .fill-B4{fill:#585B70;}
+		.d2-2133515523 .fill-B5{fill:#45475A;}
+		.d2-2133515523 .fill-B6{fill:#313244;}
+		.d2-2133515523 .fill-AA2{fill:#f38BA8;}
+		.d2-2133515523 .fill-AA4{fill:#45475A;}
+		.d2-2133515523 .fill-AA5{fill:#313244;}
+		.d2-2133515523 .fill-AB4{fill:#45475A;}
+		.d2-2133515523 .fill-AB5{fill:#313244;}
+		.d2-2133515523 .stroke-N1{stroke:#CDD6F4;}
+		.d2-2133515523 .stroke-N2{stroke:#BAC2DE;}
+		.d2-2133515523 .stroke-N3{stroke:#A6ADC8;}
+		.d2-2133515523 .stroke-N4{stroke:#585B70;}
+		.d2-2133515523 .stroke-N5{stroke:#45475A;}
+		.d2-2133515523 .stroke-N6{stroke:#313244;}
+		.d2-2133515523 .stroke-N7{stroke:#1E1E2E;}
+		.d2-2133515523 .stroke-B1{stroke:#CBA6f7;}
+		.d2-2133515523 .stroke-B2{stroke:#CBA6f7;}
+		.d2-2133515523 .stroke-B3{stroke:#6C7086;}
+		.d2-2133515523 .stroke-B4{stroke:#585B70;}
+		.d2-2133515523 .stroke-B5{stroke:#45475A;}
+		.d2-2133515523 .stroke-B6{stroke:#313244;}
+		.d2-2133515523 .stroke-AA2{stroke:#f38BA8;}
+		.d2-2133515523 .stroke-AA4{stroke:#45475A;}
+		.d2-2133515523 .stroke-AA5{stroke:#313244;}
+		.d2-2133515523 .stroke-AB4{stroke:#45475A;}
+		.d2-2133515523 .stroke-AB5{stroke:#313244;}
+		.d2-2133515523 .background-color-N1{background-color:#CDD6F4;}
+		.d2-2133515523 .background-color-N2{background-color:#BAC2DE;}
+		.d2-2133515523 .background-color-N3{background-color:#A6ADC8;}
+		.d2-2133515523 .background-color-N4{background-color:#585B70;}
+		.d2-2133515523 .background-color-N5{background-color:#45475A;}
+		.d2-2133515523 .background-color-N6{background-color:#313244;}
+		.d2-2133515523 .background-color-N7{background-color:#1E1E2E;}
+		.d2-2133515523 .background-color-B1{background-color:#CBA6f7;}
+		.d2-2133515523 .background-color-B2{background-color:#CBA6f7;}
+		.d2-2133515523 .background-color-B3{background-color:#6C7086;}
+		.d2-2133515523 .background-color-B4{background-color:#585B70;}
+		.d2-2133515523 .background-color-B5{background-color:#45475A;}
+		.d2-2133515523 .background-color-B6{background-color:#313244;}
+		.d2-2133515523 .background-color-AA2{background-color:#f38BA8;}
+		.d2-2133515523 .background-color-AA4{background-color:#45475A;}
+		.d2-2133515523 .background-color-AA5{background-color:#313244;}
+		.d2-2133515523 .background-color-AB4{background-color:#45475A;}
+		.d2-2133515523 .background-color-AB5{background-color:#313244;}
+		.d2-2133515523 .color-N1{color:#CDD6F4;}
+		.d2-2133515523 .color-N2{color:#BAC2DE;}
+		.d2-2133515523 .color-N3{color:#A6ADC8;}
+		.d2-2133515523 .color-N4{color:#585B70;}
+		.d2-2133515523 .color-N5{color:#45475A;}
+		.d2-2133515523 .color-N6{color:#313244;}
+		.d2-2133515523 .color-N7{color:#1E1E2E;}
+		.d2-2133515523 .color-B1{color:#CBA6f7;}
+		.d2-2133515523 .color-B2{color:#CBA6f7;}
+		.d2-2133515523 .color-B3{color:#6C7086;}
+		.d2-2133515523 .color-B4{color:#585B70;}
+		.d2-2133515523 .color-B5{color:#45475A;}
+		.d2-2133515523 .color-B6{color:#313244;}
+		.d2-2133515523 .color-AA2{color:#f38BA8;}
+		.d2-2133515523 .color-AA4{color:#45475A;}
+		.d2-2133515523 .color-AA5{color:#313244;}
+		.d2-2133515523 .color-AB4{color:#45475A;}
+		.d2-2133515523 .color-AB5{color:#313244;}.appendix text.text{fill:#CDD6F4}.md{--color-fg-default:#CDD6F4;--color-fg-muted:#BAC2DE;--color-fg-subtle:#A6ADC8;--color-canvas-default:#1E1E2E;--color-canvas-subtle:#313244;--color-border-default:#CBA6f7;--color-border-muted:#CBA6f7;--color-neutral-muted:#313244;--color-accent-fg:#CBA6f7;--color-accent-emphasis:#CBA6f7;--color-attention-subtle:#BAC2DE;--color-danger-fg:red;}.sketch-overlay-B1{fill:url(#streaks-normal-d2-2133515523);mix-blend-mode:color-burn}.sketch-overlay-B2{fill:url(#streaks-normal-d2-2133515523);mix-blend-mode:color-burn}.sketch-overlay-B3{fill:url(#streaks-dark-d2-2133515523);mix-blend-mode:overlay}.sketch-overlay-B4{fill:url(#streaks-dark-d2-2133515523);mix-blend-mode:overlay}.sketch-overlay-B5{fill:url(#streaks-darker-d2-2133515523);mix-blend-mode:lighten}.sketch-overlay-B6{fill:url(#streaks-darker-d2-2133515523);mix-blend-mode:lighten}.sketch-overlay-AA2{fill:url(#streaks-normal-d2-2133515523);mix-blend-mode:color-burn}.sketch-overlay-AA4{fill:url(#streaks-darker-d2-2133515523);mix-blend-mode:lighten}.sketch-overlay-AA5{fill:url(#streaks-darker-d2-2133515523);mix-blend-mode:lighten}.sketch-overlay-AB4{fill:url(#streaks-darker-d2-2133515523);mix-blend-mode:lighten}.sketch-overlay-AB5{fill:url(#streaks-darker-d2-2133515523);mix-blend-mode:lighten}.sketch-overlay-N1{fill:url(#streaks-normal-d2-2133515523);mix-blend-mode:color-burn}.sketch-overlay-N2{fill:url(#streaks-normal-d2-2133515523);mix-blend-mode:color-burn}.sketch-overlay-N3{fill:url(#streaks-normal-d2-2133515523);mix-blend-mode:color-burn}.sketch-overlay-N4{fill:url(#streaks-dark-d2-2133515523);mix-blend-mode:overlay}.sketch-overlay-N5{fill:url(#streaks-darker-d2-2133515523);mix-blend-mode:lighten}.sketch-overlay-N6{fill:url(#streaks-darker-d2-2133515523);mix-blend-mode:lighten}.sketch-overlay-N7{fill:url(#streaks-darker-d2-2133515523);mix-blend-mode:lighten}.light-code{display: none}.dark-code{display: block}}]]></style><g class="YXBp source"><g class="shape" ><rect x="26.000000" y="12.000000" width="69.000000" height="66.000000" stroke="#EDAC05" fill="#FDCB28" style="stroke-width:2;" /></g><text x="60.500000" y="50.500000" fill="#27272A" class="text-bold" style="text-anchor:middle;font-size:16px">API</text></g><g class="c3Zj process"><g class="shape" ><rect x="12.000000" y="148.000000" width="97.000000" height="66.000000" stroke="#A1A1AA" fill="#F4F4F5" style="stroke-width:2;" /></g><text x="60.500000" y="186.500000" fill="#27272A" class="text-bold" style="text-anchor:middle;font-size:16px">Service</text></g><g class="ZGI= datastore"><g class="shape" ><path d="M 18 308 C 18 284 56 284 60 284 C 64 284 102 284 102 308 V 378 C 102 402 64 402 60 402 C 56 402 18 402 18 378 V 308 Z" stroke="#26934F" fill="#5BCD86" style="stroke-width:2;" /><path d="M 18 308 C 18 332 56 332 60 332 C 64 332 102 332 102 308" stroke="#26934F" fill="#5BCD86" style="stroke-width:2;" /></g><text x="60.000000" y="360.500000" fill="#1A1A1A" class="text-bold" style="text-anchor:middle;font-size:16px">Store</text></g><g class="KGFwaSAtJmd0OyBzdmMpWzBd"><marker id="mk-d2-2133515523-3488378134" markerWidth="10.000000" markerHeight="12.000000" refX="7.000000" refY="6.000000" viewBox="0.000000 0.000000 10.000000 12.000000" orient="auto" markerUnits="userSpaceOnUse"> <polygon points="0.000000,0.000000 10.000000,6.000000 0.000000,12.000000" class="connection fill-B1" stroke-width="2" /> </marker><path d="M 60.500000 80.000000 L 60.500000 144.000000" fill="none" class="connection stroke-B1" style="stroke-width:2;" marker-end="url(#mk-d2-2133515523-3488378134)" mask="url(#d2-2133515523)" /></g><g class="KHN2YyAtJmd0OyBkYilbMF0="><path d="M 60.514285 215.999949 L 60.971429 280.000102" fill="none" class="connection stroke-B1" style="stroke-width:2;" marker-end="url(#mk-d2-2133515523-3488378134)" mask="url(#d2-2133515523)" /></g><mask id="d2-2133515523" maskUnits="userSpaceOnUse" x="-5" y="-5" width="131" height="424">
+<rect x="-5" y="-5" width="131" height="424" fill="white"></rect>
+
+</mask></svg></svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 6: DASHBOARD (max 6 KPIs, hero values <=6 chars) -->
+  <section class="slide slide--dashboard" style="background-image:radial-gradient(ellipse at 70% 30%, var(--accent-dim) 0%, transparent 40%);">
+    <h2 class="slide__heading reveal">Metrics Overview</h2>
+    <div class="slide__kpis">
+      <div class="slide__kpi reveal">
+        <div class="slide__kpi-val" style="color:var(--accent);">12ms</div>
+        <div class="slide__kpi-label">P99 Latency</div>
+        <div class="slide__kpi-trend" style="color:var(--success);">&darr; from 142ms</div>
+      </div>
+      <div class="slide__kpi reveal">
+        <div class="slide__kpi-val" style="color:var(--success);">99.97%</div>
+        <div class="slide__kpi-label">Uptime</div>
+        <div class="slide__kpi-trend" style="color:var(--success);">&uarr; from 99.2%</div>
+      </div>
+      <div class="slide__kpi reveal">
+        <div class="slide__kpi-val" style="color:var(--info);">340</div>
+        <div class="slide__kpi-label">Edge Nodes</div>
+        <div class="slide__kpi-trend" style="color:var(--text-dim);">global coverage</div>
+      </div>
+      <div class="slide__kpi reveal">
+        <div class="slide__kpi-val" style="color:var(--accent);">68%</div>
+        <div class="slide__kpi-label">Cost Cut</div>
+        <div class="slide__kpi-trend" style="color:var(--success);">vs. prior quarter</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 7: TABLE (max 8 rows; overflow paginates to next slide) -->
+  <section class="slide slide--table">
+    <h2 class="slide__heading reveal">Tabular Data</h2>
+    <div class="table-wrap reveal" style="margin-top:clamp(8px,1.5vh,20px);">
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead><tr><th>Phase</th><th>Scope</th><th>Timeline</th><th>Risk</th></tr></thead>
+          <tbody>
+            <tr><td>1. Shadow mode</td><td>Mirror traffic, compare responses</td><td>Week 1&ndash;2</td><td style="color:var(--success);">Low</td></tr>
+            <tr><td>2. Canary</td><td>5% traffic, monitor errors</td><td>Week 3</td><td style="color:var(--success);">Low</td></tr>
+            <tr><td>3. Gradual shift</td><td>25% &rarr; 50% &rarr; 75% traffic</td><td>Week 4&ndash;5</td><td style="color:var(--accent);">Medium</td></tr>
+            <tr><td>4. Full cutover</td><td>100% traffic, decommission old path</td><td>Week 6</td><td style="color:var(--accent);">Medium</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- SLIDE 8: CODE (max 10 lines, floating filename) -->
+  <section class="slide slide--code" style="background-image:radial-gradient(ellipse at 50% 80%, var(--accent-dim) 0%, transparent 40%);">
+    <h2 class="slide__heading reveal" style="text-align:center;">What Changed</h2>
+    <div class="slide__code-block reveal" style="margin-top:clamp(12px,2vh,24px);">
+      <span class="slide__code-filename">handler.go</span>
+      <pre><code><span class="hl">func</span> Handle(ctx context.Context, req Request) (Response, <span class="hl">error</span>) {
+  <span class="cm">// validate at the trust boundary</span>
+  <span class="hl">if</span> err := req.Validate(); err != <span class="hl">nil</span> {
+    <span class="hl">return</span> Response{}, fmt.Errorf(<span class="hl">"invalid request: %w"</span>, err)
+  }
+  <span class="cm">// route to the ledger</span>
+  <span class="hl">return</span> ledger.Process(ctx, req)
+}</code></pre>
+    </div>
+  </section>
+
+  <!-- SLIDE 9: QUOTE (~25 words / ~150 chars max) -->
+  <section class="slide slide--quote" style="background-image:radial-gradient(ellipse at 50% 50%, var(--accent-dim) 0%, transparent 35%);">
+    <div class="slide__quote-mark reveal">&ldquo;</div>
+    <blockquote class="reveal">
+      Correctness on the money path is not a feature. It is the foundation everything else stands on.
+    </blockquote>
+    <cite class="reveal">&mdash; Attribution</cite>
+  </section>
+
+  <!-- SLIDE 10: FULL-BLEED (gradient fallback; swap to base64 image if generated) -->
+  <section class="slide slide--bleed">
+    <!-- surf unavailable, using CSS gradient fallback -->
+    <div class="slide__bg slide__bg--gradient"></div>
+    <div class="slide__scrim"></div>
+    <div class="slide__content">
+      <p class="slide__label reveal" style="color:rgba(255,255,255,0.6);">Next Steps</p>
+      <h2 class="slide__heading reveal">Closing Statement Over Background</h2>
+      <p class="slide__subtitle reveal" style="color:rgba(255,255,255,0.6); margin-top:12px;">Supporting line for the closing slide</p>
+    </div>
+  </section>
+
+</div><!-- /deck -->
+
+<!-- ========== PERSISTENT LERIAN WORDMARK (fixed, not part of any slide) ========== -->
+<a class="deck-wordmark" href="https://lerian.studio" aria-label="Lerian Studio — lerian.studio">
+  <svg class="logo-mark" viewBox="0 0 1090.88 280" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path fill-rule="evenodd" d="M619.42,29.69c0,15.43-10.87,27.93-27.93,27.93s-27.93-12.51-27.93-27.93,10.86-27.93,27.92-27.93,27.93,12.51,27.93,27.93h0ZM158.64,242.4v33.54H12.13v-33.55h48.36c3.16,0,5.73-2.57,5.73-5.73V87.77c0-3.16-2.57-5.73-5.73-5.73H7.85v-34.31h98.33v188.94c0,3.16,2.57,5.73,5.73,5.73h46.74ZM168.85,179.86c0,58.52,37.29,98.33,99.47,98.33,49.15,0,79.7-30.6,86.27-67.08h-40.69c-6.29,24.54-26.97,33.91-48.61,33.91-48.85,0-53.41-45.18-53.83-55-.04-1.02.77-1.87,1.79-1.87h143.61c.76-5.26,1.13-10.42,1.13-15.44,0-32.71-20.25-91.92-95.33-91.92-57.04,0-93.8,41.26-93.81,99.07ZM314.47,158.39l-99.49.02c-1.08,0-1.94-.96-1.78-2.02,4.49-31.28,30.98-42.82,50.98-42.82,33.88,0,48.71,21.59,52.08,42.79.17,1.08-.69,2.04-1.78,2.04h0ZM867.2,83.16h0s0,0,0,0h0ZM826.87,83.16h40.33v192.83h-40.32v-24.53c0-3.09-3.92-4.41-5.79-1.95-.18.23-.35.47-.53.71h0s0,.02,0,.02h0c-.11.16-.23.32-.35.47-7.92,10.56-20.68,27.53-56.24,27.53-60.83,0-91.19-46.33-91.19-98.7,0-61.42,40.37-98.72,91.17-98.72,36.73,0,48.44,15.73,56.64,26.75l.49.66c1.86,2.49,5.81,1.18,5.81-1.93v-23.14ZM770.75,115.48c34.78,0,56.14,27.81,56.14,64.8h0c0,42-26.32,63.68-56.14,63.68-34.83,0-56.14-27.43-56.14-64.43,0-42.07,26.11-64.05,56.14-64.05ZM1063.39,101.7c14.42,14.06,21.64,36.67,21.64,67.8v106.25h-41.06v-103.99c0-43.98-22.35-56.14-45.96-56.14-31.99,0-51.6,23.22-51.6,62.92v97.21h-40.68V83.15h39.93v25.07c0,3.11,3.95,4.4,5.82,1.92,8.55-11.4,26.72-29.52,55.98-29.52,37.55,0,55.75,20.88,55.93,21.08ZM657.42,275.94v-33.54h0s-37.37,0-37.37,0c-3.16,0-5.73-2.57-5.73-5.73V83.14h-81.34v34.31h37.54c3.16,0,5.73,2.57,5.73,5.73v113.48c0,3.16-2.57,5.73-5.73,5.73h-38.14v33.55h125.03ZM499.27,119.27c0,.13-.1.23-.23.23h0s-36.31,0-36.31,0c-28.68,0-28.65,24.99-28.64,43.62,0,.46,0,.92,0,1.37v111.24c0,.13-.1.23-.23.23h-41.01c-.13,0-.23-.1-.23-.23V83.27c0-.13.1-.23.23-.23h36.49c.13,0,.23.1.23.23v24.03c0,4.05,5.24,5.65,7.49,2.28.22-.32.43-.64.65-.97,8.18-12.25,18.71-28.02,52.51-28.02h9.05v38.68Z"/>
+  </svg>
+  <span class="deck-wordmark-text">Generated with Ring</span>
+</a>
+
+<script>
+  // No client-side diagram library. Diagram slides hold a static, pre-rendered
+  // D2 SVG (dark/light baked in by D2). Post-render work is autoFit() for
+  // KPI/quote overflow plus the per-slide D2 pan/zoom engine below.
+
+  function autoFit() {
+    // KPI values: visually scale down text that overflows card width
+    document.querySelectorAll('.slide__kpi-val').forEach(function(el) {
+      if (el.scrollWidth > el.clientWidth) {
+        var s = el.clientWidth / el.scrollWidth;
+        el.style.transform = 'scale(' + s + ')';
+        el.style.transformOrigin = 'left top';
+      }
+    });
+    // Blockquotes: reduce font proportionally for long text
+    document.querySelectorAll('.slide--quote blockquote').forEach(function(el) {
+      var len = el.textContent.trim().length;
+      if (len > 100) {
+        var scale = Math.max(0.5, 100 / len);
+        var fs = parseFloat(getComputedStyle(el).fontSize);
+        el.style.fontSize = Math.max(16, Math.round(fs * scale)) + 'px';
+      }
+    });
+  }
+
+  // ===== D2 SVG pan/zoom engine (per-slide; source-agnostic, reads viewBox) =====
+  // Mirrors templates/diagram.html. Each .diagram-shell self-bootstraps and is
+  // independent of the SlideEngine. Toolbar buttons use data-a attributes.
+  function initDiagramShells() {
+    document.querySelectorAll('.diagram-shell').forEach(function(shell) {
+      var vp = shell.querySelector('.diagram-viewport'),
+          cv = shell.querySelector('.diagram-canvas'),
+          svg = cv && cv.querySelector('svg'),
+          label = shell.querySelector('.diagram-label');
+      if (!svg) return;
+      var vb = (svg.getAttribute('viewBox') || '0 0 800 600').split(/\s+/).map(Number),
+          nw = vb[2] || 800, nh = vb[3] || 600;
+      svg.removeAttribute('width'); svg.removeAttribute('height');
+      svg.setAttribute('width', nw); svg.setAttribute('height', nh);
+      var scale = 1, tx = 0, ty = 0, minS = 0.08, maxS = 10;
+      function apply() { cv.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')'; if (label) label.textContent = Math.round(scale * 100) + '%'; }
+      function fit() { var r = vp.getBoundingClientRect(); var pad = 40; var s = Math.min((r.width - pad) / nw, (r.height - pad) / nh); scale = Math.min(Math.max(s, minS), 1); tx = (r.width - nw * scale) / 2; ty = (r.height - nh * scale) / 2; apply(); }
+      function zoomAt(f, cx, cy) { var ns = Math.max(minS, Math.min(maxS, scale * f)); var r = vp.getBoundingClientRect(); var px = (cx - r.left - tx) / scale, py = (cy - r.top - ty) / scale; scale = ns; tx = cx - r.left - px * scale; ty = cy - r.top - py * scale; apply(); }
+      function ctr(f) { var r = vp.getBoundingClientRect(); zoomAt(f, r.left + r.width / 2, r.top + r.height / 2); }
+      shell.querySelector('[data-a=in]').onclick = function() { ctr(1.25); };
+      shell.querySelector('[data-a=out]').onclick = function() { ctr(0.8); };
+      shell.querySelector('[data-a=one]').onclick = function() { var r = vp.getBoundingClientRect(); var px = (r.width / 2 - tx) / scale, py = (r.height / 2 - ty) / scale; scale = 1; tx = r.width / 2 - px; ty = r.height / 2 - py; apply(); };
+      shell.querySelector('[data-a=fit]').onclick = fit;
+      shell.querySelector('[data-a=full]').onclick = function() { if (!document.fullscreenElement) { shell.requestFullscreen && shell.requestFullscreen(); } else { document.exitFullscreen(); } };
+      vp.addEventListener('wheel', function(e) { e.preventDefault(); if (e.ctrlKey || e.metaKey) { zoomAt(e.deltaY < 0 ? 1.1 : 0.9, e.clientX, e.clientY); } else { tx -= e.deltaX; ty -= e.deltaY; apply(); } }, { passive: false });
+      var drag = false, lx, ly;
+      vp.addEventListener('mousedown', function(e) { drag = true; lx = e.clientX; ly = e.clientY; vp.classList.add('grabbing'); });
+      window.addEventListener('mousemove', function(e) { if (!drag) return; tx += e.clientX - lx; ty += e.clientY - ly; lx = e.clientX; ly = e.clientY; apply(); });
+      window.addEventListener('mouseup', function() { drag = false; vp.classList.remove('grabbing'); });
+      vp.addEventListener('dblclick', fit);
+      if (window.ResizeObserver) new ResizeObserver(fit).observe(vp);
+      setTimeout(fit, 30);
+    });
+  }
+
+  // ===== Bootstrap =====
+  function startDeck() { autoFit(); initDiagramShells(); new SlideEngine(); }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startDeck);
+  } else {
+    startDeck();
+  }
+
+  // ===== SlideEngine =====
+  function SlideEngine() {
+    this.deck = document.querySelector('.deck');
+    this.slides = [].slice.call(document.querySelectorAll('.slide'));
+    this.current = 0;
+    this.total = this.slides.length;
+    this.buildChrome();
+    this.bindEvents();
+    this.observe();
+    this.update();
+  }
+  SlideEngine.prototype.buildChrome = function() {
+    var bar = document.createElement('div'); bar.className = 'deck-progress';
+    document.body.appendChild(bar); this.bar = bar;
+
+    var dots = document.createElement('div'); dots.className = 'deck-dots';
+    var self = this;
+    this.slides.forEach(function(_, i) {
+      var d = document.createElement('button');
+      d.className = 'deck-dot';
+      d.title = 'Slide ' + (i + 1);
+      d.onclick = function() { self.goTo(i); };
+      dots.appendChild(d);
+    });
+    document.body.appendChild(dots);
+    this.dots = [].slice.call(dots.children);
+
+    var ctr = document.createElement('div'); ctr.className = 'deck-counter';
+    document.body.appendChild(ctr); this.counter = ctr;
+
+    var hints = document.createElement('div'); hints.className = 'deck-hints';
+    hints.textContent = '← → or scroll to navigate';
+    document.body.appendChild(hints); this.hints = hints;
+    this.hintTimer = setTimeout(function() { hints.classList.add('faded'); }, 4000);
+  };
+  SlideEngine.prototype.bindEvents = function() {
+    var self = this;
+    document.addEventListener('keydown', function(e) {
+      if (e.target.closest('.diagram-viewport,.table-scroll,.code-scroll,input,textarea,[contenteditable]')) return;
+      if (['ArrowDown', 'ArrowRight', ' ', 'PageDown'].indexOf(e.key) > -1) { e.preventDefault(); self.next(); }
+      else if (['ArrowUp', 'ArrowLeft', 'PageUp'].indexOf(e.key) > -1) { e.preventDefault(); self.prev(); }
+      else if (e.key === 'Home') { e.preventDefault(); self.goTo(0); }
+      else if (e.key === 'End') { e.preventDefault(); self.goTo(self.total - 1); }
+      self.fadeHints();
+    });
+    var tY;
+    this.deck.addEventListener('touchstart', function(e) { tY = e.touches[0].clientY; }, { passive: true });
+    this.deck.addEventListener('touchend', function(e) {
+      var dy = tY - e.changedTouches[0].clientY;
+      if (Math.abs(dy) > 50) { dy > 0 ? self.next() : self.prev(); }
+    });
+  };
+  SlideEngine.prototype.observe = function() {
+    var self = this;
+    var obs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          self.current = self.slides.indexOf(entry.target);
+          self.update();
+        }
+      });
+    }, { threshold: 0.5 });
+    this.slides.forEach(function(s) { obs.observe(s); });
+  };
+  SlideEngine.prototype.goTo = function(i) {
+    this.slides[Math.max(0, Math.min(i, this.total - 1))].scrollIntoView({ behavior: 'smooth' });
+  };
+  SlideEngine.prototype.next = function() { if (this.current < this.total - 1) this.goTo(this.current + 1); };
+  SlideEngine.prototype.prev = function() { if (this.current > 0) this.goTo(this.current - 1); };
+  SlideEngine.prototype.update = function() {
+    this.bar.style.width = ((this.current + 1) / this.total * 100) + '%';
+    var c = this.current;
+    this.dots.forEach(function(d, i) { d.classList.toggle('active', i === c); });
+    this.counter.textContent = (this.current + 1) + ' / ' + this.total;
+  };
+  SlideEngine.prototype.fadeHints = function() { clearTimeout(this.hintTimer); this.hints.classList.add('faded'); };
+</script>
+
+</body>
+</html>

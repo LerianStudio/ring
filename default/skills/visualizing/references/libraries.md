@@ -1,349 +1,103 @@
 # External libraries (CDN)
 
-All color tokens and base styles are defined in `../templates/standard.html`. This reference shows library integration patterns (Mermaid, Chart.js, Highlight.js, anime.js) that build ON TOP of the standard foundation.
+All color tokens and base styles are defined in `../templates/standard.html`. This reference shows library integration patterns (D2, Chart.js, Highlight.js, anime.js) that build ON TOP of the standard foundation.
 
 Optional CDN libraries for cases where pure CSS/HTML isn't enough. Only include what the diagram actually needs; most diagrams need zero external JS.
 
-## Mermaid.js diagramming engine
+## D2 diagrams (replaces Mermaid)
 
-Use for flowcharts, sequence diagrams, ER diagrams, state machines, mind maps, class diagrams, and any diagram where automatic node positioning and edge routing saves effort. Mermaid handles layout; you handle theming.
+Use for topology, connections, and flows: architecture maps, service graphs, pipelines, sequence-style flows, decision trees, state machines, ER-style entity maps. D2 (the [Terrastruct](https://d2lang.com) diagram language) renders to a **static inline SVG** via its CLI. Dark/light is baked INTO the SVG — no client-side diagram library, no render flicker, no `foreignObject` breakage, no theme-refresh bug. The canonical authoring template is `../templates/diagram.html`; mirror it.
 
-Do NOT use for dashboards: CSS Grid card layouts with Chart.js look better for those. Data tables use `<table>` elements.
+**When to use D2 vs CSS-grid cards:** Reach for D2 when the artifact's message is the *shape of connections* — what flows into what, what depends on what, which path is critical. Reach for CSS-grid card layouts (see `./css-patterns.md`) when the content is rich and text-heavy per node (lists, code, prose, multi-field cards) where automatic graph layout would shrink the text into an unreadable thumbnail. Dashboards use CSS Grid + Chart.js; data tables use `<table>` elements. D2 owns the graph; CSS owns the document.
 
-**CDN:**
-```html
-<script type="module">
-  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+### Prerequisite: the `d2` binary
 
-  mermaid.initialize({ startOnLoad: true, /* ... */ });
-</script>
+D2 is a build-time CLI, not a runtime dependency. Install it once:
+
+```bash
+command -v d2 || brew install d2     # or: curl -fsSL https://d2lang.com/install.sh | sh
 ```
 
-**With ELK layout** (required for `layout: 'elk'`; it's a separate package, not bundled in core):
-```html
-<script type="module">
-  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-  import elkLayouts from 'https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk/dist/mermaid-layout-elk.esm.min.mjs';
+### Lerian D2 preamble (copy verbatim as the head of every `.d2` file)
 
-  mermaid.registerLayoutLoaders(elkLayouts);
-  mermaid.initialize({ startOnLoad: true, layout: 'elk', /* ... */ });
-</script>
 ```
-
-Without the ELK import and registration, `layout: 'elk'` silently falls back to dagre. Only import ELK when you actually need it; it adds significant bundle weight. Most simple diagrams render fine with dagre.
-
-### Deep theming
-
-Always use `theme: 'base'`; it's the only theme where all `themeVariables` are fully customizable. The built-in themes (`default`, `dark`, `forest`, `neutral`) ignore most variable overrides.
-
-```html
-<script type="module">
-  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-
-  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  mermaid.initialize({
-    startOnLoad: true,
-    theme: 'base',
-    look: 'classic',
-    themeVariables: {
-      // Background and surfaces: Lerian palette
-      primaryColor: isDark ? '#3F3F46' : 'oklch(96.8% 0.083 96.6)', // dark: zinc-700, light: sunglow-100
-      primaryBorderColor: isDark ? '#EDAC05' : '#EDAC05',   // sunglow-500
-      primaryTextColor: isDark ? '#F4F4F5' : '#27272A',     // dark: zinc-100, light: zinc-800
-      secondaryColor: isDark ? '#2a3a2e' : '#E0F8E8',       // dark: dark green, light: de-york-100
-      secondaryBorderColor: isDark ? '#26934F' : '#26934F', // de-york-600
-      secondaryTextColor: isDark ? '#F4F4F5' : '#27272A',
-      tertiaryColor: isDark ? '#3a2e28' : '#FEE9E2',        // dark: dark warm, light: tangerine-100
-      tertiaryBorderColor: isDark ? '#F06E43' : '#F06E43',  // tangerine-500
-      tertiaryTextColor: isDark ? '#F4F4F5' : '#27272A',
-      // Lines and edges
-      lineColor: isDark ? '#6b7280' : '#52525B',
-      // Text
-      // Global default: CSS overrides on .nodeLabel/.edgeLabel win when present
-      fontSize: '16px',
-      fontFamily: "'Inter', ui-sans-serif, system-ui, sans-serif",
-      // Notes and labels
-      noteBkgColor: isDark ? '#3F3F46' : 'oklch(96.8% 0.083 96.6)', // light: sunglow-100, not opaque near-white
-      noteTextColor: isDark ? '#F4F4F5' : '#27272A',     // dark: zinc-100, light: zinc-800
-      noteBorderColor: isDark ? '#FDCB28' : '#d97706',   // dark: sunglow-400
-    }
-  });
-</script>
-```
-
-### Mermaid readability implementation notes
-
-Use Mermaid for topology, not dense documentation. The enforceable node thresholds live in `../SKILL.md`; this reference only shows implementation patterns for making diagrams readable after the SKILL gate selects Mermaid.
-
-Implementation notes:
-- Use `subgraph` blocks for source-backed domains, layers, ownership, phases, or execution boundaries.
-- Use semantic classes and a legend when colors or strokes carry meaning.
-- Use critical-path treatment for the main decision or execution route.
-- Zoom controls are required, but zoom is not a readability excuse.
-
-Default to `look: 'classic'` for crisp technical artifacts:
-
-```html
-<script type="module">
-  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-  import elkLayouts from 'https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk/dist/mermaid-layout-elk.esm.min.mjs';
-
-  mermaid.registerLayoutLoaders(elkLayouts);
-  mermaid.initialize({
-    startOnLoad: true,
-    theme: 'base',
-    look: 'classic',
-    layout: 'elk',
-    themeVariables: { /* same as above */ }
-  });
-</script>
-```
-
-Use a sketch style only when the artifact brief explicitly calls for a whiteboard or workshop scene. Do not make it the default.
-
-Set classic mode per-diagram via frontmatter when needed:
-```
----
-config:
-  look: classic
-  layout: elk
----
-graph TD
-  A[User Request] --> B{Auth Check}
-  B -->|Valid| C[Process]
-  B -->|Invalid| D[Reject]
-```
-
-### CSS overrides on Mermaid SVG
-
-Mermaid renders SVG. Override its classes for pixel-perfect control that `themeVariables` can't reach:
-
-```css
-/* Container: see css-patterns.md "Mermaid Zoom Controls" for the full zoom pattern */
-.mermaid-wrap {
-  position: relative;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 24px;
-  overflow: auto;
+vars: { d2-config: { layout-engine: elk; theme-id: 0; dark-theme-id: 200; pad: 20 } }
+classes: {
+  source:    { style: { fill: "#FDCB28"; stroke: "#EDAC05"; font-color: "#27272A"; bold: true } }
+  process:   { style: { fill: "#F4F4F5"; stroke: "#A1A1AA"; font-color: "#27272A" } }
+  datastore: { shape: cylinder; style: { fill: "#5BCD86"; stroke: "#26934F"; font-color: "#1A1A1A" } }
+  decision:  { shape: diamond;  style: { fill: "#FDE68A"; stroke: "#EAB308"; font-color: "#27272A" } }
+  critical:  { style: { fill: "#F06E43"; stroke: "#C2410C"; font-color: "#FFFFFF"; bold: true } }
+  external:  { style: { fill: "#E4E4E7"; stroke: "#71717A"; font-color: "#27272A"; stroke-dash: 4 } }
 }
+# apply with `myshape.class: source`; semantic edges: success "#26934F", error "#EF4444"
+# leave nodes unclassed to inherit the neutral theme. Do NOT invent roles not in the source.
+```
 
-/* CRITICAL: Force node/edge text to follow the page's color scheme.
-   Without this, themeVariables.primaryTextColor works for DEFAULT nodes,
-   but any classDef that sets color: will hardcode a single value that
-   breaks in the opposite color scheme. Fix: never set color: in classDef,
-   and always include these CSS overrides. */
-.mermaid .nodeLabel { color: var(--text) !important; }
-.mermaid .edgeLabel { color: var(--text-muted) !important; background-color: var(--bg) !important; }
-.mermaid .edgeLabel rect { fill: var(--bg) !important; }
+The preamble sets a dual theme directly in the SVG: `theme-id: 0` (light) and `dark-theme-id: 200` (dark). D2 emits both palettes gated by `prefers-color-scheme`, so the single static SVG switches automatically with the page.
 
-/* Node shapes */
-.mermaid .node rect,
-.mermaid .node circle,
-.mermaid .node polygon {
-  stroke-width: 1.5px;
+### Semantic classes — when to use each
+
+Apply a class with `myshape.class: source`. Leave a node unclassed to inherit the neutral theme; do NOT invent roles the source material does not support.
+
+| Class | Shape / treatment | Use for |
+|---|---|---|
+| `source` | Sunglow fill, bold | Entry points, request origins, the thing that kicks off the flow |
+| `process` | Neutral zinc fill | Ordinary processing steps, services, handlers |
+| `datastore` | Green cylinder | Databases, caches, queues, any persisted store |
+| `decision` | Amber diamond | Branch points, auth checks, conditional routing |
+| `critical` | Tangerine fill, bold, white text | The main decision or execution route; the path that matters |
+| `external` | Gray, dashed stroke | Third-party systems, boundaries outside the owned codebase |
+
+Semantic edges: color a success edge `#26934F` (de-york) and an error/rejected edge `#EF4444`. Leave ordinary edges unstyled.
+
+### Generation
+
+1. Write `diagram.d2` starting with the Lerian preamble above, then your nodes and edges.
+2. Render to SVG:
+   ```bash
+   d2 --theme=0 --dark-theme=200 --layout=elk diagram.d2 diagram.svg
+   ```
+3. Strip the leading `<?xml ...?>` declaration from `diagram.svg`.
+4. Paste the resulting `<svg>...</svg>` into the `.diagram-canvas` div of `../templates/diagram.html` (replacing the demo SVG).
+
+The pan/zoom engine in the template is SVG-agnostic: it reads the `viewBox` and works as-is. No wiring needed beyond pasting the SVG. The engine is documented in `./css-patterns.md` ("Diagram shell").
+
+### Layout choice
+
+- `elk` (default) — hierarchical, layered layouts. Best for top-down or left-right flows, pipelines, and dependency graphs. This is what the preamble and generation command use.
+- `dagre` (alternative) — directed-graph layout; sometimes more compact for dense, less strictly-layered graphs. Swap by passing `--layout=dagre` and setting `layout-engine: dagre` in the preamble.
+
+Pick one and keep it consistent within a single artifact.
+
+### D2 syntax essentials
+
+```
+# Nodes get IDs; the readable label is the text after a colon, or the ID itself.
+api: API Gateway
+svc: Order Service
+db: Orders DB
+
+# Apply semantic classes
+api.class: source
+svc.class: process
+db.class: datastore
+
+# Edges
+api -> svc: POST /orders
+svc -> db: write
+
+# Containers group related nodes (like subgraphs)
+auth: {
+  login -> validate -> token
 }
+auth -> api
 
-/* Edge paths */
-.mermaid .edge-pattern-solid {
-  stroke-width: 1.5px;
-}
-
-/* Edge labels, smaller than node labels for visual hierarchy */
-.mermaid .edgeLabel {
-  font-family: var(--font-mono) !important;
-  font-size: 13px !important;
-}
-
-/* Node labels, 16px default; drop to 14px for complex diagrams after the SKILL readability gate */
-.mermaid .nodeLabel {
-  font-family: var(--font-body) !important;
-  font-size: 16px !important;
-}
-
-/* Sequence diagram actors */
-.mermaid .actor {
-  stroke-width: 1.5px;
-}
-
-/* Sequence diagram messages */
-.mermaid .messageText {
-  font-family: var(--font-mono) !important;
-  font-size: 12px !important;
-}
-
-/* ER diagram entities */
-.mermaid .er.entityBox {
-  stroke-width: 1.5px;
-}
-
-/* Mind map nodes */
-.mermaid .mindmap-node rect {
-  stroke-width: 1.5px;
-}
+# Styled edge for a critical/error path
+svc -> db: rollback { style.stroke: "#EF4444" }
 ```
 
-### classDef gotchas
-
-`classDef` values are static text inside `<pre>`; they can't use CSS variables or JS ternaries. Two rules:
-
-1. **Never set `color:` in classDef.** It hardcodes a text color that breaks in the opposite color scheme. Let the CSS overrides above handle text color via `var(--text)`.
-
-2. **Use semi-transparent fills (8-digit hex) for node backgrounds.** They layer over whatever Mermaid's base theme background is, producing a tint that works in both light and dark modes. Use `20`-`44` alpha for subtle, `55`-`77` for prominent:
-
-```
-classDef highlight fill:#b5761433,stroke:#b57614,stroke-width:2px
-classDef muted fill:#7c6f6411,stroke:#7c6f6444,stroke-width:1px
-```
-
-Avoid opaque light fills like `fill:#fefce8`; they render as bright boxes in dark mode.
-
-### stateDiagram-v2 label limitations
-
-State diagram transition labels have a strict parser. Avoid:
-- `<br/>`, only works in flowcharts; causes a parse error in state diagrams
-- Parentheses in labels, `cancel()` can confuse the parser
-- Multiple colons, the first `:` is the label delimiter; extra colons in the label text may break parsing
-
-If you need multi-line labels or special characters, use a `flowchart` instead of `stateDiagram-v2`. Flowcharts support quoted labels (`|"label with: special chars"|`) and `<br/>` for line breaks.
-
-### Writing valid Mermaid
-
-Most Mermaid failures come from a few recurring issues. Follow these rules to avoid invalid diagrams:
-
-**Quote labels with special characters.** Parentheses, colons, commas, brackets, and ampersands break the parser when unquoted. Wrap any label containing special characters in double quotes:
-
-```
-A["handleRequest(ctx)"] --> B["DB: query users"]
-A[handleRequest] --> B[query users]
-```
-
-**Keep IDs simple.** Node IDs should be alphanumeric with no spaces or punctuation. Put the readable name in the label, not the ID:
-
-```
-userSvc["User Service"] --> authSvc["Auth Service"]
-```
-
-**Respect the SKILL readability gate.** Beyond the node limits in `../SKILL.md`, readability collapses even with ELK layout. Use `subgraph` blocks to group related source-backed nodes, or split into multiple diagrams:
-
-```
-subgraph Auth
-  login --> validate --> token
-end
-subgraph API
-  gateway --> router --> handler
-end
-Auth --> API
-```
-
-**Arrow styles for semantic meaning:**
-
-| Arrow | Meaning | Use for |
-|-------|---------|---------|
-| `-->` | Solid | Primary flow |
-| `-.->` | Dotted | Optional, async, or fallback paths |
-| `==>` | Thick | Critical or highlighted path |
-| `--x` | Cross | Rejected or blocked |
-| `-->\|label\|` | Labeled | Decision branches, data descriptions |
-
-**Escape pipes in labels.** If a label contains a literal `|`, use `#124;` (HTML entity) or rephrase to avoid it; pipes delimit edge labels in flowcharts.
-
-**Don't mix diagram syntax.** Each diagram type has its own syntax. `-->` works in flowcharts but not in sequence diagrams (`->>` instead). `:::className` works in flowcharts but not in ER diagrams. When in doubt, check the examples below for correct syntax per type.
-
-### Diagram type examples
-
-**Flowchart with decisions:**
-```html
-<pre class="mermaid">
-graph TD
-  A[Request] --> B{Authenticated?}
-  B -->|Yes| C[Load Dashboard]
-  B -->|No| D[Login Page]
-  D --> E[Submit Credentials]
-  E --> B
-  C --> F{Role?}
-  F -->|Admin| G[Admin Panel]
-  F -->|User| H[User Dashboard]
-</pre>
-```
-
-**Sequence diagram:**
-```html
-<pre class="mermaid">
-sequenceDiagram
-  participant C as Client
-  participant G as Gateway
-  participant S as Service
-  participant D as Database
-  C->>G: POST /api/data
-  G->>G: Validate JWT
-  G->>S: Forward request
-  S->>D: Query
-  D-->>S: Results
-  S-->>G: Response
-  G-->>C: 200 OK
-</pre>
-```
-
-**ER diagram:**
-```html
-<pre class="mermaid">
-erDiagram
-  USERS ||--o{ ORDERS : places
-  ORDERS ||--|{ LINE_ITEMS : contains
-  LINE_ITEMS }o--|| PRODUCTS : references
-  USERS { string email PK }
-  ORDERS { int id PK }
-  LINE_ITEMS { int quantity }
-  PRODUCTS { string name }
-</pre>
-```
-
-**State diagram:**
-```html
-<pre class="mermaid">
-stateDiagram-v2
-  [*] --> Draft
-  Draft --> Review : submit
-  Review --> Approved : approve
-  Review --> Draft : request_changes
-  Approved --> Published : publish
-  Published --> Archived : archive
-  Archived --> [*]
-</pre>
-```
-
-**Mind map:**
-```html
-<pre class="mermaid">
-mindmap
-  root((Project))
-    Frontend
-      React
-      Next.js
-      Tailwind
-    Backend
-      Node.js
-      PostgreSQL
-      Redis
-    Infrastructure
-      AWS
-      Docker
-      Terraform
-</pre>
-```
-
-### Dark mode handling
-
-Mermaid initializes once; it can't reactively switch themes. Read the preference at load time inside your `<script type="module">`:
-
-```javascript
-const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-// Use isDark to pick light or dark values in themeVariables
-```
-
-The CSS overrides on the container (`.mermaid-wrap`) and page will still respond to `prefers-color-scheme` normally; only the Mermaid SVG internals are static.
+Keep IDs simple and alphanumeric; put readable names in the label. Group source-backed domains, layers, or phases into containers. Use the `critical` class and a colored edge for the main path. Do not let the diagram sprawl past readability — if a graph needs 25+ nodes to be honest, split it into multiple diagrams rather than one unreadable wall.
 
 ## Chart.js data visualizations
 
@@ -465,26 +219,25 @@ You may optionally load a **secondary display font** for `h1`/`h2` headings to g
 <!-- Only load a display font; Inter (body) and mono are already in the standard template -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
 ```
 
 Define the display font as a separate variable; do NOT override `--font-body`:
 ```css
 :root {
-  --font-display: 'Outfit', system-ui, sans-serif;
+  --font-display: 'Sora', system-ui, sans-serif;
   /* --font-body and --font-mono are defined in standard.html; do not redeclare */
 }
 
 h1, h2 { font-family: var(--font-display); }
 ```
 
-The standard template uses Inter as the body font (MUST NOT override). The fonts below are suggestions for an optional secondary display font used for `h1`/`h2` headings only.
+The standard template uses Inter as the body font (Lerian brand third-rail: MUST NOT override `--font-body`). The fonts below are suggestions for an optional secondary display font used for `h1`/`h2` headings only.
 
 **Secondary display font suggestions** (rotate; never use the same pairing twice in a row):
 
 | Display Font (h1/h2) | Pairs Well With (mono) | Feel |
 |---|---|---|
-| Outfit | Space Mono | Clean geometric, modern |
 | Instrument Serif | JetBrains Mono | Editorial, refined |
 | Sora | IBM Plex Mono | Technical, precise |
 | Fraunces | Source Code Pro | Warm, distinctive |
