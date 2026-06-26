@@ -83,7 +83,7 @@ Also extract any **type** restrictions — some repos limit allowed types beyond
 |-----------|-----------------|
 | Policy found, scope is clear | Use only scopes from the allowlist |
 | Policy found, scope is ambiguous | STOP and ask the user which allowed scope to use |
-| No policy file found | MUST still include a scope — ask the user what scope to use |
+| No policy file found | Infer a candidate scope from recent merged PRs first: `gh pr list --state merged --limit 15 --json title --jq '.[].title'`. Present the inferred scope to the user for confirmation; if no clear pattern emerges, ask the user for a scope. |
 
 **NEVER** omit the scope. **NEVER** invent a scope not in the allowlist.
 
