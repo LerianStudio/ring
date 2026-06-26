@@ -272,6 +272,8 @@ For each commit:
 - Accept `G` (good) or `U` (unknown validity). Reject `X`/`Y` (expired key), `B` (bad signature), `E` (missing key), `N` (unsigned).
 - If the trailer `grep` fails → stop and report the missing trailer.
 
+**Why `U` is accepted:** `U` means the commit is cryptographically signed with a valid key, but GPG has not established a trust chain for that key (e.g., the key was not signed by a trusted introducer). This is the normal state for freshly generated keys or keys imported from colleagues without manual trust assignment. The signature itself is valid — it proves authorship. `G` additionally requires GPG's web-of-trust to vouch for the key identity, which is stricter than needed for commit attribution. Both are acceptable; only unsigned (`N`), bad (`B`), missing-key (`E`), and expired-key (`X`/`Y`) commits are rejected.
+
 Note: when called from `ring:shipping-changes`, `$BASE` is already resolved in Phase 0 and propagated here — the `@{u}` and standalone detection paths are only needed for standalone invocations.
 
 ---
