@@ -31,18 +31,27 @@ MUST complete both detections before analyzing changes or drafting anything. The
 ### 0A — Detect Base Branch
 
 ```bash
-git fetch origin --quiet
+# Step 1: GitHub authoritative default
+gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name'
+# Fallback if gh unavailable:
+# git remote show origin | grep 'HEAD branch' | awk '{print $NF}'
+
+# Step 2: PR template override (highest priority)
+# Read .github/pull_request_template.md — if it names a branch, honor it
+
+# Step 3: Develop branch hint
 git ls-remote --heads origin develop
-git ls-remote --heads origin main
 ```
 
 | Result | Action |
 |--------|--------|
-| `develop` SHA found | Set `BASE=develop` |
-| `main` SHA found (develop absent) | Set `BASE=main` |
-| Neither found | STOP — ask the user which branch to target |
+| `gh repo view` returns a branch | Set `BASE` to that value (primary) |
+| PR template explicitly names a base | Override `BASE` with that value (highest priority) |
+| `develop` exists AND `BASE != develop` | STOP — ask user to confirm: GitHub default or develop |
+| `develop` does NOT exist | Use `BASE` from GitHub default without prompting |
+| Both detection methods fail | STOP — ask the user which branch to target |
 
-**Sanity-check:** read `.github/pull_request_template.md` — if it explicitly names a base, honor it and override `$BASE`.
+**Why not develop-first:** a repo may have a stale `develop` branch while the real PR target is `main`. Using the GitHub API avoids targeting the wrong branch. The user confirmation step handles Lerian-style repos where develop is the intended target despite a different GitHub default.
 
 ### 0B — Detect Scope Policy
 

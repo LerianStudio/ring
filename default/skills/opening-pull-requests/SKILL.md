@@ -24,23 +24,53 @@ Skipping detection steps is how PRs end up targeting `main` when the repo expect
 
 ## Step 1 — Detect Base Branch
 
-NEVER assume the base. Always detect it from the remote:
+NEVER assume the base. Detect in this order — stop at the first authoritative signal:
+
+### 1.1 — GitHub default branch (primary)
 
 ```bash
-git fetch origin --quiet
-git ls-remote --heads origin develop   # probe develop first
-git ls-remote --heads origin main      # fallback
+gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name'
 ```
 
-| Result | Action |
-|--------|--------|
-| `develop` SHA printed | Set `BASE=develop` |
-| `main` SHA printed (develop absent) | Set `BASE=main` |
-| Neither exists | STOP — ask the user which branch to target |
+Set `BASE` to the value returned. This is the repo's authoritative default.
 
-**Sanity-check:** read `.github/pull_request_template.md` — if it explicitly names a base branch, honor that and override `$BASE` if needed.
+If `gh` is not available or returns an error:
 
-State the resolved `$BASE` before proceeding.
+```bash
+git remote show origin | grep 'HEAD branch' | awk '{print $NF}'
+```
+
+### 1.2 — PR template override (highest priority)
+
+Read `.github/pull_request_template.md`. If it explicitly names a target branch (e.g., "PR targeted to `develop`"), honor that value and override `$BASE`.
+
+### 1.3 — Develop branch hint (Lerian convention check)
+
+```bash
+git ls-remote --heads origin develop
+```
+
+If `develop` exists on the remote **and** `BASE != develop` (detected above), present this to the user:
+
+```
+⚠️  Base branch detected: $BASE (GitHub default)
+    But 'develop' also exists on this remote.
+    Some Lerian repos target 'develop' for PRs even when the GitHub default is 'main'.
+
+Which branch should this PR target?
+  [1] $BASE (GitHub default — recommended)
+  [2] develop
+```
+
+STOP and wait for user confirmation before proceeding.
+
+If `develop` does NOT exist, use `$BASE` without prompting.
+
+### 1.4 — Neither detected
+
+If both detection methods fail, STOP and ask the user which branch to target.
+
+State the resolved `$BASE` and the detection source before proceeding.
 
 ---
 
@@ -85,8 +115,9 @@ State the policy source and chosen scope before proceeding.
 ## Step 3 — Verify Preconditions
 
 ```bash
-git status --porcelain          # check for uncommitted changes
-git branch --show-current       # confirm current branch name (empty in detached HEAD)
+git status --porcelain                                  # check for uncommitted changes
+git branch --show-current                               # confirm current branch name (empty in detached HEAD)
+git fetch origin <current-branch> --quiet               # refresh remote ref before checking push state
 git ls-remote --heads origin <current-branch>           # confirm branch exists on remote
 git rev-list origin/<current-branch>..HEAD --count      # confirm no local commits ahead
 ```

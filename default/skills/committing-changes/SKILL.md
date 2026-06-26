@@ -241,7 +241,7 @@ git log --oneline -<number_of_commits>
 for commit in $(git rev-list --max-count=<number_of_commits> HEAD); do
   # %G? returns: G=good, U=unknown-validity, X/Y=expired, B=bad, E=missing key, N=no signature
   sig_status=$(git log -1 --format="%G?" "$commit")
-  echo "$sig_status" | grep -qE '^[GUXY]' || { echo "Commit $commit: signature missing or bad (status=$sig_status)"; exit 1; }
+  echo "$sig_status" | grep -qE '^[GU]' || { echo "Commit $commit: signature invalid or insufficient (status=$sig_status)"; exit 1; }
   git log -1 --format="%(trailers)" "$commit" | grep -q '^X-Lerian-Ref: '  # fails if trailer missing
 done
 
@@ -252,10 +252,10 @@ Iterate over **every** commit created in Step 6.
 
 For each commit:
 - `%G?` returns the signature status: `G`=good, `U`=unknown validity, `X`/`Y`=expired, `B`=bad, `E`=missing key, `N`=no signature.
-- Accept `G`, `U`, `X`, `Y` (commit is signed, regardless of key trust level). Stop and report on `B` (bad signature), `E` (missing key), or `N` (unsigned).
+- Accept only `G` (good, trusted) and `U` (signed but key trust level unknown). Stop and report on `X`/`Y` (expired key), `B` (bad signature), `E` (missing key), or `N` (unsigned).
 - If the `grep` for `X-Lerian-Ref` fails, the trailer is missing — stop and report.
 
-Note: `git verify-commit` exits non-zero for both unsigned commits **and** untrusted keys, which would reject valid signed commits from unconfigured GPG trust chains. Using `%G?` directly is more precise and avoids false failures.
+Note: `git verify-commit` exits non-zero for both unsigned commits **and** untrusted/expired keys. Using `%G?` directly is more precise. Expired keys (`X`/`Y`) are explicitly rejected — renew or replace the signing key before committing.
 
 ---
 
