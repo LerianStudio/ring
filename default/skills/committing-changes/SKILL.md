@@ -236,9 +236,12 @@ Only omit `-S` if the user explicitly selects "Commit unsigned". NEVER drop sign
 
 ```bash
 git log --oneline -<number_of_commits>
-git log --show-signature -1   # if signed
+git verify-commit HEAD                                          # fails non-zero if not signed
+git log -1 --format="%(trailers)" | grep -q '^X-Lerian-Ref: ' # fails if trailer missing
 git status
 ```
+
+If `git verify-commit HEAD` exits non-zero, the commit is unsigned — stop and report to the user. If the `grep` fails, the `X-Lerian-Ref` trailer is missing — stop and report. Both failures indicate Step 6 was not executed correctly.
 
 ---
 
@@ -353,5 +356,5 @@ If the user provides a commit message as an argument:
 | "I'll commit everything at once" | Mixed changes = messy history, hard to bisect/revert. | **Analyze and group changes first** |
 | "Grouping takes too long" | Clean history saves hours of debugging later. | **Always propose commit plan** |
 | "I'll put the trailer text in the message body" | `--trailer` is a GIT FLAG, not message text. | **Use `--trailer "X-Lerian-Ref: 0x1"` as separate argument** |
-| "I'll skip GPG signing" | Unsigned commits cannot be verified. | **Use `-S` flag (skip only if no GPG key configured)** |
+| "I'll skip GPG signing" | Unsigned commits cannot be verified. `-S` is always required — the only exception is when the user explicitly approves unsigned via `AskUserQuestion` after being prompted. | **MUST prompt user with `AskUserQuestion` before dropping `-S`** |
 | "HEREDOC will format trailers correctly" | HEREDOC puts everything in the message body. | **Use `--trailer` flag, NOT HEREDOC** |

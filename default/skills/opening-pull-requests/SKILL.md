@@ -86,16 +86,17 @@ State the policy source and chosen scope before proceeding.
 
 ```bash
 git status --porcelain          # check for uncommitted changes
-git branch --show-current       # confirm current branch name
+git branch --show-current       # confirm current branch name (empty in detached HEAD)
 git ls-remote --heads origin <current-branch>   # confirm branch is pushed
 ```
 
 | Condition | Detection | Required Action |
 |-----------|-----------|-----------------|
 | Uncommitted changes exist | `git status --porcelain` returns output | STOP — ask user to commit first with `ring:committing-changes` |
+| Detached HEAD / no branch | `git branch --show-current` returns empty output | STOP — ask user to checkout or create a named branch first |
 | Branch not on remote | `git ls-remote` returns no SHA for the branch | STOP — push first: `git push -u origin <branch>` |
 
-**Fail closed.** Only continue when both checks pass. If either condition is met, STOP and ask the user to resolve it first. Do NOT continue after a warning — explicit user action is required before proceeding to Step 4.
+**Fail closed.** Check in this order: uncommitted changes → detached HEAD → branch pushed. Only continue when all three checks pass. If any condition is met, STOP and ask the user to resolve it before proceeding to Step 4. Do NOT interpolate an empty branch name into `git ls-remote`.
 
 ---
 
