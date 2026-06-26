@@ -125,6 +125,7 @@ When the phase is complete and verified:
 1. Update the plan: flip the phase Status to `Complete`; record deviations that affect later phases.
 2. Present to the user: what was built, test results, review/contrarian outcome, deviations and why.
 3. **STOP and wait** for the user's check before elaborating the next phase — unless the user pre-authorized continuous execution, in which case say so and proceed.
+4. After the user approves, call `Skill("ring:committing-changes")` to commit all phase work before rolling to the next phase.
 
 ### Step 6: Roll to the next phase, then complete
 Return to Step 2 for the next phase. Repeat until every phase is `Complete`. At plan close:
