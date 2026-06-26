@@ -83,7 +83,7 @@ Also extract any **type** restrictions — some repos limit allowed types beyond
 |-----------|-----------------|
 | Policy found, scope is clear | Use only scopes from the allowlist |
 | Policy found, scope is ambiguous | STOP and ask the user which allowed scope to use |
-| No policy file found | Infer the convention from recent merged PRs first: `gh pr list --state merged --limit 15 --json title --jq '.[].title'`. Use the dominant `type(scope)` pattern (e.g. scope = chart name, sub-env, or cluster depending on the repo). Ask the user only if no clear pattern emerges. |
+| No policy file found | Infer a candidate scope from recent merged PRs first: `gh pr list --state merged --limit 15 --json title --jq '.[].title'`. Present the inferred scope to the user for confirmation; if no clear pattern emerges, ask the user for a scope. |
 
 **NEVER** omit the scope. **NEVER** invent a scope not in the allowlist.
 
