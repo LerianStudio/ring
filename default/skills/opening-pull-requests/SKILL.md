@@ -85,18 +85,17 @@ State the policy source and chosen scope before proceeding.
 ## Step 3 — Verify Preconditions
 
 ```bash
-git status          # check for uncommitted changes
-git branch          # confirm current branch
-git log origin/<current-branch>..HEAD --oneline 2>/dev/null || \
-  git log --oneline -5   # confirm branch is pushed
+git status --porcelain          # check for uncommitted changes
+git branch --show-current       # confirm current branch name
+git ls-remote --heads origin <current-branch>   # confirm branch is pushed
 ```
 
-| Condition | Required Action |
-|-----------|-----------------|
-| Uncommitted changes exist | Warn user — suggest committing first with `ring:committing-changes` |
-| Branch not pushed | Warn user — push before opening PR: `git push -u origin <branch>` |
+| Condition | Detection | Required Action |
+|-----------|-----------|-----------------|
+| Uncommitted changes exist | `git status --porcelain` returns output | STOP — ask user to commit first with `ring:committing-changes` |
+| Branch not on remote | `git ls-remote` returns no SHA for the branch | STOP — push first: `git push -u origin <branch>` |
 
-If the user confirms they want to proceed despite warnings, continue. Do NOT block silently.
+**Fail closed.** Only continue when both checks pass. If either condition is met, STOP and ask the user to resolve it first. Do NOT continue after a warning — explicit user action is required before proceeding to Step 4.
 
 ---
 
@@ -119,6 +118,10 @@ If the template exists, use it as the body structure and fill in every section. 
 - [ ] New feature
 - [ ] Breaking change
 - [ ] Documentation update
+
+## Breaking Changes
+
+None.
 
 ## Testing
 

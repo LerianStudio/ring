@@ -16,9 +16,11 @@ allowed-tools:
 
 End-to-end shipping workflow: detect base branch and scope policy once, present a complete plan, then execute branch → commit → push → PR in sequence, confirming at each phase. Uses `ring:committing-changes` and `ring:opening-pull-requests` internally — their rules and anti-patterns apply in full.
 
-## ⛔ HARD STOP — PRESENT PLAN BEFORE EXECUTING ANYTHING
+## ⛔ HARD STOP — PRESENT PLAN BEFORE EXECUTING ANY MUTATING COMMAND
 
-MUST analyze the current state and present a complete plan to the user before running any `git` or `gh` command. Executing without approval is FORBIDDEN.
+Read-only discovery commands (`git fetch`, `git ls-remote`, `git status`, `git diff`, `git log`) are allowed before approval — they are needed to build the plan.
+
+MUST complete Phase 0 detection, analyze the current state, and present a complete plan to the user before running any **mutating** `git` or `gh` command (`git checkout -b`, `git add`, `git commit`, `git push`, `gh pr create`). Executing mutating commands without approval is FORBIDDEN.
 
 ---
 

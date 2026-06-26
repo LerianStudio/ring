@@ -209,7 +209,24 @@ For each commit group, in order:
      --trailer "X-Lerian-Ref: 0x1"
    ```
 
-**If GPG signing fails:** check `git config user.signingkey` and `gpg --list-secret-keys`. If no key configured, proceed without `-S` and inform the user.
+**If GPG signing fails:** check `git config user.signingkey` and `gpg --list-secret-keys`.
+
+If no usable key is found, STOP and ask the user:
+
+```javascript
+AskUserQuestion({
+  questions: [{
+    question: "No GPG signing key is configured. How should I proceed?",
+    header: "GPG Signing",
+    options: [
+      { label: "Configure key first", description: "I'll set up GPG signing before committing" },
+      { label: "Commit unsigned", description: "Proceed without -S for this commit (not recommended)" }
+    ]
+  }]
+});
+```
+
+Only omit `-S` if the user explicitly selects "Commit unsigned". NEVER drop signing silently.
 
 3. Repeat for each commit group.
 
