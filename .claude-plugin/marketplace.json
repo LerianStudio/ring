@@ -9,7 +9,7 @@
     {
       "name": "ring-default",
       "description": "Core skills library for the Lerian Team: TDD, code review, collaboration patterns, and proven techniques. Features parallel code review orchestration with 9 default reviewers plus triggered conditional specialists, and git shipping skills (ring:committing-changes, ring:opening-pull-requests, ring:shipping-changes) with scope allowlist enforcement. 25 essential skills for software engineering excellence, including plan authoring and execution.",
-      "version": "1.40.0",
+      "version": "1.41.0",
       "source": "./default",
       "homepage": "https://github.com/lerianstudio/ring/tree/main/default",
       "repository": "https://github.com/lerianstudio/ring/tree/main/default",
@@ -40,7 +40,7 @@
     {
       "name": "ring-dev-team",
       "description": "24 specialized developer agents + 35 development skills: Backend 10-gate dev cycle + lean frontend cycle (Gate 0, 7, 8) with quality checks (accessibility, visual, E2E, performance) + Frontend refactoring + whole-codebase simplification sweep + delivery verification + service discovery + cycle management + lib-streaming end-to-end instrumentation. Includes backend/frontend specialists, DevOps, QA, SRE, 9 default code-review reviewers, and 3 conditional stack specialists consolidated into the dev-team plugin. Complete development team coverage with TDD, observability, and security best practices.",
-      "version": "1.84.0",
+      "version": "1.85.0",
       "source": "./dev-team",
       "homepage": "https://github.com/lerianstudio/ring/tree/main/dev-team",
       "repository": "https://github.com/lerianstudio/ring/tree/main/dev-team",
@@ -114,5 +114,5 @@
       ]
     }
   ],
-  "version": "0.385.0"
+  "version": "0.386.0"
 }
