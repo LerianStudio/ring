@@ -235,14 +235,16 @@ Only omit `-S` if the user explicitly selects "Commit unsigned". NEVER drop sign
 ## Step 7 — Verify Commits
 
 ```bash
-git log --oneline -<number_of_commits>
+git log --oneline origin/$BASE..HEAD
 
-# Verify every commit in the batch, not just HEAD
-for commit in $(git rev-list --max-count=<number_of_commits> HEAD); do
+# Verify every commit in the batch (scoped to current branch, not general HEAD)
+for commit in $(git rev-list origin/$BASE..HEAD); do
   # %G? returns: G=good, U=unknown-validity, X/Y=expired, B=bad, E=missing key, N=no signature
   sig_status=$(git log -1 --format="%G?" "$commit")
-  echo "$sig_status" | grep -qE '^[GU]' || { echo "Commit $commit: signature invalid or insufficient (status=$sig_status)"; exit 1; }
-  git log -1 --format="%(trailers)" "$commit" | grep -q '^X-Lerian-Ref: '  # fails if trailer missing
+  echo "$sig_status" | grep -qE '^[GU]' \
+    || { echo "Commit $commit: signature invalid or insufficient (status=$sig_status)"; exit 1; }
+  git log -1 --format="%(trailers)" "$commit" | grep -q '^X-Lerian-Ref: ' \
+    || { echo "Commit $commit: X-Lerian-Ref trailer missing"; exit 1; }
 done
 
 git status

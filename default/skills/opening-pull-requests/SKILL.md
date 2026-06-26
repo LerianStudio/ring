@@ -24,53 +24,32 @@ Skipping detection steps is how PRs end up targeting `main` when the repo expect
 
 ## Step 1 — Detect Base Branch
 
-NEVER assume the base. Detect in this order — stop at the first authoritative signal:
+NEVER assume the base. Run all three probes first, then apply the precedence rules below.
 
-### 1.1 — GitHub default branch (primary)
+### Probes (run in parallel)
 
 ```bash
+# Probe A — GitHub API default
 gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name'
-```
+# Fallback if gh unavailable: git remote show origin | grep 'HEAD branch' | awk '{print $NF}'
 
-Set `BASE` to the value returned. This is the repo's authoritative default.
+# Probe B — PR template hint
+# Read .github/pull_request_template.md — note any explicit branch name mentioned
 
-If `gh` is not available or returns an error:
-
-```bash
-git remote show origin | grep 'HEAD branch' | awk '{print $NF}'
-```
-
-### 1.2 — PR template override (highest priority)
-
-Read `.github/pull_request_template.md`. If it explicitly names a target branch (e.g., "PR targeted to `develop`"), honor that value and override `$BASE`.
-
-### 1.3 — Develop branch hint (Lerian convention check)
-
-```bash
+# Probe C — develop branch existence
 git ls-remote --heads origin develop
 ```
 
-If `develop` exists on the remote **and** `BASE != develop` (detected above), present this to the user:
+### Precedence (apply in order — first match wins)
 
-```
-⚠️  Base branch detected: $BASE (GitHub default)
-    But 'develop' also exists on this remote.
-    Some Lerian repos target 'develop' for PRs even when the GitHub default is 'main'.
+| Priority | Source | Rule |
+|----------|--------|------|
+| **1 — highest** | PR template | If `.github/pull_request_template.md` explicitly names a target branch, use it. Overrides everything. |
+| **2** | develop exists + user confirms | If Probe C finds `develop` AND it differs from Probe A, show both options and ask the user to confirm. Use the user's choice. |
+| **3 — fallback** | GitHub API default | Use the value from Probe A. |
+| **4** | Neither detected | STOP — ask the user which branch to target. |
 
-Which branch should this PR target?
-  [1] $BASE (GitHub default — recommended)
-  [2] develop
-```
-
-STOP and wait for user confirmation before proceeding.
-
-If `develop` does NOT exist, use `$BASE` without prompting.
-
-### 1.4 — Neither detected
-
-If both detection methods fail, STOP and ask the user which branch to target.
-
-State the resolved `$BASE` and the detection source before proceeding.
+State the resolved `$BASE` and which source determined it before proceeding.
 
 ---
 

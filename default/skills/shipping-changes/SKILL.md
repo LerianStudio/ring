@@ -31,27 +31,25 @@ MUST complete both detections before analyzing changes or drafting anything. The
 ### 0A — Detect Base Branch
 
 ```bash
-# Step 1: GitHub authoritative default
+# Probe A — GitHub API default (fallback: git remote show origin | grep 'HEAD branch' | awk '{print $NF}')
 gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name'
-# Fallback if gh unavailable:
-# git remote show origin | grep 'HEAD branch' | awk '{print $NF}'
 
-# Step 2: PR template override (highest priority)
-# Read .github/pull_request_template.md — if it names a branch, honor it
+# Probe B — PR template hint: read .github/pull_request_template.md for explicit branch name
 
-# Step 3: Develop branch hint
+# Probe C — develop existence
 git ls-remote --heads origin develop
 ```
 
-| Result | Action |
-|--------|--------|
-| `gh repo view` returns a branch | Set `BASE` to that value (primary) |
-| PR template explicitly names a base | Override `BASE` with that value (highest priority) |
-| `develop` exists AND `BASE != develop` | STOP — ask user to confirm: GitHub default or develop |
-| `develop` does NOT exist | Use `BASE` from GitHub default without prompting |
-| Both detection methods fail | STOP — ask the user which branch to target |
+Apply precedence in order — first match wins:
 
-**Why not develop-first:** a repo may have a stale `develop` branch while the real PR target is `main`. Using the GitHub API avoids targeting the wrong branch. The user confirmation step handles Lerian-style repos where develop is the intended target despite a different GitHub default.
+| Priority | Source | Rule |
+|----------|--------|------|
+| **1 — highest** | PR template | Explicit branch name in `.github/pull_request_template.md` — overrides everything |
+| **2** | develop + user | Probe C finds `develop` AND differs from Probe A → ask user to confirm which target |
+| **3 — fallback** | GitHub API | Use value from Probe A |
+| **4** | Neither | STOP — ask the user |
+
+**Why not develop-first:** a repo may have a stale `develop` branch while the real PR target is `main`. The GitHub API is the authoritative source; `develop` existence triggers a confirmation step instead of a silent assumption.
 
 ### 0B — Detect Scope Policy
 
