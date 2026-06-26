@@ -211,22 +211,20 @@ For each commit group, in order:
 
 **If GPG signing fails:** check `git config user.signingkey` and `gpg --list-secret-keys`.
 
-If no usable key is found, STOP and ask the user:
+If no usable key is found, STOP — do NOT offer an unsigned path. Inform the user:
 
-```javascript
-AskUserQuestion({
-  questions: [{
-    question: "No GPG signing key is configured. How should I proceed?",
-    header: "GPG Signing",
-    options: [
-      { label: "Configure key first", description: "I'll set up GPG signing before committing" },
-      { label: "Commit unsigned", description: "Proceed without -S for this commit (not recommended)" }
-    ]
-  }]
-});
+```
+GPG signing is required. No usable signing key was found.
+
+To proceed:
+  1. Generate a key: gpg --gen-key
+  2. Configure git:  git config --global user.signingkey <key-id>
+  3. Re-run this skill.
+
+Committing without -S is not an option — Step 7 will reject unsigned commits.
 ```
 
-Only omit `-S` if the user explicitly selects "Commit unsigned". NEVER drop signing silently.
+MUST wait for the user to configure a key before continuing. NEVER drop `-S` silently or offer "unsigned" as a fallback.
 
 3. Repeat for each commit group.
 
@@ -372,5 +370,5 @@ If the user provides a commit message as an argument:
 | "I'll commit everything at once" | Mixed changes = messy history, hard to bisect/revert. | **Analyze and group changes first** |
 | "Grouping takes too long" | Clean history saves hours of debugging later. | **Always propose commit plan** |
 | "I'll put the trailer text in the message body" | `--trailer` is a GIT FLAG, not message text. | **Use `--trailer "X-Lerian-Ref: 0x1"` as separate argument** |
-| "I'll skip GPG signing" | Unsigned commits cannot be verified. `-S` is always required — the only exception is when the user explicitly approves unsigned via `AskUserQuestion` after being prompted. | **MUST prompt user with `AskUserQuestion` before dropping `-S`** |
+| "I'll skip GPG signing" | Unsigned commits fail Step 7 verification. There is no unsigned fallback path — configure a key and retry. | **MUST stop and instruct user to configure GPG key. NEVER drop `-S`** |
 | "HEREDOC will format trailers correctly" | HEREDOC puts everything in the message body. | **Use `--trailer` flag, NOT HEREDOC** |
