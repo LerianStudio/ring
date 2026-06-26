@@ -92,6 +92,7 @@ for each epic:
   # task-level validation after review passes
   for each task:
     Gate 8
+    Skill("ring:committing-changes")  # commit task work after Gate 8 user approval
 
   [checkpoint if manual_per_epic]
 
@@ -110,6 +111,7 @@ phase completes its Gate 0/7/8 flow, fire the phase boundary exactly once:
    FALLBACK single-phase plan).
 2. Checkpoint with the user: summarize the completed phase (epics done, review/validation
    outcomes) and confirm intent to continue.
+2.5. Ask the user: "Open a PR for this phase?" → if yes: `Skill("ring:opening-pull-requests")` (optional, never automatic).
 3. Elaborate the next phase's tasks inline under each epic as `#### Task N.M.T:`
    blocks, following the ring:writing-plans Task Format (`- [ ] Done` checkbox
    immediately under the heading, then Context, Implementation vision, Files,

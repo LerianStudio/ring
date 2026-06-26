@@ -133,6 +133,16 @@ golangci-lint run ./... || echo "LINT FAILED"
 - PARTIAL: some requirements delivered → list gaps, return to Gate 0
 - FAIL: critical requirements missing → return to Gate 0 with explicit instructions
 
+## Step 5: Commit
+
+When Step 4 verdict is PASS, load and call `ring:committing-changes` to create the signed atomic commit for this task before returning control to the dev-cycle orchestrator.
+
+```yaml
+Skill("ring:committing-changes")
+```
+
+MUST only run on PASS. On PARTIAL or FAIL, return to Gate 0 — do NOT commit.
+
 ## Output Format
 
 ```markdown

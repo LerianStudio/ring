@@ -64,6 +64,8 @@ for each phase (current wave; starts at Phase 1, the only detailed phase at init
     # 6. "Proceed to next epic?" checkpoint (Step 11.1) → next epic in this phase
 
   # 7. PHASE BOUNDARY (Step 11.5, after the LAST epic of the phase is approved) — read gates/phase-boundary.md
+  #    Skill("ring:committing-changes")  ← commit all phase work BEFORE closing the phase
+  #    ask user: "Open a PR for this phase?" → if yes: Skill("ring:opening-pull-requests")  ← optional
   #    close phase (Phase Overview → Complete, record deviations) →
   #    phase checkpoint (manual: ask Continue/Pause/Adjust | auto: log + continue) →
   #    elaborate next phase's epics into dispatch-ready tasks (1 planning agent, ANALYSIS mode) →
@@ -214,10 +216,11 @@ If user provides custom context at cycle start, store in `state.custom_prompt` a
 
 ## Commit Timing
 
-- Gate 0 (implementation): Commit after GREEN phase, coverage, docker-compose/local runtime, and delivery verification pass (`commit_timing == "per_task"`)
-- Gate 8 (review): Commit fixes after all reviewers pass
-- Gate 9 (validation): No commit (verification only); epic-level commit at Step 11.1 when `commit_timing == "per_epic"`
-- Cycle-end: Final commit with cycle metadata
+- Gate 0 (implementation): Commit after GREEN phase, coverage, docker-compose/local runtime, and delivery verification pass (`commit_timing == "per_task"`) via `ring:committing-changes`
+- Gate 8 (review): Commit fixes after all reviewers pass via `ring:committing-changes`
+- Gate 9 (validation): No commit (verification only); epic-level commit at Step 11.1 when `commit_timing == "per_epic"` via `ring:committing-changes`
+- Phase boundary (Step 11.5): ALWAYS call `Skill("ring:committing-changes")` to commit all phase work **before** closing the phase, regardless of `commit_timing`. After the commit, ask the user: "Open a PR for this phase?" — if yes, call `Skill("ring:opening-pull-requests")` (optional, never automatic).
+- Cycle-end: Final commit with cycle metadata via `ring:committing-changes`
 
 `commit_timing ∈ {per_task, per_epic, at_end}`. Convention: `feat|fix|test|chore(scope): description` — keep commits atomic per gate.
 
