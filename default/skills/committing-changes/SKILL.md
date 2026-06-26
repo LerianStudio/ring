@@ -236,12 +236,17 @@ Only omit `-S` if the user explicitly selects "Commit unsigned". NEVER drop sign
 
 ```bash
 git log --oneline -<number_of_commits>
-git verify-commit HEAD                                          # fails non-zero if not signed
-git log -1 --format="%(trailers)" | grep -q '^X-Lerian-Ref: ' # fails if trailer missing
+
+# Verify every commit in the batch, not just HEAD
+for commit in $(git rev-list --max-count=<number_of_commits> HEAD); do
+  git verify-commit "$commit"                                         # fails non-zero if not signed
+  git log -1 --format="%(trailers)" "$commit" | grep -q '^X-Lerian-Ref: '  # fails if trailer missing
+done
+
 git status
 ```
 
-If `git verify-commit HEAD` exits non-zero, the commit is unsigned — stop and report to the user. If the `grep` fails, the `X-Lerian-Ref` trailer is missing — stop and report. Both failures indicate Step 6 was not executed correctly.
+Iterate over **every** commit created in Step 6. If `git verify-commit` exits non-zero for any commit, it is unsigned — stop and report to the user. If `grep` fails for any commit, the `X-Lerian-Ref` trailer is missing — stop and report. Both failures indicate Step 6 was not executed correctly for that commit.
 
 ---
 
