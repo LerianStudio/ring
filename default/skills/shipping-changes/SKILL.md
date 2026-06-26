@@ -165,12 +165,15 @@ Types: `feat`, `fix`, `chore`, `refactor`, `docs`, `test`, `perf`
 
 Delegate to `ring:committing-changes` with the resolved `$BASE` and scope policy as context.
 
+**MUST propagate `$BASE`** to `ring:committing-changes` — Step 7 of that skill uses `origin/$BASE..HEAD` for commit batch scoping. Without it, the skill falls back to `@{u}` or re-detects the base, which works but is redundant when `$BASE` is already known here.
+
 The following rules from `ring:committing-changes` apply in full:
+- `$BASE` is already resolved — pass it explicitly so Step 7 skips re-detection
 - Scope MUST come from the allowlist resolved in Phase 0B
 - Scope MUST be included in every commit message — never omit
 - Commits MUST be atomic and logically grouped
 - Trailers via `--trailer "X-Lerian-Ref: 0x1"`, NEVER inside `-m`
-- GPG sign with `-S` (skip only if no key configured)
+- GPG sign with `-S` (no fallback — if no key, stop and instruct user to configure one)
 
 ---
 

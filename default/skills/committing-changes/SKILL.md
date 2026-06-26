@@ -232,11 +232,31 @@ MUST wait for the user to configure a key before continuing. NEVER drop `-S` sil
 
 ## Step 7 — Verify Commits
 
-```bash
-git log --oneline origin/$BASE..HEAD
+First, resolve the range ref for verification. `$BASE` may be provided by an orchestrating skill (e.g., `ring:shipping-changes`). Resolve in this order:
 
-# Verify every commit in the batch (scoped to current branch, not general HEAD)
-for commit in $(git rev-list origin/$BASE..HEAD); do
+```bash
+# 1. Upstream tracking ref (works when branch already has a remote tracking branch)
+if git rev-parse @{u} >/dev/null 2>&1; then
+  RANGE_REF="@{u}"
+
+# 2. $BASE propagated by the orchestrating skill (e.g., ring:shipping-changes)
+elif [ -n "$BASE" ]; then
+  RANGE_REF="origin/$BASE"
+
+# 3. Standalone: detect base branch via GitHub API
+else
+  BASE=$(gh repo view --json defaultBranchRef --jq '.defaultBranchRef.name' 2>/dev/null \
+    || git remote show origin 2>/dev/null | grep 'HEAD branch' | awk '{print $NF}')
+  RANGE_REF="origin/$BASE"
+fi
+```
+
+Then verify every commit in the batch:
+
+```bash
+git log --oneline "$RANGE_REF..HEAD"
+
+for commit in $(git rev-list "$RANGE_REF..HEAD"); do
   # %G? returns: G=good, U=unknown-validity, X/Y=expired, B=bad, E=missing key, N=no signature
   sig_status=$(git log -1 --format="%G?" "$commit")
   echo "$sig_status" | grep -qE '^[GU]' \
@@ -248,14 +268,11 @@ done
 git status
 ```
 
-Iterate over **every** commit created in Step 6.
-
 For each commit:
-- `%G?` returns the signature status: `G`=good, `U`=unknown validity, `X`/`Y`=expired, `B`=bad, `E`=missing key, `N`=no signature.
-- Accept only `G` (good, trusted) and `U` (signed but key trust level unknown). Stop and report on `X`/`Y` (expired key), `B` (bad signature), `E` (missing key), or `N` (unsigned).
-- If the `grep` for `X-Lerian-Ref` fails, the trailer is missing — stop and report.
+- Accept `G` (good) or `U` (unknown validity). Reject `X`/`Y` (expired key), `B` (bad signature), `E` (missing key), `N` (unsigned).
+- If the trailer `grep` fails → stop and report the missing trailer.
 
-Note: `git verify-commit` exits non-zero for both unsigned commits **and** untrusted/expired keys. Using `%G?` directly is more precise. Expired keys (`X`/`Y`) are explicitly rejected — renew or replace the signing key before committing.
+Note: when called from `ring:shipping-changes`, `$BASE` is already resolved in Phase 0 and propagated here — the `@{u}` and standalone detection paths are only needed for standalone invocations.
 
 ---
 
