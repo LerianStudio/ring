@@ -290,22 +290,37 @@ function Card({ children, className }: CardProps) {
 
 ### CSS Variables for Theming
 
+> **Lerian Console DS (decisão 2026-04-22):** use o padrão de **duas camadas** — valor raw em canais HSL + wrapper Tailwind. NÃO use o padrão single-layer do shadcn (`--color-primary: 220 90% 56%`): ele impede `hsl(var(--x) / alpha)`, necessário para dark mode robusto e estados (hover/disabled). Os **nomes de token espelham o Figma** e os **valores autoritativos vivem no `ring-tokens`** (accent do Console = `#FEED02`); o exemplo abaixo é ilustrativo do padrão.
+
 ```css
+/* Camada 1 — valor raw em canais HSL (sem hsl()), para permitir alpha dinâmico.
+   Nomes alinhados ao Figma / ring-tokens. */
 :root {
-    --color-primary: 220 90% 56%;
-    --color-secondary: 262 83% 58%;
-    --color-background: 0 0% 100%;
-    --color-foreground: 222 47% 11%;
-    --color-muted: 210 40% 96%;
-    --color-border: 214 32% 91%;
+    --body-surface: 240 5% 96%;
+    --container-surface: 0 0% 100%;
+    --foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --border: 214 32% 91%;
+    --accent: 55 99% 50%;          /* #FEED02 — valor real em ring-tokens */
     --radius: 0.5rem;
 }
 
 .dark {
-    --color-background: 222 47% 11%;
-    --color-foreground: 210 40% 98%;
-    --color-muted: 217 33% 17%;
-    --color-border: 217 33% 17%;
+    --body-surface: 222 47% 11%;
+    --container-surface: 222 47% 14%;
+    --foreground: 210 40% 98%;
+    --muted: 217 33% 17%;
+    --border: 217 33% 17%;
+}
+
+/* Camada 2 — wrappers Tailwind que consomem os canais (habilitam `/ alpha`) */
+@theme inline {
+    --color-body-surface: hsl(var(--body-surface));
+    --color-container-surface: hsl(var(--container-surface));
+    --color-foreground: hsl(var(--foreground));
+    --color-muted: hsl(var(--muted));
+    --color-border: hsl(var(--border));
+    --color-accent: hsl(var(--accent));   /* permite hsl(var(--accent) / 0.12) */
 }
 ```
 
@@ -328,6 +343,8 @@ function Card({ children, className }: CardProps) {
 <div className="hidden md:block">Desktop only</div>
 <div className="md:hidden">Mobile only</div>
 ```
+
+> **Lerian Console DS (decisão 2026-04-22):** breakpoints Tailwind default permanecem. Formalize **3 viewports de referência** para design e testes visuais (Playwright): **375px** (mobile — iPhone SE/mini), **768px** (tablet — iPad portrait), **1280px** (desktop). Container com **cap de 1400px** (evita linhas longas demais em ultrawide). Toda tela nova deve ter snapshot baseline nesses 3 viewports.
 
 ---
 
@@ -1132,7 +1149,10 @@ Providers MUST be composed in a specific order to ensure proper context availabi
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SessionProvider } from 'next-auth/react';
-import { ThemeProvider } from 'next-themes';
+// Lerian Console DS (decisão 2026-04-22): provider de tema CUSTOM, NÃO next-themes.
+// Justificativa: accent color por tenant (cada org tem sua cor primária) — next-themes
+// não suporta isso nativamente. Mecanismo é o mesmo (class-based `.dark`); só o wrapper muda.
+import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useState } from 'react';
@@ -1159,9 +1179,8 @@ export function Providers({ children }: ProvidersProps) {
             <QueryClientProvider client={queryClient}>
                 <ThemeProvider
                     attribute="class"
-                    defaultTheme="system"
-                    enableSystem
-                    disableTransitionOnChange
+                    defaultTheme="light"
+                    tenantAccent={org?.accent}
                 >
                     <TooltipProvider>
                         {children}
