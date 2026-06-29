@@ -103,7 +103,10 @@ jobs:
           # For each plugin in marketplace.json
           for ((i=0; i<$PLUGIN_COUNT; i++)); do
             PLUGIN_NAME=$(jq -r ".plugins[$i].name" "$MARKETPLACE_JSON")
-            PLUGIN_SOURCE=$(jq -r ".plugins[$i].source" "$MARKETPLACE_JSON" | sed 's|^\./||')
+            # source is either a relative string ("./default") or a git-subdir
+            # object ({"source":"git-subdir","path":"default",...}); both resolve
+            # to the plugin directory name used for change detection below.
+            PLUGIN_SOURCE=$(jq -r ".plugins[$i].source | if type == \"object\" then .path else . end" "$MARKETPLACE_JSON" | sed 's|^\./||')
 
             echo "Checking plugin: $PLUGIN_NAME (source: $PLUGIN_SOURCE)"
 
