@@ -11,6 +11,21 @@
 set -euo pipefail
 
 INPUT=$(cat)
+
+# Cheap short-circuit BEFORE requiring jq: this hook only guards current-cycle.json
+# writes. Any other write returns immediately without invoking jq, so unrelated writes
+# never fail when jq is absent (e.g. Windows without jq on PATH).
+case "$INPUT" in
+  *current-cycle.json*) : ;;   # potentially relevant — continue to full validation
+  *) exit 0 ;;
+esac
+
+# This hook needs jq to parse/validate state. If jq is unavailable, degrade gracefully
+# (allow the write) instead of hard-failing the tool call under `set -e`.
+if ! command -v jq >/dev/null 2>&1; then
+  exit 0
+fi
+
 FILE_PATH=$(echo "$INPUT" | jq -r '.tool_input.file_path // .tool_input.path // empty')
 CONTENT=$(echo "$INPUT" | jq -r '.tool_input.content // empty')
 
