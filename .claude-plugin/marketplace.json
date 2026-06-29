@@ -10,7 +10,12 @@
       "name": "ring-default",
       "description": "Core skills library for the Lerian Team: TDD, code review, collaboration patterns, and proven techniques. Features parallel code review orchestration with 9 default reviewers plus triggered conditional specialists, and git shipping skills (ring:committing-changes, ring:opening-pull-requests, ring:shipping-changes) with scope allowlist enforcement. 25 essential skills for software engineering excellence, including plan authoring and execution.",
       "version": "1.42.1",
-      "source": "./default",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/lerianstudio/ring.git",
+        "path": "default",
+        "ref": "main"
+      },
       "homepage": "https://github.com/lerianstudio/ring/tree/main/default",
       "repository": "https://github.com/lerianstudio/ring/tree/main/default",
       "license": "MIT",
@@ -41,7 +46,12 @@
       "name": "ring-dev-team",
       "description": "24 specialized developer agents + 35 development skills: Backend 10-gate dev cycle + lean frontend cycle (Gate 0, 7, 8) with quality checks (accessibility, visual, E2E, performance) + Frontend refactoring + whole-codebase simplification sweep + delivery verification + service discovery + cycle management + lib-streaming end-to-end instrumentation. Includes backend/frontend specialists, DevOps, QA, SRE, 9 default code-review reviewers, and 3 conditional stack specialists consolidated into the dev-team plugin. Complete development team coverage with TDD, observability, and security best practices.",
       "version": "1.85.0",
-      "source": "./dev-team",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/lerianstudio/ring.git",
+        "path": "dev-team",
+        "ref": "main"
+      },
       "homepage": "https://github.com/lerianstudio/ring/tree/main/dev-team",
       "repository": "https://github.com/lerianstudio/ring/tree/main/dev-team",
       "license": "MIT",
@@ -74,7 +84,12 @@
       "name": "ring-pm-team",
       "description": "Product team workflow: 14 skills + 4 research agents. Pre-dev planning with 4-gate (small features) and 8-gate (large features) orchestrators producing machine-consumable specs (prd, trd, openapi.yaml, schema, plan.md), plus standalone mapping-streaming-events discovery and UX validation. Includes parallel research agents, specialized code analysis, and Product Designer.",
       "version": "0.32.1",
-      "source": "./pm-team",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/lerianstudio/ring.git",
+        "path": "pm-team",
+        "ref": "main"
+      },
       "homepage": "https://github.com/lerianstudio/ring/tree/main/pm-team",
       "repository": "https://github.com/lerianstudio/ring/tree/main/pm-team",
       "license": "MIT",
@@ -96,7 +111,12 @@
       "name": "ring-tw-team",
       "description": "Technical writing specialists for functional and API documentation. 3 specialized agents (guide-writer, api-writer, docs-reviewer) and 4 documentation skills covering voice/tone, structure, API field descriptions, and quality review. Enforces clear, consistent documentation standards.",
       "version": "0.6.0",
-      "source": "./tw-team",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/lerianstudio/ring.git",
+        "path": "tw-team",
+        "ref": "main"
+      },
       "homepage": "https://github.com/lerianstudio/ring/tree/main/tw-team",
       "repository": "https://github.com/lerianstudio/ring/tree/main/tw-team",
       "license": "MIT",
