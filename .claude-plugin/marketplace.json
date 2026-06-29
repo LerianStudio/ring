@@ -9,7 +9,7 @@
     {
       "name": "ring-default",
       "description": "Core skills library for the Lerian Team: TDD, code review, collaboration patterns, and proven techniques. Features parallel code review orchestration with 9 default reviewers plus triggered conditional specialists, and git shipping skills (ring:committing-changes, ring:opening-pull-requests, ring:shipping-changes) with scope allowlist enforcement. 25 essential skills for software engineering excellence, including plan authoring and execution.",
-      "version": "1.42.0",
+      "version": "1.42.1",
       "source": "./default",
       "homepage": "https://github.com/lerianstudio/ring/tree/main/default",
       "repository": "https://github.com/lerianstudio/ring/tree/main/default",
@@ -114,5 +114,5 @@
       ]
     }
   ],
-  "version": "0.387.0"
+  "version": "0.388.0"
 }
