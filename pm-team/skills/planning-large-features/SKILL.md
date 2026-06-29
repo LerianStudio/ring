@@ -46,13 +46,17 @@ For simple features (<2 days, existing patterns), use `ring:planning-small-featu
 | Gate | Skill | Output |
 |------|-------|--------|
 | 0 | ring:researching-features | research.md |
+| 0.5 ◇ | ring:building-personas | personas.md |
 | 1 | ring:writing-prds | prd.md |
 | 2 | ring:mapping-feature-relationships | feature-map.md |
+| 2.5 ◆ | ring:structuring-information + ring:writing-ux-copy + ring:critiquing-designs + ring:applying-design-system → ring:validating-ux-completeness | user-flows.md, wireframes/, ux-criteria.md, design-validation.md |
 | 3 | ring:writing-trds | trd.md |
 | 4 | ring:designing-api-contracts | openapi.yaml |
 | 5 | ring:designing-data-model | schema.sql / schema.prisma (stack-native) |
 | 6 | ring:pinning-dependency-versions | dependencies.md |
 | 7 | ring:writing-plans | plan.md |
+
+◇ **Gate 0.5** runs when the feature has human users (default for product features; skip for pure infra). ◆ **Gate 2.5 (Design) is REQUIRED when Q4=Yes (has UI)** — see Step 4. Gates 4/5 conditional per execution rules.
 
 All artifacts saved to: `docs/pre-dev/<feature-name>/`
 
@@ -86,7 +90,17 @@ Each gate invokes its sub-skill. Human approval required at each gate before pro
 - Gate 5 (Data model) runs only if the feature has persistent data; otherwise record it as `"SKIPPED"` in workflow-state.json
 - Gate 7 (Plan): invoke `ring:writing-plans` with trd.md as spec input plus feature-map.md, openapi.yaml, the schema file, and dependencies.md as supporting inputs, passing `TopologyConfig`. **Binding constraint:** plan phases mirror feature-map.md `## Phases` one-to-one. Output path: `docs/pre-dev/{feature}/plan.md` (overrides the writing-plans default). plan.md is always a SINGLE document per feature. **Topology clause:** when `TopologyConfig` structure is monorepo or multi-repo, each epic carries one line `**Target:** backend | frontend | infra` (placed right before `**Status:**`); for multi-repo, the orchestrator copies plan.md into each repo and the local dev-cycle executes only epics whose Target matches that repo. No per-module plan splits.
 
-**Standalone UX step (if Q4=Yes):** after Gate 1 approval, RECOMMEND running `ring:product-designer` + `ring:validating-ux-completeness` before Gate 3. It is optional, not a gate, and not tracked in workflow-state.json. If design-validation.md exists when Gate 3 runs, the TRD honors its verdict; if absent, proceed and note the UX risk.
+**Gate 0.5 — Personas (if the feature has human users):** after Gate 0, run `ring:building-personas` to produce `personas.md` before the PRD. The PRD (Gate 1) consumes it (functional requirements trace to personas). Skip only for pure-infra features with no human user.
+
+**Gate 2.5 — Design (REQUIRED when Q4=Yes / has UI):** after Gate 2 approval and before Gate 3, run the design phase as a tracked gate, not an optional step:
+1. `ring:structuring-information` → information architecture / navigation / `user-flows.md`
+2. `ring:product-designer` → wireframes (`wireframes/`)
+3. `ring:writing-ux-copy` → in-product microcopy feeding `ux-criteria.md`
+4. `ring:applying-design-system` → enforce the locked DS (tokens, Geist, viewports, provider) on the wireframes
+5. `ring:critiquing-designs` → structured critique before validation
+6. `ring:validating-ux-completeness` → emits `design-validation.md` with a DESIGN VALIDATED / NEEDS REVISION verdict
+
+**Hard gate:** when Q4=Yes, Gate 3 (TRD) MUST NOT proceed unless `design-validation.md` exists with verdict **DESIGN VALIDATED**. A NEEDS REVISION verdict or a missing file blocks Gate 3 — return to the design step. (For Q4=No, skip Gate 2.5 entirely.) Track Gate 2.5 in workflow-state.json like any other gate.
 
 ## Gate Progress Tracking
 
