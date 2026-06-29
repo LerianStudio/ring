@@ -16,7 +16,7 @@ line (whitespace collapsed).
 import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 # Plugin directories to scan.
 # MUST stay in sync with validate-frontmatter.py:ALL_PLUGINS
@@ -294,14 +294,60 @@ def scan_all_plugins(repo_root: Path, plugins: List[str]) -> List[Skill]:
     return aggregated
 
 
-def main():
+def _max_version_dir(version_dirs: List[Path]) -> Path:
+    """Pick the highest-version directory, comparing version components numerically.
+
+    Plugin caches name dirs by version (``1.39.0``); lexical sorting misorders
+    them (``1.4.0`` > ``1.39.0`` as strings), so compare integer tuples.
+    """
+
+    def key(path: Path) -> Tuple[int, ...]:
+        nums = re.findall(r"\d+", path.name)
+        return tuple(int(n) for n in nums) if nums else (0,)
+
+    return max(version_dirs, key=key)
+
+
+def scan_installed_cache(marketplace_dir: Path, plugins: List[str]) -> List[Skill]:
+    """Aggregate skills when plugins are installed as a flattened plugin cache.
+
+    Claude Code installs each plugin into its own
+    ``<marketplace_dir>/ring-<plugin>/<version>/`` directory rather than as
+    sibling dirs under one repo root, and may keep several versions side by
+    side. For each plugin we scan only the highest installed version's
+    ``skills/`` directory (avoids listing every skill once per cached version).
+    """
+    aggregated: List[Skill] = []
+    for plugin in plugins:
+        version_dirs = [
+            d
+            for d in marketplace_dir.glob(f"ring-{plugin}/*")
+            if (d / "skills").is_dir()
+        ]
+        if not version_dirs:
+            continue
+        skills_dir = _max_version_dir(version_dirs) / "skills"
+        aggregated.extend(scan_skills_directory(skills_dir, plugin=plugin))
+    return aggregated
+
+
+def main() -> None:
     """Main entry point."""
-    # This script lives in default/hooks/, so the marketplace root is two up.
     script_dir = Path(__file__).parent.resolve()
     repo_root = script_dir.parent.parent
 
-    # Scan and parse skills across every active plugin
-    skills = scan_all_plugins(repo_root, ALL_PLUGINS)
+    # Two install layouts must both work:
+    #   - Monorepo source checkout: this script is at <root>/default/hooks/ and
+    #     every plugin is a sibling dir under <root> (<root>/<plugin>/skills).
+    #   - Installed plugin cache: Claude Code flattens each plugin into
+    #     <marketplace>/ring-<plugin>/<version>/, so the four plugins are NOT
+    #     siblings under one root. This script ships in ring-default, so the
+    #     marketplace dir holding all plugins is three levels up from hooks/.
+    if (repo_root / "default" / "skills").is_dir():
+        skills = scan_all_plugins(repo_root, ALL_PLUGINS)
+    else:
+        marketplace_dir = script_dir.parent.parent.parent
+        skills = scan_installed_cache(marketplace_dir, ALL_PLUGINS)
 
     if not skills:
         print("Error: No valid skills found", file=sys.stderr)
