@@ -203,12 +203,33 @@ main() {
     umask "$old_umask"
     trap "rm -f '$tmpfile'" EXIT INT TERM HUP
 
+    # Detect install layout once (mirrors generate-skills-ref.py main()):
+    #   - Monorepo: <root>/<plugin>/skills exist as siblings.
+    #   - Installed cache: each plugin is flattened into
+    #     <marketplace>/ring-<plugin>/<version>/skills; plugins are NOT siblings.
+    local marketplace_dir="${SCRIPT_DIR}/../../.."
+    local monorepo=0
+    [[ -d "${REPO_ROOT}/default/skills" ]] && monorepo=1
+
     local found_any_plugin=0
     local plugin
     for plugin in "${PLUGINS[@]}"; do
-        local skills_dir="${REPO_ROOT}/${plugin}/skills"
+        local skills_dir=""
+        if [[ "$monorepo" -eq 1 ]]; then
+            skills_dir="${REPO_ROOT}/${plugin}/skills"
+        else
+            # ponytail: lexical sort picks the newest cached version. Ring
+            # versions are same-width in practice so this matches numeric
+            # order; swap to `sort -V` if mixed-width versions ever ship.
+            # if/fi (not `&& printf`) so a non-matching glob leaves the loop's
+            # exit status 0; under `set -e` + `pipefail` a bare `&&` would make
+            # the subshell return non-zero and abort the whole script.
+            skills_dir=$(for d in "${marketplace_dir}/ring-${plugin}"/*/skills; do
+                             if [[ -d "$d" ]]; then printf '%s\n' "$d"; fi
+                         done | sort | tail -1)
+        fi
         # Mirror Python behavior: silently skip plugins without a skills/ dir.
-        if [[ ! -d "$skills_dir" ]]; then
+        if [[ -z "$skills_dir" || ! -d "$skills_dir" ]]; then
             continue
         fi
         found_any_plugin=1

@@ -23,6 +23,8 @@ parse_skill_file = mod.parse_skill_file
 scan_skills_directory = mod.scan_skills_directory
 generate_markdown = mod.generate_markdown
 scan_all_plugins = mod.scan_all_plugins
+scan_installed_cache = mod.scan_installed_cache
+_max_version_dir = mod._max_version_dir
 
 
 # ---------------------------------------------------------------------------
@@ -297,6 +299,70 @@ class TestScanAllPlugins:
         result = scan_all_plugins(tmp_path, ["default", "dev-team", "pm-team"])
         names = sorted(s.name for s in result)
         assert names == ["ring:skill-a", "ring:skill-b"]
+
+
+# ---------------------------------------------------------------------------
+# _max_version_dir() — newest cached version selection
+# ---------------------------------------------------------------------------
+
+
+class TestMaxVersionDir:
+    def test_numeric_not_lexical(self, tmp_path):
+        # Lexically "1.4.0" > "1.39.0"; numerically 1.39.0 wins.
+        for name in ("1.4.0", "1.39.0", "1.5.0"):
+            (tmp_path / name).mkdir()
+        dirs = [d for d in tmp_path.iterdir() if d.is_dir()]
+        assert _max_version_dir(dirs).name == "1.39.0"
+
+    def test_real_dev_team_spread(self, tmp_path):
+        for name in ("1.81.0", "1.81.1", "1.81.2", "1.82.0", "1.85.0"):
+            (tmp_path / name).mkdir()
+        dirs = [d for d in tmp_path.iterdir() if d.is_dir()]
+        assert _max_version_dir(dirs).name == "1.85.0"
+
+
+# ---------------------------------------------------------------------------
+# scan_installed_cache() — flattened plugin-cache layout
+# ---------------------------------------------------------------------------
+
+
+def _write_skill(skills_dir: Path, name: str, desc: str = "d") -> None:
+    d = skills_dir / name.split(":")[-1]
+    d.mkdir(parents=True)
+    (d / "SKILL.md").write_text(f"---\nname: {name}\ndescription: {desc}\n---\n# Body\n")
+
+
+class TestScanInstalledCache:
+    def test_aggregates_across_flattened_plugins(self, tmp_path):
+        """Plugins live in ring-<plugin>/<version>/skills, not as siblings."""
+        _write_skill(tmp_path / "ring-default" / "1.42.0" / "skills", "ring:a")
+        _write_skill(tmp_path / "ring-dev-team" / "1.85.0" / "skills", "ring:b")
+        result = scan_installed_cache(tmp_path, ["default", "dev-team", "pm-team"])
+        assert sorted(s.name for s in result) == ["ring:a", "ring:b"]
+
+    def test_uses_only_newest_version_no_duplicates(self, tmp_path):
+        # Two cached versions of dev-team; the skill must appear exactly once,
+        # sourced from the newest version.
+        _write_skill(
+            tmp_path / "ring-dev-team" / "1.84.0" / "skills", "ring:x", "old"
+        )
+        _write_skill(
+            tmp_path / "ring-dev-team" / "1.85.0" / "skills", "ring:x", "new"
+        )
+        result = scan_installed_cache(tmp_path, ["dev-team"])
+        assert [s.name for s in result] == ["ring:x"]
+        assert result[0].description == "new"
+
+    def test_categorizes_by_plugin(self, tmp_path):
+        _write_skill(tmp_path / "ring-pm-team" / "0.32.1" / "skills", "ring:p")
+        result = scan_installed_cache(tmp_path, ["pm-team"])
+        assert result[0].category == "Pre-Dev Planning"
+
+    def test_missing_plugin_skipped(self, tmp_path):
+        _write_skill(tmp_path / "ring-default" / "1.42.0" / "skills", "ring:a")
+        # dev-team has no cache dir at all → silently skipped.
+        result = scan_installed_cache(tmp_path, ["default", "dev-team"])
+        assert [s.name for s in result] == ["ring:a"]
 
 
 # ---------------------------------------------------------------------------
