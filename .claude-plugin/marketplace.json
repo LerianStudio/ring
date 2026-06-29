@@ -32,14 +32,6 @@
         "parallel-review",
         "git",
         "pull-requests"
-      ],
-      "skills": [
-        "ring:committing-changes",
-        "ring:opening-pull-requests",
-        "ring:shipping-changes"
-      ],
-      "deprecated": [
-        "ring:generating-pr-descriptions"
       ]
     },
     {
