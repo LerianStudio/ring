@@ -218,15 +218,18 @@ main() {
         if [[ "$monorepo" -eq 1 ]]; then
             skills_dir="${REPO_ROOT}/${plugin}/skills"
         else
-            # ponytail: lexical sort picks the newest cached version. Ring
-            # versions are same-width in practice so this matches numeric
-            # order; swap to `sort -V` if mixed-width versions ever ship.
-            # if/fi (not `&& printf`) so a non-matching glob leaves the loop's
-            # exit status 0; under `set -e` + `pipefail` a bare `&&` would make
-            # the subshell return non-zero and abort the whole script.
-            skills_dir=$(for d in "${marketplace_dir}/ring-${plugin}"/*/skills; do
-                             if [[ -d "$d" ]]; then printf '%s\n' "$d"; fi
-                         done | sort | tail -1)
+            # Pick the highest installed version with portable numeric ordering
+            # by major.minor.patch (`sort -V` is absent on BSD/macOS), matching
+            # generate-skills-ref.py:_max_version_dir() so both paths agree.
+            # if/fi (not `&& basename`) keeps the loop's exit status 0 so
+            # `set -e` + `pipefail` don't abort the script on a non-matching glob.
+            local newest_ver
+            newest_ver=$(for d in "${marketplace_dir}/ring-${plugin}"/*/skills; do
+                             if [[ -d "$d" ]]; then basename "$(dirname "$d")"; fi
+                         done | sort -t. -k1,1n -k2,2n -k3,3n | tail -1)
+            if [[ -n "$newest_ver" ]]; then
+                skills_dir="${marketplace_dir}/ring-${plugin}/${newest_ver}/skills"
+            fi
         fi
         # Mirror Python behavior: silently skip plugins without a skills/ dir.
         if [[ -z "$skills_dir" || ! -d "$skills_dir" ]]; then

@@ -16,7 +16,7 @@ line (whitespace collapsed).
 import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 # Plugin directories to scan.
 # MUST stay in sync with validate-frontmatter.py:ALL_PLUGINS
@@ -301,7 +301,7 @@ def _max_version_dir(version_dirs: List[Path]) -> Path:
     them (``1.4.0`` > ``1.39.0`` as strings), so compare integer tuples.
     """
 
-    def key(path: Path):
+    def key(path: Path) -> Tuple[int, ...]:
         nums = re.findall(r"\d+", path.name)
         return tuple(int(n) for n in nums) if nums else (0,)
 
@@ -331,7 +331,7 @@ def scan_installed_cache(marketplace_dir: Path, plugins: List[str]) -> List[Skil
     return aggregated
 
 
-def main():
+def main() -> None:
     """Main entry point."""
     script_dir = Path(__file__).parent.resolve()
     repo_root = script_dir.parent.parent
