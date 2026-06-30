@@ -97,3 +97,43 @@ AskUserQuestion at start: "Execution mode?" Options: Automatic (pause only on fa
 ## Completion
 
 After Gate 3 approved: `docs/pre-dev/{feature}/plan.md` is the single execution document. Execute with `ring:running-dev-cycle` (subagent orchestration) or `ring:executing-plans` (inline).
+
+## Lerian Map Card Creation (optional)
+
+**OPTIONAL and opt-in. Runs only AFTER Gate 3 is approved (plan.md validated) — never before — and NEVER blocks the workflow.** Because plan.md is the canonical epic list at this point, creating the Lerian Map cards now (instead of at the start of `ring:running-dev-cycle`) avoids the rework of re-deriving them once the dev cycle begins.
+
+### Why here
+
+The epic-card creation handshake today lives ONLY in `ring:running-dev-cycle` (`## Lerian Map Sync (optional)` → `### Discovery handshake`, steps 1–5), where it runs before the first Gate 0. By then planning happened in an earlier session, so the feature is already mapped and the cards are pure rework. Offering the same creation step at the end of planning — when plan.md just passed Gate 3 — moves the work to where the epics are freshest.
+
+### Step (after Gate 3 approval)
+
+1. **Ask (AskUserQuestion):** "plan.md is validated. Create the Lerian Map cards for these epics now (so `ring:running-dev-cycle` can skip the card-creation handshake)?" Options: Yes / No.
+   - **No** (or no answer): do nothing — plan.md is already the completed deliverable; the workflow ends normally.
+2. **If Yes — run the canonical discovery handshake; do NOT reimplement it.** Execute `ring:running-dev-cycle` → `## Lerian Map Sync (optional)` → `### Discovery handshake` steps 1–5 exactly as written (all Map I/O through `ring:delegating-to-gandalf` — never a direct Map API call):
+   - repo → `GET /products(repositoryUrl)` → resolve product
+   - `GET /features` → resolve the Feature by name (AskUserQuestion if ambiguous) → `featureId`
+   - resolve the feature's **`Desenvolvimento`** milestone BY NAME → `dev_milestone_id` (if it cannot be resolved → STOP and surface to the user; MUST NOT create the Feature or any milestone — they come from the template)
+   - build ONE epic-card per epic in plan.md (`tipo: Task`, checklist = that epic's task names), matched by name + `[map:#<card_id>]` tag — CREATE only the missing ones
+   - **preview the create plan ONCE + confirm**, then `POST /tasks` for the confirmed cards; record each `card_id` (+ checklist item ids) and auto-inject the `[map:#<card_id>]` tags
+3. **Persist** the result into `docs/pre-dev/{feature}/workflow-state.json` (see below) so `ring:running-dev-cycle` reuses it.
+4. **Never blocks:** if the user declines, the handshake errors, or the Map is unreachable, log it and finish — plan.md is already generated and the workflow completes normally.
+
+### Persisted state (consumed by ring:running-dev-cycle)
+
+When cards are created, extend `docs/pre-dev/{feature}/workflow-state.json` with a `lerianMap` block:
+
+```json
+"lerianMap": {
+  "cardsCreated": true,
+  "createdAt": "ISO timestamp",
+  "featureId": 77,
+  "devMilestoneId": 433,
+  "devMilestoneName": "Desenvolvimento",
+  "cards": [
+    {"epic": "Epic 1.1", "cardId": 1222, "checklistItemIds": {"Task 1.1.1": "uuid"}}
+  ]
+}
+```
+
+`ring:running-dev-cycle`'s discovery handshake checks this block at init: when `cardsCreated == true`, it SKIPS the card-creation handshake (steps 1–4) and only re-validates the recorded `card_id`s against the board (re-creating any that no longer exist), instead of re-running the full create-with-preview flow. If the block is absent, the dev cycle runs the handshake as today — zero behavior change for users who skip this step.
