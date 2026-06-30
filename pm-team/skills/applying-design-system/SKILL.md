@@ -37,13 +37,16 @@ The Lerian Console design system has **locked decisions** (ratified 2026-04-22) 
 
 Scan code/design for these and report file:line:
 
-- **Inter anywhere** — `next/font/google` importing Inter, `--font-inter`, `Inter` in a font stack (Console `layout.tsx` or `sindarian-ui`). → must be Geist.
-- **Single-layer color tokens** — a `--color-*` defined with a raw value directly, instead of wrapping a raw `--token`. → must be two-layer.
-- **Hardcoded hex/hsl in components** — colors not referencing a token. → use the token.
+- **Inter anywhere** (❌ critical) — `next/font/google` importing Inter, `--font-inter`, `Inter` in a font stack (Console `layout.tsx` or `sindarian-ui`). → must be Geist.
+- **No affirmative Geist** (⚠️ partial) — a generic `system-ui`/`sans-serif` stack with no Inter *but also no Geist*. Weaker than an Inter violation, but the surface still must use Geist. → wire Geist.
+- **Single-layer color tokens** — a `--color-*` defined with a raw value directly (instead of wrapping a raw `--token`), **OR raw hex/hsl in `tailwind.config` `theme.extend.colors`** (same violation, different file). → must be two-layer.
+- **Hardcoded hex/hsl in components** — colors not referencing a token. → use the token. *(Raw values living ONLY in the token definitions are correct — that's the single source; flag duplication in components, not the definitions.)*
 - **`next-themes`** import or `defaultTheme="system"` / `defaultTheme="dark"`. → custom provider, default `light`.
-- **Playwright config** missing the 375 / 768 / 1280 viewports, or no mobile/tablet snapshots. → add them.
+- **Playwright config** missing the exact **375 / 768 / 1280** viewports — `320`/`390` "close enough" approximations count as violations — or no mobile/tablet snapshots. → use exactly 375/768/1280.
 - **Container** without the 1400px cap on wide screens.
-- **Arbitrary spacing** (`mt-[13px]`) instead of the spacing scale.
+- **Off-scale spacing/size** — a `[…]` arbitrary value used for *spacing off the scale* (`mt-[13px]`). NOT every bracket value: a deliberate width like `max-w-[480px]` is fine.
+
+**Rate each finding** `critical` / `major` / `minor` (reuse the Design-QA severity vocabulary below): Inter = critical; single-layer tokens / `next-themes` = major; viewport/cap/off-scale spacing = minor→major by impact.
 
 ## Design QA checklist (biweekly, sprint-close)
 
