@@ -134,12 +134,12 @@ The epic-card creation handshake lives canonically in `ring:running-dev-cycle` (
    - build ONE epic-card per epic in plan.md (`tipo: Task`, checklist = that epic's task names), matched by name + `[map:#<card_id>]` tag — CREATE only the missing ones
    - **preview the create plan ONCE + confirm**, then `POST /tasks` for the confirmed cards; record each `card_id` (+ checklist item ids) and auto-inject the `[map:#<card_id>]` tags
    - The only interaction is the create-plan preview+confirm (the user confirms the card SET, not whether to create).
-2. **Persist** the result into `docs/pre-dev/{feature}/workflow-state.json` (see below) so `ring:running-dev-cycle` reuses it — persisting `featureId`, `devMilestoneId`, and the per-epic `card_id`s is the contract the dev cycle relies on to skip re-creation.
+2. **Persist** the result into `docs/pre-dev/{feature}/workflow-state.json` (see below) so `ring:running-dev-cycle` reuses it — persisting `featureId`, `devMilestoneId`, the per-epic `cardId`s and their `checklistItemIds` is the contract the dev cycle relies on to skip re-creation.
 3. **Map unreachable (genuine outage only):** if the Map cannot be reached so the cards cannot be created, surface the error to the user. plan.md is already generated (planning's primary deliverable is complete), but record the card creation as not-done (omit the `lerianMap` block, or set `cardsCreated: false`) so `ring:running-dev-cycle` falls back to its own discovery handshake.
 
 ### Persisted state (consumed by ring:running-dev-cycle)
 
-When cards are created, extend `docs/pre-dev/{feature}/workflow-state.json` with a `lerianMap` block:
+When cards are created, extend `docs/pre-dev/{feature}/workflow-state.json` with a `lerianMap` block. **Key naming (one scheme for the contract):** the persisted keys are camelCase end-to-end — `featureId`, `devMilestoneId`, `cardId`, `checklistItemIds` — and those are the canonical names the dev cycle reads. They mirror the Map API's snake_case fields (`card_id`, `dev_milestone_id`); only the `[map:#<card_id>]` plan tag keeps the Map's snake_case form. `checklistItemIds` ARE part of the reuse contract: the dev cycle adopts them directly to flip each checklist item `done` (re-resolving ids from a fetched card only when that card had to be re-created).
 
 ```json
 "lerianMap": {
@@ -154,4 +154,4 @@ When cards are created, extend `docs/pre-dev/{feature}/workflow-state.json` with
 }
 ```
 
-`ring:running-dev-cycle`'s discovery handshake checks this block at init: when the `lerianMap` block is present (`cardsCreated == true` with `featureId` + `devMilestoneId` + non-empty `cards[]`), it treats card creation as ALREADY DONE — it SKIPS the create-with-preview handshake (steps 2–4) and only re-validates the recorded `card_id`s against the board via `GET /tasks/{id}` (re-creating only any that no longer exist), and adopts `featureId`/`devMilestoneId`/`card_id`s as the source of truth (Map sync implicitly enabled, no opt-in re-asked). Only when the block is ABSENT does the dev cycle run the full create handshake itself — backward-compat for features planned before this flow.
+`ring:running-dev-cycle`'s discovery handshake checks this block at init: when the `lerianMap` block is present (`cardsCreated == true` with `featureId` + `devMilestoneId` + non-empty `cards[]`), it treats card creation as ALREADY DONE — it SKIPS the create-with-preview handshake (steps 2–4) and only re-validates the recorded `cardId`s against the board via `GET /tasks/{id}` (re-creating only any that no longer exist), and adopts `featureId`/`devMilestoneId`/`cardId`s/`checklistItemIds` as the source of truth (Map sync implicitly enabled, no opt-in re-asked). Only when the block is ABSENT does the dev cycle run the full create handshake itself — backward-compat for features planned before this flow.
