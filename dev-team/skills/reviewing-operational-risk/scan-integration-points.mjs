@@ -173,11 +173,20 @@ function enclosingGoFunc(lines, idx) {
   let start = idx;
   for (; start >= 0; start--) if (/^func\b/.test(lines[start])) break;
   if (start < 0) return null;
-  let end = lines.length;
-  for (let j = start + 1; j < lines.length; j++) {
-    if (/^\}/.test(lines[j])) { end = j + 1; break; }
+  // Track brace depth from the function's opening `{` so nested if/for/switch
+  // blocks don't truncate the body at the first indented-or-not `}`.
+  let depth = 0;
+  let sawOpen = false;
+  for (let j = start; j < lines.length; j++) {
+    for (const ch of lines[j]) {
+      if (ch === '{') { depth++; sawOpen = true; }
+      else if (ch === '}' && sawOpen) {
+        depth--;
+        if (depth === 0) return [start, j + 1];
+      }
+    }
   }
-  return [start, end];
+  return [start, lines.length];
 }
 
 // Go resilience: prefer the enclosing function body (so retry/timeout wrappers
@@ -417,7 +426,7 @@ async function main() {
     // (or returning an interface-like *Client) counts. Timeout/retry configured
     // once here is inherited by every call site through the wrapper pkg.
     if (lang === 'go' && pkgName && pkgName !== 'http' && pkgName !== 'main') {
-      const ctorRe = /func\s+(?:\([^)]*\)\s+)?(New\w*Client)\s*\(([^)]*)\)\s*(?:\*[\w.]+|[\w.]+)?\s*\{/g;
+      const ctorRe = /func\s+(?:\([^)]*\)\s+)?(New\w*Client)\s*\(([^)]*)\)\s*(?:\([^)]*\)|\*?[\w.]+)?\s*\{/g;
       let cm;
       while ((cm = ctorRe.exec(content))) {
         const params = cm[2] || '';
@@ -458,11 +467,15 @@ async function main() {
     // Collect Go func/method declarations (for port->adapter mapping).
     if (lang === 'go') {
       for (let i = 0; i < lines.length; i++) {
-        const fm = lines[i].match(/^func\s+(?:\([^)]*\)\s+)?([A-Z]\w*)\s*\(/);
+        // Capture the receiver type (group 1) so port->adapter matching can
+        // require the full interface method set on one concrete type instead
+        // of matching by bare method name.
+        const fm = lines[i].match(/^func\s+(?:\((?:\w+\s+)?\*?([\w.]+)\)\s+)?([A-Z]\w*)\s*\(/);
         if (fm) {
-          const name = fm[1];
+          const recv = fm[1] || null;
+          const name = fm[2];
           if (!funcDecls.has(name)) funcDecls.set(name, []);
-          funcDecls.get(name).push({ rel, line: i + 1, entry });
+          funcDecls.get(name).push({ rel, line: i + 1, entry, recv });
         }
       }
       if (isPort) {
@@ -604,24 +617,56 @@ async function main() {
   // FILE that implements it (catches SDK adapters like midazsdk.WithTimeout
   // that never touch net/http on the call line).
   // ------------------------------------------------------------------------
+  //
+  // Matching is receiver-type aware, NOT name-only: a concrete type is treated
+  // as an adapter for an interface only when it implements the FULL method set
+  // of that interface. This prevents common method names (Close, Send, Publish)
+  // on unrelated receivers from being misclassified as port implementations and
+  // inflating outbound_port points / bogus resilience gaps.
+
+  // Group interface method names by their declaring (file, interface).
+  const ifaceSets = new Map(); // `${rel}::${iface}` -> { rel, iface, methods:Set }
   for (const pm of portMethods) {
-    const impls = (funcDecls.get(pm.method) || []).filter((d) => !d.entry.isPort);
-    for (const impl of impls) {
-      const e = impl.entry;
-      // whole adapter file: client ctor + retry wrapper may live elsewhere
-      const resilience = resilienceOver(e.content);
-      points.push({
-        category: 'outbound_port',
-        matcher: `port ${pm.iface}.${pm.method} -> adapter`,
-        direction: 'outbound',
-        language: 'go',
-        service: serviceOf(impl.rel),
-        file: impl.rel,
-        line: impl.line,
-        snippet: `${pm.iface}.${pm.method}() implemented here`.slice(0, 200),
-        resilience,
-        port: { interface: pm.iface, method: pm.method, declared_in: pm.rel },
-      });
+    const key = `${pm.rel}::${pm.iface}`;
+    if (!ifaceSets.has(key)) ifaceSets.set(key, { rel: pm.rel, iface: pm.iface, methods: new Set() });
+    ifaceSets.get(key).methods.add(pm.method);
+  }
+
+  // Map each concrete (non-port) receiver type to the methods it defines.
+  const receiverMethods = new Map(); // recv -> Map(method -> decl)
+  for (const [name, decls] of funcDecls) {
+    for (const d of decls) {
+      if (d.entry.isPort || !d.recv) continue;
+      if (!receiverMethods.has(d.recv)) receiverMethods.set(d.recv, new Map());
+      const mmap = receiverMethods.get(d.recv);
+      if (!mmap.has(name)) mmap.set(name, d);
+    }
+  }
+
+  for (const { rel, iface, methods } of ifaceSets.values()) {
+    const methodList = [...methods];
+    if (!methodList.length) continue;
+    for (const [recv, mmap] of receiverMethods) {
+      // Require the receiver to implement EVERY method of the interface.
+      if (!methodList.every((m) => mmap.has(m))) continue;
+      for (const m of methodList) {
+        const impl = mmap.get(m);
+        const e = impl.entry;
+        // whole adapter file: client ctor + retry wrapper may live elsewhere
+        const resilience = resilienceOver(e.content);
+        points.push({
+          category: 'outbound_port',
+          matcher: `port ${iface}.${m} -> adapter (${recv})`,
+          direction: 'outbound',
+          language: 'go',
+          service: serviceOf(impl.rel),
+          file: impl.rel,
+          line: impl.line,
+          snippet: `${iface}.${m}() implemented by ${recv}`.slice(0, 200),
+          resilience,
+          port: { interface: iface, method: m, declared_in: rel, adapter_type: recv },
+        });
+      }
     }
   }
 
@@ -638,8 +683,15 @@ async function main() {
 
   // Aggregate resilience gaps.
   const gaps = [];
+  // Inbound entry points don't own outbound-recovery concerns (retry, dlq,
+  // timeout, rollback); flagging those would flood resilience_gaps with inbound
+  // noise. For inbound points only idempotency is a meaningful gap.
+  const INBOUND_RELEVANT = new Set(['idempotency']);
   for (const p of deduped) {
-    const missing = Object.entries(p.resilience).filter(([, v]) => !v).map(([k]) => k);
+    const inbound = p.entry_point === true || p.direction === 'inbound';
+    const missing = Object.entries(p.resilience)
+      .filter(([k, v]) => !v && (!inbound || INBOUND_RELEVANT.has(k)))
+      .map(([k]) => k);
     if (missing.length) gaps.push({ file: p.file, line: p.line, category: p.category, service: p.service, missing });
   }
 

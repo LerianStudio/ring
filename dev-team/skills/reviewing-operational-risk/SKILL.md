@@ -143,15 +143,16 @@ on what the service **expects to receive and how it reacts when it does not** �
 do NOT leave the repo to inspect dependencies.
 
 If the script cannot be run (no Node.js, restricted env), fall back to manual
-greps for the same boundaries — **run these from the repo root and include
-`pkg/`**, not just the service subdir:
+greps for the same boundaries — **run these from the repo root and cover the
+same root set as the scanner** (`internal/ components/ pkg/ src/ apps/ cmd/
+services/ plugins/`), not just the service subdir:
 
 ```bash
-grep -rn "http.NewRequest\|http.Client\|resty\|req.Get\|req.Post\|Do(ctx\|httpclient.\|DoWithRetry\|New.*Client(" internal/ components/ pkg/ 2>/dev/null
-grep -rn "axios\|fetch(\|got(\|undici" src/ 2>/dev/null      # TS
-grep -rn "Consume(\|Subscribe(\|HandleDelivery\|amqp\|rabbitmq\|sqs\|kafka" internal/ components/ pkg/ src/ 2>/dev/null
-grep -rn "Publish(\|Produce(\|NotifyURL\|callbackURL\|webhookURL" internal/ components/ pkg/ src/ 2>/dev/null
-grep -rln "ports/out\|port.[A-Z].*Port" internal/ components/ apps/ 2>/dev/null   # find hexagonal outbound ports, then read their adapters in pkg/
+grep -rn "http.NewRequest\|http.Client\|resty\|req.Get\|req.Post\|Do(ctx\|httpclient.\|DoWithRetry\|New.*Client(" internal/ components/ pkg/ apps/ cmd/ services/ plugins/ 2>/dev/null
+grep -rn "axios\|fetch(\|got(\|undici" src/ apps/ services/ plugins/ 2>/dev/null      # TS
+grep -rn "Consume(\|Subscribe(\|HandleDelivery\|amqp\|rabbitmq\|sqs\|kafka" internal/ components/ pkg/ src/ apps/ cmd/ services/ plugins/ 2>/dev/null
+grep -rn "Publish(\|Produce(\|NotifyURL\|callbackURL\|webhookURL" internal/ components/ pkg/ src/ apps/ cmd/ services/ plugins/ 2>/dev/null
+grep -rln "ports/out\|port.[A-Z].*Port" internal/ components/ apps/ cmd/ services/ plugins/ 2>/dev/null   # find hexagonal outbound ports, then read their adapters in pkg/
 ```
 
 For **each** integration point, confirm the resilience posture (the script
