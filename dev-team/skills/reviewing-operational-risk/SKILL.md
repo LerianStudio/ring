@@ -149,7 +149,7 @@ services/ plugins/`), not just the service subdir:
 
 ```bash
 grep -rn "http.NewRequest\|http.Client\|resty\|req.Get\|req.Post\|Do(ctx\|httpclient.\|DoWithRetry\|New.*Client(" internal/ components/ pkg/ apps/ cmd/ services/ plugins/ 2>/dev/null
-grep -rn "axios\|fetch(\|got(\|undici" src/ apps/ services/ plugins/ 2>/dev/null      # TS
+grep -rn "axios\|fetch(\|got(\|undici" internal/ components/ pkg/ src/ apps/ cmd/ services/ plugins/ 2>/dev/null      # TS
 grep -rn "Consume(\|Subscribe(\|HandleDelivery\|amqp\|rabbitmq\|sqs\|kafka" internal/ components/ pkg/ src/ apps/ cmd/ services/ plugins/ 2>/dev/null
 grep -rn "Publish(\|Produce(\|NotifyURL\|callbackURL\|webhookURL" internal/ components/ pkg/ src/ apps/ cmd/ services/ plugins/ 2>/dev/null
 grep -rln "ports/out\|port.[A-Z].*Port" internal/ components/ apps/ cmd/ services/ plugins/ 2>/dev/null   # find hexagonal outbound ports, then read their adapters in pkg/

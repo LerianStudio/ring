@@ -633,12 +633,16 @@ async function main() {
   }
 
   // Map each concrete (non-port) receiver type to the methods it defines.
-  const receiverMethods = new Map(); // recv -> Map(method -> decl)
+  // Key by package-qualified receiver so same-named types in different
+  // packages (Client, Service, Repository, Handler, ...) are not merged into
+  // a single union that could spuriously satisfy an interface's method set.
+  const receiverMethods = new Map(); // `${pkg}::${recv}` -> { recv, methods: Map(method -> decl) }
   for (const [name, decls] of funcDecls) {
     for (const d of decls) {
       if (d.entry.isPort || !d.recv) continue;
-      if (!receiverMethods.has(d.recv)) receiverMethods.set(d.recv, new Map());
-      const mmap = receiverMethods.get(d.recv);
+      const rkey = `${d.entry.pkgName || ''}::${d.recv}`;
+      if (!receiverMethods.has(rkey)) receiverMethods.set(rkey, { recv: d.recv, methods: new Map() });
+      const mmap = receiverMethods.get(rkey).methods;
       if (!mmap.has(name)) mmap.set(name, d);
     }
   }
@@ -646,7 +650,7 @@ async function main() {
   for (const { rel, iface, methods } of ifaceSets.values()) {
     const methodList = [...methods];
     if (!methodList.length) continue;
-    for (const [recv, mmap] of receiverMethods) {
+    for (const { recv, methods: mmap } of receiverMethods.values()) {
       // Require the receiver to implement EVERY method of the interface.
       if (!methodList.every((m) => mmap.has(m))) continue;
       for (const m of methodList) {
