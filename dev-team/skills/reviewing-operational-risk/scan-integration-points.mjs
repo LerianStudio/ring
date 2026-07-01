@@ -4,33 +4,49 @@
  *
  * Deterministically walks a Go or TypeScript/Node.js repo and finds the points
  * where the service talks to the outside world:
- *   - outbound external HTTP calls
+ *   - outbound external HTTP calls (incl. local http wrappers and SDK clients)
  *   - queue consumers (RabbitMQ, SQS, Kafka, NATS, ...)
  *   - event publishers / producers
  *   - outbound webhooks / callbacks
+ *   - hexagonal outbound ports (each ports/out interface method + its adapter)
  *
- * For each integration point it records, from a window around the match, whether
- * the following resilience mechanisms appear to be present:
- *   retry, dlq, timeout, rollback/compensation, idempotency
+ * For each integration point it records whether the following resilience
+ * mechanisms appear present: retry, dlq, timeout, rollback/compensation,
+ * idempotency. Resilience is inferred at the ENCLOSING-FUNCTION / ADAPTER-FILE
+ * level for Go (so a `DoWithRetry` wrapper or a `New*Client(timeout)` client
+ * defined elsewhere in the file/adapter still counts), not from a fixed ±N-line
+ * window around the call site.
  *
- * Output: a structured JSON report on stdout. Feed that JSON to the LLM (Step 2)
- * as structured context BEFORE starting the confirmation dialogue.
+ * SCOPE — IMPORTANT: in a hexagonal Go monorepo, scanning only a service subdir
+ * (apps/<svc>) yields a FALSE 0 because the boundaries live in the imported
+ * pkg/* adapters. This scanner therefore walks up to the repo/module root, scans
+ * the whole tree, and attributes each boundary to the consuming service via its
+ * top-level dir. It never returns 0 silently for a service that imports ports/out.
+ *
+ * Output: a structured JSON report on stdout (schema ring.ops-risk.integration-scan.v1).
+ * Feed that JSON to the LLM (Step 2) as structured context BEFORE the dialogue.
  *
  * Zero dependencies — Node.js built-ins only. Detection is heuristic (regex over
  * source, not full AST): treat every hit as a candidate to confirm, and expect
  * false positives/negatives. The LLM step exercises judgement over this data.
  *
  * Usage:
- *   node scan-integration-points.mjs [targetDir] [--json] [--out FILE] [--context N]
+ *   node scan-integration-points.mjs [targetDir] [--json] [--out FILE]
+ *                                    [--context N] [--config FILE] [--no-gen-config]
+ *                                    [--no-repo-root]
  *
- *   targetDir     Repo root to scan (default: current working directory)
- *   --out FILE    Also write the JSON report to FILE
- *   --context N   Lines of context each side of a match for resilience detection (default 12)
- *   --json        (default) emit JSON to stdout
+ *   targetDir        Dir to scan from (default: cwd). Expanded to repo/module root.
+ *   --out FILE       Also write the JSON report to FILE
+ *   --context N      Fallback lines of context each side of a match (default 12)
+ *   --config FILE    Path to a .ops-risk.json config (default: <repoRoot>/.ops-risk.json)
+ *   --no-gen-config  Do not auto-generate a default .ops-risk.json when missing
+ *   --no-repo-root   Do NOT expand to repo root; scan exactly targetDir (legacy)
+ *   --json           (default) emit JSON to stdout
  */
 
-import { readdir, readFile, stat, writeFile } from 'node:fs/promises';
-import { join, relative, extname, basename } from 'node:path';
+import { readdir, readFile, stat, writeFile, access } from 'node:fs/promises';
+import { join, relative, extname, dirname, basename, sep, isAbsolute, resolve } from 'node:path';
+import { homedir } from 'node:os';
 
 // ---------------------------------------------------------------------------
 // CLI args
@@ -39,13 +55,20 @@ const args = process.argv.slice(2);
 let targetDir = process.cwd();
 let outFile = null;
 let contextLines = 12;
+let configPath = null;
+let genConfig = true;
+let expandToRepoRoot = true;
 for (let i = 0; i < args.length; i++) {
   const a = args[i];
   if (a === '--out') outFile = args[++i];
   else if (a === '--context') contextLines = parseInt(args[++i], 10) || 12;
+  else if (a === '--config') configPath = args[++i];
+  else if (a === '--no-gen-config') genConfig = false;
+  else if (a === '--no-repo-root') expandToRepoRoot = false;
   else if (a === '--json') { /* default */ }
   else if (!a.startsWith('--')) targetDir = a;
 }
+targetDir = isAbsolute(targetDir) ? targetDir : resolve(process.cwd(), targetDir);
 
 // ---------------------------------------------------------------------------
 // Walk config
@@ -58,43 +81,146 @@ const CODE_EXT = new Set(['.go', '.ts', '.tsx', '.js', '.mjs', '.cjs', '.jsx']);
 const TEST_RE = /(_test\.go|\.test\.[tj]sx?|\.spec\.[tj]sx?)$/;
 
 // ---------------------------------------------------------------------------
+// Default per-repo config (.ops-risk.json)
+// ---------------------------------------------------------------------------
+const DEFAULT_CONFIG = {
+  $schema: 'ring.ops-risk.config.v1',
+  // Dirs that hold shared adapters / SDK wrappers imported by services.
+  shared_adapter_dirs: ['pkg', 'internal/adapter', 'internal/adapters'],
+  // Local packages that wrap net/http (e.g. "httpclient"). Auto-detection adds
+  // to this list; declaring here forces inclusion.
+  http_wrapper_packages: [],
+  // Globs for hexagonal outbound port interfaces (each method = a boundary).
+  outbound_port_globs: ['**/ports/out/**', '**/port/**', '**/ports/**'],
+  // Inbound handler globs to EXCLUDE from outbound_webhook detection.
+  exclude_handler_globs: [
+    '**/handler/**', '**/handlers/**', '**/inbound/**', '**/in/**',
+    '**/api/**', '**/rest/**', '**/http/in/**', '**/controller/**', '**/controllers/**',
+  ],
+};
+
+// ---------------------------------------------------------------------------
 // Detection patterns. category -> [ {label, re} ]
 // ---------------------------------------------------------------------------
-const PATTERNS = {
+const BASE_PATTERNS = {
   http_outbound: [
     { label: 'go net/http', re: /http\.(NewRequest(WithContext)?|Get|Post|Do)\s*\(/ },
     { label: 'go http.Client', re: /\bhttp\.Client\b|\(&?http\.Client\{|\.Do\(ctx/ },
     { label: 'go resty', re: /resty\.|\.R\(\)\.(Get|Post|Put|Delete|Patch)\(/ },
     { label: 'go grpc client', re: /grpc\.Dial\(|grpc\.NewClient\(/ },
+    // local http wrappers + generic client constructors + retry wrappers
+    { label: 'go http wrapper/client ctor', re: /\bhttpclient\.|\bDoWithRetry\s*\(|\bNew\w+Client\s*\(|\b\w+\.Do\(\s*req\b/ },
+    // SDK clients that talk to the outside without touching net/http directly
+    { label: 'go sdk client', re: /\b\w*sdk\.[A-Z]\w*\s*\(|\bmidazsdk\./ },
     { label: 'ts axios', re: /\baxios\b|axios\.(get|post|put|delete|patch|request)\(/ },
     { label: 'ts fetch', re: /(?<![.\w])fetch\s*\(/ },
     { label: 'ts got/undici/superagent', re: /\bgot\s*\(|\bundici\b|superagent\.|node-fetch/ },
   ],
   queue_consumer: [
-    { label: 'amqp consume', re: /\.Consume\s*\(|HandleDelivery|amqp\.|rabbitmq/i },
-    { label: 'sqs receive', re: /ReceiveMessage|sqs\.|SQSClient/ },
-    { label: 'kafka consume', re: /\bConsume(r)?\b.*(kafka|sarama|segmentio)|kafka\.|sarama\.|Reader\.ReadMessage/i },
-    { label: 'nats subscribe', re: /nats\.|\.Subscribe\s*\(|QueueSubscribe/ },
-    { label: 'ts amqplib/bull', re: /amqplib|\.consume\s*\(|new Worker\(|bull(mq)?|@nestjs\/microservices/i },
+    { label: 'amqp consume', re: /\.Consume\s*\(|HandleDelivery/ },
+    { label: 'sqs receive', re: /ReceiveMessage|SQSClient/ },
+    { label: 'kafka consume', re: /Reader\.ReadMessage|\bConsumer\b/ },
+    { label: 'nats subscribe', re: /\.Subscribe\s*\(|QueueSubscribe/ },
+    { label: 'ts amqplib/bull', re: /\.consume\s*\(|new Worker\(/ },
   ],
   event_publisher: [
     { label: 'go publish/produce', re: /\.Publish\s*\(|\.Produce\s*\(|PublishWithContext|SendMessage\s*\(/ },
-    { label: 'kafka producer', re: /\.WriteMessages\s*\(|Producer\b.*(kafka|sarama)/i },
-    { label: 'ts emit/publish', re: /\.publish\s*\(|\.emit\s*\(|producer\.send\(/ },
+    { label: 'kafka producer', re: /\.WriteMessages\s*\(/ },
+    { label: 'ts emit/publish', re: /\.publish\s*\(|producer\.send\(/ },
   ],
+  // Tightened: require a SEND verb AND an explicit URL var; case-sensitive
+  // (no blanket /i flag); inbound handler files are excluded before matching.
   outbound_webhook: [
-    { label: 'webhook/callback', re: /webhook|callbackURL|CallbackURL|NotifyURL|notifyUrl|callback_url/i },
+    {
+      label: 'webhook send + url',
+      re: /(Post|Send|Notify|Dispatch|Deliver|Trigger|Call|Fire|Emit)[A-Za-z]*\s*\([^)]*\b(webhookURL|webhookUrl|WebhookURL|callbackURL|callbackUrl|CallbackURL|NotifyURL|notifyUrl|callback_url|webhook_url)\b/,
+    },
   ],
 };
 
-// Resilience detection over the surrounding window.
+// Broker imports that must be present for queue_consumer hits to count.
+const BROKER_IMPORT_RE = /(streadway\/amqp|rabbitmq\/amqp091|amqp091|aws-sdk-go[^"]*\/sqs|aws\/aws-sdk[^"]*sqs|segmentio\/kafka-go|Shopify\/sarama|IBM\/sarama|nats-io\/nats|amqplib|bullmq|@nestjs\/microservices|"github\.com\/[^"]*kafka)/i;
+
+// Import path signalling a hexagonal outbound port dependency.
+const PORTS_OUT_IMPORT_RE = /["`][^"`]*(ports\/out|\/port|\/ports)\b[^"`]*["`]|\bport\.[A-Z]\w*Port\b/;
+
+// ---------------------------------------------------------------------------
+// Resilience detection.
+// ---------------------------------------------------------------------------
 const RESILIENCE = {
-  retry: /\bretry\b|retryCount|RetryCount|maxRetries|MaxRetries|WithRetry|backoff|Backoff|retryable|Retryable|\.Retry\(|attempts?\b/i,
+  retry: /\bretry\b|retryCount|RetryCount|maxRetries|MaxRetries|WithRetry|DoWithRetry|backoff|Backoff|retryable|Retryable|\.Retry\(|attempts?\b/i,
   dlq: /\bdlq\b|dead[-_ ]?letter|DeadLetter|parkingLot|x-dead-letter|deadLetterQueue/i,
   timeout: /context\.WithTimeout|context\.WithDeadline|WithTimeout|SetTimeout|\btimeout\b|Timeout:|deadline/i,
   rollback: /rollback|Rollback|compensat|Compensat|\bsaga\b|Saga|revert|Revert|undo\b|unwind/i,
   idempotency: /idempoten|Idempoten|idempotency[-_ ]?key|dedup|deduplicat|exactly[-_ ]?once/i,
 };
+
+function resilienceOver(text) {
+  const found = {};
+  for (const [k, re] of Object.entries(RESILIENCE)) found[k] = re.test(text);
+  return found;
+}
+
+// ±span-line window (used for TS/Node and as a Go fallback).
+function windowResilience(lines, idx, span) {
+  const from = Math.max(0, idx - span);
+  const to = Math.min(lines.length, idx + span + 1);
+  return resilienceOver(lines.slice(from, to).join('\n'));
+}
+
+// Enclosing top-level Go func/method body [start, end).
+function enclosingGoFunc(lines, idx) {
+  let start = idx;
+  for (; start >= 0; start--) if (/^func\b/.test(lines[start])) break;
+  if (start < 0) return null;
+  let end = lines.length;
+  for (let j = start + 1; j < lines.length; j++) {
+    if (/^\}/.test(lines[j])) { end = j + 1; break; }
+  }
+  return [start, end];
+}
+
+// Go resilience: prefer the enclosing function body (so retry/timeout wrappers
+// anywhere in the function count), fall back to the window if no func found.
+function goResilience(lines, idx, span) {
+  const range = enclosingGoFunc(lines, idx);
+  if (!range) return windowResilience(lines, idx, span);
+  return resilienceOver(lines.slice(range[0], range[1]).join('\n'));
+}
+
+function languageOf(file) {
+  return extname(file) === '.go' ? 'go' : 'ts_node';
+}
+
+// ---------------------------------------------------------------------------
+// glob helpers (support ** and *)
+// ---------------------------------------------------------------------------
+function toPosix(p) {
+  return p.split(sep).join('/');
+}
+function globToRe(glob) {
+  const re = glob
+    .replace(/[.+^${}()|[\]\\]/g, '\\$&')
+    .replace(/\*\*/g, '\u0000')
+    .replace(/\*/g, '[^/]*')
+    .replace(/\u0000/g, '.*');
+  return new RegExp('^' + re + '$');
+}
+function anyGlobMatch(globs, relPath) {
+  const p = toPosix(relPath);
+  return globs.some((g) => globToRe(g).test(p));
+}
+
+// Attribute a boundary to its consuming service via top-level dir.
+function serviceOf(relPath) {
+  const parts = toPosix(relPath).split('/');
+  const roots = new Set(['apps', 'components', 'cmd', 'services', 'plugins']);
+  if (parts.length > 1 && roots.has(parts[0])) return `${parts[0]}/${parts[1]}`;
+  return parts[0] || '.';
+}
+function topDirOf(relPath) {
+  return toPosix(relPath).split('/')[0] || '.';
+}
 
 // ---------------------------------------------------------------------------
 // Walk the tree
@@ -109,7 +235,10 @@ async function* walk(dir) {
   for (const e of entries) {
     const full = join(dir, e.name);
     if (e.isDirectory()) {
-      if (SKIP_DIRS.has(e.name) || e.name.startsWith('.')) continue;
+      // 'out' is a common build-output dir, but in hexagonal Go it is also the
+      // outbound-ports dir (ports/out). Never skip it under a 'ports' parent.
+      const isHexOut = e.name === 'out' && basename(dir) === 'ports';
+      if ((SKIP_DIRS.has(e.name) && !isHexOut) || e.name.startsWith('.')) continue;
       yield* walk(full);
     } else if (e.isFile()) {
       if (CODE_EXT.has(extname(e.name)) && !TEST_RE.test(e.name)) yield full;
@@ -117,25 +246,66 @@ async function* walk(dir) {
   }
 }
 
-function detectResilience(lines, idx, span) {
-  const from = Math.max(0, idx - span);
-  const to = Math.min(lines.length, idx + span + 1);
-  const window = lines.slice(from, to).join('\n');
-  const found = {};
-  for (const [k, re] of Object.entries(RESILIENCE)) found[k] = re.test(window);
-  return found;
+async function exists(p) {
+  try { await access(p); return true; } catch { return false; }
 }
 
-function languageOf(file) {
-  const ext = extname(file);
-  if (ext === '.go') return 'go';
-  return 'ts_node';
+// Find the repo/module root. Prefer the INNERMOST enclosing .git (the actual
+// project repo — avoids over-expanding into a parent workspace / monorepo-of-
+// repos that also happens to be a git repo). If there is no .git, fall back to
+// the OUTERMOST go.mod (module root). The upward walk stops at $HOME so a nested
+// target can never escape into unrelated parent directories.
+async function findRepoRoot(startDir) {
+  const home = homedir();
+  let dir = startDir;
+  let innermostGit = null;
+  const goModDirs = [];
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    if (!innermostGit && (await exists(join(dir, '.git')))) innermostGit = dir;
+    if (await exists(join(dir, 'go.mod'))) goModDirs.push(dir);
+    if (dir === home) break;
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  if (innermostGit) return innermostGit;
+  if (goModDirs.length) return goModDirs[goModDirs.length - 1];
+  return startDir;
+}
+
+// Parse Go interface method names out of a source file.
+function goInterfaceMethods(content) {
+  const methods = [];
+  const ifaceRe = /type\s+(\w+)\s+interface\s*\{/g;
+  let m;
+  while ((m = ifaceRe.exec(content))) {
+    const ifaceName = m[1];
+    // scan from the opening brace to its matching close
+    let depth = 1;
+    let i = ifaceRe.lastIndex;
+    let body = '';
+    while (i < content.length && depth > 0) {
+      const ch = content[i];
+      if (ch === '{') depth++;
+      else if (ch === '}') depth--;
+      if (depth > 0) body += ch;
+      i++;
+    }
+    for (const line of body.split(/\r?\n/)) {
+      const mm = line.match(/^\s*([A-Z]\w*)\s*\(/);
+      if (mm) methods.push({ iface: ifaceName, method: mm[1] });
+    }
+  }
+  return methods;
 }
 
 // ---------------------------------------------------------------------------
 // Main scan
 // ---------------------------------------------------------------------------
 async function main() {
+  const warnings = [];
+
   try {
     const s = await stat(targetDir);
     if (!s.isDirectory()) throw new Error('not a directory');
@@ -144,10 +314,60 @@ async function main() {
     process.exit(1);
   }
 
-  const points = [];
-  let filesScanned = 0;
+  // --- scope: expand to repo/module root -----------------------------------
+  const repoRoot = expandToRepoRoot ? await findRepoRoot(targetDir) : targetDir;
+  const scopeExpanded = expandToRepoRoot && repoRoot !== targetDir;
+  const scanRoot = repoRoot;
+  if (scopeExpanded) {
+    warnings.push({
+      level: 'info',
+      code: 'scope_expanded',
+      message:
+        `requested target "${toPosix(relative(repoRoot, targetDir)) || '.'}" is inside repo root; ` +
+        `scanning the full repo root so imported pkg/* adapters and ports/out boundaries are included. ` +
+        `Boundaries are attributed to each service via top-level dir. Pass --no-repo-root to scan only the subdir.`,
+    });
+  }
 
-  for await (const file of walk(targetDir)) {
+  // --- config --------------------------------------------------------------
+  const cfgFile = configPath
+    ? (isAbsolute(configPath) ? configPath : resolve(process.cwd(), configPath))
+    : join(scanRoot, '.ops-risk.json');
+  let config = { ...DEFAULT_CONFIG };
+  let configGenerated = false;
+  if (await exists(cfgFile)) {
+    try {
+      const loaded = JSON.parse(await readFile(cfgFile, 'utf8'));
+      config = { ...DEFAULT_CONFIG, ...loaded };
+    } catch (e) {
+      warnings.push({ level: 'warn', code: 'config_parse_error', message: `could not parse ${cfgFile}: ${e.message}; using defaults` });
+    }
+  } else if (genConfig) {
+    try {
+      await writeFile(cfgFile, JSON.stringify(DEFAULT_CONFIG, null, 2) + '\n', 'utf8');
+      configGenerated = true;
+      warnings.push({
+        level: 'info',
+        code: 'config_generated',
+        message: `no .ops-risk.json found; generated a default at ${toPosix(relative(scanRoot, cfgFile))}. ` +
+          `Edit shared_adapter_dirs / http_wrapper_packages / outbound_port_globs / exclude_handler_globs to tune this repo.`,
+      });
+    } catch {
+      /* non-fatal */
+    }
+  }
+
+  // ------------------------------------------------------------------------
+  // Pass 1: read all files, collect metadata (imports, ports, func decls).
+  // ------------------------------------------------------------------------
+  const files = []; // { rel, lang, lines, content, importsBroker, importsPortsOut, importsNetHttp, pkgName, isPort, isHandler }
+  const funcDecls = new Map(); // methodName -> [{ rel, line, entry }]
+  const portMethods = []; // { rel, iface, method }
+  const httpWrapperPkgs = new Set(config.http_wrapper_packages || []);
+  let filesScanned = 0;
+  const filesByTopDir = {};
+
+  for await (const file of walk(scanRoot)) {
     let content;
     try {
       content = await readFile(file, 'utf8');
@@ -155,27 +375,94 @@ async function main() {
       continue;
     }
     filesScanned++;
-    const lines = content.split(/\r?\n/);
-    const rel = relative(targetDir, file);
+    const rel = relative(scanRoot, file);
     const lang = languageOf(file);
+    const lines = content.split(/\r?\n/);
 
+    const td = topDirOf(rel);
+    filesByTopDir[td] = (filesByTopDir[td] || 0) + 1;
+
+    const importsBroker = BROKER_IMPORT_RE.test(content);
+    const importsPortsOut = PORTS_OUT_IMPORT_RE.test(content);
+    const importsNetHttp = /["`]net\/http["`]/.test(content);
+    const isPort = anyGlobMatch(config.outbound_port_globs || [], rel);
+    const isHandler = anyGlobMatch(config.exclude_handler_globs || [], rel);
+    const pkgMatch = lang === 'go' ? content.match(/^package\s+(\w+)/m) : null;
+    const pkgName = pkgMatch ? pkgMatch[1] : null;
+
+    const entry = { rel, lang, lines, content, importsBroker, importsPortsOut, importsNetHttp, pkgName, isPort, isHandler };
+    files.push(entry);
+
+    // Auto-detect local http wrapper packages: a package that imports net/http
+    // and lives under a shared adapter dir (or is named like a client wrapper).
+    if (lang === 'go' && importsNetHttp && pkgName && pkgName !== 'http' && pkgName !== 'main') {
+      const underShared = (config.shared_adapter_dirs || []).some((d) => {
+        const dp = toPosix(d);
+        return toPosix(rel).startsWith(dp + '/') || toPosix(rel).includes(`/${dp}/`);
+      });
+      if (underShared || /client|httpclient|gateway|rest/i.test(pkgName)) {
+        httpWrapperPkgs.add(pkgName);
+      }
+    }
+
+    // Collect Go func/method declarations (for port->adapter mapping).
+    if (lang === 'go') {
+      for (let i = 0; i < lines.length; i++) {
+        const fm = lines[i].match(/^func\s+(?:\([^)]*\)\s+)?([A-Z]\w*)\s*\(/);
+        if (fm) {
+          const name = fm[1];
+          if (!funcDecls.has(name)) funcDecls.set(name, []);
+          funcDecls.get(name).push({ rel, line: i + 1, entry });
+        }
+      }
+      if (isPort) {
+        for (const pm of goInterfaceMethods(content)) portMethods.push({ rel, ...pm });
+      }
+    }
+  }
+
+  // Build dynamic http_outbound patterns for detected wrapper packages.
+  const patterns = {};
+  for (const [cat, defs] of Object.entries(BASE_PATTERNS)) patterns[cat] = defs.slice();
+  for (const pkg of httpWrapperPkgs) {
+    if (!pkg || pkg === 'http') continue;
+    patterns.http_outbound.push({
+      label: `go http wrapper pkg (${pkg})`,
+      re: new RegExp(`\\b${pkg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\.[A-Z]?\\w*\\s*\\(`),
+    });
+  }
+
+  // ------------------------------------------------------------------------
+  // Pass 2: line-level pattern scan.
+  // ------------------------------------------------------------------------
+  const points = [];
+  for (const f of files) {
+    const { rel, lang, lines, importsBroker, isHandler } = f;
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      if (!line.trim() || line.trim().startsWith('//') || line.trim().startsWith('*')) continue;
-      for (const [category, defs] of Object.entries(PATTERNS)) {
+      const t = line.trim();
+      if (!t || t.startsWith('//') || t.startsWith('*')) continue;
+      for (const [category, defs] of Object.entries(patterns)) {
+        // queue_consumer only counts in files that also import a broker.
+        if (category === 'queue_consumer' && !importsBroker) continue;
+        // outbound_webhook excludes inbound handler files.
+        if (category === 'outbound_webhook' && isHandler) continue;
         for (const { label, re } of defs) {
           if (re.test(line)) {
-            const direction =
-              category === 'queue_consumer' ? 'inbound' : 'outbound';
+            const direction = category === 'queue_consumer' ? 'inbound' : 'outbound';
+            const resilience = lang === 'go'
+              ? goResilience(lines, i, contextLines)
+              : windowResilience(lines, i, contextLines);
             points.push({
               category,
               matcher: label,
               direction,
               language: lang,
+              service: serviceOf(rel),
               file: rel,
               line: i + 1,
-              snippet: line.trim().slice(0, 200),
-              resilience: detectResilience(lines, i, contextLines),
+              snippet: t.slice(0, 200),
+              resilience,
             });
             break; // one hit per line per category is enough
           }
@@ -184,7 +471,36 @@ async function main() {
     }
   }
 
+  // ------------------------------------------------------------------------
+  // Pass 3: port-aware detection (hexagonal). Each ports/out interface method
+  // is a boundary candidate; resilience is analysed over the concrete adapter
+  // FILE that implements it (catches SDK adapters like midazsdk.WithTimeout
+  // that never touch net/http on the call line).
+  // ------------------------------------------------------------------------
+  for (const pm of portMethods) {
+    const impls = (funcDecls.get(pm.method) || []).filter((d) => !d.entry.isPort);
+    for (const impl of impls) {
+      const e = impl.entry;
+      // whole adapter file: client ctor + retry wrapper may live elsewhere
+      const resilience = resilienceOver(e.content);
+      points.push({
+        category: 'outbound_port',
+        matcher: `port ${pm.iface}.${pm.method} -> adapter`,
+        direction: 'outbound',
+        language: 'go',
+        service: serviceOf(impl.rel),
+        file: impl.rel,
+        line: impl.line,
+        snippet: `${pm.iface}.${pm.method}() implemented here`.slice(0, 200),
+        resilience,
+        port: { interface: pm.iface, method: pm.method, declared_in: pm.rel },
+      });
+    }
+  }
+
+  // ------------------------------------------------------------------------
   // Deduplicate identical (file,line,category) entries.
+  // ------------------------------------------------------------------------
   const seen = new Set();
   const deduped = points.filter((p) => {
     const key = `${p.file}:${p.line}:${p.category}`;
@@ -196,25 +512,88 @@ async function main() {
   // Aggregate resilience gaps.
   const gaps = [];
   for (const p of deduped) {
-    const missing = Object.entries(p.resilience)
-      .filter(([, v]) => !v)
-      .map(([k]) => k);
-    if (missing.length) gaps.push({ file: p.file, line: p.line, category: p.category, missing });
+    const missing = Object.entries(p.resilience).filter(([, v]) => !v).map(([k]) => k);
+    if (missing.length) gaps.push({ file: p.file, line: p.line, category: p.category, service: p.service, missing });
   }
 
   const byCategory = {};
-  for (const p of deduped) byCategory[p.category] = (byCategory[p.category] || 0) + 1;
+  const byService = {};
+  for (const p of deduped) {
+    byCategory[p.category] = (byCategory[p.category] || 0) + 1;
+    byService[p.service] = (byService[p.service] || 0) + 1;
+  }
+
+  // ------------------------------------------------------------------------
+  // Warnings: never report a silent 0 where ports/out is imported.
+  // ------------------------------------------------------------------------
+  const servicesImportingPortsOut = new Set();
+  const portServiceFiles = {}; // service -> [files importing ports/out]
+  for (const f of files) {
+    if (f.importsPortsOut) {
+      const svc = serviceOf(f.rel);
+      servicesImportingPortsOut.add(svc);
+      (portServiceFiles[svc] ||= []).push(f.rel);
+    }
+  }
+  const anySharedAdapterBoundaries = deduped.some((p) =>
+    (config.shared_adapter_dirs || []).some((d) => {
+      const dp = toPosix(d);
+      return toPosix(p.file).startsWith(dp + '/') || toPosix(p.file).includes(`/${dp}/`);
+    }));
+  for (const svc of servicesImportingPortsOut) {
+    if (!byService[svc]) {
+      // If the whole scan found nothing, this is a real scope error (warn).
+      // If boundaries exist in shared adapter dirs (pkg/*), the service's
+      // adapters simply live there — informational, not an error.
+      const isScopeError = deduped.length === 0 || !anySharedAdapterBoundaries;
+      warnings.push({
+        level: isScopeError ? 'warn' : 'info',
+        code: 'zero_boundaries_in_port_service',
+        service: svc,
+        message: isScopeError
+          ? `0 fronteiras num serviço que importa ports/out — provável erro de escopo; ` +
+            `escaneie o repo root ou pkg/. Service "${svc}" imports outbound ports but no boundary was ` +
+            `attributed to it. Files importing ports/out: ${(portServiceFiles[svc] || []).slice(0, 5).join(', ')}` +
+            ((portServiceFiles[svc] || []).length > 5 ? ' …' : '')
+          : `Service "${svc}" imports outbound ports but its boundaries were attributed to shared adapter ` +
+            `dirs (e.g. pkg/*) rather than the service tree — expected for hexagonal layouts. Cross-check ` +
+            `outbound_port entries whose adapter lives under a shared dir when reviewing "${svc}".`,
+      });
+    }
+  }
+  if (deduped.length === 0 && servicesImportingPortsOut.size > 0) {
+    warnings.push({
+      level: 'warn',
+      code: 'zero_integration_points',
+      message:
+        '0 fronteiras num serviço que importa ports/out — provável erro de escopo; escaneie o repo root ou pkg/. ' +
+        'The scan found zero integration points but outbound ports are imported: this is almost certainly a scope error. ' +
+        'Run from the repo root (default) or include pkg/*.',
+    });
+  }
 
   const report = {
     schema: 'ring.ops-risk.integration-scan.v1',
     generated_at: new Date().toISOString(),
-    target: targetDir,
+    requested_target: targetDir,
+    scan_root: scanRoot,
+    config_file: (await exists(cfgFile)) ? cfgFile : null,
     note:
-      'Heuristic regex scan (not full AST). Each integration_point is a candidate to CONFIRM in the Step 2 dialogue. resilience flags mean the pattern was FOUND in a window around the match; a true value is a hint, not proof, and a false value is a prompt to verify, not a confirmed gap.',
+      'Heuristic regex scan (not full AST). Each integration_point is a candidate to CONFIRM in the Step 2 dialogue. ' +
+      'For Go, resilience flags are inferred over the ENCLOSING FUNCTION (line-matched points) or the whole ADAPTER FILE ' +
+      '(outbound_port points), so a DoWithRetry wrapper or a New*Client(timeout) defined elsewhere still counts. ' +
+      'A true flag is a hint, not proof; a false flag is a prompt to verify, not a confirmed gap. ' +
+      'In a hexagonal monorepo the scan runs from the repo root and attributes each boundary to its service via top-level dir.',
+    warnings,
     summary: {
       files_scanned: filesScanned,
       integration_points: deduped.length,
       by_category: byCategory,
+      by_service: byService,
+      files_by_top_dir: filesByTopDir,
+      services_importing_ports_out: [...servicesImportingPortsOut],
+      http_wrapper_packages_detected: [...httpWrapperPkgs],
+      config_generated: configGenerated,
     },
     integration_points: deduped,
     resilience_gaps: gaps,

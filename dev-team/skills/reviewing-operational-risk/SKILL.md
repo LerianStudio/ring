@@ -79,20 +79,62 @@ node /path/to/reviewing-operational-risk/scan-integration-points.mjs . --out ops
 # then paste/attach ops-risk-scan.json to the agent before the dialogue.
 ```
 
+> **Monorepo / hexagonal Go — do NOT scan only the service subdir.** In a
+> hexagonal layout the outbound boundaries live in the imported `pkg/*` (or
+> shared adapter) packages, **not** under `apps/<svc>`. Scanning only
+> `apps/<svc>` returns a **false 0**. The scanner defends against this: given a
+> subdir it walks up to the repo/module root, scans the whole tree, and
+> attributes each boundary to its service via top-level dir. **Always run from
+> the repo root (or let the scanner expand to it) so `pkg/*` adapters and
+> `ports/out` methods are included.** If you must scan a single subdir, pass
+> `--no-repo-root` and expect the map to miss shared adapters. Whenever
+> `integration_points == 0` for a service that imports `ports/out`, the scanner
+> emits an explicit `warnings[]` entry — treat it as a scope error, not a clean
+> bill of health.
+
+The scanner is **port-aware and adapter-aware**: each method of a `ports/out`
+interface is treated as a boundary candidate (`category: "outbound_port"`), and
+its resilience is inferred over the whole concrete **adapter file** — so an SDK
+adapter (e.g. `midazsdk.WithTimeout`, `DoWithRetry`) that never calls `net/http`
+directly is still detected. Resilience for Go line-matches is inferred over the
+**enclosing function**, not a fixed ±N-line window, so a retry/timeout wrapper
+elsewhere in the function still counts.
+
+**Optional per-repo config (`.ops-risk.json`)** at the repo root tunes
+detection: `shared_adapter_dirs`, `http_wrapper_packages`, `outbound_port_globs`,
+and `exclude_handler_globs`. The scanner **auto-generates a default on first run**
+if none exists (pass `--no-gen-config` to skip). Edit it to match the repo's
+layout before a serious review.
+
 The script emits `ring.ops-risk.integration-scan.v1` JSON:
 
 ```jsonc
 {
-  "summary": { "files_scanned": 210, "integration_points": 102, "by_category": {...} },
+  "scan_root": "/repo", "requested_target": "/repo/apps/svc",
+  "warnings": [ { "level": "warn", "code": "zero_boundaries_in_port_service",
+                 "service": "apps/svc", "message": "0 fronteiras num serviço que importa ports/out ..." } ],
+  "summary": {
+    "files_scanned": 210, "integration_points": 102,
+    "by_category": {...}, "by_service": {...}, "files_by_top_dir": {...},
+    "services_importing_ports_out": ["apps/svc"], "http_wrapper_packages_detected": ["httpclient"]
+  },
   "integration_points": [
     { "category": "http_outbound", "direction": "outbound", "language": "go",
-      "file": "internal/x.go", "line": 156, "snippet": "...",
+      "service": "apps/svc", "file": "internal/x.go", "line": 156, "snippet": "...",
       "resilience": { "retry": false, "dlq": false, "timeout": true,
-                      "rollback": false, "idempotency": false } }
+                      "rollback": false, "idempotency": false } },
+    { "category": "outbound_port", "direction": "outbound", "language": "go",
+      "service": "pkg", "file": "pkg/midazadapter/adapter.go", "line": 42,
+      "port": { "interface": "PaymentPort", "method": "Charge", "declared_in": "apps/svc/ports/out/gateway.go" },
+      "resilience": { "retry": true, "timeout": true, "dlq": false, "rollback": false, "idempotency": false } }
   ],
-  "resilience_gaps": [ { "file": "...", "line": 156, "category": "...", "missing": ["retry","dlq"] } ]
+  "resilience_gaps": [ { "file": "...", "line": 156, "category": "...", "service": "...", "missing": ["retry","dlq"] } ]
 }
 ```
+
+Always read `warnings[]` first: a `zero_integration_points` or
+`zero_boundaries_in_port_service` warning means the map is probably incomplete
+(scope error) and must not be treated as "no boundaries exist".
 
 The agent consumes this JSON as the starting boundary map. **Treat every hit as
 a candidate and every `false` resilience flag as a prompt to verify, not a
@@ -101,13 +143,15 @@ on what the service **expects to receive and how it reacts when it does not** �
 do NOT leave the repo to inspect dependencies.
 
 If the script cannot be run (no Node.js, restricted env), fall back to manual
-greps for the same boundaries:
+greps for the same boundaries — **run these from the repo root and include
+`pkg/`**, not just the service subdir:
 
 ```bash
-grep -rn "http.NewRequest\|http.Client\|resty\|req.Get\|req.Post\|Do(ctx" internal/ components/ 2>/dev/null
+grep -rn "http.NewRequest\|http.Client\|resty\|req.Get\|req.Post\|Do(ctx\|httpclient.\|DoWithRetry\|New.*Client(" internal/ components/ pkg/ 2>/dev/null
 grep -rn "axios\|fetch(\|got(\|undici" src/ 2>/dev/null      # TS
-grep -rn "Consume(\|Subscribe(\|HandleDelivery\|amqp\|rabbitmq\|sqs\|kafka" internal/ components/ src/ 2>/dev/null
-grep -rn "Publish(\|Produce(\|webhook\|NotifyURL\|callback" internal/ components/ src/ 2>/dev/null
+grep -rn "Consume(\|Subscribe(\|HandleDelivery\|amqp\|rabbitmq\|sqs\|kafka" internal/ components/ pkg/ src/ 2>/dev/null
+grep -rn "Publish(\|Produce(\|NotifyURL\|callbackURL\|webhookURL" internal/ components/ pkg/ src/ 2>/dev/null
+grep -rln "ports/out\|port.[A-Z].*Port" internal/ components/ apps/ 2>/dev/null   # find hexagonal outbound ports, then read their adapters in pkg/
 ```
 
 For **each** integration point, confirm the resilience posture (the script
@@ -231,6 +275,7 @@ Summarize: mode used, flows reviewed, scenario count per tier, the count of Tier
 - Skipping the Step 2 confirmation dialogue → you may be analysing the wrong flow model.
 - Trusting the scanner's `resilience` flags as ground truth → they are heuristic; a `true` is a hint and a `false` is a prompt to verify, never a final verdict.
 - Starting the analysis in Mode A without the `scan-integration-points.mjs` JSON when Node.js is available → run the mechanical phase first, then reason over its output.
+- **Scanning only `apps/<svc>` in a hexagonal monorepo and trusting a `0` result** → the boundaries live in imported `pkg/*` adapters; a subdir-only scan is a false 0. Run from the repo root (the scanner auto-expands) and never treat a `warnings[]` scope alert as "no boundaries exist".
 - Reporting only Tier 3 counts without the concrete "what should exist" → a gap without a spec is not actionable.
 
 ## Common Mistakes
