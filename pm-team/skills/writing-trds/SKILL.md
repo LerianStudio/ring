@@ -1,6 +1,6 @@
 ---
 name: ring:writing-trds
-description: "Writing a Technical Requirements Document that designs the technical architecture of the system or feature: components and boundaries, data flow, integration points, and failure modes — in technology-agnostic patterns, plus auth/pagination and BFF contracts for fullstack. Gate 3 of ring:planning-large-features (after ring:mapping-feature-relationships, before ring:designing-api-contracts) and Gate 2 of ring:planning-small-features (after ring:writing-prds, before ring:writing-plans). Use when the PRD passed validation. Skip when the PRD is unvalidated or the architecture is already documented."
+description: "Writing a Technical Requirements Document that designs the technical architecture of the system or feature: components and boundaries, data flow, integration points, failure modes, and the mandatory program structure (DDD/hexagonal source tree) — in technology-agnostic patterns (code structure excepted), plus auth/pagination and BFF contracts for fullstack. Gate 3 of ring:planning-large-features (after ring:mapping-feature-relationships, before ring:designing-api-contracts) and Gate 2 of ring:planning-small-features (after ring:writing-prds, before ring:writing-plans). Use when the PRD passed validation. Skip when the PRD is unvalidated or the architecture is already documented."
 ---
 
 # TRD Creation — Architecture Before Implementation
@@ -79,9 +79,66 @@ TRD header must include: `feature`, `gate: 3` (Large) / `gate: 2` (Small), `depl
 | Phase | Activities |
 |-------|------------|
 | **1. Analysis** | PRD (required); Feature Map (Large Track); identify NFRs (performance, security, scalability); map domains to components |
-| **2. Architecture Definition** | Choose style (Microservices, Modular Monolith, Serverless); design components with explicit boundaries; define interfaces; model data flow end-to-end; plan integration points and patterns; design security |
+| **2. Architecture Definition** | Choose style (Microservices, Modular Monolith, Serverless); design components with explicit boundaries; define interfaces; model data flow end-to-end; plan integration points and patterns; design security; produce **Program Design** — bounded contexts (vertical slices) + source tree (see section below) |
 | **3. Failure Modes** | For each component and integration point: what fails, how it is detected, how the system degrades or recovers (timeout/retry/circuit-break/fallback); consistency under partial failure |
 | **4. Gate Validation** | All domains mapped; component boundaries clear; interfaces technology-agnostic; data ownership explicit; failure modes covered; quality attributes achievable; no specific products named |
+
+## Program Design (Code Structure — MANDATORY)
+
+Every TRD MUST include a `## Program Design` section with **two mandatory parts**: (1) the **bounded contexts / vertical slices** the feature creates or touches, and (2) the **source tree** for each. This anchors implementation to Lerian's mandatory modeling — **Modular Monolith + DDD + Hexagonal (ports & adapters) + CQRS-light** — as shipped in the canonical `go-boilerplate-ddd`. It is the one place a TRD is concrete about *code structure*; it stays silent on *product* choices (see exception note under Technology Abstraction Rules).
+
+### Part 1 — Bounded Contexts (Vertical Slices) [MANDATORY]
+
+In the Lerian model a **vertical slice = bounded context = one `internal/{context}/` module** that owns its full stack top to bottom (adapters → ports → services → domain). Identifying them is the highest-leverage modeling decision and the most expensive to get wrong, so the TRD MUST make it explicit before any code is written.
+
+Enumerate every context the feature creates or touches:
+
+| Context | New / Existing | Responsibility (ubiquitous language) | Owns (entities / tables) | Talks to (via port) |
+|---------|----------------|--------------------------------------|--------------------------|---------------------|
+| `{context}` | New | one-line bounded responsibility | entities + tables it owns | other contexts / external capabilities |
+
+**Slicing rules:**
+- **Fewest contexts that hold.** Extend an existing context by default; create a new one ONLY when the feature introduces a genuinely distinct ubiquitous language / ownership boundary. No speculative contexts.
+- **One context owns its data.** Cross-context access goes through `ports/`, never by reaching into another context's tables.
+- **Large Track:** contexts MUST be consistent with `feature-map.md` `## Phases` — a phase may deliver one or more contexts; a context never straddles unrelated phases. **Small Track:** this table is the first place contexts are defined.
+
+### Part 2 — Source Tree [MANDATORY]
+
+**When `tech_stack.primary` is Go:** render EACH context from Part 1 using the canonical slice layout. Replace `{context}` with the real bounded-context name (never ship `example` — that is the boilerplate's teaching scaffold).
+
+```text
+internal/{context}/
+├── adapters/
+│   ├── http/          # driving adapter — thin Huma/HTTP handlers (parse, validate, call service)
+│   ├── m2m/           # driving adapter — machine-to-machine (only if service-to-service auth)
+│   └── postgres/      # driven adapter — persistence via lib-commons (libPostgres); no raw sql.Open
+├── domain/
+│   └── entities/      # entities + value objects; pure domain, imports no infrastructure
+├── ports/             # interfaces only — driving (service contracts) + driven (repos / gateways)
+├── services/
+│   ├── command/       # CQRS write side — use cases that mutate state
+│   └── query/         # CQRS read side — use cases that read state
+├── streaming/         # event producers / consumers (Event-Driven profile only)
+└── mocks/             # generated mocks for the ports
+```
+
+Shared/platform code lives OUTSIDE the slice — reference only what the feature touches:
+
+| Path | Role — and the slice's constraint |
+|------|-----------------------------------|
+| `cmd/app/main.go` | process entry point — slice does not touch it |
+| `internal/bootstrap/` | composition root (config, telemetry, DB, auth, route wiring, lifecycle) — register routes/wiring here; a slice NEVER bootstraps its own logger/DB/telemetry |
+| `internal/shared/` | service-specific shared code — reuse, but never duplicate `lib-commons`/`lib-observability`/`lib-systemplane`/`lib-streaming` features |
+| `migrations/` | SQL migrations (golang-migrate) — add the feature's migration here |
+| `docs/openapi.yaml` | committed OAS 3.1 spec (generated) — regenerate after any API-surface change |
+
+**Modeling rules to state alongside the tree:**
+- Dependencies point inward: `adapters → ports ← services → domain`. `domain` imports no infrastructure.
+- Interfaces in `ports/`, implementations in `adapters/`.
+- Keep handlers thin; infrastructure concerns stay in `bootstrap`, never in the slice.
+- `tenantId` derives from validated request identity — never from JSON payload or path params.
+
+**When `tech_stack.primary` is not Go:** mirror the project's equivalent canonical layout (or the existing module structure detected in the repo) and state the same context boundaries, dependency direction, and ports/adapters split. Do not invent a structure the codebase does not already use.
 
 ## Technology Abstraction Rules
 
@@ -95,6 +152,8 @@ TRD header must include: `feature`, `gate: 3` (Large) / `gate: 2` (Small), `depl
 | Auth | "JWT-based Authentication" | "specific library" |
 
 TRD never includes: product names with versions, package manager commands, cloud service names (RDS, Lambda), framework-specific terms, container/orchestration specifics, CI/CD tool names.
+
+**Exception — Program Design:** the `## Program Design` section IS concrete about code structure (layer and adapter folder names that mirror the mandatory boilerplate). Those names describe *modeling slots*, not product couplings — `adapters/postgres/` is the persistence-adapter slot, not a PostgreSQL-version dependency. The abstraction rules above govern *product/capability* choices (DB engine, broker, cache); they never apply to the code-modeling tree.
 
 ## Authentication/Authorization Architecture (If Required)
 
@@ -176,11 +235,12 @@ Document in TRD: `API Patterns → Pagination → Strategy + Rationale`
 | Category | Requirements |
 |----------|--------------|
 | **Architecture Completeness** | All PRD features mapped; DDD boundaries; clear responsibilities; stable interfaces |
+| **Program Design** | Bounded contexts (vertical slices) enumerated (new vs existing); source tree present per context, mirroring DDD+Hexagonal+CQRS boilerplate; `{context}` named (never `example`); dependency direction stated; ports/adapters split correct; Large Track consistent with feature-map Phases |
 | **Data Design** | Ownership explicit; models support PRD; consistency strategy; flows documented end-to-end |
 | **Failure Modes** | Each component and integration point has failure behavior defined: detection, degradation, recovery |
 | **Quality Attributes** | Performance targets set; security addressed; scalability path clear |
 | **Integration Readiness** | External deps identified (by capability); patterns selected; errors considered |
-| **Technology Agnostic** | Zero product names; capabilities abstract; can swap tech without redesign |
+| **Technology Agnostic** | Zero product names (Program Design code-structure names excepted); capabilities abstract; can swap tech without redesign |
 | **Design System** (UI) | Library specified; CSS framework; theme variables; component matrix; variant mapping |
 
 **Gate Result:** ✅ PASS → API Design / Gate 4 (Large) or plan / Gate 3 (Small) | ⚠️ CONDITIONAL (remove product names) | ❌ FAIL (too coupled or failure modes missing)
