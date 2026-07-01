@@ -364,6 +364,13 @@ async function main() {
   const funcDecls = new Map(); // methodName -> [{ rel, line, entry }]
   const portMethods = []; // { rel, iface, method }
   const httpWrapperPkgs = new Set(config.http_wrapper_packages || []);
+  // pkg name -> resilience contributed by the client CONSTRUCTION site
+  // (e.g. `func New*Client(timeout ...) *http.Client { ... }`). Merged into
+  // every call-site whose wrapper pkg is detected, eliminating false-negative
+  // `timeout` flags when the deadline is configured once at construction.
+  const wrapperResilienceByPkg = {};
+  // TS wrapper resilience: file -> {timeout, retry}. Applied to points in that file.
+  const tsWrapperResilienceByFile = {};
   let filesScanned = 0;
   const filesByTopDir = {};
 
@@ -405,6 +412,49 @@ async function main() {
       }
     }
 
+    // Auto-detect Go client-constructor sites and harvest resilience from the
+    // construction body. Any `func New*Client(... timeout ...) *http.Client`
+    // (or returning an interface-like *Client) counts. Timeout/retry configured
+    // once here is inherited by every call site through the wrapper pkg.
+    if (lang === 'go' && pkgName && pkgName !== 'http' && pkgName !== 'main') {
+      const ctorRe = /func\s+(?:\([^)]*\)\s+)?(New\w*Client)\s*\(([^)]*)\)\s*(?:\*[\w.]+|[\w.]+)?\s*\{/g;
+      let cm;
+      while ((cm = ctorRe.exec(content))) {
+        const params = cm[2] || '';
+        const decl = cm[0];
+        // Only care about wrappers that either mention http.Client in return
+        // or accept a timeout-shaped parameter; either signals the wrapper.
+        const returnsHttpClient = /\*http\.Client\b/.test(decl) || /http\.Client\b/.test(decl);
+        const timeoutInParams = /\btimeout\b/i.test(params) || /time\.Duration\b/.test(params);
+        if (!returnsHttpClient && !timeoutInParams) continue;
+        httpWrapperPkgs.add(pkgName);
+        // resilience from the constructor body
+        const startLine = content.slice(0, cm.index).split(/\r?\n/).length - 1;
+        const range = enclosingGoFunc(lines, startLine);
+        const body = range ? lines.slice(range[0], range[1]).join('\n') : decl;
+        const res = resilienceOver(params + '\n' + body);
+        const prev = wrapperResilienceByPkg[pkgName] || {};
+        wrapperResilienceByPkg[pkgName] = {
+          timeout: !!(prev.timeout || res.timeout || timeoutInParams),
+          retry: !!(prev.retry || res.retry),
+        };
+      }
+    }
+
+    // TS equivalent: `axios.create({ timeout: ... })` / fetch-wrapper factories
+    // inside a `create*Client` / `new*Client` / `make*Client` function. Any point
+    // in the same file inherits that construction-site resilience.
+    if (lang === 'ts_node') {
+      const tsCtorRe = /(?:function|const|export\s+(?:const|function))\s+(new\w*Client|create\w*Client|make\w*Client|build\w*Client)\b/i;
+      if (tsCtorRe.test(content)) {
+        const res = resilienceOver(content);
+        const looksHttp = /axios\.create\s*\(|got\.extend\s*\(|new\s+Agent\s*\(|\bfetch\b|\bundici\b/i.test(content);
+        if (looksHttp && (res.timeout || res.retry)) {
+          tsWrapperResilienceByFile[rel] = { timeout: !!res.timeout, retry: !!res.retry };
+        }
+      }
+    }
+
     // Collect Go func/method declarations (for port->adapter mapping).
     if (lang === 'go') {
       for (let i = 0; i < lines.length; i++) {
@@ -438,6 +488,52 @@ async function main() {
   const points = [];
   for (const f of files) {
     const { rel, lang, lines, importsBroker, isHandler } = f;
+    // Entry-point handler signatures. Instead of silently dropping files under
+    // exclude_handler_globs, we surface each handler function/route as an
+    // integration_point with entry_point:true so the flow's entry is
+    // discoverable in the JSON map without manual grep.
+    if (isHandler) {
+      const ENTRY_PATTERNS_GO = [
+        { label: 'go net/http handler', re: /func\s+(?:\([^)]*\)\s+)?(\w+)\s*\([^)]*http\.ResponseWriter[^)]*\*http\.Request[^)]*\)/ },
+        { label: 'go fiber handler', re: /func\s+(?:\([^)]*\)\s+)?(\w+)\s*\(\s*\w+\s+\*fiber\.Ctx\s*\)/ },
+        { label: 'go gin handler', re: /func\s+(?:\([^)]*\)\s+)?(\w+)\s*\(\s*\w+\s+\*gin\.Context\s*\)/ },
+        { label: 'go echo handler', re: /func\s+(?:\([^)]*\)\s+)?(\w+)\s*\(\s*\w+\s+echo\.Context\s*\)/ },
+        { label: 'go chi/mux route', re: /\b(router|r|mux|app|api)\.(Get|Post|Put|Delete|Patch|Handle|HandleFunc|Method|Route)\s*\(/ },
+      ];
+      const ENTRY_PATTERNS_TS = [
+        { label: 'ts express route', re: /\b(app|router|api)\.(get|post|put|delete|patch|all|use)\s*\(/ },
+        { label: 'ts nest controller', re: /@(Get|Post|Put|Delete|Patch|All|Head|Options)\s*\(/ },
+        { label: 'ts fastify route', re: /\b(fastify|app|server)\.(get|post|put|delete|patch|route)\s*\(/ },
+        { label: 'ts handler arrow', re: /\((?:req|request)\b[^,)]*,\s*(?:res|response)\b[^)]*\)\s*(?::\s*[\w<>[\]]+\s*)?=>/ },
+      ];
+      const entryPats = lang === 'go' ? ENTRY_PATTERNS_GO : ENTRY_PATTERNS_TS;
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const t = line.trim();
+        if (!t || t.startsWith('//') || t.startsWith('*')) continue;
+        for (const { label, re } of entryPats) {
+          if (re.test(line)) {
+            const resilience = lang === 'go'
+              ? goResilience(lines, i, contextLines)
+              : windowResilience(lines, i, contextLines);
+            points.push({
+              category: 'entry_point',
+              matcher: label,
+              direction: 'inbound',
+              language: lang,
+              service: serviceOf(rel),
+              file: rel,
+              line: i + 1,
+              snippet: t.slice(0, 200),
+              resilience,
+              entry_point: true,
+            });
+            break;
+          }
+        }
+      }
+    }
+
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const t = line.trim();
@@ -445,7 +541,8 @@ async function main() {
       for (const [category, defs] of Object.entries(patterns)) {
         // queue_consumer only counts in files that also import a broker.
         if (category === 'queue_consumer' && !importsBroker) continue;
-        // outbound_webhook excludes inbound handler files.
+        // outbound_webhook excludes inbound handler files (they're inbound
+        // entry points, surfaced separately with entry_point:true above).
         if (category === 'outbound_webhook' && isHandler) continue;
         for (const { label, re } of defs) {
           if (re.test(line)) {
@@ -453,7 +550,35 @@ async function main() {
             const resilience = lang === 'go'
               ? goResilience(lines, i, contextLines)
               : windowResilience(lines, i, contextLines);
-            points.push({
+            // Merge in wrapper-construction-site resilience so a timeout/retry
+            // configured once in `New*Client(...)` counts for every call site.
+            let wrapperInherited = null;
+            if (category === 'http_outbound') {
+              // Prefer the dynamic per-pkg label; else detect wrapper pkg by
+              // scanning the line for `<pkg>.` since the generic wrapper regex
+              // may have already matched first.
+              const pkgMatch = label.match(/^go http wrapper pkg \((\w+)\)$/);
+              let wrapperPkg = pkgMatch ? pkgMatch[1] : null;
+              if (!wrapperPkg && lang === 'go') {
+                for (const pkg of httpWrapperPkgs) {
+                  if (!pkg || pkg === 'http') continue;
+                  if (new RegExp(`\\b${pkg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\.`).test(line)) {
+                    wrapperPkg = pkg;
+                    break;
+                  }
+                }
+              }
+              if (wrapperPkg && wrapperResilienceByPkg[wrapperPkg]) {
+                wrapperInherited = wrapperResilienceByPkg[wrapperPkg];
+              } else if (lang === 'ts_node' && tsWrapperResilienceByFile[rel]) {
+                wrapperInherited = tsWrapperResilienceByFile[rel];
+              }
+              if (wrapperInherited) {
+                resilience.timeout = resilience.timeout || !!wrapperInherited.timeout;
+                resilience.retry = resilience.retry || !!wrapperInherited.retry;
+              }
+            }
+            const point = {
               category,
               matcher: label,
               direction,
@@ -463,7 +588,9 @@ async function main() {
               line: i + 1,
               snippet: t.slice(0, 200),
               resilience,
-            });
+            };
+            if (wrapperInherited) point.resilience_source = 'wrapper_construction+call_site';
+            points.push(point);
             break; // one hit per line per category is enough
           }
         }
