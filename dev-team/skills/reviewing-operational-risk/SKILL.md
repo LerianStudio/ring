@@ -33,6 +33,30 @@ The output is always written **for the developer running the skill** (tech lead 
 
 ---
 
+## How this skill runs: a hybrid (mechanical + judgement) flow
+
+The review is split into two phases so the deterministic work is not left to the LLM:
+
+**Phase 1 — mechanical (`scan-integration-points.mjs`, run by the dev):**
+A zero-dependency Node.js script traverses the target repo and finds integration
+boundaries (external HTTP calls, queue consumers, event publishers, outbound
+webhooks). For each point it heuristically records whether retry, DLQ, timeout,
+rollback/compensation, and idempotency patterns appear nearby. It emits a
+structured JSON report. It is generic: it runs on any Go or TypeScript/Node.js
+Lerian repo. This phase is repeatable and produces the same map every time.
+
+**Phase 2 — judgement (this agent, from here on):**
+The agent takes the JSON as structured context, runs the confirmation dialogue,
+simulates stuck states, classifies Tier 1/2/3, and writes runbooks (T2) and gap
+specs (T3). This is the analysis that needs a human-in-the-loop and cannot be
+reduced to regex.
+
+> **The developer runs the `.mjs` first and pastes/attaches its JSON output to
+> the agent before the dialogue begins.** In Mode A the agent uses that JSON as
+> the boundary map instead of re-deriving it by hand. See **Step 1 (Mode A)**.
+
+---
+
 ## Step 0: Determine entry mode
 
 Ask the developer (or infer from context):
@@ -44,23 +68,50 @@ If a `plan.md` (ring:writing-plans format) with an active cycle is present and t
 
 ---
 
-## Step 1 (Mode A): Map integration boundaries
+## Step 1 (Mode A): Map integration boundaries — run the scanner first
 
-Scan the repo for the points where the service **talks to the outside world**. The focus is on what the service **expects to receive and how it reacts when it does not** — do NOT leave the repo to inspect dependencies.
+The boundary map is produced **mechanically** by the script, not by hand. The
+developer runs it against the target repo and gives the JSON to the agent:
 
 ```bash
-# Outbound HTTP calls (clients this service makes)
+# From the target repo root (any Go or TS/Node.js Lerian service):
+node /path/to/reviewing-operational-risk/scan-integration-points.mjs . --out ops-risk-scan.json
+# then paste/attach ops-risk-scan.json to the agent before the dialogue.
+```
+
+The script emits `ring.ops-risk.integration-scan.v1` JSON:
+
+```jsonc
+{
+  "summary": { "files_scanned": 210, "integration_points": 102, "by_category": {...} },
+  "integration_points": [
+    { "category": "http_outbound", "direction": "outbound", "language": "go",
+      "file": "internal/x.go", "line": 156, "snippet": "...",
+      "resilience": { "retry": false, "dlq": false, "timeout": true,
+                      "rollback": false, "idempotency": false } }
+  ],
+  "resilience_gaps": [ { "file": "...", "line": 156, "category": "...", "missing": ["retry","dlq"] } ]
+}
+```
+
+The agent consumes this JSON as the starting boundary map. **Treat every hit as
+a candidate and every `false` resilience flag as a prompt to verify, not a
+confirmed gap** — the regex scan is deterministic but heuristic. The focus stays
+on what the service **expects to receive and how it reacts when it does not** —
+do NOT leave the repo to inspect dependencies.
+
+If the script cannot be run (no Node.js, restricted env), fall back to manual
+greps for the same boundaries:
+
+```bash
 grep -rn "http.NewRequest\|http.Client\|resty\|req.Get\|req.Post\|Do(ctx" internal/ components/ 2>/dev/null
 grep -rn "axios\|fetch(\|got(\|undici" src/ 2>/dev/null      # TS
-
-# Queue consumers (things this service waits to receive)
 grep -rn "Consume(\|Subscribe(\|HandleDelivery\|amqp\|rabbitmq\|sqs\|kafka" internal/ components/ src/ 2>/dev/null
-
-# Outbound webhooks / event publishes
 grep -rn "Publish(\|Produce(\|webhook\|NotifyURL\|callback" internal/ components/ src/ 2>/dev/null
 ```
 
-For **each** integration point, record the resilience posture:
+For **each** integration point, confirm the resilience posture (the script
+pre-fills these flags; verify them against the code):
 
 | Attribute | What to check |
 |-----------|---------------|
@@ -88,7 +139,10 @@ Produce, per flow: `{flow_name, entry_point, entities[], state_transitions[], te
 
 ## Step 2: Confirmation dialogue with the developer
 
-Before analysing failures, confirm the model out loud and get agreement:
+Before analysing failures, confirm the model out loud and get agreement. In
+Mode A, drive this dialogue **from the scanner JSON** — walk the developer
+through the `integration_points` and the `resilience_gaps` the script surfaced,
+and let them correct false positives/negatives before you classify anything:
 
 ```
 For flow "<flow_name>":
@@ -175,6 +229,8 @@ Summarize: mode used, flows reviewed, scenario count per tier, the count of Tier
 - Classifying a scenario Tier 2 when the "trigger" only works after a manual DB edit → it is **Tier 3**.
 - Leaving the repo in Mode A to audit a dependency's internals → out of scope; review only how THIS service reacts.
 - Skipping the Step 2 confirmation dialogue → you may be analysing the wrong flow model.
+- Trusting the scanner's `resilience` flags as ground truth → they are heuristic; a `true` is a hint and a `false` is a prompt to verify, never a final verdict.
+- Starting the analysis in Mode A without the `scan-integration-points.mjs` JSON when Node.js is available → run the mechanical phase first, then reason over its output.
 - Reporting only Tier 3 counts without the concrete "what should exist" → a gap without a spec is not actionable.
 
 ## Common Mistakes
