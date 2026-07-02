@@ -356,6 +356,10 @@ function Copy-MirrorDirectory {
         # robocopy /MIR mirrors source to destination (replaces rsync -a --delete)
         # Exit codes 0-7 are success for robocopy
         $null = robocopy $Source $Destination /MIR /NJH /NJS /NP /NFL /NDL 2>&1
+        if ($LASTEXITCODE -gt 7) {
+            Write-Err "robocopy failed with exit code ${LASTEXITCODE}: $Source -> $Destination"
+            $script:Errors++
+        }
     }
 }
 
@@ -541,10 +545,20 @@ function Install-PerFileHooks {
 
         if ($existing.hooks.PSObject.Properties[$eventName]) {
             $existingEntries = @($existing.hooks.$eventName)
-            # Deduplicate by comparing serialized JSON of each entry
-            $existingSerialized = $existingEntries | ForEach-Object { ($_ | ConvertTo-Json -Depth 10 -Compress) }
+            # Deduplicate by comparing only matcher + hooks fields (matches bash unique_by)
+            $existingSerialized = $existingEntries | ForEach-Object {
+                $dedupeKey = [PSCustomObject]@{
+                    matcher = $_.matcher
+                    hooks = $_.hooks
+                }
+                $dedupeKey | ConvertTo-Json -Depth 10 -Compress
+            }
             foreach ($entry in $newEntries) {
-                $entrySerialized = $entry | ConvertTo-Json -Depth 10 -Compress
+                $dedupeKey = [PSCustomObject]@{
+                    matcher = $entry.matcher
+                    hooks = $entry.hooks
+                }
+                $entrySerialized = $dedupeKey | ConvertTo-Json -Depth 10 -Compress
                 if ($existingSerialized -notcontains $entrySerialized) {
                     $existingEntries += $entry
                 }
@@ -570,7 +584,7 @@ function Prune-PerFileStale {
             $linkTarget = $item.Target
             if ($linkTarget -is [array]) { $linkTarget = $linkTarget[0] }
             # Only prune symlinks that point into our Ring directory
-            $ringDirNormalized = $script:RingDir -replace '\\', '/'
+            $ringDirNormalized = ($script:RingDir -replace '\\', '/').TrimEnd('/') + '/'
             $linkTargetNormalized = $linkTarget -replace '\\', '/'
             if (-not $linkTargetNormalized.StartsWith($ringDirNormalized)) { continue }
             # Check if the target still exists (dangling symlink)
@@ -757,6 +771,11 @@ function Build-OpencodeSkillCommands {
         }
         New-DirectoryIfNeeded $dstDir
         & python $script:PyHelper --emit-opencode-skill-shim --source $srcMd --dest $dstMd
+        if ($LASTEXITCODE -ne 0) {
+            Write-Err "python transform failed with exit code $LASTEXITCODE"
+            $script:Errors++
+            continue
+        }
         Write-VerboseLog "opencode skill-cmd: $Team/$($skillDir.Name)"
     }
 }
@@ -811,6 +830,11 @@ function Build-CodexSkill {
 
     $dstSkillMd = Join-Path $dstDir "SKILL.md"
     & python $script:PyHelper --source $srcSkillMd --dest $dstSkillMd --team $Team --skill-name $name --lookup $script:LookupJson
+    if ($LASTEXITCODE -ne 0) {
+        Write-Err "python transform failed with exit code $LASTEXITCODE"
+        $script:Errors++
+        return
+    }
 
     Invoke-RewriteAccessoryPaths -Dir $dstDir -Team $Team
     Write-VerboseLog "codex skill: $Team/$name -> ring-${Team}-${name}"
@@ -853,6 +877,11 @@ function Invoke-RewriteAccessoryPaths {
         Where-Object { $_.Name -ne "SKILL.md" }
     foreach ($f in $mdFiles) {
         & python $script:PyHelper --rewrite-paths --source $f.FullName --dest $f.FullName --team $Team --lookup $script:LookupJson
+        if ($LASTEXITCODE -ne 0) {
+            Write-Err "python transform failed with exit code $LASTEXITCODE"
+            $script:Errors++
+            continue
+        }
     }
 }
 
@@ -911,6 +940,10 @@ function Invoke-Build {
     }
     else {
         & python $script:PyHelper --build-lookup $script:RingDir --lookup-out $script:LookupJson
+        if ($LASTEXITCODE -ne 0) {
+            Write-Err "python transform failed with exit code $LASTEXITCODE"
+            exit 5
+        }
         Write-VerboseLog "lookup written: $($script:LookupJson)"
     }
 
@@ -1010,7 +1043,7 @@ function Remove-PerFileSymlinks {
         foreach ($item in Get-ChildItem -Path $subDir -Force -ErrorAction SilentlyContinue) {
             if ($item.LinkType -ne "SymbolicLink") { continue }
             $target = if ($item.Target -is [array]) { $item.Target[0] } else { $item.Target }
-            $ringDirNormalized = $script:RingDir -replace '\\', '/'
+            $ringDirNormalized = ($script:RingDir -replace '\\', '/').TrimEnd('/') + '/'
             $targetNormalized = $target -replace '\\', '/'
             if ($targetNormalized.StartsWith($ringDirNormalized)) {
                 Remove-SafeItem $item.FullName
@@ -1074,8 +1107,8 @@ function Remove-TopLevelSymlink {
 
     $linkTarget = if ($item.Target -is [array]) { $item.Target[0] } else { $item.Target }
     $linkTargetNormalized = $linkTarget -replace '\\', '/'
-    $buildDirNormalized = $script:BuildDir -replace '\\', '/'
-    $ringDirNormalized = $script:RingDir -replace '\\', '/'
+    $buildDirNormalized = ($script:BuildDir -replace '\\', '/').TrimEnd('/') + '/'
+    $ringDirNormalized = ($script:RingDir -replace '\\', '/').TrimEnd('/') + '/'
 
     if ($linkTargetNormalized.StartsWith($buildDirNormalized) -or $linkTargetNormalized.StartsWith($ringDirNormalized)) {
         Remove-SafeItem $item.FullName
@@ -1129,7 +1162,7 @@ function Test-PerFileInstall {
         foreach ($item in Get-ChildItem -Path $subDir -Force -ErrorAction SilentlyContinue) {
             if ($item.LinkType -ne "SymbolicLink") { continue }
             $target = if ($item.Target -is [array]) { $item.Target[0] } else { $item.Target }
-            $ringDirNormalized = $script:RingDir -replace '\\', '/'
+            $ringDirNormalized = ($script:RingDir -replace '\\', '/').TrimEnd('/') + '/'
             $targetNormalized = $target -replace '\\', '/'
             if (-not $targetNormalized.StartsWith($ringDirNormalized)) { continue }
 
@@ -1396,13 +1429,10 @@ if ($Help) {
     exit 0
 }
 
-# 4. Check symlink capability
-Test-SymlinkCapability
-
-# 5. Resolve Ring dir
+# 4. Resolve Ring dir (symlink capability checked later, only for install/all)
 Resolve-RingDir
 
-# 6. Set target selection from flags
+# 5. Set target selection from flags
 if ($All) {
     $script:InstallClaude = $true
     $script:InstallFactory = $true
@@ -1423,7 +1453,7 @@ if ($Subcommand -in @("install", "remove", "all")) {
     }
 }
 
-# 7. Print plan
+# 6. Print plan
 Write-Info "Ring repo:   $($script:RingDir)"
 Write-Info "Subcommand:  $Subcommand"
 if (Test-AnyTargetSelected) {
@@ -1433,14 +1463,20 @@ if ($script:DryRunMode) { Write-Warn "DRY-RUN mode -- no changes will be made" }
 if ($script:VerboseMode) { Write-Info "Verbose logging enabled" }
 if ($script:ForceMode) { Write-Info "Force mode -- non-symlink collisions will be backed up" }
 
-# 8. Switch on subcommand
+# 7. Switch on subcommand
 switch ($Subcommand) {
     "install" {
         Confirm-Interactive
+        if (-not $script:DryRunMode) {
+            Test-SymlinkCapability
+        }
         if ($script:InstallClaude)   { Install-PerFile $script:ClaudeDir   "Claude Code" }
         if ($script:InstallFactory)  { Install-PerFile $script:FactoryDir  "Factory AI" }
-        # Auto-build if opencode/codex selected but build outputs are missing
-        if ((Test-NeedsBuild) -and -not (Test-Path $script:OpencodeOut) -and -not (Test-Path $script:CodexOut)) {
+        # Auto-build if selected targets are missing their build outputs
+        $needsAutoBuild = $false
+        if ($script:InstallOpencode -and -not (Test-Path $script:OpencodeOut)) { $needsAutoBuild = $true }
+        if ($script:InstallCodex -and -not (Test-Path $script:CodexOut)) { $needsAutoBuild = $true }
+        if ($needsAutoBuild) {
             Write-Info "Build outputs missing -- running build first..."
             Invoke-Build
         }
@@ -1463,6 +1499,9 @@ switch ($Subcommand) {
     }
     "all" {
         Confirm-Interactive
+        if (-not $script:DryRunMode) {
+            Test-SymlinkCapability
+        }
         Invoke-CleanBuild
         Invoke-Build
         if ($script:InstallClaude)   { Install-PerFile $script:ClaudeDir   "Claude Code" }
