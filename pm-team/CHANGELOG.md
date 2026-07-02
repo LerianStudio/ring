@@ -5,7 +5,14 @@
 - **Features**
   - Replace single multiplier with layered calculation model for delivery planning (#385)
 
-Contributors: @fred, @gandalf
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.1...ring-pm-team@0.26.0)
+
+---
+
+## [0.26.0](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.26.0)
+
+- **Features**
+  - Replace single multiplier with layered calculation model in delivery planning (#385)
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.1...ring-pm-team@0.26.0)
 
@@ -16,7 +23,14 @@ Contributors: @fred, @gandalf
 - **Features**
   - Replace single multiplier with layered calculation model in delivery planning (#385)
 
-Contributors: @fred, @gandalf
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.1...ring-pm-team@0.26.0)
+
+---
+
+## [0.26.0](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.26.0)
+
+- **Features**
+  - Replace single multiplier with layered calculation model in delivery planning (#385)
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.1...ring-pm-team@0.26.0)
 
@@ -27,8 +41,6 @@ Contributors: @fred, @gandalf
 - **Features**
   - Replace single multiplier with layered calculation model in delivery planning (#385)
 
-Contributors: @fred, @gandalf
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.1...ring-pm-team@0.26.0)
 
 ---
@@ -37,30 +49,6 @@ Contributors: @fred, @gandalf
 
 - **Features**
   - Replace single multiplier with layered calculation model in delivery planning (#385)
-
-Contributors: @fred, @gandalf
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.1...ring-pm-team@0.26.0)
-
----
-
-## [0.26.0](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.26.0)
-
-- **Features**
-  - Replace single multiplier with layered calculation model in delivery planning (#385)
-
-Contributors: @fred, @gandalf
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.1...ring-pm-team@0.26.0)
-
----
-
-## [0.26.0](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.26.0)
-
-- **Features**
-  - Replace single multiplier with layered calculation model in delivery planning (#385)
-
-Contributors: @fred, @gandalf
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.1...ring-pm-team@0.26.0)
 
@@ -70,8 +58,6 @@ Contributors: @fred, @gandalf
 
 - Improvements:
   - Refactor: Canonize `POSTGRES_*` environment variables instead of `DB_*`.
-
-Contributors: @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
@@ -82,8 +68,6 @@ Contributors: @jefferson.comff
 - Improvements:
   - Refactored environment variables to use `POSTGRES_*` instead of `DB_*` for consistency.
 
-Contributors: @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
 ---
@@ -93,8 +77,6 @@ Contributors: @jefferson.comff
 - Improvements:
   - Refactored environment variables to canonize `POSTGRES_*` instead of `DB_*`.
 
-Contributors: @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
 ---
@@ -103,8 +85,6 @@ Contributors: @jefferson.comff
 
 - Improvements:
   - Refactored environment variable standards to canonize `POSTGRES_*` instead of `DB_*`.
-
-Contributors: @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
@@ -115,8 +95,6 @@ Contributors: @jefferson.comff
 - **Improvements**
   - Refactor: Canonize POSTGRES_* environment variables instead of using DB_* for better clarity and standardization.
 
-Contributors: @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
 ---
@@ -125,8 +103,6 @@ Contributors: @jefferson.comff
 
 - Improvements:
   - Refactored environment variable naming standards to use `POSTGRES_*` instead of `DB_*`.
-
-Contributors: @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
@@ -137,8 +113,6 @@ Contributors: @jefferson.comff
 - **Improvements:**
   - Canonized environment variables by replacing `DB_*` with `POSTGRES_*` for better clarity and standardization.
 
-Contributors: @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
 ---
@@ -148,8 +122,6 @@ Contributors: @jefferson.comff
 - Improvements:
   - Refactored environment variables to canonize `POSTGRES_*` instead of `DB_*`.
 
-Contributors: @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
 ---
@@ -159,8 +131,6 @@ Contributors: @jefferson.comff
 - Improvements:
   - Refactored environment variables to use `POSTGRES_*` instead of `DB_*` for standardization.
 
-Contributors: @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
 ---
@@ -169,8 +139,6 @@ Contributors: @jefferson.comff
 
 - Improvements:
   - Refactored environment variables to use `POSTGRES_*` instead of `DB_*` for standardization.
-
-Contributors: @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
@@ -181,8 +149,6 @@ Contributors: @jefferson.comff
 - Improvements:
   - Canonized environment variables by changing `DB_*` to `POSTGRES_*`.
 
-Contributors: @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
 ---
@@ -191,8 +157,6 @@ Contributors: @jefferson.comff
 
 - Improvements:
   - Canonized `POSTGRES_*` environment variables instead of `DB_*`.
-
-Contributors: @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
@@ -203,8 +167,6 @@ Contributors: @jefferson.comff
 - Improvements:
   - Canonized environment variables by replacing `DB_*` with `POSTGRES_*` for better clarity and standardization.
 
-Contributors: @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
 ---
@@ -213,8 +175,6 @@ Contributors: @jefferson.comff
 
 - Improvements:
   - Refactored environment variable standards to canonize `POSTGRES_*` instead of `DB_*`.
-
-Contributors: @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
@@ -225,8 +185,6 @@ Contributors: @jefferson.comff
 - Improvements:
   - Canonized environment variables from `DB_*` to `POSTGRES_*`.
 
-Contributors: @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
 ---
@@ -235,8 +193,6 @@ Contributors: @jefferson.comff
 
 - Improvements:
   - Refactored environment variables to canonize `POSTGRES_*` instead of `DB_*`.
-
-Contributors: @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
@@ -247,8 +203,6 @@ Contributors: @jefferson.comff
 - **Improvements:**
   - Refactored environment variable standards to use `POSTGRES_*` instead of `DB_*`.
 
-Contributors: @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
 ---
@@ -257,8 +211,6 @@ Contributors: @jefferson.comff
 
 - Improvements:
   - Refactored environment variables to use `POSTGRES_*` instead of `DB_*` for standardization.
-
-Contributors: @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
@@ -269,8 +221,6 @@ Contributors: @jefferson.comff
 - Improvements:
   - Refactored environment variables by canonizing `POSTGRES_*` instead of `DB_*`.
 
-Contributors: @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
 ---
@@ -279,8 +229,6 @@ Contributors: @jefferson.comff
 
 - Improvements:
   - Refactored environment variables to use `POSTGRES_*` instead of `DB_*` for standardization.
-
-Contributors: @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
@@ -291,8 +239,6 @@ Contributors: @jefferson.comff
 - Improvements:
   - Refactored environment variable standards to use `POSTGRES_*` instead of `DB_*`.
 
-Contributors: @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
 ---
@@ -301,8 +247,6 @@ Contributors: @jefferson.comff
 
 - Improvements:
   - Refactored environment variable naming to use `POSTGRES_*` instead of `DB_*`.
-
-Contributors: @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
@@ -313,8 +257,6 @@ Contributors: @jefferson.comff
 - Improvements:
   - Refactored environment variable standards to canonize `POSTGRES_*` instead of `DB_*`.
 
-Contributors: @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
 ---
@@ -324,8 +266,6 @@ Contributors: @jefferson.comff
 - Improvements:
   - Refactor: Canonize `POSTGRES_*` environment variables instead of `DB_*`.
 
-Contributors: @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
 ---
@@ -333,8 +273,6 @@ Contributors: @jefferson.comff
 ## [0.25.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.25.1)
 
 - Refactor: Canonized `POSTGRES_*` environment variables instead of `DB_*`.
-
-Contributors: @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.25.0...ring-pm-team@0.25.1)
 
@@ -344,8 +282,6 @@ Contributors: @jefferson.comff
 
 - Features:
   - Added deep-doc-review skill (adapted from optimus).
-
-Contributors: @gandalf, @jeff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.24.0...ring-pm-team@0.25.0)
 
@@ -355,8 +291,6 @@ Contributors: @gandalf, @jeff
 
 - Features:
   - Added deep-doc-review skill (adapted from optimus).
-
-Contributors: @gandalf, @jeff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.24.0...ring-pm-team@0.25.0)
 
@@ -367,8 +301,6 @@ Contributors: @gandalf, @jeff
 - Features:
   - Added deep-doc-review skill, adapted from optimus.
 
-Contributors: @gandalf, @jeff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.24.0...ring-pm-team@0.25.0)
 
 ---
@@ -377,8 +309,6 @@ Contributors: @gandalf, @jeff
 
 - Features:
   - Added deep-doc-review skill (adapted from optimus).
-
-Contributors: @gandalf, @jeff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.24.0...ring-pm-team@0.25.0)
 
@@ -392,8 +322,6 @@ Contributors: @gandalf, @jeff
 - Improvements:
   - Updated CHANGELOG for ring-pm-team to version v0.24.0.
 
-Contributors: @gandalf, @jeff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.24.0...ring-pm-team@0.25.0)
 
 ---
@@ -403,9 +331,6 @@ Contributors: @gandalf, @jeff
 - **Features**
   - Added integration contract validation to pre-dev and delivery verification.
 
-- **Contributors**
-  - @fred, @gandalf, @jeff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.23.1...ring-pm-team@0.24.0)
 
 ---
@@ -413,8 +338,6 @@ Contributors: @gandalf, @jeff
 ## [0.23.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.23.1)
 
 - Updated CHANGELOG for ring-pm-team to v0.23.0.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.23.0...ring-pm-team@0.23.1)
 
@@ -425,8 +348,6 @@ Contributors: @fred
 - Improvements:
   - Updated CHANGELOG for ring-pm-team to version v0.23.0.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.23.0...ring-pm-team@0.23.1)
 
 ---
@@ -434,8 +355,6 @@ Contributors: @fred
 ## [0.23.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.23.1)
 
 - Refactor: Removed commands layer and renamed skills to match command names.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.23.0...ring-pm-team@0.23.1)
 
@@ -449,8 +368,6 @@ Contributors: @fred
 - **Improvements**
   - Updated CHANGELOG for ring-pm-team:v0.22.0.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.22.0...ring-pm-team@0.23.0)
 
 ---
@@ -459,8 +376,6 @@ Contributors: @fred
 
 - **Features**
   - Added skill for Lerian Map platform integration.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.22.0...ring-pm-team@0.23.0)
 
@@ -471,8 +386,6 @@ Contributors: @fred
 - **Features:**
   - Added skill for Lerian Map platform integration.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.22.0...ring-pm-team@0.23.0)
 
 ---
@@ -481,8 +394,6 @@ Contributors: @fred
 
 - **Features**
   - Added Operational Dashboard Discovery to Gate 1, enhancing project management capabilities.
-
-Contributors: @fred, @gandalf
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.21.2...ring-pm-team@0.22.0)
 
@@ -493,8 +404,6 @@ Contributors: @fred, @gandalf
 - Fixes:
   - Enforced zero panic policy across all standards and agents to improve system stability and reliability.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.21.0...ring-pm-team@0.21.1)
 
 ---
@@ -504,8 +413,6 @@ Contributors: @jeff, @jefferson.comff
 - Fixes:
   - Enforced zero panic policy across all standards and agents to enhance stability and reliability. (#277)
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.21.0...ring-pm-team@0.21.1)
 
 ---
@@ -514,8 +421,6 @@ Contributors: @jeff, @jefferson.comff
 
 - Fixes:
   - Enforced zero panic policy across all standards and agents to improve stability and reliability.
-
-Contributors: @jeff, @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.21.0...ring-pm-team@0.21.1)
 
@@ -526,8 +431,6 @@ Contributors: @jeff, @jefferson.comff
 - Fixes:
   - Enforced zero panic policy across all standards and agents to enhance system stability and reliability.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.21.0...ring-pm-team@0.21.1)
 
 ---
@@ -537,8 +440,6 @@ Contributors: @jeff, @jefferson.comff
 - Fixes:
   - Enforced zero panic policy across all standards and agents to improve system stability and reliability.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.21.0...ring-pm-team@0.21.1)
 
 ---
@@ -547,8 +448,6 @@ Contributors: @jeff, @jefferson.comff
 
 - Fixes:
   - Enforced zero panic policy across all standards and agents to improve system stability and reliability.
-
-Contributors: @jeff, @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.21.0...ring-pm-team@0.21.1)
 
@@ -559,8 +458,6 @@ Contributors: @jeff, @jefferson.comff
 - Fixes:
   - Enforced zero panic policy across all standards and agents to enhance stability and reliability. (#277)
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.21.0...ring-pm-team@0.21.1)
 
 ---
@@ -569,8 +466,6 @@ Contributors: @jeff, @jefferson.comff
 
 - Fixes:
   - Enforced zero panic policy across all standards and agents to improve system stability and reliability. (#277)
-
-Contributors: @jeff, @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.21.0...ring-pm-team@0.21.1)
 
@@ -581,8 +476,6 @@ Contributors: @jeff, @jefferson.comff
 - Fixes:
   - Enforced zero panic policy across all standards and agents to improve stability and reliability.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.21.0...ring-pm-team@0.21.1)
 
 ---
@@ -591,8 +484,6 @@ Contributors: @jeff, @jefferson.comff
 
 - Fixes:
   - Enforced zero panic policy across all standards and agents to improve system stability and reliability.
-
-Contributors: @jeff, @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.21.0...ring-pm-team@0.21.1)
 
@@ -603,8 +494,6 @@ Contributors: @jeff, @jefferson.comff
 - Fixes:
   - Enforced zero panic policy across all standards and agents to enhance stability and reliability.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.21.0...ring-pm-team@0.21.1)
 
 ---
@@ -613,8 +502,6 @@ Contributors: @jeff, @jefferson.comff
 
 - **Features**
   - Moved `lerian-map-management` skill from `pmo-team` to `pm-team`.
-
-Contributors: @gandalf
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.2...ring-pm-team@0.21.0)
 
@@ -625,8 +512,6 @@ Contributors: @gandalf
 - Fixes:
   - Removed data envelope from BFF Response Contract template.
 
-Contributors: @gandalf,
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.1...ring-pm-team@0.20.2)
 
 ---
@@ -636,7 +521,14 @@ Contributors: @gandalf,
 - Fixes:
   - Removed data envelope from BFF Response Contract template
 
-Contributors: @gandalf
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.1...ring-pm-team@0.20.2)
+
+---
+
+## [0.20.2](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.20.2)
+
+- Fixes:
+  - Removed data envelope from BFF Response Contract template.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.1...ring-pm-team@0.20.2)
 
@@ -647,7 +539,14 @@ Contributors: @gandalf
 - Fixes:
   - Removed data envelope from BFF Response Contract template.
 
-Contributors: @gandalf,
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.1...ring-pm-team@0.20.2)
+
+---
+
+## [0.20.2](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.20.2)
+
+- Fixes:
+  - Removed data envelope from BFF Response Contract template.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.1...ring-pm-team@0.20.2)
 
@@ -658,8 +557,6 @@ Contributors: @gandalf,
 - Fixes:
   - Removed data envelope from BFF Response Contract template.
 
-Contributors: @gandalf,
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.1...ring-pm-team@0.20.2)
 
 ---
@@ -668,30 +565,6 @@ Contributors: @gandalf,
 
 - Fixes:
   - Removed data envelope from BFF Response Contract template.
-
-Contributors: @gandalf,
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.1...ring-pm-team@0.20.2)
-
----
-
-## [0.20.2](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.20.2)
-
-- Fixes:
-  - Removed data envelope from BFF Response Contract template.
-
-Contributors: @gandalf,
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.1...ring-pm-team@0.20.2)
-
----
-
-## [0.20.2](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.20.2)
-
-- Fixes:
-  - Removed data envelope from BFF Response Contract template.
-
-Contributors: @gandalf,
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.1...ring-pm-team@0.20.2)
 
@@ -702,8 +575,6 @@ Contributors: @gandalf,
 - Fixes:
   - Added bootstrap-only comments to `panic()` examples to adhere to standards.
 
-Contributors: @gandalf,
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.0...ring-pm-team@0.20.1)
 
 ---
@@ -713,8 +584,6 @@ Contributors: @gandalf,
 - **Fixes:**
   - Added bootstrap-only comments to `panic()` examples to enhance code clarity and maintainability.
 
-Contributors: @gandalf,
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.0...ring-pm-team@0.20.1)
 
 ---
@@ -723,8 +592,6 @@ Contributors: @gandalf,
 
 - Fixes:
   - Added bootstrap-only comments to `panic()` examples to align with standards.
-
-Contributors: @gandalf
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.0...ring-pm-team@0.20.1)
 
@@ -735,8 +602,6 @@ Contributors: @gandalf
 - Fixes:
   - Added bootstrap-only comments to `panic()` examples.
 
-Contributors: @gandalf
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.0...ring-pm-team@0.20.1)
 
 ---
@@ -745,8 +610,6 @@ Contributors: @gandalf
 
 - Fixes:
   - Added bootstrap-only comments to panic() examples for improved clarity and standardization.
-
-Contributors: @gandalf
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.0...ring-pm-team@0.20.1)
 
@@ -757,8 +620,6 @@ Contributors: @gandalf
 - **Fixes**
   - Added bootstrap-only comments to `panic()` examples to enhance clarity and maintain code standards.
 
-Contributors: @gandalf,
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.0...ring-pm-team@0.20.1)
 
 ---
@@ -767,8 +628,6 @@ Contributors: @gandalf,
 
 - Fixes:
   - Added bootstrap-only comments to `panic()` examples to align with standards.
-
-Contributors: @gandalf
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.20.0...ring-pm-team@0.20.1)
 
@@ -781,8 +640,6 @@ Contributors: @gandalf
 
 - Improvements:
   - Update output references for dual MD+JSON delivery roadmap.
-
-Contributors: @rsane.melo
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.19.3...ring-pm-team@0.20.0)
 
@@ -796,7 +653,17 @@ Contributors: @rsane.melo
 - **Improvements:**
   - Updated output references for the dual MD+JSON delivery roadmap.
 
-Contributors: @rsane.melo
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.19.3...ring-pm-team@0.20.0)
+
+---
+
+## [0.20.0](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.20.0)
+
+- **Features:**
+  - Added JSON output schema to the delivery-planning skill.
+
+- **Improvements:**
+  - Updated output references for dual MD+JSON delivery roadmap.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.19.3...ring-pm-team@0.20.0)
 
@@ -810,22 +677,6 @@ Contributors: @rsane.melo
 - **Improvements:**
   - Updated output references for dual MD+JSON delivery roadmap.
 
-Contributors: @rsane.melo,
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.19.3...ring-pm-team@0.20.0)
-
----
-
-## [0.20.0](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.20.0)
-
-- **Features:**
-  - Added JSON output schema to the delivery-planning skill.
-
-- **Improvements:**
-  - Updated output references for dual MD+JSON delivery roadmap.
-
-Contributors: @rsane.melo
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.19.3...ring-pm-team@0.20.0)
 
 ---
@@ -837,8 +688,6 @@ Contributors: @rsane.melo
 
 - **Improvements:**
   - Updated output references for dual MD+JSON delivery roadmap.
-
-Contributors: @rsane.melo,
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.19.3...ring-pm-team@0.20.0)
 
@@ -852,8 +701,6 @@ Contributors: @rsane.melo,
 - Improvements:
   - Update output references for dual MD+JSON delivery roadmap.
 
-Contributors: @rsane.melo
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.19.3...ring-pm-team@0.20.0)
 
 ---
@@ -865,8 +712,6 @@ Contributors: @rsane.melo
 
 - **Improvements:**
   - Updated output references for dual MD+JSON delivery roadmap.
-
-Contributors: @rsane.melo,
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.19.3...ring-pm-team@0.20.0)
 
@@ -880,8 +725,6 @@ Contributors: @rsane.melo,
 - Improvements:
   - Update output references for dual MD+JSON delivery roadmap.
 
-Contributors: @rsane.melo
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.19.3...ring-pm-team@0.20.0)
 
 ---
@@ -893,8 +736,6 @@ Contributors: @rsane.melo
 
 - Improvements:
   - Updated output references for dual MD+JSON delivery roadmap.
-
-Contributors: @rsane.melo
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.19.3...ring-pm-team@0.20.0)
 
@@ -904,8 +745,6 @@ Contributors: @rsane.melo
 
 - **Features:**
   - Added orchestrator skills for pre-development planning workflows.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.19.2...ring-pm-team@0.19.3)
 
@@ -916,8 +755,6 @@ Contributors: @fred
 - Features:
   - Add orchestrator skills for pre-dev planning workflows.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.19.2...ring-pm-team@0.19.3)
 
 ---
@@ -926,8 +763,6 @@ Contributors: @fred
 
 - **Features:**
   - Added orchestrator skills for pre-dev planning workflows.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.19.2...ring-pm-team@0.19.3)
 
@@ -938,8 +773,6 @@ Contributors: @fred
 - **Features:**
   - Added orchestrator skills for pre-development planning workflows.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.19.2...ring-pm-team@0.19.3)
 
 ---
@@ -948,8 +781,6 @@ Contributors: @fred
 
 - Improvements:
   - Decoupled agents from specific model requirements to enhance flexibility and maintainability.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.19.1...ring-pm-team@0.19.2)
 
@@ -960,8 +791,6 @@ Contributors: @fred
 - Improvements:
   - Decoupled agents from specific model requirements.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.19.1...ring-pm-team@0.19.2)
 
 ---
@@ -970,8 +799,6 @@ Contributors: @fred
 
 - Improvements:
   - Refactored code to decouple agents from specific model requirements.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.19.1...ring-pm-team@0.19.2)
 
@@ -982,8 +809,6 @@ Contributors: @fred
 - Improvements:
   - Refactored to decouple agents from specific model requirements.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.19.1...ring-pm-team@0.19.2)
 
 ---
@@ -993,8 +818,6 @@ Contributors: @fred
 - **Fixes:**
   - Removed leading slash from delivery-status command name.
 
-Contributors: @gandalf
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.19.0...ring-pm-team@0.19.1)
 
 ---
@@ -1004,8 +827,6 @@ Contributors: @gandalf
 - Fixes:
   - Removed leading slash from delivery-status command name.
 
-Contributors: @gandalf
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.19.0...ring-pm-team@0.19.1)
 
 ---
@@ -1014,8 +835,6 @@ Contributors: @gandalf
 
 - Fixes:
   - Removed leading slash from delivery-status command name.
-
-Contributors: @gandalf,
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.19.0...ring-pm-team@0.19.1)
 
@@ -1026,8 +845,6 @@ Contributors: @gandalf,
 - Fixes:
   - Removed leading slash from the delivery-status command name.
 
-Contributors: @gandalf
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.19.0...ring-pm-team@0.19.1)
 
 ---
@@ -1038,7 +855,15 @@ Contributors: @gandalf
   - Added task status tracking between tasks.md and dev-cycle. (fa0351e4)
   - Merged task status tracking feature. (44bee525)
 
-Contributors: @jeff, @jota
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.1...ring-pm-team@0.19.0)
+
+---
+
+## [0.19.0](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.19.0)
+
+- **Features:**
+  - Added task status tracking between tasks.md and dev-cycle. (fa0351e4)
+  - Merged task status tracking feature. (44bee525)
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.1...ring-pm-team@0.19.0)
 
@@ -1050,8 +875,6 @@ Contributors: @jeff, @jota
   - Added task status tracking between tasks.md and dev-cycle. (fa0351e4)
   - Merged task status tracking feature. (44bee525)
 
-Contributors: @jeff, @jota
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.1...ring-pm-team@0.19.0)
 
 ---
@@ -1061,20 +884,6 @@ Contributors: @jeff, @jota
 - **Features:**
   - Added task status tracking between tasks.md and dev-cycle. (fa0351e4)
   - Merged task status tracking feature. (44bee525)
-
-Contributors: @jeff, @jota
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.1...ring-pm-team@0.19.0)
-
----
-
-## [0.19.0](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.19.0)
-
-- **Features:**
-  - Added task status tracking between tasks.md and dev-cycle. (fa0351e4)
-  - Merged task status tracking feature. (44bee525)
-
-Contributors: @jeff, @jota
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.1...ring-pm-team@0.19.0)
 
@@ -1084,8 +893,6 @@ Contributors: @jeff, @jota
 
 - **Features:**
   - Added task status tracking between tasks.md and dev-cycle.
-
-Contributors: @jeff, @jota
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.1...ring-pm-team@0.19.0)
 
@@ -1097,7 +904,24 @@ Contributors: @jeff, @jota
   - Added task status tracking between tasks.md and dev-cycle.
   - Implemented task status tracking feature.
 
-Contributors: @jeff, @jota
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.1...ring-pm-team@0.19.0)
+
+---
+
+## [0.19.0](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.19.0)
+
+- **Features:**
+  - Added task status tracking between tasks.md and dev-cycle. (fa0351e4)
+  - Merged task status tracking feature. (44bee525)
+
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.1...ring-pm-team@0.19.0)
+
+---
+
+## [0.19.0](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.19.0)
+
+- **Features:**
+  - Added task status tracking between tasks.md and dev-cycle.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.1...ring-pm-team@0.19.0)
 
@@ -1109,8 +933,6 @@ Contributors: @jeff, @jota
   - Added task status tracking between tasks.md and dev-cycle. (fa0351e4)
   - Merged task status tracking feature. (44bee525)
 
-Contributors: @jeff, @jota
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.1...ring-pm-team@0.19.0)
 
 ---
@@ -1119,31 +941,6 @@ Contributors: @jeff, @jota
 
 - **Features:**
   - Added task status tracking between tasks.md and dev-cycle.
-
-Contributors: @jeff, @jota
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.1...ring-pm-team@0.19.0)
-
----
-
-## [0.19.0](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.19.0)
-
-- **Features:**
-  - Added task status tracking between tasks.md and dev-cycle. (fa0351e4)
-  - Merged task status tracking feature. (44bee525)
-
-Contributors: @jeff, @jota
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.1...ring-pm-team@0.19.0)
-
----
-
-## [0.19.0](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.19.0)
-
-- **Features:**
-  - Added task status tracking between tasks.md and dev-cycle.
-
-Contributors: @jeff, @jota
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.1...ring-pm-team@0.19.0)
 
@@ -1155,8 +952,6 @@ Contributors: @jeff, @jota
   - Added task status tracking between tasks.md and dev-cycle. (fa0351e4)
   - Merged pull request for task status tracking feature. (44bee525)
 
-Contributors: @jeff, @jota
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.1...ring-pm-team@0.19.0)
 
 ---
@@ -1166,10 +961,6 @@ Contributors: @jeff, @jota
 - **Features:**
   - Added task status tracking between tasks.md and dev-cycle.
 
-- **Contributors:**
-  - @jeff
-  - @jota
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.1...ring-pm-team@0.19.0)
 
 ---
@@ -1178,8 +969,6 @@ Contributors: @jeff, @jota
 
 - **Features:**
   - Added task status tracking between tasks.md and dev-cycle.
-
-Contributors: @jeff, @jota
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.1...ring-pm-team@0.19.0)
 
@@ -1191,8 +980,6 @@ Contributors: @jeff, @jota
   - Added task status tracking between tasks.md and dev-cycle. (fa0351e4)
   - Merged task status tracking feature. (44bee525)
 
-Contributors: @jeff, @jota
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.1...ring-pm-team@0.19.0)
 
 ---
@@ -1203,8 +990,6 @@ Contributors: @jeff, @jota
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.0...ring-pm-team@0.18.1)
 
 ---
@@ -1214,8 +999,6 @@ Contributors: @jeff, @jefferson.comff
 - Fixes:
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections.
-
-Contributors: @jeff, @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.0...ring-pm-team@0.18.1)
 
@@ -1227,7 +1010,15 @@ Contributors: @jeff, @jefferson.comff
   - Applied lexical salience guidelines across skills.
   - Added missing required sections in CLAUDE.md.
 
-Contributors: @jeff, @jefferson.comff
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.0...ring-pm-team@0.18.1)
+
+---
+
+## [0.18.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.18.1)
+
+- Fixes:
+  - Applied lexical salience guidelines across skills.
+  - Added missing CLAUDE.md required sections.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.0...ring-pm-team@0.18.1)
 
@@ -1239,7 +1030,15 @@ Contributors: @jeff, @jefferson.comff
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections.
 
-Contributors: @jeff, @jefferson.comff
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.0...ring-pm-team@0.18.1)
+
+---
+
+## [0.18.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.18.1)
+
+- Fixes:
+  - Applied lexical salience guidelines across skills.
+  - Added missing CLAUDE.md required sections.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.0...ring-pm-team@0.18.1)
 
@@ -1251,8 +1050,6 @@ Contributors: @jeff, @jefferson.comff
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.0...ring-pm-team@0.18.1)
 
 ---
@@ -1263,8 +1060,6 @@ Contributors: @jeff, @jefferson.comff
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.0...ring-pm-team@0.18.1)
 
 ---
@@ -1274,32 +1069,6 @@ Contributors: @jeff, @jefferson.comff
 - Fixes:
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections.
-
-Contributors: @jeff, @jefferson.comff
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.0...ring-pm-team@0.18.1)
-
----
-
-## [0.18.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.18.1)
-
-- Fixes:
-  - Applied lexical salience guidelines across skills.
-  - Added missing CLAUDE.md required sections.
-
-Contributors: @jeff, @jefferson.comff
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.0...ring-pm-team@0.18.1)
-
----
-
-## [0.18.1](https://github.com/LerianStudio/ring/releases/tag/ring-pm-team@0.18.1)
-
-- Fixes:
-  - Applied lexical salience guidelines across skills.
-  - Added missing CLAUDE.md required sections.
-
-Contributors: @jeff, @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.0...ring-pm-team@0.18.1)
 
@@ -1311,8 +1080,6 @@ Contributors: @jeff, @jefferson.comff
   - Applied lexical salience guidelines across skills to enhance clarity and consistency.
   - Added missing required sections in CLAUDE.md to ensure comprehensive documentation.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.0...ring-pm-team@0.18.1)
 
 ---
@@ -1322,8 +1089,6 @@ Contributors: @jeff, @jefferson.comff
 - Fixes:
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections.
-
-Contributors: @jeff, @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.18.0...ring-pm-team@0.18.1)
 
@@ -1340,8 +1105,6 @@ Contributors: @jeff, @jefferson.comff
   - Address second round of coderabbit feedback on business deliverables.
   - Address coderabbit feedback on business deliverables view.
 
-Contributors: @jota
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.17.0...ring-pm-team@0.18.0)
 
 ---
@@ -1357,8 +1120,6 @@ Contributors: @jota
   - Addressed second round of coderabbit feedback on business deliverables.
   - Addressed coderabbit feedback on business deliverables view.
 
-Contributors: @jota
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.17.0...ring-pm-team@0.18.0)
 
 ---
@@ -1367,8 +1128,6 @@ Contributors: @jota
 
 - **Features**
   - Added GPT Changelog workflow and initial CHANGELOG files for ring-pm-team.
-
-Contributors: @gui.rodrigues
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.16.3...ring-pm-team@0.17.0)
 
@@ -1379,8 +1138,6 @@ Contributors: @gui.rodrigues
 - **Features**
   - Added GPT Changelog workflow.
   - Created initial CHANGELOG files for teams header.
-
-Contributors: @gui.rodrigues
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.16.3...ring-pm-team@0.17.0)
 
@@ -1392,8 +1149,6 @@ Contributors: @gui.rodrigues
   - Added GPT Changelog workflow for ring-pm-team.
   - Created initial CHANGELOG files for teams header.
 
-Contributors: @gui.rodrigues
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.16.3...ring-pm-team@0.17.0)
 
 ---
@@ -1403,8 +1158,6 @@ Contributors: @gui.rodrigues
 - **Features**
   - Added GPT Changelog workflow.
   - Created initial CHANGELOG files for teams header.
-
-Contributors: @gui.rodrigues
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.16.3...ring-pm-team@0.17.0)
 
@@ -1416,8 +1169,6 @@ Contributors: @gui.rodrigues
   - Added GPT Changelog workflow for ring-pm-team.
   - Introduced initial CHANGELOG files for teams header.
 
-Contributors: @gui.rodrigues
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.16.3...ring-pm-team@0.17.0)
 
 ---
@@ -1428,8 +1179,6 @@ Contributors: @gui.rodrigues
   - Added GPT Changelog workflow.
   - Introduced initial CHANGELOG files for teams header.
 
-Contributors: @gui.rodrigues
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.16.3...ring-pm-team@0.17.0)
 
 ---
@@ -1439,8 +1188,6 @@ Contributors: @gui.rodrigues
 - **Features**
   - Added GPT Changelog workflow.
   - Introduced initial CHANGELOG files for teams header.
-
-Contributors: @gui.rodrigues
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.16.3...ring-pm-team@0.17.0)
 
@@ -1452,8 +1199,6 @@ Contributors: @gui.rodrigues
   - Added GPT Changelog workflow.
   - Created initial CHANGELOG files for teams header.
 
-Contributors: @gui.rodrigues
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.16.3...ring-pm-team@0.17.0)
 
 ---
@@ -1462,8 +1207,6 @@ Contributors: @gui.rodrigues
 
 - Added GPT Changelog workflow.
 - Created initial CHANGELOG files for teams header.
-
-Contributors: @gui.rodrigues
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-pm-team@0.16.3...ring-pm-team@0.17.0)
 
