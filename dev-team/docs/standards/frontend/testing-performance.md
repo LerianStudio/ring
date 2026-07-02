@@ -217,17 +217,18 @@ next build 2>&1 | grep -A 20 "Route (app)"
 # Compare after build
 ```
 
-### Tree-Shaking Verification for sindarian-ui
+### Tree-Shaking Verification for the design system
 
+<!-- Replace @your-org/design-system with your organization's design system package. -->
 ```typescript
 // CORRECT: Named imports (tree-shakeable)
-import { Button, Input } from '@lerianstudio/sindarian-ui';
+import { Button, Input } from '@your-org/design-system';
 
 // FORBIDDEN: Wildcard import (imports everything)
-import * as SindarianUI from '@lerianstudio/sindarian-ui';
+import * as DesignSystem from '@your-org/design-system';
 
 // FORBIDDEN: Default import of entire library
-import SindarianUI from '@lerianstudio/sindarian-ui';
+import DesignSystem from '@your-org/design-system';
 ```
 
 ---
@@ -311,8 +312,8 @@ grep -rn '<img ' --include="*.tsx" src/ | grep -v 'next/image' | grep -v '_test'
 # useEffect for fetching (should use TanStack Query)
 grep -rn 'useEffect.*fetch\|useEffect.*axios\|useEffect.*api' --include="*.tsx" src/
 
-# Wildcard sindarian-ui imports (not tree-shakeable)
-grep -rn "import \* as.*sindarian" --include="*.tsx" --include="*.ts" src/
+# Wildcard design-system imports (not tree-shakeable)
+grep -rn "import \* as.*design-system" --include="*.tsx" --include="*.ts" src/
 
 # Missing next/image imports where <img> is used
 grep -rln '<img ' --include="*.tsx" src/ | while read f; do
@@ -331,7 +332,7 @@ Before marking performance tests complete:
 - [ ] Bundle size within 10% of baseline
 - [ ] No bare `<img>` tags (all use `next/image`)
 - [ ] `'use client'` used only when necessary (< 40% of components)
-- [ ] sindarian-ui imports are tree-shakeable (named imports only)
+- [ ] design-system imports are tree-shakeable (named imports only)
 - [ ] No `useEffect` for data fetching
 
 ---
@@ -378,7 +379,7 @@ Before marking performance tests complete:
 |---------|-------------|--------|
 | Bare <img> | 0 | PASS |
 | useEffect for fetching | 0 | PASS |
-| Wildcard sindarian imports | 0 | PASS |
+| Wildcard design-system imports | 0 | PASS |
 
 ### Standards Compliance
 

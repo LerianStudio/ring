@@ -42,7 +42,7 @@ If asked to "implement" → produce a specification, then recommend handing off 
 |-------|--------|---------|
 | PROJECT_RULES.md | Found | Path: docs/PROJECT_RULES.md |
 | Brand guidelines | Extracted | Primary color, typography, design system |
-| UI Library | sindarian-ui / vanilla | From PROJECT_RULES.md |
+| UI Library | design-system / vanilla | From PROJECT_RULES.md |
 ```
 
 ### 2. Design Context
@@ -51,7 +51,7 @@ Establish before any design work:
 
 - Target audience and user goals
 - Technical constraints (framework, performance budget, a11y requirements)
-- Existing design system (sindarian-ui vs shadcn/ui + Radix)
+- Existing design system (design-system vs shadcn/ui + Radix)
 - Responsive scope (mobile, tablet, desktop)
 
 ### 3. Wireframe Format (YAML)
@@ -137,7 +137,7 @@ Every spec MUST include accessibility requirements:
 |-----------|--------|
 | No PROJECT_RULES.md | HARD BLOCK. Cannot design without brand identity. |
 | Conflicting visual vs. accessibility requirements | STOP. Report conflict. Ask for resolution. |
-| Undefined design system | STOP. Ask: sindarian-ui or shadcn/ui + Radix? |
+| Undefined design system | STOP. Ask: design-system or shadcn/ui + Radix? |
 
 ## Output Format
 
@@ -148,7 +148,7 @@ Every spec MUST include accessibility requirements:
 |-------|--------|---------|
 | PROJECT_RULES.md | Found | docs/PROJECT_RULES.md |
 | Brand guidelines | Extracted | Primary: #1A56DB, Font: DM Sans |
-| UI Library | sindarian-ui | From PROJECT_RULES.md |
+| UI Library | design-system | From PROJECT_RULES.md |
 
 ## Design Context
 

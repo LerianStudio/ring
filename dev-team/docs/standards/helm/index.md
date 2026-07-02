@@ -3,7 +3,7 @@
 > **⚠️ MAINTENANCE:** This directory is indexed in `dev-team/skills/shared-patterns/standards-coverage-table.md`.
 > When adding/removing sections, follow FOUR-FILE UPDATE RULE in CLAUDE.md.
 
-This directory contains modular Helm chart standards for Lerian Studio. Load only the modules you need.
+This directory contains modular Helm chart standards from Lerian Studio. Load only the modules you need.
 
 > **Reference**: Always consult `docs/PROJECT_RULES.md` for common project standards.
 

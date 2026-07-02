@@ -1273,14 +1273,14 @@ if (result.ok) {
 
 ### Dual-Mode Architecture
 
-The BFF architecture supports two modes based on whether `@lerianstudio/sindarian-server` is available:
+The BFF architecture supports two modes based on whether a decorator-based server framework (`@your-org/server-framework` — an example decorator-based BFF framework, e.g. NestJS) is available:
 
 | Mode | When to Use | Characteristics |
 |------|-------------|-----------------|
-| **With sindarian-server** | Project has `@lerianstudio/sindarian-server` dependency | Use decorators (@Controller, @Get, @injectable, @inject, @Module) |
-| **Without sindarian-server** | Standard Next.js project | Same architecture, manual DI container, no decorators |
+| **With server-framework** | Project has `@your-org/server-framework` dependency | Use decorators (@Controller, @Get, @injectable, @inject, @Module) |
+| **Without server-framework** | Standard Next.js project | Same architecture, manual DI container, no decorators |
 
-**IMPORTANT:** Both modes follow IDENTICAL architecture. The only difference is decorator usage.
+**IMPORTANT:** Both modes follow IDENTICAL architecture. The only difference is decorator usage. The decorator examples below assume an example decorator-based BFF framework (e.g. NestJS); the documented alternative is the manual dependency-injection mode (the "Without server-framework" path), which keeps the same architecture and drops the decorators.
 
 ### Directory Structure
 
@@ -1311,15 +1311,16 @@ The BFF architecture supports two modes based on whether `@lerianstudio/sindaria
     /repositories
       organization.repository.ts # Implementation
     /modules
-      organization.module.ts     # DI module (sindarian) or container setup
+      organization.module.ts     # DI module (server-framework) or container setup
     app.ts                       # Bootstrap
 ```
 
-### With sindarian-server (Decorators)
+### With server-framework (Decorators)
 
 ```typescript
 // src/core/infrastructure/http/controllers/organization.controller.ts
-import { Controller, Get, Post, Body, Query } from '@lerianstudio/sindarian-server';
+// Decorators from an example decorator-based BFF framework (e.g. NestJS).
+import { Controller, Get, Post, Body, Query } from '@your-org/server-framework';
 
 @Controller('/organizations')
 export class OrganizationController {
@@ -1340,7 +1341,7 @@ export class OrganizationController {
 }
 
 // src/core/infrastructure/app.ts
-import { ServerFactory } from '@lerianstudio/sindarian-server';
+import { ServerFactory } from '@your-org/server-framework';
 import { AppModule } from './modules/app.module';
 
 export const app = await ServerFactory.create(AppModule);
@@ -1352,7 +1353,7 @@ export const GET = app.handler.bind(app);
 export const POST = app.handler.bind(app);
 ```
 
-### Without sindarian-server (Manual DI)
+### Without server-framework (Manual DI)
 
 ```typescript
 // src/core/infrastructure/http/controllers/organization.controller.ts
@@ -1777,13 +1778,13 @@ export class Core oneHttpService extends BaseHttpService {
 // ✅ CORRECT: API Route with controller resolution
 // app/api/organizations/route.ts
 
-// With sindarian-server
+// With server-framework
 import { app } from '@/core/infrastructure/app';
 
 export const GET = app.handler.bind(app);
 export const POST = app.handler.bind(app);
 
-// Without sindarian-server
+// Without server-framework
 import { NextRequest, NextResponse } from 'next/server';
 import { container } from '@/core/infrastructure/container';
 import { OrganizationController } from '@/core/infrastructure/http/controllers/organization.controller';
@@ -1834,14 +1835,14 @@ export async function getOrganizations() {
 ```typescript
 // app/api/organizations/[id]/route.ts
 
-// With sindarian-server
+// With server-framework
 import { app } from '@/core/infrastructure/app';
 
 export const GET = app.handler.bind(app);
 export const PUT = app.handler.bind(app);
 export const DELETE = app.handler.bind(app);
 
-// Without sindarian-server
+// Without server-framework
 export async function GET(
     request: NextRequest,
     { params }: { params: { id: string } }

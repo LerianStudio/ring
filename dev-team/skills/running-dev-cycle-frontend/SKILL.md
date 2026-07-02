@@ -26,7 +26,8 @@ All code changes go through `Task(subagent_type=...)`. Announce at start: "Using
 
 ```
 1. Detect UI library: Read package.json
-   - "@lerianstudio/sindarian-ui" present → ui_library_mode = "sindarian-ui"
+   <!-- Replace @your-org/design-system with your organization's design system package. -->
+   - "@your-org/design-system" present → ui_library_mode = "design-system"
    - Otherwise → ui_library_mode = "fallback-only"
    Store in state.
 
@@ -59,7 +60,7 @@ All listed gates are MANDATORY. No exceptions.
 | Condition | Agent |
 |-----------|-------|
 | React/Next.js component | ring:frontend |
-| Design system / Sindarian UI | ring:ui-engineer |
+| Design system UI | ring:ui-engineer |
 | BFF / API aggregation | ring:bff-ts |
 | Mixed | frontend first, then bff-ts |
 

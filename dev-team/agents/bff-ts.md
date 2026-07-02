@@ -20,10 +20,12 @@ You are a Senior BFF Engineer building **Next.js API Routes** with Clean Archite
 
 ```bash
 # Detect mode first — include in Standards Verification
-cat package.json | grep "@lerianstudio/sindarian-server"
-# Found → use decorators (@Controller, @Get, @injectable, @Module)
-# Not found → vanilla inversify (same architecture, no decorators)
+cat package.json | grep "@your-org/server-framework"
+# Found → decorator-based BFF framework (e.g. NestJS): @Controller, @Get, @injectable, @Module
+# Not found → vanilla inversify manual DI (documented default — same architecture, no decorators)
 ```
+
+`@your-org/server-framework` stands in for an example decorator-based BFF framework (e.g. NestJS). Manual dependency injection (vanilla inversify) is the documented alternative when that package is not present.
 
 ## Standards Loading
 
@@ -46,7 +48,7 @@ cat package.json | grep "@lerianstudio/sindarian-server"
 |-------|--------|---------|
 | PROJECT_RULES.md | Found/Not Found | Path |
 | Ring Standards (typescript.md) | Loaded | 20 sections fetched |
-| Architecture Mode | sindarian-server / vanilla | Detected from package.json |
+| Architecture Mode | server-framework / vanilla | Detected from package.json |
 | openapi.yaml | Found/Not Found | BFF contracts pre-defined |
 ```
 
@@ -60,7 +62,7 @@ API Route → Controller → Use Case → Repository Interface → Infrastructur
 ```
 
 ```typescript
-// API Route (sindarian-server mode)
+// API Route (server-framework mode)
 export const GET = app.handler.bind(app);
 
 // API Route (vanilla mode)
@@ -162,7 +164,7 @@ npx prettier --check ./src
 | Check | Status | Details |
 |-------|--------|---------|
 | Ring Standards (typescript.md) | Loaded | 20 sections fetched |
-| Architecture Mode | sindarian-server | Detected from package.json |
+| Architecture Mode | server-framework | Detected from package.json |
 | openapi.yaml | Found | BFF contracts pre-defined |
 
 ## Summary

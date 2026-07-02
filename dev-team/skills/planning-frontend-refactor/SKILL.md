@@ -1,6 +1,6 @@
 ---
 name: ring:planning-frontend-refactor
-description: "Planning a frontend refactor: audits an existing React/Next.js frontend against Ring standards (architecture, Sindarian UI, accessibility, testing) and produces a prioritized task list (findings.md + tasks.md) for ring:running-dev-cycle-frontend. Plans only — no edits. Use when an existing frontend needs to meet standards or an audit is requested. Skip for greenfield, single-file fixes, or backend (use ring:planning-backend-refactor)."
+description: "Planning a frontend refactor: audits an existing React/Next.js frontend against Ring standards (architecture, design system, accessibility, testing) and produces a prioritized task list (findings.md + tasks.md) for ring:running-dev-cycle-frontend. Plans only — no edits. Use when an existing frontend needs to meet standards or an audit is requested. Skip for greenfield, single-file fixes, or backend (use ring:planning-backend-refactor)."
 ---
 
 # Dev Refactor Frontend
@@ -54,7 +54,8 @@ STOP if any fetch fails.
 
 - Check `docs/PROJECT_RULES.md` exists → STOP if missing
 - Detect UI library mode: read `package.json`
-  - `@lerianstudio/sindarian-ui` → `sindarian-ui`
+  <!-- Replace @your-org/design-system with your organization's design system package. -->
+  - `@your-org/design-system` → `design-system`
   - Otherwise → `fallback-only`
 - If `go.mod` and no React → STOP: use `ring:planning-backend-refactor`
 
@@ -89,7 +90,7 @@ Task 2: ring:qa-frontend (MODE: ANALYSIS only)
   - Output: Standards Coverage Table + ISSUE-XXX for gaps
 
 Task 3: ring:ui-engineer (MODE: ANALYSIS only)
-  - Check Sindarian UI component usage compliance
+  - Check design system component usage compliance
   - If ui_library_mode = "fallback-only", check custom component WCAG 2.1 AA accessibility, responsive/layout fallback behavior, and design-token/theme fallback usage
   - For fallback-only mode, output ISSUE-XXX per violation plus a short note that frontend and qa-frontend own baseline implementation/testing coverage
   - Output: ISSUE-XXX for non-compliant usage

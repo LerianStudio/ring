@@ -369,14 +369,13 @@ postgresql:
 
 ### Lerian Helm Charts
 
-For Lerian-specific Helm chart creation (naming conventions, directory structure, ConfigMap/Secrets split, dual-mode KEDA/Deployment, AWS RolesAnywhere sidecar, port allocation, and all production patterns), use the dedicated skill and agent:
+For Lerian-convention Helm chart creation (naming conventions, directory structure, ConfigMap/Secrets split, dual-mode KEDA/Deployment, AWS RolesAnywhere sidecar, port allocation, and all production patterns), use the dedicated skill and agent:
 
 - **Skill:** `ring:creating-helm-charts` — Orchestrates Helm chart creation following Lerian conventions
 - **Agent:** `ring:helm` — Specialist agent with all Lerian Helm patterns
 - **Standards:** [`dev-team/docs/standards/helm/`](helm/index.md) — Complete Lerian Helm conventions (conventions, values, templates, dependencies, worker patterns)
-- **Reference charts:** `Documents/Lerian/helm/charts/` (production charts as source of truth)
 
-> **⚠️ DELEGATION:** When creating or modifying Helm charts for Lerian services, `ring:devops` MUST delegate to `ring:helm` via the `ring:creating-helm-charts` skill. The generic patterns above apply to non-Lerian charts only.
+> **⚠️ DELEGATION:** When creating or modifying Helm charts that follow Lerian conventions, `ring:devops` MUST delegate to `ring:helm` via the `ring:creating-helm-charts` skill. The generic patterns above apply to other charts only.
 
 ---
 

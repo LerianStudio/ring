@@ -7,13 +7,15 @@ Extends `qa-frontend.v2.md`. Load when dispatched with `mode: visual`.
 - Snapshot consistency across all component states
 - All breakpoints (mobile 375px, tablet 768px, desktop 1440px)
 - Dark mode / light mode variants (if applicable)
-- Component duplication check (sindarian-ui vs shadcn/radix — NEVER both)
+- Component duplication check (design-system vs shadcn/radix — NEVER both)
 
 ## Component Duplication Check (HARD GATE)
 
+<!-- Replace @your-org/design-system with your organization's design system package. -->
+
 ```bash
 # Detect if both UI libraries are imported
-grep -r "@lerianstudio/sindarian-ui" ./components ./app
+grep -r "@your-org/design-system" ./components ./app
 grep -r "@radix-ui\|shadcn" ./components ./app
 
 # If both found in same file → FAIL
@@ -108,7 +110,7 @@ export const Loading: Story = {
 
 | Library | Imports Found | Status |
 |---------|--------------|--------|
-| @lerianstudio/sindarian-ui | N files | [list] |
+| @your-org/design-system | N files | [list] |
 | @radix-ui / shadcn | N files | [list] |
 | Overlap | N files | ✅ None / ❌ Overlap at [files] |
 

@@ -27,7 +27,7 @@
   "interface": {
     "displayName": "Ring TW Team",
     "shortDescription": "Technical writing specialists for functional guides and API reference",
-    "longDescription": "Documentation specialists for the Lerian docs surface: a guide-writer for guides, tutorials, and conceptual content; an api-writer for endpoint reference and schemas; a docs-reviewer for voice, tone, structure, and accuracy. Skills enforce consistent voice/tone, structure, and quality across all Lerian documentation.",
+    "longDescription": "Documentation specialists: a guide-writer for guides, tutorials, and conceptual content; an api-writer for endpoint reference and schemas; a docs-reviewer for voice, tone, structure, and accuracy. Skills enforce consistent voice/tone, structure, and quality across all documentation.",
     "developerName": "Lerian Studio",
     "category": "Writing",
     "capabilities": [

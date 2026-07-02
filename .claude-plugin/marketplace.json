@@ -2,13 +2,13 @@
   "name": "ring",
   "description": "Lerian Studio plugin marketplace: Core software engineering skills (TDD, debugging, code review), specialized developer agents (Backend, DevOps, Frontend, QA, SRE) plus 12 code-review reviewers (9 default hard-gate reviewers and 3 conditional stack specialists), product planning workflows (8-gate pre-dev system), and technical writing specialists for documentation.",
   "owner": {
-    "name": "Presenter Name",
-    "email": "fred@fredamaral.com.br"
+    "name": "Lerian Studio",
+    "email": "contact@lerian.studio"
   },
   "plugins": [
     {
       "name": "ring-default",
-      "description": "Core skills library for the Lerian Team: TDD, code review, collaboration patterns, and proven techniques. Features parallel code review orchestration with 9 default reviewers plus triggered conditional specialists, and git shipping skills (ring:committing-changes, ring:opening-pull-requests, ring:shipping-changes) with scope allowlist enforcement. 25 essential skills for software engineering excellence, including plan authoring and execution.",
+      "description": "Core skills library from the Lerian Team: TDD, code review, collaboration patterns, and proven techniques. Features parallel code review orchestration with 9 default reviewers plus triggered conditional specialists, and git shipping skills (ring:committing-changes, ring:opening-pull-requests, ring:shipping-changes) with scope allowlist enforcement. 23 essential skills for software engineering excellence, including plan authoring and execution.",
       "version": "1.43.0",
       "source": {
         "source": "git-subdir",

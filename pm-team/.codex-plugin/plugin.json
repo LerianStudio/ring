@@ -28,7 +28,7 @@
   "interface": {
     "displayName": "Ring PM Team",
     "shortDescription": "Pre-dev planning workflows: PRD, TRD, OpenAPI contracts, schema design, phased plan",
-    "longDescription": "Structured pre-development workflow for the Lerian team. 4-gate orchestrator for small features (<2 days) and 8-gate orchestrator for large features (≥2 days). Each gate produces a versioned artifact (research.md, prd.md, feature-map.md, trd.md, openapi.yaml, schema.sql/schema.prisma, dependencies.md, plan.md) with human approval between gates.",
+    "longDescription": "Structured pre-development workflow. 4-gate orchestrator for small features (<2 days) and 8-gate orchestrator for large features (≥2 days). Each gate produces a versioned artifact (research.md, prd.md, feature-map.md, trd.md, openapi.yaml, schema.sql/schema.prisma, dependencies.md, plan.md) with human approval between gates.",
     "developerName": "Lerian Studio",
     "category": "Productivity",
     "capabilities": [

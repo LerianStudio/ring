@@ -1,6 +1,6 @@
 ---
 name: ring:creating-grafana-dashboards
-description: "Authoring Grafana dashboards for Lerian Go services from lib-observability telemetry (tracing, metrics, log), plus a reference mode for RED/USE panel patterns and Grafonnet templates. Sweep mode inventories telemetry, runs PM deliberation on themes/SLIs/alerts, authors Grafonnet libsonnet compiled to JSON, and installs a CI drift gate. Use when scaffolding dashboards. Skip when the service is non-Go or emits no telemetry."
+description: "Authoring Grafana dashboards for Go services instrumented with lib-observability telemetry (tracing, metrics, log), plus a reference mode for RED/USE panel patterns and Grafonnet templates. Sweep mode inventories telemetry, runs PM deliberation on themes/SLIs/alerts, authors Grafonnet libsonnet compiled to JSON, and installs a CI drift gate. Use when scaffolding dashboards. Skip when the service is non-Go or emits no telemetry."
 ---
 
 # Creating Grafana Dashboards (lib-observability, PM-team)

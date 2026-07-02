@@ -15,7 +15,7 @@ This module covers visual and snapshot testing patterns for React/Next.js applic
 | 1 | [Snapshot Testing Patterns](#snapshot-testing-patterns-mandatory) | toMatchSnapshot usage with Vitest |
 | 2 | [States Coverage](#states-coverage-mandatory) | All component states must be captured |
 | 3 | [Responsive Snapshots](#responsive-snapshots-mandatory) | Mobile, tablet, desktop viewports |
-| 4 | [Component Duplication Check](#component-duplication-check-mandatory) | Prevent recreating sindarian-ui components |
+| 4 | [Component Duplication Check](#component-duplication-check-mandatory) | Prevent recreating design-system components |
 
 **Meta-sections:** [Output Format (Gate 4 - Visual Testing)](#output-format-gate-4---visual-testing), [Anti-Rationalization Table](#anti-rationalization-table-visual-testing)
 
@@ -265,17 +265,18 @@ for (const viewport of VIEWPORTS) {
 
 ## Component Duplication Check (MANDATORY)
 
-**HARD GATE:** MUST NOT recreate components that exist in `@lerianstudio/sindarian-ui`.
+<!-- Replace @your-org/design-system with your organization's design system package. -->
+**HARD GATE:** MUST NOT recreate components that exist in `@your-org/design-system`.
 
 ### Detection Pattern
 
 Before creating any component in `components/ui/`:
 
 ```bash
-# Check if component exists in sindarian-ui
-grep -r "export.*{ComponentName}" node_modules/@lerianstudio/sindarian-ui/
+# Check if component exists in the design system
+grep -r "export.*{ComponentName}" node_modules/@your-org/design-system/
 
-# If found → Import from sindarian-ui
+# If found → Import from the design system
 # If NOT found → Create as shadcn/radix fallback in components/ui/
 ```
 
@@ -283,9 +284,9 @@ grep -r "export.*{ComponentName}" node_modules/@lerianstudio/sindarian-ui/
 
 ```tsx
 describe('Component duplication check', () => {
-    it('MUST NOT duplicate sindarian-ui components', () => {
-        // List of components available in sindarian-ui
-        const sindarianComponents = [
+    it('MUST NOT duplicate design-system components', () => {
+        // List of components available in the design system
+        const designSystemComponents = [
             'Button', 'Input', 'Select', 'FormField', 'FormItem',
             'FormLabel', 'FormControl', 'FormMessage', 'FormTooltip',
             'Dialog', 'Sheet', 'Popover', 'Tooltip', 'Toast',
@@ -293,7 +294,7 @@ describe('Component duplication check', () => {
             'Accordion', 'Separator', 'ScrollArea', 'Skeleton',
         ];
 
-        // Check that project components/ui/ doesn't duplicate sindarian-ui
+        // Check that project components/ui/ doesn't duplicate the design system
         // This is a documentation/review check, not a runtime test
     });
 });
@@ -303,9 +304,9 @@ describe('Component duplication check', () => {
 
 | Check | How to Verify |
 |-------|---------------|
-| No duplicated components | `ls components/ui/` vs sindarian-ui exports |
-| Fallback components documented | Each shadcn component has comment: "Fallback: not in sindarian-ui" |
-| Import paths correct | sindarian-ui → `@lerianstudio/sindarian-ui`, fallback → `@/components/ui/` |
+| No duplicated components | `ls components/ui/` vs design-system exports |
+| Fallback components documented | Each shadcn component has comment: "Fallback: not in design-system" |
+| Import paths correct | design-system → `@your-org/design-system`, fallback → `@/components/ui/` |
 
 ---
 
@@ -332,7 +333,7 @@ describe('Component duplication check', () => {
 
 ### Component Duplication Check
 
-| Component in components/ui/ | In sindarian-ui? | Status |
+| Component in components/ui/ | In design-system? | Status |
 |-----------------------------|------------------|--------|
 | DateRangePicker | No | PASS (valid fallback) |
 | Button | Yes | FAIL (duplicate!) |
@@ -344,7 +345,7 @@ describe('Component duplication check', () => {
 | All snapshots pass | PASS | 0 failures |
 | States coverage | PASS | All applicable states |
 | Responsive coverage | PASS | 3 viewports |
-| No sindarian duplication | PASS | 0 duplicates |
+| No design-system duplication | PASS | 0 duplicates |
 ```
 
 ---
@@ -357,7 +358,7 @@ describe('Component duplication check', () => {
 | "We'll test visually in the browser" | Manual testing doesn't catch regressions. | **Add snapshot tests** |
 | "Only default state matters" | Error and loading states are user-facing too. | **Test all states** |
 | "Mobile layout is the same" | Responsive issues are common and subtle. | **Test all viewports** |
-| "This shadcn component is better" | sindarian-ui is PRIMARY. Don't duplicate. | **Check sindarian-ui first** |
+| "This shadcn component is better" | design-system is PRIMARY. Don't duplicate. | **Check design-system first** |
 | "Snapshot diffs are too noisy" | Noisy diffs indicate untested refactors. | **Review and update snapshots** |
 
 ---

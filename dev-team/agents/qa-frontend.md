@@ -135,7 +135,7 @@ vitest run --coverage
 |----------|--------|
 | Testing library choice not specified | Check PROJECT_RULES.md → default Vitest + RTL |
 | UI state not documented in ux-criteria.md | STOP. Ask product-designer for state definition. |
-| Component duplication (sindarian-ui + shadcn) | Flag as FAIL. Cannot import from both. |
+| Component duplication (design-system + shadcn/radix) | Flag as FAIL. Cannot import from both. |
 
 ## Output Format
 
