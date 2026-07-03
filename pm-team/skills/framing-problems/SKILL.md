@@ -1,6 +1,6 @@
 ---
 name: ring:framing-problems
-description: "Framing a rough idea, request, or complaint into a validated problem statement BEFORE designing a solution: separates symptom from root cause, demands evidence, names the user + job + context, defines success metrics and scope, and converts to How-Might-We questions. Forbids jumping to a solution or solving a stated symptom. Use at the start of a feature, when a request arrives as a solution ('build X'), or when the problem feels fuzzy. Skip when the problem is already framed and validated."
+description: "Framing a rough idea, request, feature, or complaint into a validated problem statement BEFORE any design or solution: separates symptom from root cause, demands evidence (marks assumptions), names user + job + context, sets a behavior/outcome success metric and scope, converts to How-Might-We. Refuses 'build X' / 'add feature Y' as the brief; forbids jumping to a solution. Use the moment a request arrives as a solution or feature ('build a chatbot', 'add X', 'start the design for Y'), at feature kickoff, or when the problem feels fuzzy. Skip when already framed and validated."
 ---
 
 # Framing Problems

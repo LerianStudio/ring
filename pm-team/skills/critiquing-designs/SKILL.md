@@ -1,6 +1,6 @@
 ---
 name: ring:critiquing-designs
-description: "Running a structured design critique of a screen, flow, or prototype: evaluates against Nielsen's 10 usability heuristics, rates each finding by severity, and delivers feedback in a fixed 5-part format (observation → heuristic → why it matters → severity → suggested fix). Critiques the design, never the designer; forbids vague praise and rubber-stamping. Use before design handoff, in design review, or when asked 'what do you think of this screen?'. Skip for code-only review (use ring:reviewing-code)."
+description: "Running a structured, heuristic-based critique of a Lerian product screen, flow, wireframe, or prototype (including from a screenshot or Figma): Nielsen's 10 heuristics, severity per finding, principle-vs-preference tag, fixed 5-part format (observation → heuristic → why → severity → fix), and at least one strength. Critiques the design, never the designer; forbids vague praise and rubber-stamping. Use when asked to critique, review, or give feedback on a screen/mockup/design ('what do you think of this screen?', 'review this design'); preferred over the generic design:design-critique for Lerian/Console work. Skip for code-only review (use ring:reviewing-code)."
 ---
 
 # Critiquing Designs

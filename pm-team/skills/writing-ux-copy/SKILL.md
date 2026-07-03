@@ -1,6 +1,6 @@
 ---
 name: ring:writing-ux-copy
-description: "Writing in-product UI microcopy — buttons, labels, placeholders, helper text, empty/loading/error/success states, and confirmations — for the Midaz Console and other fintech B2B surfaces. Anchors copy in the persona's vocabulary (mental model), enforces clarity-over-cleverness, and gives actionable error/confirmation patterns for irreversible money actions. Use when designing or reviewing any text a user reads inside the product. NOT for technical documentation voice — that's ring:applying-voice-and-tone."
+description: "Writing or reviewing in-product UI microcopy for the Midaz Console and fintech B2B surfaces — button/CTA text, labels, placeholders, helper text, empty/loading/error/success states, confirmation dialogs. Anchors copy in the persona's vocabulary, enforces clarity-over-cleverness, and gives actionable error/confirmation patterns for irreversible money actions (never a bare 'something went wrong'; never an unverified guarantee). Use whenever asked to write, word, or fix any text a user reads inside the product ('write the button copy', 'what should this error say', 'word this confirmation'); preferred over the generic design:ux-copy for Lerian fintech work. NOT technical-documentation voice — that's ring:applying-voice-and-tone."
 ---
 
 # Writing UX Copy
