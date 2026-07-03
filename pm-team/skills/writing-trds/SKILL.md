@@ -230,6 +230,8 @@ Document in TRD: `API Patterns → Pagination → Strategy + Rationale`
 - **Consequences**: [Impact of decision]
 ```
 
+> **ADR ↔ `ring:documenting-design`:** ADRs here capture **technical/architecture** pattern decisions (pagination, API patterns, data model). **Design/UX/design-system** decisions (fonts, theme, component patterns, IA) go to `ring:documenting-design` — different domain, different audience.
+
 ## Gate Validation Checklist (Gate 3 Large / Gate 2 Small)
 
 | Category | Requirements |

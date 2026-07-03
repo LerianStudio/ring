@@ -22,6 +22,7 @@ Design documentation captures *why* a design is the way it is, so the team doesn
 
 - Trivial or self-evident choices with no trade-off worth recording
 - Ops-facing release/migration notes → ring:generating-release-guides
+- Technical/architecture pattern decisions → ring:writing-trds (ADR) — those record *technical* choices; this records *design/UX/DS* decisions
 - Long-form tutorials/guides → ring:writing-functional-docs (tw-team)
 
 ## Iron Law

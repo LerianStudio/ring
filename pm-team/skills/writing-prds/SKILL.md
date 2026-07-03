@@ -93,6 +93,8 @@ AskUserQuestion: "Will an operator need a consolidated view of this feature's da
 | **Scope** | In-scope features explicit; out-of-scope stated; boundaries clear |
 | **Technology-Free** | Zero technology names; zero implementation details; zero framework mentions |
 
+> **Problem Clarity ↔ `ring:framing-problems`:** the problem is *produced* upstream by a `ring:framing-problems` Problem Frame (symptom vs. root cause, evidence, HMW). This gate only *verifies* that output — if a Problem Frame exists, reuse it rather than re-framing here.
+
 **Gate Result:** ✅ PASS → next gate | ❌ FAIL (re-work technical content or missing requirements)
 
 ## Output
