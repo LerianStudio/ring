@@ -1,7 +1,7 @@
 {
   "name": "ring-default",
-  "version": "1.38.0",
-  "description": "Core skills library for the Lerian Team: TDD, code review, collaboration patterns, and proven techniques. Features parallel code review orchestration with 9 default reviewers plus triggered conditional specialists. 16 essential skills for software engineering excellence, including plan authoring and execution.",
+  "version": "1.43.0",
+  "description": "Core skills library for the Lerian Team: TDD, code review, collaboration patterns, and proven techniques. Features parallel code review orchestration with 9 default reviewers plus triggered conditional specialists. 22 essential skills for software engineering excellence, including plan authoring and execution.",
   "author": {
     "name": "Lerian Studio",
     "email": "fred@lerian.studio",

@@ -178,3 +178,19 @@ state.gate_progress.migration_safety_verification = {
    - **Per-task checklist `done=true` flip:** on the same push-to-develop event, flip EACH completed task's checklist item `done=true` (`task_matches[].done_dispatch`). ⛔ IDEMPOTENCY (MANDATORY): the checklist push MERGES BY `checklist_item_id` — instruct Gandalf to read the card's `checklist` array, set the matching item's `done`, and PATCH; it MUST NEVER replace the whole array (that would drop sibling items). A retried push re-asserts the same item id safely. Skipped tasks (`tasks[j].status == "blocked"`) stay `done=false`. Same terminal trigger as the epic `done` status, NOT Gate 9. Async fire-and-forget.
    - **Deferred reconciliation:** drain the `state.lerian_map_sync.pending` queue (oldest → newest) and do one batched non-blocking verification of outstanding `dispatched` task_ids, flipping any confirmed ones to `synced`; clear `degraded` when nothing is `pending`.
    - **End-of-cycle report:** print outstanding items, e.g. `⚠️ Lerian Map Sync: 2 dispatched (awaiting confirmation), 1 pending (Gandalf was down)`. All Map I/O here is non-blocking — see SKILL.md '## Lerian Map Sync (optional)'.
+
+### Step 12.2: Operational Risk Review (optional, opt-in)
+
+**OPTIONAL and opt-in — never automatic, never blocking.** After the cycle report is printed, offer a review of the flows just built for operational recovery gaps:
+
+```text
+Offer once, after Step 12.1:
+  "This cycle built <N> flow(s). Run ring:reviewing-operational-risk (Mode B) to
+   map stuck-state failure modes and produce runbooks / gap specs? (y/n)"
+
+- y → Skill("ring:reviewing-operational-risk") in plan-context mode (reads this cycle's
+      plan.md + epic artifacts; no full-repo exploration needed).
+- n → done. The cycle is already complete; this offer adds nothing to gate state.
+```
+
+Declining has zero effect on cycle completion — Step 12.1 already finished the cycle. Do NOT gate, block, or re-prompt.

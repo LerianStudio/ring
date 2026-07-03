@@ -6,7 +6,7 @@
 
 **Proven engineering practices, enforced through skills.**
 
-Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **4 active plugins**, **67 skills**, and **33 agents** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
+Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **4 active plugins**, **75 skills**, and **33 agents** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
 
 ## ✨ Why Ring?
 
@@ -21,7 +21,7 @@ Without Ring, AI assistants often:
 Ring solves this by:
 
 - **Enforcing proven workflows** - Test-driven development, systematic debugging, proper planning
-- **Providing 67 specialized skills** (16 core + 33 dev-team + 14 product planning + 4 technical writing)
+- **Providing 75 specialized skills** (22 core + 35 dev-team + 14 product planning + 4 technical writing)
 - **33 specialized agents** - 2 planning/analysis + 24 developer/reviewer + 4 product research + 3 technical writing
 - **Automating skill discovery** - Skills load automatically at session start
 - **Preventing common failures** - Built-in anti-patterns and mandatory checklists
@@ -225,7 +225,7 @@ When you start a new Claude Code session with Ring installed, you'll see:
 - ring:test-driven-development (RED-GREEN-REFACTOR cycle)
 - ring:reviewing-code (9 defaults + conditional specialist dispatch)
 - ring:exploring-codebases (Two-phase codebase exploration)
-... and 73 more skills
+... and 71 more skills
 ```
 
 ## 🎯 Core Skills
@@ -248,45 +248,51 @@ GREEN → Minimal code → Watch it pass
 REFACTOR → Clean up → Stay green
 ```
 
-## 📚 All 67 Skills (Across 4 Plugins)
+## 📚 All 75 Skills (Across 4 Plugins)
 
-### Core Skills (ring-default plugin - 16 skills)
+### Core Skills (ring-default plugin - 22 skills)
 
-**Testing & Quality (2):**
+**Testing & Quality (3):**
 
 - `ring:test-driven-development` - Write test first, watch fail, minimal code
 - `ring:fixing-lint` - Parallel lint fixing with agent dispatch
+- `ring:cleaning-comments` - Remove redundant, stale, or low-value comments while preserving intent-revealing ones
 
-**Collaboration & Planning (5):**
+**Collaboration & Planning (8):**
 
 - `ring:reviewing-code` - **Parallel 9 defaults + conditional specialist dispatch** with severity-based handling
 - `ring:creating-worktrees` - Isolated development
 - `ring:committing-changes` - Smart commit organization with atomic grouping, conventional commits, and trailers
 - `ring:writing-plans` - Author phased implementation plans (phase → epic → task) from a spec; first phase detailed into dispatch-ready tasks, later phases epic-level for rolling-wave elaboration
 - `ring:executing-plans` - Rolling-wave execution of a phased plan: implement the detailed phase, checkpoint with the user, elaborate the next phase against the real codebase, repeat
+- `ring:dispatching-workflows` - Rolling-wave execution where each phase runs as a reviewed multi-agent workflow harness (mandatory in-harness review + adversarial contrarian pass) before returning verified work
+- `ring:analyzing-options` - Structured comparison of approaches with effort estimates and a recommendation
+- `ring:generating-pr-descriptions` - Generate PR descriptions from branch diff analysis
 
-**Meta Skills (3):**
+**Meta Skills (4):**
 
 - `ring:using-ring` - Mandatory skill discovery
 - `ring:writing-skills` - TDD for documentation
 - `ring:testing-skills-with-subagents` - Skill validation
+- `ring:engineering-prompts` - Engineer and refine prompts for skills and agents
 
 **Integration (1):**
 
 - `ring:delegating-to-gandalf` - Send tasks to Gandalf (AI team member) via webhook for Slack, Google Workspace, and Jira interactions
 
-**Session & Learning (4):**
+**Session & Learning (5):**
 
 - `ring:exploring-codebases` - Two-phase codebase exploration
 - `ring:generating-release-guides` - Generate Ops Update Guide from git diff analysis
 - `ring:visualizing` - Generate self-contained HTML pages to visually explain systems, code changes, and data
 - `ring:creating-handoffs` - Create handoff documents capturing session state for seamless context-clear and resume
+- `ring:searching-code` - Targeted code search patterns and dispatch strategies
 
 **Audit & Readiness (1):**
 
 - `ring:auditing-production-readiness` - 44-dimension production readiness audit; runs explorers in batches of up to 10, appends incrementally to a single report; output: scored report (0-430, max 440 with multi-tenant) with severity ratings. See [default/skills/auditing-production-readiness/SKILL.md](default/skills/auditing-production-readiness/SKILL.md) for invocation and implementation details.
 
-### Developer Skills (ring-dev-team plugin - 33 skills)
+### Developer Skills (ring-dev-team plugin - 35 skills)
 
 **Orchestration & Refactoring (7):**
 
@@ -316,7 +322,7 @@ REFACTOR → Clean up → Stay green
 - `ring:writing-dev-reports` - Assertiveness scoring and metrics
 - `ring:verifying-code` - Atomic Go code verification with MERGE_READY/NEEDS_FIX verdict
 
-**Migration & Reference (6):**
+**Migration & Reference (14):**
 
 - `ring:using-lib-commons` - Comprehensive reference for lib-commons v5.0.2 (Lerian's shared Go library with 30+ packages)
 - `ring:using-runtime` - Deep reference and 6-angle audit for lib-observability/runtime: SafeGo, panic recovery, observability trident, policy selection, framework integration. Catches naked goroutine launches that cause silent production failures.
@@ -324,6 +330,14 @@ REFACTOR → Clean up → Stay green
 - `ring:migrating-to-lib-systemplane` - Migrate Lerian Go services from .env/YAML config to systemplane (database-backed hot-reloadable config)
 - `ring:generating-llms-txt` - Generate or audit llms.txt files following llmstxt.org spec for AI-friendly repository entry points
 - `ring:applying-licenses` - Repository license management (Apache 2.0, Elastic v2, Proprietary)
+- `ring:adopting-lib-commons-huma-wrapper` - Adopt the lib-commons/v5 shared Huma (OAS 3.1) OpenAPI wrapper + RFC 9457 problem model
+- `ring:applying-composition-patterns` - Apply Go composition patterns (interfaces, embedding, functional options)
+- `ring:migrating-to-lib-observability` - Migrate off deprecated lib-commons observability imports to lib-observability
+- `ring:using-lib-observability` - Reference + sweep for lib-observability (log, metrics, zap, redaction, constants)
+- `ring:using-lib-streaming` - Reference + sweep for lib-streaming (business events, outbox, producers, CloudEvents)
+- `ring:using-lib-systemplane` - Reference + sweep for lib-systemplane (runtime config, hot-reloadable knobs)
+- `ring:using-outbox` - Transactional outbox pattern via lib-commons for reliable event publishing
+- `ring:using-tracing` - Reference + sweep for lib-observability tracing (spans, context propagation, OTel)
 
 **Security (1):**
 
@@ -452,10 +466,10 @@ ring/                                  # Monorepo root
 ├── .claude-plugin/
 │   └── marketplace.json              # Multi-plugin marketplace config (4 active plugins)
 ├── default/                          # Core Ring plugin (ring-default)
-│   ├── skills/                       # 16 core skills
+│   ├── skills/                       # 22 core skills
 │   │   ├── skill-name/
 │   │   │   └── SKILL.md             # Skill definition with frontmatter
-│   │   └── shared-patterns/         # Universal patterns (15 patterns)
+│   │   └── shared-patterns/         # Universal patterns (10 patterns)
 │   ├── hooks/                       # Session initialization
 │   │   ├── hooks.json              # Hook configuration
 │   │   ├── session-start.sh        # Loads skills at startup
@@ -464,7 +478,7 @@ ring/                                  # Monorepo root
 │   │   ├── review-slicer.md             # Review slicing for large PRs (`ring:review-slicer`)
 │   │   └── codebase-explorer.md         # Deep architecture analysis (`ring:codebase-explorer`)
 │   └── docs/                       # Documentation
-├── dev-team/                      # Developer Agents plugin (ring-dev-team) - 33 skills, 24 agents
+├── dev-team/                      # Developer Agents plugin (ring-dev-team) - 35 skills, 24 agents
 │   └── agents/                      # 24 specialized developer/reviewer agents
 │       ├── backend-go.md       # Go backend specialist (`ring:backend-go`)
 │       ├── backend-ts.md   # TypeScript/Node.js backend specialist (`ring:backend-ts`)

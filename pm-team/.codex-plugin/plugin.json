@@ -1,6 +1,6 @@
 {
   "name": "ring-pm-team",
-  "version": "0.32.1",
+  "version": "0.33.0",
   "description": "Product team workflow: 14 skills + 4 research agents. Pre-dev planning with 4-gate (small features) and 8-gate (large features) orchestrators producing machine-consumable specs (prd, trd, openapi.yaml, schema, plan.md), plus standalone mapping-streaming-events discovery and UX validation. Includes parallel research agents, specialized code analysis, and Product Designer.",
   "author": {
     "name": "Lerian Studio",

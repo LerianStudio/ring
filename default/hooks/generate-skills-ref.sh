@@ -203,12 +203,36 @@ main() {
     umask "$old_umask"
     trap "rm -f '$tmpfile'" EXIT INT TERM HUP
 
+    # Detect install layout once (mirrors generate-skills-ref.py main()):
+    #   - Monorepo: <root>/<plugin>/skills exist as siblings.
+    #   - Installed cache: each plugin is flattened into
+    #     <marketplace>/ring-<plugin>/<version>/skills; plugins are NOT siblings.
+    local marketplace_dir="${SCRIPT_DIR}/../../.."
+    local monorepo=0
+    [[ -d "${REPO_ROOT}/default/skills" ]] && monorepo=1
+
     local found_any_plugin=0
     local plugin
     for plugin in "${PLUGINS[@]}"; do
-        local skills_dir="${REPO_ROOT}/${plugin}/skills"
+        local skills_dir=""
+        if [[ "$monorepo" -eq 1 ]]; then
+            skills_dir="${REPO_ROOT}/${plugin}/skills"
+        else
+            # Pick the highest installed version with portable numeric ordering
+            # by major.minor.patch (`sort -V` is absent on BSD/macOS), matching
+            # generate-skills-ref.py:_max_version_dir() so both paths agree.
+            # if/fi (not `&& basename`) keeps the loop's exit status 0 so
+            # `set -e` + `pipefail` don't abort the script on a non-matching glob.
+            local newest_ver
+            newest_ver=$(for d in "${marketplace_dir}/ring-${plugin}"/*/skills; do
+                             if [[ -d "$d" ]]; then basename "$(dirname "$d")"; fi
+                         done | sort -t. -k1,1n -k2,2n -k3,3n | tail -1)
+            if [[ -n "$newest_ver" ]]; then
+                skills_dir="${marketplace_dir}/ring-${plugin}/${newest_ver}/skills"
+            fi
+        fi
         # Mirror Python behavior: silently skip plugins without a skills/ dir.
-        if [[ ! -d "$skills_dir" ]]; then
+        if [[ -z "$skills_dir" || ! -d "$skills_dir" ]]; then
             continue
         fi
         found_any_plugin=1

@@ -100,7 +100,9 @@ If the snippet exists to "save the implementer time", delete it. If it exists be
 > **For implementers:** Use ring:executing-plans (rolling wave: dispatch each
 > wave — a phase or one epic, your choice — as a workflow → review → user
 > checkpoint → detail the next phase against the real code → repeat),
-> or ring:running-dev-cycle for the full subagent-orchestrated workflow.
+> ring:dispatching-workflows to run each phase as a reviewed multi-agent
+> workflow (review + contrarian baked in), or ring:running-dev-cycle for the
+> full subagent-orchestrated workflow.
 > This document is the living source of truth — task elaboration for later
 > phases is written back into it during execution.
 
@@ -194,19 +196,33 @@ If you find issues, fix them inline. No need to re-review — just fix and move 
 
 **For high-stakes plans** (large surface, multiple authors, critical path): also dispatch a plan-document reviewer subagent using the template in `plan-document-reviewer-prompt.md`.
 
+## Lerian Map Card Creation (optional)
+
+**Standalone invocations only, opt-in.** SKIP this section entirely when invoked from pre-dev (output path `docs/pre-dev/{feature}/plan.md`): there `ring:planning-large-features` / `ring:planning-small-features` own card creation as their mandatory final step and running it here too would double-create. This applies only to ad-hoc plans saved under `docs/plans/`.
+
+After saving the plan, ask the user (via the question/ask tool the harness provides) whether to open the plan's epics as cards on the Lerian Map — **Yes** / **No**, default **No**. It is opt-in because an ad-hoc plan may not map to a tracked Feature, and forcing cards onto throwaway work is wrong.
+
+**If yes:** do NOT reimplement the flow — run `ring:running-dev-cycle` → `## Lerian Map Sync (optional)` → `### Discovery handshake` steps 1–5 exactly as written (all Map I/O through `ring:delegating-to-gandalf`, never a direct Map API call): resolve product by repo → Feature by name (AskUserQuestion if ambiguous) → the feature's **`Desenvolvimento`** milestone BY NAME → one epic-card per plan epic (checklist = that epic's task names, matched by name + `[map:#<card_id>]` tag, create only the missing) → preview the create plan ONCE + confirm → create and auto-inject the `[map:#<card_id>]` epic tags into plan.md.
+
+**Durable mapping (no state file):** the injected `[map:#<card_id>]` epic tags ARE the mapping — standalone plans have no `workflow-state.json`, and `ring:running-dev-cycle`'s discovery handshake matches cards by that tag on its fallback path, so a later dev cycle reuses them without re-creating. No `lerianMap` JSON block is written for ad-hoc plans.
+
+**Feature/milestone unresolvable or Map unreachable → STOP and surface.** MUST NOT create the Feature or any milestone (they come from the Map template). plan.md is already saved, so the plan itself is unaffected — the user retries or proceeds without cards.
+
 ## Execution Handoff
 
-After saving the plan, offer execution choice:
+After saving the plan, announce the save, then collect the execution choice **using the question/ask tool the harness provides** (e.g. `AskUserQuestion` in Claude Code). If no question tool is available, present the options as a prose prompt and ask which to use. The three options:
 
-> Plan complete and saved to `docs/plans/<filename>.md`. Two execution options:
+> Plan complete and saved to `docs/plans/<filename>.md`. Pick how to execute it:
 >
-> **1. Rolling-Wave Execution (this session)** — Use ring:executing-plans: you supervise while one workflow per wave-unit (a whole phase, or one epic at a time — you choose at start) implements its tasks; you review what returns, checkpoint, then elaborate the next phase into tasks against the real landed code, and repeat. Best for iterative delivery with course-correction between waves.
+> **1. Rolling-Wave Execution (this session)** — Use ring:executing-plans: you supervise while one workflow per wave-unit (a whole phase, or one epic at a time — you choose at start) implements its tasks; you review what returns, checkpoint, then elaborate the next phase into tasks against the real landed code, and repeat. Lightest: one supervised subagent per wave, reviewed after it returns. Best for iterative delivery with course-correction between waves.
 >
-> **2. Subagent-Orchestrated (ring:running-dev-cycle)** — lean backend cycle (Gate 0/8/9) with parallel specialist dispatch. Best for production work that must pass through the full review pool.
+> **2. Reviewed Multi-Agent Workflows (this session)** — Use ring:dispatching-workflows: the same rolling wave, but each phase runs as a multi-agent workflow harness that implements, reviews, and runs an adversarial contrarian pass internally before returning verified work. Best when you want review and a contrarian baked into every wave, without the full gated cycle.
 >
-> Which approach?
+> **3. Subagent-Orchestrated (ring:running-dev-cycle)** — lean backend cycle (Gate 0/8/9) with parallel specialist dispatch. Heaviest: full review pool per epic. Best for production work that must pass through the full review pool.
 
 **If Rolling-Wave chosen:** Continue with ring:executing-plans in this session.
+
+**If Reviewed Multi-Agent Workflows chosen:** Continue with ring:dispatching-workflows in this session.
 
 **If Subagent-Orchestrated chosen:** Hand off to ring:running-dev-cycle, which owns implementation across the lean cycle (Gate 0 per task, Gates 8/9 per epic, phase boundaries per phase).
 
@@ -223,6 +239,7 @@ Before marking the plan complete:
 - [ ] Contract consistency across epics
 - [ ] Self-review checklist applied
 - [ ] Plan saved to `docs/plans/YYYY-MM-DD-<feature-name>.md` (or `docs/pre-dev/{feature}/plan.md` when invoked from pre-dev)
+- [ ] Lerian Map cards offered (standalone only; skipped when invoked from pre-dev)
 - [ ] Execution handoff offered
 
 ## Worked Example

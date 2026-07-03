@@ -13,7 +13,7 @@
 
 ## Overview
 
-Ring is a **Claude Code plugin marketplace** that provides a comprehensive skills library and workflow system with **4 active plugins** (67 skills, 33 agents). It extends Claude Code's capabilities through structured, reusable patterns that enforce proven software engineering practices across the software delivery value chain: Product Planning → Development → Documentation.
+Ring is a **Claude Code plugin marketplace** that provides a comprehensive skills library and workflow system with **4 active plugins** (75 skills, 33 agents). It extends Claude Code's capabilities through structured, reusable patterns that enforce proven software engineering practices across the software delivery value chain: Product Planning → Development → Documentation.
 
 Beyond Claude Code, each Ring plugin ships native install manifests for Codex (`<plugin>/.codex-plugin/`), Cursor (`<plugin>/.cursor-plugin/`), and OpenCode (`<plugin>/.opencode/`), plus a `ring-install.sh` symlink installer for local-dev workflows targeting Claude Code, Factory AI, OpenCode, and Codex.
 
@@ -70,8 +70,8 @@ _Versions managed in `.claude-plugin/marketplace.json`_
 
 | Plugin               | Description                          | Components                       |
 | -------------------- | ------------------------------------ | -------------------------------- |
-| **ring-default**     | Core skills library                  | 16 skills, 2 agents               |
-| **ring-dev-team**    | Developer agents                     | 33 skills, 24 agents              |
+| **ring-default**     | Core skills library                  | 22 skills, 2 agents               |
+| **ring-dev-team**    | Developer agents                     | 35 skills, 24 agents              |
 | **ring-pm-team**     | Product planning workflows           | 14 skills, 4 agents               |
 | **ring-tw-team**     | Technical writing specialists        | 4 skills, 3 agents                |
 
