@@ -586,7 +586,7 @@ function Prune-PerFileStale {
             # Only prune symlinks that point into our Ring directory
             $ringDirNormalized = ($script:RingDir -replace '\\', '/').TrimEnd('/') + '/'
             $linkTargetNormalized = $linkTarget -replace '\\', '/'
-            if (-not $linkTargetNormalized.StartsWith($ringDirNormalized)) { continue }
+            if (-not $linkTargetNormalized.StartsWith($ringDirNormalized, [System.StringComparison]::OrdinalIgnoreCase)) { continue }
             # Check if the target still exists (dangling symlink)
             if (Test-Path $linkTarget) { continue }
             Remove-SafeItem $item.FullName
@@ -925,7 +925,9 @@ function Test-NeedsBuild {
 }
 
 function Invoke-Build {
-    Test-RequiredCommand "python" "Codex frontmatter transform"
+    if (-not $script:DryRunMode) {
+        Test-RequiredCommand "python" "Codex frontmatter transform"
+    }
     Write-Section "Build .ring-build\ (opencode + codex)"
 
     Invoke-CleanBuild
@@ -1045,7 +1047,7 @@ function Remove-PerFileSymlinks {
             $target = if ($item.Target -is [array]) { $item.Target[0] } else { $item.Target }
             $ringDirNormalized = ($script:RingDir -replace '\\', '/').TrimEnd('/') + '/'
             $targetNormalized = $target -replace '\\', '/'
-            if ($targetNormalized.StartsWith($ringDirNormalized)) {
+            if ($targetNormalized.StartsWith($ringDirNormalized, [System.StringComparison]::OrdinalIgnoreCase)) {
                 Remove-SafeItem $item.FullName
                 Write-Ok "Removed: $sub/$($item.Name)"
                 $script:Removed++
@@ -1110,7 +1112,7 @@ function Remove-TopLevelSymlink {
     $buildDirNormalized = ($script:BuildDir -replace '\\', '/').TrimEnd('/') + '/'
     $ringDirNormalized = ($script:RingDir -replace '\\', '/').TrimEnd('/') + '/'
 
-    if ($linkTargetNormalized.StartsWith($buildDirNormalized) -or $linkTargetNormalized.StartsWith($ringDirNormalized)) {
+    if ($linkTargetNormalized.StartsWith($buildDirNormalized, [System.StringComparison]::OrdinalIgnoreCase) -or $linkTargetNormalized.StartsWith($ringDirNormalized, [System.StringComparison]::OrdinalIgnoreCase)) {
         Remove-SafeItem $item.FullName
         Write-Ok "Removed: $Label"
         $script:Removed++
