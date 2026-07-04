@@ -49,6 +49,7 @@ All code changes go through `Task(subagent_type=...)`. Announce at start: "Using
 |------|---------|-------|-------|---------|
 | 0 | task | ring:implementing-tasks | ring:frontend / ring:ui-engineer / ring:bff-ts | TDD, coverage, accessibility, visual/E2E/perf checks, local runtime |
 | 0.5 | task (conditional) | ring:applying-composition-patterns | ring:frontend | Composition refactoring when complexity signals detected |
+| 0.6 | task (conditional, UI) | ring:applying-design-system | ring:ui-engineer / ring:frontend | Design-system compliance sweep on implemented UI (Geist, two-layer tokens, viewports, Sindarian) |
 | 7 | epic | ring:reviewing-code | 9 defaults + triggered specialists via ring:reviewing-code | Code review |
 | 8 | task | ring:validating-acceptance-criteria | User | Acceptance sign-off |
 
@@ -173,6 +174,23 @@ If no signals are detected, skip this gate entirely (zero overhead).
 - Coverage after refactoring MUST be >= Gate 0 coverage
 - Behavior MUST NOT change — refactor structure only (same props in = same render out)
 
+## Gate 0.6: Design System Compliance (Conditional — UI tasks)
+
+After Gate 0 (and Gate 0.5 if it ran), for tasks that touch UI, verify the **implemented** components against the locked Console design-system decisions. This re-verifies on real code what `ring:planning-large-features` Gate 2.5 validated on wireframes/criteria — closing the pre-dev → dev loop. Skip for non-UI tasks (pure hooks/BFF/logic with no rendered surface).
+
+### When it runs
+- Changed files include `.tsx` / `.jsx` / `.css`, OR the task implements a rendered component/screen.
+
+### How
+1. `Skill("ring:applying-design-system")` — load the design-system skill.
+2. Run its **sweep mode** over the changed UI files, checking the locked decisions: Geist (no Inter), two-layer HSL tokens (no hardcoded hex), viewports 375/768/1280 + 1400px cap, custom theme provider (default light, per-tenant accent), and `ui_library_mode` (Sindarian UI vs fallback).
+3. Report violations by severity (critical / major / minor) with `file:line` + fix.
+
+### Completion
+- No unresolved **critical/major** DS violations → PASS.
+- Minor violations documented (backlog) → PASS with note.
+- Critical/major unresolved → STOP, dispatch `ring:ui-engineer`/`ring:frontend` to fix, re-sweep (same contract as any Gate 0 failure).
+
 ## Gate 7: Reviewers
 
 Invoke `Skill("ring:reviewing-code")`. The ring:reviewing-code skill dispatches its 9 default reviewers plus triggered conditional specialists in parallel and applies its own pass/fail rules.
@@ -183,6 +201,7 @@ Invoke `Skill("ring:reviewing-code")`. The ring:reviewing-code skill dispatches 
 |------|-----------------------|
 | 0 | TDD RED captured (behavioral) + GREEN passes; visual: implementation complete |
 | 0.5 | Conditional: no complexity signals OR refactored + tests pass + coverage >= Gate 0 |
+| 0.6 | Conditional (UI): no unresolved critical/major DS violations (Geist/tokens/viewports/Sindarian); minors documented |
 | 7 | ring:reviewing-code PASS (all 9 defaults and triggered specialists) |
 | 8 | Explicit "APPROVED" from user |
 
@@ -190,7 +209,7 @@ Former Gates 1-6 checks are owned by Gate 0 implementation and local verificatio
 
 ## State Management
 
-State: `docs/ring:running-dev-cycle-frontend/current-cycle.json` (state schema v2.0.0).
+State: `docs/ring-dev-cycle-frontend/current-cycle.json` (state schema v2.0.0). *(Windows-safe path — no `:` in directory names.)*
 
 Write after EVERY gate. If write fails → STOP.
 
