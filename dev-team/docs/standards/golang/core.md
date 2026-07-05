@@ -859,8 +859,8 @@ Lerian uses three license types, chosen per-app. The actual header text MUST mat
 | License | SPDX Identifier | When Used |
 | ------- | --------------- | --------- |
 | Apache 2.0 | `Apache-2.0` | Open source projects (e.g., Core one core) |
-| Elastic License v2 | `Elastic-2.0` | Source-available Lerian products |
-| Proprietary | `LicenseRef-Lerian-Proprietary` | Internal/closed repositories |
+| Elastic License v2 | `Elastic-2.0` | Source-available products |
+| Proprietary | `LicenseRef-Proprietary` | Internal/closed repositories |
 
 ### Required Format: Apache 2.0
 
@@ -892,7 +892,7 @@ package yourpackage
 package yourpackage
 ```
 
-### Required Format: Proprietary (Lerian Studio General License)
+### Required Format: Proprietary
 
 ```go
 // Copyright (c) 2025 Lerian Studio Ltd. All rights reserved.
@@ -1350,8 +1350,8 @@ If any checkbox fails → Reconsider or document exception.
 ### Private Modules (GOPRIVATE)
 
 ```bash
-# For Lerian private repos
-export GOPRIVATE=github.com/LerianStudio/*
+# For private repos
+export GOPRIVATE=github.com/your-org/*
 
 # In ~/.gitconfig
 [url "ssh://git@github.com/"]

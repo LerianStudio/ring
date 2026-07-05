@@ -20,7 +20,7 @@ description: "Generating or auditing a repository's llms.txt per the llmstxt.org
 **Complementary:** ring:running-dev-cycle, ring:implementing-tasks
 
 
-Generates `llms.txt`, `CLAUDE.md`, and `AGENTS.md` for Lerian repositories.
+Generates `llms.txt`, `CLAUDE.md`, and `AGENTS.md` for repositories.
 
 ## Step 1: Analyze Repository
 

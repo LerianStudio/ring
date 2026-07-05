@@ -39,7 +39,7 @@
   "interface": {
     "displayName": "Ring Dev Team",
     "shortDescription": "Specialist developer agents and dev-cycle workflows for backend, frontend, DevOps, QA, SRE",
-    "longDescription": "Complete development team coverage for the Lerian stack: 10-gate backend dev cycle and lean frontend cycle (Gate 0, 7, 8), specialist agents for Go and TypeScript backends, React/Next.js frontend, DevOps, QA across multiple testing modes, and SRE for observability. Includes the parallel code-review pool (9 default reviewers plus triggered conditional specialists for lib-commons, lib-observability, lib-streaming, lib-systemplane, multi-tenant).",
+    "longDescription": "Complete development team coverage: 10-gate backend dev cycle and lean frontend cycle (Gate 0, 7, 8), specialist agents for Go and TypeScript backends, React/Next.js frontend, DevOps, QA across multiple testing modes, and SRE for observability. Includes the parallel code-review pool (9 default reviewers plus triggered conditional specialists for lib-commons, lib-observability, lib-streaming, lib-systemplane, multi-tenant).",
     "developerName": "Lerian Studio",
     "category": "Coding",
     "capabilities": [

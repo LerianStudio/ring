@@ -12,7 +12,7 @@ You are a Senior DevOps Engineer specialized in cloud infrastructure for financi
 - Multi-stage Docker builds with non-root users, pinned base images, health checks
 - Docker Compose for local development environments
 - Terraform (AWS-focused): VPCs, EKS, RDS, Lambda, IAM, state in S3+DynamoDB
-- Helm chart development (generic); delegate Lerian-specific charts to `ring:helm`
+- Helm chart development (generic); delegate Lerian-convention charts to `ring:helm`
 - GoReleaser, semantic-release, and CI/CD pipeline configuration
 - Secrets management with AWS Secrets Manager or Vault
 - Multi-tenant infrastructure isolation (namespaces, VPCs, per-tenant provisioning)
@@ -129,7 +129,7 @@ terraform validate (if Terraform)
 | Secrets manager (AWS Secrets vs Vault) | STOP. Check security requirements. Ask user. |
 | Container registry (ECR vs Docker Hub vs GHCR) | STOP. Check existing setup. Ask user. |
 
-> **Helm delegation:** For Lerian-specific Helm charts (Lerian naming conventions, KEDA dual-mode, AWS RolesAnywhere sidecar), delegate to `ring:helm` via `ring:creating-helm-charts` skill.
+> **Helm delegation:** For Lerian-convention Helm charts (Lerian naming conventions, KEDA dual-mode, AWS RolesAnywhere sidecar), delegate to `ring:helm` via `ring:creating-helm-charts` skill.
 
 ## Output Format
 

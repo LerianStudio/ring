@@ -6,7 +6,7 @@
 
 **Proven engineering practices, enforced through skills.**
 
-Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **4 active plugins**, **75 skills**, and **33 agents** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
+Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **4 active plugins**, **76 skills**, and **33 agents** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
 
 ## ✨ Why Ring?
 
@@ -21,7 +21,7 @@ Without Ring, AI assistants often:
 Ring solves this by:
 
 - **Enforcing proven workflows** - Test-driven development, systematic debugging, proper planning
-- **Providing 75 specialized skills** (22 core + 35 dev-team + 14 product planning + 4 technical writing)
+- **Providing 76 specialized skills** (23 core + 35 dev-team + 14 product planning + 4 technical writing)
 - **33 specialized agents** - 2 planning/analysis + 24 developer/reviewer + 4 product research + 3 technical writing
 - **Automating skill discovery** - Skills load automatically at session start
 - **Preventing common failures** - Built-in anti-patterns and mandatory checklists
@@ -248,9 +248,9 @@ GREEN → Minimal code → Watch it pass
 REFACTOR → Clean up → Stay green
 ```
 
-## 📚 All 75 Skills (Across 4 Plugins)
+## 📚 All 76 Skills (Across 4 Plugins)
 
-### Core Skills (ring-default plugin - 22 skills)
+### Core Skills (ring-default plugin - 23 skills)
 
 **Testing & Quality (3):**
 
@@ -258,11 +258,13 @@ REFACTOR → Clean up → Stay green
 - `ring:fixing-lint` - Parallel lint fixing with agent dispatch
 - `ring:cleaning-comments` - Remove redundant, stale, or low-value comments while preserving intent-revealing ones
 
-**Collaboration & Planning (8):**
+**Collaboration & Planning (10):**
 
 - `ring:reviewing-code` - **Parallel 9 defaults + conditional specialist dispatch** with severity-based handling
 - `ring:creating-worktrees` - Isolated development
 - `ring:committing-changes` - Smart commit organization with atomic grouping, conventional commits, and trailers
+- `ring:opening-pull-requests` - Open a PR with base-branch detection, scope allowlist enforcement, and template filling
+- `ring:shipping-changes` - End-to-end commit-and-ship flow from working tree to open PR
 - `ring:writing-plans` - Author phased implementation plans (phase → epic → task) from a spec; first phase detailed into dispatch-ready tasks, later phases epic-level for rolling-wave elaboration
 - `ring:executing-plans` - Rolling-wave execution of a phased plan: implement the detailed phase, checkpoint with the user, elaborate the next phase against the real codebase, repeat
 - `ring:dispatching-workflows` - Rolling-wave execution where each phase runs as a reviewed multi-agent workflow harness (mandatory in-harness review + adversarial contrarian pass) before returning verified work
@@ -275,10 +277,6 @@ REFACTOR → Clean up → Stay green
 - `ring:writing-skills` - TDD for documentation
 - `ring:testing-skills-with-subagents` - Skill validation
 - `ring:engineering-prompts` - Engineer and refine prompts for skills and agents
-
-**Integration (1):**
-
-- `ring:delegating-to-gandalf` - Send tasks to Gandalf (AI team member) via webhook for Slack, Google Workspace, and Jira interactions
 
 **Session & Learning (5):**
 
@@ -317,7 +315,6 @@ REFACTOR → Clean up → Stay green
 **Testing & Validation:**
 
 - `ring:detecting-goroutine-leaks` - Goroutine leak detection and regression testing
-- `ring:load-testing-with-k6` - k6 load test generation following Lerian platform conventions
 - `ring:validating-acceptance-criteria` - Gate 9: User approval
 - `ring:writing-dev-reports` - Assertiveness scoring and metrics
 - `ring:verifying-code` - Atomic Go code verification with MERGE_READY/NEEDS_FIX verdict
@@ -339,9 +336,10 @@ REFACTOR → Clean up → Stay green
 - `ring:using-outbox` - Transactional outbox pattern via lib-commons for reliable event publishing
 - `ring:using-tracing` - Reference + sweep for lib-observability tracing (spans, context propagation, OTel)
 
-**Security (1):**
+**Security (2):**
 
 - `ring:auditing-dependency-security` - Supply-chain gate for dependency installations (validates identity, vulnerabilities, suspicious signals)
+- `ring:reviewing-operational-risk` - Reviews built flows for operational recovery gaps and resilience risks
 
 **Frontend Quality Skills (1):**
 
@@ -466,7 +464,7 @@ ring/                                  # Monorepo root
 ├── .claude-plugin/
 │   └── marketplace.json              # Multi-plugin marketplace config (4 active plugins)
 ├── default/                          # Core Ring plugin (ring-default)
-│   ├── skills/                       # 22 core skills
+│   ├── skills/                       # 23 core skills
 │   │   ├── skill-name/
 │   │   │   └── SKILL.md             # Skill definition with frontmatter
 │   │   └── shared-patterns/         # Universal patterns (10 patterns)
