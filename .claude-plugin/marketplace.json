@@ -9,7 +9,7 @@
     {
       "name": "ring-default",
       "description": "Core skills library from the Lerian Team: TDD, code review, collaboration patterns, and proven techniques. Features parallel code review orchestration with 9 default reviewers plus triggered conditional specialists, and git shipping skills (ring:committing-changes, ring:opening-pull-requests, ring:shipping-changes) with scope allowlist enforcement. 23 essential skills for software engineering excellence, including plan authoring and execution.",
-      "version": "1.43.0",
+      "version": "2.0.0",
       "source": {
         "source": "git-subdir",
         "url": "https://github.com/lerianstudio/ring.git",
@@ -37,7 +37,7 @@
     {
       "name": "ring-dev-team",
       "description": "24 specialized developer agents + 35 development skills: Backend 10-gate dev cycle + lean frontend cycle (Gate 0, 7, 8) with quality checks (accessibility, visual, E2E, performance) + Frontend refactoring + whole-codebase simplification sweep + delivery verification + service discovery + cycle management + lib-streaming end-to-end instrumentation. Includes backend/frontend specialists, DevOps, QA, SRE, 9 default code-review reviewers, and 3 conditional stack specialists consolidated into the dev-team plugin. Complete development team coverage with TDD, observability, and security best practices.",
-      "version": "1.87.0",
+      "version": "2.0.0",
       "source": {
         "source": "git-subdir",
         "url": "https://github.com/lerianstudio/ring.git",
@@ -75,7 +75,7 @@
     {
       "name": "ring-pm-team",
       "description": "Product team workflow: 14 skills + 4 research agents. Pre-dev planning with 4-gate (small features) and 8-gate (large features) orchestrators producing machine-consumable specs (prd, trd, openapi.yaml, schema, plan.md), plus standalone mapping-streaming-events discovery and UX validation. Includes parallel research agents, specialized code analysis, and Product Designer.",
-      "version": "0.33.0",
+      "version": "1.0.0",
       "source": {
         "source": "git-subdir",
         "url": "https://github.com/lerianstudio/ring.git",
@@ -102,7 +102,7 @@
     {
       "name": "ring-tw-team",
       "description": "Technical writing specialists for functional and API documentation. 3 specialized agents (guide-writer, api-writer, docs-reviewer) and 4 documentation skills covering voice/tone, structure, API field descriptions, and quality review. Enforces clear, consistent documentation standards.",
-      "version": "0.6.0",
+      "version": "1.0.0",
       "source": {
         "source": "git-subdir",
         "url": "https://github.com/lerianstudio/ring.git",
@@ -126,5 +126,5 @@
       ]
     }
   ],
-  "version": "0.391.0"
+  "version": "0.392.0"
 }

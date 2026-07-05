@@ -2,7 +2,7 @@
   "name": "ring-dev-team",
   "displayName": "Ring Dev Team",
   "description": "24 specialized developer agents + 35 development skills. Backend (Go/TypeScript) and frontend (React/Next.js) dev cycles, DevOps, QA, SRE, and the parallel code-review pool.",
-  "version": "1.87.0",
+  "version": "2.0.0",
   "author": {
     "name": "Lerian Studio",
     "email": "fred@lerian.studio"

@@ -1,6 +1,6 @@
 {
   "name": "ring-tw-team",
-  "version": "0.6.0",
+  "version": "1.0.0",
   "description": "Technical writing specialists for functional and API documentation. 3 specialized agents (guide-writer, api-writer, docs-reviewer) and 4 documentation skills covering voice/tone, structure, API field descriptions, and quality review. Enforces clear, consistent documentation standards.",
   "author": {
     "name": "Lerian Studio",
