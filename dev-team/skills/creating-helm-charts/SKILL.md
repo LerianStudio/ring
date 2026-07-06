@@ -96,6 +96,12 @@ Task:
 
     8. Service type: ALWAYS ClusterIP (never NodePort or LoadBalancer)
 
+    9. NEW chart only — create the README "Application Version Mapping" matrix in the
+       helm repo root README.md (see conventions.md → README Version Matrix). Table
+       headers: `Chart Version` + one `TitleCase(component) + " Version"` per component;
+       seed row = chart version (backticked) + each component image tag. The CI updater
+       ERRORS if this table is missing. Do NOT hand-bump afterward — CI owns versions.
+
     ## Required Output
     - Env Var Coverage table (100% of .env.example covered)
     - helm lint result: MUST PASS
@@ -138,4 +144,5 @@ Additional dispatch for worker component:
 | Service type = ClusterIP | ✅/❌ | service.yaml:{line} |
 | Health probes match endpoints | ✅/❌ | deployment.yaml:{line} |
 | No real secrets in values | ✅/❌ | |
+| README version matrix (NEW chart) | ✅/❌/N/A | root README.md section + table, correct headers |
 ```

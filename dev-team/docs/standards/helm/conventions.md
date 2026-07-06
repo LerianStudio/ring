@@ -1,5 +1,17 @@
 # Helm Conventions (Lerian Standard)
 
+## Chart Location
+
+Charts live in the **`LerianStudio/helm` monorepo**, one directory per chart:
+- Public product → `charts/<svc>-helm/` → `oci://ghcr.io/lerianstudio/<svc>-helm`
+- Closed/internal → `oci://ghcr.io/lerianstudio/helm-internal/<svc>-helm`
+
+Do NOT author the chart in the app repo's `deploy/charts/` — that path is legacy.
+The `home:`/`sources:` fields still point at the app's **source** repo (the code),
+which is correct; the chart **files** live in the `helm` monorepo and are published
+to OCI by that repo's `release.yml` (semantic-release). GitOps then references the
+published OCI version.
+
 ## Chart Naming
 
 ```text
@@ -107,3 +119,42 @@ Lerian port ranges:
   15672: RabbitMQ management
   27017: MongoDB
 ```
+
+---
+
+## README Version Matrix (NEW chart — create it)
+
+The `LerianStudio/helm` root `README.md` carries a per-chart **Application Version
+Mapping** table (Chart Version → each app component's image version). On a **new
+chart** this section MUST be **created by hand** — the CI updater only maintains
+existing tables and **errors** if the chart's table is missing
+(`update-readme-matrix` → "Could not find version matrix table for chart 'X'").
+
+Add a section to the root README:
+
+```markdown
+### {Chart Display Name}
+
+For implementation and configuration details, see the [README](https://charts.lerian.studio/charts/{chart}).
+
+#### Application Version Mapping
+
+| Chart Version | {Component} Version |
+| :---: | :---: |
+| `{chart version}` | {component image tag} |
+-----------------
+```
+
+- One `{Component} Version` column per app component (multi-component = one each,
+  e.g. `Manager Version | Worker Version`).
+- **Header format is load-bearing:** `TitleCase(component) + " Version"` — this is
+  what `update-readme-matrix --component <name>` matches. Wrong header = CI can't
+  update it on future bumps.
+- First row: current chart `version` (backticked) + each component's image `tag`.
+
+<cannot_skip>
+Do NOT hand-bump versions after creation. Chart Version is managed by
+semantic-release (`update-chart-version-readme` in release.yml); component versions
+by `update-readme-matrix` on component bump. The chart-creation job only creates the
+initial table STRUCTURE with correct headers + seed row.
+</cannot_skip>

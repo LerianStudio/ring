@@ -6,7 +6,7 @@
 
 **Proven engineering practices, enforced through skills.**
 
-Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **4 active plugins**, **76 skills**, and **33 agents** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
+Ring is a comprehensive skills library and workflow system for AI agents that transforms how AI assistants approach software development. Currently implemented as a **Claude Code plugin marketplace** with **4 active plugins**, **78 skills**, and **34 agents** (see `.claude-plugin/marketplace.json` for current versions), the skills themselves are agent-agnostic and can be used with any AI agent system. Ring provides battle-tested patterns, mandatory workflows, and systematic approaches across the entire software delivery value chain.
 
 ## ✨ Why Ring?
 
@@ -21,8 +21,8 @@ Without Ring, AI assistants often:
 Ring solves this by:
 
 - **Enforcing proven workflows** - Test-driven development, systematic debugging, proper planning
-- **Providing 76 specialized skills** (23 core + 35 dev-team + 14 product planning + 4 technical writing)
-- **33 specialized agents** - 2 planning/analysis + 24 developer/reviewer + 4 product research + 3 technical writing
+- **Providing 78 specialized skills** (23 core + 37 dev-team + 14 product planning + 4 technical writing)
+- **34 specialized agents** - 2 planning/analysis + 25 developer/reviewer + 4 product research + 3 technical writing
 - **Automating skill discovery** - Skills load automatically at session start
 - **Preventing common failures** - Built-in anti-patterns and mandatory checklists
 
@@ -290,7 +290,7 @@ REFACTOR → Clean up → Stay green
 
 - `ring:auditing-production-readiness` - 44-dimension production readiness audit; runs explorers in batches of up to 10, appends incrementally to a single report; output: scored report (0-430, max 440 with multi-tenant) with severity ratings. See [default/skills/auditing-production-readiness/SKILL.md](default/skills/auditing-production-readiness/SKILL.md) for invocation and implementation details.
 
-### Developer Skills (ring-dev-team plugin - 35 skills)
+### Developer Skills (ring-dev-team plugin - 37 skills)
 
 **Orchestration & Refactoring (7):**
 
@@ -476,7 +476,7 @@ ring/                                  # Monorepo root
 │   │   ├── review-slicer.md             # Review slicing for large PRs (`ring:review-slicer`)
 │   │   └── codebase-explorer.md         # Deep architecture analysis (`ring:codebase-explorer`)
 │   └── docs/                       # Documentation
-├── dev-team/                      # Developer Agents plugin (ring-dev-team) - 35 skills, 24 agents
+├── dev-team/                      # Developer Agents plugin (ring-dev-team) - 37 skills, 25 agents
 │   └── agents/                      # 24 specialized developer/reviewer agents
 │       ├── backend-go.md       # Go backend specialist (`ring:backend-go`)
 │       ├── backend-ts.md   # TypeScript/Node.js backend specialist (`ring:backend-ts`)

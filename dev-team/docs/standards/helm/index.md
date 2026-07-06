@@ -7,6 +7,12 @@ This directory contains modular Helm chart standards from Lerian Studio. Load on
 
 > **Reference**: Always consult `docs/PROJECT_RULES.md` for common project standards.
 
+> **⛔ CANONICAL SOURCE OF TRUTH:** the authority for chart structure is the
+> `LerianStudio/helm` repo — `docs/helm-chart-standard.md` + its CI Go validator
+> (`.github/scripts/validate-helm-charts`, run `--strict --render-gate`). These ring
+> modules are the **agent-facing digest** of that contract; when they disagree, the
+> helm repo wins. Do not diverge — align the digest to the canonical doc.
+
 ---
 
 ## Table of Contents
@@ -14,7 +20,7 @@ This directory contains modular Helm chart standards from Lerian Studio. Load on
 | # | Section | Description |
 |---|---------|-------------|
 | 1 | [Quick Reference - Which File for What](#quick-reference---which-file-for-what) | Task-based file selection guide |
-| 2 | [Module Index](#module-index) | All 6 modules with descriptions |
+| 2 | [Module Index](#module-index) | All 9 modules with descriptions |
 | 3 | [WebFetch URLs](#webfetch-urls) | Raw GitHub URLs for agent loading |
 
 ---
@@ -29,6 +35,9 @@ This directory contains modular Helm chart standards from Lerian Studio. Load on
 | **Add dependency** | dependencies.md |
 | **ConfigMap/Secrets review** | values.md |
 | **Security context review** | templates.md |
+| **Test chart locally (lint/template/minikube)** | local-testing.md |
+| **Deploy chart to a GitOps env** | gitops-helmfile.md → local-testing.md |
+| **Chart/service needs AWS creds (no static keys)** | aws-rolesanywhere.md |
 
 ---
 
@@ -42,6 +51,9 @@ This directory contains modular Helm chart standards from Lerian Studio. Load on
 | 4 | [dependencies.md](dependencies.md) | Subchart versions (PostgreSQL, MongoDB, RabbitMQ, Valkey, KEDA), bootstrap jobs |
 | 5 | [worker-patterns.md](worker-patterns.md) | Dual-mode KEDA ScaledJob + Deployment fallback, trigger authentication |
 | 6 | [compliance.md](compliance.md) | Standards Compliance output format for ring:helm |
+| 7 | [local-testing.md](local-testing.md) | Local validation ladder: helm lint/template + best-effort minikube install/verify (used by ring:helm-deploy) |
+| 8 | [gitops-helmfile.md](gitops-helmfile.md) | GitOps wiring via helmfile + ArgoCD app-of-apps; per-env matrix (ALB/nginx, gp2/local-path, domain/TLS); offline-render caveats (used by ring:helm-deploy) |
+| 9 | [aws-rolesanywhere.md](aws-rolesanywhere.md) | AWS IAM Roles Anywhere credential-helper sidecar (chart side) + `iam-cert` cert-manager Certificate (deploy side); used by fetcher/matcher/plugin-fees/reporter |
 
 ---
 
@@ -58,3 +70,6 @@ For agents loading standards via WebFetch:
 | dependencies.md | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/helm/dependencies.md` |
 | worker-patterns.md | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/helm/worker-patterns.md` |
 | compliance.md | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/helm/compliance.md` |
+| local-testing.md | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/helm/local-testing.md` |
+| gitops-helmfile.md | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/helm/gitops-helmfile.md` |
+| aws-rolesanywhere.md | `https://raw.githubusercontent.com/LerianStudio/ring/main/dev-team/docs/standards/helm/aws-rolesanywhere.md` |
