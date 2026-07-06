@@ -1,6 +1,6 @@
 {
   "name": "ring-pm-team",
-  "version": "0.33.0",
+  "version": "1.0.0",
   "description": "Product team workflow: 14 skills + 4 research agents. Pre-dev planning with 4-gate (small features) and 8-gate (large features) orchestrators producing machine-consumable specs (prd, trd, openapi.yaml, schema, plan.md), plus standalone mapping-streaming-events discovery and UX validation. Includes parallel research agents, specialized code analysis, and Product Designer.",
   "author": {
     "name": "Lerian Studio",
@@ -28,7 +28,7 @@
   "interface": {
     "displayName": "Ring PM Team",
     "shortDescription": "Pre-dev planning workflows: PRD, TRD, OpenAPI contracts, schema design, phased plan",
-    "longDescription": "Structured pre-development workflow for the Lerian team. 4-gate orchestrator for small features (<2 days) and 8-gate orchestrator for large features (≥2 days). Each gate produces a versioned artifact (research.md, prd.md, feature-map.md, trd.md, openapi.yaml, schema.sql/schema.prisma, dependencies.md, plan.md) with human approval between gates.",
+    "longDescription": "Structured pre-development workflow. 4-gate orchestrator for small features (<2 days) and 8-gate orchestrator for large features (≥2 days). Each gate produces a versioned artifact (research.md, prd.md, feature-map.md, trd.md, openapi.yaml, schema.sql/schema.prisma, dependencies.md, plan.md) with human approval between gates.",
     "developerName": "Lerian Studio",
     "category": "Productivity",
     "capabilities": [

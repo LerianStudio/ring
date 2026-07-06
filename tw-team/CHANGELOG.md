@@ -6,8 +6,6 @@
 - Refactor: Aligned all components with the new frontmatter schema.
 - Improvement: Enhanced skill generation with a schema validator.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
 ---
@@ -21,8 +19,6 @@ Contributors: @fred
   - Removed invalid version field from agent frontmatter.
   - Added unit tests for frontmatter validation and generation.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
 ---
@@ -33,8 +29,6 @@ Contributors: @fred
   - Refactored skills by removing the commands layer and renaming skills to match command names for better alignment and clarity.
   - Enhanced skill generation with a new schema validator and improved frontmatter schema for standardizing component metadata.
   - Replaced arguments object with simple argument-hint in commands for streamlined functionality.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
@@ -48,8 +42,6 @@ Contributors: @fred
 - Improvement: Replaced arguments object with a simple argument-hint.
 - Improvement: Removed invalid version field from agent frontmatter.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
 ---
@@ -62,8 +54,6 @@ Contributors: @fred
 - Refactor: Aligned all components with the new frontmatter schema.
 - Refactor: Replaced arguments object with a simple argument-hint.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
 ---
@@ -75,8 +65,6 @@ Contributors: @fred
 - Feature: Added schema validator and enhanced skill generation.
 - Refactor: Aligned all components with the new frontmatter schema and replaced arguments object with simple argument-hint.
 - Test: Added unit tests for frontmatter validation and generation.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
@@ -93,8 +81,6 @@ Contributors: @fred
   - Aligned all components with the new frontmatter schema.
   - Replaced arguments object with simple argument-hint in commands.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
 ---
@@ -105,8 +91,6 @@ Contributors: @fred
 - Documentation: Created canonical schema to standardize component metadata.
 - Feature: Added schema validator and enhanced skill generation.
 - Refactor: Aligned all components with the new frontmatter schema.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
@@ -119,8 +103,6 @@ Contributors: @fred
   - Aligned all components with the new frontmatter schema.
   - Replaced arguments object with simple argument-hint in commands.
   - Removed invalid version field from agent frontmatter.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
@@ -135,8 +117,6 @@ Contributors: @fred
   - Enhance skill generation by adding a schema validator.
   - Align all components with the new frontmatter schema.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
 ---
@@ -148,8 +128,6 @@ Contributors: @fred
 - Feature: Added schema validator and enhanced skill generation.
 - Refactor: Aligned all components with the new frontmatter schema.
 - Test: Added unit tests for frontmatter validation and generation.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
@@ -165,8 +143,6 @@ Contributors: @fred
   - Added schema validator and enhanced skill generation.
   - Replaced arguments object with simple argument-hint.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
 ---
@@ -181,8 +157,6 @@ Contributors: @fred
   - Enhanced skill generation with the addition of a schema validator.
   - Aligned all components with the new frontmatter schema.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
 ---
@@ -191,8 +165,6 @@ Contributors: @fred
 
 - **Improvements:**
   - Updated CHANGELOG for ring-tw-team to version v0.4.2.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
@@ -208,8 +180,6 @@ Contributors: @fred
   - Enhanced skill generation with a new schema validator.
   - Aligned all components with the new frontmatter schema.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
 ---
@@ -218,8 +188,6 @@ Contributors: @fred
 
 - **Improvements:**
   - Updated CHANGELOG for ring-tw-team to version v0.4.2.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
@@ -235,8 +203,6 @@ Contributors: @fred
   - Enhance skill generation with a new schema validator.
   - Align all components with the new frontmatter schema.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
 ---
@@ -251,8 +217,6 @@ Contributors: @fred
   - Enhanced skill generation with schema validator.
   - Aligned all components with the new frontmatter schema.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
 ---
@@ -261,8 +225,6 @@ Contributors: @fred
 
 - **Improvements:**
   - Updated CHANGELOG for ring-tw-team to version v0.4.2.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
@@ -274,8 +236,6 @@ Contributors: @fred
   - Refactored skills by removing the commands layer and renamed skills to match command names for better alignment and clarity.
   - Created a canonical schema to standardize component metadata, enhancing consistency across the team.
   - Enhanced skill generation with a new schema validator, improving the reliability of the process.
-
-Contributors: @fred,
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
@@ -292,8 +252,6 @@ Contributors: @fred,
   - Align all components with the new frontmatter schema.
   - Replace arguments object with simple argument-hint.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
 ---
@@ -306,8 +264,6 @@ Contributors: @fred
 - **Improvements:**
   - Refactored skills by removing the commands layer and renaming skills to match command names.
   - Aligned all components with the new frontmatter schema.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
@@ -324,8 +280,6 @@ Contributors: @fred
   - Aligned all components with the new frontmatter schema.
   - Replaced arguments object with simple argument-hint.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
 ---
@@ -335,8 +289,6 @@ Contributors: @fred
 - **Improvements:**
   - Updated CHANGELOG for ring-tw-team to version v0.4.2.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
 ---
@@ -345,8 +297,6 @@ Contributors: @fred
 
 - **Improvements:**
   - Updated CHANGELOG for ring-tw-team to version v0.4.2.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
@@ -362,8 +312,6 @@ Contributors: @fred
   - Align all components with the new frontmatter schema.
   - Replace arguments object with simple argument-hint for commands.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
 ---
@@ -378,8 +326,6 @@ Contributors: @fred
   - Enhanced skill generation with schema validator.
   - Aligned all components with the new frontmatter schema.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
 ---
@@ -389,8 +335,6 @@ Contributors: @fred
 - **Improvements:**
   - Updated CHANGELOG for ring-tw-team to version v0.4.2.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
 ---
@@ -399,8 +343,6 @@ Contributors: @fred
 
 - **Improvements:**
   - Updated CHANGELOG for ring-tw-team to version v0.4.2.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
@@ -415,8 +357,6 @@ Contributors: @fred
   - Removed commands layer and renamed skills to match command names.
   - Aligned all components with the new frontmatter schema.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
 ---
@@ -429,8 +369,6 @@ Contributors: @fred
 - Enhanced skill generation with a schema validator.
 - Aligned all components with the new frontmatter schema.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
 ---
@@ -439,8 +377,6 @@ Contributors: @fred
 
 - **Improvements:**
   - Updated CHANGELOG for ring-tw-team to version v0.4.2.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
@@ -454,8 +390,6 @@ Contributors: @fred
 - **Improvements**
   - Standardize component metadata with the creation of a canonical schema for frontmatter, enhancing skill generation and validation processes.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
 ---
@@ -464,8 +398,6 @@ Contributors: @fred
 
 - **Improvements:**
   - Updated CHANGELOG for ring-tw-team to v0.4.2.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
@@ -481,8 +413,6 @@ Contributors: @fred
   - Aligned all components with the new frontmatter schema.
   - Replaced arguments object with a simple argument-hint in commands.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
 ---
@@ -491,8 +421,6 @@ Contributors: @fred
 
 - **Improvements:**
   - Updated CHANGELOG for ring-tw-team to version v0.4.2.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
@@ -503,8 +431,6 @@ Contributors: @fred
 - **Improvements**
   - Updated CHANGELOG for ring-tw-team to version v0.4.2.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
 ---
@@ -514,8 +440,6 @@ Contributors: @fred
 - Updated CHANGELOG for ring-tw-team to version v0.4.2.
 - Removed commands layer and renamed skills to match command names.
 - Aligned components with the new frontmatter schema.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
@@ -532,8 +456,6 @@ Contributors: @fred
   - Aligned all components with the new frontmatter schema.
   - Replaced arguments object with simple argument-hint.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
 ---
@@ -547,8 +469,6 @@ Contributors: @fred
   - Aligned all components with the new frontmatter schema.
   - Replaced arguments object with a simple argument-hint in commands.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.2...ring-tw-team@0.4.3)
 
 ---
@@ -557,8 +477,6 @@ Contributors: @fred
 
 - Improvements:
   - Refactored to decouple agents from specific model requirements.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
@@ -569,8 +487,6 @@ Contributors: @fred
 - **Improvements**
   - Decoupled agents from specific model requirements to enhance flexibility and maintainability.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
 ---
@@ -579,8 +495,6 @@ Contributors: @fred
 
 - Improvements:
   - Decoupled agents from specific model requirements.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
@@ -591,8 +505,6 @@ Contributors: @fred
 - **Improvements:**
   - Decoupled agents from specific model requirements, enhancing flexibility and modularity.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
 ---
@@ -602,8 +514,6 @@ Contributors: @fred
 - **Improvements:**
   - Decoupled agents from specific model requirements to enhance flexibility and maintainability.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
 ---
@@ -613,8 +523,6 @@ Contributors: @fred
 - Improvements:
   - Decoupled agents from specific model requirements to enhance flexibility and maintainability.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
 ---
@@ -624,8 +532,6 @@ Contributors: @fred
 - Improvements:
   - Decoupled agents from specific model requirements.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
 ---
@@ -634,8 +540,6 @@ Contributors: @fred
 
 - Improvements:
   - Decoupled agents from specific model requirements.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
@@ -645,8 +549,6 @@ Contributors: @fred
 
 - **Improvements**
   - Decoupled agents from specific model requirements to enhance flexibility and maintainability.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
@@ -657,8 +559,6 @@ Contributors: @fred
 - Improvements:
   - Decoupled agents from specific model requirements for better modularity and flexibility.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
 ---
@@ -668,8 +568,6 @@ Contributors: @fred
 - **Improvements:**
   - Decoupled agents from specific model requirements to enhance flexibility and maintainability.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
 ---
@@ -678,8 +576,6 @@ Contributors: @fred
 
 - Improvements:
   - Decoupled agents from specific model requirements to enhance flexibility and maintainability.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
@@ -690,8 +586,6 @@ Contributors: @fred
 - Improvements:
   - Decoupled agents from specific model requirements.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
 ---
@@ -700,8 +594,6 @@ Contributors: @fred
 
 - Improvements:
   - Decoupled agents from specific model requirements for enhanced flexibility and maintainability.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
@@ -712,8 +604,6 @@ Contributors: @fred
 - Improvements:
   - Decoupled agents from specific model requirements, enhancing flexibility and modularity within the system.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
 ---
@@ -723,8 +613,6 @@ Contributors: @fred
 - **Improvements:**
   - Decoupled agents from specific model requirements, enhancing flexibility and modularity.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
 ---
@@ -734,8 +622,6 @@ Contributors: @fred
 - **Improvements:**
   - Decoupled agents from specific model requirements.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
 ---
@@ -745,8 +631,6 @@ Contributors: @fred
 - Improvements:
   - Decoupled agents from specific model requirements.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
 ---
@@ -755,8 +639,6 @@ Contributors: @fred
 
 - Improvements:
   - Decoupled agents from specific model requirements.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
@@ -767,8 +649,6 @@ Contributors: @fred
 - **Improvements:**
   - Decoupled agents from specific model requirements for enhanced flexibility and maintainability.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
 ---
@@ -777,8 +657,6 @@ Contributors: @fred
 
 - Improvements:
   - Decoupled agents from specific model requirements.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
@@ -789,7 +667,14 @@ Contributors: @fred
 - Improvements:
   - Decoupled agents from specific model requirements to enhance flexibility and maintainability.
 
-Contributors: @fred
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
+
+---
+
+## [0.4.2](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.2)
+
+- Improvements:
+  - Decoupled agents from specific model requirements.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
@@ -800,8 +685,6 @@ Contributors: @fred
 - Improvements:
   - Decoupled agents from specific model requirements.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
 ---
@@ -811,8 +694,6 @@ Contributors: @fred
 - Improvements:
   - Decoupled agents from specific model requirements.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
 ---
@@ -821,19 +702,6 @@ Contributors: @fred
 
 - Improvements:
   - Decoupled agents from specific model requirements.
-
-Contributors: @fred
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
-
----
-
-## [0.4.2](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.2)
-
-- Improvements:
-  - Decoupled agents from specific model requirements.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
@@ -844,8 +712,6 @@ Contributors: @fred
 - **Improvements**
   - Decoupled agents from specific model requirements to enhance flexibility and maintainability.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
 ---
@@ -854,8 +720,6 @@ Contributors: @fred
 
 - Improvements:
   - Decoupled agents from specific model requirements.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
@@ -866,7 +730,14 @@ Contributors: @fred
 - **Improvements**
   - Decoupled agents from specific model requirements to enhance flexibility and maintainability.
 
-Contributors: @fred
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
+
+---
+
+## [0.4.2](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.2)
+
+- Improvements:
+  - Decoupled agents from specific model requirements.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
@@ -877,7 +748,14 @@ Contributors: @fred
 - Improvements:
   - Decoupled agents from specific model requirements.
 
-Contributors: @fred
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
+
+---
+
+## [0.4.2](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.2)
+
+- Improvements:
+  - Decoupled agents from specific model requirements.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
@@ -888,8 +766,6 @@ Contributors: @fred
 - Improvements:
   - Decoupled agents from specific model requirements.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
 ---
@@ -898,30 +774,6 @@ Contributors: @fred
 
 - Improvements:
   - Decoupled agents from specific model requirements.
-
-Contributors: @fred
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
-
----
-
-## [0.4.2](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.2)
-
-- Improvements:
-  - Decoupled agents from specific model requirements.
-
-Contributors: @fred
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
-
----
-
-## [0.4.2](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.2)
-
-- Improvements:
-  - Decoupled agents from specific model requirements.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
@@ -932,7 +784,14 @@ Contributors: @fred
 - Improvements:
   - Decoupled agents from specific model requirements to enhance flexibility and maintainability.
 
-Contributors: @fred
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
+
+---
+
+## [0.4.2](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.2)
+
+- Improvements:
+  - Decoupled agents from specific model requirements.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
@@ -943,8 +802,6 @@ Contributors: @fred
 - Improvements:
   - Decoupled agents from specific model requirements.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
 ---
@@ -953,19 +810,6 @@ Contributors: @fred
 
 - Improvements:
   - Decoupled agents from specific model requirements.
-
-Contributors: @fred
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
-
----
-
-## [0.4.2](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.2)
-
-- Improvements:
-  - Decoupled agents from specific model requirements.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
@@ -975,8 +819,6 @@ Contributors: @fred
 
 - Improvements:
   - Decoupled agents from specific model requirements to enhance flexibility and maintainability.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
@@ -987,8 +829,6 @@ Contributors: @fred
 - **Improvements:**
   - Decoupled agents from specific model requirements to enhance flexibility and maintainability.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
 ---
@@ -997,8 +837,6 @@ Contributors: @fred
 
 - Improvements:
   - Decoupled agents from specific model requirements.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
@@ -1009,7 +847,14 @@ Contributors: @fred
 - Improvements:
   - Decoupled agents from specific model requirements to enhance flexibility and maintainability.
 
-Contributors: @fred
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
+
+---
+
+## [0.4.2](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.2)
+
+- Improvements:
+  - Decoupled agents from specific model requirements.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
@@ -1020,8 +865,6 @@ Contributors: @fred
 - Improvements:
   - Decoupled agents from specific model requirements.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
 ---
@@ -1030,19 +873,6 @@ Contributors: @fred
 
 - Improvements:
   - Decoupled agents from specific model requirements.
-
-Contributors: @fred
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
-
----
-
-## [0.4.2](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.2)
-
-- Improvements:
-  - Decoupled agents from specific model requirements.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
@@ -1053,8 +883,6 @@ Contributors: @fred
 - Improvements:
   - Decoupled agents from specific model requirements to enhance flexibility and modularity.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.1...ring-tw-team@0.4.2)
 
 ---
@@ -1065,8 +893,6 @@ Contributors: @fred
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
 
 ---
@@ -1076,8 +902,6 @@ Contributors: @jeff, @jefferson.comff
 - Fixes:
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections.
-
-Contributors: @jeff, @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
 
@@ -1091,7 +915,15 @@ Contributors: @jeff, @jefferson.comff
 - Fixes:
   - Added missing CLAUDE.md required sections.
 
-Contributors: @jeff, @jefferson.comff
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
+
+---
+
+## [0.4.1](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.1)
+
+- Fixes:
+  - Applied lexical salience guidelines across skills.
+  - Added missing CLAUDE.md required sections.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
 
@@ -1103,8 +935,6 @@ Contributors: @jeff, @jefferson.comff
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
 
 ---
@@ -1114,20 +944,6 @@ Contributors: @jeff, @jefferson.comff
 - Fixes:
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections.
-
-Contributors: @jeff, @jefferson.comff
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
-
----
-
-## [0.4.1](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.1)
-
-- Fixes:
-  - Applied lexical salience guidelines across skills.
-  - Added missing CLAUDE.md required sections.
-
-Contributors: @jeff, @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
 
@@ -1138,7 +954,15 @@ Contributors: @jeff, @jefferson.comff
 - Improvements:
   - Updated CHANGELOG for ring-tw-team to version v0.4.0.
 
-Contributors: @jeff, @jefferson.comff
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
+
+---
+
+## [0.4.1](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.1)
+
+- Fixes:
+  - Applied lexical salience guidelines across skills.
+  - Added missing CLAUDE.md required sections.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
 
@@ -1150,7 +974,15 @@ Contributors: @jeff, @jefferson.comff
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections.
 
-Contributors: @jeff, @jefferson.comff
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
+
+---
+
+## [0.4.1](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.1)
+
+- Fixes:
+  - Applied lexical salience guidelines across skills.
+  - Added missing CLAUDE.md required sections.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
 
@@ -1162,7 +994,15 @@ Contributors: @jeff, @jefferson.comff
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections.
 
-Contributors: @jeff, @jefferson.comff
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
+
+---
+
+## [0.4.1](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.1)
+
+- Fixes:
+  - Applied lexical salience guidelines across skills.
+  - Added missing CLAUDE.md required sections.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
 
@@ -1174,7 +1014,15 @@ Contributors: @jeff, @jefferson.comff
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections.
 
-Contributors: @jeff, @jefferson.comff
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
+
+---
+
+## [0.4.1](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.1)
+
+- Fixes:
+  - Applied lexical salience guidelines across skills.
+  - Added missing CLAUDE.md required sections.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
 
@@ -1186,7 +1034,15 @@ Contributors: @jeff, @jefferson.comff
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections.
 
-Contributors: @jeff, @jefferson.comff
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
+
+---
+
+## [0.4.1](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.1)
+
+- Fixes:
+  - Applied lexical salience guidelines across skills.
+  - Added missing CLAUDE.md required sections.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
 
@@ -1198,8 +1054,6 @@ Contributors: @jeff, @jefferson.comff
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
 
 ---
@@ -1209,68 +1063,6 @@ Contributors: @jeff, @jefferson.comff
 - Fixes:
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections.
-
-Contributors: @jeff, @jefferson.comff
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
-
----
-
-## [0.4.1](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.1)
-
-- Fixes:
-  - Applied lexical salience guidelines across skills.
-  - Added missing CLAUDE.md required sections.
-
-Contributors: @jeff, @jefferson.comff
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
-
----
-
-## [0.4.1](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.1)
-
-- Fixes:
-  - Applied lexical salience guidelines across skills.
-  - Added missing CLAUDE.md required sections.
-
-Contributors: @jeff, @jefferson.comff
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
-
----
-
-## [0.4.1](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.1)
-
-- Fixes:
-  - Applied lexical salience guidelines across skills.
-  - Added missing CLAUDE.md required sections.
-
-Contributors: @jeff, @jefferson.comff
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
-
----
-
-## [0.4.1](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.1)
-
-- Fixes:
-  - Applied lexical salience guidelines across skills.
-  - Added missing CLAUDE.md required sections.
-
-Contributors: @jeff, @jefferson.comff
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
-
----
-
-## [0.4.1](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.1)
-
-- Fixes:
-  - Applied lexical salience guidelines across skills.
-  - Added missing CLAUDE.md required sections.
-
-Contributors: @jeff, @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
 
@@ -1281,7 +1073,15 @@ Contributors: @jeff, @jefferson.comff
 - Improvements:
   - Updated CHANGELOG for ring-tw-team to version v0.4.0.
 
-Contributors: @jeff, @jefferson.comff
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
+
+---
+
+## [0.4.1](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.1)
+
+- Fixes:
+  - Applied lexical salience guidelines across skills.
+  - Added missing CLAUDE.md required sections.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
 
@@ -1293,7 +1093,15 @@ Contributors: @jeff, @jefferson.comff
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections.
 
-Contributors: @jeff, @jefferson.comff
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
+
+---
+
+## [0.4.1](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.1)
+
+- Fixes:
+  - Applied lexical salience guidelines across skills.
+  - Added missing CLAUDE.md required sections.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
 
@@ -1305,8 +1113,6 @@ Contributors: @jeff, @jefferson.comff
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
 
 ---
@@ -1316,32 +1122,6 @@ Contributors: @jeff, @jefferson.comff
 - Fixes:
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections.
-
-Contributors: @jeff, @jefferson.comff
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
-
----
-
-## [0.4.1](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.1)
-
-- Fixes:
-  - Applied lexical salience guidelines across skills.
-  - Added missing CLAUDE.md required sections.
-
-Contributors: @jeff, @jefferson.comff
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
-
----
-
-## [0.4.1](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.1)
-
-- Fixes:
-  - Applied lexical salience guidelines across skills.
-  - Added missing CLAUDE.md required sections.
-
-Contributors: @jeff, @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
 
@@ -1353,7 +1133,15 @@ Contributors: @jeff, @jefferson.comff
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections.
 
-Contributors: @jeff, @jefferson.comff
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
+
+---
+
+## [0.4.1](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.1)
+
+- Fixes:
+  - Applied lexical salience guidelines across skills.
+  - Added missing CLAUDE.md required sections.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
 
@@ -1365,8 +1153,6 @@ Contributors: @jeff, @jefferson.comff
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
 
 ---
@@ -1377,8 +1163,6 @@ Contributors: @jeff, @jefferson.comff
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
 
 ---
@@ -1388,20 +1172,6 @@ Contributors: @jeff, @jefferson.comff
 - Fixes:
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections.
-
-Contributors: @jeff, @jefferson.comff
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
-
----
-
-## [0.4.1](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.1)
-
-- Fixes:
-  - Applied lexical salience guidelines across skills.
-  - Added missing CLAUDE.md required sections.
-
-Contributors: @jeff, @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.4.0...ring-tw-team@0.4.1)
 
@@ -1413,8 +1183,6 @@ Contributors: @jeff, @jefferson.comff
   - Added GPT Changelog workflow.
   - Introduced initial CHANGELOG files for teams header.
 
-Contributors: @gui.rodrigues
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.3.12...ring-tw-team@0.4.0)
 
 ---
@@ -1425,8 +1193,6 @@ Contributors: @gui.rodrigues
   - Added GPT Changelog workflow for ring-tw-team.
   - Created initial CHANGELOG files for ring-tw-team.
 
-Contributors: @gui.rodrigues
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.3.12...ring-tw-team@0.4.0)
 
 ---
@@ -1436,8 +1202,6 @@ Contributors: @gui.rodrigues
 - Features:
   - Added GPT Changelog workflow.
   - Created initial CHANGELOG files for teams header.
-
-Contributors: @gui.rodrigues
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.3.12...ring-tw-team@0.4.0)
 
@@ -1449,8 +1213,6 @@ Contributors: @gui.rodrigues
   - Added GPT Changelog workflow for ring-tw-team.
   - Created initial CHANGELOG files for teams header.
 
-Contributors: @gui.rodrigues
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.3.12...ring-tw-team@0.4.0)
 
 ---
@@ -1460,8 +1222,6 @@ Contributors: @gui.rodrigues
 - **Features**
   - Added GPT Changelog workflow.
   - Created initial CHANGELOG files for teams header.
-
-Contributors: @gui.rodrigues
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.3.12...ring-tw-team@0.4.0)
 
@@ -1473,7 +1233,15 @@ Contributors: @gui.rodrigues
   - Added GPT Changelog workflow for ring-tw-team.
   - Created initial CHANGELOG files for teams header.
 
-Contributors: @gui.rodrigues
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.3.12...ring-tw-team@0.4.0)
+
+---
+
+## [0.4.0](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.0)
+
+- **Features**
+  - Added GPT Changelog workflow.
+  - Created initial CHANGELOG files for teams header.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.3.12...ring-tw-team@0.4.0)
 
@@ -1485,8 +1253,6 @@ Contributors: @gui.rodrigues
   - Added GPT Changelog workflow.
   - Created initial CHANGELOG files for teams header.
 
-Contributors: @gui.rodrigues
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.3.12...ring-tw-team@0.4.0)
 
 ---
@@ -1497,8 +1263,6 @@ Contributors: @gui.rodrigues
   - Added GPT Changelog workflow.
   - Created initial CHANGELOG files for teams header.
 
-Contributors: @gui.rodrigues
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.3.12...ring-tw-team@0.4.0)
 
 ---
@@ -1508,20 +1272,6 @@ Contributors: @gui.rodrigues
 - **Features**
   - Added GPT Changelog workflow.
   - Created initial CHANGELOG files for teams header.
-
-Contributors: @gui.rodrigues
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.3.12...ring-tw-team@0.4.0)
-
----
-
-## [0.4.0](https://github.com/LerianStudio/ring/releases/tag/ring-tw-team@0.4.0)
-
-- **Features**
-  - Added GPT Changelog workflow.
-  - Created initial CHANGELOG files for teams header.
-
-Contributors: @gui.rodrigues
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.3.12...ring-tw-team@0.4.0)
 
@@ -1532,8 +1282,6 @@ Contributors: @gui.rodrigues
 - **Features**
   - Added GPT Changelog workflow.
   - Introduced initial CHANGELOG files for teams header.
-
-Contributors: @gui.rodrigues
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-tw-team@0.3.12...ring-tw-team@0.4.0)
 

@@ -1,6 +1,6 @@
 ---
 name: ring:applying-licenses
-description: "Applying or switching a repository's license (Apache 2.0, Elastic License v2, or Lerian Proprietary): rewrites the LICENSE file, updates Go/TS source headers, sets SPDX identifiers, and validates consistency after user confirmation. Use when asked to set, apply, or switch a license, or when scaffolding a service with no LICENSE. Skip when license, headers, and SPDX already match, or for non-code repos."
+description: "Applying or switching a repository's license (Apache 2.0, Elastic License v2, or Proprietary): rewrites the LICENSE file, updates Go/TS source headers, sets SPDX identifiers, and validates consistency after user confirmation. Use when asked to set, apply, or switch a license, or when scaffolding a service with no LICENSE. Skip when license, headers, and SPDX already match, or for non-code repos."
 ---
 
 # License Management
@@ -26,8 +26,8 @@ You orchestrate. Agents update source headers. NEVER apply a license without use
 | License | SPDX | Use Case |
 |---------|------|----------|
 | Apache 2.0 | `Apache-2.0` | Open source (e.g., Midaz core) |
-| Elastic License v2 | `Elastic-2.0` | Source-available Lerian products |
-| Proprietary | `LicenseRef-Lerian-Proprietary` | Internal/closed repositories |
+| Elastic License v2 | `Elastic-2.0` | Source-available products |
+| Proprietary | `LicenseRef-Proprietary` | Internal/closed repositories |
 
 ## Header Templates
 
@@ -90,7 +90,7 @@ test -f package.json && echo "TypeScript project"
 Determine:
 - `current_license`: apache | elv2 | proprietary | none
 - `language`: go | typescript | both
-- `copyright_holder`: from existing headers or Lerian Studio default
+- `copyright_holder`: from existing headers, else detect from git config (`git config user.name` / remote org), else ask the user
 - `year`: current year
 
 ## Gate 1: User Confirmation
@@ -120,7 +120,7 @@ After confirmation:
 **1. Replace LICENSE file** (orchestrator writes directly):
 - Apache 2.0: fetch from https://www.apache.org/licenses/LICENSE-2.0.txt
 - ELv2: write canonical ELv2 text
-- Proprietary: write Lerian General License text
+- Proprietary: write the proprietary license template
 
 **2. Update source headers** (dispatch agent):
 

@@ -17,8 +17,6 @@ MUST execute the **Before Gate 0 (epic start)** row from the State Persistence C
 
 CANNOT proceed to sub-steps 2.1–2.3 without completing this checkpoint. (The `epic.base_sha` captured here is the lower bound of the Gate 8 cumulative review diff — the SHA before the epic's first task.)
 
-**Lerian Map Sync hook (only when `state.lerian_map_sync.enabled`) — PER-EPIC cadence (fires ONCE per epic):** fire the async fire-and-forget board push at the START of the epic — at this checkpoint, for the epic's FIRST task only — for the EPIC `card_id` → absolute column `in_progress` (the card moves only if currently `backlog`/`todo`). ⛔ Guard against re-pushing: this push is recorded in `state.lerian_map_sync.epic_matches[].status_dispatch`; if that record already exists for this epic (subsequent tasks of the same epic, or a resumed cycle), DO NOT re-push. The same push also stamps the epic card's `startDate` (set-if-empty) per SKILL.md '### Date stamping (start/end)' and '### Evidence & enrichment (comments, repositoryPath)'. Non-blocking: POST, record `{task_id, to: "in_progress", dispatched_at, state: "dispatched"}` in `epic_matches[].status_dispatch`, log the dispatch line, continue. On POST failure keep it `pending` + `degraded` and continue. See SKILL.md '## Lerian Map Sync (optional)'.
-
 ### ⛔ MANDATORY: Invoke ring:implementing-tasks Skill (not inline execution)
 
 See [shared-patterns/shared-orchestrator-principle.md](../../shared-patterns/shared-orchestrator-principle.md) for full details.
@@ -76,24 +74,6 @@ implementation_input = {
   project_rules_path: "docs/PROJECT_RULES.md"
 }
 ```
-
-### ⛔ Step 2.1.5: Map Body Hard Gate — validates the PLAN task block (MANDATORY — `state.task_source == "lerian_map"` only)
-
-When `state.task_source == "lerian_map"`, the dispatch-ready contract lives ONLY in the derived `plan.md` (see SKILL.md `## Lerian Map as Task Source (optional)`) — the Map card body holds the macro overview, NOT the contract. Before Step 2.2, verify the local plan task block (`implementation_input.requirements`, i.e. `current_task_block_from_plan`) meets the sufficiency bar (the Step 11.5.5 validation bar in `gates/phase-boundary.md`): no "TBD"/vague deferrals; Context with file:line refs; Implementation vision; Files; Verification; Done when.
-
-**The gate FAILS ONLY when the local plan task block itself is insufficient (empty, title-only, or below the bar) — that is the product contract.** The Map card body is NOT validated here and never blocks this gate: it is a macro overview, not the contract. The epic's macro-body push lag (`epic_matches[].body_dispatch.state != "synced"`) is NEVER a failure — board convergence is the reconciliation triggers' job, not this gate's.
-
-**⛔ PROHIBITION: a plan task block with only a title is NOT executable. If the block is empty, title-only, or insufficient → DO NOT dispatch.** The plan task block IS the implementation contract; executing from a title alone produces unverifiable work. This failure is handled by the options below, NOT by the generic Blocker Handling table; only option (c) Pause stops the cycle.
-
-On failure, AskUserQuestion:
-
-| Option | Action |
-|--------|--------|
-| (a) **Elaborate now** | Dispatch ONE planning agent in ANALYSIS mode (same mechanism as SKILL.md init step 3a / `gates/phase-boundary.md` Step 11.5.4) to produce the dispatch-ready block and write it INTO the derived plan — the local plan block is the contract and is sufficient on its own to dispatch. The epic's macro overview SHOULD be queued for re-push to the card `body` (`epic_matches[].body_dispatch`) async fire-and-forget for board convergence, but this push NEVER blocks Gate 0 dispatch — the board body is a macro overview, not the contract. Then re-run this gate. |
-| (b) **Skip this task** | Set `tasks[j].status = "blocked"`, fire the per-task evidence comment on the EPIC card (the skip-explanation, tagged `**Task N.M.T:** …`) per SKILL.md '### Evidence & enrichment (comments, repositoryPath)' — async fire-and-forget — move to the next task, and surface the skipped task at the epic checkpoint (Step 11.1). The epic card's own status follows its normal lifecycle, unaffected by a skipped task. Skipped tasks are excluded from Gate 8's cumulative-diff expectations and Gate 9's criteria aggregation — see `gates/gate-9-validation.md` (`SKIPPED (no contract)`). |
-| (c) **Pause the cycle** | Set `status = "paused"`, save state, STOP, output the resume command. |
-
-This check is a BACKSTOP — init step 3 (elaboration) and phase-boundary elaboration (Step 11.5.4 / 11.5.5b) normally guarantee the plan blocks exist. It catches drift: a derived plan regenerated from a board with an un-elaborated later-phase epic (task-name stubs, empty bodies — all under the single `Desenvolvimento` milestone) reaching Gate 0 before its phase was elaborated produces an insufficient local block → gate FAILURE, resolved by option (a).
 
 ### Step 2.2: Invoke ring:implementing-tasks Skill
 
@@ -229,8 +209,6 @@ Anti-Rationalization:
 | "I'll just skip this check if Gate 0 passed" | Gate 0 passing without `delivery_verification` means Gate 0 is incomplete. | **Verify `delivery_verification` exists in handoff. If absent → Gate 0 failed.** |
 
 No separate `state.gate_progress.delivery_verification` field — delivery verification is a sub-check of implementation, tracked inline under `state.epics[i].tasks[j].gate_progress.implementation`.
-
-**Lerian Map Sync evidence comment (only when `state.lerian_map_sync.enabled` AND `commit_timing == "per_task"`):** after the task's Gate 0 completes (delivery verification PASS + the per-task commit), post the ONE consolidated task-completed evidence comment on the EPIC card, tagged `**Task N.M.T:** …` (commit SHAs, TDD evidence, verification, PR link when available) per SKILL.md '### Evidence & enrichment (comments, repositoryPath)'. The comment POSTs once, at the task's COMMIT moment, so SHAs always exist: with `per_epic` the POST defers to the Step 11.1 epic commit; with `at_end` to the `done` push. A Gate 0 re-entry (Gate 9 criterion FAIL → rebuild) UPDATEs the existing comment (located via the card's comment list, by its `**Task N.M.T:**` tag) — never a second POST. Best-effort fire-and-forget, never retried by reconciliation.
 
 ### Anti-Rationalization: Gate 0 Skill Invocation
 

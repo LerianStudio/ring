@@ -388,7 +388,7 @@ These sections describe HOW to use the standards, not WHAT the standards are.
 | 13  | Directory Structure           | `#directory-structure`                 | Lerian pattern                                                             |
 | 14  | RabbitMQ Worker Pattern       | `#rabbitmq-worker-pattern`             | Async message processing                                                   |
 | 15  | Always-Valid Domain Model     | `#always-valid-domain-model-mandatory` | Constructor validation                                                     |
-| 16  | BFF Architecture Pattern      | `#bff-architecture-pattern-mandatory`  | **HARD GATE:** Clean Architecture, dual-mode (sindarian-server vs vanilla) |
+| 16  | BFF Architecture Pattern      | `#bff-architecture-pattern-mandatory`  | **HARD GATE:** Clean Architecture, dual-mode (server-framework vs vanilla) |
 | 17  | Three-Layer DTO Mapping       | `#three-layer-dto-mapping-mandatory`   | **HARD GATE:** HTTP ↔ Domain ↔ External DTOs, mappers                      |
 | 18  | HttpService Lifecycle         | `#httpservice-lifecycle`               | createDefaults, onBeforeFetch, onAfterFetch, catch hooks                   |
 | 19  | API Routes Pattern            | `#api-routes-pattern-mandatory`        | **⛔ FORBIDDEN:** Server Actions. MUST use Next.js API Routes              |
@@ -421,7 +421,7 @@ These sections describe HOW to use the standards, not WHAT the standards are.
 | 12  | Directory Structure             | `#directory-structure`             | Next.js App Router layout                                               |
 | 13  | Forbidden Patterns              | `#forbidden-patterns`              | Anti-patterns to avoid                                                  |
 | 14  | Standards Compliance Categories | `#standards-compliance-categories` | Categories for ring:planning-backend-refactor                                        |
-| 15  | Form Field Abstraction Layer    | `#form-field-abstraction-layer`    | **HARD GATE:** Field wrappers, dual-mode (sindarian-ui vs vanilla)      |
+| 15  | Form Field Abstraction Layer    | `#form-field-abstraction-layer`    | **HARD GATE:** Field wrappers, dual-mode (design-system vs vanilla)      |
 | 16  | Provider Composition Pattern    | `#provider-composition-pattern`    | Nested providers order, feature providers                               |
 | 17  | Custom Hooks Patterns           | `#custom-hooks-patterns`           | **HARD GATE:** usePagination, useCursorPagination, useCreateUpdateSheet |
 | 18  | Core five Utilities Pattern       | `#fetcher-utilities-pattern`       | getCore five, postCore five, patchCore five, deleteCore five                    |

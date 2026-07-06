@@ -1,14 +1,14 @@
-Lerian Studio General License
+Proprietary License
 
 Copyright (c) {YEAR} {COPYRIGHT_HOLDER}. All rights reserved.
 
 NOTICE: All information contained herein is, and remains the property of
-Lerian Studio Ltd. and its suppliers, if any. The intellectual and technical
-concepts contained herein are proprietary to Lerian Studio Ltd. and its
+{COPYRIGHT_HOLDER} and its suppliers, if any. The intellectual and technical
+concepts contained herein are proprietary to {COPYRIGHT_HOLDER} and its
 suppliers and are protected by trade secret or copyright law.
 
 Dissemination of this information or reproduction of this material is strictly
-forbidden unless prior written permission is obtained from Lerian Studio Ltd.
+forbidden unless prior written permission is obtained from {COPYRIGHT_HOLDER}.
 
 This software is provided by the copyright holders and contributors "as is"
 and any express or implied warranties, including, but not limited to, the
@@ -21,4 +21,4 @@ caused and on any theory of liability, whether in contract, strict liability,
 or tort (including negligence or otherwise) arising in any way out of the use
 of this software, even if advised of the possibility of such damage.
 
-For licensing inquiries, contact: legal@lerian.studio
+For licensing inquiries, contact the copyright holder.

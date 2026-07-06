@@ -5,8 +5,6 @@
 - **Improvements**
   - Refactor(deck): replace rigid archetypes with flexible composition model
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.29.1...ring-default@1.29.2)
 
 ---
@@ -14,8 +12,6 @@ Contributors: @fred
 ## [1.29.2](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.29.2)
 
 - Refactor: Replaced rigid archetypes with a flexible composition model for improved adaptability and customization.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.29.1...ring-default@1.29.2)
 
@@ -26,8 +22,6 @@ Contributors: @fred
 - Improvements:
   - Refactor(deck): Replace rigid archetypes with flexible composition model.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.29.1...ring-default@1.29.2)
 
 ---
@@ -36,8 +30,6 @@ Contributors: @fred
 
 - Improvements:
   - Refactor(deck): replace rigid archetypes with flexible composition model
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.29.1...ring-default@1.29.2)
 
@@ -48,8 +40,6 @@ Contributors: @fred
 - **Features**
   - Refactor(deck): Replace rigid archetypes with flexible composition model
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.29.1...ring-default@1.29.2)
 
 ---
@@ -57,7 +47,6 @@ Contributors: @fred
 ## [1.29.2](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.29.2)
 
 - Updated CHANGELOG for ring-default:v1.29.1.  
-- Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.29.1...ring-default@1.29.2)
 
@@ -68,8 +57,6 @@ Contributors: @fred
 - Improvements:
   - Refactor(deck): replace rigid archetypes with flexible composition model
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.29.1...ring-default@1.29.2)
 
 ---
@@ -79,15 +66,11 @@ Contributors: @fred
 - Features:
   - Polish pass on skill functionality for improved user experience.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.29.0...ring-default@1.29.1)
 
 ---
 
 ## [1.29.1](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.29.1)
-
-- Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.29.0...ring-default@1.29.1)
 
@@ -98,8 +81,6 @@ Contributors: @fred
 - Features:
   - Flagship polish pass on skill.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.29.0...ring-default@1.29.1)
 
 ---
@@ -108,8 +89,6 @@ Contributors: @fred
 
 - Features:
   - Refine hover target selection for feedback.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.28.0...ring-default@1.29.0)
 
@@ -127,8 +106,6 @@ Contributors: @fred
   - Update documentation for new features.
   - Add dependencies for PPTX export and auto-open.
   - Update .gitignore for new artifacts and remove .DS_Store files.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.27.0...ring-default@1.28.0)
 
@@ -148,8 +125,6 @@ Contributors: @fred
   - Add dependencies for PPTX export and auto-open.
   - Update .gitignore for new artifacts and remove .DS_Store files.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.27.0...ring-default@1.28.0)
 
 ---
@@ -158,8 +133,6 @@ Contributors: @fred
 
 - **Features**
   - Introduced extensive new UI primitives and archetypes.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.26.0...ring-default@1.27.0)
 
@@ -177,8 +150,6 @@ Contributors: @fred
 - **Chore:**
   - Removed obsolete caching and dev-cycle plan documents.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.25.2...ring-default@1.26.0)
 
 ---
@@ -187,8 +158,6 @@ Contributors: @fred
 
 - Improvements:
   - Refactored hooks by removing the periodic context re-injection hook.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.25.1...ring-default@1.25.2)
 
@@ -199,8 +168,6 @@ Contributors: @fred
 - Improvements:
   - Refactor hooks to remove periodic context re-injection hook.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.25.1...ring-default@1.25.2)
 
 ---
@@ -209,8 +176,6 @@ Contributors: @fred
 
 - Fixes:
   - Align reviewer references and harden lib-commons/multi-tenant agents.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.25.0...ring-default@1.25.1)
 
@@ -225,8 +190,6 @@ Contributors: @fred
   - Aligned all documentation with the new 10-reviewer workflow.
   - Updated skill documentation to reflect major v5.0.2 release of lib-commons.
   - Tuned context reminder hook to reduce token consumption.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.24.0...ring-default@1.25.0)
 
@@ -243,8 +206,6 @@ Contributors: @fred
 - **Improvements**
   - Reclassified gate cadence for approximately 40-50% speedup, optimizing development cycles. (Commit: f862c50a)
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.23.0...ring-default@1.24.0)
 
 ---
@@ -254,8 +215,6 @@ Contributors: @fred
 - Features:
   - Context-aware drift refresh with PROJECT_RULES support.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.22.1...ring-default@1.23.0)
 
 ---
@@ -265,8 +224,6 @@ Contributors: @fred
 - **Features**
   - Context-aware drift refresh with PROJECT_RULES support.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.22.1...ring-default@1.23.0)
 
 ---
@@ -275,8 +232,6 @@ Contributors: @fred
 
 - **Features**
   - Context-aware drift refresh with PROJECT_RULES support.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.22.1...ring-default@1.23.0)
 
@@ -291,8 +246,6 @@ Contributors: @fred
   - Propagated performance-reviewer as the 8th code review agent across all downstream references.
   - Synced plugin counts and added performance-reviewer as the 8th code review reviewer.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.22.0...ring-default@1.22.1)
 
 ---
@@ -306,8 +259,6 @@ Contributors: @fred
   - Propagated performance-reviewer as 8th code review agent across all downstream references.
   - Synced plugin counts and added performance-reviewer as 8th code review reviewer.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.22.0...ring-default@1.22.1)
 
 ---
@@ -320,8 +271,6 @@ Contributors: @fred
 - **Fixes:**
   - Added pagination and used node_id instead of the deprecated databaseId in pr-review-multi-source.
   - Added node_id to Phase 0 extraction and paginated GraphQL in pr-review.
-
-Contributors: @gandalf, @jeff, @jefferson.comff,
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.21.0...ring-default@1.22.0)
 
@@ -337,8 +286,6 @@ Changelog for ring-default:
 - Fixes:
   - Added pagination and utilized node_id instead of deprecated databaseId in pr-review-multi-source.
 
-Contributors: @gandalf, @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.21.0...ring-default@1.22.0)
 
 ---
@@ -353,8 +300,6 @@ Changelog for ring-default:
 - **Fixes:**
   - Added pagination and used node_id instead of deprecated databaseId in pr-review-multi-source.
 
-Contributors: @gandalf, @jeff, @jefferson.comff,
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.21.0...ring-default@1.22.0)
 
 ---
@@ -367,8 +312,6 @@ Contributors: @gandalf, @jeff, @jefferson.comff,
 - Fixes:
   - Added pagination and switched to using node_id instead of the deprecated databaseId in pr-review-multi-source.
   - Added node_id to Phase 0 extraction and implemented pagination for GraphQL.
-
-Contributors: @gandalf, @jeff, @jefferson.comff,
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.21.0...ring-default@1.22.0)
 
@@ -383,8 +326,6 @@ Contributors: @gandalf, @jeff, @jefferson.comff,
   - Improved pr-review by adding pagination and using node_id instead of the deprecated databaseId.
   - Added node_id to Phase 0 extraction and implemented GraphQL pagination.
 
-Contributors: @gandalf, @jeff, @jefferson.comff,
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.21.0...ring-default@1.22.0)
 
 ---
@@ -397,8 +338,6 @@ Contributors: @gandalf, @jeff, @jefferson.comff,
 - **Fixes:**
   - Added pagination and used node_id instead of deprecated databaseId in pr-review-multi-source.
   - Added node_id to Phase 0 extraction and paginated GraphQL in pr-review.
-
-Contributors: @gandalf, @jeff, @jefferson.comff,
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.21.0...ring-default@1.22.0)
 
@@ -414,8 +353,6 @@ Changelog for ring-default:
 - **Fixes**
   - Added pagination and used node_id instead of deprecated databaseId for pr-review-multi-source.
 
-Contributors: @gandalf, @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.21.0...ring-default@1.22.0)
 
 ---
@@ -431,8 +368,6 @@ Changelog for ring-default:
   - Added pagination and used node_id instead of deprecated databaseId in pr-review-multi-source.
   - Added node_id to Phase 0 extraction and paginated GraphQL in pr-review.
 
-Contributors: @gandalf, @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.21.0...ring-default@1.22.0)
 
 ---
@@ -444,8 +379,6 @@ Contributors: @gandalf, @jeff, @jefferson.comff
 
 - **Fixes:**
   - Added pagination and used node_id instead of deprecated databaseId in pr-review-multi-source.
-
-Contributors: @gandalf, @jeff, @jefferson.comff,
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.21.0...ring-default@1.22.0)
 
@@ -459,8 +392,6 @@ Contributors: @gandalf, @jeff, @jefferson.comff,
 - **Fixes:**
   - Added pagination and replaced deprecated databaseId with node_id in pr-review-multi-source.
   - Included node_id in Phase 0 extraction and implemented GraphQL pagination.
-
-Contributors: @gandalf, @jeff, @jefferson.comff,
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.21.0...ring-default@1.22.0)
 
@@ -477,8 +408,6 @@ Contributors: @gandalf, @jeff, @jefferson.comff,
   - Corrected M2M activation logic to require both conditions.
   - Aligned Agent 33 multi-tenant checks with the canonical standard.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.20.2...ring-default@1.21.0)
 
 ---
@@ -493,8 +422,6 @@ Contributors: @jeff, @jefferson.comff
   - Corrected canonical environment variable count from 14 to 15.
   - Corrected M2M activation logic to require both conditions.
   - Aligned Agent 33 multi-tenant checks with canonical standard.
-
-Contributors: @jeff, @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.20.2...ring-default@1.21.0)
 
@@ -511,8 +438,6 @@ Contributors: @jeff, @jefferson.comff
   - Corrected M2M activation logic to require both conditions.
   - Aligned Agent 33 multi-tenant checks with canonical standards.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.20.2...ring-default@1.21.0)
 
 ---
@@ -524,8 +449,6 @@ Contributors: @jeff, @jefferson.comff
   - Standardized component metadata with a canonical schema.
   - Enhanced skill generation with a schema validator.
   - Replaced arguments object with a simple argument-hint.
-
-Contributors: @fred, @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.20.1...ring-default@1.20.2)
 
@@ -539,8 +462,6 @@ Contributors: @fred, @jefferson.comff
   - Enhanced skill generation by adding a schema validator.
   - Aligned all components with the new frontmatter schema.
 
-Contributors: @fred, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.20.1...ring-default@1.20.2)
 
 ---
@@ -549,8 +470,6 @@ Contributors: @fred, @jefferson.comff
 
 - **Fixes:**
   - Use camelCase for JSON field naming in code examples.
-
-Contributors: @jeff, @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.20.0...ring-default@1.20.1)
 
@@ -561,8 +480,6 @@ Contributors: @jeff, @jefferson.comff
 - **Fixes:**
   - Use camelCase for JSON field naming in code examples. This addresses the issue raised in #278.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.20.0...ring-default@1.20.1)
 
 ---
@@ -571,8 +488,6 @@ Contributors: @jeff, @jefferson.comff
 
 - Fixes:
   - Use camelCase for JSON field naming in code examples.
-
-Contributors: @jeff, @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.20.0...ring-default@1.20.1)
 
@@ -583,8 +498,6 @@ Contributors: @jeff, @jefferson.comff
 - **Fixes:**
   - Use camelCase for JSON field naming in code examples.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.20.0...ring-default@1.20.1)
 
 ---
@@ -593,8 +506,6 @@ Contributors: @jeff, @jefferson.comff
 
 - Fixes:
   - Use camelCase for JSON field naming in code examples.
-
-Contributors: @jeff, @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.20.0...ring-default@1.20.1)
 
@@ -605,8 +516,6 @@ Contributors: @jeff, @jefferson.comff
 - **Fixes:**
   - Resolved issue with JSON field naming by adopting camelCase in code examples. (#278)
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.20.0...ring-default@1.20.1)
 
 ---
@@ -616,7 +525,14 @@ Contributors: @jeff, @jefferson.comff
 - **Fixes:**
   - Resolved issue with JSON field naming by using camelCase in code examples. (Commit: 491f85dc)
 
-Contributors: @jeff, @jefferson.comff
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.20.0...ring-default@1.20.1)
+
+---
+
+## [1.20.1](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.20.1)
+
+- Fixes:
+  - Use camelCase for JSON field naming in code examples.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.20.0...ring-default@1.20.1)
 
@@ -627,7 +543,14 @@ Contributors: @jeff, @jefferson.comff
 - Fixes:
   - Use camelCase for JSON field naming in code examples.
 
-Contributors: @jeff, @jefferson.comff,
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.20.0...ring-default@1.20.1)
+
+---
+
+## [1.20.1](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.20.1)
+
+- Fixes:
+  - Use camelCase for JSON field naming in code examples.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.20.0...ring-default@1.20.1)
 
@@ -638,8 +561,6 @@ Contributors: @jeff, @jefferson.comff,
 - Fixes:
   - Use camelCase for JSON field naming in code examples.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.20.0...ring-default@1.20.1)
 
 ---
@@ -648,30 +569,6 @@ Contributors: @jeff, @jefferson.comff
 
 - Fixes:
   - Use camelCase for JSON field naming in code examples.
-
-Contributors: @jeff, @jefferson.comff
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.20.0...ring-default@1.20.1)
-
----
-
-## [1.20.1](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.20.1)
-
-- Fixes:
-  - Use camelCase for JSON field naming in code examples.
-
-Contributors: @jeff, @jefferson.comff
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.20.0...ring-default@1.20.1)
-
----
-
-## [1.20.1](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.20.1)
-
-- Fixes:
-  - Use camelCase for JSON field naming in code examples.
-
-Contributors: @jeff, @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.20.0...ring-default@1.20.1)
 
@@ -682,8 +579,6 @@ Contributors: @jeff, @jefferson.comff
 - Fixes:
   - Use camelCase for JSON field naming in code examples.
   
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.20.0...ring-default@1.20.1)
 
 ---
@@ -693,8 +588,6 @@ Contributors: @jeff, @jefferson.comff
 - Fixes:
   - Use camelCase for JSON field naming in code examples.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.20.0...ring-default@1.20.1)
 
 ---
@@ -704,8 +597,6 @@ Contributors: @jeff, @jefferson.comff
 - **Features**
   - Upgrade to adaptive cohesion-based slicing (v2)
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.19.0...ring-default@1.20.0)
 
 ---
@@ -715,8 +606,6 @@ Contributors: @fred
 - **Features**
   - Upgrade to adaptive cohesion-based slicing (v2)
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.19.0...ring-default@1.20.0)
 
 ---
@@ -725,8 +614,6 @@ Contributors: @fred
 
 - **Features**
   - Upgrade to adaptive cohesion-based slicing (v2).
-
-Contributors: @fred,
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.19.0...ring-default@1.20.0)
 
@@ -737,8 +624,6 @@ Contributors: @fred,
 - **Features**
   - Upgrade to adaptive cohesion-based slicing (v2) in review-slicer.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.19.0...ring-default@1.20.0)
 
 ---
@@ -747,8 +632,6 @@ Contributors: @fred
 
 - **Features**
   - Upgrade to adaptive cohesion-based slicing (v2).
-
-Contributors: @fred,
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.19.0...ring-default@1.20.0)
 
@@ -759,8 +642,6 @@ Contributors: @fred,
 - Features:
   - Upgrade to adaptive cohesion-based slicing (v2)
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.19.0...ring-default@1.20.0)
 
 ---
@@ -770,8 +651,6 @@ Contributors: @fred
 - **Features**
   - Upgrade to adaptive cohesion-based slicing (v2)
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.19.0...ring-default@1.20.0)
 
 ---
@@ -780,8 +659,6 @@ Contributors: @fred
 
 - **Features**
   - Upgrade to adaptive cohesion-based slicing (v2)
-
-Contributors: @fred,
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.19.0...ring-default@1.20.0)
 
@@ -792,8 +669,6 @@ Contributors: @fred,
 - **Features**
   - Upgrade to adaptive cohesion-based slicing (v2).
 
-Contributors: @fred,
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.19.0...ring-default@1.20.0)
 
 ---
@@ -803,8 +678,6 @@ Contributors: @fred,
 - **Features:**
   - Upgrade to adaptive cohesion-based slicing (v2)
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.19.0...ring-default@1.20.0)
 
 ---
@@ -813,8 +686,6 @@ Contributors: @fred
 
 - **Features:**
   - Upgrade to adaptive cohesion-based slicing (v2).
-
-Contributors: @fred,
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.19.0...ring-default@1.20.0)
 
@@ -825,15 +696,11 @@ Contributors: @fred,
 - Features:
   - v3 with fast paths (publish, notify, ask)
 
-Contributors: @gandalf,
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.18.0...ring-default@1.19.0)
 
 ---
 
 ## [1.19.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.19.0)
-
-- Contributors: @gandalf
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.18.0...ring-default@1.19.0)
 
@@ -844,8 +711,6 @@ Contributors: @gandalf,
 - Features:
   - Add inline content field to gandalf-webhook.
 
-Contributors: @gandalf
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.17.0...ring-default@1.18.0)
 
 ---
@@ -855,8 +720,6 @@ Contributors: @gandalf
 - **Features:**
   - Added gandalf-webhook skill.
 
-Contributors: @fred, @gandalf
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.16.0...ring-default@1.17.0)
 
 ---
@@ -865,7 +728,14 @@ Contributors: @fred, @gandalf
 
 - Introduce review slicing for large pull requests
 
-Contributors: @fred
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.15.0...ring-default@1.16.0)
+
+---
+
+## [1.16.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.16.0)
+
+- **Features**
+  - Introduce review slicing for large pull requests
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.15.0...ring-default@1.16.0)
 
@@ -876,19 +746,6 @@ Contributors: @fred
 - **Features**
   - Introduce review slicing for large pull requests
 
-Contributors: @fred
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.15.0...ring-default@1.16.0)
-
----
-
-## [1.16.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.16.0)
-
-- **Features**
-  - Introduce review slicing for large pull requests
-
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.15.0...ring-default@1.16.0)
 
 ---
@@ -897,8 +754,6 @@ Contributors: @fred
 
 - Introduce review slicing for large pull requests
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.15.0...ring-default@1.16.0)
 
 ---
@@ -906,8 +761,6 @@ Contributors: @fred
 ## [1.16.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.16.0)
 
 - Introduce review slicing for large pull requests
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.15.0...ring-default@1.16.0)
 
@@ -917,8 +770,6 @@ Contributors: @fred
 
 - Introduced review slicing for large pull requests.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.15.0...ring-default@1.16.0)
 
 ---
@@ -926,8 +777,6 @@ Contributors: @fred
 ## [1.16.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.16.0)
 
 - Introduce review slicing for large pull requests
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.15.0...ring-default@1.16.0)
 
@@ -938,8 +787,6 @@ Contributors: @fred
 - **Features**
   - Introduce review slicing for large pull requests.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.15.0...ring-default@1.16.0)
 
 ---
@@ -947,8 +794,6 @@ Contributors: @fred
 ## [1.16.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.16.0)
 
 - Introduced review slicing for large pull requests.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.15.0...ring-default@1.16.0)
 
@@ -958,8 +803,6 @@ Contributors: @fred
 
 - **Features**
   - Add dead-code-reviewer agent for orphan detection.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.14.3...ring-default@1.15.0)
 
@@ -970,8 +813,6 @@ Contributors: @fred
 - Features:
   - Add dead-code-reviewer agent for orphan detection
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.14.3...ring-default@1.15.0)
 
 ---
@@ -981,8 +822,6 @@ Contributors: @fred
 - **Features**
   - Add dead-code-reviewer agent for orphan detection.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.14.3...ring-default@1.15.0)
 
 ---
@@ -990,8 +829,6 @@ Contributors: @fred
 ## [1.14.3](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.14.3)
 
 - Refactor(session-handoff): Remove redundant archival copy step
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.14.2...ring-default@1.14.3)
 
@@ -1010,8 +847,6 @@ Contributors: @fred
 - **Documentation:**
   - Updated all documentation to reflect major skill refactoring.
 
-Contributors: @fred, @gandalf
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.14.1...ring-default@1.14.2)
 
 ---
@@ -1020,8 +855,6 @@ Contributors: @fred, @gandalf
 
 - Refactor: Decouple agents from specific model requirements
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.14.0...ring-default@1.14.1)
 
 ---
@@ -1029,8 +862,6 @@ Contributors: @fred
 ## [1.14.1](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.14.1)
 
 - Refactor: Decouple agents from specific model requirements
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.14.0...ring-default@1.14.1)
 
@@ -1040,8 +871,6 @@ Contributors: @fred
 
 - Refactor: Decouple agents from specific model requirements.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.14.0...ring-default@1.14.1)
 
 ---
@@ -1050,8 +879,6 @@ Contributors: @fred
 
 - Refactor: Decoupled agents from specific model requirements.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.14.0...ring-default@1.14.1)
 
 ---
@@ -1064,7 +891,17 @@ Contributors: @fred
 - **Fixes**
   - Addressed CodeRabbit review feedback on PR #228.
 
-Contributors: @gandalf
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.13.0...ring-default@1.14.0)
+
+---
+
+## [1.14.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.14.0)
+
+- **Features:**
+  - Enforce Ring standards across all gates (R1-R5).
+
+- **Fixes:**
+  - Address CodeRabbit review feedback on PR #228.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.13.0...ring-default@1.14.0)
 
@@ -1078,8 +915,6 @@ Contributors: @gandalf
 - **Fixes:**
   - Address CodeRabbit review feedback on PR #228.
 
-Contributors: @gandalf
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.13.0...ring-default@1.14.0)
 
 ---
@@ -1092,8 +927,6 @@ Contributors: @gandalf
 - **Fixes:**
   - Address CodeRabbit review feedback on PR #228.
 
-Contributors: @gandalf
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.13.0...ring-default@1.14.0)
 
 ---
@@ -1105,22 +938,6 @@ Contributors: @gandalf
 
 - **Fixes:**
   - Address CodeRabbit review feedback on PR #228.
-
-Contributors: @gandalf
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.13.0...ring-default@1.14.0)
-
----
-
-## [1.14.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.14.0)
-
-- **Features:**
-  - Enforce Ring standards across all gates (R1-R5).
-
-- **Fixes:**
-  - Address CodeRabbit review feedback on PR #228.
-
-Contributors: @gandalf
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.13.0...ring-default@1.14.0)
 
@@ -1134,8 +951,6 @@ Contributors: @gandalf
 - **Fixes:**
   - Addressed CodeRabbit review feedback on PR #228.
 
-Contributors: @gandalf
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.13.0...ring-default@1.14.0)
 
 ---
@@ -1147,8 +962,6 @@ Contributors: @gandalf
 
 - **Fixes:**
   - Address CodeRabbit review feedback on PR #228.
-
-Contributors: @gandalf
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.13.0...ring-default@1.14.0)
 
@@ -1162,7 +975,17 @@ Contributors: @gandalf
 - **Fixes**
   - Address CodeRabbit review feedback on PR #228.
 
-Contributors: @gandalf
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.13.0...ring-default@1.14.0)
+
+---
+
+## [1.14.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.14.0)
+
+- **Features:**
+  - Enforce Ring standards across all gates (R1-R5).
+
+- **Fixes:**
+  - Address CodeRabbit review feedback on PR #228.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.13.0...ring-default@1.14.0)
 
@@ -1176,22 +999,6 @@ Contributors: @gandalf
 - **Fixes:**
   - Address CodeRabbit review feedback on PR #228.
 
-Contributors: @gandalf
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.13.0...ring-default@1.14.0)
-
----
-
-## [1.14.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.14.0)
-
-- **Features:**
-  - Enforce Ring standards across all gates (R1-R5).
-
-- **Fixes:**
-  - Address CodeRabbit review feedback on PR #228.
-
-Contributors: @gandalf
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.13.0...ring-default@1.14.0)
 
 ---
@@ -1201,7 +1008,15 @@ Contributors: @gandalf
 - Features:
   - Add docs for diagram and visualize commands.
   
-Contributors: @fred
+[Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.12.2...ring-default@1.13.0)
+
+---
+
+## [1.13.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.13.0)
+
+- Features:
+  - Add documentation for diagram and visualize commands.
+  - Add drawing-diagrams skill for Mermaid visualizations.
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.12.2...ring-default@1.13.0)
 
@@ -1213,8 +1028,6 @@ Contributors: @fred
   - Add documentation for diagram and visualize commands.
   - Add drawing-diagrams skill for Mermaid visualizations.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.12.2...ring-default@1.13.0)
 
 ---
@@ -1224,20 +1037,6 @@ Contributors: @fred
 - Features:
   - Add documentation for diagram and visualize commands.
   - Add drawing-diagrams skill for Mermaid visualizations.
-
-Contributors: @fred
-
-[Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.12.2...ring-default@1.13.0)
-
----
-
-## [1.13.0](https://github.com/LerianStudio/ring/releases/tag/ring-default@1.13.0)
-
-- Features:
-  - Add documentation for diagram and visualize commands.
-  - Add drawing-diagrams skill for Mermaid visualizations.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.12.2...ring-default@1.13.0)
 
@@ -1249,8 +1048,6 @@ Contributors: @fred
   - Add docs for diagram and visualize commands.
   - Add drawing-diagrams skill for Mermaid visualizations.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.12.2...ring-default@1.13.0)
 
 ---
@@ -1260,8 +1057,6 @@ Contributors: @fred
 - Features:
   - Add documentation for diagram and visualize commands.
   
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.12.2...ring-default@1.13.0)
 
 ---
@@ -1270,8 +1065,6 @@ Contributors: @fred
 
 - Refactor: Replace codereview binaries and overhaul diff visualization.
 - Chore: Remove codereview tooling and all related assets.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.12.1...ring-default@1.12.2)
 
@@ -1282,8 +1075,6 @@ Contributors: @fred
 - Fixes:
   - Add fill-rule to logo SVG for correct rendering in visual-explainer.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.12.0...ring-default@1.12.1)
 
 ---
@@ -1292,8 +1083,6 @@ Contributors: @fred
 
 - Fixes:
   - Add fill-rule to logo SVG for correct rendering
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.12.0...ring-default@1.12.1)
 
@@ -1304,8 +1093,6 @@ Contributors: @fred
 - Fixes:
   - Add fill-rule to logo SVG for correct rendering.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.12.0...ring-default@1.12.1)
 
 ---
@@ -1314,8 +1101,6 @@ Contributors: @fred
 
 - Features:
   - Introduce mandatory Lerian design system in visual explainer.
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.11.1...ring-default@1.12.0)
 
@@ -1326,8 +1111,6 @@ Contributors: @fred
 - **Fixes:**
   - Corrected Resolve* examples and checklist after code review.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.11.0...ring-default@1.11.1)
 
 ---
@@ -1336,8 +1119,6 @@ Contributors: @jeff, @jefferson.comff
 
 - **Fixes:**
   - Corrected `Resolve*` examples and checklist following code review.
-
-Contributors: @jeff, @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.11.0...ring-default@1.11.1)
 
@@ -1351,8 +1132,6 @@ Contributors: @jeff, @jefferson.comff
 - **Fixes:**
   - Corrected Resolve* examples and checklist following a code review to ensure accuracy and adherence to standards.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.11.0...ring-default@1.11.1)
 
 ---
@@ -1365,8 +1144,6 @@ Contributors: @jeff, @jefferson.comff
 - **Improvements:**
   - Updated function names in dispatch layer to align with the Resolve* interface.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.11.0...ring-default@1.11.1)
 
 ---
@@ -1377,8 +1154,6 @@ Contributors: @jeff, @jefferson.comff
   - Update dispatch layer function names to Resolve* interface for consistency.
   - Correct Resolve* examples and checklist after code review for better clarity.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.11.0...ring-default@1.11.1)
 
 ---
@@ -1392,8 +1167,6 @@ Contributors: @jeff, @jefferson.comff
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections across all 6 plugins.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.10.0...ring-default@1.11.0)
 
 ---
@@ -1407,8 +1180,6 @@ Contributors: @jeff, @jefferson.comff
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections across all 6 plugins.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.10.0...ring-default@1.11.0)
 
 ---
@@ -1421,8 +1192,6 @@ Contributors: @jeff, @jefferson.comff
 - **Fixes:**
   - Applied lexical salience guidelines across skills.
   - Added missing CLAUDE.md required sections across all 6 plugins.
-
-Contributors: @jeff, @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.10.0...ring-default@1.11.0)
 
@@ -1433,10 +1202,6 @@ Contributors: @jeff, @jefferson.comff
 - **Features**
   - Add visual HTML reports to code review and production readiness audit.
 
-- **Contributors**
-  - @jefferson.comff
-  - @lucasc.bedatty
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.9.0...ring-default@1.10.0)
 
 ---
@@ -1445,10 +1210,6 @@ Contributors: @jeff, @jefferson.comff
 
 - **Features:**
   - Add visual HTML reports to code review and production readiness audit.
-
-- **Contributors:**
-  - @jefferson.comff
-  - @lucasc.bedatty
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.9.0...ring-default@1.10.0)
 
@@ -1458,8 +1219,6 @@ Contributors: @jeff, @jefferson.comff
 
 - **Features**
   - Add legacy ripple-effect reviewer to parallel code review
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.8.0...ring-default@1.9.0)
 
@@ -1469,8 +1228,6 @@ Contributors: @fred
 
 - **Features**
   - Add legacy ripple-effect reviewer to parallel code review
-
-Contributors: @fred
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.8.0...ring-default@1.9.0)
 
@@ -1481,8 +1238,6 @@ Contributors: @fred
 - **Features**
   - Add legacy ripple-effect reviewer to parallel code review.
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.8.0...ring-default@1.9.0)
 
 ---
@@ -1491,8 +1246,6 @@ Contributors: @fred
 
 - Integrate visual-explainer with ring:md-to-html command
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.7.1...ring-default@1.8.0)
 
 ---
@@ -1501,8 +1254,6 @@ Contributors: @fred
 
 - Integrate visual-explainer with ring:md-to-html command
 
-Contributors: @fred
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.7.1...ring-default@1.8.0)
 
 ---
@@ -1513,8 +1264,6 @@ Contributors: @fred
   - Align multi-tenant standards with midaz dual-pool architecture.
   - Rename poolmanager to tenantmanager across standards.
 
-Contributors: @jeff, @jefferson.comff
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.7.0...ring-default@1.7.1)
 
 ---
@@ -1525,8 +1274,6 @@ Contributors: @jeff, @jefferson.comff
   - Align multi-tenant standards with midaz dual-pool architecture.
   - Rename poolmanager to tenantmanager across standards.
 
-Contributors: @jeff, @jefferson.comff,
-
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.7.0...ring-default@1.7.1)
 
 ---
@@ -1536,8 +1283,6 @@ Contributors: @jeff, @jefferson.comff,
 - Fixes:
   - Align multi-tenant standards with midaz dual-pool architecture.
   - Rename poolmanager to tenantmanager across standards.
-
-Contributors: @jeff, @jefferson.comff
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.7.0...ring-default@1.7.1)
 
@@ -1547,7 +1292,5 @@ Contributors: @jeff, @jefferson.comff
 
 - Added GPT Changelog workflow.
 - Created initial CHANGELOG files for teams header.
-
-Contributors: @gui.rodrigues
 
 [Compare changes](https://github.com/LerianStudio/ring/compare/ring-default@1.6.2...ring-default@1.7.0)

@@ -198,7 +198,7 @@ Read `api_pattern` from research.md frontmatter (`bff` or `none`).
 
 ## Design System Configuration (UI Features)
 
-Auto-detect from package.json: `@lerianstudio/sindarian-ui`, `@radix-ui/*`, `@shadcn/ui`, `@chakra-ui/*`, `@mui/material`, etc.
+Auto-detect from package.json: `@your-org/design-system` (your design-system package, if any), `@radix-ui/*`, `@shadcn/ui`, `@chakra-ui/*`, `@mui/material`, etc.
 
 TRD must include `## Design System Configuration` section:
 - UI library + version

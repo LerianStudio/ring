@@ -26,15 +26,15 @@ Apply or switch the license for the current repository.
 |--------|-------------|---------|
 | `--dry-run` | Show what would change without modifying files | `--dry-run` |
 | `--year YEAR` | Override copyright year (default: current year) | `--year 2025` |
-| `--holder NAME` | Override copyright holder (default: Lerian Studio Ltd.) | `--holder "Lerian Studio Ltd."` |
+| `--holder NAME` | Override copyright holder (default: from existing headers, else git config, else prompted) | `--holder "Your Org"` |
 
 ## License Types
 
 | Type | Full Name | SPDX | Use Case |
 |------|-----------|------|----------|
 | `apache` | Apache License 2.0 | `Apache-2.0` | Open source (e.g., Core one core) |
-| `elv2` | Elastic License v2 | `Elastic-2.0` | Source-available Lerian products |
-| `proprietary` | Lerian Studio General License | `LicenseRef-Lerian-Proprietary` | Internal/closed repos |
+| `elv2` | Elastic License v2 | `Elastic-2.0` | Source-available products |
+| `proprietary` | Proprietary License | `LicenseRef-Proprietary` | Internal/closed repos |
 
 ## Examples
 
@@ -99,4 +99,4 @@ Pass the following context to the skill:
 | `license_type` | First argument: `apache`, `elv2`, or `proprietary` (if provided) |
 | `dry_run` | `true` if `--dry-run` flag present |
 | `copyright_year` | Value of `--year` option (default: current year) |
-| `copyright_holder` | Value of `--holder` option (default: `Lerian Studio Ltd.`) |
+| `copyright_holder` | Value of `--holder` option (default: from existing headers, else git config, else prompted) |
