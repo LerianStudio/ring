@@ -208,6 +208,18 @@ After saving the plan, announce the save, then collect the execution choice **us
 >
 > **3. Subagent-Orchestrated (ring:running-dev-cycle)** — lean backend cycle (Gate 0/8/9) with parallel specialist dispatch. Heaviest: full review pool per epic. Best for production work that must pass through the full review pool.
 
+**Worktree isolation (ask before dispatching the executor):** Once the executor is chosen, and **before** dispatching it, ask whether to isolate this feature in a worktree — using the same question/ask mechanism as the executor choice above (`AskUserQuestion` / question tool, prose prompt as fallback):
+
+```
+Worktree isolation: work in an isolated worktree for this feature?
+
+  [Y] Yes — create worktree now, then run the executor from there
+  [N] No  — continue on current branch
+```
+
+- **If Y:** invoke `Skill("ring:creating-worktrees")`, passing `feature_name` derived from the plan's filename — strip the `docs/plans/` (or `docs/pre-dev/{feature}/`) prefix, the `.md` extension, and the leading `YYYY-MM-DD-` date (e.g. `docs/plans/2026-07-08-payment-retry.md` → `payment-retry`). After the worktree is ready, dispatch the chosen executor **from inside the worktree**.
+- **If N:** dispatch the chosen executor normally, on the current branch.
+
 **If Rolling-Wave chosen:** Continue with ring:executing-plans in this session.
 
 **If Reviewed Multi-Agent Workflows chosen:** Continue with ring:dispatching-workflows in this session.
