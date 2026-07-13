@@ -35,6 +35,33 @@ The plan is a **rolling-wave document**. Only the first phase is detailed to tas
 
 **Invoked from pre-dev:** when dispatched as the final gate of ring:planning-large-features or ring:planning-small-features, the spec inputs are the pre-dev artifacts — trd.md (plus feature-map.md, openapi.yaml, the schema file, and dependencies.md on the Large track). On Large, plan phases MUST mirror feature-map.md phases one-to-one. Output path is `docs/pre-dev/{feature}/plan.md`, overriding the default above; standalone invocations keep the default. plan.md is always a SINGLE document per feature: on multi-module topologies (monorepo fullstack / multi-repo), each epic carries one line `**Target:** backend | frontend | infra` (placed right before `**Status:**`); for multi-repo features the orchestrator copies plan.md into each repo and the local dev-cycle executes only epics whose Target matches that repo. No per-module plan splits.
 
+## Single Feature or Multiple Features (ask first)
+
+**Before any plan detailing, ask — using the question/ask tool the harness provides (e.g. `AskUserQuestion` in Claude Code; prose fallback if none):**
+
+> Is this a **single feature**, or **multiple features to run in parallel**?
+>
+> **1. Single feature** — one plan, detailed now, handed off to an executor.
+> **2. Multiple features (parallel)** — orchestration mode: scaffold an isolated worktree + tmux window per feature; each feature gets its own detailed plan later, inside its own window.
+
+- **If Single feature:** continue with the normal flow below (Plan Language → collect context → author the detailed plan → Execution Handoff).
+- **If Multiple features:** switch to **Orchestration Mode** (next section) and do NOT author a detailed implementation plan in this session.
+
+### Orchestration Mode (multiple features in parallel)
+
+In this mode **this** `ring:writing-plans` invocation is the **orchestrator**: it scaffolds the parallel workspaces and stops. It does **not** produce a detailed plan. Each feature's detailed plan is authored later by a **second** `ring:writing-plans` run started inside that feature's own window — that second run is the **plan executor** for its feature.
+
+Steps:
+
+1. **Collect each feature separately.** For every feature gather its **name** (used to derive the worktree/window slug) and a short **scope** (what it covers, which subsystems/layers it touches). Keep one entry per feature — do not merge them into a single spec.
+2. **Map dependencies between features.** Determine which features are independent (can run fully in parallel) and which have a mandatory order (feature B must land after feature A). Record the dependency graph so the user knows the safe parallelism and any required sequencing. Surface it back to the user before scaffolding.
+3. **Handoff = Worktree + managed tmux sessions.** Orchestration mode always uses isolated worktrees plus managed tmux sessions — do NOT ask the Worktree/Tree-default or the tmux yes/no questions from the single-feature Execution Handoff. Invoke `Skill("ring:creating-worktrees")` and `Skill("ring:creating-managed-sessions")`. If `ai-tmux-sessions` is not detected (`[[ -f ~/.config/ai-sessions/ai-sessions.sh ]] && command -v tmux >/dev/null 2>&1` fails), tell the user managed sessions are unavailable and fall back to one worktree per feature without tmux windows.
+4. **One worktree + one tmux window per feature.** For each feature, create a dedicated worktree (via `ring:creating-worktrees`, passing `feature_name` = that feature's slug) and a matching tmux window (via `ring:creating-managed-sessions`). Position each window's `cwd` on **its own** worktree directory, so every window opens already inside the correct feature's worktree.
+5. **Do NOT generate a detailed implementation plan.** The orchestrator stops after the worktrees + windows exist. Each window is left ready for the user to start a **new, focused** `ring:writing-plans` scoped to that single feature — and *that* second run authors the detailed, dispatch-ready plan for its feature.
+6. **State the two-level handoff explicitly to the user.** Make clear: this first `ring:writing-plans` is the **orchestrator** (scaffolds parallel worktrees + windows, no detailed plan); the second `ring:writing-plans`, run inside each window, is the **plan executor** that produces the detailed plan for that specific feature. Then stop — do not continue into Plan Language, plan authoring, or the single-feature Execution Handoff.
+
+---
+
 ## Plan Language
 
 Before authoring, ask which language the plan's **prose** should be written in — using the question/ask tool the harness provides (e.g. `AskUserQuestion` in Claude Code). Offer three options: **English** (default), **Brazilian Portuguese (pt-BR)**, **Spanish**. If the user skips or no question tool is available, default to English.
