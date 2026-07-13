@@ -112,6 +112,16 @@ npm test / cargo test / pytest / go test ./...
 - When `feature_name` is absent, directory selection MUST follow priority order
 - Dependency install and baseline test are OPTIONAL (opt-in) — run only when the dev explicitly requests them
 
+## tmux Integration (managed sessions)
+
+When invoked in tandem with managed tmux sessions — i.e. the user opted in during the ring:writing-plans execution handoff and `ai-tmux-sessions` is detected — the ring pairs worktree creation with ring:creating-managed-sessions: **after** each worktree is created, a tmux window (or a new detached session, when outside tmux) is opened with `cwd` pinned to the freshly created worktree path.
+
+- The worktree MUST exist before its window opens — this skill runs first, then ring:creating-managed-sessions opens the window with `-c <path-worktree>`.
+- Window/session names reuse the `<feature-slug>` this skill derives (window `<slug>`; session `ring-<repo>` when outside tmux), so tmux names line up with `.worktrees/<feature-slug>/` and branch `feature/<feature-slug>`.
+- Detection and the window-vs-session logic (`$TMUX` present → `new-window`; absent → `new-session -d`) live entirely in ring:creating-managed-sessions; this skill only guarantees the worktree exists to point `cwd` at.
+
+See **ring:creating-managed-sessions** for detection, naming, collisions, and teardown.
+
 ## Integration
 
-Pairs with **finishing-a-development-branch** for cleanup and **ring:running-dev-cycle** for work.
+Pairs with **finishing-a-development-branch** for cleanup, **ring:running-dev-cycle** for work, and **ring:creating-managed-sessions** to open a tmux window/session per created worktree.

@@ -223,6 +223,26 @@ Where should this feature run?
 - **If Worktree:** invoke `Skill("ring:creating-worktrees")`, passing `feature_name` derived from the plan's filename — strip the `docs/plans/` (or `docs/pre-dev/{feature}/`) prefix, the `.md` extension, and the leading `YYYY-MM-DD-` date (e.g. `docs/plans/2026-07-08-payment-retry.md` → `payment-retry`). After the worktree is ready, dispatch the chosen executor **from inside the worktree**.
 - **If Tree default:** dispatch the chosen executor normally, on the current tree/branch.
 
+**Managed tmux sessions (orthogonal — ask only after the Worktree/Tree-default choice, and only if detected):** After the where-to-run choice, detect whether `ai-tmux-sessions` is installed:
+
+```bash
+[[ -f ~/.config/ai-sessions/ai-sessions.sh ]] && command -v tmux >/dev/null 2>&1
+```
+
+If detection **fails**, skip this question entirely — dispatch the executor in place as decided above. If it **succeeds**, ask (same question/ask mechanism as above; prose fallback) whether to open managed tmux sessions for the run — this is orthogonal to Worktree/Tree-default and applies to either:
+
+```
+Open managed tmux sessions for this run? (ai-tmux-sessions detected)
+
+  [1] Yes — open one tmux window per worktree (via ring:creating-managed-sessions),
+            each with cwd on its worktree. Inside tmux ($TMUX set) → new windows in the
+            current session; outside tmux → a new detached session ring-<repo>.
+  [2] No  — run the executor without managed tmux sessions.
+```
+
+- **If Yes:** invoke `Skill("ring:creating-managed-sessions")` **after** the worktree(s) exist, passing the worktree path(s) + `<feature-slug>`(s). It opens a window per worktree (`$TMUX` present → `tmux new-window`; absent → `tmux new-session -d -s ring-<repo>`), each with `cwd` on the worktree, then dispatch the executor inside the managed window. On Tree default (no worktree), it opens a single window/session with `cwd` on the current tree.
+- **If No / not detected:** dispatch the executor as decided by the where-to-run choice, with no tmux orchestration.
+
 **If Rolling-Wave chosen:** Continue with ring:executing-plans in this session.
 
 **If Reviewed Multi-Agent Workflows chosen:** Continue with ring:dispatching-workflows in this session.
