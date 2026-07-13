@@ -208,17 +208,20 @@ After saving the plan, announce the save, then collect the execution choice **us
 >
 > **3. Subagent-Orchestrated (ring:running-dev-cycle)** — lean backend cycle (Gate 0/8/9) with parallel specialist dispatch. Heaviest: full review pool per epic. Best for production work that must pass through the full review pool.
 
-**Worktree isolation (ask before dispatching the executor):** Once the executor is chosen, and **before** dispatching it, ask whether to isolate this feature in a worktree — using the same question/ask mechanism as the executor choice above (`AskUserQuestion` / question tool, prose prompt as fallback):
+**Where to run (ask before dispatching the executor):** Once the executor is chosen, and **before** dispatching it, ask **where** this feature should run — an isolated worktree or the current tree — using the same question/ask mechanism as the executor choice above (`AskUserQuestion` / question tool, prose prompt as fallback). This is a choice between two named options, not a yes/no:
 
 ```
-Worktree isolation: work in an isolated worktree for this feature?
+Where should this feature run?
 
-  [Y] Yes — create worktree now, then run the executor from there
-  [N] No  — continue on current branch
+  [1] Worktree     — isolate this feature in a dedicated git worktree (via ring:creating-worktrees),
+                     then run the executor from inside it. Keeps this work on its own branch and
+                     directory, separate from whatever is checked out now.
+  [2] Tree default — work in the current tree/branch as-is, no worktree isolation. Run the executor
+                     right here on the checked-out branch.
 ```
 
-- **If Y:** invoke `Skill("ring:creating-worktrees")`, passing `feature_name` derived from the plan's filename — strip the `docs/plans/` (or `docs/pre-dev/{feature}/`) prefix, the `.md` extension, and the leading `YYYY-MM-DD-` date (e.g. `docs/plans/2026-07-08-payment-retry.md` → `payment-retry`). After the worktree is ready, dispatch the chosen executor **from inside the worktree**.
-- **If N:** dispatch the chosen executor normally, on the current branch.
+- **If Worktree:** invoke `Skill("ring:creating-worktrees")`, passing `feature_name` derived from the plan's filename — strip the `docs/plans/` (or `docs/pre-dev/{feature}/`) prefix, the `.md` extension, and the leading `YYYY-MM-DD-` date (e.g. `docs/plans/2026-07-08-payment-retry.md` → `payment-retry`). After the worktree is ready, dispatch the chosen executor **from inside the worktree**.
+- **If Tree default:** dispatch the chosen executor normally, on the current tree/branch.
 
 **If Rolling-Wave chosen:** Continue with ring:executing-plans in this session.
 
