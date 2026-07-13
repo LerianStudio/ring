@@ -247,7 +247,11 @@ Where should this feature run?
                      right here on the checked-out branch.
 ```
 
-- **If Worktree:** invoke `Skill("ring:creating-worktrees")`, passing `feature_name` derived from the plan's filename — strip the `docs/plans/` (or `docs/pre-dev/{feature}/`) prefix, the `.md` extension, and the leading `YYYY-MM-DD-` date (e.g. `docs/plans/2026-07-08-payment-retry.md` → `payment-retry`). After the worktree is ready, dispatch the chosen executor **from inside the worktree**.
+- **If Worktree:** invoke `Skill("ring:creating-worktrees")`, passing `feature_name` derived from the plan **path** (not just the filename), branching on the layout:
+  - `docs/plans/YYYY-MM-DD-<feature>.md` → `<feature>` (strip the `docs/plans/` prefix, the `.md` extension, and the leading `YYYY-MM-DD-` date, e.g. `docs/plans/2026-07-08-payment-retry.md` → `payment-retry`).
+  - `docs/pre-dev/<feature>/plan.md` → `<feature>` (take the directory name under `docs/pre-dev/`, since the filename is always `plan.md`, e.g. `docs/pre-dev/payment-retry/plan.md` → `payment-retry`).
+
+  After the worktree is ready, dispatch the chosen executor **from inside the worktree**.
 - **If Tree default:** dispatch the chosen executor normally, on the current tree/branch.
 
 **Managed tmux sessions (orthogonal — ask only after the Worktree/Tree-default choice, and only if detected):** After the where-to-run choice, detect whether `ai-tmux-sessions` is installed:
