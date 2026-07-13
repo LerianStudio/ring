@@ -27,7 +27,7 @@ This skill can be invoked two ways:
 
 ## Parameters
 - `worktrees` (optional): list of `{ path, slug }` pairs — one per worktree to open. When provided, the skill runs **non-interactively**: it opens one window/session per entry, named by `slug`, with `cwd` set to `path`.
-  - `slug` MUST match the worktree/feature slug used by ring:creating-worktrees (`<feature-slug>`), so window names line up with `.worktrees/<feature-slug>/` and branch `feature/<feature-slug>`.
+  - `slug` MUST match the worktree/feature slug used by ring:creating-worktrees (`<feature-slug>`), so window names line up with the worktree path (`../<repo>-<feature-slug>/` or `../<project>-worktrees/<project>-<feature-slug>/`) and branch `feature/<feature-slug>`.
 - When `worktrees` is **absent**, ask the user which existing worktree path(s) to open, then proceed with the same logic.
 
 ## Detection
@@ -69,7 +69,7 @@ fi
 
 ## Naming
 
-- **Window name:** the worktree/feature `slug` (e.g. `payment-retry`). This keeps the window name aligned with `.worktrees/<slug>/` and branch `feature/<slug>`.
+- **Window name:** the worktree/feature `slug` (e.g. `payment-retry`). This keeps the window name aligned with the worktree directory (`../<repo>-<slug>/` or `../<project>-worktrees/<project>-<slug>/`) and branch `feature/<slug>`.
 - **Session name (outside tmux):** `ring-<repo>` where `<repo>` is `basename "$(git rev-parse --show-toplevel)"`.
 - Slugs come straight from ring:creating-worktrees; do not re-slugify differently here or names will drift from the worktree directories.
 
@@ -77,7 +77,7 @@ fi
 
 A window's `cwd` (`-c <path>`) must point to a real directory. If a target worktree does not exist yet:
 
-1. Create it first via ring:creating-worktrees (`feature_name` → `.worktrees/<slug>/`, branch `feature/<slug>`).
+1. Create it first via ring:creating-worktrees (`feature_name` → sibling `../<repo>-<slug>/`, or `<base_dir>/<project>-<slug>/` in orchestration mode; branch `feature/<slug>`).
 2. Only then open the tmux window/session with `-c` on the freshly created path.
 
 Never open a window with `-c` on a non-existent path — tmux errors out or falls back to the wrong cwd.
@@ -121,7 +121,7 @@ After opening, report per worktree:
 
 ```
 Managed sessions ready:
-  <slug> → window "<slug>" (cwd .worktrees/<slug>/)   [inside tmux]
+  <slug> → window "<slug>" (cwd ../<repo>-<slug>/)   [inside tmux]
   <slug> → session "ring-<repo>" window "<slug>"      [outside tmux — attach: tmux attach -t ring-<repo>]
 ```
 
