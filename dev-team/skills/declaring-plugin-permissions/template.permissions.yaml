@@ -1,0 +1,74 @@
+# =============================================================================
+# access-manager permission-declaration manifest — CANONICAL TEMPLATE
+# =============================================================================
+# This file is the client-side, SEMANTIC source of truth for a plugin's RBAC.
+# Under the access-manager "inversão de responsabilidade" the plugin embeds this
+# with //go:embed and PUBLISHES it at boot (lib-auth authdecl.WireFromEnv), instead
+# of the permissions living centrally in the access-manager seed / init_data.json.
+#
+# Schema authority: lib-auth/v3 auth/declaration/manifest.go (>= v3.4.0-beta.1),
+# mirrored server-side by plugin-access-manager identity/pkg/model/declaration.go.
+# The reconciler validates this exact shape at boot and rejects a bad manifest.
+#
+# GOLDEN RULES
+#   1. resources are written BARE      -> server composes "{service}/{resource}".
+#   2. groups are written BARE         -> server composes "{owner}/{group}" (e.g. lerian/).
+#   3. role names are written BARE     -> server composes "{service}/{name}".
+#      Do NOT pre-prefix; "{service}/admin" would double-prefix to "{service}/{service}/admin".
+#   4. actions are SEMANTIC verbs      -> create/read/update/delete + domain verbs
+#      (rotate/trigger/justify/generate/reprocess/read_pii). NEVER an HTTP verb
+#      (post/get/patch/put/delete-the-method). This is THE naming standard.
+#   5. every (resource, action) here MUST match a real AuthClient.Authorize(
+#      service, resource, action) guard in the plugin, or authz silently breaks.
+# =============================================================================
+
+# service: REQUIRED. Non-empty, no "."/".." segments. KEEP any "plugin-" prefix.
+# MUST equal the plugin's M2M app slug AND DisplayName (BOLA rule enforced at boot:
+# slug == manifest.service == DisplayName). This is also the first arg passed to
+# AuthClient.Authorize(service, ...).
+service: plugin-example
+
+# version: REQUIRED, integer >= 1. ADVISORY ONLY — excluded from the content hash,
+# so bumping it with identical content is a no-op publish. Bump it for your own
+# change tracking; it does not affect reconciliation.
+version: 1
+
+# permissions: one entry per (resource, action) the plugin enforces.
+permissions:
+  # A read permission granted to BOTH roles (read is broad).
+  - resource: widget          # BARE. Reconciles to "plugin-example/widget".
+    action: read              # SEMANTIC. NOT "get".
+    effect: allow             # allow | deny ONLY.
+    roles:                    # >= 1 role, each MUST be declared in roles: below.
+      - viewer
+      - editor
+  # A mutating permission granted to the editor role ONLY (default: mutate = editor-only).
+  - resource: widget
+    action: create            # SEMANTIC. NOT "post".
+    effect: allow
+    roles:
+      - editor
+  # A domain-specific verb (not CRUD). Semantic verbs are first-class.
+  - resource: widget_key
+    action: rotate            # domain verb; keep it, do not force into CRUD.
+    effect: allow
+    roles:
+      - editor
+
+# roles: every role referenced above MUST appear here.
+roles:
+  # name: REQUIRED, BARE. "/" is allowed as a hierarchy separator (e.g. widget/editor).
+  - name: viewer
+    granted_to:               # GROUP-ONLY grants (there is no "user" grantee).
+      - group: example-viewer # BARE group -> reconciles to "{owner}/example-viewer".
+  - name: editor
+    granted_to:
+      - group: example-editor
+      # A role may bind to several groups (e.g. a cross-cutting admin group):
+      - group: admin-group
+
+# m2m: the plugin's bilateral machine-to-machine contract. Optional block.
+m2m:
+  exposed: true               # true => this plugin is callable AS an M2M target.
+  needs:                      # target service slugs this plugin CALLS via M2M.
+    - midaz                   # omit or leave empty if it calls nothing.
