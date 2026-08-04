@@ -71,6 +71,11 @@ Domain verbs are first-class and encouraged where CRUD does not fit:
 `rotate`, `trigger`, `justify`, `generate`, `reprocess`, `read_pii`,
 `request_read`, `request_write`, `receive`. Keep them; do not force them into CRUD.
 
+**This is ENFORCED, not just advised.** `post`/`get`/`put`/`patch` are rejected by
+the lib-auth manifest validator at boot AND by the `check-manifest-actions` CI
+guard (Step 9). Only `delete` among HTTP methods is allowed — it is also a valid
+semantic action. Never emit `post`/`get`/`put`/`patch` as an `action`.
+
 ## Manifest schema (author against THIS)
 
 Top-level YAML: `service` (str, REQUIRED), `version` (int, REQUIRED), `permissions`
@@ -182,6 +187,8 @@ zero network) with a tiny throwaway program:
 Or a YAML lint + this checklist. **Validation rules (all aggregated at boot):**
 - `service` non-empty and not `.`/`..`.
 - `version` >= 1.
+- each `action` is SEMANTIC: `post`/`get`/`put`/`patch` are REJECTED at boot
+  (`delete` is allowed — also a valid semantic action).
 - each permission: non-empty `resource` and `action`; `effect` in {allow, deny};
   >= 1 role; every role reference is a DECLARED role.
 - no duplicate composed permission `{service}/{resource}:{action}`.
@@ -199,6 +206,41 @@ Re-confirm every declared `(resource, action)` maps to a real `Authorize(...)` c
   action so both sides use it (do not "fix" it by declaring the verb).
 
 Do not consider the manifest done while any mismatch remains.
+
+### Step 9 — Scaffold the durable CI guard (Makefile)
+The alignment gate above is a one-time check. Lock the semantic standard in so a
+future edit that reintroduces an HTTP verb FAILS the build — two layers:
+
+- **Boot-time (lib-auth):** the manifest validator rejects `post`/`get`/`put`/`patch`
+  actions at boot — a plugin with an HTTP-verb action won't start. `delete` stays
+  valid. Automatic once the plugin is on the lib-auth release carrying the rule;
+  nothing to add.
+- **CI (Makefile):** add an earlier, cheaper guard that fails in CI before boot.
+
+Check the plugin's Makefile for the existing `check-*` convention (most Lerian
+plugins wire `check-tests`, `check-migrations`, … into a `ci:`/`check` aggregate —
+grep `^check-` and `^ci:`). Add a `check-manifest-actions` target matching that
+idiom and wire it into the aggregate:
+
+```makefile
+MANIFEST ?= internal/auth/declaration/permissions.yaml
+
+.PHONY: check-manifest-actions
+# Fail if the manifest uses HTTP-verb actions. 'delete' is allowed (also a valid
+# semantic action). Mirrors the boot-time lib-auth rule.
+check-manifest-actions:
+	@echo "Checking manifest actions are semantic (not HTTP verbs)..."
+	@if grep -inE '^[[:space:]]*action:[[:space:]]*["'\'']?(post|get|put|patch)["'\'']?[[:space:]]*$$' $(MANIFEST); then \
+		echo "ERROR: HTTP-verb action in $(MANIFEST) — use a SEMANTIC action (create/read/update/delete or a domain verb). 'delete' is allowed."; \
+		exit 1; \
+	fi
+	@echo "OK: manifest actions are semantic."
+```
+
+Add `check-manifest-actions` to the `ci:`/`check:` prerequisite list (and `.PHONY`).
+If the plugin has no `check-*`/`ci` idiom, still add the target and call it where
+tests run. Confirm it FAILS on a seeded `action: post` and PASSES on the real
+manifest before finishing.
 
 ---
 
