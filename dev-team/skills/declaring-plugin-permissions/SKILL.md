@@ -226,11 +226,14 @@ idiom and wire it into the aggregate:
 MANIFEST ?= internal/auth/declaration/permissions.yaml
 
 .PHONY: check-manifest-actions
-# Fail if the manifest uses HTTP-verb actions. 'delete' is allowed (also a valid
-# semantic action). Mirrors the boot-time lib-auth rule.
+# Fail if the manifest is missing/unreadable, or if it uses HTTP-verb actions.
+# 'delete' is allowed (also a valid semantic action). Mirrors the boot-time
+# lib-auth rule. (Pattern assumes block-style `action:` entries — adapt it if
+# your manifest uses flow-style, e.g. `- {resource: x, action: post}`.)
 check-manifest-actions:
+	@test -r "$(MANIFEST)" || { echo "ERROR: manifest not found or unreadable: $(MANIFEST)"; exit 1; }
 	@echo "Checking manifest actions are semantic (not HTTP verbs)..."
-	@if grep -inE '^[[:space:]]*action:[[:space:]]*["'\'']?(post|get|put|patch)["'\'']?[[:space:]]*$$' $(MANIFEST); then \
+	@if grep -inE '^[[:space:]]*action:[[:space:]]*["'\'']?(post|get|put|patch)["'\'']?[[:space:]]*$$' "$(MANIFEST)"; then \
 		echo "ERROR: HTTP-verb action in $(MANIFEST) — use a SEMANTIC action (create/read/update/delete or a domain verb). 'delete' is allowed."; \
 		exit 1; \
 	fi
