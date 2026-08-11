@@ -8,7 +8,9 @@ description: >-
   and the M2M contract, then emits and validates a manifest that matches the
   lib-auth/v3 auth/declaration schema. Use when a plugin must publish its own
   permissions at boot (WireFromEnv) instead of the access-manager seed owning them,
-  or when writing/fixing a permissions.yaml. Skip when the plugin has no auth guards,
+  or when writing/fixing a permissions.yaml. It also bumps the repo's
+  github-actions-shared-workflows CI pin to the release carrying the
+  permission-manifest nudge. Skip when the plugin has no auth guards,
   or you only need the wiring (see WireFromEnv) and the manifest already exists.
 allowed-tools:
   - AskUserQuestion
@@ -244,6 +246,26 @@ Add `check-manifest-actions` to the `ci:`/`check:` prerequisite list (and `.PHON
 If the plugin has no `check-*`/`ci` idiom, still add the target and call it where
 tests run. Confirm it FAILS on a seeded `action: post` and PASSES on the real
 manifest before finishing.
+
+### Step 10 — Bump the shared-workflows CI pin
+The org shared CI (`LerianStudio/github-actions-shared-workflows`, reusable
+`go-pr-validation.yml`) now carries a NON-BLOCKING `permission-manifest-nudge` that
+reminds any lib-auth repo still missing a `permissions.yaml`. You are already
+touching this repo — bump its pin so the pipeline is current.
+
+- Find the consumer pins: `grep -rn 'LerianStudio/github-actions-shared-workflows' .github/workflows`.
+  Expect exact-tag `uses: …@vX.Y.Z` on `go-pr-validation.yml` / `go-release.yml` /
+  `routine.yml`. Leave any `…@v1` major-float pins as-is.
+- Resolve the latest release tag:
+  `gh release view --repo LerianStudio/github-actions-shared-workflows --json tagName -q .tagName`
+  (or `gh api repos/LerianStudio/github-actions-shared-workflows/releases/latest -q .tag_name`).
+  It must be `>=` the release that introduced `permission-manifest-nudge`.
+- Bump EVERY exact-tag shared-workflows pin in `.github/workflows/*.yml` to that tag,
+  keeping all of them on the SAME version. Do not touch unrelated `uses:` lines.
+
+This is hygiene, not a gate: for THIS repo — which now declares a manifest — the
+nudge reports "compliant" and posts nothing. The bump only keeps the shared pipeline
+current. Confirm the target tag exists before writing, and preserve the pin format.
 
 ---
 
