@@ -180,9 +180,8 @@ lib-auth #4232 — shared across every plugin, NOT a per-plugin prefix):
 plus the token-minter vars `PLUGIN_AUTH_ENABLED`, `PLUGIN_AUTH_HOST` (out of scope
 for #4232, unchanged).
 
-The `IDP_` names require **lib-auth ≥ the #4232 release** — the next `v3.4.0-beta.x`
-(exact tag TBD, semantic-release-driven: pin it once the beta is tagged). This is a
-LATER threshold than the `>= v3.4.0-beta.1` manifest-schema pin above. For ONE
+The `IDP_` names require **lib-auth ≥ `v3.4.0-beta.6`** (the release that carries #4232).
+This is a LATER threshold than the `>= v3.4.0-beta.1` manifest-schema pin above. For ONE
 release after #4232 the old names (`DECLARATION_ENABLED`, `PLUGIN_IDENTITY_HOST`,
 `M2M_CLIENT_ID`, `M2M_CLIENT_SECRET`) still work as deprecated aliases (canonical
 `IDP_` wins; `WireFromEnv` WARNs when only the alias is set), so a plugin pinned to
