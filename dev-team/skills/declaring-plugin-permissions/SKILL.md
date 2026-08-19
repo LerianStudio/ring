@@ -172,9 +172,21 @@ stop, err := authdecl.WireFromEnv(ctx, authdecl.WireInput{
     Logger:   logger,
 })
 ```
-Deployment sets the FIXED, un-prefixed env contract (default OFF, fail-open):
-`DECLARATION_ENABLED`, `PLUGIN_IDENTITY_HOST`, `M2M_CLIENT_ID`, `M2M_CLIENT_SECRET`,
-`PLUGIN_AUTH_ENABLED`, `PLUGIN_AUTH_HOST`.
+Deployment sets the FIXED env contract (default OFF, fail-open). A NEW adopter
+creates these vars with the canonical `IDP_` names from the start. The four
+RI/D7-declaration vars carry the product-wide `IDP_` prefix (identity provider,
+lib-auth #4232 — shared across every plugin, NOT a per-plugin prefix):
+`IDP_DECLARATION_ENABLED`, `IDP_HOST`, `IDP_M2M_CLIENT_ID`, `IDP_M2M_CLIENT_SECRET`,
+plus the token-minter vars `PLUGIN_AUTH_ENABLED`, `PLUGIN_AUTH_HOST` (out of scope
+for #4232, unchanged).
+
+The `IDP_` names require **lib-auth ≥ `v3.4.0-beta.6`** (the release that carries #4232).
+This is a LATER threshold than the `>= v3.4.0-beta.1` manifest-schema pin above. For ONE
+release after #4232 the old names (`DECLARATION_ENABLED`, `PLUGIN_IDENTITY_HOST`,
+`M2M_CLIENT_ID`, `M2M_CLIENT_SECRET`) still work as deprecated aliases (canonical
+`IDP_` wins; `WireFromEnv` WARNs when only the alias is set), so a plugin pinned to
+an older lib-auth keeps booting — migrate to the `IDP_` names before the following
+release drops the aliases.
 
 ### Step 7 — Validate
 Run structural checks against every rule below, and if a Go toolchain + lib-auth
