@@ -243,16 +243,19 @@ Do not consider the manifest done while any mismatch remains.
 
 ### Step 9 — Scaffold the durable CI guard (Makefile)
 The alignment gate above is a one-time check. Lock the semantic standard in so a
-future edit that reintroduces an HTTP verb FAILS the build. There is exactly ONE
-automated layer, and it is the one you add here:
+future edit that reintroduces an HTTP verb FAILS the build. For the MANIFEST's
+action names there is exactly ONE automated layer, and it is the one you add
+here. Guard alignment is NOT automated at all: the target below reads
+`$(MANIFEST)` and nothing else, so a guard still passing `get` against a manifest
+declaring `read` is caught by Steps 3 and 8 and by review — nowhere else.
 
 - **Boot-time (lib-auth): none.** The validator used to reject
   `post`/`get`/`put`/`patch`, and that reject was removed from lib-auth and
   identity (lib-auth#145 / plugin-access-manager#310). A manifest with a verb
   action starts and publishes fine — nothing catches the regression at runtime.
 - **CI (Makefile):** the `check-manifest-actions` guard below. Cheap, lives in the
-  plugin's own repo, and is the only thing that fails a build on a reintroduced
-  verb.
+  plugin's own repo, and is the only thing that fails a build on a verb
+  reintroduced in the manifest.
 
 Check the plugin's Makefile for the existing `check-*` convention (most Lerian
 plugins wire `check-tests`, `check-migrations`, … into a `ci:`/`check` aggregate —
@@ -265,7 +268,8 @@ MANIFEST ?= internal/auth/declaration/permissions.yaml
 .PHONY: check-manifest-actions
 # Fail if the manifest is missing/unreadable, or if it uses HTTP-verb actions.
 # 'delete' is allowed (also a valid semantic action). This is the ONLY automated
-# check for the semantic standard — lib-auth no longer rejects verbs at boot.
+# check for the semantic standard — lib-auth no longer rejects verbs at boot. It
+# reads the manifest only: a mismatched Authorize() guard is Step 8's job.
 # (Pattern assumes block-style `action:` entries — adapt it if your manifest uses
 # flow-style, e.g. `- {resource: x, action: post}`.)
 check-manifest-actions:
