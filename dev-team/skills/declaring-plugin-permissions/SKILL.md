@@ -90,10 +90,23 @@ composes the prefix — never pre-prefix.**
 | `version` | REQUIRED int >= 1. ADVISORY — excluded from content hash; bumping alone is a no-op publish. |
 | `permissions[].resource` | REQUIRED, **BARE** (server composes `{service}/`). |
 | `permissions[].action` | REQUIRED, **SEMANTIC** — never an HTTP verb. |
-| `permissions[].effect` | `allow` or `deny` ONLY. |
+| `permissions[].effect` | `allow` ONLY. A `deny` is REJECTED — see below. |
 | `permissions[].roles` | >= 1 BARE role name, each MUST be declared in `roles:`. |
 | `roles[].name` | REQUIRED, BARE. `/` allowed as hierarchy separator (`fees/editor`). |
 | `roles[].granted_to` | list of `{ group: <bare-name> }`. **GROUP-ONLY** — there is no `user` grantee. Server composes the `{owner}/` prefix. |
+
+**Why `deny` is refused and not merely discouraged.** The manifest used to accept
+it and the reconciler wrote it to Casdoor as a real permission, but no decision
+point ever applied it: every evaluator reads an effect other than `allow` as "did
+not match" and carries on, authorizing on the first `allow` that does match. There
+is no deny-wins pass. So a `deny` was a refusal you could read in the manifest, in
+review, and in the stored permission — while the runtime granted. Validation now
+rejects it at boot (fail-closed) and the PUT answers 422.
+
+Only the `effect` field is constrained. `deny` is still a fine ACTION name:
+`br-sfn/services/spb` declares `{ resource: str-emission-approvals, action: deny,
+effect: allow }`, because approving or denying an STR emission is that domain's
+verb.
 | `m2m.exposed` | bool — this plugin is callable as an M2M target. |
 | `m2m.needs` | list of target service slugs this plugin CALLS via M2M (e.g. `midaz`). |
 
@@ -201,9 +214,12 @@ zero network) with a tiny throwaway program:
 Or a YAML lint + this checklist. **Validation rules (all aggregated at boot):**
 - `service` non-empty and not `.`/`..`.
 - `version` >= 1.
-- each `action` is SEMANTIC: `post`/`get`/`put`/`patch` are REJECTED at boot
-  (`delete` is allowed — also a valid semantic action).
-- each permission: non-empty `resource` and `action`; `effect` in {allow, deny};
+- each `action` is non-empty. The SEMANTIC standard above is a CONVENTION, not
+  a boot check: the HTTP-verb reject was removed from both lib-auth and identity
+  (lib-auth#145 / plugin-access-manager#310), so a manifest with `action: get`
+  publishes without complaint. Hold the standard in review and with the Makefile
+  guard below — nothing downstream will hold it for you.
+- each permission: non-empty `resource` and `action`; `effect` is `allow`;
   >= 1 role; every role reference is a DECLARED role.
 - no duplicate composed permission `{service}/{resource}:{action}`.
 - no duplicate composed role `{service}/{name}`.
