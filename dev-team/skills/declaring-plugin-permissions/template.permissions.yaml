@@ -38,7 +38,7 @@ permissions:
   # A read permission granted to BOTH roles (read is broad).
   - resource: widget          # BARE. Reconciles to "plugin-example/widget".
     action: read              # SEMANTIC. NOT "get".
-    effect: allow             # allow | deny ONLY.
+    effect: allow             # ALWAYS allow. A deny is rejected: nothing applies it.
     roles:                    # >= 1 role, each MUST be declared in roles: below.
       - viewer
       - editor
