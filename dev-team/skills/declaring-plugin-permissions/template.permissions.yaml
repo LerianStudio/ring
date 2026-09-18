@@ -34,26 +34,26 @@ service: plugin-example
 version: 1
 
 # permissions: one entry per (resource, action) the plugin enforces.
+#
+# STYLE: FLOW — one permission per line, `- { ... }`. This is the org house style
+# (midaz, tracer, plugin-access-manager, streaming-hub, reporter, lender,
+# br-sfn/*, br-sisbajud, ...). Block style is equally valid YAML and the schema
+# does not care, but flow keeps a 90-pair manifest readable and gives a one-line
+# diff per permission. Align the columns so the grant matrix reads down the page.
+#
+# Per-field rules (they used to sit as inline comments; flow style has no room):
+#   resource: BARE     -> reconciles to "{service}/{resource}", e.g. "plugin-example/widget".
+#   action:   SEMANTIC -> "read", NOT "get". "create", NOT "post". Never an HTTP verb.
+#   effect:   ALWAYS allow. A deny is rejected: nothing applies it.
+#   roles:    >= 1 role, each MUST be declared in roles: below.
 permissions:
   # A read permission granted to BOTH roles (read is broad).
-  - resource: widget          # BARE. Reconciles to "plugin-example/widget".
-    action: read              # SEMANTIC. NOT "get".
-    effect: allow             # ALWAYS allow. A deny is rejected: nothing applies it.
-    roles:                    # >= 1 role, each MUST be declared in roles: below.
-      - viewer
-      - editor
+  - { resource: widget,     action: read,   effect: allow, roles: [viewer, editor] }
   # A mutating permission granted to the editor role ONLY (default: mutate = editor-only).
-  - resource: widget
-    action: create            # SEMANTIC. NOT "post".
-    effect: allow
-    roles:
-      - editor
-  # A domain-specific verb (not CRUD). Semantic verbs are first-class.
-  - resource: widget_key
-    action: rotate            # domain verb; keep it, do not force into CRUD.
-    effect: allow
-    roles:
-      - editor
+  - { resource: widget,     action: create, effect: allow, roles: [editor] }
+  # A domain-specific verb (not CRUD). Semantic verbs are first-class:
+  # keep the domain verb, do not force it into CRUD.
+  - { resource: widget_key, action: rotate, effect: allow, roles: [editor] }
 
 # roles: every role referenced above MUST appear here.
 roles:
