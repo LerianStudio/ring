@@ -117,6 +117,25 @@ verb.
 Composed names the server builds: permission `{service}/{resource}:{action}`,
 role `{service}/{name}`, group `{owner}/{group}`.
 
+### House style: write `permissions:` in FLOW style
+
+The schema is indifferent to YAML style, the org is not. Write each permission as
+a single flow-mapping line and align the columns:
+
+```yaml
+permissions:
+  - { resource: account-types, action: read,   effect: allow, roles: [editor, contributor, viewer] }
+  - { resource: account-types, action: create, effect: allow, roles: [editor, contributor] }
+  - { resource: account-types, action: delete, effect: allow, roles: [editor] }
+```
+
+not the five-line block form. This is what the existing manifests do — `midaz`,
+`tracer`, `plugin-access-manager`, `streaming-hub`, `reporter`, `lender`,
+`br-sisbajud`, `billing-worker` and every `br-sfn/services/*` — and a real
+manifest is 20-100 pairs, where flow gives one readable line and one clean diff
+hunk per permission instead of five. Keep `roles:` and `m2m:` in block style, as
+those same manifests do.
+
 See `template.permissions.yaml` in this folder for a compact, valid, commented example.
 
 ---
@@ -175,7 +194,8 @@ Ask:
 ### Step 6 — Emit `permissions.yaml`
 `Write` the manifest to the plugin's declaration dir (mirror `br-sisbajud`:
 `internal/auth/declaration/permissions.yaml`). Bare resources/groups/roles,
-semantic actions, valid effects, >= 1 role per permission. Then show the wiring the
+semantic actions, valid effects, >= 1 role per permission, `permissions:` entries
+in FLOW style (see "House style" above). Then show the wiring the
 plugin adds (manifest authoring is the focus; this is the glue):
 
 ```go
@@ -270,12 +290,15 @@ MANIFEST ?= internal/auth/declaration/permissions.yaml
 # 'delete' is allowed (also a valid semantic action). This is the ONLY automated
 # check for the semantic standard — lib-auth no longer rejects verbs at boot. It
 # reads the manifest only: a mismatched Authorize() guard is Step 8's job.
-# (Pattern assumes block-style `action:` entries — adapt it if your manifest uses
-# flow-style, e.g. `- {resource: x, action: post}`.)
+# The pattern matches BOTH styles: flow `- { ..., action: post, ... }` (the house
+# style) and block `action: post` on its own line, with or without quotes and with
+# or without a trailing `# comment`. It deliberately does NOT match a `#` comment
+# line that merely mentions an action, and does not fire on a resource or a longer
+# action that starts with a verb (`repost`, `getaway`, `read_pii`).
 check-manifest-actions:
 	@test -r "$(MANIFEST)" || { echo "ERROR: manifest not found or unreadable: $(MANIFEST)"; exit 1; }
 	@echo "Checking manifest actions are semantic (not HTTP verbs)..."
-	@if grep -inE '^[[:space:]]*action:[[:space:]]*["'\'']?(post|get|put|patch)["'\'']?[[:space:]]*$$' "$(MANIFEST)"; then \
+	@if grep -inE '^([[:space:]]*-[[:space:]]*\{(.*[{,])?)?[[:space:]]*action:[[:space:]]*["'\'']?(post|get|put|patch)["'\'']?[[:space:]]*([,}#]|$$)' "$(MANIFEST)"; then \
 		echo "ERROR: HTTP-verb action in $(MANIFEST) — use a SEMANTIC action (create/read/update/delete or a domain verb). 'delete' is allowed."; \
 		exit 1; \
 	fi
@@ -284,8 +307,8 @@ check-manifest-actions:
 
 Add `check-manifest-actions` to the `ci:`/`check:` prerequisite list (and `.PHONY`).
 If the plugin has no `check-*`/`ci` idiom, still add the target and call it where
-tests run. Confirm it FAILS on a seeded `action: post` and PASSES on the real
-manifest before finishing.
+tests run. Confirm it FAILS on a seeded `action: post` — seeded in the SAME style
+the manifest uses — and PASSES on the real manifest before finishing.
 
 ### Step 10 — Bump the shared-workflows CI pin
 The org shared CI (`LerianStudio/github-actions-shared-workflows`, reusable
