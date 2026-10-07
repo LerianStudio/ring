@@ -347,9 +347,11 @@ M2M target — `m2m.exposed: true`, or any other service holds a credential for 
 Say all of this, not a summary of it:
 - **This is a deploy prerequisite, not tuning.** The RI reconcile prunes the
   template anchor role `{tenantSlug}-{service}-editor-role`, and the access manager
-  only enters the RI path when the call carries `product`. Without BOTH flags on
-  the CALLED plugin, every M2M call into it denies after the reconcile. Set them
-  and confirm them in the pod BEFORE anyone clicks reconcile for this service.
+  only enters the RI path when the call carries `product`. Without the flags on
+  the CALLED plugin (both on v3.1.0+; on v3.0.0 the forward alone), every
+  application-token M2M call into it denies after the reconcile — only a
+  partner-bound credential (v5.1.0+) already carries `product`. Set them and
+  confirm them in the pod BEFORE anyone clicks reconcile for this service.
 - **They go on the called service (Y), never on the caller.** The caller only
   fetches a token; Y's middleware asks the access manager.
 - **Defaults are `false`; only the exact string `"true"` enables.**
@@ -392,8 +394,8 @@ Full reference: internal-docs `infra-layer/access-manager/helm-7.x.x/7.0.0-refac
 - You are emitting a verb action to sidestep a guard mismatch → fix the guard instead.
 - `service` differs from the M2M app DisplayName / the `Authorize` 1st arg → BOLA break.
 - You are closing the session on an M2M-target plugin without telling the team about
-  `AUTH_M2M_INVERSION_ENABLED` + `AUTH_M2M_PRODUCT_FORWARD_ENABLED` → its M2M callers
-  break on the first reconcile (Step 11).
+  `AUTH_M2M_INVERSION_ENABLED` + `AUTH_M2M_PRODUCT_FORWARD_ENABLED` → its
+  application-token M2M callers break on the first reconcile (Step 11).
 
 All of these mean: **stop and correct before writing/finishing the manifest.**
 
@@ -405,5 +407,5 @@ All of these mean: **stop and correct before writing/finishing the manifest.**
 | "I'll pre-prefix the resource with the service to be safe." | Server composes the prefix; you get `{service}/{service}/…`. | Write resources/roles/groups BARE. |
 | "A user grantee would be convenient here." | The schema has no user grantee. | Use a group; grant the group to the role. |
 | "Version bump publishes the new content." | Version is excluded from the content hash — bump alone is a no-op. | Change the actual permissions/roles content. |
-| "The env flags are ops' business, not the manifest's." | Without them the reconcile this manifest triggers denies every M2M call into the plugin. | Deliver Step 11 before closing. |
+| "The env flags are ops' business, not the manifest's." | Without them the reconcile this manifest triggers denies every application-token M2M call into the plugin. | Deliver Step 11 before closing. |
 | "The manifest is valid, so we're done." | Structural validity ≠ alignment with real guards. | Pass Step 8; every pair must map to an `Authorize` call. |
