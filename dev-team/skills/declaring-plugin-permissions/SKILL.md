@@ -225,6 +225,10 @@ release after #4232 the old names (`DECLARATION_ENABLED`, `PLUGIN_IDENTITY_HOST`
 an older lib-auth keeps booting — migrate to the `IDP_` names before the following
 release drops the aliases.
 
+These vars only PUBLISH the manifest. A plugin that other services call via M2M
+also needs the two `AUTH_M2M_*` runtime flags before its first reconcile — Step 11
+hands them to the team.
+
 ### Step 7 — Validate
 Run structural checks against every rule below, and if a Go toolchain + lib-auth
 (>= v3.4.0-beta.1) are available, verify against the REAL validator (parse+Validate,
@@ -330,6 +334,55 @@ This is hygiene, not a gate: for THIS repo — which now declares a manifest —
 nudge reports "compliant" and posts nothing. The bump only keeps the shared pipeline
 current. Confirm the target tag exists before writing, and preserve the pin format.
 
+### Step 11 — Hand off the two M2M deploy flags (do not skip)
+Finish the session by TELLING the team, in plain words, that the deploy needs two
+more env vars whenever this plugin is CALLED by another service via M2M (it is an
+M2M target — `m2m.exposed: true`, or any other service holds a credential for it):
+
+| Variable | Value | What it does (lib-auth `auth/middleware/middleware.go`) |
+|----------|-------|---------------------------------------------------------|
+| `AUTH_M2M_INVERSION_ENABLED` | `"true"` | Inversion model in `Authorize`: an application token authorizes under its own `sub`, and token types outside `{normal-user, application}` get 401. Off (legacy): every non-user token becomes the fabricated `admin/{product}-editor-role`. |
+| `AUTH_M2M_PRODUCT_FORWARD_ENABLED` | `"true"` | Sends `product` on application-token authorize calls. Inert unless the flag above is on (`forwardM2MProduct := auth.ForwardM2MProduct && auth.M2MInversionEnabled`). |
+
+Say all of this, not a summary of it:
+- **This is a deploy prerequisite, not tuning.** The RI reconcile prunes the
+  template anchor role `{tenantSlug}-{service}-editor-role`, and the access manager
+  only enters the RI path when the call carries `product`. Without the flags on
+  the CALLED plugin (both on v3.1.0+; on v3.0.0 the forward alone), every
+  application-token M2M call into it denies after the reconcile — only a
+  partner-bound credential (v5.1.0+) already carries `product`. Set them and
+  confirm them in the pod BEFORE anyone clicks reconcile for this service.
+- **They go on the called service (Y), never on the caller.** The caller only
+  fetches a token; Y's middleware asks the access manager.
+- **Defaults are `false`; only the exact string `"true"` enables.**
+- **lib-auth version:** neither exists up to v2.x (a v2 plugin ignores both — a
+  flag in values proves nothing); v3.0.0 has only the forward, with inversion
+  always on; v3.1.0 onward (v3, v4, v5) has both. Check `go.mod`.
+- **Without the forward, the access manager's product-isolation gate is inert**
+  for this service (an empty `product` is never denied cross-product). The org
+  decision (lmap #5077, 2026-10-07) is to close that by turning the forward on.
+- **Where:** `extraEnvVars` in the plugin's gitops `values.yaml`, NOT a typed
+  `configmap` block — the charts' typed blocks drop unknown keys silently. Real
+  pattern: `environments/benedita/helmfile/applications/stg-mt/midaz/values.yaml`
+  in `lerian-internal-gitops`:
+  ```yaml
+  extraEnvVars:
+    AUTH_M2M_INVERSION_ENABLED: "true"
+    AUTH_M2M_PRODUCT_FORWARD_ENABLED: "true"
+  ```
+- Today both flags are explicit. Coupling the forward to `IDP_DECLARATION_ENABLED`
+  is deferred to phase 2 (lmap #4304); do not tell the team it is automatic.
+- `lender` already refuses to boot a hardened deployment without
+  `AUTH_M2M_INVERSION_ENABLED=true` (`internal/bootstrap/config_validation.go`), so
+  there only the forward is missing.
+
+lib-auth v5 notes: since v5.1.0 a partner-bound credential forwards `product`
+without these flags (that does not cover ordinary M2M); since v5.6.0
+`Principal.SourceService` is published only with `AUTH_M2M_INVERSION_ENABLED=true`.
+
+If the plugin is not an M2M target, say so and that the flags are not needed yet.
+Full reference: internal-docs `infra-layer/access-manager/helm-7.x.x/7.0.0-refactor-am/permission-declaration/m2m-credential-guide.md` §7.1.
+
 ---
 
 ## Red Flags — STOP
@@ -340,6 +393,9 @@ current. Confirm the target tag exists before writing, and preserve the pin form
 - A permission lists zero roles, or a role not in `roles:` → validation fails.
 - You are emitting a verb action to sidestep a guard mismatch → fix the guard instead.
 - `service` differs from the M2M app DisplayName / the `Authorize` 1st arg → BOLA break.
+- You are closing the session on an M2M-target plugin without telling the team about
+  `AUTH_M2M_INVERSION_ENABLED` + `AUTH_M2M_PRODUCT_FORWARD_ENABLED` → its
+  application-token M2M callers break on the first reconcile (Step 11).
 
 All of these mean: **stop and correct before writing/finishing the manifest.**
 
@@ -351,4 +407,5 @@ All of these mean: **stop and correct before writing/finishing the manifest.**
 | "I'll pre-prefix the resource with the service to be safe." | Server composes the prefix; you get `{service}/{service}/…`. | Write resources/roles/groups BARE. |
 | "A user grantee would be convenient here." | The schema has no user grantee. | Use a group; grant the group to the role. |
 | "Version bump publishes the new content." | Version is excluded from the content hash — bump alone is a no-op. | Change the actual permissions/roles content. |
+| "The env flags are ops' business, not the manifest's." | Without them the reconcile this manifest triggers denies every application-token M2M call into the plugin. | Deliver Step 11 before closing. |
 | "The manifest is valid, so we're done." | Structural validity ≠ alignment with real guards. | Pass Step 8; every pair must map to an `Authorize` call. |
