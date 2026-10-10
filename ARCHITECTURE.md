@@ -733,11 +733,11 @@ _Component counts reflect current state; plugin versions managed in `.claude-plu
 | Component                 | Count      | Location               |
 | ------------------------- | ---------- | ---------------------- |
 | Active Plugins            | 4          | All plugin directories |
-| Skills (ring-default)     | 16         | `default/skills/`      |
+| Skills (ring-default)     | 17         | `default/skills/`      |
 | Skills (ring-dev-team)    | 33         | `dev-team/skills/`     |
 | Skills (ring-pm-team)     | 14         | `pm-team/skills/`      |
 | Skills (ring-tw-team)     | 4          | `tw-team/skills/`      |
-| **Total Skills**          | **67**     | **All plugins**        |
+| **Total Skills**          | **68**     | **All plugins**        |
 | Agents (ring-default)     | 2          | `default/agents/`      |
 | Agents (ring-dev-team)    | 24         | `dev-team/agents/`     |
 | Agents (ring-pm-team)     | 4          | `pm-team/agents/`      |
