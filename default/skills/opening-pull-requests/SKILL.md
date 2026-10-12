@@ -259,6 +259,18 @@ Only report success after the base is confirmed correct.
 
 ---
 
+## Step 9.5 — Trigger CodeRabbit Review
+
+CodeRabbit's automatic review on new PRs is disabled in this org. MUST explicitly request the review by posting a comment so CodeRabbit runs in a controlled way.
+
+```bash
+gh pr comment <number> --body '@coderabbitai review'
+```
+
+Run this once after the base branch is confirmed correct (Step 9) and before returning the URL. Do NOT skip it — without this comment, no automated review will run on the PR.
+
+---
+
 ## Step 10 — Return PR URL
 
 ```bash
@@ -274,6 +286,7 @@ Return the PR URL to the user.
 - Do NOT call `gh pr create` before completing Steps 1–7 — bypassing detection causes PRs targeting the wrong base
 - Do NOT hardcode `--base develop` or `--base main` — always pass `--base $BASE` resolved in Step 1
 - Do NOT skip Step 9 (post-create verification) — GitHub may default to the wrong base
+- Do NOT skip Step 9.5 (`@coderabbitai review` comment) — CodeRabbit's auto-review is disabled, so without this comment the PR gets no automated review
 - Do NOT invent scopes — a scope not in the allowlist fails PR validation
 - Do NOT omit the scope — every PR title MUST carry `type(scope): description`, never `type: description`
 
@@ -289,3 +302,4 @@ Return the PR URL to the user.
 | "I'll guess the scope, it looks right" | Guessing breaks validation. Ask the user if ambiguous. | **MUST use only allowlist scopes** |
 | "No PR template? I'll skip the body" | A minimal body is always better than an empty one. | **MUST use default structure if no template** |
 | "Already opened PR, base looks fine" | GitHub silently defaults to wrong base. Verify explicitly. | **MUST run `gh pr view --json baseRefName`** |
+| "CodeRabbit will review it automatically" | Auto-review is disabled in this org; nothing runs without the trigger comment. | **MUST post `@coderabbitai review` (Step 9.5)** |
