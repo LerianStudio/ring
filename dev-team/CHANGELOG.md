@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Removed — `ring:declaring-plugin-permissions`
+
+- Removed the `ring:declaring-plugin-permissions` skill from the public dev-team plugin. The dev-team skill count in `.claude-plugin/marketplace.json` drops from 36 to 35.
+
 ### Changed — Bump observability stack to lib-commons v5.7.0 + lib-observability v1.1.0
 
 - Updated the documented stable targets across the dev-team and pm-team skill set to lib-commons `v5.7.0` and lib-observability `v1.1.0`: `dev-team/agents/backend-go.md`, `dev-team/skills/using-lib-observability/SKILL.md`, `dev-team/skills/using-lib-systemplane/SKILL.md` (companion dependency), and `pm-team/skills/shared-patterns/code-example-standards.md`. Historical migration-baseline notes (e.g. the `v5.2.0` / `v1.0.0` pins) are left unchanged as provenance.
