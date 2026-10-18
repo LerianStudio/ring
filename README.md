@@ -250,7 +250,7 @@ REFACTOR → Clean up → Stay green
 
 ## 📚 All 76 Skills (Across 4 Plugins)
 
-### Core Skills (ring-default plugin - 23 skills)
+### Core Skills (ring-default plugin - 24 skills)
 
 **Testing & Quality (3):**
 
@@ -258,10 +258,11 @@ REFACTOR → Clean up → Stay green
 - `ring:fixing-lint` - Parallel lint fixing with agent dispatch
 - `ring:cleaning-comments` - Remove redundant, stale, or low-value comments while preserving intent-revealing ones
 
-**Collaboration & Planning (10):**
+**Collaboration & Planning (11):**
 
 - `ring:reviewing-code` - **Parallel 9 defaults + conditional specialist dispatch** with severity-based handling
 - `ring:creating-worktrees` - Isolated development
+- `ring:creating-managed-sessions` - Open one tmux window/session per worktree (auto-detects ai-tmux-sessions; windows inside tmux, new session outside)
 - `ring:committing-changes` - Smart commit organization with atomic grouping, conventional commits, and trailers
 - `ring:opening-pull-requests` - Open a PR with base-branch detection, scope allowlist enforcement, and template filling
 - `ring:shipping-changes` - End-to-end commit-and-ship flow from working tree to open PR
