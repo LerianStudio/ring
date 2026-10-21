@@ -858,7 +858,7 @@ Lerian uses three license types, chosen per-app. The actual header text MUST mat
 
 | License | SPDX Identifier | When Used |
 | ------- | --------------- | --------- |
-| Apache 2.0 | `Apache-2.0` | Open source projects (e.g., Core one core) |
+| Apache 2.0 | `Apache-2.0` | Open source projects |
 | Elastic License v2 | `Elastic-2.0` | Source-available products |
 | Proprietary | `LicenseRef-Proprietary` | Internal/closed repositories |
 

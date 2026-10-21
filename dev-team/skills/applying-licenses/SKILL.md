@@ -25,7 +25,7 @@ You orchestrate. Agents update source headers. NEVER apply a license without use
 
 | License | SPDX | Use Case |
 |---------|------|----------|
-| Apache 2.0 | `Apache-2.0` | Open source (e.g., Midaz core) |
+| Apache 2.0 | `Apache-2.0` | Open source |
 | Elastic License v2 | `Elastic-2.0` | Source-available products |
 | Proprietary | `LicenseRef-Proprietary` | Internal/closed repositories |
 
