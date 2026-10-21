@@ -32,7 +32,7 @@ Apply or switch the license for the current repository.
 
 | Type | Full Name | SPDX | Use Case |
 |------|-----------|------|----------|
-| `apache` | Apache License 2.0 | `Apache-2.0` | Open source (e.g., Core one core) |
+| `apache` | Apache License 2.0 | `Apache-2.0` | Open source |
 | `elv2` | Elastic License v2 | `Elastic-2.0` | Source-available products |
 | `proprietary` | Proprietary License | `LicenseRef-Proprietary` | Internal/closed repos |
 

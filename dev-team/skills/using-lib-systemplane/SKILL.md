@@ -54,7 +54,6 @@ Reference mode:
 - **Observability:** `github.com/LerianStudio/lib-observability v1.1.0` (`log.Logger`, `tracing.Telemetry`, `runtime.RecoverAndLog`)
 - **Dual backend:** Postgres 13+ (LISTEN/NOTIFY) **or** MongoDB 4.4+ (change streams; polling fallback for standalone deployments)
 - **Provisioning:** migration-only via `systemplane.SchemaSQL()` + `systemplane.DefaultSeedSQL()` public artifacts. Runtime DDL hook (`runSchema`) was removed in v1.6.0. Consumers vendor the artifacts into their own SQL migration pipeline via the `make systemplane-ddl` generator pattern — see `ring:migrating-to-lib-systemplane` Gate 3.5 and `multi-tenant.md` §27 "Cold-tenant resolution"
-- **License:** Elastic 2.0
 - **Scope:** runtime-mutable knobs only — never bootstrap-only material (DSNs, TLS, listen addresses, secrets)
 
 ---
